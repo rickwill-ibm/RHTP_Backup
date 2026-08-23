@@ -82,24 +82,38 @@ Key domains: `policy/` (engine + 17-policy corpus), `identity/` (match engine),
 README updated · commit message says what changed, why, and which invariants/contracts
 were touched.
 
-## Coalition and iteration work — governed by the Agentic Build Framework v1.4
+## Coalition and iteration work — governed by the Agentic Build Framework v1.5
 
 ANY multi-agent build, hardening, or iteration work on this platform MUST load and follow
-the **Agentic Build Framework v1.4** at `docs/framework/` (`SKILL.md` + `personas.md` +
+the **Agentic Build Framework v1.5** at `docs/framework/` (`SKILL.md` + `personas.md` +
 `enforcement-kit.md` + `operating-model.md`). Read it before orchestrating agents. Essentials:
 
 - **Wave unit:** probe -> spine (publish the inter-wave INTERFACE first — interface-freeze)
   -> parallel specialists on disjoint trees -> convergence to DRY -> the FIVE-persona
   red-team panel (R1 domain-fidelity, R2 negative-space, R3 stub-legitimacy, R4 governance,
   R5 cross-examiner; + the on-demand Performance/Scale adversary for substrate/scale work)
-  -> the orchestrator's OWN authoritative gate -> provenance close-out -> one sync.
-- **Composite Definition of Done = E1-E13** (enforcement-kit.md): fail-closed seams (E1),
+  -> the orchestrator's OWN authoritative gate -> provenance close-out -> one sync. The
+  required adversarial LENS SET is DERIVED from the iteration's NFR + regulatory surface
+  (lens-completeness doctrine), not a fixed panel.
+- **Composite Definition of Done = E1-E15** (enforcement-kit.md): fail-closed seams (E1),
   quality ratchet (E2), namespace + shared-file partitions (E3), DRY convergence (E4),
   authoritative gate (E5), artifact-existence probe (E6), fidelity ledgers (E7), living
   risk register (E8), fail-open lint run at BUILD TIME not just review (E9 shift-left),
   verbatim prompts (E10), provenance completeness `docs/build-provenance/check-provenance.sh`
   (E11), claim-vs-evidence (E12), test-effectiveness `docs/build-provenance/check-testlink.mjs`
-  + `check-mutation.mjs` on the critical set (E13).
+  + `check-mutation.mjs` on the critical set (E13), WIRED-PATH / integration ratchet
+  `docs/build-provenance/check-wiring.mjs` — no unit-tested-but-unreachable module, new
+  orphans fail against `wiring-baseline.json` (E14), and the seam MOCK<->PRODUCTION PARITY
+  gate — mock and production dispositions are shape-equivalent (E15).
+- **Two-tier done (v1.5):** open each iteration with a Definition of READY (an NFR +
+  regulatory manifest with acceptance criteria + a lens-coverage map); close with a
+  Production-READINESS gate that VERIFIES that manifest — CI-green is not production-ready.
+  Every CRITICAL fix passes the critical-finding protocol (N-skeptic verify + mutation-tested
+  regression + a red-team RE-ATTACK proving the exploit is closed) before E12 accepts it.
+- **Program spine (v1.5):** a multi-iteration program keeps a cross-iteration dependency
+  graph + shared interface registry + phase gates; sequence iterations by DEPENDENCY, not
+  severity — freeze and publish a foundational contract (tenancy, audit spine) BEFORE the
+  iterations that build on it.
 - **Reasoning mode:** chain-of-thought by default; INJECT tree-of-thought at design /
   red-team-hypothesis / ambiguity forks (enumerate -> score -> prune -> proceed). Not on
   mechanical single-path tasks.
@@ -107,8 +121,8 @@ the **Agentic Build Framework v1.4** at `docs/framework/` (`SKILL.md` + `persona
   `docs/build-provenance/PROMPT_MASTER_LOG.csv` (regenerate via `build_log.py`);
   `check-provenance.sh` must pass; per-agent prompts captured verbatim under `verbatim/`.
 
-The framework's E11/E13 checks are wired into CI (`.github/workflows/convention-gates.yml`).
+The framework's E11/E13/E14 checks are wired into CI (`.github/workflows/convention-gates.yml`).
 The `docs/production-plan/ACE_Production_Gap_Execution_Plan.md` remains the binding DOMAIN /
 governance plan (record model, ADRs, contracts, risk register); the framework above
 SUPERSEDES its generic orchestration guidance (the former "R1-R10 in section 11") with the
-v1.4 wave + E1-E13 model.
+v1.5 wave + E1-E15 model.

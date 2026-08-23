@@ -11,6 +11,7 @@
  */
 import { promises as fs } from 'fs';
 import path from 'path';
+import { getAuditLedger } from './auditLedger';
 
 export interface AuditEvent {
   ts: string; // ISO timestamp (caller supplies to stay deterministic/testable)
@@ -81,6 +82,11 @@ function auditFilePath(): string {
 export async function audit(event: AuditEvent): Promise<void> {
   try {
     assertPhiSafe(event);
+    // Tamper-evident chain (AUD-01): append to the hash-linked ledger. In demo/mock
+    // this is the in-memory process chain; production (AUDIT_LEDGER=durable) uses the
+    // registered durable ledger, or raises the fallback below if none is configured
+    // (never silently pretends an in-memory Map is durable).
+    await getAuditLedger(process.env.AUDIT_LEDGER === 'durable').append(event);
     const line = JSON.stringify(event) + '\n';
     const file = auditFilePath();
     await fs.mkdir(path.dirname(file), { recursive: true });

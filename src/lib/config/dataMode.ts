@@ -62,6 +62,10 @@ export const DATA_MODE_SEAMS = Object.freeze([
   'crossReference', //   wired: member<->source-id xref (F3) — in-memory (mock/seeded) vs pg append-only table, fail-closed until wired (lib/identity/crossReference/)
   // ── I8A-iii Wave A (value-set governance lifecycle) — appended block ──────────
   'valueSetGovernanceStore', // wired: value-set version-lifecycle + maker-checker audit ledger — in-memory (mock/seeded) vs pg append-only governance ledger, fail-closed until wired (lib/terminology/governance/)
+  // ── I13 HW-SEC (tenant/plan/LOB boundary) — appended block ───────────────────
+  'tenancy', //     wired: tenant/plan/LOB isolation (C-TEN) — single demo tenant (mock/seeded, demo intact) vs per-record tenant + IdP-claim actor scope, fail-closed (lib/security/tenant/)
+  // ── I19 HW4 (external DEQM measures ingestion) — appended block ───────────────
+  'measures', //    wired: external HEDIS/Stars/MIPS measures (C-MEAS) — authored demo gaps (mock/seeded, demo intact) vs ingested Da Vinci DEQM MeasureReport feed, fail-closed. Platform ingests, does not compute (lib/measures/)
 ] as const);
 export type DataModeSeam = (typeof DATA_MODE_SEAMS)[number];
 

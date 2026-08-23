@@ -10,7 +10,9 @@
  * param or path segment (beneficiary=Patient/X, subject=Patient/X, patient=Patient/X).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated, getSessionPatient } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionPatient, getSessionAuthContext } from '@/lib/server/smartSession';
+import { getPrincipal } from '@/lib/authz/principal';
+import { canAccessMemberTenantAware } from '@/lib/security/tenant';
 import { fhirRead, fhirCreate } from '@/lib/server/fhirServer';
 import { correlationFrom, CORRELATION_HEADER } from '@/lib/server/correlation';
 import { ooError } from '@/lib/fhir/operationOutcome';
@@ -144,6 +146,11 @@ export async function GET(
   const targetPid = normalizePatientId(extractPatientId(search));
   const breakGlass = req.headers.get('x-break-glass') === 'true';
 
+  // Real actor identity (AUD-02): audit with the resolved session principal, not a
+  // hardcoded 'session-user'. Resolved once and reused by every gate below.
+  const actorCtx = await getSessionAuthContext().catch(() => null);
+  const actorId = getPrincipal(actorCtx).userId;
+
   // CONSENT GATE (CMS-0057-F): a member who has opted out of Provider Access data
   // sharing must not have their PHI released, regardless of treatment relationship.
   // Break-glass emergency access overrides, and is always audited. Mirrors the
@@ -151,7 +158,7 @@ export async function GET(
   if (targetPid && getProviderAccessConsentStore().isOptedOut(targetPid)) {
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: breakGlass ? 'fhir.read.break-glass' : 'fhir.read.consent-denied',
       resourceRef: `Patient/${targetPid}`,
       correlationId,
@@ -176,7 +183,7 @@ export async function GET(
     if (sessionPatient && targetPid !== sessionPatient) {
       await audit({
         ts: new Date().toISOString(),
-        actor: 'session-user',
+        actor: actorId,
         action: 'fhir.read.idor-denied',
         resourceRef: `Patient/${targetPid}`,
         correlationId,
@@ -184,6 +191,33 @@ export async function GET(
         detail: 'request patient id outside session scope',
       });
       return NextResponse.json(ooError('Requested member is outside the session scope', 'forbidden'), {
+        status: 403,
+        headers: { [CORRELATION_HEADER]: correlationId },
+      });
+    }
+  }
+
+  // TENANT + MEMBER-SCOPE GATE (HW-SEC / I13, C-TEN): closes the documented BOLA on
+  // clinical FHIR reads (Coverage/Condition/Observation/...). Even an org-scoped
+  // reviewer is bounded to their tenant/plan/LOB and their member scope. Seam
+  // `tenancy`: mock => the single demo tenant (permissive, demo intact); production
+  // => per-record tenant + IdP-claim actor scope, fail-closed. Break-glass excepted
+  // (audited). Patient already handled by the IDOR gate above.
+  if (targetPid && resourceType !== 'Patient' && !breakGlass) {
+    const authCtx = await getSessionAuthContext().catch(() => null);
+    const principal = getPrincipal(authCtx);
+    const decision = canAccessMemberTenantAware(principal, authCtx, targetPid);
+    if (!decision.allow) {
+      await audit({
+        ts: new Date().toISOString(),
+        actor: principal.userId,
+        action: 'fhir.read.tenant-denied',
+        resourceRef: `${resourceType}/${targetPid}`,
+        correlationId,
+        outcome: 'failure',
+        detail: decision.reason,
+      });
+      return NextResponse.json(ooError('Requested member is outside your authorization scope', 'forbidden'), {
         status: 403,
         headers: { [CORRELATION_HEADER]: correlationId },
       });
@@ -199,7 +233,7 @@ export async function GET(
   }
 
   const fhirPath = path.join('/') + search;
-  const result = await fhirRead(fhirPath, { actor: 'session-user', correlationId });
+  const result = await fhirRead(fhirPath, { actor: actorId, correlationId });
   return NextResponse.json(result.ok ? result.raw : result.error, {
     status: result.status || (result.ok ? 200 : 502),
     headers: { [CORRELATION_HEADER]: result.correlationId },
@@ -220,7 +254,8 @@ export async function POST(
   const { path } = await ctx.params;
   const type = path[0];
   const body = await req.json().catch(() => null);
-  const result = await fhirCreate(type, body, { actor: 'session-user', correlationId });
+  const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
+  const result = await fhirCreate(type, body, { actor: actorId, correlationId });
   return NextResponse.json(result.ok ? result.raw : result.error, {
     status: result.status || (result.ok ? 201 : 502),
     headers: { [CORRELATION_HEADER]: result.correlationId },

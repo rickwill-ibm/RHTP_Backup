@@ -33,17 +33,59 @@ function isCommentLine(line) {
   return t.startsWith('//') || t.startsWith('*') || t.startsWith('/*');
 }
 
+// Build the search regex for an operator. Operators are LITERAL text (e.g. '||',
+// '>=') and MUST be regex-escaped — otherwise '||' is read as an empty regex
+// alternation that matches zero-width at every position (a real bug this tool hit
+// when dogfooded). The two `\b...\b` word-boundary operators (true/false) are the
+// deliberate exception and are used as-is.
+function opRegex(from) {
+  if (from.includes('\\b')) return new RegExp(from, 'g');
+  return new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+}
+
+// Replace string-literal interiors and TS generic parameter lists with spaces,
+// preserving length, so operator matching only sees executable code. Handles
+// single-line '...' / "..." / `...` strings and `Name<...>` type arguments.
+function maskNonCode(line) {
+  const chars = line.split('');
+  let quote = null;
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i];
+    if (quote) {
+      if (c === quote && chars[i - 1] !== '\\') quote = null;
+      else chars[i] = ' ';
+    } else if (c === "'" || c === '"' || c === '`') {
+      quote = c;
+    }
+  }
+  let masked = chars.join('');
+  // Blank out the inside of TS generic argument lists (angle brackets) so a
+  // comparison operator is never confused with a type bracket.
+  masked = masked.replace(/<[^<>]*>/g, (g) => ' '.repeat(g.length));
+  return masked;
+}
+
 // Find every (index, from, to) mutation site in the source, skipping comment lines.
 function findSites(src) {
   const lines = src.split('\n');
   const sites = [];
   let offset = 0;
   for (const line of lines) {
-    if (!isCommentLine(line)) {
+    // A line marked `mut-equiv:` carries a PROVABLY-EQUIVALENT mutant (a mutation
+    // that cannot change observable behavior — e.g. `x > 9` vs `x >= 9` where x is
+    // always even). Equivalent mutants are unkillable by definition; the marker
+    // (with a justification) excludes the line, the standard way real mutation
+    // tools handle them. Use sparingly and only with a written reason.
+    if (!isCommentLine(line) && !line.includes('mut-equiv')) {
+      // Mask string-literal interiors (and TS generic angle-brackets) so operator-
+      // like text INSIDE a string ('partial-approval') or a type (Pick<A,'b'>) is
+      // never a mutation site. Masking preserves length, so indices stay aligned
+      // with the original line — the mutation is still applied to real code only.
+      const scan = maskNonCode(line);
       for (const [from, to] of OPERATORS) {
-        const re = new RegExp(from, 'g');
+        const re = opRegex(from);
         let m;
-        while ((m = re.exec(line)) !== null) {
+        while ((m = re.exec(scan)) !== null) {
           sites.push({ absIndex: offset + m.index, matched: m[0], from, to,
             lineText: line.trim().slice(0, 80) });
           if (m.index === re.lastIndex) re.lastIndex++; // zero-width guard

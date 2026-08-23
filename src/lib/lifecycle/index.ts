@@ -65,3 +65,20 @@ export {
   auditHoldPlaced,
   auditHoldReleased,
 } from './audit';
+
+// ── HW3 / I17: record lifecycle + content-hash idempotency (C-LIFE) ──────────
+export {
+  contentHash,
+  classify,
+  createMemoryRecordLifecycleStore,
+  getRecordLifecycleStore,
+  setProductionRecordLifecycleFactory,
+  RecordLifecycleNotConfiguredError,
+  _resetRecordLifecycleStore,
+  type RecordStatus,
+  type LifecycleDisposition,
+  type RecordState,
+  type ClassifyInput,
+  type ClassifyResult,
+  type RecordLifecycleStore,
+} from './recordLifecycle';

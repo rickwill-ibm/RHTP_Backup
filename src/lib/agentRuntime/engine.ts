@@ -14,6 +14,7 @@
 import { buildAgentEvent } from './events';
 import { buildProposalWorkItem } from './inbox';
 import { getEscalationTier, nextEscalationStep } from './escalation';
+import { isAutoApprovable } from '@/lib/agents/governance';
 import {
   AUTONOMY_BEHAVIOR,
   defer,
@@ -189,7 +190,14 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     this.setStatus(workflowId, 'waiting-decision', proposalId);
 
     // Autonomy tier -> decision behavior via DATA lookup (never a branch on agentId).
-    const behavior = AUTONOMY_BEHAVIOR[manifest.autonomyTier].autoApprove;
+    // HW-AI / I16 (C-DEC): the tier-independent invariant. An adverse coverage-
+    // affecting action (a denial / termination / reduction) can NEVER auto-resolve,
+    // regardless of HITL / HOTL / autonomous — it is forced onto the human path.
+    // This kills the HOTL SLA-timeout auto-approve and the autonomous-tier flip for
+    // adverse determinations, which qualified humans must make.
+    const behavior = isAutoApprovable(action, manifest.autonomyTier)
+      ? AUTONOMY_BEHAVIOR[manifest.autonomyTier].autoApprove
+      : 'human-required';
     if (behavior === 'immediate') {
       void Promise.resolve().then(() =>
         this.runOnMember(memberId, () => this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`)),
@@ -200,7 +208,8 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
           await this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`);
       });
     } else {
-      // HITL: escalate on SLA breach; resolve ONLY on an external human signal.
+      // HITL or an adverse coverage action: escalate on SLA breach; resolve ONLY on
+      // an external qualified-human signal (never an auto-approve timer).
       this.scheduleEscalation(rec);
     }
     return decided.promise;

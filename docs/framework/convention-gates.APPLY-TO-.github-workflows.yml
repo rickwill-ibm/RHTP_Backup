@@ -1,8 +1,10 @@
-# Convention gates — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.4
+# Convention gates — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.5
 # Fails the PR on: type errors, NEW size violations or ratchet regressions,
 # lint errors, failing unit tests, untested new code or a surviving mutant (E13),
-# or a stale/hand-edited provenance log (E11). Legacy files frozen in
-# quality-baseline.json do not fail the build unless they grow.
+# a NEW unwired module beyond the wiring baseline (E14), or a stale/hand-edited
+# provenance log (E11). Legacy files frozen in quality-baseline.json do not fail
+# the build unless they grow; unwired modules frozen in wiring-baseline.json do
+# not fail the build unless a new one appears.
 
 name: Convention Gates
 
@@ -14,7 +16,7 @@ on:
 
 jobs:
   gates:
-    name: types / sizes+ratchet / lint / unit / E13 / E11
+    name: types / sizes+ratchet / lint / unit / E13 / E14 / E11
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,7 +45,7 @@ jobs:
       - name: Unit tests (vitest)
         run: npx vitest run
 
-      # --- Agentic Build Framework v1.4 gates ---
+      # --- Agentic Build Framework v1.5 gates ---
 
       - name: Test-effectiveness — new code is test-linked (E13)
         run: |
@@ -61,6 +63,9 @@ jobs:
 
       - name: Test-effectiveness — mutation sample on critical modules (E13)
         run: node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json
+
+      - name: Wired-path — no new unwired module (E14)
+        run: node docs/build-provenance/check-wiring.mjs src --baseline docs/build-provenance/wiring-baseline.json
 
       - name: Provenance completeness (E11)
         run: |

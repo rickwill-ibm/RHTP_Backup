@@ -65,3 +65,28 @@ Any build where: work is decomposed across multiple agents; correctness matters 
 
 ## When NOT to over-apply it
 A trivial or throwaway task does not need the full wave unit. Scale the ceremony to the stakes: a one-file fix needs the gate, not a red-team panel. The judgment call is the orchestrator's.
+
+## Program spine (added v1.5) — interface-freeze extended across iterations
+A single wave has an intra-wave interface-freeze (the spine publishes the stub before parallel
+agents build). A multi-iteration PROGRAM (e.g. a hardening program of many iterations with
+cross-dependencies) needs the same at the PROGRAM level, or iterations rework each other. The
+program spine maintains:
+- a cross-iteration DEPENDENCY GRAPH (iteration N publishes contracts that iteration N+k builds
+  against - e.g. a tenant-isolation model published early is consumed by every later store);
+- a shared INTERFACE REGISTRY (the frozen contracts/types each iteration exposes, versioned);
+- PHASE GATES (group iterations into phases; a phase does not start until the prior phase's
+  published contracts are frozen and its production-readiness gate passed).
+Sequence iterations by DEPENDENCY, not severity alone: a foundational model (tenancy, an
+AI-accountability invariant, an audit spine) is published BEFORE the iterations that build on it,
+so they build against the frozen contract instead of retrofitting.
+
+## Definition of Ready (added v1.5) — NFRs and lens coverage BEFORE the build
+Each iteration opens with a Definition of READY (the front bracket to the Definition of Done):
+- an NFR + REGULATORY MANIFEST - the -ilities the increment must meet (security, tenancy,
+  availability, observability, auditability, privacy, performance, DR) with acceptance criteria,
+  so they are designed-in, not bolted-on;
+- a LENS-COVERAGE MAP - the required adversarial lenses DERIVED from the domain's risk surface,
+  with an owning persona per dimension (see personas: lens-completeness doctrine). A dimension
+  with no owning lens is a gap to fill before building, not to discover after.
+Production-readiness (Definition of Done) then VERIFIES the manifest, so "done" means
+production-ready, not merely CI-green.

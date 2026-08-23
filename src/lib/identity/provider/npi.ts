@@ -49,7 +49,7 @@ function luhnCheckDigit(base: string): number {
     let d = base.charCodeAt(i) - 48;
     if (double) {
       d *= 2;
-      if (d > 9) d -= 9;
+      if (d > 9) d -= 9; // mut-equiv: d is 2*(0..9) so always even; d>9 and d>=9 are identical (9 never occurs)
     }
     sum += d;
     double = !double;

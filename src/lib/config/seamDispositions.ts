@@ -269,15 +269,19 @@ export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEnt
   },
 
   // ── mock-only: registered for ops visibility; NO production decision consumer ─
+  // (graph + wpcRecord were reclassified fail-closed-stub in I14/I17 when the
+  //  projection consumer + record-lifecycle wired real production consumers.)
   graph: {
     seamId: 'graph',
-    disposition: 'mock-only',
-    productionResolverRef: 'lib/careTeam/graph/resources.ts (SEAM anchor; getDataMode not called)',
+    disposition: 'fail-closed-stub',
+    productionResolverRef: 'lib/graph/consumer/provider.ts → resolveProjectionStores()',
+    notConfiguredError: 'ProjectionStoresNotConfiguredError',
     note:
-      'Authored whole-person graph is a demo/UI source only, not the production ' +
-      'read path (finding A14). No getDataMode(\'graph\') consumer exists, so ' +
-      'production cannot serve a fake value from it. Wiring a production consumer ' +
-      'forces reclassification (the gate goes red).',
+      'I14 (REC-01) wired the outbox->projector consumer: resolveProjectionStores() ' +
+      'consults getDataMode(\'graph\'). production requires a REGISTERED durable ' +
+      'outbox + graph-store factory, or throws ProjectionStoresNotConfiguredError ' +
+      '(never the in-memory fake presented as durable). mock/seeded → the in-memory ' +
+      'projection stores (demo/authored graph unchanged).',
   },
   sde: {
     seamId: 'sde',
@@ -290,12 +294,15 @@ export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEnt
   },
   wpcRecord: {
     seamId: 'wpcRecord',
-    disposition: 'mock-only',
-    productionResolverRef: 'registered in dataMode.ts; no consumer wired yet',
+    disposition: 'fail-closed-stub',
+    productionResolverRef: 'lib/lifecycle/recordLifecycle.ts → getRecordLifecycleStore() (via /api/records)',
+    notConfiguredError: 'RecordLifecycleNotConfiguredError',
     note:
-      'Whole-person care record seam, registered ahead of its backend. No ' +
-      'getDataMode(\'wpcRecord\') consumer exists — inert until wired, at which ' +
-      'point it must be reclassified real-impl or fail-closed-stub.',
+      'I17 (RP-01/CRUD-02) wired the record-correction/void route: it consults ' +
+      'getDataMode(\'wpcRecord\') and resolves getRecordLifecycleStore(durable). ' +
+      'production requires a REGISTERED durable lifecycle factory, or throws ' +
+      'RecordLifecycleNotConfiguredError (never a process-local Map as durable). ' +
+      'mock/seeded → the in-memory lifecycle store (demo unchanged).',
   },
   carePlan: {
     seamId: 'carePlan',
@@ -313,6 +320,35 @@ export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEnt
       'Network-adequacy input seam. loadMockNetwork() serves the bundled seed; ' +
       'non-mock callers pass their own AdequacyInput. No getDataMode(\'adequacy\') ' +
       'consumer exists — inert until wired.',
+  },
+
+  // ── I13 HW-SEC: tenant/plan/LOB boundary (C-TEN) ─────────────────────────────
+  tenancy: {
+    seamId: 'tenancy',
+    disposition: 'real-impl',
+    productionResolverRef: 'lib/security/tenant/resolve.ts → resolveActorTenantScope()/resolveMemberTenant()',
+    note:
+      'Tenant/plan/LOB isolation. production derives the member tenant from the ' +
+      'record (payer/contract) and the actor scope from VERIFIED IdP claims on the ' +
+      'session, then assertTenantScope() denies cross-tenant/cross-LOB access — even ' +
+      'for an org-scoped reviewer. production NEVER returns the permissive demo scope ' +
+      '(no mock fallback); an absent claim fails CLOSED to an empty scope (deny). ' +
+      'mock/seeded → the single demo tenant so the frontend-only demo is unchanged.',
+  },
+
+  // ── I19 HW4: external DEQM measures ingestion (C-MEAS) ────────────────────────
+  measures: {
+    seamId: 'measures',
+    disposition: 'fail-closed-stub',
+    productionResolverRef: 'lib/measures/index.ts → getCareGapView()',
+    notConfiguredError: 'MeasuresFeedNotConfiguredError',
+    note:
+      'External HEDIS/Stars/MIPS measures. The platform INGESTS a Da Vinci DEQM ' +
+      'MeasureReport feed; it does NOT compute measures (constraint #4). production ' +
+      'with no registered external feed loader throws MeasuresFeedNotConfiguredError ' +
+      '(never a fabricated gap list presented as the real feed). mock/seeded → the ' +
+      'authored demo gaps (HEDIS/Stars/MIPS), normalized read-only so the demo golden ' +
+      'is unchanged.',
   },
 } as const);
 

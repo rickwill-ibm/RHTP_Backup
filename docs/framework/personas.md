@@ -121,3 +121,49 @@ Mandate upgrade (v1.4): for every new `supported`/`fixed`/`closed` claim, R5 run
 Not part of the standing panel: the fakes and pg-mem that make CI cheap also HIDE performance, concurrency-at-scale, and resource limits, so a dedicated scale lens is dead weight on a domain-logic iteration but essential on a substrate / deployment / high-throughput one. Trigger it for those iterations only.
 
 Mandate: assume production volume and hostile load. Hunt: what breaks at 10^6+ members / high write concurrency (lock contention, connection-pool exhaustion, the outbox/idempotency stores under real multi-writer Postgres); backpressure and unbounded queues/retries (poison loops, dead-letter growth); N+1 and full-scan query shapes the projector/lens issue; memory/streaming limits on bulk (FHIR Bulk, batch ingest); migration hazards at scale (a non-concurrent index build that locks a large table); and the gap between what the fake proves and what the real backend does. Output: a ranked list {what breaks, at what load, why the fake hides it, severity, owning iteration}. Findings that need real infra to prove are routed as CI-pending with the honest note, not marked closed.
+
+---
+
+## Lens-completeness doctrine + the derived lens set (added v1.5)
+
+A FIXED red-team panel (R1-R5 + Performance) guarantees BLIND SPOTS on any domain whose risk
+surface it was not shaped for. A full 11-iteration payer build passed every standing lens and
+still missed security, multi-tenancy, AI-governance, and financial-integrity entirely - they
+surfaced only when an external expert prompted them, after the fact. The fix is a mechanism, not
+one more fixed persona.
+
+RULE: before a build, DERIVE the required adversarial lenses from the domain's non-functional +
+regulatory surface, and produce a LENS-COVERAGE MAP that proves every risk dimension has an
+owning persona. The map is part of the Definition of Ready; a dimension with no owning lens is a
+gap to fill, not a thing to discover later. Re-derive when the domain or regulatory context
+changes.
+
+Starter taxonomy (the dimensions a REGULATED / PAYER / PHI platform must have an owning lens for -
+extend per domain):
+- Security & multi-tenancy - authz depth, tenant/LOB isolation, secrets, OWASP-API, supply-chain.
+- AI-governance / algorithmic accountability - adverse-action HITL invariant, transparency,
+  bias/equity, model-risk (versioning/eval/drift), where AI must NOT be the decider.
+- Financial / actuarial integrity - risk-adjustment defensibility, encounter-submission +
+  acceptance/rejection reconciliation, RADV audit trail, COB, payment integrity/FWA, TCOC from
+  adjudicated dollars.
+- Observability / operability - metrics, tracing, SLOs, alerting, dead-letter inspection.
+- Privacy - accounting-of-disclosures, minimum-necessary, consent lifecycle, de-identification.
+- Reliability / DR - RTO/RPO, tested restore, failover.
+Plus the standing R1-R5 + Performance. Each derived lens gets a persona card of the same shape
+(role + mandate + tree-of-thought hypothesis generation + ranked findings). On a smaller or
+non-regulated domain, the map is smaller - the point is that it is DERIVED and COMPLETE, never
+assumed.
+
+## Critical-finding protocol (added v1.5)
+
+A CRITICAL finding is not closed by a green test - a happy-path test can pass while the exploit
+still works. Every Critical fix must pass three checks before it is marked closed:
+1. N-INDEPENDENT-SKEPTIC verify - a few reviewers each prompted to REFUTE that the fix closes the
+   issue; confirmed only on a majority.
+2. MUTATION-TESTED regression - the regression test is added to the E13 mutation set and proven to
+   KILL a mutant of the fix (so the test actually catches the break, not just the happy path).
+3. RED-TEAM RE-ATTACK - the original adversary re-attacks the fixed code and cannot reproduce the
+   exploit. For a security/authz/financial Critical, the re-attack is the proof of closure, not
+   the unit test.
+Only then does E12 (claim-vs-evidence) accept the finding as CLOSED. This is mandatory for
+Critical; recommended for High.

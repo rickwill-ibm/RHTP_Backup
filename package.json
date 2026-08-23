@@ -63,7 +63,8 @@
     "check:testlink": "node docs/build-provenance/check-testlink.mjs src tests",
     "check:mutation": "node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json",
     "check:provenance": "bash docs/build-provenance/check-provenance.sh",
-    "check:framework": "npm run check:testlink && npm run check:mutation && npm run check:provenance",
+    "check:wiring": "node docs/build-provenance/check-wiring.mjs src --baseline docs/build-provenance/wiring-baseline.json",
+    "check:framework": "npm run check:testlink && npm run check:mutation && npm run check:wiring && npm run check:provenance",
     "pretest": "npm run check:types && npm run check:sizes"
   },
   "dependencies": {

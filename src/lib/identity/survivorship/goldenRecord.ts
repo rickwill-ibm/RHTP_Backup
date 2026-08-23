@@ -35,9 +35,9 @@ export interface BuildGoldenRecordOptions {
 
 /** Stable, deterministic pick among facts of equal precedence: newest, then source, then value. */
 function moreRecent(a: SourceAttributedFact, b: SourceAttributedFact): SourceAttributedFact {
-  if (a.asOf !== b.asOf) return a.asOf > b.asOf ? a : b;
-  if (a.source !== b.source) return a.source < b.source ? a : b;
-  return a.value <= b.value ? a : b;
+  if (a.asOf !== b.asOf) return a.asOf > b.asOf ? a : b; // mut-equiv: guarded by asOf!==, so > and >= are identical (equal case unreachable)
+  if (a.source !== b.source) return a.source < b.source ? a : b; // mut-equiv: guarded by source!==, so < and <= are identical
+  return a.value <= b.value ? a : b; // mut-equiv: reached only when asOf+source already equal; <= vs < differ only when value is equal too, where a and b are observationally identical
 }
 
 /**
@@ -66,7 +66,7 @@ function winnerForField(
   const tiebreak = rules.tiebreak;
 
   // Walk ranks top-first; first source with any fact wins, its facts resolved by tiebreak.
-  for (let rank = 0; rank < ranking.length; rank++) {
+  for (let rank = 0; rank < ranking.length; rank++) { // mut-equiv: <= adds one iteration reading ranking[len]=undefined, which filters to zero facts and continues — identical behavior
     const source = ranking[rank];
     const atSource = facts.filter((f) => f.source === source);
     if (atSource.length === 0) continue;

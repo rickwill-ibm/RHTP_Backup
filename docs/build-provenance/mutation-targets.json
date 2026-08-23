@@ -1,5 +1,47 @@
 [
-  { "file": "src/lib/identity/provider/npi.ts", "test": "npx vitest run tests/identity/providerIdentity.test.ts", "maxMutants": 6 },
-  { "file": "src/lib/identity/survivorship/goldenRecord.ts", "test": "npx vitest run tests/identity/survivorship.test.ts tests/identity/survivorshipTiebreak.test.ts", "maxMutants": 6 },
-  { "file": "src/lib/terminology/validateCode/membership.ts", "test": "npx vitest run tests/terminology/validateCode.test.ts tests/terminology/version.test.ts", "maxMutants": 6 }
+  {
+    "file": "src/lib/identity/provider/npi.ts",
+    "test": "npx vitest run tests/identity/providerIdentity.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/identity/survivorship/goldenRecord.ts",
+    "test": "npx vitest run tests/identity/survivorship.test.ts tests/identity/survivorshipTiebreak.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/terminology/validateCode/membership.ts",
+    "test": "npx vitest run tests/terminology/validateCode.test.ts tests/terminology/version.test.ts tests/terminology/membersForVersion.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/security/tenant/authz.ts",
+    "test": "npx vitest run tests/security/tenant.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/agents/governance/decisionGate.ts",
+    "test": "npx vitest run tests/agents/governance/decisionGate.test.ts",
+    "maxMutants": 8
+  },
+  {
+    "file": "src/lib/server/auditLedger.ts",
+    "test": "npx vitest run tests/server/auditLedger.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/lifecycle/recordLifecycle.ts",
+    "test": "npx vitest run tests/lifecycle/recordLifecycle.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/finance/riskAdjustment/meat.ts",
+    "test": "npx vitest run tests/finance/riskAdjustment.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/measures/deqmIngest.ts",
+    "test": "npx vitest run tests/measures/deqmIngest.test.ts",
+    "maxMutants": 6
+  }
 ]

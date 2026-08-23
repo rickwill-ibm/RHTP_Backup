@@ -1,0 +1,548 @@
+[
+  {
+    "seam": "graph",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "cluster": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "color": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "label": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "lens": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "nodeNum": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "properties": {
+          "k": "object",
+          "fields": {
+            "age": {
+              "k": "primitive",
+              "t": "number"
+            },
+            "confidence": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "id": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "location": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "roles": {
+              "k": "array",
+              "of": {
+                "k": "primitive",
+                "t": "string"
+              }
+            }
+          }
+        },
+        "propertyRichness": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "radius": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "sublabel": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "totalProperties": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "type": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "0cbb1a7d"
+  },
+  {
+    "seam": "graph.edge",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "color": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "edgeProps": {
+          "k": "object",
+          "fields": {
+            "confidence": {
+              "k": "primitive",
+              "t": "number"
+            },
+            "lastContact": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "since": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "status": {
+              "k": "primitive",
+              "t": "string"
+            },
+            "touchpoints": {
+              "k": "primitive",
+              "t": "number"
+            }
+          }
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "label": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "lens": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "source": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "strokeWidth": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "target": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "type": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "03ebc83c"
+  },
+  {
+    "seam": "graph.signal",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "action": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "chainNodeIds": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "detail": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "label": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "relatedNodeIds": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "targetLens": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "type": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "urgency": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "a1fcfb9f"
+  },
+  {
+    "seam": "fhirStore",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "cardType": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "detail": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "hookType": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "indicator": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "source": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "suggestions": {
+          "k": "array",
+          "of": {
+            "k": "object",
+            "fields": {
+              "actions": {
+                "k": "array",
+                "of": {
+                  "k": "object",
+                  "fields": {
+                    "description": {
+                      "k": "primitive",
+                      "t": "string"
+                    },
+                    "type": {
+                      "k": "primitive",
+                      "t": "string"
+                    }
+                  }
+                }
+              },
+              "id": {
+                "k": "primitive",
+                "t": "string"
+              },
+              "label": {
+                "k": "primitive",
+                "t": "string"
+              }
+            }
+          }
+        },
+        "summary": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "timestamp": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "d96b500c"
+  },
+  {
+    "seam": "wpcRecord",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "activeAlerts": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "address": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "age": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "attributionStatus": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "carePlanStatus": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "contractId": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "dob": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "enrollmentDate": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "gender": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "hccSuspectValue": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "insuranceId": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "lastContactDate": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "mrn": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "name": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "openCareGaps": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "openHCCSuspects": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "payer": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "phone": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "pmpmCost": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "pmpmTarget": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "predictedErRisk": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "primaryCareProvider": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "rafScore": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "rafScoreDelta": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "riskTier": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "3df7f3a8"
+  },
+  {
+    "seam": "providerDirectory",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "acceptingNewPatients": {
+          "k": "primitive",
+          "t": "boolean"
+        },
+        "address": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "affiliatedFacility": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "avgWaitDays": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "boardCertified": {
+          "k": "primitive",
+          "t": "boolean"
+        },
+        "city": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "costPercentile": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "distance": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "languagesSpoken": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "name": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "networkTier": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "npi": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "patientSatisfaction": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "phone": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "qualityScore": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "specialty": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "starsRating": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "state": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "vbcAligned": {
+          "k": "primitive",
+          "t": "boolean"
+        },
+        "zip": {
+          "k": "primitive",
+          "t": "string"
+        }
+      }
+    },
+    "shapeHash": "7efb7393"
+  },
+  {
+    "seam": "measures",
+    "shape": {
+      "k": "object",
+      "fields": {
+        "complianceRate": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "contractName": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "domain": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "dueDate": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "evidenceTypes": {
+          "k": "array",
+          "of": {
+            "k": "primitive",
+            "t": "string"
+          }
+        },
+        "id": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "measureId": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "measureName": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "patientsCompliant": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "patientsDue": {
+          "k": "primitive",
+          "t": "number"
+        },
+        "status": {
+          "k": "primitive",
+          "t": "string"
+        },
+        "targetRate": {
+          "k": "primitive",
+          "t": "number"
+        }
+      }
+    },
+    "shapeHash": "15ea7300"
+  }
+]

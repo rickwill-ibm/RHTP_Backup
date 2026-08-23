@@ -91,6 +91,10 @@ import {
   ValueSetGovernanceStoreNotConfiguredError,
 } from '@/lib/terminology/governance';
 import type { NormalizedRecord } from '@/lib/pipeline/types';
+import { resolveActorTenantScope } from '@/lib/security/tenant';
+import { getCareGapView, setProductionMeasuresFeedLoader, MeasuresFeedNotConfiguredError } from '@/lib/measures';
+import { resolveProjectionStores, ProjectionStoresNotConfiguredError, setProductionOutboxFactory, setProductionGraphFactory } from '@/lib/graph/consumer/provider';
+import { getRecordLifecycleStore, RecordLifecycleNotConfiguredError, setProductionRecordLifecycleFactory } from '@/lib/lifecycle';
 
 // A structurally-complete record (so the mock/seeded validators pass — proving the
 // production throw is production-specific, not a shape rejection).
@@ -162,6 +166,33 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     expect(() => getProviderAccessConsentStore()).toThrow(/consent=production/);
     setSessionDataMode('consent', 'mock');
     expect(getProviderAccessConsentStore()).toBeTruthy();
+  },
+  measures: () => {
+    setProductionMeasuresFeedLoader(null);
+    setSessionDataMode('measures', 'production');
+    // production with no external DEQM feed loader fails loud (never a fabricated feed).
+    expect(() => getCareGapView()).toThrow(MeasuresFeedNotConfiguredError);
+    setSessionDataMode('measures', 'mock');
+    // mock returns the authored demo gaps (demo preserved).
+    expect(getCareGapView().gaps.length).toBeGreaterThan(0);
+    setProductionMeasuresFeedLoader(null);
+  },
+  graph: () => {
+    setProductionOutboxFactory(null);
+    setProductionGraphFactory(null);
+    setSessionDataMode('graph', 'production');
+    // production with no durable outbox/graph factory fails loud (never the in-memory fake).
+    expect(() => resolveProjectionStores()).toThrow(ProjectionStoresNotConfiguredError);
+    setSessionDataMode('graph', 'mock');
+    expect(resolveProjectionStores().durable).toBe(false); // in-memory stores, no throw
+  },
+  wpcRecord: () => {
+    setProductionRecordLifecycleFactory(null);
+    setSessionDataMode('wpcRecord', 'production');
+    expect(() => getRecordLifecycleStore(true)).toThrow(RecordLifecycleNotConfiguredError);
+    setSessionDataMode('wpcRecord', 'mock');
+    expect(getRecordLifecycleStore(false)).toBeTruthy(); // in-memory default, no throw
+    setProductionRecordLifecycleFactory(null);
   },
   signalDisposition: () => {
     setProductionPolicyPackLoader(null);
@@ -262,6 +293,24 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     expect(res.mode).toBe('production');
     // Production runs the REAL agents and must NOT return the authored mock array.
     expect(res.actions).not.toBe(authoredAgentActions());
+  },
+  tenancy: () => {
+    // production derives the actor scope from VERIFIED claims, never the permissive
+    // demo scope; an absent claim fails CLOSED to an empty scope (no mock fallback).
+    setSessionDataMode('tenancy', 'production');
+    const prod = resolveActorTenantScope(
+      { userId: 'Practitioner/x', role: 'pa-reviewer', authorizedMemberScope: { kind: 'org' } },
+      { fhirUser: 'Practitioner/x' },
+    );
+    expect(prod.kind).not.toBe('demo');
+    expect(prod.tenantIds).toEqual([]);
+    // mock/seeded: the permissive single demo tenant (demo intact).
+    setSessionDataMode('tenancy', 'mock');
+    const demo = resolveActorTenantScope(
+      { userId: 'x', role: 'pa-reviewer', authorizedMemberScope: { kind: 'org' } },
+      {},
+    );
+    expect(demo.kind).toBe('demo');
   },
 };
 

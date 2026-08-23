@@ -1,0 +1,89 @@
+{
+  "_fixture": {
+    "id": "pediatric-caregiver",
+    "description": "6-year-old with an open well-child visit gap and a childcare-support (caregiver burden) SDOH gap. Exercises caregiver-burden barrier detection, required in-person visit template, and telehealth substitution for follow-up-class interventions.",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-peds-005",
+      "name": "Fixture Member Five",
+      "dob": "2020-05-15",
+      "age": 6,
+      "gender": "Male",
+      "mrn": "MRN-FIX-005",
+      "riskTier": "Moderate",
+      "rafScore": 0.31,
+      "rafScoreDelta": 0.0,
+      "predictedErRisk": 8,
+      "openHCCSuspects": 0,
+      "hccSuspectValue": 0,
+      "openCareGaps": 2,
+      "lastContactDate": "2026-07-30",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 190,
+      "pmpmTarget": 220,
+      "primaryCareProvider": "Dr. Fixture Peds",
+      "activeAlerts": 0,
+      "carePlanStatus": "None",
+      "contractId": "contract-fix-02",
+      "phone": "555-0105",
+      "address": "105 Fixture St",
+      "insuranceId": "INS-FIX-005",
+      "payer": "Fixture Medicaid MCO",
+      "enrollmentDate": "2023-09-01"
+    },
+    "hccSuspects": [],
+    "careGaps": [
+      {
+        "id": "gap-fix-008",
+        "patientId": "member-peds-005",
+        "measureId": "WCV-311",
+        "measureName": "Well-Child Visit (3-11 years)",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-10-15",
+        "daysOpen": 25,
+        "lastActionDate": "2026-07-28",
+        "assignedTo": "Care Manager",
+        "notes": "Annual well-child visit not scheduled",
+        "closureRequirement": "Comprehensive well-child visit completed"
+      },
+      {
+        "id": "gap-fix-009",
+        "patientId": "member-peds-005",
+        "measureId": "SDOH-CC",
+        "measureName": "Childcare Support Assessment",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-15",
+        "daysOpen": 18,
+        "lastActionDate": "2026-08-04",
+        "assignedTo": "Community Health Worker",
+        "notes": "Caregiver unable to attend weekday appointments",
+        "closureRequirement": "Childcare subsidy enrollment supported"
+      }
+    ],
+    "alerts": []
+  },
+  "expected": {
+    "priority": "Moderate",
+    "goalCount": { "min": 3, "max": 3 },
+    "firstGoalIncludes": "Social Determinants",
+    "goalDescriptionsInclude": [
+      "Close Well-Child Visit (3-11 years) quality gap",
+      "Close Childcare Support Assessment quality gap"
+    ],
+    "interventionDescriptionsInclude": [
+      "Schedule in-person visit",
+      "Address Childcare Support Assessment (telehealth)",
+      "Community resource connection"
+    ],
+    "referralCount": 2,
+    "referralSpecialtiesInclude": ["Primary Care"],
+    "sharedWithIncludes": ["Patient Portal"],
+    "sharedWithExcludes": ["Health Plan", "(via FHIR)"],
+    "addressesInclude": ["SDoH: Childcare support: Caregiver unable to attend weekday appointments"]
+  }
+}

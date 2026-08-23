@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // careTeam/assignments.ts — Assignment + audit types and caseload math.
 // The live state lives in appContext; these are the shapes + pure reducers.
 
@@ -101,13 +102,13 @@ export function makeAuditEntry(
   fromMemberId?: string
 ): AuditEntry {
   return {
-    id: `audit-${patientId}-${Date.now()}`,
+    id: `audit-${patientId}-${clock.now()}`,
     patientId,
     fromMemberId,
     toMemberId,
     reason,
     actor,
-    at: new Date().toISOString(),
+    at: clock.nowIso(),
   };
 }
 

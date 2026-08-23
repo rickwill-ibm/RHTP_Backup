@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "policies": {
+    "default": {
+      "tiers": [
+        {
+          "priority": "urgent",
+          "slaHours": 4,
+          "hierarchy": ["assigned-reviewer", "care-team-lead", "clinical-supervisor"],
+          "onExhaust": "park"
+        },
+        {
+          "priority": "high",
+          "slaHours": 24,
+          "hierarchy": ["assigned-reviewer", "care-team-lead"],
+          "onExhaust": "park"
+        },
+        {
+          "priority": "routine",
+          "slaHours": 72,
+          "hierarchy": ["assigned-reviewer"],
+          "onExhaust": "park"
+        }
+      ]
+    }
+  }
+}

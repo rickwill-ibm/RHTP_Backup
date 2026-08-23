@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Correlation IDs (plan F-6). Every privileged server action mints or propagates
  * an `x-correlation-id` so a transaction can be traced across RHTP → APIM →
@@ -12,7 +13,7 @@ export function newCorrelationId(): string {
   const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
   if (c?.randomUUID) return c.randomUUID();
   // Fallback (non-cryptographic) — sufficient for a trace id.
-  return 'cid-' + Math.abs(hash(String(Date.now()) + Math.random())).toString(16);
+  return 'cid-' + Math.abs(hash(String(clock.now()) + clock.rng())).toString(16);
 }
 
 /** Read an inbound correlation id from request headers, or mint a fresh one. */

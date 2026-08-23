@@ -10,15 +10,28 @@
  * financial-clearance run to populate the in-memory store.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionAuthContext } from '@/lib/server/smartSession';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { correlationFrom } from '@/lib/server/correlation';
 import { canReadMemberData } from '@/lib/authz/guard';
+import { getPrincipal, canAccessMember, purposeForRole } from '@/lib/authz/principal';
 import { audit } from '@/lib/server/audit';
-import { defaultEvidenceStore } from '@/lib/evidence/evidenceStore';
+import { getEvidenceStore } from '@/lib/evidence/store';
 import { validateEvidenceId } from '@/lib/goldenThread/validate';
 import { devMockEnabled } from '@/lib/server/devStubs';
 import { getPatientById } from '@/lib/patientRegistry';
+import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
+
+/**
+ * Parse the member id out of an evidence id (ev-{memberId}-{cpt}-{epoch}).
+ * memberId may contain hyphens, so parse from the right: the last two segments
+ * are cpt + epoch, everything between "ev-" and them is the member id.
+ */
+function memberIdFromEvidenceId(id: string): string {
+  const withoutPrefix = id.startsWith('ev-') ? id.slice(3) : id;
+  const parts = withoutPrefix.split('-');
+  return parts.length >= 3 ? parts.slice(0, parts.length - 2).join('-') : 'MARIA_SD_001';
+}
 
 // CPT code → procedure metadata — mirrors PATIENT_PA_SCENARIOS in api-explorer and devStubs
 const CPT_META: Record<string, { display: string; policyRef: string; deficiency: string; payer: string; propensity: number; propensityBand: string }> = {
@@ -42,7 +55,7 @@ function seededEvidenceRecord(id: string) {
   const withoutPrefix = id.startsWith('ev-') ? id.slice(3) : id;
   const parts = withoutPrefix.split('-');
   const cptCode  = parts.length >= 3 ? parts[parts.length - 2] : '72148';
-  const memberId = parts.length >= 3 ? parts.slice(0, parts.length - 2).join('-') : 'MARIA_SD_001';
+  const memberId = memberIdFromEvidenceId(id);
   const code = cptCode || '72148';
   const meta = CPT_META[code] ?? DEFAULT_META;
 
@@ -95,7 +108,61 @@ export async function GET(
     return NextResponse.json(ooError(v.error ?? 'invalid id', 'invalid'), { status: 400 });
   }
 
-  const decision = canReadMemberData({ role: 'pa-reviewer', purpose: 'operations' });
+  // CONSENT GATE (CMS-0057-F): honor the Provider Access opt-out before releasing
+  // the member's Evidence Record (patientName, coverage note). Mirrors /api/match
+  // and the FHIR passthrough. Break-glass emergency access overrides, and is
+  // always audited. SEAM: consent — lib/consent/providerAccessOptOut.ts.
+  const memberId = memberIdFromEvidenceId(id);
+  const breakGlass = req.headers.get('x-break-glass') === 'true';
+  if (getProviderAccessConsentStore().isOptedOut(memberId)) {
+    await audit({
+      ts: new Date().toISOString(),
+      actor: 'session-user',
+      action: breakGlass ? 'evidence.read.break-glass' : 'evidence.read.consent-denied',
+      resourceRef: `Evidence/${id}`,
+      correlationId,
+      outcome: breakGlass ? 'success' : 'failure',
+      detail: 'provider-access opt-out',
+    });
+    if (!breakGlass) {
+      return NextResponse.json(
+        ooError('Member has opted out of Provider Access data sharing', 'forbidden'),
+        { status: 403 }
+      );
+    }
+  }
+
+  // AUTHORIZATION (session-principal role model — closes cycle-3 IDOR / MEDIUM #3).
+  // Derive the acting principal from the session (NOT a hardcoded role) and
+  // scope-check the requested member. A member-scoped session reading another
+  // member is denied (403, audited); a reviewer principal reads within its
+  // authorized scope (org-wide today, panel when assignment data is wired).
+  const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
+  const scopeDecision = canAccessMember(principal, memberId);
+  if (!scopeDecision.allow) {
+    await audit({
+      ts: new Date().toISOString(),
+      actor: principal.userId,
+      action: 'evidence.read.idor-denied',
+      resourceRef: `Evidence/${id}`,
+      correlationId,
+      outcome: 'failure',
+      detail: 'requested member outside session-principal scope',
+    });
+    return NextResponse.json(
+      ooError('Requested member is outside the session scope', 'forbidden'),
+      { status: 403 }
+    );
+  }
+
+  // Defense in depth: the existing role/purpose policy, now driven by the REAL
+  // session role rather than a constant.
+  const decision = canReadMemberData({
+    role: principal.role,
+    purpose: purposeForRole(principal.role),
+    selfPatientId: principal.authorizedMemberScope.memberId,
+    targetPatientId: memberId,
+  });
   if (!decision.allow) {
     return NextResponse.json(ooError(decision.reason, 'forbidden'), { status: 403 });
   }
@@ -108,7 +175,7 @@ export async function GET(
       await audit({ ts: new Date().toISOString(), actor: 'session-user', action: 'evidence.read', resourceRef: `Evidence/${id}`, correlationId, outcome: 'success' });
       return NextResponse.json(seeded, { status: 200 });
     }
-    const record = await defaultEvidenceStore().get(id);
+    const record = await getEvidenceStore().get(id);
     if (!record) {
       return NextResponse.json(ooError(`Evidence record ${id} not found`, 'not-found'), {
         status: 404,

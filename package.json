@@ -36,7 +36,7 @@
       "serve",
       "type-check"
     ],
-    "warning": "\ud83d\udea8 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
+    "warning": "🚨 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
   },
   "scripts": {
     "dev": "next dev -p 4029",
@@ -51,6 +51,7 @@
     "test:watch": "vitest",
     "test:contract": "newman run tools/contract/cms0057f.postman_collection.json -e tools/contract/local.postman_environment.json",
     "test:e2e": "playwright test",
+    "a11y": "playwright test e2e/a11y.spec.ts",
     "seed:maria": "node tools/seed/load-maria.mjs",
     "backbone:up": "docker compose -f install/docker-compose.backbone.yml up -d",
     "backbone:down": "docker compose -f install/docker-compose.backbone.yml down",
@@ -59,6 +60,10 @@
     "check:types": "tsc --noEmit",
     "check:sizes": "bash check-file-sizes.sh",
     "check:all": "npm run check:types && npm run check:sizes && npm run lint && vitest run",
+    "check:testlink": "node docs/build-provenance/check-testlink.mjs src tests",
+    "check:mutation": "node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json",
+    "check:provenance": "bash docs/build-provenance/check-provenance.sh",
+    "check:framework": "npm run check:testlink && npm run check:mutation && npm run check:provenance",
     "pretest": "npm run check:types && npm run check:sizes"
   },
   "dependencies": {
@@ -78,13 +83,18 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.11.1",
+    "@playwright/test": "^1.62.1",
+    "@testcontainers/postgresql": "^12.1.0",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/d3": "7.4.3",
     "@types/newman": "^5.3.6",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "19.0.3",
     "@types/react-dom": "19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
@@ -95,11 +105,15 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
     "jsdom": "^25.0.1",
+    "neo4j-driver": "^6.2.0",
     "newman": "^6.2.2",
+    "pg": "^8.23.0",
+    "pg-mem": "^3.0.14",
     "postcss": "^8.5.26",
     "prettier": "^3.5.3",
     "tailwindcss": "3.4.6",
     "tailwindcss-animate": "^1.0.7",
+    "testcontainers": "^12.1.0",
     "typescript": "^5",
     "vitest": "^4.1.10"
   },

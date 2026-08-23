@@ -4,6 +4,8 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { UserRole } from './mockData';
+import { DEMO_MEMBER_ID } from './config/demoDefaults';
+import * as clock from './clock'; // determinism seam (Cycle 1)
 
 // ─── Physician Personas ───────────────────────────────────────────────────────
 export type PhysicianPersona = 'rick' | 'jon';
@@ -110,7 +112,7 @@ interface AppContextValue {
   setSelectedPatientId: (id: string | null) => void;
 
   // Active patient — persists across all patient-facing screens
-  // Default: MARIA_SD_001 (Maria Redhawk — primary demo patient)
+  // Default: DEMO_MEMBER_ID (configured demo patient, see config/demoDefaults)
   activePatientId: string;
   setActivePatientId: (id: string) => void;
 
@@ -165,8 +167,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const [entryContext, setEntryContext] = useState<EntryContext>('browse');
   const [selectedContractId, setSelectedContractId] = useState<string | null>('contract-001');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>('patient-001');
-  // Maria Redhawk is the default active patient for all patient-facing demo screens
-  const [activePatientId, setActivePatientId] = useState<string>('MARIA_SD_001');
+  // The configured demo member is the default active patient for all patient-facing demo screens
+  const [activePatientId, setActivePatientId] = useState<string>(DEMO_MEMBER_ID);
 
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
@@ -200,7 +202,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             rationale: reason || 'Manual reassignment',
             riskTier: existing?.riskTier ?? 'Moderate',
             cohortId: existing?.cohortId,
-            assignedAt: new Date().toISOString(),
+            assignedAt: clock.nowIso(),
             assignedBy: user.name,
           },
         };

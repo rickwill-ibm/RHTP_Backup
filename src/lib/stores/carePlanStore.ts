@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Care Plan Store
  * 
@@ -56,8 +57,8 @@ export const useCarePlanStore = create<CarePlanStore>((set, get) => ({
   setCarePlan: (patientId: string, plan: CarePlan) => {
     const monitoredPlan: MonitoredCarePlan = {
       ...plan,
-      generatedDate: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
+      generatedDate: clock.nowIso(),
+      lastUpdated: clock.nowIso(),
       overallProgress: 0,
       tierProgress: {},
     };
@@ -98,7 +99,7 @@ export const useCarePlanStore = create<CarePlanStore>((set, get) => ({
           return {
             ...intervention,
             status,
-            ...(status === 'Completed' ? { completedDate: new Date().toISOString() } : {})
+            ...(status === 'Completed' ? { completedDate: clock.nowIso() } : {})
           };
         }
         return intervention;
@@ -109,7 +110,7 @@ export const useCarePlanStore = create<CarePlanStore>((set, get) => ({
       const updatedPlan: MonitoredCarePlan = {
         ...plan,
         goals: updatedGoals,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: clock.nowIso()
       };
       
       const newPlans = new Map(activePlans);
@@ -131,10 +132,10 @@ export const useCarePlanStore = create<CarePlanStore>((set, get) => ({
     if (!plan) return;
     
     const note: ActionNote = {
-      id: `note-${Date.now()}`,
+      id: `note-${clock.now()}`,
       text: noteText,
       author,
-      timestamp: new Date().toISOString()
+      timestamp: clock.nowIso()
     };
     
     // Find and update the action with the note
@@ -155,7 +156,7 @@ export const useCarePlanStore = create<CarePlanStore>((set, get) => ({
     const updatedPlan: MonitoredCarePlan = {
       ...plan,
       goals: updatedGoals,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: clock.nowIso()
     };
     
     const newPlans = new Map(activePlans);

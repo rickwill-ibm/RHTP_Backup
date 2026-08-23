@@ -15,7 +15,7 @@ import { correlationFrom } from '@/lib/server/correlation';
 import { canReadMemberData } from '@/lib/authz/guard';
 import { audit } from '@/lib/server/audit';
 import { flag } from '@/lib/flags/flags';
-import { defaultEvidenceStore } from '@/lib/evidence/evidenceStore';
+import { getEvidenceStore } from '@/lib/evidence/store';
 import { listWorkItems, groupByQueue } from '@/lib/goldenThread/workQueueView';
 import { devMockEnabled, devWorkQueueItems } from '@/lib/server/devStubs';
 
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       for (const it of seeded) groups[it.queue as QN].push(it);
       return NextResponse.json({ count: seeded.length, groups }, { status: 200 });
     }
-    const items = await listWorkItems(defaultEvidenceStore());
+    const items = await listWorkItems(getEvidenceStore());
     await audit({
       ts: new Date().toISOString(),
       actor: 'session-user',

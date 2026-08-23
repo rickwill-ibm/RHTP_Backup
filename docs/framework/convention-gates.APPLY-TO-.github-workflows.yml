@@ -1,0 +1,68 @@
+# Convention gates — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.4
+# Fails the PR on: type errors, NEW size violations or ratchet regressions,
+# lint errors, failing unit tests, untested new code or a surviving mutant (E13),
+# or a stale/hand-edited provenance log (E11). Legacy files frozen in
+# quality-baseline.json do not fail the build unless they grow.
+
+name: Convention Gates
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  gates:
+    name: types / sizes+ratchet / lint / unit / E13 / E11
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # E13 test-link diffs against the base commit
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Types (tsc --noEmit)
+        run: npm run check:types
+
+      - name: File sizes + quality ratchet
+        run: npm run check:sizes
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (vitest)
+        run: npx vitest run
+
+      # --- Agentic Build Framework v1.4 gates ---
+
+      - name: Test-effectiveness — new code is test-linked (E13)
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ]; then
+            FILES=$(git diff --name-only --diff-filter=AM "$BASE"...HEAD -- 'src/**/*.ts' 'src/**/*.tsx' | tr '\n' ' ')
+          else
+            FILES=""
+          fi
+          if [ -n "$FILES" ]; then
+            node docs/build-provenance/check-testlink.mjs src tests $FILES
+          else
+            echo "no changed source files to test-link"
+          fi
+
+      - name: Test-effectiveness — mutation sample on critical modules (E13)
+        run: node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json
+
+      - name: Provenance completeness (E11)
+        run: |
+          python3 -m pip install --quiet openpyxl || true
+          bash docs/build-provenance/check-provenance.sh

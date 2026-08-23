@@ -15,7 +15,9 @@ export type QueueName =
   | 'ready-to-submit' // criteria met / low risk
   | 'high-risk-review' // likely deny / high propensity — work with partial evidence
   | 'denied-appeal'
-  | 'more-info';
+  | 'more-info'
+  | 'agent-proposal' // G4: an agent-runtime proposal awaiting a human decision (HITL)
+  | 'escalated'; // G4: an agent proposal escalated past its SLA up the care-team hierarchy
 
 export interface WorkItem {
   queue: QueueName;

@@ -1,15 +1,17 @@
 /**
  * FHIR R4 HTTP Client
  *
- * A thin, fetch-based FHIR R4 client.  When NEXT_PUBLIC_USE_MOCK_DATA=true
- * every method short-circuits to return empty / stub data so the app works
- * without a live FHIR server.
- *
- * When NEXT_PUBLIC_USE_MOCK_DATA=false the client issues real HTTP requests
- * against NEXT_PUBLIC_FHIR_BASE_URL (default http://localhost:8080/fhir).
+ * A thin, fetch-based FHIR R4 client. The 'fhirStore' seam of the data-mode
+ * registry (lib/config/dataMode.ts) decides its behavior: in 'mock'/'seeded'
+ * mode every method serves the in-memory fixture store so the app works
+ * without a live FHIR server; in 'production' mode the client issues real
+ * HTTP requests against NEXT_PUBLIC_FHIR_BASE_URL (default
+ * http://localhost:8080/fhir). Legacy NEXT_PUBLIC_USE_MOCK_DATA still works
+ * via the registry's compat layer.
  */
 
 import type { RegistryPatient } from '../patientRegistry';
+import { getDataMode, setSessionDataMode } from '../config/dataMode';
 import {
   storeRead,
   storeSearch,
@@ -23,19 +25,23 @@ const FHIR_BASE =
 
 const TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_FHIR_TIMEOUT ?? 30_000);
 
-// Runtime-overridable mock flag.
-// Starts from env var but can be toggled at runtime via setFhirMockMode().
-let _useMock =
-  (process.env.NEXT_PUBLIC_USE_MOCK_DATA ?? 'true').toLowerCase() === 'true';
+// SEAM: fhirStore — mode-registry switch point (lib/config/dataMode.ts).
+// 'mock' / 'seeded' serve the in-memory fixture store; 'production' issues real
+// HTTP requests. Config: DATA_MODE_FHIR_STORE / DATA_MODE (legacy
+// NEXT_PUBLIC_USE_MOCK_DATA still honored below them); the UI FHIR/Mock toggle
+// layers on top as a session override via setFhirMockMode().
+function useMock(): boolean {
+  return getDataMode('fhirStore') !== 'production';
+}
 
 /** Toggle mock mode at runtime — called by the FHIR/Mock toggle in the UI. */
 export function setFhirMockMode(mock: boolean): void {
-  _useMock = mock;
+  setSessionDataMode('fhirStore', mock ? 'mock' : 'production');
 }
 
 /** Read current mock mode — useful for components that need to check. */
 export function getFhirMockMode(): boolean {
-  return _useMock;
+  return useMock();
 }
 
 // ─── Low-level fetch wrapper ──────────────────────────────────────────────────
@@ -75,8 +81,7 @@ export class FhirClient {
 
   /** Read a single resource by type and id */
   async read<T = unknown>(resourceType: string, id: string): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] read ${resourceType}/${id}`);
+    if (useMock()) {
       // Serve from the fixture store (same bundles that seed HAPI);
       // fall back to the legacy stub shape if the fixture is absent.
       return (storeRead<T>(resourceType, id) ?? ({ resourceType, id } as T));
@@ -86,8 +91,7 @@ export class FhirClient {
 
   /** Create a resource (server assigns id) */
   async create<T = unknown>(resource: Record<string, unknown>): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] create ${resource.resourceType}`);
+    if (useMock()) {
       // Persist to the in-memory fixture store so demo write-back flows work.
       return storeCreate<T>(resource);
     }
@@ -99,8 +103,7 @@ export class FhirClient {
 
   /** Update (PUT) a resource — id must be set on the resource */
   async update<T = unknown>(resource: Record<string, unknown> & { id: string }): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] update ${resource.resourceType}/${resource.id}`);
+    if (useMock()) {
       return storeUpdate<T>(resource);
     }
     return fhirFetch<T>(`${resource.resourceType}/${resource.id}`, {
@@ -114,8 +117,7 @@ export class FhirClient {
     resourceType: string,
     params: Record<string, string | number | boolean>,
   ): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] search ${resourceType}`, params);
+    if (useMock()) {
       return storeSearch<T>(resourceType, params);
     }
     const qs = new URLSearchParams(
@@ -126,8 +128,7 @@ export class FhirClient {
 
   /** Delete a resource */
   async delete(resourceType: string, id: string): Promise<void> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] delete ${resourceType}/${id}`);
+    if (useMock()) {
       storeDelete(resourceType, id);
       return;
     }
@@ -143,7 +144,7 @@ export class FhirClient {
    * Returns undefined if not found.
    */
   async getRegistryPatient(fhirPatientId: string): Promise<RegistryPatient | undefined> {
-    if (_useMock) return undefined;
+    if (useMock()) return undefined;
 
     try {
       const { mapFhirPatientToRegistryPatient, bundleEntries } = await import('./fhirResourceMappers');
@@ -220,7 +221,7 @@ export class FhirClient {
    * Falls back to empty array on error.
    */
   async getAllRegistryPatients(): Promise<RegistryPatient[]> {
-    if (_useMock) return [];
+    if (useMock()) return [];
 
     try {
       const bundle = await fhirFetch<{ resourceType: string; entry?: { resource?: { id?: string } }[] }>(

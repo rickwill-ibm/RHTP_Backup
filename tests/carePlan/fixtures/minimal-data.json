@@ -1,0 +1,50 @@
+{
+  "_fixture": {
+    "id": "minimal-data",
+    "description": "Member with no gaps, no suspects, no alerts — demographics and risk tier only. Proves graceful minimal behavior: an honest thin plan (follow-up review only), no fabricated clinical goals, no referrals, no external sharing, and the data-limitation flags fire (validator.checkDataLimitations).",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-min-006",
+      "name": "Fixture Member Six",
+      "dob": "1990-11-30",
+      "age": 35,
+      "gender": "Female",
+      "mrn": "MRN-FIX-006",
+      "riskTier": "Low",
+      "rafScore": 0.55,
+      "rafScoreDelta": 0.0,
+      "predictedErRisk": 5,
+      "openHCCSuspects": 0,
+      "hccSuspectValue": 0,
+      "openCareGaps": 0,
+      "lastContactDate": "2026-06-20",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 150,
+      "pmpmTarget": 300,
+      "primaryCareProvider": "Dr. Fixture PCP",
+      "activeAlerts": 0,
+      "carePlanStatus": "None",
+      "contractId": "contract-fix-01",
+      "phone": "555-0106",
+      "address": "106 Fixture St",
+      "insuranceId": "INS-FIX-006",
+      "payer": "Fixture Health Plan",
+      "enrollmentDate": "2022-04-01"
+    },
+    "hccSuspects": [],
+    "careGaps": [],
+    "alerts": []
+  },
+  "expected": {
+    "priority": "Low",
+    "title": "Comprehensive Care Plan",
+    "goalCount": { "min": 0, "max": 0 },
+    "interventionDescriptionsInclude": ["Care plan review (in-person)"],
+    "referralCount": 0,
+    "sharedWithIncludes": ["Patient Portal"],
+    "sharedWithExcludes": ["Health Plan", "(via FHIR)", "Care Manager"]
+  }
+}

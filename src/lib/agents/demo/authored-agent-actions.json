@@ -1,0 +1,29 @@
+{
+  "_note": "Authored agent actions the demo screen renders in mock mode. In production mode the SAME shape is EMERGENT from the runtime (SDE dispositions -> dispatcher -> agents -> HITL approval -> executed); this authored list is kept at parity with that output so mock and production agree. Regenerated from the seeded SDE demo batch, not hand-invented.",
+  "actions": [
+    {
+      "agentId": "outreach-agent",
+      "taskKind": "outreach",
+      "actionType": "send-outreach",
+      "memberId": "sde-demo-member",
+      "outcome": "executed",
+      "refs": { "touchpoint": "tp:sde-demo-member:cw:20687", "channel": "portal" }
+    },
+    {
+      "agentId": "referral-coordination-agent",
+      "taskKind": "referral",
+      "actionType": "referral-followup",
+      "memberId": "sde-demo-member",
+      "outcome": "executed",
+      "refs": { "referral": "ServiceRequest/ref-12" }
+    },
+    {
+      "agentId": "pa-documentation-agent",
+      "taskKind": "pa",
+      "actionType": "advance-pa-documentation",
+      "memberId": "sde-demo-member",
+      "outcome": "executed",
+      "refs": { "thread": "Claim/clm-9", "event": "appeal" }
+    }
+  ]
+}

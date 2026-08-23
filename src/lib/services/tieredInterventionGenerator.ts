@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Tiered Intervention Generator
  *
@@ -41,7 +42,7 @@ export class TieredInterventionGenerator {
       successProbability: analysis.successProbabilityWithIntervention,
       estimatedCostSavings: this.calculateCostSavings(context, interventions),
       estimatedBurdenReduction: this.calculateBurdenReduction(interventions),
-      generatedAt: new Date().toISOString(),
+      generatedAt: clock.nowIso(),
     };
   }
 

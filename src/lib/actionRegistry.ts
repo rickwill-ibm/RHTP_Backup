@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // Central Action Registry — role, state, and context guards for all 6 screens
 // Every user-facing action in the platform is defined here with its full guard set.
 
@@ -102,7 +103,7 @@ export function createAuditEntry(
   notes?: string
 ): AuditEntry {
   return {
-    id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    id: `audit-${clock.now()}-${clock.rng().toString(36).slice(2, 7)}`,
     actionId: action.id,
     auditLabel: action.auditLabel,
     entityId,
@@ -112,7 +113,7 @@ export function createAuditEntry(
     entryContext: ctx.entryContext,
     screen: ctx.screen,
     tab: ctx.tab,
-    timestamp: new Date().toISOString(),
+    timestamp: clock.nowIso(),
     notes,
     workflowType: action.initiatesWorkflow ?? action.workflowStep?.workflow,
     workflowStep: action.workflowStep?.step,

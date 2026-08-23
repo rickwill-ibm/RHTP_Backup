@@ -1,0 +1,47 @@
+{
+  "_comment": "Seeded gold-card roster (O-2). Generic demo data, no persona. cards = explicitly granted gold cards; histories = raw PA outcome stats to compute qualification. Data is not code: edit here, never in a .ts file.",
+  "cards": [
+    {
+      "providerNpi": "1000000001",
+      "code": "72148",
+      "payer": "PAYER_A",
+      "program": "Default gold-card program",
+      "approvalRate": 0.96,
+      "sampleSize": 40,
+      "lookbackMonths": 12,
+      "grantedOn": "2026-01-01T00:00:00.000Z",
+      "expiresOn": "2027-01-01T00:00:00.000Z",
+      "revoked": false
+    },
+    {
+      "providerNpi": "1000000002",
+      "code": "70450",
+      "payer": "PAYER_A",
+      "program": "Default gold-card program",
+      "approvalRate": 0.93,
+      "sampleSize": 22,
+      "lookbackMonths": 12,
+      "grantedOn": "2025-09-01T00:00:00.000Z",
+      "expiresOn": "2026-09-01T00:00:00.000Z",
+      "revoked": false
+    }
+  ],
+  "histories": [
+    {
+      "providerNpi": "1000000003",
+      "code": "72148",
+      "payer": "PAYER_B",
+      "submissions": 30,
+      "approvals": 29,
+      "windowMonths": 12
+    },
+    {
+      "providerNpi": "1000000004",
+      "code": "75561",
+      "payer": "PAYER_B",
+      "submissions": 8,
+      "approvals": 5,
+      "windowMonths": 12
+    }
+  ]
+}

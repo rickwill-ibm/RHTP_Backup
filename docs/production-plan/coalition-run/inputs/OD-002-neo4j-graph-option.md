@@ -1,0 +1,3 @@
+# OD-002 Owner directive (2026-08-22): Neo4j graph backend option
+
+The knowledge graph must offer a Neo4j backend option supported on all target clouds, in addition to the Postgres-projection reference. Landed per rule R9. Consequences: ADR-001 amended (dual certified backends behind the graph seam; conformance suite gates both), DP-1 mapping specs are store-agnostic property-graph mutations, deploy.config.yaml gains graph: postgres-projection | neo4j-selfhosted | neo4j-aura, Terraform modules add the graph tier for AWS/Azure (GCP fast-follow). G1 build epics updated accordingly before that increment starts.

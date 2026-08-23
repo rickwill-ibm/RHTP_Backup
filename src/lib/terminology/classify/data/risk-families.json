@@ -1,0 +1,41 @@
+{
+  "_comment": "The risk-adjustment / classification family taxonomy as DATA (data-is-not-code). CMS-HCC is ONE family of several - enumerating them here makes that explicit and data-driven. Each family names its program, population, steward, canonical system, and the registry asset id of its active model version (versions/currency live in registry/data/terminology-assets.json). This is reference metadata, NOT the code-to-group content (which the crosswalk seed answers).",
+  "families": [
+    {
+      "id": "cms-hcc",
+      "name": "CMS-HCC",
+      "program": "Medicare Advantage (Part C)",
+      "population": "Medicare Advantage enrollees",
+      "steward": "CMS",
+      "system": "urn:cms:risk-adjustment:hcc",
+      "activeAssetId": "cms-hcc-v28"
+    },
+    {
+      "id": "rxhcc",
+      "name": "RxHCC",
+      "program": "Medicare Part D",
+      "population": "Part D prescription-drug enrollees",
+      "steward": "CMS",
+      "system": "urn:cms:risk-adjustment:rxhcc",
+      "activeAssetId": "rxhcc-v08"
+    },
+    {
+      "id": "hhs-hcc",
+      "name": "HHS-HCC",
+      "program": "Commercial ACA (Marketplace)",
+      "population": "Individual and small-group commercial",
+      "steward": "CMS / CCIIO",
+      "system": "urn:hhs:risk-adjustment:hcc",
+      "activeAssetId": "hhs-hcc-2026"
+    },
+    {
+      "id": "cdps",
+      "name": "CDPS",
+      "program": "Medicaid",
+      "population": "Medicaid managed-care enrollees",
+      "steward": "UC San Diego / state Medicaid programs",
+      "system": "urn:ucsd:cdps",
+      "activeAssetId": "cdps-6.5"
+    }
+  ]
+}

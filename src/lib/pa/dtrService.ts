@@ -5,6 +5,7 @@
  */
 import { postJson } from '@/lib/client/bff';
 import type { DtrMatchResult } from '@/lib/pa/pa-types';
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 
 export async function runDtrMatch(
   patientId: string,
@@ -28,7 +29,7 @@ function getMockDtrResult(
   cptCode: string,
   procedureName: string
 ): DtrMatchResult {
-  const isMaria = patientId === 'MARIA_SD_001' || cptCode === '72148';
+  const isMaria = patientId === DEMO_MEMBER_ID || cptCode === '72148';
 
   if (isMaria) {
     return {

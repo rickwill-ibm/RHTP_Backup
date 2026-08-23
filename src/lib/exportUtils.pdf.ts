@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // ─── exportUtils.pdf.ts ───────────────────────────────────────────────────────
 // PDF generation utilities via print window.
 
@@ -25,7 +26,7 @@ export function generatePDFReport(opts: {
   tableRows?: string[][];
 }) {
   const { reportTitle, subtitle, generatedBy, sections, tableHeaders, tableRows } = opts;
-  const now = new Date().toLocaleString('en-US', {
+  const now = clock.nowDate().toLocaleString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });

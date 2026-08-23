@@ -1,4 +1,6 @@
 // Care plans, care plan templates, ReferralStore singleton, and episodes of care
+import { log } from '@/lib/server/log'; // structured logging seam
+import * as clock from './clock'; // determinism seam (Cycle 1)
 import type {
   CarePlan, Referral, QualityMetrics, GainshareRecord, Episode,
 } from './mockData.types';
@@ -247,11 +249,11 @@ class ReferralStore {
   private listeners: Array<() => void> = [];
 
   private qualityMetrics: QualityMetrics[] = [
-    { measureId: 'HEDIS-CDC-HbA1c', measureName: 'HbA1c Poor Control (>9%)', program: 'HEDIS', numerator: 142, denominator: 487, rate: 0.291, target: 0.25, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-    { measureId: 'STARS-C01', measureName: 'Annual Wellness Visit', program: 'STARS', numerator: 3621, denominator: 4872, rate: 0.743, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-    { measureId: 'HEDIS-EED', measureName: 'Eye Exam for Diabetics', program: 'HEDIS', numerator: 2891, denominator: 4872, rate: 0.593, target: 0.70, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-    { measureId: 'MIPS-PREV-12', measureName: 'Colorectal Cancer Screening', program: 'MIPS', numerator: 3142, denominator: 4872, rate: 0.645, target: 0.75, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-    { measureId: 'STARS-D12', measureName: 'Medication Adherence — Diabetes', program: 'STARS', numerator: 3456, denominator: 4872, rate: 0.709, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
+    { measureId: 'HEDIS-CDC-HbA1c', measureName: 'HbA1c Poor Control (>9%)', program: 'HEDIS', numerator: 142, denominator: 487, rate: 0.291, target: 0.25, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+    { measureId: 'STARS-C01', measureName: 'Annual Wellness Visit', program: 'STARS', numerator: 3621, denominator: 4872, rate: 0.743, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+    { measureId: 'HEDIS-EED', measureName: 'Eye Exam for Diabetics', program: 'HEDIS', numerator: 2891, denominator: 4872, rate: 0.593, target: 0.70, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+    { measureId: 'MIPS-PREV-12', measureName: 'Colorectal Cancer Screening', program: 'MIPS', numerator: 3142, denominator: 4872, rate: 0.645, target: 0.75, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+    { measureId: 'STARS-D12', measureName: 'Medication Adherence — Diabetes', program: 'STARS', numerator: 3456, denominator: 4872, rate: 0.709, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
   ];
 
   private gainshareRecords: GainshareRecord[] = [];
@@ -288,12 +290,12 @@ class ReferralStore {
       metric.rate = metric.numerator / metric.denominator;
       metric.gapsClosed += 1;
       metric.gapsOpen = Math.max(0, metric.gapsOpen - 1);
-      metric.lastUpdated = new Date().toISOString();
+      metric.lastUpdated = clock.nowIso();
     }
     const gapIndex = mockCareGaps.findIndex(g => g.measureId === referral.careGap!.measure && g.patientId === referral.patientId);
     if (gapIndex !== -1) {
       mockCareGaps[gapIndex].status = 'Closed';
-      mockCareGaps[gapIndex].lastActionDate = new Date().toISOString().split('T')[0];
+      mockCareGaps[gapIndex].lastActionDate = clock.nowIso().split('T')[0];
       mockCareGaps[gapIndex].daysOpen = 0;
     }
     const totalAmount = referral.careGap.gainshareAmount;
@@ -305,7 +307,7 @@ class ReferralStore {
       patientName: referral.patientName,
       measureId: referral.careGap.measure,
       measureName: referral.careGap.description,
-      closureDate: new Date().toISOString().split('T')[0],
+      closureDate: clock.nowIso().split('T')[0],
       totalAmount,
       providerShare,
       specialistShare,
@@ -316,8 +318,8 @@ class ReferralStore {
       status: 'approved',
     };
     this.gainshareRecords.push(gainshareRecord);
-    console.log(`✅ Gap closed: ${referral.careGap.description}`);
-    console.log(`💰 Gainshare: Provider $${providerShare} | Specialist $${specialistShare}`);
+    // Structured logging (PHI-safe ids/amounts); see src/lib/server/log.ts
+    log.info('demo.gapClosed', { referralId: referral.referralId, measure: referral.careGap.measure, providerShare, specialistShare });
     this.notifyListeners();
   }
 
@@ -346,7 +348,6 @@ class ReferralStore {
   }
 
   resetDemo(): void {
-    console.log('🔄 Resetting demo data...');
     this.referrals = this.referrals.filter(r => {
       if (r.patientId === 'patient-001' || r.patientName === 'Maria Reyes') return false;
       return r.referralId === 'ref-001' || r.referralId === 'ref-002' || r.referralId === 'ref-003';
@@ -354,23 +355,19 @@ class ReferralStore {
     this.referrals.forEach(r => { r.status = 'pending'; r.appointmentDate = undefined; });
     this.gainshareRecords = [];
     this.qualityMetrics = [
-      { measureId: 'HEDIS-CDC-HbA1c', measureName: 'HbA1c Poor Control (>9%)', program: 'HEDIS', numerator: 142, denominator: 487, rate: 0.291, target: 0.25, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-      { measureId: 'STARS-C01', measureName: 'Annual Wellness Visit', program: 'STARS', numerator: 3621, denominator: 4872, rate: 0.743, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-      { measureId: 'HEDIS-EED', measureName: 'Eye Exam for Diabetics', program: 'HEDIS', numerator: 2891, denominator: 4872, rate: 0.593, target: 0.70, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-      { measureId: 'MIPS-PREV-12', measureName: 'Colorectal Cancer Screening', program: 'MIPS', numerator: 3142, denominator: 4872, rate: 0.645, target: 0.75, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
-      { measureId: 'STARS-D12', measureName: 'Medication Adherence — Diabetes', program: 'STARS', numerator: 3456, denominator: 4872, rate: 0.709, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: new Date().toISOString() },
+      { measureId: 'HEDIS-CDC-HbA1c', measureName: 'HbA1c Poor Control (>9%)', program: 'HEDIS', numerator: 142, denominator: 487, rate: 0.291, target: 0.25, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+      { measureId: 'STARS-C01', measureName: 'Annual Wellness Visit', program: 'STARS', numerator: 3621, denominator: 4872, rate: 0.743, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+      { measureId: 'HEDIS-EED', measureName: 'Eye Exam for Diabetics', program: 'HEDIS', numerator: 2891, denominator: 4872, rate: 0.593, target: 0.70, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+      { measureId: 'MIPS-PREV-12', measureName: 'Colorectal Cancer Screening', program: 'MIPS', numerator: 3142, denominator: 4872, rate: 0.645, target: 0.75, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
+      { measureId: 'STARS-D12', measureName: 'Medication Adherence — Diabetes', program: 'STARS', numerator: 3456, denominator: 4872, rate: 0.709, target: 0.80, gapsClosed: 0, gapsOpen: 1, lastUpdated: clock.nowIso() },
     ];
     mockCareGaps.forEach(gap => {
       if (gap.patientId === 'patient-001') {
         gap.status = gap.measureId === 'HEDIS-CBP' ? 'Closed' : 'Open';
-        gap.daysOpen = gap.measureId === 'HEDIS-CBP' ? 0 : Math.floor(Math.random() * 100) + 20;
+        gap.daysOpen = gap.measureId === 'HEDIS-CBP' ? 0 : Math.floor(clock.rng() * 100) + 20;
       }
     });
-    console.log('✅ Demo data reset complete');
-    console.log(`   - Referrals: ${this.referrals.length} (initial state)`);
-    console.log(`   - Gainshare records: ${this.gainshareRecords.length}`);
-    console.log(`   - Quality metrics: ${this.qualityMetrics.length} (reset to baseline)`);
-    console.log(`   - Care gaps: Reset to Open status`);
+    log.info('demo.reset.complete', { referrals: this.referrals.length, gainshareRecords: this.gainshareRecords.length, qualityMetrics: this.qualityMetrics.length });
     this.notifyListeners();
   }
 }

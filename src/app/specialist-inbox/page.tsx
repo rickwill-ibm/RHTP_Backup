@@ -348,7 +348,6 @@ export default function SpecialistInboxPage() {
           notes: `Gap closed by ${activePhysician.displayName} on ${new Date().toLocaleDateString()}`,
         });
         setClosedByFhir(prev => new Set(prev).add(task.id));
-        console.log('[SpecialistInbox] Gap closed in FHIR for task', task.id);
 
         // ── DetectedIssue PUT: mark gap as mitigated on HAPI ─────────────────
         // Try to find and update the DetectedIssue for this gap if one exists.
@@ -419,7 +418,6 @@ export default function SpecialistInboxPage() {
         };
         await client.create(condition as any);
         entry.savedToFhir = true;
-        console.log('[SpecialistInbox] Condition saved to FHIR:', diagnosisInput.icdCode);
       } catch (err) {
         console.warn('[SpecialistInbox] FHIR Condition save failed:', err);
       }

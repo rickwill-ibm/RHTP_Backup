@@ -1,0 +1,41 @@
+{
+  "_comment": "Seeded provider directory (O-2). Generic demo data, no persona. Normalized provider rows for network/adequacy and directory lookups. Data is not code.",
+  "providers": [
+    {
+      "npi": "1000000001",
+      "name": "Provider One",
+      "specialty": "Radiology",
+      "county": "Fulton",
+      "state": "GA",
+      "lat": 33.749,
+      "lng": -84.388,
+      "lobs": ["Medicaid", "Commercial"],
+      "acceptingNewPatients": true,
+      "status": "active"
+    },
+    {
+      "npi": "1000000005",
+      "name": "Provider Five",
+      "specialty": "Cardiology",
+      "county": "DeKalb",
+      "state": "GA",
+      "lat": 33.771,
+      "lng": -84.24,
+      "lobs": ["Medicaid"],
+      "acceptingNewPatients": false,
+      "status": "credentialing"
+    },
+    {
+      "npi": "1000000006",
+      "name": "Provider Six",
+      "specialty": "Pediatrics",
+      "county": "Minnehaha",
+      "state": "SD",
+      "lat": 43.55,
+      "lng": -96.7,
+      "lobs": ["Medicaid", "Medicare"],
+      "acceptingNewPatients": true,
+      "status": "active"
+    }
+  ]
+}

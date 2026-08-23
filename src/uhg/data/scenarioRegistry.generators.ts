@@ -6,7 +6,7 @@ import { getVisiblePatients, type RegistryPatient } from '@/lib/patientRegistry'
 import { getFhirMockMode } from '@/lib/services/fhirClient';
 import { contextFor, type CitizenContext } from '@/uhg/data/citizenContext';
 import { journeyForPatient } from '@/uhg/data/journeys';
-import { dispatchAgentsForPatient } from '@/app/uhg-orchestrate/agent-library/page';
+import { dispatchAgentsForPatient } from '@/app/uhg-orchestrate/agent-library/coalition';
 import type {
   CitizenScenario, ScSourceRecord, ScLogEntry, ScNode, ScEdge,
   ScReasoningLine, ScAgentPanel, ScActivity, ScCondition, ScOtherScenario, ScTrigger,

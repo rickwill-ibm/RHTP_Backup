@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Minimal FHIR R4 typings for the resources this app renders.
  * Intentionally partial — only the fields the UI consumes.
@@ -296,7 +297,7 @@ export function bannerName(names?: FhirHumanName[]): string {
 export function ageFromDob(dob?: string): number | undefined {
   if (!dob) return undefined;
   const d = new Date(dob);
-  const now = new Date();
+  const now = clock.nowDate();
   let age = now.getFullYear() - d.getFullYear();
   const m = now.getMonth() - d.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;

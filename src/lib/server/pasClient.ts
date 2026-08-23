@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * PAS (Prior Authorization Support) submit client — plan Slice 4.
  * Submits a DaVinci PAS Claim Bundle to Claim/$submit with an idempotency key.
@@ -37,7 +38,7 @@ export async function submitPas(
     });
     const claimResponse = await res.json().catch(() => null);
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor,
       action: 'pas.submit',
       correlationId,

@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Server-side FHIR gateway client (plan F-4).
  *
@@ -66,7 +67,7 @@ async function call<T>(
     const parsed = text ? (JSON.parse(text) as T) : null;
 
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor ?? 'unknown',
       action: `fhir.${method.toLowerCase()}`,
       resourceRef: fhirPath,
@@ -89,7 +90,7 @@ async function call<T>(
     return { ok: true, status: res.status, raw: parsed, vm: parsed, correlationId };
   } catch (err) {
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor ?? 'unknown',
       action: `fhir.${method.toLowerCase()}`,
       resourceRef: fhirPath,

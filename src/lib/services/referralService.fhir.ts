@@ -1,3 +1,5 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
+import { log } from '@/lib/server/log'; // structured logging seam (see src/lib/server/log.ts)
 // ─── referralService.fhir.ts ──────────────────────────────────────────────────
 // All FHIR resource creation/update functions for the closed-loop referral
 // workflow: ServiceRequest, Task, Procedure, Observation, MeasureReport,
@@ -66,7 +68,7 @@ export async function createReferralServiceRequest(
         text: request.serviceDisplay,
       },
       subject: { reference: `Patient/${request.patientId}` },
-      authoredOn: new Date().toISOString(),
+      authoredOn: clock.nowIso(),
       requester: { reference: `Practitioner/${request.requesterId}` },
       performer: [{ reference: `Practitioner/${request.performerId}` }],
       ...(request.reasonCode && {
@@ -82,7 +84,7 @@ export async function createReferralServiceRequest(
     };
 
     const response = await fhirClient.create<{ id: string }>(serviceRequest as any);
-    console.log('ServiceRequest created:', response.id);
+    log.info('referral.serviceRequest.created', { id: response.id });
     return response;
   }, 'Create ServiceRequest');
 }
@@ -108,14 +110,14 @@ export async function createReferralTask(
       code: { coding: [{ system: 'http://hl7.org/fhir/CodeSystem/task-code', code: 'fulfill', display: 'Fulfill the focal request' }], text: 'Specialist Referral' },
       focus: { reference: `ServiceRequest/${serviceRequestId}` },
       for: { reference: `Patient/${patientId}` },
-      authoredOn: new Date().toISOString(),
+      authoredOn: clock.nowIso(),
       requester: { reference: `Practitioner/${requesterId}`, display: requesterId === 'practitioner-rick' ? 'Dr. Rick Williams' : requesterId },
       owner: { reference: `Practitioner/${performerId}`, display: performerId === 'practitioner-jon' ? 'Dr. Jon Noyes' : performerId },
       businessStatus: { text: 'Referral sent, awaiting appointment' },
     };
 
     const response = await fhirClient.create<{ id: string }>(task as any);
-    console.log('Task created:', response.id);
+    log.info('referral.task.created', { id: response.id });
     return response;
   }, 'Create Task');
 }
@@ -133,12 +135,12 @@ export async function updateTaskStatus(
     task.status = status;
     if (businessStatus) task.businessStatus = { text: businessStatus };
     if (status === 'completed') {
-      task.executionPeriod = { start: task.authoredOn, end: new Date().toISOString() };
+      task.executionPeriod = { start: task.authoredOn, end: clock.nowIso() };
     }
     if (output) task.output = output;
 
     const response = await fhirClient.update(task);
-    console.log('Task updated:', taskId);
+    log.info('referral.task.updated', { id: taskId });
     return response;
   }, 'Update Task');
 }
@@ -169,7 +171,7 @@ export async function createProcedure(request: ServiceCompletionRequest): Promis
     };
 
     const response = await fhirClient.create<{ id: string }>(procedure);
-    console.log('Procedure created:', response.id);
+    log.info('referral.procedure.created', { id: response.id });
     return response;
   }, 'Create Procedure');
 }
@@ -195,8 +197,8 @@ export async function createObservations(
         category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'laboratory' }] }],
         code: { coding: [{ system: obs.codeSystem, code: obs.code, display: obs.display }] },
         subject: { reference: `Patient/${patientId}` },
-        effectiveDateTime: new Date().toISOString(),
-        issued: new Date().toISOString(),
+        effectiveDateTime: clock.nowIso(),
+        issued: clock.nowIso(),
         performer: [{ reference: `Practitioner/${performerId}` }],
         ...(obs.valueQuantity && {
           valueQuantity: {
@@ -214,7 +216,7 @@ export async function createObservations(
       };
 
       const response = await fhirClient.create<{ id: string }>(resource);
-      console.log('Observation created:', response.id);
+      log.info('referral.observation.created', { id: response.id });
       return response;
     }, `Create Observation ${obs.code}`);
 
@@ -241,7 +243,7 @@ export async function updateMeasureReportForGapClosure(update: MeasureReportUpda
     });
 
     const response = await fhirClient.update(measureReport);
-    console.log('MeasureReport updated for gap closure:', update.measureReportId);
+    log.info('referral.measureReport.updated', { id: update.measureReportId });
     return response;
   }, 'Update MeasureReport');
 }
@@ -258,7 +260,7 @@ export async function createProvenanceRecord(
     const provenance: any = {
       resourceType: 'Provenance',
       target: [{ reference: `${targetResourceType}/${targetResourceId}` }],
-      recorded: new Date().toISOString(),
+      recorded: clock.nowIso(),
       agent: [{
         type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/provenance-participant-type', code: 'author' }] },
         who: { reference: `Practitioner/${actorId}` },
@@ -268,7 +270,7 @@ export async function createProvenanceRecord(
     };
 
     const response = await fhirClient.create<{ id: string }>(provenance);
-    console.log('Provenance record created:', response.id);
+    log.info('referral.provenance.created', { id: response.id });
     return response;
   }, 'Create Provenance');
 }

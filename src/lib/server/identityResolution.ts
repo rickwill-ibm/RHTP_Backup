@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Server-side wrapper: cross-source identity resolution + audit trail
  * (Dev Plan Workstream A3 — "integrate MPI layer with existing $member-match +
@@ -28,7 +29,7 @@ export async function resolveIdentityWithAudit(
   const result = resolveIdentity(input, originSystem, mockIdentitySource);
 
   await audit({
-    ts: new Date().toISOString(),
+    ts: clock.nowIso(),
     actor: ctx.actor,
     action: 'identity-resolution',
     resourceRef: result.resolvedId ? `mpi/${result.resolvedId}` : undefined,

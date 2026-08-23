@@ -146,7 +146,6 @@ export default function CaseloadDashboard() {
         ],
       }).catch(() => { /* non-fatal */ });
 
-      console.log(`[CaseloadDashboard] CareTeam updated in FHIR: ${careTeamId}`);
     } catch (err) {
       console.warn('[CaseloadDashboard] FHIR CareTeam update failed (local state updated):', err);
     }

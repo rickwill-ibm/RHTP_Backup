@@ -1,0 +1,108 @@
+{
+  "_fixture": {
+    "id": "diabetes-transportation",
+    "description": "Adult with diabetes HCC suspect, open HbA1c gap, and a documented transportation barrier. Exercises barrier-first ordering and home-based lab modality substitution.",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-dm-tx-001",
+      "name": "Fixture Member One",
+      "dob": "1961-04-12",
+      "age": 65,
+      "gender": "Female",
+      "mrn": "MRN-FIX-001",
+      "riskTier": "High",
+      "rafScore": 1.42,
+      "rafScoreDelta": 0.12,
+      "predictedErRisk": 34,
+      "openHCCSuspects": 1,
+      "hccSuspectValue": 4200,
+      "openCareGaps": 2,
+      "lastContactDate": "2026-07-15",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 812,
+      "pmpmTarget": 750,
+      "primaryCareProvider": "Dr. Fixture PCP",
+      "activeAlerts": 0,
+      "carePlanStatus": "Pending",
+      "contractId": "contract-fix-01",
+      "phone": "555-0100",
+      "address": "100 Fixture St",
+      "insuranceId": "INS-FIX-001",
+      "payer": "Fixture Health Plan",
+      "enrollmentDate": "2024-01-01"
+    },
+    "hccSuspects": [
+      {
+        "id": "hcc-fix-001",
+        "patientId": "member-dm-tx-001",
+        "hccCode": "HCC-18",
+        "hccDescription": "Diabetes with Chronic Complications",
+        "icdCode": "E11.42",
+        "icdDescription": "Type 2 diabetes mellitus with diabetic polyneuropathy",
+        "estimatedRafDelta": 0.302,
+        "estimatedRevenueDelta": 4200,
+        "status": "Surfaced",
+        "evidenceSources": ["Claims", "Pharmacy"],
+        "lastEncounterDate": "2026-06-10",
+        "suspectConfidence": 82,
+        "assignedPhysician": "Dr. Fixture PCP",
+        "submissionDeadline": "2026-12-31",
+        "dataSource": "Claims",
+        "freshnessDate": "2026-08-01"
+      }
+    ],
+    "careGaps": [
+      {
+        "id": "gap-fix-001",
+        "patientId": "member-dm-tx-001",
+        "measureId": "CDC-HBA1C",
+        "measureName": "HbA1c Lab Test",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-30",
+        "daysOpen": 45,
+        "lastActionDate": "2026-07-08",
+        "assignedTo": "Care Manager",
+        "notes": "Member overdue for HbA1c testing",
+        "closureRequirement": "HbA1c result documented within measurement year"
+      },
+      {
+        "id": "gap-fix-002",
+        "patientId": "member-dm-tx-001",
+        "measureId": "SDOH-TRANS",
+        "measureName": "Transportation Needs Assessment",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-15",
+        "daysOpen": 30,
+        "lastActionDate": "2026-07-23",
+        "assignedTo": "Care Manager",
+        "notes": "No reliable transportation to appointments",
+        "closureRequirement": "Transportation support in place"
+      }
+    ],
+    "alerts": []
+  },
+  "expected": {
+    "priority": "High",
+    "goalCount": { "min": 4, "max": 4 },
+    "firstGoalIncludes": "Social Determinants",
+    "goalDescriptionsInclude": [
+      "Close HbA1c Lab Test quality gap",
+      "Document and code Diabetes with Chronic Complications"
+    ],
+    "interventionDescriptionsInclude": [
+      "Order at-home lab test kit",
+      "Telehealth follow-up to review lab results",
+      "Endocrinology consultation (referral pending)"
+    ],
+    "referralCount": 2,
+    "referralSpecialtiesInclude": ["Endocrinology", "Primary Care"],
+    "sharedWithIncludes": ["Patient Portal", "Endocrinology (via FHIR)", "Care Manager"],
+    "sharedWithExcludes": ["Health Plan"],
+    "addressesInclude": ["SDoH: Transportation barrier: No reliable transportation to appointments"]
+  }
+}

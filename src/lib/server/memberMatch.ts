@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * $member-match client (plan Slice 2 — Provider Access, Slice 3 — P2P).
  * The payer identifies the member before releasing data.
@@ -28,7 +29,7 @@ export async function memberMatch(
     });
     const result = await res.json().catch(() => null);
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor,
       action: 'member-match',
       correlationId,

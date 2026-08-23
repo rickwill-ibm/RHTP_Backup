@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Da Vinci CDex-conformant DocumentReference construction.
  * Ported from PA-Standalone-SmartApp — no external dependencies.
@@ -21,7 +22,7 @@ export function buildCdexDocumentReference(
   file: UploadedFileMeta,
   ctx: CdexContext
 ): DocumentReference {
-  const creation = ctx.creation ?? new Date().toISOString();
+  const creation = ctx.creation ?? clock.nowIso();
   return {
     resourceType: 'DocumentReference',
     status: 'current',

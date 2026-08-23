@@ -1,0 +1,69 @@
+{
+  "_fixture": {
+    "id": "bh-part2",
+    "description": "Behavioral-health context with 42 CFR Part 2-protected SUD treatment noted. Exercises digital-first screening modality and asserts that NO external FHIR/health-plan sharing occurs for this context. NOTE: the current engine is consent-blind by construction (FINDINGS F3) — this fixture pins the structurally-safe output (no specialty detected means no external push), it does not prove Part 2 handling exists.",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-bh-002",
+      "name": "Fixture Member Two",
+      "dob": "1988-09-02",
+      "age": 37,
+      "gender": "Male",
+      "mrn": "MRN-FIX-002",
+      "riskTier": "Moderate",
+      "rafScore": 0.94,
+      "rafScoreDelta": 0.0,
+      "predictedErRisk": 18,
+      "openHCCSuspects": 0,
+      "hccSuspectValue": 0,
+      "openCareGaps": 1,
+      "lastContactDate": "2026-08-01",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 410,
+      "pmpmTarget": 450,
+      "primaryCareProvider": "Dr. Fixture PCP",
+      "activeAlerts": 0,
+      "carePlanStatus": "None",
+      "contractId": "contract-fix-01",
+      "phone": "555-0102",
+      "address": "102 Fixture St",
+      "insuranceId": "INS-FIX-002",
+      "payer": "Fixture Health Plan",
+      "enrollmentDate": "2023-06-01"
+    },
+    "hccSuspects": [],
+    "careGaps": [
+      {
+        "id": "gap-fix-003",
+        "patientId": "member-bh-002",
+        "measureId": "DSF-PHQ9",
+        "measureName": "Depression Screening (PHQ-9)",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-10-01",
+        "daysOpen": 40,
+        "lastActionDate": "2026-07-13",
+        "assignedTo": "Care Manager",
+        "notes": "Annual depression screening due; member in outpatient SUD counseling (42 CFR Part 2 protected)",
+        "closureRequirement": "PHQ-9 completed and documented"
+      }
+    ],
+    "alerts": []
+  },
+  "expected": {
+    "priority": "Moderate",
+    "goalCount": { "min": 1, "max": 1 },
+    "firstGoalIncludes": "Depression Screening (PHQ-9)",
+    "interventionDescriptionsInclude": [
+      "Complete screening via patient portal",
+      "Telehealth follow-up if screening indicates need"
+    ],
+    "referralCount": 1,
+    "referralSpecialtiesInclude": ["Primary Care"],
+    "sharedWithIncludes": ["Patient Portal"],
+    "sharedWithExcludes": ["(via FHIR)", "Health Plan"]
+  }
+}

@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // ─── exportUtils.ts ───────────────────────────────────────────────────────────
 // CSV download utilities. PDF generation → exportUtils.pdf.ts.
 
@@ -68,7 +69,7 @@ export function exportPanelCSV(patients: PanelPatientRow[]) {
     'PCP': p.primaryCareProvider,
     'Payer': p.payer,
   }));
-  downloadCSV(`panel-cohort-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`panel-cohort-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 // ─── Financial CSV ────────────────────────────────────────────────────────────
@@ -98,7 +99,7 @@ export function exportFinancialCSV(patients: FinancialPatientRow[]) {
     'Payer': p.payer,
     'Attribution': p.attributionStatus,
   }));
-  downloadCSV(`financial-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`financial-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 // ─── Referral CSV ─────────────────────────────────────────────────────────────
@@ -143,7 +144,7 @@ export function exportReferralsCSV(referrals: ReferralExportRow[]) {
     'Coordinator': r.coordinatorName,
     'Days Open': r.daysOpen,
   }));
-  downloadCSV(`referrals-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`referrals-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 // ─── STARS/HEDIS/MIPS CSV ─────────────────────────────────────────────────────
@@ -165,7 +166,7 @@ export function exportSTARSCSV(measures: Array<{
     'Deadline': m.deadline,
     'Status': m.status,
   }));
-  downloadCSV(`stars-measures-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`stars-measures-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 export function exportHEDISCSV(measures: Array<{
@@ -186,7 +187,7 @@ export function exportHEDISCSV(measures: Array<{
     'Due Date': m.dueDate,
     'Status': m.status,
   }));
-  downloadCSV(`hedis-measures-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`hedis-measures-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 export function exportMIPSCSV(adjustments: Array<{
@@ -209,7 +210,7 @@ export function exportMIPSCSV(adjustments: Array<{
     'Status': a.status,
     'Appeal Eligible': a.appealEligible ? 'Yes' : 'No',
   }));
-  downloadCSV(`mips-adjustments-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`mips-adjustments-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
 // ─── Demo Track Export ────────────────────────────────────────────────────────
@@ -255,6 +256,6 @@ export function exportDemoTrackCSV(patients: DemoPatientExportRow[]) {
     'Exported By': p.exportedBy,
     'Exported At': p.exportedAt,
   }));
-  downloadCSV(`demo-track-export-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+  downloadCSV(`demo-track-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 

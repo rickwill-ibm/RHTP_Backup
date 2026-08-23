@@ -1,0 +1,14 @@
+{
+  "_comment": "SEEDED ICD-10-CM -> CMS-HCC classification crosswalk (data-is-not-code). Maps a diagnosis code to its HCC group under a SPECIFIC, versioned model. This is a stub demo mapping, NOT the full licensed CMS HCC crosswalk. `model` names the family + registry asset id + version this content represents, so a classification carries WHICH model version grouped the code. An unmapped diagnosis returns NO group (never a fabricated group).",
+  "model": {
+    "family": "CMS-HCC",
+    "assetId": "cms-hcc-v28",
+    "version": "V28",
+    "system": "urn:cms:risk-adjustment:hcc"
+  },
+  "map": {
+    "E11.9": { "hcc": "HCC38", "label": "Diabetes with glycemic, unspecified, or no complications" },
+    "I50.9": { "hcc": "HCC226", "label": "Heart failure, except end-stage and severe" },
+    "N18.6": { "hcc": "HCC329", "label": "Chronic kidney disease, stage 5, or end-stage renal disease" }
+  }
+}

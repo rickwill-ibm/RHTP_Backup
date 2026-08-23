@@ -50,6 +50,8 @@ export function groupByQueue(items: WorkItem[]): Record<QueueName, WorkItem[]> {
     'high-risk-review': [],
     'denied-appeal': [],
     'more-info': [],
+    'agent-proposal': [],
+    escalated: [],
   };
   for (const it of items) groups[it.queue].push(it);
   return groups;

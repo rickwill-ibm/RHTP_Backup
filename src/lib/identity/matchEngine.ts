@@ -35,15 +35,31 @@ function levenshtein(a: string, b: string): number {
   return dp[a.length][b.length];
 }
 
-/** Normalized similarity in [0, 1]; 1 = identical. */
+/**
+ * Normalized similarity in [0, 1]; 1 = identical.
+ *
+ * Absence is not agreement (Cycle 2A finding 2): if either value is empty after
+ * normalization — including BOTH empty — similarity is 0, so records that are
+ * merely missing the same field earn no probabilistic weight from it.
+ */
 function stringSimilarity(a: string, b: string): number {
   const na = normalize(a);
   const nb = normalize(b);
-  if (!na && !nb) return 1;
   if (!na || !nb) return 0;
   const dist = levenshtein(na, nb);
   const maxLen = Math.max(na.length, nb.length);
-  return maxLen === 0 ? 1 : 1 - dist / maxLen;
+  return 1 - dist / maxLen;
+}
+
+/**
+ * True only when both values are present (non-empty after normalization) AND
+ * equal. Every deterministic exact-match comparison goes through this guard:
+ * an exact-match rule must never fire on blank/absent values (Cycle 2A
+ * finding 1 — e.g. blank names + shared DOB previously fired 'name+dob-exact').
+ */
+function bothPresentAndEqual(a: string | undefined, b: string | undefined): boolean {
+  const na = normalize(a);
+  return na !== '' && na === normalize(b);
 }
 
 export interface DeterministicResult {
@@ -53,16 +69,16 @@ export interface DeterministicResult {
 
 /** Deterministic rules, in priority order. Any hit is treated as a certain match. */
 export function runDeterministicRules(a: IdentityTraits, b: IdentityTraits): DeterministicResult {
-  if (a.medicaidId && b.medicaidId && normalize(a.medicaidId) === normalize(b.medicaidId)) {
+  if (bothPresentAndEqual(a.medicaidId, b.medicaidId)) {
     return { hit: true, rule: 'medicaidId-exact' };
   }
-  if (a.ssnLast4 && b.ssnLast4 && a.ssnLast4 === b.ssnLast4 && a.dob === b.dob) {
+  if (bothPresentAndEqual(a.ssnLast4, b.ssnLast4) && bothPresentAndEqual(a.dob, b.dob)) {
     return { hit: true, rule: 'ssnLast4+dob-exact' };
   }
   if (
-    a.dob === b.dob &&
-    normalize(a.firstName) === normalize(b.firstName) &&
-    normalize(a.lastName) === normalize(b.lastName)
+    bothPresentAndEqual(a.dob, b.dob) &&
+    bothPresentAndEqual(a.firstName, b.firstName) &&
+    bothPresentAndEqual(a.lastName, b.lastName)
   ) {
     return { hit: true, rule: 'name+dob-exact' };
   }
@@ -86,7 +102,9 @@ export function scoreProbabilisticMatch(a: IdentityTraits, b: IdentityTraits): P
   const firstNameWeight = Math.round(firstNameSim * 20);
   if (firstNameWeight > 0) ruleHits.push({ rule: 'firstName-similarity', weight: firstNameWeight });
 
-  if (a.dob && b.dob && a.dob === b.dob) {
+  // Exact-agreement traits use the same blank-field guard as the deterministic
+  // rules: two absent/whitespace values are missing data, not agreement.
+  if (bothPresentAndEqual(a.dob, b.dob)) {
     ruleHits.push({ rule: 'dob-exact', weight: 25 });
   }
 
@@ -94,11 +112,11 @@ export function scoreProbabilisticMatch(a: IdentityTraits, b: IdentityTraits): P
     ruleHits.push({ rule: 'sex-match', weight: 5 });
   }
 
-  if (a.zip && b.zip && normalize(a.zip) === normalize(b.zip)) {
+  if (bothPresentAndEqual(a.zip, b.zip)) {
     ruleHits.push({ rule: 'zip-match', weight: 10 });
   }
 
-  if (a.phone && b.phone && normalize(a.phone) === normalize(b.phone)) {
+  if (bothPresentAndEqual(a.phone, b.phone)) {
     ruleHits.push({ rule: 'phone-match', weight: 10 });
   }
 

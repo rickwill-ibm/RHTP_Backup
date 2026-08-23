@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { getFhirClient, getFhirMockMode } from './services/fhirClient';
+import * as clock from './clock'; // determinism seam (Cycle 1)
 import type { GapClosureEvidence, GapClosureStoreValue, HedisCompliance } from './patientContext.types';
 
 export const GapClosureStoreContext = createContext<GapClosureStoreValue | null>(null);
@@ -20,7 +21,7 @@ export function postGapClosureAuditEvent(
     type: { system: 'http://terminology.hl7.org/CodeSystem/audit-event-type', code: 'rest', display: 'RESTful Operation' },
     subtype: [{ system: 'http://hl7.org/fhir/restful-interaction', code: 'update', display: 'update' }],
     action: 'U',
-    recorded: new Date().toISOString(),
+    recorded: clock.nowIso(),
     outcome: '0',
     agent: [{
       type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v3-ParticipationType', code: 'IRCP' }] },
@@ -36,7 +37,6 @@ export function postGapClosureAuditEvent(
   };
   getFhirClient()
     .create(auditEvent as Record<string, unknown>)
-    .then(() => console.debug(`[AuditEvent] Gap closure audit posted for gap ${gapId}`))
     .catch((err) => console.warn('[AuditEvent] Post failed:', err));
 }
 
@@ -56,7 +56,7 @@ export function GapClosureStoreProvider({ children }: { children: React.ReactNod
   }, []);
 
   const submitClosure = useCallback((evidence: GapClosureEvidence) => {
-    const closedAt = evidence.closedAt ?? new Date().toISOString();
+    const closedAt = evidence.closedAt ?? clock.nowIso();
     const procedureCode = evidence.procedureCode ?? '83036';
     const resultUnit = evidence.resultUnit ?? '%';
     const hedisCompliance: HedisCompliance =
@@ -97,7 +97,7 @@ export function GapClosureStoreProvider({ children }: { children: React.ReactNod
         getFhirClient()
           .update({
             id: taskId, resourceType: 'Task', status: 'completed', intent: 'order',
-            lastModified: new Date().toISOString(),
+            lastModified: clock.nowIso(),
             output: [{ type: { text: 'Gap Closure Evidence' }, valueReference: { reference: `Observation/patient-${fhirId}-gap-${evidence.gapId}` } }],
           })
           .then(() => console.info(`[GapClosureStore] Task/${taskId} → completed`))
@@ -177,7 +177,7 @@ export function GapClosureStoreProvider({ children }: { children: React.ReactNod
         resourceType: 'Task',
         status: 'completed',
         intent: 'order',
-        lastModified: new Date().toISOString(),
+        lastModified: clock.nowIso(),
         output: [{ type: { text: 'Gap Closure Evidence' }, valueReference: { reference: `Observation/patient-${fhirId}-gap-${gapId}` } }],
       })
       .then(() => console.info(`[GapClosureStore] Task/${taskId} marked completed`))

@@ -1,0 +1,9 @@
+{
+  "_comment": "Seeded historical denial-rate feed (O-2). Generic demo data, no persona. rate is 0..1 for a code, optionally scoped to a plan. Data is not code.",
+  "rates": [
+    { "code": "72148", "plan": null, "rate": 0.28, "sampleSize": 1200, "windowMonths": 12 },
+    { "code": "72148", "plan": "PLAN_HDHP", "rate": 0.34, "sampleSize": 300, "windowMonths": 12 },
+    { "code": "75561", "plan": null, "rate": 0.18, "sampleSize": 640, "windowMonths": 12 },
+    { "code": "70450", "plan": null, "rate": 0.12, "sampleSize": 900, "windowMonths": 12 }
+  ]
+}

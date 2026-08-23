@@ -1,0 +1,103 @@
+{
+  "_fixture": {
+    "id": "pregnancy",
+    "description": "Pregnant member with prenatal-care timeliness gap, Edinburgh postnatal depression screening gap, and a WIC enrollment (food security) SDOH gap. Exercises barrier-first ordering, perinatal behavioral screening via portal, and food-security need detection.",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-preg-004",
+      "name": "Fixture Member Four",
+      "dob": "1997-03-08",
+      "age": 29,
+      "gender": "Female",
+      "mrn": "MRN-FIX-004",
+      "riskTier": "Moderate",
+      "rafScore": 0.72,
+      "rafScoreDelta": 0.0,
+      "predictedErRisk": 12,
+      "openHCCSuspects": 0,
+      "hccSuspectValue": 0,
+      "openCareGaps": 3,
+      "lastContactDate": "2026-08-10",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 380,
+      "pmpmTarget": 420,
+      "primaryCareProvider": "Dr. Fixture OB",
+      "activeAlerts": 0,
+      "carePlanStatus": "None",
+      "contractId": "contract-fix-02",
+      "phone": "555-0104",
+      "address": "104 Fixture St",
+      "insuranceId": "INS-FIX-004",
+      "payer": "Fixture Medicaid MCO",
+      "enrollmentDate": "2026-02-01"
+    },
+    "hccSuspects": [],
+    "careGaps": [
+      {
+        "id": "gap-fix-005",
+        "patientId": "member-preg-004",
+        "measureId": "PPC-TIMELY",
+        "measureName": "Prenatal Care Timeliness",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-05",
+        "daysOpen": 15,
+        "lastActionDate": "2026-08-07",
+        "assignedTo": "Care Manager",
+        "notes": "First trimester visit not yet completed",
+        "closureRequirement": "Prenatal visit within first trimester or 42 days of enrollment"
+      },
+      {
+        "id": "gap-fix-006",
+        "patientId": "member-preg-004",
+        "measureId": "EPDS-SCRN",
+        "measureName": "Edinburgh Depression Screening",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-20",
+        "daysOpen": 10,
+        "lastActionDate": "2026-08-12",
+        "assignedTo": "Care Manager",
+        "notes": "Perinatal depression screening due",
+        "closureRequirement": "EPDS completed and documented"
+      },
+      {
+        "id": "gap-fix-007",
+        "patientId": "member-preg-004",
+        "measureId": "SDOH-WIC",
+        "measureName": "WIC Nutrition Program Enrollment",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-01",
+        "daysOpen": 21,
+        "lastActionDate": "2026-08-01",
+        "assignedTo": "Community Health Worker",
+        "notes": "Eligible, not yet enrolled",
+        "closureRequirement": "WIC enrollment confirmed"
+      }
+    ],
+    "alerts": []
+  },
+  "expected": {
+    "priority": "Moderate",
+    "goalCount": { "min": 4, "max": 4 },
+    "firstGoalIncludes": "Social Determinants",
+    "goalDescriptionsInclude": [
+      "Close Prenatal Care Timeliness quality gap",
+      "Close Edinburgh Depression Screening quality gap",
+      "Close WIC Nutrition Program Enrollment quality gap"
+    ],
+    "interventionDescriptionsInclude": [
+      "Complete screening via patient portal",
+      "Community resource connection"
+    ],
+    "referralCount": 3,
+    "referralSpecialtiesInclude": ["Primary Care"],
+    "sharedWithIncludes": ["Patient Portal"],
+    "sharedWithExcludes": ["Health Plan", "(via FHIR)"],
+    "addressesInclude": ["SDoH: Food security: Eligible, not yet enrolled"]
+  }
+}

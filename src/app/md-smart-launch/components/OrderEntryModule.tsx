@@ -34,7 +34,8 @@ function buildFhirServiceRequest(order: MdOrder, patientId: string, encounterId:
     intent: 'order',
     category: [{ coding: [{ system: 'http://snomed.info/sct', code: '386053000', display: order.category }], text: order.category }],
     code: { coding: [{ system: 'http://loinc.org', code: order.code, display: order.display }], text: order.display },
-    subject: { reference: `Patient/${patientId}`, display: 'Margaret Okonkwo' },
+    // Persona-free (conventions §1.2): no hardcoded display name; the reference already carries the launch patient.
+    subject: { reference: `Patient/${patientId}` },
     encounter: { reference: `Encounter/${encounterId}` },
     requester: { reference: `Practitioner/${practitionerId}`, display: 'Dr. James Whitfield' },
     priority: order.priority,

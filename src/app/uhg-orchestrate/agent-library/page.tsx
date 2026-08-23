@@ -1,5 +1,6 @@
 'use client';
 
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 import React, { useState } from 'react';
 import { getPatientById, type RegistryPatient } from '@/lib/patientRegistry';
 import { useDemoStore } from '@/uhg/store/demoStore';
@@ -82,62 +83,9 @@ const TIERS: { id: string; label: string; sublabel: string; color: string; agent
 // Always-on (Tier 1) + governance (Tier 4) run for every scenario. Exported for the controller
 // (renders the coalition) and the marketplace drawdown (counts + highlights dispatched agents).
 
-export type TriggerCode = 'CARE_GAP' | 'AUTH_EXPIRY' | 'SDOH' | 'CAREGIVER' | 'BH' | 'COST';
-
-export interface CoalitionAgent {
-  id: string;        // controller panel id
-  libId: string;     // agent-library registry id (for highlight)
-  name: string;
-  role: 'PRIMARY' | 'CONCURRENT' | 'SUPPORTING' | 'COMPLIANCE' | 'SPECIALIST';
-  color: string;
-  trigger: TriggerCode;
-}
-
-// The dispatchable domain agents (these become the controller's agent panels)
-export const DOMAIN_COALITION: CoalitionAgent[] = [
-  { id: 'agent-care',      libId: 'care-mgmt',       name: 'Clinical Care Agent',          role: 'PRIMARY',    color: '#0C55B8', trigger: 'CARE_GAP' },
-  { id: 'agent-provider',  libId: 'sdoh-intel',      name: 'Social / SDOH Agent',          role: 'CONCURRENT', color: '#8b5cf6', trigger: 'SDOH' },
-  { id: 'agent-util',      libId: 'util-mgmt',       name: 'Eligibility Agent',            role: 'SUPPORTING', color: '#f59e0b', trigger: 'AUTH_EXPIRY' },
-  { id: 'agent-appeals',   libId: 'appeals',         name: 'Behavioral Health Agent',      role: 'COMPLIANCE', color: '#ef4444', trigger: 'BH' },
-  { id: 'agent-caregiver', libId: 'caregiver-intel', name: 'Caregiver Intelligence Agent', role: 'SPECIALIST', color: '#c084fc', trigger: 'CAREGIVER' },
-  { id: 'agent-financial', libId: 'financial-intel', name: 'Financial Intelligence Agent', role: 'SPECIALIST', color: '#10b981', trigger: 'COST' },
-];
-
-// Always-on foundation agents (Tier 1) — run for every scenario
-const ALWAYS_ON_LIB_IDS = ['graph-intel', 'identity', 'consent', 'person-state'];
-
-// Evaluate a member's active trigger codes from their knowledge-graph context.
-export function activeTriggers(p: RegistryPatient): Set<TriggerCode> {
-  const t = new Set<TriggerCode>(['CARE_GAP', 'AUTH_EXPIRY', 'COST']);
-  const sdoh =
-    /barrier|mile|insecur|waitlist|instab|assistance|not enrolled|expired|lapsed/i.test(
-      `${p.transportStatus || ''} ${p.foodSecurity || ''} ${p.housingStatus || ''} ${p.snapStatus || ''}`,
-    ) ||
-    /low income|rural/i.test(p.disparityFlag || '') ||
-    (p.careGaps || []).some((g) => g.domain === 'Social' && g.status !== 'Closed');
-  if (sdoh) t.add('SDOH');
-  if (p.household?.caregiverFor?.length) t.add('CAREGIVER');
-  if (p.bhRisk && p.bhRisk !== 'Low') t.add('BH');
-  return t;
-}
-
-// The dispatched domain coalition for a member (ordered, deterministic).
-export function dispatchAgentsForPatient(p: RegistryPatient): CoalitionAgent[] {
-  // Maria Redhawk — flagship authored coalition (the canonical 4-agent walkthrough).
-  if (p.platformId === 'MARIA_SD_001') {
-    const core = ['agent-care', 'agent-provider', 'agent-util', 'agent-appeals'];
-    return DOMAIN_COALITION.filter((a) => core.includes(a.id));
-  }
-  const active = activeTriggers(p);
-  return DOMAIN_COALITION.filter((a) => active.has(a.trigger));
-}
-
-// Marketplace drawdown — which library agent ids are dispatched/active for this member.
-export function dispatchedLibIds(p: RegistryPatient): Set<string> {
-  const ids = new Set<string>(ALWAYS_ON_LIB_IDS);
-  dispatchAgentsForPatient(p).forEach((a) => ids.add(a.libId));
-  return ids;
-}
+// Coalition types and dispatch logic live in ./coalition (Next.js forbids
+// non-framework exports from a page file). Import only what the page renders.
+import { dispatchedLibIds } from './coalition';
 
 const STATUS_CONFIG = {
   active: { label: 'ACTIVE', color: '#42be65', bg: 'rgba(66,190,101,0.12)' },
@@ -388,7 +336,7 @@ function RegisterAgentModal({ onClose }: { onClose: () => void }) {
 export default function AgentLibraryPage() {
   // Screen navigation (Up/Down arrows) is handled centrally by PresenterControls.
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
-  const reg = getPatientById(activeCitizenId) || getPatientById('MARIA_SD_001')!;
+  const reg = getPatientById(activeCitizenId) || getPatientById(DEMO_MEMBER_ID)!;
   const dispatched = dispatchedLibIds(reg);
   const totalAgents = TIERS.reduce((n, t) => n + t.agents.length, 0);
   const govCount = TIERS.find((t) => t.id === 't4')?.agents.length ?? 0;

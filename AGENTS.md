@@ -46,7 +46,7 @@ tests/<domain>/       one test file per domain module (+ fixtures/ as JSON)
 e2e/                  Playwright
 fhir/ install/        HAPI FHIR backbone (Docker), seed + install tooling
 tools/                seed scripts, contract tests, hooks
-docs/                 architecture, traceability, conformance plan, archive/
+docs/                 architecture, traceability, conformance plan, framework, build-provenance, archive/
 ```
 
 Key domains: `policy/` (engine + 17-policy corpus), `identity/` (match engine),
@@ -81,3 +81,34 @@ Key domains: `policy/` (engine + 17-policy corpus), `identity/` (match engine),
 `npm run check:all` exits 0 · traceability row added for new capabilities · feature
 README updated · commit message says what changed, why, and which invariants/contracts
 were touched.
+
+## Coalition and iteration work — governed by the Agentic Build Framework v1.4
+
+ANY multi-agent build, hardening, or iteration work on this platform MUST load and follow
+the **Agentic Build Framework v1.4** at `docs/framework/` (`SKILL.md` + `personas.md` +
+`enforcement-kit.md` + `operating-model.md`). Read it before orchestrating agents. Essentials:
+
+- **Wave unit:** probe -> spine (publish the inter-wave INTERFACE first — interface-freeze)
+  -> parallel specialists on disjoint trees -> convergence to DRY -> the FIVE-persona
+  red-team panel (R1 domain-fidelity, R2 negative-space, R3 stub-legitimacy, R4 governance,
+  R5 cross-examiner; + the on-demand Performance/Scale adversary for substrate/scale work)
+  -> the orchestrator's OWN authoritative gate -> provenance close-out -> one sync.
+- **Composite Definition of Done = E1-E13** (enforcement-kit.md): fail-closed seams (E1),
+  quality ratchet (E2), namespace + shared-file partitions (E3), DRY convergence (E4),
+  authoritative gate (E5), artifact-existence probe (E6), fidelity ledgers (E7), living
+  risk register (E8), fail-open lint run at BUILD TIME not just review (E9 shift-left),
+  verbatim prompts (E10), provenance completeness `docs/build-provenance/check-provenance.sh`
+  (E11), claim-vs-evidence (E12), test-effectiveness `docs/build-provenance/check-testlink.mjs`
+  + `check-mutation.mjs` on the critical set (E13).
+- **Reasoning mode:** chain-of-thought by default; INJECT tree-of-thought at design /
+  red-team-hypothesis / ambiguity forks (enumerate -> score -> prune -> proceed). Not on
+  mechanical single-path tasks.
+- **Provenance is mandatory:** every agent invocation is a row in
+  `docs/build-provenance/PROMPT_MASTER_LOG.csv` (regenerate via `build_log.py`);
+  `check-provenance.sh` must pass; per-agent prompts captured verbatim under `verbatim/`.
+
+The framework's E11/E13 checks are wired into CI (`.github/workflows/convention-gates.yml`).
+The `docs/production-plan/ACE_Production_Gap_Execution_Plan.md` remains the binding DOMAIN /
+governance plan (record model, ADRs, contracts, risk register); the framework above
+SUPERSEDES its generic orchestration guidance (the former "R1-R10 in section 11") with the
+v1.4 wave + E1-E13 model.

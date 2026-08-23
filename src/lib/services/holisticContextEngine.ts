@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // ─── holisticContextEngine.ts ────────────────────────────────────────────────
 // Class + singleton. Types live in holisticContextEngine.types.ts.
 
@@ -256,7 +257,7 @@ export class HolisticContextEngine {
         stressLevel: 'severe'
       },
       
-      contextGeneratedAt: new Date().toISOString()
+      contextGeneratedAt: clock.nowIso()
     };
   }
   
@@ -340,7 +341,7 @@ export class HolisticContextEngine {
         socialIsolation: false,
         stressLevel: 'low'
       },
-      contextGeneratedAt: new Date().toISOString()
+      contextGeneratedAt: clock.nowIso()
     };
   }
   

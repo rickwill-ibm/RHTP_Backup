@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 import { getAllPatients, getVisiblePatients } from '../patientRegistry';
 import { getFhirMockMode } from '../services/fhirClient';
 import { CARE_TEAM_MEMBERS, type Specialty } from './members';
@@ -77,7 +78,7 @@ export function buildCohort(m: MeasureDescriptor): Cohort {
   }
 
   return {
-    id: `cohort-${m.measureKey}-${Date.now()}`,
+    id: `cohort-${m.measureKey}-${clock.now()}`,
     measureKey: m.measureKey,
     measureName: m.measureName,
     contractName: m.contractName,
@@ -88,7 +89,7 @@ export function buildCohort(m: MeasureDescriptor): Cohort {
     patients,
     assignments,
     distribution,
-    createdAt: new Date().toISOString(),
+    createdAt: clock.nowIso(),
     status: 'active',
   };
 }

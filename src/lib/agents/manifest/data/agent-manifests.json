@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "agents": [
+    {
+      "id": "outreach-agent",
+      "version": "1.0.0",
+      "purpose": "Consume an SDE-approved member-outreach touchpoint, propose the outreach action, and wait at the HITL gate before any contact is sent.",
+      "toolAllowlist": [
+        "person-context.read",
+        "comms-channel.send",
+        "work-queue.submit",
+        "signal.report"
+      ],
+      "autonomyTier": "HITL",
+      "escalationPolicyRef": "default",
+      "phiPosture": "references-only",
+      "owningModule": "src/lib/agents/outreach"
+    },
+    {
+      "id": "referral-coordination-agent",
+      "version": "1.0.0",
+      "purpose": "Open and track a referral, propose a nudge on stall, and escalate up the care-team hierarchy per escalation-as-data; never books external transactions.",
+      "toolAllowlist": [
+        "referral-status.read",
+        "provider-context.read",
+        "work-queue.submit",
+        "signal.report"
+      ],
+      "autonomyTier": "HITL",
+      "escalationPolicyRef": "default",
+      "phiPosture": "references-only",
+      "owningModule": "src/lib/agents/referral"
+    },
+    {
+      "id": "pa-documentation-agent",
+      "version": "1.0.0",
+      "purpose": "Drive the existing /prior-auth (goldenThread) flow from thread context, proposing documentation and submission under a human gate; never sets an authoritative PA state.",
+      "toolAllowlist": [
+        "person-context.read",
+        "dtr.generate",
+        "pa-machine.transition",
+        "evidence.append",
+        "work-queue.submit"
+      ],
+      "autonomyTier": "HITL",
+      "escalationPolicyRef": "default",
+      "phiPosture": "references-only",
+      "owningModule": "src/lib/agents/pa"
+    }
+  ]
+}

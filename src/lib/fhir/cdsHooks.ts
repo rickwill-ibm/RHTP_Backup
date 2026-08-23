@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * CDS Hooks client — calls configured CDS services with a real
  * `patient-view` request (prefetch: Patient, Conditions, MedicationRequests).
@@ -40,7 +41,7 @@ function toAppCard(raw: RawCdsCard, i: number): CdsCard {
     })),
     links: raw.links?.map((l) => ({ label: l.label, url: l.url, type: l.type as 'smart' | 'absolute' })),
     overrideReasons: raw.overrideReasons?.map((o) => o.display ?? ''),
-    timestamp: new Date().toISOString(),
+    timestamp: clock.nowIso(),
   };
 }
 

@@ -611,7 +611,6 @@ export default function SocialNeedsScreeningPage() {
           await postPrapareObservations(fhirId);
           // POST Z-code Conditions to problem list for VBC-mapped domains
           await postZCodeConditions(fhirId);
-          console.log('[SocialScreening] PRAPARE observations + Z-code Conditions posted to FHIR');
 
           // ── POST QuestionnaireResponse for full PRAPARE instrument ────────
           const client = getFhirClient();

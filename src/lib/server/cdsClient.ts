@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * CDS Hooks client (Coverage Requirements Discovery) — plan Slice 4.
  * RHTP CALLS the payer CDS service to discover coverage/PA requirements.
@@ -42,7 +43,7 @@ export async function invokeCrd(
     });
     const body = (await res.json().catch(() => ({ cards: [] }))) as CdsResponse;
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor ?? 'system',
       action: 'cds.crd',
       resourceRef: hookId,

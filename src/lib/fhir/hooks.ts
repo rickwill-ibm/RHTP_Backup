@@ -1,4 +1,5 @@
 'use client';
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Typed FHIR data hooks — one per clinical domain.
  *
@@ -70,7 +71,7 @@ export function useFhirSearch<T extends FhirResource>(
       .then((bundle) => {
         if (cancelled) return;
         setData(entries<T>(bundle));
-        setFetchedAt(new Date().toISOString());
+        setFetchedAt(clock.nowIso());
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -109,7 +110,7 @@ export function useFhirRead<T extends FhirResource>(
       .then((res) => {
         if (cancelled) return;
         setData(res && (res as FhirResource).resourceType === resourceType ? res : null);
-        setFetchedAt(new Date().toISOString());
+        setFetchedAt(clock.nowIso());
       })
       .catch((err: unknown) => {
         if (cancelled) return;

@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * SMART-on-FHIR session & server-held token manager (plan F-3).
  *
@@ -14,7 +15,8 @@
  */
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
-import { serverEnv, requireWso2, type ServerEnv } from './env';
+import { serverEnv, requireWso2, requireSessionSecret, type ServerEnv } from './env';
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 
 const SESSION_COOKIE = 'rhtp_smart_session';
 const PKCE_COOKIE = 'rhtp_pkce';
@@ -32,7 +34,10 @@ export interface SessionData {
 // ---- cookie crypto (AES-256-GCM) -------------------------------------------
 
 function key(env: ServerEnv): Buffer {
-  return crypto.createHash('sha256').update(env.sessionSecret).digest();
+  // R5: fail closed. requireSessionSecret throws in production when SESSION_SECRET
+  // is unset (no public default -> no cookie forgery), and yields the labelled dev
+  // secret ONLY in explicit dev-mock mode. The cookie key is NEVER a shared constant.
+  return crypto.createHash('sha256').update(requireSessionSecret(env)).digest();
 }
 
 function seal(value: object, env: ServerEnv): string {
@@ -133,7 +138,7 @@ export async function getAccessToken(): Promise<string> {
   const jar = await cookies();
   const session = open<SessionData>(jar.get(SESSION_COOKIE)?.value ?? '', env);
 
-  if (session && session.expiresAt - Date.now() > 30_000) return session.accessToken;
+  if (session && session.expiresAt - clock.now() > 30_000) return session.accessToken;
 
   if (session?.refreshToken && env.tokenUrl) {
     const refreshed = await refresh(session.refreshToken, env);
@@ -171,7 +176,7 @@ export async function isAuthenticated(): Promise<boolean> {
   const env = serverEnv();
   const jar = await cookies();
   const session = open<SessionData>(jar.get(SESSION_COOKIE)?.value ?? '', env);
-  if (session && session.expiresAt > Date.now()) return true;
+  if (session && session.expiresAt > clock.now()) return true;
   // Dev offline path: no WSO2 configured + ALLOW_DEV_MOCK_AUTH=true → auto-establish a dev session
   if (!env.tokenUrl && env.allowDevMockAuth) {
     await startDevSession();
@@ -193,6 +198,39 @@ export async function getSessionPatient(): Promise<string | null> {
   return session?.patient ?? null;
 }
 
+/**
+ * Non-secret session facts the principal role model derives from (ids / scopes /
+ * references, never a token). Safe to pass to lib/authz/principal.getPrincipal.
+ */
+export interface SessionAuthContext {
+  patient: string | null;
+  fhirUser: string | null;
+  scope: string | null;
+}
+
+/** The acting session's authorization context (for lib/authz/principal). */
+export async function getSessionAuthContext(): Promise<SessionAuthContext | null> {
+  const env = serverEnv();
+  const jar = await cookies();
+  const session = open<SessionData>(jar.get(SESSION_COOKIE)?.value ?? '', env);
+  if (session && session.expiresAt > clock.now()) {
+    return {
+      patient: session.patient ?? null,
+      fhirUser: session.fhirUser ?? null,
+      scope: session.scope ?? null,
+    };
+  }
+  // Dev offline path: mirror isAuthenticated's auto-established dev session.
+  if (!env.tokenUrl && env.allowDevMockAuth) {
+    await startDevSession();
+    const dev = open<SessionData>((await cookies()).get(SESSION_COOKIE)?.value ?? '', env);
+    return dev
+      ? { patient: dev.patient ?? null, fhirUser: dev.fhirUser ?? null, scope: dev.scope ?? null }
+      : null;
+  }
+  return null;
+}
+
 export async function setDevSessionPatient(patient: string): Promise<boolean> {
   const env = serverEnv();
   if (env.tokenUrl || !env.allowDevMockAuth) return false;
@@ -204,7 +242,7 @@ export async function setDevSessionPatient(patient: string): Promise<boolean> {
  * install renders real FHIR data. Only works when WSO2 is unconfigured AND
  * ALLOW_DEV_MOCK_AUTH=true. Never fires in production.
  */
-export async function startDevSession(patient = 'MARIA_SD_001'): Promise<boolean> {
+export async function startDevSession(patient = DEMO_MEMBER_ID): Promise<boolean> {
   const env = serverEnv();
   if (env.tokenUrl || !env.allowDevMockAuth) return false;
   const jar = await cookies();
@@ -213,7 +251,7 @@ export async function startDevSession(patient = 'MARIA_SD_001'): Promise<boolean
     scope: env.scope,
     patient,
     fhirUser: 'Practitioner/dev',
-    expiresAt: Date.now() + 8 * 60 * 60 * 1000,
+    expiresAt: clock.now() + 8 * 60 * 60 * 1000,
   };
   jar.set(SESSION_COOKIE, seal(session, env), {
     httpOnly: true,
@@ -246,7 +284,7 @@ async function writeSession(tok: TokenResponse, env: ServerEnv): Promise<void> {
     scope: tok.scope ?? env.scope,
     patient: tok.patient,
     fhirUser: tok.fhirUser,
-    expiresAt: Date.now() + (tok.expires_in ?? 3600) * 1000,
+    expiresAt: clock.now() + (tok.expires_in ?? 3600) * 1000,
   };
   jar.set(SESSION_COOKIE, seal(session, env), {
     httpOnly: true,

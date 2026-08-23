@@ -9,6 +9,8 @@ import { PLATFORM_TO_FHIR_ID_MAP } from './patientRegistry';
 import { useAppContext } from './appContext';
 import { GapClosureStoreContext } from './patientContext.fhirObs';
 import { defaultMariaState, defaultDorothyState } from './patientContext.defaults';
+import { DEMO_MEMBER_ID } from './config/demoDefaults';
+import * as clock from './clock'; // determinism seam (Cycle 1)
 import { buildStateFromRegistry, buildStateFromFhirPatient } from './patientContext.builders';
 import type { GapClosureEvidence, PatientSharedState, EpisodeStatus, BHRiskLevel, GapStatus } from './patientContext.types';
 
@@ -53,7 +55,7 @@ export function PatientContextProvider({ patientId, children }: { patientId?: st
     const registryState = buildStateFromRegistry(patientId);
     if (registryState) return registryState;
     if (patientId === 'PAT-0042' || patientId === 'patient-001') return defaultDorothyState;
-    if (patientId === 'MARIA_SD_001' || patientId === 'patient-maria' || patientId === '') return defaultMariaState;
+    if (patientId === DEMO_MEMBER_ID || patientId === '') return defaultMariaState;
     return defaultMariaState;
   };
 
@@ -115,7 +117,7 @@ export function PatientContextProvider({ patientId, children }: { patientId?: st
     setPatient((p) => ({
       ...p,
       careGaps: p.careGaps.map((g) =>
-        g.id === gapId ? { ...g, status: 'Closed' as GapStatus, evidence, closedDate: new Date().toLocaleDateString() } : g
+        g.id === gapId ? { ...g, status: 'Closed' as GapStatus, evidence, closedDate: clock.nowDate().toLocaleDateString() } : g
       ),
     }));
   }, []);

@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * runtimeConfig.ts — server-side runtime configuration store
  *
@@ -14,6 +15,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 
 // ─── Shape ────────────────────────────────────────────────────────────────────
 
@@ -76,8 +78,9 @@ export function getDefaultConfig(): RuntimeConfig {
     wso2AuthorizeUrl: process.env.WSO2_AUTHORIZE_URL ?? '',
     wso2TokenUrl: process.env.WSO2_TOKEN_URL ?? '',
     wso2ClientId: process.env.WSO2_CLIENT_ID ?? '',
-    allowDevMockAuth: (process.env.ALLOW_DEV_MOCK_AUTH ?? 'true').toLowerCase() === 'true',
-    postmanPatientId: 'MARIA_SD_001',
+    // Fail-closed default: OFF unless explicitly opted in (mirrors server/env.ts). (U1 fix)
+    allowDevMockAuth: (process.env.ALLOW_DEV_MOCK_AUTH ?? 'false').toLowerCase() === 'true',
+    postmanPatientId: DEMO_MEMBER_ID,
     postmanReviewerEmail: 'reviewer@rhtp-health.org',
     postmanProviderNpi: '1730154783',
     postmanScopes: {
@@ -122,7 +125,7 @@ export function writeRuntimeConfig(patch: Partial<RuntimeConfig>): RuntimeConfig
       ...current.postmanScopes,
       ...(patch.postmanScopes ?? {}),
     },
-    lastSaved: new Date().toISOString(),
+    lastSaved: clock.nowIso(),
   };
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(next, null, 2), 'utf8');
   return next;

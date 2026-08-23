@@ -1,0 +1,5 @@
+member_source_id,screen_date,domain,zcode,result,program
+CBO-MEM-01,2026-04-03,transportation-insecurity,Z59.82,positive,general
+CBO-MEM-02,2026-04-04,food-insecurity,Z59.41,positive,behavioral-health
+CBO-MEM-03,2026-04-05,housing-instability,,negative,general
+CBO-MEM-04,2026-04-06,substance-use,Z71.41,positive,sud-recovery

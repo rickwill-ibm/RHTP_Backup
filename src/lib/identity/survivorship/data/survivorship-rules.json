@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "description": "F3 golden-record survivorship: per-field source ranking (highest-priority source first). The golden record is a PROJECTION of source-attributed facts; changing this data re-derives the golden view with no data loss.",
+  "tiebreak": "most-recent",
+  "defaultRanking": ["state-agency", "payer", "emr"],
+  "fieldRankings": {
+    "firstName": ["emr", "payer", "state-agency"],
+    "lastName": ["emr", "payer", "state-agency"],
+    "dob": ["state-agency", "payer", "emr"],
+    "sex": ["state-agency", "emr", "payer"],
+    "ssnLast4": ["state-agency", "payer", "emr"],
+    "medicaidId": ["state-agency", "payer", "emr"],
+    "address": ["payer", "emr", "state-agency"],
+    "zip": ["payer", "emr", "state-agency"],
+    "phone": ["emr", "payer", "state-agency"],
+    "email": ["emr", "payer", "state-agency"]
+  }
+}

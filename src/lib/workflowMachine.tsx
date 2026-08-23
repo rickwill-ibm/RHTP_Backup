@@ -11,6 +11,7 @@ import type {
 } from './actionRegistry';
 import { workflowDefinitions } from './actionRegistry';
 import type { UserRole } from './mockData';
+import * as clock from './clock'; // determinism seam (Cycle 1)
 
 // ─── State Shape ──────────────────────────────────────────────────────────────
 interface WorkflowMachineState {
@@ -37,7 +38,7 @@ function workflowReducer(state: WorkflowMachineState, action: WorkflowAction): W
       const { workflowType, entityId, startedBy, startedByRole } = action.payload;
       const def = workflowDefinitions[workflowType];
       const key = workflowKey(workflowType, entityId);
-      const now = new Date().toISOString();
+      const now = clock.nowIso();
       return {
         ...state,
         workflows: {
@@ -64,7 +65,7 @@ function workflowReducer(state: WorkflowMachineState, action: WorkflowAction): W
       const existing = state.workflows[key];
       if (!existing) return state;
       const def = workflowDefinitions[workflowType];
-      const now = new Date().toISOString();
+      const now = clock.nowIso();
       const completedStep = def.steps.find((s) => s.step === existing.currentStep);
       const stepRecord: WorkflowStepRecord = {
         step: existing.currentStep,
@@ -97,7 +98,7 @@ function workflowReducer(state: WorkflowMachineState, action: WorkflowAction): W
       const existing = state.workflows[key];
       if (!existing) return state;
       const def = workflowDefinitions[workflowType];
-      const now = new Date().toISOString();
+      const now = clock.nowIso();
       const completedStep = def.steps.find((s) => s.step === existing.currentStep);
       const stepRecord: WorkflowStepRecord = {
         step: existing.currentStep,
@@ -126,7 +127,7 @@ function workflowReducer(state: WorkflowMachineState, action: WorkflowAction): W
       const key = workflowKey(workflowType, entityId);
       const existing = state.workflows[key];
       if (!existing) return state;
-      const now = new Date().toISOString();
+      const now = clock.nowIso();
       const stepRecord: WorkflowStepRecord = {
         step: existing.currentStep,
         label: 'Rejected',

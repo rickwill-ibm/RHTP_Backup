@@ -3,9 +3,14 @@
 // social fields for everyone else) and matches/ranks CBO resources as NBAs,
 // flagging keystone resources (those that address a barrier BLOCKing a care gap).
 
+// SEAM: graph — registered in the data-mode registry (lib/config/dataMode.ts,
+// seam id 'graph', env DATA_MODE_GRAPH). The authored whole-person graph below
+// is the mock source; when a production graph backend exists, switch on
+// getDataMode('graph') here instead of importing the authored data directly.
 import { graphNodes } from '@/lib/wholePersonGraphData';
 import { getPatientById, type RegistryPatient } from '@/lib/patientRegistry';
 import { keystones } from './keystones';
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 
 export type ResourceCategory =
   | 'Financial'
@@ -27,9 +32,8 @@ export interface CitizenNeed {
   cypher: string;
 }
 
-const MARIA = 'MARIA_SD_001';
-
-// Maria's graph SDOH node labels → resource category
+// The graph-backed dataset belongs to the configured demo member.
+// Graph SDOH node labels → resource category
 const SDOH_LABEL_CATEGORY: Record<string, ResourceCategory> = {
   Transportation: 'Transportation',
   'Childcare Barrier': 'Financial',
@@ -44,7 +48,7 @@ function normSeverity(s: unknown): Severity {
   return s === 'HIGH' ? 'HIGH' : s === 'LOW' ? 'LOW' : 'MODERATE';
 }
 
-function mariaNeeds(): CitizenNeed[] {
+function graphNeeds(): CitizenNeed[] {
   const ksMap: Record<string, string[]> = {};
   keystones().forEach((k) => (ksMap[k.barrierId] = k.blockedGaps));
   return graphNodes
@@ -59,7 +63,7 @@ function mariaNeeds(): CitizenNeed[] {
           label: n.label,
           keystone: !!ksMap[n.id],
           blockedGaps: ksMap[n.id],
-          cypher: `MATCH (c:Member {id:'${MARIA}'})-[:HAS_SDOH]->(n:SDOHNode {label:'${n.label}'}) RETURN n`,
+          cypher: `MATCH (c:Member {id:'${DEMO_MEMBER_ID}'})-[:HAS_SDOH]->(n:SDOHNode {label:'${n.label}'}) RETURN n`,
         } as CitizenNeed,
       ];
     });
@@ -79,7 +83,7 @@ function registryNeeds(p: RegistryPatient): CitizenNeed[] {
 }
 
 export function citizenNeeds(citizenId: string): CitizenNeed[] {
-  if (citizenId === MARIA) return mariaNeeds();
+  if (citizenId === DEMO_MEMBER_ID) return graphNeeds();
   const p = getPatientById(citizenId);
   return p ? registryNeeds(p) : [];
 }

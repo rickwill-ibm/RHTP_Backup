@@ -1,3 +1,5 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
+import { log } from '@/lib/server/log'; // structured logging seam (see src/lib/server/log.ts)
 /**
  * patientService.ts — TCOC Patient Service Wrapper
  *
@@ -78,7 +80,7 @@ export async function upsertGapObservation(
     hedisCompliance?: string;
   },
 ): Promise<{ id: string }> {
-  const now = new Date().toISOString();
+  const now = clock.nowIso();
   const BASE = 'http://tcoc.example.org/fhir/StructureDefinition';
   const resource: Record<string, unknown> = {
     resourceType: 'Observation',
@@ -116,7 +118,7 @@ export async function completeTask(fhirPatientId: string, gapId: string): Promis
     resourceType: 'Task',
     status: 'completed',
     intent: 'order',
-    lastModified: new Date().toISOString(),
+    lastModified: clock.nowIso(),
     output: [{ type: { text: 'Gap Closure Evidence' }, valueReference: { reference: `Observation/patient-${fhirPatientId}-gap-${gapId}` } }],
   });
 }
@@ -145,7 +147,8 @@ export async function updateCareTeamMember(
     });
     await client.update({ ...existing, participant: updatedParticipants, id: careTeamId });
   } catch {
-    /* CareTeam may not exist for all patients — silently ignore */
+    // CareTeam may not exist for all patients (expected); logged so the skip is visible (silent-failure audit).
+    log.debug('patientService.careTeam.updateSkipped', { careTeamId, role: roleName });
   }
 }
 
@@ -162,7 +165,7 @@ export async function postScreeningAuditEvent(
     type: { system: 'http://terminology.hl7.org/CodeSystem/audit-event-type', code: 'rest', display: 'RESTful Operation' },
     subtype: [{ system: 'http://hl7.org/fhir/restful-interaction', code: 'create', display: 'create' }],
     action: 'C',
-    recorded: new Date().toISOString(),
+    recorded: clock.nowIso(),
     outcome: '0',
     agent: [{ who: { display: 'TCOC Platform' }, requestor: true }],
     source: { observer: { display: 'TCOC-PatientService' } },

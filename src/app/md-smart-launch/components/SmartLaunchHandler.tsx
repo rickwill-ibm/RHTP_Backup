@@ -4,7 +4,7 @@ import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
 import { mockSmartLaunchContext } from '@/lib/smartFhirMockData';
 import Icon from '@/components/ui/AppIcon';
 import { SmartErrorFallback, type SmartError } from './SmartErrorBoundary';
-import { appConfig, shouldUseMockData } from '@/lib/config/appConfig';
+import { shouldUseMockData } from '@/lib/config/appConfig';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
 
 interface SmartLaunchHandlerProps {
@@ -101,15 +101,6 @@ export default function SmartLaunchHandler({
         gender?: string;
       }>('Patient', fhirPatientId);
 
-      // Derive display name from FHIR Patient.name
-      let patientName = 'Unknown Patient';
-      if (patientResource?.name?.length) {
-        const n = patientResource.name[0];
-        const given = n.given?.join(' ') ?? '';
-        const family = n.family ?? '';
-        patientName = `${given} ${family}`.trim() || 'Unknown Patient';
-      }
-
       setProgress(85);
       await new Promise((r) => setTimeout(r, 300));
 
@@ -123,9 +114,6 @@ export default function SmartLaunchHandler({
       setProgress(100);
       setTimeout(() => onLaunchReady(launchContext), 300);
 
-      if (appConfig.dev.enableDebugLogging) {
-        console.log(`[SmartLaunchHandler] Live FHIR — loaded Patient/${fhirPatientId} → "${patientName}"`);
-      }
     } catch (err) {
       // Patient not found on HAPI — fall back to mock launch sequence
       console.warn('[SmartLaunchHandler] Live FHIR patient read failed, falling back to mock:', err);
@@ -137,9 +125,6 @@ export default function SmartLaunchHandler({
    * Run appropriate launch sequence based on mode
    */
   useEffect(() => {
-    if (appConfig.dev.enableDebugLogging) {
-      console.log('[SmartLaunchHandler] mode:', getFhirMockMode() ? 'MOCK DATA' : 'LIVE FHIR');
-    }
     if (getFhirMockMode()) {
       runMockLaunchSequence();
     } else {

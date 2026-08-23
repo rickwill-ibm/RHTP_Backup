@@ -1,0 +1,5 @@
+[
+  { "file": "src/lib/identity/provider/npi.ts", "test": "npx vitest run tests/identity/providerIdentity.test.ts", "maxMutants": 6 },
+  { "file": "src/lib/identity/survivorship/goldenRecord.ts", "test": "npx vitest run tests/identity/survivorship.test.ts tests/identity/survivorshipTiebreak.test.ts", "maxMutants": 6 },
+  { "file": "src/lib/terminology/validateCode/membership.ts", "test": "npx vitest run tests/terminology/validateCode.test.ts tests/terminology/version.test.ts", "maxMutants": 6 }
+]

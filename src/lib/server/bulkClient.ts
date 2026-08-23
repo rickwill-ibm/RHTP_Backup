@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Payer-to-Payer bulk export client — plan Slice 3.
  * Kicks off a PDex $export via the bulk-export-client and polls status.
@@ -29,7 +30,7 @@ export async function startExport(
     });
     const body = (await res.json().catch(() => ({}))) as { jobId?: string };
     await audit({
-      ts: new Date().toISOString(),
+      ts: clock.nowIso(),
       actor: ctx.actor,
       action: 'p2p.export.start',
       resourceRef: priorPayer,

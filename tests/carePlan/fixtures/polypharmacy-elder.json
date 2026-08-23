@@ -1,0 +1,132 @@
+{
+  "_fixture": {
+    "id": "polypharmacy-elder",
+    "description": "78-year-old with CHF + CKD suspects, poly-pharmacy alert, and an open medication-reconciliation gap. Exercises multi-specialty routing, utilization-risk goal generation, and the medication-review intervention. Revenue delta above the health-plan share threshold documents the (consent-checked) legacy revenue-gated sharing behavior.",
+    "clinicalReview": "medical-lens drafted, SME sign-off pending (GB-3)",
+    "clock": "2026-08-22T12:00:00Z"
+  },
+  "input": {
+    "patient": {
+      "id": "member-poly-003",
+      "name": "Fixture Member Three",
+      "dob": "1948-01-20",
+      "age": 78,
+      "gender": "Male",
+      "mrn": "MRN-FIX-003",
+      "riskTier": "High",
+      "rafScore": 2.11,
+      "rafScoreDelta": 0.31,
+      "predictedErRisk": 51,
+      "openHCCSuspects": 2,
+      "hccSuspectValue": 7100,
+      "openCareGaps": 1,
+      "lastContactDate": "2026-08-05",
+      "attributionStatus": "Confirmed",
+      "pmpmCost": 1340,
+      "pmpmTarget": 1100,
+      "primaryCareProvider": "Dr. Fixture Geriatrics",
+      "activeAlerts": 1,
+      "carePlanStatus": "Pending",
+      "contractId": "contract-fix-01",
+      "phone": "555-0103",
+      "address": "103 Fixture St",
+      "insuranceId": "INS-FIX-003",
+      "payer": "Fixture Medicare Advantage",
+      "enrollmentDate": "2021-01-01"
+    },
+    "hccSuspects": [
+      {
+        "id": "hcc-fix-002",
+        "patientId": "member-poly-003",
+        "hccCode": "HCC-85",
+        "hccDescription": "Congestive Heart Failure",
+        "icdCode": "I50.22",
+        "icdDescription": "Chronic systolic congestive heart failure",
+        "estimatedRafDelta": 0.331,
+        "estimatedRevenueDelta": 3900,
+        "status": "Surfaced",
+        "evidenceSources": ["EMR"],
+        "lastEncounterDate": "2026-05-18",
+        "suspectConfidence": 88,
+        "assignedPhysician": "Dr. Fixture Geriatrics",
+        "submissionDeadline": "2026-11-30",
+        "dataSource": "EMR",
+        "freshnessDate": "2026-08-01"
+      },
+      {
+        "id": "hcc-fix-003",
+        "patientId": "member-poly-003",
+        "hccCode": "HCC-138",
+        "hccDescription": "Chronic Kidney Disease Stage 3",
+        "icdCode": "N18.30",
+        "icdDescription": "Chronic kidney disease, stage 3 unspecified",
+        "estimatedRafDelta": 0.237,
+        "estimatedRevenueDelta": 3200,
+        "status": "Surfaced",
+        "evidenceSources": ["Claims"],
+        "lastEncounterDate": "2026-06-02",
+        "suspectConfidence": 79,
+        "assignedPhysician": "Dr. Fixture Geriatrics",
+        "submissionDeadline": "2026-11-30",
+        "dataSource": "Claims",
+        "freshnessDate": "2026-08-01"
+      }
+    ],
+    "careGaps": [
+      {
+        "id": "gap-fix-004",
+        "patientId": "member-poly-003",
+        "measureId": "MRP-30",
+        "measureName": "Medication Reconciliation Post-Discharge",
+        "program": "HEDIS",
+        "status": "Open",
+        "dueDate": "2026-09-10",
+        "daysOpen": 20,
+        "lastActionDate": "2026-08-02",
+        "assignedTo": "Pharmacist",
+        "notes": "Discharged 2026-08-02; reconciliation not yet documented",
+        "closureRequirement": "Medication reconciliation documented within 30 days of discharge"
+      }
+    ],
+    "alerts": [
+      {
+        "id": "alert-fix-001",
+        "patientId": "member-poly-003",
+        "tier": "Important",
+        "type": "Poly-Pharmacy",
+        "description": "12 active medications with potential interaction risk",
+        "riskScore": 72,
+        "estimatedCost": 8500,
+        "createdDate": "2026-08-03",
+        "source": "Claims",
+        "status": "Active",
+        "freshnessDate": "2026-08-10"
+      }
+    ]
+  },
+  "expected": {
+    "priority": "High",
+    "goalCount": { "min": 4, "max": 4 },
+    "goalDescriptionsInclude": [
+      "Close Medication Reconciliation Post-Discharge quality gap",
+      "Document and code Congestive Heart Failure",
+      "Document and code Chronic Kidney Disease Stage 3",
+      "Mitigate Poly-Pharmacy"
+    ],
+    "interventionDescriptionsInclude": [
+      "Medication review (in-person)",
+      "Cardiology consultation (referral pending)",
+      "Nephrology consultation (referral pending)",
+      "Home monitoring program enrollment"
+    ],
+    "referralCount": 1,
+    "referralSpecialtiesInclude": ["Primary Care"],
+    "sharedWithIncludes": [
+      "Patient Portal",
+      "Cardiology (via FHIR)",
+      "Nephrology (via FHIR)",
+      "Care Manager",
+      "Health Plan"
+    ]
+  }
+}

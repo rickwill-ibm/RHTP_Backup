@@ -1,0 +1,27 @@
+{
+  "packId": "disposition-policy.default",
+  "version": "1.0",
+  "priorityWeights": { "urgent": 100, "high": 60, "routine": 30 },
+  "recentEdBoost": 25,
+  "frequencyCaps": [
+    { "channel": "sms", "windowHours": 24, "maxPerWindow": 2 },
+    { "channel": "email", "windowHours": 24, "maxPerWindow": 2 },
+    { "channel": "portal", "windowHours": 24, "maxPerWindow": 3 },
+    { "channel": "mail", "windowHours": 168, "maxPerWindow": 1 }
+  ],
+  "channelDefaultOrder": ["portal", "sms", "email", "mail"],
+  "smsWindow": { "startHour": 15, "endHour": 19 },
+  "bundling": { "coordinationWindowCadenceHours": 24, "maxIntentsPerTouchpoint": 8 },
+  "suppression": { "supersedeOnClosure": true, "duplicateCollapse": true },
+  "ruleIds": {
+    "consentScope": "consent-scope/1.0",
+    "duplicateCollapse": "duplicate-collapse/1.0",
+    "supersedeOnClosure": "supersede-on-closure/1.2",
+    "frequencyCap": "frequency-cap/1.0",
+    "quietHoursWindow": "quiet-hours-window/1.0",
+    "priorityScoring": "priority-scoring/1.0",
+    "bundlingWindow": "bundling-window/2.0",
+    "expiredTtl": "expired-ttl/1.0",
+    "internalOnly": "internal-only/1.0"
+  }
+}

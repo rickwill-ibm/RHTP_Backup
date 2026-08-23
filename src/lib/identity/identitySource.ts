@@ -12,6 +12,7 @@
  *    business/architecture decision that must be made jointly with HCA (Dev Plan
  *    task A5), so this file only defines the seam, not a live integration.
  */
+import { getDataMode } from '@/lib/config/dataMode';
 import type { SourceIdentityRecord, SourceSystem } from './mpiTypes';
 
 export type IdentityIntegrationMode = 'standalone' | 'hca-mpi';
@@ -73,3 +74,43 @@ function createMockIdentitySource(): IdentitySource {
 }
 
 export const mockIdentitySource: IdentitySource = createMockIdentitySource();
+
+// ─── Production candidate-source seam (U3 fix) ───────────────────────────────
+/**
+ * The REAL match engine (matchEngine.ts) must score inbound records against a
+ * REAL candidate pool — never the 3 hard-coded demo records. Until an HCA-MPI /
+ * cross-source client is registered, production fails loud (never silently scores
+ * or mints against the demo fixture). This is the BackboneNotConfigured pattern
+ * every sibling seam uses (goldCardRoster, terminology, consent, evidence).
+ */
+export class EmpiCandidateSourceNotConfiguredError extends Error {
+  constructor() {
+    super(
+      'DATA_MODE identity=production: no production EMPI candidate source is wired yet. ' +
+        'Register one with setProductionIdentitySource(realCrossSourceClient) ' +
+        '(SEAM: identity) or set DATA_MODE_IDENTITY=mock to score against the demo registry.'
+    );
+    this.name = 'EmpiCandidateSourceNotConfiguredError';
+  }
+}
+
+let productionIdentitySource: IdentitySource | null = null;
+
+/** Register (or clear, with null) the production candidate source (composition root / tests). */
+export function setProductionIdentitySource(source: IdentitySource | null): void {
+  productionIdentitySource = source;
+}
+
+/**
+ * Resolve the EMPI candidate source for the configured `identity` data mode.
+ *   mock / seeded -> the in-memory demo registry (demo stays green).
+ *   production     -> the registered production source, or throw
+ *                     EmpiCandidateSourceNotConfiguredError (fail loud) if none.
+ */
+export function getIdentitySource(): IdentitySource {
+  if (getDataMode('identity') === 'production') {
+    if (!productionIdentitySource) throw new EmpiCandidateSourceNotConfiguredError();
+    return productionIdentitySource;
+  }
+  return mockIdentitySource;
+}

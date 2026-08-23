@@ -1,3 +1,5 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
+import { getDataMode } from '@/lib/config/dataMode';
 /**
  * Provider Access opt-out consent store (Dev Plan Workstream A — closes the RFI
  * audit gap: "provides the opt-out model for Provider Access" was previously
@@ -36,7 +38,7 @@ export interface ProviderAccessConsentStore {
 }
 
 function nowIso(): string {
-  return new Date().toISOString();
+  return clock.nowIso();
 }
 
 /** In-memory mock store over a Map — swap for a real consent-repository client in production. */
@@ -86,3 +88,21 @@ function createMockProviderAccessConsentStore(): ProviderAccessConsentStore {
 
 export const mockProviderAccessConsentStore: ProviderAccessConsentStore =
   createMockProviderAccessConsentStore();
+
+// SEAM: consent — mode-registry switch point (lib/config/dataMode.ts).
+// The future production backend (a consent-management system or HCA's own
+// consent repository) plugs in here; callers go through this selector and
+// never change. deploy.config.yaml's dataMode block sets DATA_MODE_CONSENT.
+
+/** Resolve the consent store for the configured 'consent' data mode. */
+export function getProviderAccessConsentStore(): ProviderAccessConsentStore {
+  const mode = getDataMode('consent');
+  if (mode === 'production') {
+    throw new Error(
+      'DATA_MODE consent=production: no production consent store is wired yet — ' +
+        'implement a ProviderAccessConsentStore client here (SEAM: consent) or set DATA_MODE_CONSENT=mock.'
+    );
+  }
+  // 'mock' and 'seeded' both serve the in-memory store (it has no seed file yet).
+  return mockProviderAccessConsentStore;
+}

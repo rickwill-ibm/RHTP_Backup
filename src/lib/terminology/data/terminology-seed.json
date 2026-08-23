@@ -1,0 +1,101 @@
+{
+  "_comment": "Minimal in-repo terminology allowlist for the SEEDED TerminologyService stub (data-is-not-code). Covers exactly the RxNorm / LOINC / SNOMED-CT / ICD-10-CM codes the demo pipeline fixtures use, plus a few ICD-10 diagnoses with a stub CMS-HCC mapping so classify() has demo data. NOT a real terminology server; production uses a FHIR terminology server ($validate-code / $translate / ValueSet $expand).",
+  "codeSystems": {
+    "RxNorm": {
+      "uri": "http://www.nlm.nih.gov/research/umls/rxnorm",
+      "codes": {
+        "310798": "Hydrochlorothiazide 25 MG Oral Tablet",
+        "197361": "Amlodipine 5 MG Oral Tablet",
+        "7980": "Penicillin G"
+      }
+    },
+    "LOINC": {
+      "uri": "http://loinc.org",
+      "codes": {
+        "4548-4": "Hemoglobin A1c/Hemoglobin.total in Blood",
+        "8480-6": "Systolic blood pressure",
+        "2339-0": "Glucose [Mass/volume] in Blood",
+        "34133-9": "Summary of episode note",
+        "18842-5": "Discharge summary",
+        "11506-3": "Progress note"
+      }
+    },
+    "SNOMED-CT": {
+      "uri": "http://snomed.info/sct",
+      "codes": {
+        "227493005": "Cashew nuts",
+        "44054006": "Type 2 diabetes mellitus",
+        "80146002": "Appendectomy",
+        "103696004": "Patient referral to specialist"
+      }
+    },
+    "ICD-10-CM": {
+      "uri": "http://hl7.org/fhir/sid/icd-10-cm",
+      "codes": {
+        "Z59.82": "Transportation insecurity",
+        "Z59.41": "Food insecurity",
+        "Z71.41": "Alcohol abuse counseling and surveillance",
+        "E11.9": "Type 2 diabetes mellitus without complications",
+        "I50.9": "Heart failure, unspecified",
+        "N18.6": "End stage renal disease",
+        "F11.20": "Opioid dependence, uncomplicated",
+        "F10.20": "Alcohol dependence, uncomplicated",
+        "F32.1": "Major depressive disorder, single episode, moderate",
+        "F41.1": "Generalized anxiety disorder"
+      }
+    },
+    "CPT-HCPCS": {
+      "uri": "http://www.ama-assn.org/go/cpt",
+      "codes": {
+        "99213": "Office/outpatient visit, established patient",
+        "45378": "Colonoscopy, flexible; diagnostic",
+        "99242": "Office consultation, new or established patient"
+      }
+    },
+    "HCC": {
+      "uri": "urn:cms:risk-adjustment:hcc",
+      "codes": {
+        "HCC38": "Diabetes with glycemic, unspecified, or no complications",
+        "HCC226": "Heart failure, except end-stage and severe",
+        "HCC329": "Chronic kidney disease, stage 5, or end-stage renal disease"
+      }
+    }
+  },
+  "conceptMap": {
+    "_comment": "Minimal $translate stub pairs, keyed sourceSystem->targetSystem then source code.",
+    "ICD-10-CM->SNOMED-CT": { "E11.9": "44054006" },
+    "SNOMED-CT->ICD-10-CM": { "44054006": "E11.9" }
+  },
+  "valueSets": {
+    "sdoh-z-codes": ["Z59.82", "Z59.41", "Z71.41"],
+    "chronic-conditions": ["E11.9", "I50.9", "N18.6"]
+  },
+  "membership": {
+    "_comment": "Wave A (I8A-ii) versioned value-set membership. The CURRENT-version members of each governed system are the keys of codeSystems[system].codes (single source of truth, DRY). This block adds ONLY the version deltas: retiredInCurrent = codes removed as of the current bound version (valid in a prior version, invalid now), and priorVersions = how an older version's membership differs from current (adds/removes), so $expand can enumerate a specific version and a retired code is provable. Codes here are ILLUSTRATIVE STUBS, not the full authority release.",
+    "systems": {
+      "ICD-10-CM": {
+        "currentVersion": "FY2026",
+        "retiredInCurrent": ["R51"],
+        "priorVersions": {
+          "FY2025": { "adds": ["R51"], "removes": [] }
+        }
+      },
+      "HCC": {
+        "currentVersion": "V28",
+        "retiredInCurrent": ["HCC58"],
+        "priorVersions": {
+          "V24": { "adds": ["HCC58"], "removes": [] }
+        }
+      }
+    }
+  },
+  "ucum": {
+    "_comment": "Wave A (I8A-ii) UCUM unit validation for LOINC quantitative results. validUnits is an illustrative allowlist of well-formed UCUM unit atoms (a real server parses the UCUM grammar); loincUnits maps a quantitative LOINC to the units appropriate for it. A LOINC absent from loincUnits is treated as non-quantitative (no unit check). NOT the full UCUM registry.",
+    "validUnits": ["mg/dL", "mmol/L", "%", "mmol/mol", "mm[Hg]", "g/dL", "/min", "10*3/uL", "fL", "pg", "mL/min/{1.73_m2}", "U/L", "ng/mL"],
+    "loincUnits": {
+      "4548-4": ["%", "mmol/mol"],
+      "8480-6": ["mm[Hg]"],
+      "2339-0": ["mg/dL", "mmol/L"]
+    }
+  }
+}

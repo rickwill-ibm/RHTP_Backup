@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * In-memory FHIR store — backs the FhirClient's mock mode.
  *
@@ -143,8 +144,8 @@ export function storeCreate<T = unknown>(resource: Record<string, unknown>): T {
   const d = load();
   const rt = String(resource.resourceType ?? 'Basic');
   createSeq += 1;
-  const id = (resource.id as string) ?? `local-${rt.toLowerCase()}-${Date.now()}-${createSeq}`;
-  const stored = { ...resource, id, meta: { lastUpdated: new Date().toISOString() } } as AnyResource;
+  const id = (resource.id as string) ?? `local-${rt.toLowerCase()}-${clock.now()}-${createSeq}`;
+  const stored = { ...resource, id, meta: { lastUpdated: clock.nowIso() } } as AnyResource;
   if (!d.has(rt)) d.set(rt, new Map());
   d.get(rt)!.set(id, stored);
   return stored as unknown as T;
@@ -153,7 +154,7 @@ export function storeCreate<T = unknown>(resource: Record<string, unknown>): T {
 export function storeUpdate<T = unknown>(resource: Record<string, unknown> & { id: string }): T {
   const d = load();
   const rt = String(resource.resourceType ?? 'Basic');
-  const stored = { ...resource, meta: { lastUpdated: new Date().toISOString() } } as AnyResource;
+  const stored = { ...resource, meta: { lastUpdated: clock.nowIso() } } as AnyResource;
   if (!d.has(rt)) d.set(rt, new Map());
   d.get(rt)!.set(resource.id, stored);
   return stored as unknown as T;

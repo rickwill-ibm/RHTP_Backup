@@ -9,6 +9,8 @@
  * Prevents drift between what the Explorer shows and what the collection tests.
  */
 
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
+
 // ─── Patient scenarios ────────────────────────────────────────────────────────
 
 export interface PatientScenario {
@@ -93,7 +95,7 @@ export const PATIENT_SCENARIOS: Record<string, PatientScenario> = {
   },
 };
 
-export const DEFAULT_PATIENT_ID = 'MARIA_SD_001';
+export const DEFAULT_PATIENT_ID = DEMO_MEMBER_ID;
 export const DEFAULT_PROVIDER_NPI = '1730154783';
 export const DEFAULT_REVIEWER_EMAIL = 'reviewer@rhtp-health.org';
 

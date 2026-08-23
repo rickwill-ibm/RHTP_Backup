@@ -67,6 +67,8 @@ export const navItems: NavItem[] = [
   { key: 'nav-ac-iam',     label: 'Identity & Access',    icon: 'UserCircleIcon',              href: '/admin-console/identity-access',     group: 'Admin Console' },
   { key: 'nav-ac-quality', label: 'Data Quality',         icon: 'MagnifyingGlassIcon',         href: '/admin-console/data-quality',        group: 'Admin Console' },
   { key: 'nav-ac-audit',   label: 'Audit & Compliance',   icon: 'DocumentMagnifyingGlassIcon', href: '/admin-console/audit-compliance',    group: 'Admin Console' },
+  // ── Iteration 8A-iii Wave B — Value-Set Governance Console ──
+  { key: 'nav-ac-vsgov',   label: 'Value-Set Governance', icon: 'RectangleStackIcon',          href: '/admin-console/value-set-governance', group: 'Admin Console' },
   // System
   { key: 'nav-settings', label: 'EHR Settings', icon: 'Cog6ToothIcon', href: '/settings', group: 'System' },
   { key: 'nav-fhir-tester', label: 'FHIR API Tester', icon: 'BeakerIcon', href: '/settings/fhir-tester', group: 'System' },

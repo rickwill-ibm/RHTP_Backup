@@ -10,7 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/server/smartSession';
 import { ooError } from '@/lib/fhir/operationOutcome';
-import { mockProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
+import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
 import { devMockEnabled } from '@/lib/server/devStubs';
 
 export const runtime = 'nodejs';
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (!memberId) {
     return NextResponse.json(ooError('memberId required', 'required'), { status: 400 });
   }
-  const record = mockProviderAccessConsentStore.getStatus(memberId);
+  const record = getProviderAccessConsentStore().getStatus(memberId);
   return NextResponse.json({
     memberId,
     optedOut: record?.optedOut ?? false,
@@ -58,10 +58,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const store = getProviderAccessConsentStore();
   const record =
     body.action === 'opt-out'
-      ? mockProviderAccessConsentStore.optOut(body.memberId, recordedBy, body.reason)
-      : mockProviderAccessConsentStore.revokeOptOut(body.memberId, recordedBy, body.reason);
+      ? store.optOut(body.memberId, recordedBy, body.reason)
+      : store.revokeOptOut(body.memberId, recordedBy, body.reason);
 
   return NextResponse.json({ memberId: body.memberId, optedOut: record.optedOut, record });
 }

@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "reviewLevel": "reference-level",
+    "smeReviewed": false,
+    "note": "Guideline source registry for care-plan citations. Medical-lens drafted; SME sign-off pending (GB-3). These are reference-level pointers to published guideline families, NOT extracted clinical criteria. Every consumer must surface the not-SME-reviewed state (coalition design g5-careplan.md section 3.4)."
+  },
+  "sources": {
+    "ada-soc-glycemic": {
+      "system": "ADA",
+      "title": "ADA Standards of Care in Diabetes — Glycemic Assessment (A1C testing cadence and goals)",
+      "url": "https://diabetesjournals.org/care"
+    },
+    "ncqa-hedis": {
+      "system": "HEDIS",
+      "title": "NCQA HEDIS Measure Specifications (quality-gap closure requirements)",
+      "url": "https://www.ncqa.org/hedis/"
+    },
+    "uspstf-depression": {
+      "system": "USPSTF",
+      "title": "USPSTF Recommendation — Screening for Depression and Suicide Risk (Grade B); includes perinatal screening",
+      "url": "https://www.uspreventiveservicestaskforce.org/"
+    },
+    "aap-bright-futures": {
+      "system": "AAP",
+      "title": "AAP Bright Futures — Periodicity Schedule for Well-Child Preventive Care",
+      "url": "https://www.aap.org/periodicityschedule"
+    },
+    "cdc-acip": {
+      "system": "CDC",
+      "title": "CDC ACIP Recommended Immunization Schedules",
+      "url": "https://www.cdc.gov/vaccines/schedules/"
+    },
+    "gravity-sdohcc": {
+      "system": "Gravity",
+      "title": "Gravity Project SDOH Clinical Care — social-risk screening and referral coding guidance",
+      "url": "https://thegravityproject.net/"
+    },
+    "ahrq-care-coordination": {
+      "system": "AHRQ",
+      "title": "AHRQ Care Coordination Measures Atlas — coordination, education, and follow-up practice base",
+      "url": "https://www.ahrq.gov/ncepcr/care/coordination.html"
+    },
+    "ags-beers": {
+      "system": "AGS",
+      "title": "AGS Beers Criteria — medication review and deprescribing in older adults (polypharmacy)",
+      "url": "https://geriatricscareonline.org/"
+    },
+    "cms-hcc-guidance": {
+      "system": "CMS",
+      "title": "CMS-HCC Risk Adjustment — documentation and coding guidance (support the diagnosis in the encounter record)",
+      "url": "https://www.cms.gov/medicare/health-plans/medicareadvtgspecratestats/risk-adjustors"
+    },
+    "cms-ccm": {
+      "system": "CMS",
+      "title": "CMS Chronic Care Management guidance — structured follow-up, remote monitoring, and care-plan review",
+      "url": "https://www.cms.gov/medicare/payment/fee-for-service-providers/chronic-care-management"
+    }
+  },
+  "categoryToSources": {
+    "sdoh": ["gravity-sdohcc", "ahrq-care-coordination"],
+    "lab-glycemic": ["ada-soc-glycemic", "ncqa-hedis"],
+    "behavioral-screening": ["uspstf-depression", "ncqa-hedis"],
+    "well-child": ["aap-bright-futures", "cdc-acip"],
+    "quality-gap-general": ["ncqa-hedis"],
+    "hcc-documentation": ["cms-hcc-guidance"],
+    "utilization-risk": ["cms-ccm"],
+    "medication-review": ["ags-beers"],
+    "monitoring": ["cms-ccm"],
+    "education": ["ahrq-care-coordination"],
+    "referral": ["ahrq-care-coordination"],
+    "follow-up": ["cms-ccm"],
+    "general": ["ahrq-care-coordination"]
+  }
+}

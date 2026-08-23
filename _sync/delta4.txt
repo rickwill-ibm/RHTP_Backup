@@ -1,0 +1,40 @@
+ITER8AIII_WAVEA_REPORT.md: FAILED open or read
+ITER8AIII_WAVEB_REPORT.md: FAILED open or read
+ITER8AIII_WAVEC_REPORT.md: FAILED open or read
+ITER8AIII_WAVED_REPORT.md: FAILED open or read
+src/app/admin-console/value-set-governance/components/Console.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/components/DiffView.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/components/HistoryTimeline.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/components/ReplayPanel.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/components/VersionList.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/components/WorkflowGates.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/governanceApi.ts: FAILED open or read
+src/app/admin-console/value-set-governance/page.tsx: FAILED open or read
+src/app/admin-console/value-set-governance/tsconfig.json: FAILED open or read
+src/app/api/value-set-governance/_lib/backendAdapter.ts: FAILED open or read
+src/app/api/value-set-governance/_lib/backendPort.ts: FAILED open or read
+src/app/api/value-set-governance/_lib/routeKit.ts: FAILED open or read
+src/app/api/value-set-governance/approve/route.ts: FAILED open or read
+src/app/api/value-set-governance/history/route.ts: FAILED open or read
+src/app/api/value-set-governance/reject/route.ts: FAILED open or read
+src/app/api/value-set-governance/replay/route.ts: FAILED open or read
+src/app/api/value-set-governance/retire/route.ts: FAILED open or read
+src/app/api/value-set-governance/submit/route.ts: FAILED open or read
+src/components/AppLayout.nav.ts: FAILED
+src/lib/authz/principal/types.ts: FAILED
+src/lib/config/dataMode.ts: FAILED
+src/lib/config/seamDispositions.ts: FAILED
+src/lib/terminology/governance/index.ts: FAILED open or read
+src/lib/terminology/governance/makerChecker.ts: FAILED open or read
+src/lib/terminology/governance/replay.ts: FAILED open or read
+src/lib/terminology/governance/service.ts: FAILED open or read
+src/lib/terminology/governance/stateMachine.ts: FAILED open or read
+src/lib/terminology/governance/store.ts: FAILED open or read
+src/lib/terminology/governance/types.ts: FAILED open or read
+src/lib/terminology/index.ts: FAILED
+tests/api/routes-value-set-governance.test.ts: FAILED open or read
+tests/app/tsconfig.json: FAILED open or read
+tests/app/valueSetGovernanceConsole.test.tsx: FAILED open or read
+tests/governance/seamFailClosed.test.ts: FAILED
+tests/terminology/governance.test.ts: FAILED open or read
+verification/GAP_AND_STUB_RISK_REGISTER.md: FAILED

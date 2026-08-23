@@ -10,12 +10,14 @@
  * param or path segment (beneficiary=Patient/X, subject=Patient/X, patient=Patient/X).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionPatient } from '@/lib/server/smartSession';
 import { fhirRead, fhirCreate } from '@/lib/server/fhirServer';
 import { correlationFrom, CORRELATION_HEADER } from '@/lib/server/correlation';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { devMockEnabled, devBulkStatus } from '@/lib/server/devStubs';
 import { getPatientById, resolveFhirToPlatformId } from '@/lib/patientRegistry';
+import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
+import { audit } from '@/lib/server/audit';
 
 export const runtime = 'nodejs';
 
@@ -135,10 +137,61 @@ export async function GET(
   }
   const { path } = await ctx.params;
   const search = req.nextUrl.search;
+  const resourceType = path[0] ?? '';
+
+  // Resolve the target member from the request once (query param), for the two
+  // release gates below. Both apply in mock AND live mode.
+  const targetPid = normalizePatientId(extractPatientId(search));
+  const breakGlass = req.headers.get('x-break-glass') === 'true';
+
+  // CONSENT GATE (CMS-0057-F): a member who has opted out of Provider Access data
+  // sharing must not have their PHI released, regardless of treatment relationship.
+  // Break-glass emergency access overrides, and is always audited. Mirrors the
+  // gate on /api/match. SEAM: consent — lib/consent/providerAccessOptOut.ts.
+  if (targetPid && getProviderAccessConsentStore().isOptedOut(targetPid)) {
+    await audit({
+      ts: new Date().toISOString(),
+      actor: 'session-user',
+      action: breakGlass ? 'fhir.read.break-glass' : 'fhir.read.consent-denied',
+      resourceRef: `Patient/${targetPid}`,
+      correlationId,
+      outcome: breakGlass ? 'success' : 'failure',
+      detail: 'provider-access opt-out',
+    });
+    if (!breakGlass) {
+      return NextResponse.json(
+        ooError('Member has opted out of Provider Access data sharing', 'forbidden'),
+        { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
+      );
+    }
+  }
+
+  // IDOR GATE: the Patient identity read (demographics) must be scoped to the
+  // session principal. A session scoped to member A must not resolve member B's
+  // Patient resource from a request-supplied id. Break-glass excepted (audited).
+  // Clinical searches (Coverage/Condition/...) remain a reviewer surface — their
+  // per-member scoping needs the session-principal role model (documented finding).
+  if (resourceType === 'Patient' && targetPid && !breakGlass) {
+    const sessionPatient = await getSessionPatient().catch(() => null);
+    if (sessionPatient && targetPid !== sessionPatient) {
+      await audit({
+        ts: new Date().toISOString(),
+        actor: 'session-user',
+        action: 'fhir.read.idor-denied',
+        resourceRef: `Patient/${targetPid}`,
+        correlationId,
+        outcome: 'failure',
+        detail: 'request patient id outside session scope',
+      });
+      return NextResponse.json(ooError('Requested member is outside the session scope', 'forbidden'), {
+        status: 403,
+        headers: { [CORRELATION_HEADER]: correlationId },
+      });
+    }
+  }
 
   // Mock bypass — build response from registry data, no FHIR server needed
   if (devMockEnabled()) {
-    const resourceType = path[0] ?? '';
     return NextResponse.json(mockFhirGet(resourceType, search), {
       status: 200,
       headers: { [CORRELATION_HEADER]: correlationId },

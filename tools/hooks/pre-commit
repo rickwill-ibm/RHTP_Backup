@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Versioned pre-commit hook — AI-CODING-CONVENTIONS.md v2 §18.
+# Versioned pre-commit hook — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.4.
 # Enable once per clone:  git config core.hooksPath tools/hooks
-# Runs the two cheapest rungs of the verification ladder (§13.4).
+# Runs the cheapest rungs of the verification ladder locally before a commit.
 
 set -e
 cd "$(git rev-parse --show-toplevel)"
@@ -11,5 +11,15 @@ npx tsc --noEmit
 
 echo "[pre-commit] file sizes + quality ratchet"
 bash check-file-sizes.sh
+
+# E13 (test-effectiveness, cheap half): every staged new/changed source module must be
+# referenced by a test. The mutation sample is heavier and runs in CI / at iteration close.
+echo "[pre-commit] E13 test-link on staged source"
+STAGED=$(git diff --cached --name-only --diff-filter=AM -- 'src/*.ts' 'src/*.tsx' 2>/dev/null | tr '\n' ' ')
+if [ -n "$STAGED" ]; then
+  node docs/build-provenance/check-testlink.mjs src tests $STAGED
+else
+  echo "  (no staged source files)"
+fi
 
 echo "[pre-commit] OK"

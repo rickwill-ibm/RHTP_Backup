@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * FHIR R4 Resource Mappers
  *
@@ -12,7 +13,6 @@
  *
  * Extensions written by migrate-patients.mjs are consumed here.
  */
-
 import type {
   RegistryPatient,
   CareGapEntry,
@@ -192,8 +192,8 @@ export function mapFhirPatientToRegistryPatient(
   // Demographics
   const gender = patient.gender === 'male' ? 'M' : patient.gender === 'female' ? 'F' : 'U';
   const dob = patient.birthDate ?? '';
-  const birthYear = dob ? new Date(dob).getFullYear() : new Date().getFullYear();
-  const age = new Date().getFullYear() - birthYear;
+  const birthYear = dob ? new Date(dob).getFullYear() : clock.nowDate().getFullYear();
+  const age = clock.nowDate().getFullYear() - birthYear;
 
   // Contact
   const phone =

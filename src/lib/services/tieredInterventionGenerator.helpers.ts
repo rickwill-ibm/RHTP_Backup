@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 // tieredInterventionGenerator.helpers.ts — Tier-specific intervention builder functions
 
 import type { HolisticPatientContext } from './holisticContextEngine';
@@ -5,7 +6,7 @@ import type { TieredIntervention, InterventionAction } from './tieredInterventio
 
 /** Calculate specific date from days offset — returns e.g. "Thursday, March 17, 2026" */
 export function calculateSpecificDate(daysFromNow: number): string {
-  const date = new Date();
+  const date = clock.nowDate();
   date.setDate(date.getDate() + daysFromNow);
   return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 }

@@ -43,6 +43,57 @@ describe('MPI matching engine — deterministic rules (Dev Plan Workstream A1/A2
   });
 });
 
+// Regression tests for the Cycle 2A findings: an exact-match rule never fires on
+// blank/absent values, across every deterministic rule (blank-field permutations).
+describe('MPI matching engine — blank-field guards (Cycle 2A findings 1 & 2)', () => {
+  it('name+dob-exact does not fire when either name is blank/whitespace, even with matching DOB', () => {
+    const dob = '1985-04-12';
+    // Both names blank on both sides.
+    expect(
+      runDeterministicRules(
+        { firstName: '', lastName: ' ', dob },
+        { firstName: '  ', lastName: '', dob }
+      ).hit
+    ).toBe(false);
+    // One blank field is enough to block the rule (last names agree, first names blank).
+    expect(
+      runDeterministicRules(
+        { firstName: '', lastName: 'Redhawk', dob },
+        { firstName: '', lastName: 'Redhawk', dob }
+      ).hit
+    ).toBe(false);
+  });
+
+  it('medicaidId-exact and ssnLast4+dob-exact do not fire on blank/whitespace values', () => {
+    // Whitespace-only medicaid ids both normalize to '' — must not be treated as equal ids.
+    const wsId = runDeterministicRules(
+      { firstName: 'A', lastName: 'B', dob: '1990-01-01', medicaidId: '   ' },
+      { firstName: 'X', lastName: 'Y', dob: '1970-05-05', medicaidId: ' ' }
+    );
+    expect(wsId.hit).toBe(false);
+    // Matching ssnLast4 with blank DOBs must not fire ssnLast4+dob-exact.
+    const blankDob = runDeterministicRules(
+      { firstName: 'A', lastName: 'B', dob: '', ssnLast4: '1234' },
+      { firstName: 'X', lastName: 'Y', dob: ' ', ssnLast4: '1234' }
+    );
+    expect(blankDob.hit).toBe(false);
+  });
+
+  it('probabilistic scoring gives zero weight to fields blank on both sides (absence is not agreement)', () => {
+    const a: IdentityTraits = { firstName: '', lastName: '', dob: '', zip: '   ', phone: '' };
+    const b: IdentityTraits = { firstName: ' ', lastName: '', dob: ' ', zip: ' ', phone: '' };
+    const { score, ruleHits } = scoreProbabilisticMatch(a, b);
+    expect(score).toBe(0);
+    expect(ruleHits).toEqual([]);
+    // One empty vs one non-empty is also zero, not partial credit.
+    const oneSided = scoreProbabilisticMatch(
+      { firstName: '', lastName: '', dob: '1985-04-12' },
+      { firstName: 'Maria', lastName: 'Redhawk', dob: '1985-04-12' }
+    );
+    expect(oneSided.ruleHits.filter((h) => h.rule.endsWith('-similarity'))).toEqual([]);
+  });
+});
+
 describe('MPI matching engine — probabilistic scoring', () => {
   it('scores an exact-trait match at the sum of all weights the fixture carries (MARIA has no phone, so 30+20+25+5+10=90)', () => {
     const { score } = scoreProbabilisticMatch(MARIA, MARIA);

@@ -6,7 +6,7 @@ import PresenterControls from '@/uhg/components/shared/PresenterControls';
 import MariaStatusStrip from '@/uhg/components/shared/MariaStatusStrip';
 import { useDemoStore } from '@/uhg/store/demoStore';
 import { getPatientById } from '@/lib/patientRegistry';
-import { dispatchAgentsForPatient, type CoalitionAgent } from '@/app/uhg-orchestrate/agent-library/page';
+import { dispatchAgentsForPatient, type CoalitionAgent } from '@/app/uhg-orchestrate/agent-library/coalition';
 import OrchestrationFlowModal from '@/uhg/components/shared/OrchestrationFlowModal';
 
 // ─── Timeline milestones ──────────────────────────────────────────────────────

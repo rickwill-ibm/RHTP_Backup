@@ -1,0 +1,65 @@
+{
+  "_comment": "SEEDED $translate crosswalks (data-is-not-code). Representative cross-map pairs the demo pipeline uses: ICD-10-CM <-> CMS-HCC and SNOMED-CT <-> ICD-10-CM. Each crosswalk declares its asset id + version (ILLUSTRATIVE STUB, NOT the full licensed ConceptMap / CMS mapping) so a translated target carries WHICH crosswalk (and which version) produced it. A source code with no entry returns NO-MAP; a target is NEVER fabricated. Live ConceptMap $translate against a real terminology server is the not-configured production path (fail-closed via the terminology seam).",
+  "crosswalks": [
+    {
+      "id": "icd10cm-to-cms-hcc-v28",
+      "name": "ICD-10-CM to CMS-HCC (V28)",
+      "sourceSystem": "ICD-10-CM",
+      "targetSystem": "HCC",
+      "assetId": "cms-hcc-v28",
+      "version": "V28",
+      "steward": "CMS",
+      "sourceUrl": "https://www.cms.gov/medicare/payment/medicare-advantage-rates-statistics/risk-adjustment",
+      "stub": true,
+      "map": {
+        "E11.9": [{ "code": "HCC38", "display": "Diabetes with glycemic, unspecified, or no complications" }],
+        "I50.9": [{ "code": "HCC226", "display": "Heart failure, except end-stage and severe" }],
+        "N18.6": [{ "code": "HCC329", "display": "Chronic kidney disease, stage 5, or end-stage renal disease" }]
+      }
+    },
+    {
+      "id": "cms-hcc-v28-to-icd10cm",
+      "name": "CMS-HCC (V28) to ICD-10-CM exemplar diagnoses",
+      "sourceSystem": "HCC",
+      "targetSystem": "ICD-10-CM",
+      "assetId": "cms-hcc-v28",
+      "version": "V28",
+      "steward": "CMS",
+      "sourceUrl": "https://www.cms.gov/medicare/payment/medicare-advantage-rates-statistics/risk-adjustment",
+      "stub": true,
+      "map": {
+        "HCC38": [{ "code": "E11.9", "display": "Type 2 diabetes mellitus without complications" }],
+        "HCC226": [{ "code": "I50.9", "display": "Heart failure, unspecified" }],
+        "HCC329": [{ "code": "N18.6", "display": "End stage renal disease" }]
+      }
+    },
+    {
+      "id": "snomedct-to-icd10cm-us20260301",
+      "name": "SNOMED CT US Edition to ICD-10-CM",
+      "sourceSystem": "SNOMED-CT",
+      "targetSystem": "ICD-10-CM",
+      "assetId": "snomed-ct-us-20260301",
+      "version": "US20260301",
+      "steward": "NLM (US Edition SNOMED CT to ICD-10-CM map)",
+      "sourceUrl": "https://www.nlm.nih.gov/healthit/snomedct/us_edition.html",
+      "stub": true,
+      "map": {
+        "44054006": [{ "code": "E11.9", "display": "Type 2 diabetes mellitus without complications" }]
+      }
+    },
+    {
+      "id": "icd10cm-to-snomedct-fy2026",
+      "name": "ICD-10-CM to SNOMED CT US Edition",
+      "sourceSystem": "ICD-10-CM",
+      "targetSystem": "SNOMED-CT",
+      "assetId": "icd-10-cm-fy2026",
+      "version": "FY2026",
+      "steward": "NLM (ICD-10-CM to SNOMED CT map)",
+      "sourceUrl": "https://www.nlm.nih.gov/research/umls/mapping_projects/icd10cm_to_snomedct.html",
+      "stub": true,
+      "map": {
+        "E11.9": [{ "code": "44054006", "display": "Type 2 diabetes mellitus" }]
+      }
+    }
+  ]
+}

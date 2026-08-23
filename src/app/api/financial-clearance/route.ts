@@ -12,7 +12,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { isAuthenticated, getSessionPatient } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionPatient, getSessionAuthContext } from '@/lib/server/smartSession';
+import { getPrincipal, canAccessMember, purposeForRole } from '@/lib/authz/principal';
 import { fhirSearch } from '@/lib/server/fhirServer';
 import { devMockEnabled } from '@/lib/server/devStubs';
 import { getPatientById } from '@/lib/patientRegistry';
@@ -24,7 +25,7 @@ import { audit } from '@/lib/server/audit';
 import { loadMockLibrary } from '@/lib/policy';
 import { mockGoldCardDataSource } from '@/lib/policy/goldCardSource';
 import { mockDenialRateProvider } from '@/lib/policy/denialRates';
-import { defaultEvidenceStore } from '@/lib/evidence/evidenceStore';
+import { getEvidenceStore } from '@/lib/evidence/store';
 import { projectThreadInputs } from '@/lib/goldenThread/fromFhirBundle';
 import { runFinancialClearance } from '@/lib/goldenThread/threadOrchestrator';
 import { validateClearanceRequest, validateOrderCode } from '@/lib/goldenThread/validate';
@@ -144,18 +145,43 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     (await getSessionPatient().catch(() => null)) ||
     'MARIA_SD_001';
 
-  // 2) authorization (member-scope). This ops surface is a PA-reviewer action;
-  // the gate is enforced and audited (break-glass / member self-access supported
-  // by the same policy in canReadMemberData).
+  // 2) authorization (session-principal role model — closes cycle-3 IDOR /
+  // MEDIUM #3). Derive the acting principal from the session (NOT a hardcoded
+  // role) and scope-check the requested member. A member-scoped session that
+  // supplies another member's id in the body is denied (the request id is no
+  // longer trusted over the session); a reviewer principal reads within its
+  // authorized scope (org-wide today, panel when assignment data is wired).
+  const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
+  const scopeDecision = canAccessMember(principal, patientId);
+  if (!scopeDecision.allow) {
+    await audit({
+      ts: new Date().toISOString(),
+      actor: principal.userId,
+      action: 'financial-clearance.idor-denied',
+      resourceRef: `Patient/${patientId}`,
+      correlationId,
+      outcome: 'failure',
+      detail: 'requested member outside session-principal scope',
+    });
+    return NextResponse.json(
+      ooError('Requested member is outside the session scope', 'forbidden'),
+      { status: 403 }
+    );
+  }
+
+  // Defense in depth: the existing role/purpose policy, now driven by the REAL
+  // session role rather than a constant (break-glass / member self-access are
+  // governed by the same policy in canReadMemberData).
   const decision = canReadMemberData({
-    role: 'pa-reviewer',
-    purpose: 'operations',
+    role: principal.role,
+    purpose: purposeForRole(principal.role),
+    selfPatientId: principal.authorizedMemberScope.memberId,
     targetPatientId: patientId,
   });
   if (!decision.allow) {
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: principal.userId,
       action: 'financial-clearance.denied',
       resourceRef: `Patient/${patientId}`,
       correlationId,
@@ -251,7 +277,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       library: loadMockLibrary(),
       goldCardSource: mockGoldCardDataSource,
       denialRates: mockDenialRateProvider,
-      store: defaultEvidenceStore(),
+      store: getEvidenceStore(),
       ts,
       ids: {
         evidence: evId,

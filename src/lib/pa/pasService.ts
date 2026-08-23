@@ -1,3 +1,4 @@
+import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * PAS submission service.
  * Wired to RHTP's /api/pas/submit BFF route. No SmartContext.
@@ -34,8 +35,8 @@ export async function submitPriorAuth(input: SubmitPaInput): Promise<PasSubmissi
   );
 
   if (r.ok && r.data) {
-    const paNumber = r.data.paNumber ?? r.data.id ?? `PA-${Date.now()}`;
-    const timestamp = r.data.timestamp ?? new Date().toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const paNumber = r.data.paNumber ?? r.data.id ?? `PA-${clock.now()}`;
+    const timestamp = r.data.timestamp ?? clock.nowDate().toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     return {
       channel: input.channel,
       paNumber,
@@ -48,8 +49,8 @@ export async function submitPriorAuth(input: SubmitPaInput): Promise<PasSubmissi
   }
 
   // BFF returned 202 (human gate) or error — generate stub PA number for demo continuity
-  const paNumber = `PA-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 90000) + 10000)}`;
-  const timestamp = new Date().toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const paNumber = `PA-${clock.nowDate().getFullYear()}-${String(Math.floor(clock.rng() * 90000) + 10000)}`;
+  const timestamp = clock.nowDate().toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   return {
     channel: input.channel,
     paNumber,
@@ -69,7 +70,7 @@ function buildPasBundle(input: SubmitPaInput): object {
       profile: ['http://hl7.org/fhir/us/davinci-pas/StructureDefinition/profile-pas-request-bundle'],
     },
     type: 'collection',
-    timestamp: new Date().toISOString(),
+    timestamp: clock.nowIso(),
     entry: [
       {
         resource: {
@@ -79,7 +80,7 @@ function buildPasBundle(input: SubmitPaInput): object {
           type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/claim-type', code: 'professional' }] },
           use: 'preauthorization',
           patient: { reference: `Patient/${input.patient.memberId}` },
-          created: new Date().toISOString(),
+          created: clock.nowIso(),
           insurer: { display: 'South Dakota Medicaid' },
           provider: { display: input.order.orderingProvider },
           priority: { coding: [{ code: 'normal' }] },

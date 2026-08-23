@@ -4,6 +4,7 @@
 
 import { keystones, totalUnblockedGaps } from './graph/keystones';
 import { citizenNeeds } from './graph/resources';
+import { DEMO_MEMBER_ID } from '../config/demoDefaults';
 
 export interface VisitPlanItem {
   id: string;
@@ -18,8 +19,6 @@ export interface VisitPlan {
   keystoneNote?: string;
 }
 
-const MARIA = 'MARIA_SD_001';
-
 const NEED_ACTION: Record<string, string> = {
   Transportation: 'Arrange NEMT transportation',
   Food: 'Submit SNAP / food assistance referral',
@@ -31,7 +30,7 @@ const NEED_ACTION: Record<string, string> = {
 };
 
 export function visitPlanFor(patientId: string): VisitPlan {
-  if (patientId === MARIA) {
+  if (patientId === DEMO_MEMBER_ID) {
     const ks = keystones();
     const items: VisitPlanItem[] = [
       ...ks.map((k, i) => ({

@@ -30,7 +30,8 @@ export class Scheduler {
   private jobs = new Map<string, JobState>();
 
   register(job: ScheduledJob): void {
-    if (job.intervalMs <= 0) throw new Error(`scheduler: job '${job.id}' needs a positive interval`);
+    if (job.intervalMs <= 0)
+      throw new Error(`scheduler: job '${job.id}' needs a positive interval`);
     // register at lastRun = -Infinity so a job is due on the first tick
     this.jobs.set(job.id, { job, lastRunMs: Number.NEGATIVE_INFINITY });
   }

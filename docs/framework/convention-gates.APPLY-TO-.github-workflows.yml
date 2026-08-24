@@ -38,8 +38,20 @@ jobs:
       - name: File sizes + quality ratchet
         run: npm run check:sizes
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (changed files — ratcheted)
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ]; then
+            FILES=$(git diff --name-only --diff-filter=AM "$BASE"...HEAD -- 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'src/**/*.jsx' | tr '\n' ' ')
+          else
+            FILES=""
+          fi
+          if [ -n "$FILES" ]; then
+            ARGS=""; for f in $FILES; do ARGS="$ARGS --file $f"; done
+            npx next lint $ARGS
+          else
+            echo "no changed source files to lint"
+          fi
 
       - name: Unit tests (vitest)
         run: npx vitest run

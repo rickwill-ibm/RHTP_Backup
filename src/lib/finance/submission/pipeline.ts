@@ -46,7 +46,10 @@ export interface ReconResult {
 }
 
 /** Build a submission batch from submittable encounters. */
-export function buildBatch(batchId: string, encounters: Array<Omit<EncounterSubmission, 'status' | 'attempts'>>): SubmissionBatch {
+export function buildBatch(
+  batchId: string,
+  encounters: Array<Omit<EncounterSubmission, 'status' | 'attempts'>>
+): SubmissionBatch {
   return {
     batchId,
     encounters: encounters.map((e) => ({ ...e, status: 'submitted', attempts: 1 })),
@@ -59,7 +62,11 @@ export function buildBatch(batchId: string, encounters: Array<Omit<EncounterSubm
  * MAO-002 encounter reject all block acceptance). A rejected encounter with < max
  * attempts is a resubmission candidate.
  */
-export function reconcile(batch: SubmissionBatch, acks: Acknowledgment[], maxAttempts = 3): ReconResult {
+export function reconcile(
+  batch: SubmissionBatch,
+  acks: Acknowledgment[],
+  maxAttempts = 3
+): ReconResult {
   const byEnc = new Map<string, Acknowledgment[]>();
   for (const a of acks) {
     const list = byEnc.get(a.encounterId) ?? [];
@@ -88,9 +95,17 @@ export function reconcile(batch: SubmissionBatch, acks: Acknowledgment[], maxAtt
 }
 
 /** Prepare a resubmission batch from the rejected-but-retryable encounters. */
-export function buildResubmission(batchId: string, resubmit: EncounterSubmission[]): SubmissionBatch {
+export function buildResubmission(
+  batchId: string,
+  resubmit: EncounterSubmission[]
+): SubmissionBatch {
   return {
     batchId,
-    encounters: resubmit.map((e) => ({ ...e, status: 'resubmitted', attempts: e.attempts + 1, rejectionCode: undefined })),
+    encounters: resubmit.map((e) => ({
+      ...e,
+      status: 'resubmitted',
+      attempts: e.attempts + 1,
+      rejectionCode: undefined,
+    })),
   };
 }

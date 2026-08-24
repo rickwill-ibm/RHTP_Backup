@@ -20,17 +20,29 @@ export const runtime = 'nodejs';
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
-    return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Not authenticated', 'login'), {
+      status: 401,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
   if (!isOpsPrincipal(principal) && principal.role !== 'auditor') {
-    return NextResponse.json(ooError('Fairness report requires an ops/auditor role', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Fairness report requires an ops/auditor role', 'forbidden'), {
+      status: 403,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const result = currentDisparateImpact();
   await audit({
-    ts: new Date().toISOString(), actor: principal.userId, action: 'fairness.report',
-    correlationId, outcome: result.fair ? 'success' : 'failure',
+    ts: new Date().toISOString(),
+    actor: principal.userId,
+    action: 'fairness.report',
+    correlationId,
+    outcome: result.fair ? 'success' : 'failure',
     detail: `fair=${result.fair}; flagged=${result.flagged.join(',') || 'none'}; cohorts=${result.stats.length}`,
   });
-  return NextResponse.json(result, { status: result.fair ? 200 : 409, headers: { [CORRELATION_HEADER]: correlationId } });
+  return NextResponse.json(result, {
+    status: result.fair ? 200 : 409,
+    headers: { [CORRELATION_HEADER]: correlationId },
+  });
 }

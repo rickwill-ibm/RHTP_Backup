@@ -46,7 +46,12 @@ export function aggregate(outcomes: CohortOutcome[]): CohortStat[] {
     byCohort.set(o.cohort, s);
   }
   return [...byCohort.entries()]
-    .map(([cohort, s]) => ({ cohort, total: s.total, favorable: s.favorable, favorableRate: s.total ? s.favorable / s.total : 0 }))
+    .map(([cohort, s]) => ({
+      cohort,
+      total: s.total,
+      favorable: s.favorable,
+      favorableRate: s.total ? s.favorable / s.total : 0,
+    }))
     .sort((a, b) => a.cohort.localeCompare(b.cohort));
 }
 

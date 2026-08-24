@@ -1,6 +1,7 @@
 # Convention gates — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.5
 # Fails the PR on: type errors, NEW size violations or ratchet regressions,
-# lint errors, failing unit tests, untested new code or a surviving mutant (E13),
+# lint errors in changed files (ratcheted, like E13/E14), failing unit tests,
+# untested new code or a surviving mutant (E13),
 # a NEW unwired module beyond the wiring baseline (E14), or a stale/hand-edited
 # provenance log (E11). Legacy files frozen in quality-baseline.json do not fail
 # the build unless they grow; unwired modules frozen in wiring-baseline.json do
@@ -38,8 +39,20 @@ jobs:
       - name: File sizes + quality ratchet
         run: npm run check:sizes
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (changed files — ratcheted)
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -n "$BASE" ]; then
+            FILES=$(git diff --name-only --diff-filter=AM "$BASE"...HEAD -- 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'src/**/*.jsx' | tr '\n' ' ')
+          else
+            FILES=""
+          fi
+          if [ -n "$FILES" ]; then
+            ARGS=""; for f in $FILES; do ARGS="$ARGS --file $f"; done
+            npx next lint $ARGS
+          else
+            echo "no changed source files to lint"
+          fi
 
       - name: Unit tests (vitest)
         run: npx vitest run

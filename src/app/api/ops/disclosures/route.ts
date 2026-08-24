@@ -23,29 +23,48 @@ const ROLES = new Set(['payer-ops', 'admin', 'auditor']);
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
-    return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Not authenticated', 'login'), {
+      status: 401,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const authCtx = await getSessionAuthContext().catch(() => null);
   const principal = getPrincipal(authCtx);
   if (!ROLES.has(principal.role)) {
-    return NextResponse.json(ooError('Accounting of disclosures requires an ops/auditor role', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(
+      ooError('Accounting of disclosures requires an ops/auditor role', 'forbidden'),
+      { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
+    );
   }
   const memberId = req.nextUrl.searchParams.get('memberId');
   if (!memberId) {
-    return NextResponse.json(ooError('memberId is required', 'invalid'), { status: 400, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('memberId is required', 'invalid'), {
+      status: 400,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const access = canAccessMemberTenantAware(principal, authCtx, memberId);
   if (!access.allow) {
-    return NextResponse.json(ooError('Member is outside your authorization scope', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Member is outside your authorization scope', 'forbidden'), {
+      status: 403,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
 
   const log = getDisclosureLog(getDataMode('wpcRecord') === 'production');
   const all = await log.accountingFor(memberId);
   const accountable = all.filter((d) => isAccountable(d.purpose));
   await audit({
-    ts: new Date().toISOString(), actor: principal.userId, action: 'disclosure.accounting',
-    resourceRef: `Patient/${memberId}`, correlationId, outcome: 'success',
+    ts: new Date().toISOString(),
+    actor: principal.userId,
+    action: 'disclosure.accounting',
+    resourceRef: `Patient/${memberId}`,
+    correlationId,
+    outcome: 'success',
     detail: `accountable=${accountable.length} of ${all.length}`,
   });
-  return NextResponse.json({ memberId, count: accountable.length, disclosures: accountable }, { status: 200, headers: { [CORRELATION_HEADER]: correlationId } });
+  return NextResponse.json(
+    { memberId, count: accountable.length, disclosures: accountable },
+    { status: 200, headers: { [CORRELATION_HEADER]: correlationId } }
+  );
 }

@@ -42,7 +42,7 @@ export function bootstrapReliability(): void {
             now,
             rng: seededRng(),
           });
-        }),
+        })
       );
     },
   });
@@ -69,7 +69,7 @@ export function _resetReliabilityBootstrap(): void {
 function seededRng(): () => number {
   let s = 0x2545f491;
   return () => {
-    s = (Math.imul(s, 0x01000193) >>> 0) || 1;
+    s = Math.imul(s, 0x01000193) >>> 0 || 1;
     return (s >>> 8) / 0x01000000;
   };
 }

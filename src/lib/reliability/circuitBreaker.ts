@@ -32,7 +32,10 @@ export class CircuitOpenError extends Error {
 }
 
 export class CircuitTimeoutError extends Error {
-  constructor(public readonly seam: string, ms: number) {
+  constructor(
+    public readonly seam: string,
+    ms: number
+  ) {
     super(`seam '${seam}' timed out after ${ms}ms`);
     this.name = 'CircuitTimeoutError';
   }
@@ -45,7 +48,7 @@ export class CircuitBreaker {
 
   constructor(
     public readonly seam: string,
-    private readonly opts: BreakerOptions,
+    private readonly opts: BreakerOptions
   ) {}
 
   /** Current state, advancing open -> half-open when the cooldown has elapsed. */
@@ -96,10 +99,23 @@ export class CircuitBreaker {
           reject(new CircuitTimeoutError(this.seam, this.opts.timeoutMs));
         }
       }, this.opts.timeoutMs);
-      if (typeof (timer as { unref?: () => void }).unref === 'function') (timer as { unref: () => void }).unref();
+      if (typeof (timer as { unref?: () => void }).unref === 'function')
+        (timer as { unref: () => void }).unref();
       p.then(
-        (v) => { if (!settled) { settled = true; clearTimeout(timer); resolve(v); } },
-        (e) => { if (!settled) { settled = true; clearTimeout(timer); reject(e); } },
+        (v) => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            resolve(v);
+          }
+        },
+        (e) => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            reject(e);
+          }
+        }
       );
     });
   }

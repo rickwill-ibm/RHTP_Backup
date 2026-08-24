@@ -29,11 +29,16 @@ export interface CobOrder {
  */
 function rank(c: Coverage): number {
   switch (c.type) {
-    case 'commercial-active': return 0;   // active employer coverage pays first (MSP)
-    case 'medicare': return 1;            // Medicare secondary to active employer, primary to the rest
-    case 'commercial-retiree': return 2;
-    case 'other': return 3;
-    case 'medicaid': return 9;            // payer of last resort
+    case 'commercial-active':
+      return 0; // active employer coverage pays first (MSP)
+    case 'medicare':
+      return 1; // Medicare secondary to active employer, primary to the rest
+    case 'commercial-retiree':
+      return 2;
+    case 'other':
+      return 3;
+    case 'medicaid':
+      return 9; // payer of last resort
   }
 }
 

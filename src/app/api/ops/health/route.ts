@@ -35,11 +35,17 @@ function liveness() {
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
-    return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Not authenticated', 'login'), {
+      status: 401,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
   if (!isOpsPrincipal(principal) && principal.role !== 'auditor') {
-    return NextResponse.json(ooError('Health requires an ops or auditor role', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Health requires an ops or auditor role', 'forbidden'), {
+      status: 403,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   bootstrapReliability();
   const live = liveness();
@@ -50,19 +56,31 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     metrics: metrics().snapshot(),
     slos: metrics().evaluateSlos(SLOS),
   };
-  return NextResponse.json(body, { status: live.live ? 200 : 503, headers: { [CORRELATION_HEADER]: correlationId } });
+  return NextResponse.json(body, {
+    status: live.live ? 200 : 503,
+    headers: { [CORRELATION_HEADER]: correlationId },
+  });
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
-    return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Not authenticated', 'login'), {
+      status: 401,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
   if (!isOpsPrincipal(principal)) {
-    return NextResponse.json(ooError('Scheduler tick requires an ops role', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Scheduler tick requires an ops role', 'forbidden'), {
+      status: 403,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   bootstrapReliability();
   const result = await getScheduler().tick(now());
-  return NextResponse.json(result, { status: 200, headers: { [CORRELATION_HEADER]: correlationId } });
+  return NextResponse.json(result, {
+    status: 200,
+    headers: { [CORRELATION_HEADER]: correlationId },
+  });
 }

@@ -78,7 +78,8 @@ class Observability {
       const errorRatio = total === 0 ? 0 : err / total;
       const breaches: string[] = [];
       if (lat.p95 > t.p95BudgetMs) breaches.push(`p95 ${lat.p95}ms > ${t.p95BudgetMs}ms`);
-      if (errorRatio > t.maxErrorRatio) breaches.push(`errorRatio ${errorRatio.toFixed(3)} > ${t.maxErrorRatio}`);
+      if (errorRatio > t.maxErrorRatio)
+        breaches.push(`errorRatio ${errorRatio.toFixed(3)} > ${t.maxErrorRatio}`);
       return { name: t.name, ok: breaches.length === 0, p95: lat.p95, errorRatio, breaches };
     });
   }
@@ -98,7 +99,11 @@ export function metrics(): Observability {
  * Time an async operation, recording latency + an ok/error counter for its series.
  * The single helper every route/consumer uses so observability is uniform.
  */
-export async function instrument<T>(name: string, now: () => number, fn: () => Promise<T>): Promise<T> {
+export async function instrument<T>(
+  name: string,
+  now: () => number,
+  fn: () => Promise<T>
+): Promise<T> {
   const start = now();
   try {
     const r = await fn();

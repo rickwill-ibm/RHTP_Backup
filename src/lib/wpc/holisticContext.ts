@@ -25,7 +25,9 @@ export interface HolisticContextResult {
 
 export class HolisticContextNotConfiguredError extends Error {
   constructor() {
-    super('holistic context production=on but no projected-graph aggregator is registered (fail-closed)');
+    super(
+      'holistic context production=on but no projected-graph aggregator is registered (fail-closed)'
+    );
     this.name = 'HolisticContextNotConfiguredError';
   }
 }
@@ -34,7 +36,9 @@ export class HolisticContextNotConfiguredError extends Error {
 let productionAggregator: ((memberId: string) => HolisticPatientContext) | null = null;
 
 /** Register (or clear) the production graph-aggregation function. */
-export function setProductionHolisticAggregator(fn: ((memberId: string) => HolisticPatientContext) | null): void {
+export function setProductionHolisticAggregator(
+  fn: ((memberId: string) => HolisticPatientContext) | null
+): void {
   productionAggregator = fn;
 }
 

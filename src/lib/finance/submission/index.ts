@@ -13,9 +13,4 @@ export {
   type SubmissionStatus,
   type AckLevel,
 } from './pipeline';
-export {
-  orderOfBenefits,
-  primaryPayer,
-  type Coverage,
-  type CobOrder,
-} from './cob';
+export { orderOfBenefits, primaryPayer, type Coverage, type CobOrder } from './cob';

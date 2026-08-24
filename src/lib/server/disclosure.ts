@@ -9,8 +9,14 @@
  */
 
 export type DisclosurePurpose =
-  | 'treatment' | 'payment' | 'operations' | 'patient-request'
-  | 'required-by-law' | 'public-health' | 'break-glass' | 'audit';
+  | 'treatment'
+  | 'payment'
+  | 'operations'
+  | 'patient-request'
+  | 'required-by-law'
+  | 'public-health'
+  | 'break-glass'
+  | 'audit';
 
 export interface DisclosureRecord {
   id: string;

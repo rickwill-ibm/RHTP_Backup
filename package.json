@@ -49,6 +49,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
     "test:contract": "newman run tools/contract/cms0057f.postman_collection.json -e tools/contract/local.postman_environment.json",
     "test:e2e": "playwright test",
     "a11y": "playwright test e2e/a11y.spec.ts",

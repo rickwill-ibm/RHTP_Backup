@@ -104,6 +104,13 @@ export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>
     idempotencyStore: 'DATABASE_URL',
     deadLetterStore: 'DATABASE_URL',
     crossReference: 'DATABASE_URL',
+    // fail-closed-stub seams introduced in later hardening waves (graph projection I14,
+    // whole-person record lifecycle I17, external DEQM measures ingestion I19). Each names
+    // the server-only env key that configures its real backend; production stays fail-closed
+    // until the key is present and a real resolver is registered.
+    graph: 'GRAPH_STORE_URL',
+    wpcRecord: 'WPC_RECORD_STORE_URL',
+    measures: 'DEQM_MEASURES_URL',
   });
 
 /**

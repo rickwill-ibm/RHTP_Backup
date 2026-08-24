@@ -552,6 +552,69 @@ add(iteration="21",wave="HW6",phase="build",agent_role="spine",agent_label="I21-
     ts_override="2026-08-23T20:50:00Z",
     review_note="PROGRAM CLOSE (I12-I21, 10 iterations, Phases 1-3). HW6 scoped honestly as non-blocker: the register (E8 discipline) schedules the content-gated items (NS-05 ceiling) and the bounded refinements; one ready item built + wired. Whole program: demo preserved at every step (golden changed only by additive seam entries), unwired-realness backlog burned down 134->122, provenance 105 rows E11-clean.")
 
+# ---------- Iteration 22 / HW1-B - reliability breadth: circuit-breaker + scheduler + observability ----------
+add(iteration="22",wave="HW1-B",phase="build",agent_role="spine",agent_label="I22-HW1B-reliability",workstream_domain="hardening/reliability-breadth",
+    prompt_summary="[framework v1.5] HW1 breadth: circuit-breaker + timeout for external seams (HS-03); deterministic scheduler for the outbox->projector drain + reconciliation (REC-03/HS-02, previously invoked by nothing); observability (metrics/latency/SLO); readiness=liveness (HS-06). Wired via /api/ops/health.",
+    key_inputs="ha-scale.md HS-03/HS-06; reconciliation.md REC-03; the HW1 projection consumer (now driven by a real scheduled job)",
+    output_summary="src/lib/reliability/{circuitBreaker,scheduler,bootstrap,index}.ts + src/lib/observability/{context,index}.ts + src/app/api/ops/health/route.ts (GET health+SLO, POST scheduler tick) + tests. Gates: tsc 0, 5 tests pass, E14 122/122 (entries 231->232, reachable 574->581 WIRED), demo 26 pass.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="HW1 C-STORE (the projection drain is now a scheduled job under a breaker + observability)",
+    ts_override="2026-08-23T21:20:00Z",
+    review_note="Closes HS-03 (breaker+timeout), REC-03/HS-02 (scheduled sweep), HS-06 (liveness), observability. Deterministic (clock injected) so unit-testable; production binds the same API to a real worker + metrics backend. Demo untouched.")
+
+# ---------- Iteration 23 / HW2-B - accounting of disclosures + retention (compliance breadth) ----------
+add(iteration="23",wave="HW2-B",phase="build",agent_role="spine",agent_label="I23-HW2B-disclosures",workstream_domain="hardening/compliance-breadth",
+    prompt_summary="[framework v1.5] HW2 breadth: HIPAA accounting-of-disclosures (AUD-10) - record who received a member's PHI, when, purpose; classify accountable vs exempt (treatment/payment/operations); enforce 6-year retention (flag purgeable, never auto-delete). Wired: FHIR break-glass records an accountable disclosure; /api/ops/disclosures returns the accounting.",
+    key_inputs="audit.md AUD-10 (accounting-of-disclosures, read-audit, retention); the C-AUD tamper-evident ledger; the FHIR break-glass path",
+    output_summary="src/lib/server/disclosure.ts (DisclosureLog + isAccountable + retention + fail-closed factory) + FHIR break-glass disclosure recording + src/app/api/ops/disclosures/route.ts (tenant+authz) + tests. Gates: tsc 0, disclosure+fhir tests pass, E14 122/122 (entries 232->233, reachable 581->583 WIRED), demo 26 pass.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="HW2 C-AUD (disclosure is the member-facing dimension of the audit spine); HW-SEC tenant scope",
+    ts_override="2026-08-23T21:45:00Z",
+    review_note="AUD-10 accounting-of-disclosures with HIPAA accountable/exempt classification + 6-year retention. PHI-safe (references+purpose only). Break-glass over a consent opt-out is correctly recorded as accountable. Demo untouched.")
+
+# ---------- Iteration 24 / HW-FIN-B - encounter-submission pipeline + COB (financial breadth) ----------
+add(iteration="24",wave="HW-FIN-B",phase="build",agent_role="spine",agent_label="I24-HWFINB-submission",workstream_domain="hardening/financial-breadth",
+    prompt_summary="[framework v1.5] HW-FIN breadth: the encounter-submission pipeline (C-SUB pipeline half) - build a submission batch, reconcile against 999/277CA/MAO-002 acknowledgments (a reject at ANY level blocks acceptance), drive resubmission with attempt limits; COB order-of-benefits (MSP + Medicaid-last-resort + birthday rule). Only ACCEPTED encounters earn risk revenue.",
+    key_inputs="financial-integrity.md (no encounter-submission pipeline = no risk revenue earned; COB order-of-benefits); HW-FIN C-SUB submission gate",
+    output_summary="src/lib/finance/submission/{pipeline,cob,index}.ts (buildBatch/reconcile/buildResubmission + orderOfBenefits/primaryPayer) + src/app/api/finance/submission/route.ts (build + reconcile modes, tenant+authz) + tests. Gates: tsc 0, 6 tests pass, E14 122/122 (entries 233->234, reachable 583->587 WIRED), demo 26 pass.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="HW-FIN C-SUB (the scrub feeds submittable encounters into this pipeline)",
+    ts_override="2026-08-23T22:05:00Z",
+    review_note="Closes the 'no risk revenue earned' Crit: nothing is earned until an encounter is ACCEPTED (no rejecting ack at 999/277CA/MAO-002). COB prevents overpayment/FWA exposure. Live X12/EDPS transport is the NS-05 ceiling; the reconciliation logic is production-real. Demo untouched.")
+
+# ---------- Iteration 25 / HW-AI-B - fairness / disparate-impact monitoring (AI equity breadth) ----------
+add(iteration="25",wave="HW-AI-B",phase="build",agent_role="spine",agent_label="I25-HWAIB-fairness",workstream_domain="hardening/ai-governance-breadth",
+    prompt_summary="[framework v1.5] HW-AI breadth: fairness/disparate-impact monitoring (the equity claim, previously ZERO tested). EEOC four-fifths rule over AI-influenced decision outcomes by PHI-safe cohort; flag a cohort whose favorable rate < 80% of the reference; report only, never auto-act. Wired: the PA decision route records the cohort outcome; /api/ops/fairness reports.",
+    key_inputs="ai-governance.md (zero fairness/equity testing); HW-AI C-DEC decision surface",
+    output_summary="src/lib/agents/governance/fairness.ts (aggregate + disparateImpact four-fifths + record/current) + decision-route cohort recording + src/app/api/ops/fairness/route.ts (409 when flagged) + tests. Gates: tsc 0, 4 tests pass, E14 122/122 (entries 234->235, reachable 587->589 WIRED), demo 26 pass.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="HW-AI C-DEC (fairness monitors the decisions the invariant governs)",
+    ts_override="2026-08-23T22:25:00Z",
+    review_note="Addresses the equity Crit with the EEOC four-fifths rule; small-sample cohorts reported but not flagged (no false alarm). PHI-safe (coarse cohort labels + counts). Reports for human review, never auto-acts on a disparity. Demo untouched.")
+
+# ---------- Iteration 26 / HW4-B - holistic-context seam (whole-person breadth) ----------
+add(iteration="26",wave="HW4-B",phase="build",agent_role="spine",agent_label="I26-HW4B-holistic-context",workstream_domain="hardening/whole-person-breadth",
+    prompt_summary="[framework v1.5] HW4 breadth: holistic-context SEAM (WPC-01/02) - the engine returned rich context only for authored demo members; the real projected graph reached no route. mock/seeded=authored engine context (demo intact, Maria et al.); production=aggregate the real projected graph via a registered aggregator, fail-closed. UI reads one interface; config chooses the source.",
+    key_inputs="whole-person-care.md WPC-01/02 (empty context for non-demo members; projected graph wired to zero routes); existing holisticContextEngine.buildContext",
+    output_summary="src/lib/wpc/holisticContext.ts (resolveHolisticContext seam + fail-closed aggregator) + src/app/api/wpc/context/route.ts (tenant+authz, 503 fail-closed) + tests. Gates: tsc 0, 3 tests pass, E14 122/122 (entries 235->236, reachable 589->591 WIRED), demo 26 pass.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="HW1 C-STORE graph + HW-SEC tenant scope; the existing authored holistic engine (mock disposition)",
+    ts_override="2026-08-23T22:45:00Z",
+    review_note="De-hardcoding the demo = ADDING the production branch, never deleting the mock (constraint #2). The projected graph now reaches a real route via the seam. Production aggregator is the NS-05 wiring step; mock preserves the demo exactly. Demo untouched.")
+
+# ---------- Iteration 27 / HW5-B - property/fuzz tests over the hardening logic (test breadth) ----------
+add(iteration="27",wave="HW5-B",phase="build",agent_role="spine",agent_label="I27-HW5B-property-tests",workstream_domain="hardening/test-breadth",
+    prompt_summary="[framework v1.5] HW5 breadth: property/fuzz tests (dependency-free seeded PRNG, reproducible) asserting INVARIANTS over all inputs for the hardening logic: contentHash order-independence+sensitivity, DEQM gapCount=max(0,denom-numer), tenant-scope membership, COB medicaid-never-primary, adverse-action monotonicity, record-lifecycle unchanged-vs-correction.",
+    key_inputs="testing.md T-05 (property/fuzz); the hardening modules from I12-I26",
+    output_summary="tests/property/invariants.test.ts (6 properties x 300 randomized runs = 1800 assertions, seeded mulberry32). Gates: tsc 0, 6 property tests pass, demo 26 pass, E14 122/122 unchanged (test-only).",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="every hardening module (now property-tested for invariants, not just examples)",
+    ts_override="2026-08-23T23:05:00Z",
+    review_note="Invariant-based testing complements the example-based unit tests + the E13 mutation gate: 1800 randomized assertions found no invariant violation. Deterministic seed so any future failure reproduces. Remaining HW5 breadth (contract/Inferno in CI, testcontainer concurrency, D4 load/soak, chaos) needs live infra - named in GO_LIVE_GATES.md.")
+
+# ---------- E13-FIX - test-link gate made symbol-aware + a ratchet (fixes whole-repo FAIL) ----------
+add(iteration="E13-FIX",wave="fix",phase="fix",agent_role="spine",agent_label="E13-testlink-ratchet",workstream_domain="framework/enforcement",
+    prompt_summary="Owner-reported: E13 test-coverage gate FAILS on every commit (273 modules need test linkage). Root cause: check-testlink.mjs ran WHOLE-REPO as a hard fail (a 200+ module pre-existing backlog can never pass), and matched only FILENAME stems - so a new module imported via a barrel (its symbols used, filename not) was a FALSE POSITIVE. Fix: make the check SYMBOL-AWARE (a test using any exported symbol links the module, following barrel re-exports) and a RATCHET (testlink-baseline.json freezes the backlog; only NEW untested modules fail), matching E2/E14.",
+    key_inputs="check-testlink.mjs (filename-only, whole-repo hard fail); the 268->213 false-positive drop from symbol matching; the 686-module repo",
+    output_summary="check-testlink.mjs v2 (symbol-aware linkage + --baseline/--write-baseline ratchet) + testlink-baseline.json (212 known-untested backlog, frozen) + tests/demoPreservation/fingerprint.test.ts (the 1 genuinely-untested new module, now tested) + package.json check:testlink uses the baseline + CI E13 step uses the baseline. Verified: my 26 new hardening modules are all symbol-linked (0 in the baseline); ratchet passes at baseline and catches a new untested module.",
+    gate_result="green",fidelity="live",depends_on="105",builds_on="the E13 test-link tool from framework v1.4 (bug found from the owner's CI feedback, fixed same way as the E13 mutation-tool bug in HW5)",
+    ts_override="2026-08-24T00:10:00Z",
+    review_note="Same pattern as the HW5 mutation-tool fix and the E14 wiring ratchet: a gate that hard-fails on a pre-existing backlog is unusable; a ratchet + a committed baseline makes every commit pass unless it ADDS untested code, while the backlog is burned down. Symbol-aware matching removes the barrel-import false positives that were failing the hardening commits. None of the new hardening modules were actually untested - they were false positives.")
+
 # ===========================================================================
 # WRITE CSV (pass 1: base columns) then compute the longitudinal chain
 # ===========================================================================

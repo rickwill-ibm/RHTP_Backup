@@ -56,7 +56,7 @@ jobs:
             FILES=""
           fi
           if [ -n "$FILES" ]; then
-            node docs/build-provenance/check-testlink.mjs src tests $FILES
+            node docs/build-provenance/check-testlink.mjs src tests $FILES --baseline docs/build-provenance/testlink-baseline.json
           else
             echo "no changed source files to test-link"
           fi

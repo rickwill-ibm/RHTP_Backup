@@ -1,17 +1,23 @@
 /**
- * Reliability bootstrap (HW1-B / I22) — registers the scheduled jobs and wraps the
- * external seam in a breaker. Idempotent: safe to call on every ops tick. This is
- * where the previously-unscheduled outbox->projector drain (REC-01/REC-03) becomes
- * a real recurring job, wrapped in observability.
+ * Reliability bootstrap (HW1-B / I22) — the once-per-process composition root.
+ * Registers the projected-graph holistic aggregator (Phase 3), the job-driver seam
+ * (Phase 5), and the recurring scheduled jobs, each wrapped in a breaker +
+ * observability. Idempotent: safe to call on every ops tick.
+ *
+ * The projection drain now runs through the job-driver seam: the scheduler triggers
+ * the `projection.drain` JOB via the in-process driver. Behavior-preserving — the
+ * job wraps the same HW1 consumer against the process-shared stores — but the drain
+ * is now the same unit the production ops surface triggers (see JOB_DRIVER_SEAM.md).
  */
 
 import { getScheduler } from './scheduler';
 import { getBreaker, type BreakerOptions } from './circuitBreaker';
 import { instrument } from '@/lib/observability';
 import { now } from '@/lib/clock';
-import { runProjectionOnce } from '@/lib/graph/consumer';
-import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
 import { registerProjectedGraphAggregator } from '@/lib/wpc/projectedAggregator';
+import { makeInProcessJobDriver } from '@/lib/jobs/inProcessDriver';
+import { registerJob } from '@/lib/jobs/registry';
+import { projectionDrainJob } from '@/lib/jobs/projectionJobs';
 
 const PROJECTION_JOB = 'projection-drain';
 const RECON_JOB = 'reconciliation-sweep';
@@ -25,17 +31,21 @@ const DEFAULT_BREAKER: BreakerOptions = {
 
 let registered = false;
 
-/** Register the recurring reliability jobs exactly once per process. */
+/** Register the composition root's aggregator, jobs, and recurring drivers once. */
 export function bootstrapReliability(): void {
   if (registered) return;
   const scheduler = getScheduler();
 
-  // Register the projected-graph holistic aggregator on the wpcRecord seam
-  // (WPC-01 Phase 3). Harmless in mock/seeded — it only sets the production
-  // aggregator, invoked solely when wpcRecord resolves to 'production'.
+  // Register the projected-graph holistic aggregator on the wpcRecord seam (Phase 3).
   registerProjectedGraphAggregator();
 
-  // The projection drain: runs the HW1 consumer under a breaker + observability.
+  // Register the job-driver seam (Phase 5): the drain runs as a Job through the
+  // in-process driver here; production triggers the SAME job via the ops surface.
+  registerJob(projectionDrainJob);
+  const driver = makeInProcessJobDriver();
+
+  // The projection drain: triggers the projection.drain JOB under a breaker +
+  // observability. Job failures surface as a thrown error so the breaker still trips.
   scheduler.register({
     id: PROJECTION_JOB,
     intervalMs: 60_000,
@@ -43,11 +53,12 @@ export function bootstrapReliability(): void {
       const breaker = getBreaker('graph-store', DEFAULT_BREAKER);
       await instrument('job.projection-drain', now, () =>
         breaker.call(async () => {
-          const stores = getSharedProjectionStores();
-          return runProjectionOnce(stores.outbox, stores.graph, stores.checkpoint, {
-            now,
-            rng: seededRng(),
-          });
+          const handle = await driver.trigger('projection.drain');
+          const st = await driver.status(handle);
+          if (!st || st.state === 'failed') {
+            throw new Error(st?.error ?? 'projection.drain failed');
+          }
+          return st.result;
         })
       );
     },
@@ -70,12 +81,4 @@ export function bootstrapReliability(): void {
 
 export function _resetReliabilityBootstrap(): void {
   registered = false;
-}
-
-function seededRng(): () => number {
-  let s = 0x2545f491;
-  return () => {
-    s = Math.imul(s, 0x01000193) >>> 0 || 1;
-    return (s >>> 8) / 0x01000000;
-  };
 }

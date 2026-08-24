@@ -14,7 +14,7 @@ import { correlationFrom, CORRELATION_HEADER } from '@/lib/server/correlation';
 import { getPrincipal } from '@/lib/authz/principal';
 import { canAccessMemberTenantAware } from '@/lib/security/tenant';
 import { audit } from '@/lib/server/audit';
-import { resolveHolisticContext } from '@/lib/wpc/holisticContext';
+import { resolveHolisticContextAsync } from '@/lib/wpc/holisticContext';
 
 export const runtime = 'nodejs';
 
@@ -52,7 +52,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const result = resolveHolisticContext(memberId);
+    // Consent scope defaults to the most restrictive (NO_CONSENT): restricted
+    // (42 CFR Part 2 / segmented) data is excluded until a principal->scope
+    // mapping is wired. Async because production reads the projected graph.
+    const result = await resolveHolisticContextAsync(memberId);
     await audit({
       ts: new Date().toISOString(),
       actor: principal.userId,
@@ -68,7 +71,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
   } catch (err) {
     const detail = err instanceof Error ? err.name : 'exception';
-    const status = detail.includes('NotConfigured') ? 503 : 500;
+    const status = detail.includes('NotConfigured')
+      ? 503 // production seam not wired (fail-closed)
+      : detail.includes('NotInProjectedGraph')
+        ? 404 // member has no node in the projected graph (honest, not fabricated)
+        : 500;
     return NextResponse.json(ooError('Holistic context unavailable', 'exception'), {
       status,
       headers: { [CORRELATION_HEADER]: correlationId },

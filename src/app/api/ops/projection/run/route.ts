@@ -19,6 +19,7 @@ import { audit } from '@/lib/server/audit';
 import { now } from '@/lib/clock';
 import { runProjectionOnce } from '@/lib/graph/consumer';
 import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
+import { ensureDevProjectionSeeded } from '@/lib/runtime/devIngestion';
 
 export const runtime = 'nodejs';
 
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    await ensureDevProjectionSeeded();
     const stores = getSharedProjectionStores();
     // deterministic rng seed for envelope ids within a run (audited, not security-sensitive)
     let seed = 0x2545f491;

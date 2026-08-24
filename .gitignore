@@ -56,3 +56,6 @@ fhir/**/*.war
 
 # Runtime config (contains FHIR URLs + auth, user-editable)
 .rhtp-config.json
+
+# E11 provenance check scratch artifact (created + deleted at runtime)
+docs/build-provenance/.PROMPT_MASTER_LOG.committed

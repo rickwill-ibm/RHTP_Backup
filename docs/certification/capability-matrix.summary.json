@@ -1,0 +1,228 @@
+{
+  "version": "v1.2",
+  "kind": "capability-matrix-rollup",
+  "generatedFrom": "src/lib/certification (buildMatrixDocument -> readinessRollup)",
+  "claimedStandards": [
+    "us-core-uscdi",
+    "davinci-pas",
+    "davinci-crd",
+    "davinci-dtr",
+    "carin",
+    "smart",
+    "cds-hooks",
+    "cms-0057-f",
+    "ihe-pix-pdq",
+    "ihe-pixm-pdqm",
+    "x12-834",
+    "x12-837",
+    "x12-835",
+    "x12-278",
+    "x12-270-271",
+    "terminology",
+    "part2-hipaa",
+    "npi-nppes"
+  ],
+  "readinessStandards": 13,
+  "standards": [
+    {
+      "id": "us-core-uscdi",
+      "name": "US Core / USCDI",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "us-core-uscdi"
+      ],
+      "capabilityStatuses": {
+        "supported": 1,
+        "partial": 2,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "davinci-pas",
+      "name": "Da Vinci PAS",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "davinci-pas"
+      ],
+      "capabilityStatuses": {
+        "supported": 2,
+        "partial": 1,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "davinci-crd",
+      "name": "Da Vinci CRD",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "davinci-crd"
+      ],
+      "capabilityStatuses": {
+        "supported": 0,
+        "partial": 1,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "davinci-dtr",
+      "name": "Da Vinci DTR",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "davinci-dtr"
+      ],
+      "capabilityStatuses": {
+        "supported": 2,
+        "partial": 0,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "carin",
+      "name": "CARIN (Blue Button)",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "carin"
+      ],
+      "capabilityStatuses": {
+        "supported": 0,
+        "partial": 1,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "smart",
+      "name": "SMART on FHIR",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "smart"
+      ],
+      "capabilityStatuses": {
+        "supported": 1,
+        "partial": 1,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "cds-hooks",
+      "name": "CDS Hooks",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "cds-hooks"
+      ],
+      "capabilityStatuses": {
+        "supported": 2,
+        "partial": 0,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "cms-0057-f",
+      "name": "CMS-0057-F APIs",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "cms-0057-f"
+      ],
+      "capabilityStatuses": {
+        "supported": 0,
+        "partial": 5,
+        "ci-pending": 0,
+        "absent": 1
+      }
+    },
+    {
+      "id": "ihe-pix-pdq",
+      "name": "IHE PIX / PDQ (+ PIXm / PDQm)",
+      "status": "absent",
+      "ciCeiling": "wire-absent",
+      "claimIds": [
+        "ihe-pix-pdq",
+        "ihe-pixm-pdqm"
+      ],
+      "capabilityStatuses": {
+        "supported": 0,
+        "partial": 2,
+        "ci-pending": 2,
+        "absent": 0
+      }
+    },
+    {
+      "id": "x12",
+      "name": "X12 EDI (834 / 837 / 835 / 278 / 270-271)",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "x12-834",
+        "x12-837",
+        "x12-835",
+        "x12-278",
+        "x12-270-271"
+      ],
+      "capabilityStatuses": {
+        "supported": 0,
+        "partial": 4,
+        "ci-pending": 0,
+        "absent": 1
+      }
+    },
+    {
+      "id": "terminology",
+      "name": "Terminology services",
+      "status": "ci-pending",
+      "ciCeiling": "ci-complete",
+      "claimIds": [
+        "terminology"
+      ],
+      "capabilityStatuses": {
+        "supported": 1,
+        "partial": 6,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "part2-hipaa",
+      "name": "42 CFR Part 2 / HIPAA",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "part2-hipaa"
+      ],
+      "capabilityStatuses": {
+        "supported": 4,
+        "partial": 1,
+        "ci-pending": 0,
+        "absent": 0
+      }
+    },
+    {
+      "id": "npi-nppes",
+      "name": "NPI / NPPES provider identity",
+      "status": "partial",
+      "ciCeiling": "material-ci-gap",
+      "claimIds": [
+        "npi-nppes"
+      ],
+      "capabilityStatuses": {
+        "supported": 1,
+        "partial": 0,
+        "ci-pending": 1,
+        "absent": 0
+      }
+    }
+  ]
+}

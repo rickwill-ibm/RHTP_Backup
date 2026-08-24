@@ -10,7 +10,11 @@
  * param or path segment (beneficiary=Patient/X, subject=Patient/X, patient=Patient/X).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated, getSessionPatient, getSessionAuthContext } from '@/lib/server/smartSession';
+import {
+  isAuthenticated,
+  getSessionPatient,
+  getSessionAuthContext,
+} from '@/lib/server/smartSession';
 import { getPrincipal } from '@/lib/authz/principal';
 import { canAccessMemberTenantAware } from '@/lib/security/tenant';
 import { fhirRead, fhirCreate } from '@/lib/server/fhirServer';
@@ -20,6 +24,9 @@ import { devMockEnabled, devBulkStatus } from '@/lib/server/devStubs';
 import { getPatientById, resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
 import { audit } from '@/lib/server/audit';
+import { getDisclosureLog } from '@/lib/server/disclosure';
+import { getDataMode } from '@/lib/config/dataMode';
+import { now as clockNow } from '@/lib/clock';
 
 export const runtime = 'nodejs';
 
@@ -44,35 +51,66 @@ function mockFhirGet(resourceType: string, search: string): unknown {
   const patient = pid ? (getPatientById(pid) ?? null) : null;
 
   if (resourceType === 'Patient' && pid) {
-    return patient ? {
-      resourceType: 'Patient', id: pid,
-      name: [{ family: patient.name.split(' ').pop(), given: [patient.name.split(' ')[0]] }],
-      birthDate: patient.dob, gender: patient.gender.toLowerCase() === 'f' ? 'female' : 'male',
-      address: [{ text: patient.location }], telecom: [{ system: 'phone', value: patient.phone }],
-    } : { resourceType: 'OperationOutcome', issue: [{ severity: 'error', code: 'not-found', diagnostics: `Patient/${pid} not found` }] };
+    return patient
+      ? {
+          resourceType: 'Patient',
+          id: pid,
+          name: [{ family: patient.name.split(' ').pop(), given: [patient.name.split(' ')[0]] }],
+          birthDate: patient.dob,
+          gender: patient.gender.toLowerCase() === 'f' ? 'female' : 'male',
+          address: [{ text: patient.location }],
+          telecom: [{ system: 'phone', value: patient.phone }],
+        }
+      : {
+          resourceType: 'OperationOutcome',
+          issue: [
+            { severity: 'error', code: 'not-found', diagnostics: `Patient/${pid} not found` },
+          ],
+        };
   }
 
   if (resourceType === 'Coverage') {
-    return { resourceType: 'Bundle', type: 'searchset', total: 1, entry: [{
-      resource: { resourceType: 'Coverage', id: `cov-${pid ?? 'mock'}`, status: 'active',
-        beneficiary: { reference: `Patient/${pid}` },
-        payor: [{ display: patient?.contract ?? 'Medicaid' }],
-        period: { start: '2024-01-01', end: '2026-12-31' },
-        class: [{ type: { text: 'plan' }, name: patient?.contract ?? 'Medicaid Plan' }],
-      },
-    }]};
+    return {
+      resourceType: 'Bundle',
+      type: 'searchset',
+      total: 1,
+      entry: [
+        {
+          resource: {
+            resourceType: 'Coverage',
+            id: `cov-${pid ?? 'mock'}`,
+            status: 'active',
+            beneficiary: { reference: `Patient/${pid}` },
+            payor: [{ display: patient?.contract ?? 'Medicaid' }],
+            period: { start: '2024-01-01', end: '2026-12-31' },
+            class: [{ type: { text: 'plan' }, name: patient?.contract ?? 'Medicaid Plan' }],
+          },
+        },
+      ],
+    };
   }
 
   if (resourceType === 'Condition') {
     const conditions = patient?.conditions ?? [];
-    return { resourceType: 'Bundle', type: 'searchset', total: conditions.length,
-      entry: conditions.map((c) => ({ resource: {
-        resourceType: 'Condition', id: c.key,
-        subject: { reference: `Patient/${pid}` },
-        code: { coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: c.code, display: c.name }], text: c.name },
-        clinicalStatus: { coding: [{ code: c.status.toLowerCase().replace(' ', '-') }] },
-        onsetDateTime: c.onset,
-      }}))
+    return {
+      resourceType: 'Bundle',
+      type: 'searchset',
+      total: conditions.length,
+      entry: conditions.map((c) => ({
+        resource: {
+          resourceType: 'Condition',
+          id: c.key,
+          subject: { reference: `Patient/${pid}` },
+          code: {
+            coding: [
+              { system: 'http://hl7.org/fhir/sid/icd-10-cm', code: c.code, display: c.name },
+            ],
+            text: c.name,
+          },
+          clinicalStatus: { coding: [{ code: c.status.toLowerCase().replace(' ', '-') }] },
+          onsetDateTime: c.onset,
+        },
+      })),
     };
   }
 
@@ -81,7 +119,9 @@ function mockFhirGet(resourceType: string, search: string): unknown {
     // Patient Access API tab shows real denial/approval data per patient.
     const paHistory = pid ? devBulkStatus(pid).paHistory : [];
     return {
-      resourceType: 'Bundle', type: 'searchset', total: paHistory.length,
+      resourceType: 'Bundle',
+      type: 'searchset',
+      total: paHistory.length,
       entry: paHistory.map((h, i) => ({
         resource: {
           resourceType: 'ClaimResponse',
@@ -90,10 +130,14 @@ function mockFhirGet(resourceType: string, search: string): unknown {
           use: 'preauthorization',
           patient: { reference: `Patient/${pid}` },
           outcome: h.decision === 'approved' ? 'complete' : 'error',
-          disposition: h.decision === 'approved'
-            ? `Approved — Auth# ${h.authNumber ?? 'N/A'}`
-            : `Denied — ${h.denialReason ?? 'See details'}`,
-          type: { coding: [{ system: 'http://www.ama-assn.org/go/cpt', code: h.cpt, display: h.service }], text: h.service },
+          disposition:
+            h.decision === 'approved'
+              ? `Approved — Auth# ${h.authNumber ?? 'N/A'}`
+              : `Denied — ${h.denialReason ?? 'See details'}`,
+          type: {
+            coding: [{ system: 'http://www.ama-assn.org/go/cpt', code: h.cpt, display: h.service }],
+            text: h.service,
+          },
           created: h.date,
         },
       })),
@@ -102,15 +146,22 @@ function mockFhirGet(resourceType: string, search: string): unknown {
 
   if (resourceType === 'MedicationRequest') {
     const meds = patient?.medications ?? [];
-    return { resourceType: 'Bundle', type: 'searchset', total: meds.length,
-      entry: meds.map((m) => ({ resource: {
-        resourceType: 'MedicationRequest', id: m.key,
-        subject: { reference: `Patient/${pid}` },
-        status: 'active', intent: 'order',
-        medicationCodeableConcept: { text: `${m.name} ${m.dose}` },
-        dosageInstruction: [{ text: `${m.dose} ${m.frequency}` }],
-        requester: { display: m.prescriber },
-      }}))
+    return {
+      resourceType: 'Bundle',
+      type: 'searchset',
+      total: meds.length,
+      entry: meds.map((m) => ({
+        resource: {
+          resourceType: 'MedicationRequest',
+          id: m.key,
+          subject: { reference: `Patient/${pid}` },
+          status: 'active',
+          intent: 'order',
+          medicationCodeableConcept: { text: `${m.name} ${m.dose}` },
+          dosageInstruction: [{ text: `${m.dose} ${m.frequency}` }],
+          requester: { display: m.prescriber },
+        },
+      })),
     };
   }
 
@@ -171,6 +222,21 @@ export async function GET(
         { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
       );
     }
+    // Break-glass over an opt-out is an ACCOUNTABLE disclosure (AUD-10): record it
+    // in the accounting-of-disclosures log the member/OCR can request.
+    await getDisclosureLog(getDataMode('wpcRecord') === 'production')
+      .record({
+        memberId: targetPid,
+        recipient: actorId,
+        resourceRef: `Patient/${targetPid}`,
+        purpose: 'break-glass',
+        tsMs: clockNow(),
+        actor: actorId,
+        correlationId,
+      })
+      .catch(() => {
+        /* disclosure logging must never block a request */
+      });
   }
 
   // IDOR GATE: the Patient identity read (demographics) must be scoped to the
@@ -190,10 +256,13 @@ export async function GET(
         outcome: 'failure',
         detail: 'request patient id outside session scope',
       });
-      return NextResponse.json(ooError('Requested member is outside the session scope', 'forbidden'), {
-        status: 403,
-        headers: { [CORRELATION_HEADER]: correlationId },
-      });
+      return NextResponse.json(
+        ooError('Requested member is outside the session scope', 'forbidden'),
+        {
+          status: 403,
+          headers: { [CORRELATION_HEADER]: correlationId },
+        }
+      );
     }
   }
 
@@ -217,10 +286,13 @@ export async function GET(
         outcome: 'failure',
         detail: decision.reason,
       });
-      return NextResponse.json(ooError('Requested member is outside your authorization scope', 'forbidden'), {
-        status: 403,
-        headers: { [CORRELATION_HEADER]: correlationId },
-      });
+      return NextResponse.json(
+        ooError('Requested member is outside your authorization scope', 'forbidden'),
+        {
+          status: 403,
+          headers: { [CORRELATION_HEADER]: correlationId },
+        }
+      );
     }
   }
 

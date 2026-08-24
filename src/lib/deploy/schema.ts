@@ -22,14 +22,8 @@
  * decision (that is preflight.ts). It does not import backend resolvers, so a
  * preflight never has a side effect on the seams it inspects.
  */
-import {
-  DATA_MODE_SEAMS,
-  type DataModeSeam,
-} from '@/lib/config/dataMode';
-import {
-  SEAM_DISPOSITIONS,
-  seamsWithDisposition,
-} from '@/lib/config/seamDispositions';
+import { DATA_MODE_SEAMS, type DataModeSeam } from '@/lib/config/dataMode';
+import { SEAM_DISPOSITIONS, seamsWithDisposition } from '@/lib/config/seamDispositions';
 import { DEPLOYMENT_ENV_NAMES, type DeploymentEnvName } from '@/lib/server/env';
 
 // ── 1. Required env keys per deploy posture ──────────────────────────────────
@@ -86,32 +80,31 @@ export function requiredEnvKeys(env: DeploymentEnvName): readonly string[] {
 // Keys are server-only. Completeness is asserted by
 // assertConnectionKeyCompleteness() and by tests/deploy/schema.test.ts, so a new
 // fail-closed-stub seam with no key mapping cannot ship silently.
-export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>>> =
-  Object.freeze({
-    // endpoint-contract seams (operator-declared endpoint; live client CI-pending)
-    identity: 'EMPI_CANDIDATE_SOURCE_URL',
-    terminology: 'TERMINOLOGY_SERVICE_URL',
-    profileValidation: 'PROFILE_VALIDATION_SERVICE_URL',
-    consent: 'CONSENT_STORE_URL',
-    signalDisposition: 'SDE_POLICY_PACK_URL',
-    goldCardRoster: 'GOLD_CARD_ROSTER_URL',
-    denialRateFeed: 'DENIAL_RATE_FEED_URL',
-    providerDirectory: 'PROVIDER_DIRECTORY_URL',
-    providerIdentity: 'NPPES_BASE_URL',
-    valueSetGovernanceStore: 'VALUE_SET_GOVERNANCE_STORE_URL',
-    // substrate-backed seams: the single substrate entry (Wave A) is DATABASE_URL
-    evidence: 'DATABASE_URL',
-    idempotencyStore: 'DATABASE_URL',
-    deadLetterStore: 'DATABASE_URL',
-    crossReference: 'DATABASE_URL',
-    // fail-closed-stub seams introduced in later hardening waves (graph projection I14,
-    // whole-person record lifecycle I17, external DEQM measures ingestion I19). Each names
-    // the server-only env key that configures its real backend; production stays fail-closed
-    // until the key is present and a real resolver is registered.
-    graph: 'GRAPH_STORE_URL',
-    wpcRecord: 'WPC_RECORD_STORE_URL',
-    measures: 'DEQM_MEASURES_URL',
-  });
+export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>>> = Object.freeze({
+  // endpoint-contract seams (operator-declared endpoint; live client CI-pending)
+  identity: 'EMPI_CANDIDATE_SOURCE_URL',
+  terminology: 'TERMINOLOGY_SERVICE_URL',
+  profileValidation: 'PROFILE_VALIDATION_SERVICE_URL',
+  consent: 'CONSENT_STORE_URL',
+  signalDisposition: 'SDE_POLICY_PACK_URL',
+  goldCardRoster: 'GOLD_CARD_ROSTER_URL',
+  denialRateFeed: 'DENIAL_RATE_FEED_URL',
+  providerDirectory: 'PROVIDER_DIRECTORY_URL',
+  providerIdentity: 'NPPES_BASE_URL',
+  valueSetGovernanceStore: 'VALUE_SET_GOVERNANCE_STORE_URL',
+  // substrate-backed seams: the single substrate entry (Wave A) is DATABASE_URL
+  evidence: 'DATABASE_URL',
+  idempotencyStore: 'DATABASE_URL',
+  deadLetterStore: 'DATABASE_URL',
+  crossReference: 'DATABASE_URL',
+  // fail-closed-stub seams introduced in later hardening waves (graph projection I14,
+  // whole-person record lifecycle I17, external DEQM measures ingestion I19). Each names
+  // the server-only env key that configures its real backend; production stays fail-closed
+  // until the key is present and a real resolver is registered.
+  graph: 'GRAPH_STORE_URL',
+  wpcRecord: 'WPC_RECORD_STORE_URL',
+  measures: 'DEQM_MEASURES_URL',
+});
 
 /**
  * The `fail-closed-stub` seams whose backend is the ONE pg substrate the Wave-A
@@ -151,7 +144,7 @@ export function connectionKeyCompletenessProblems(): string[] {
   for (const seam of stubs) {
     if (!SEAM_CONNECTION_KEYS[seam]) {
       problems.push(
-        `fail-closed-stub seam '${seam}' has no backend connection key in SEAM_CONNECTION_KEYS`,
+        `fail-closed-stub seam '${seam}' has no backend connection key in SEAM_CONNECTION_KEYS`
       );
     }
   }
@@ -164,7 +157,7 @@ export function connectionKeyCompletenessProblems(): string[] {
     const s = seam as DataModeSeam;
     if (registered.has(seam) && SEAM_DISPOSITIONS[s].disposition !== 'fail-closed-stub') {
       problems.push(
-        `SEAM_CONNECTION_KEYS maps '${seam}', which is '${SEAM_DISPOSITIONS[s].disposition}', not fail-closed-stub`,
+        `SEAM_CONNECTION_KEYS maps '${seam}', which is '${SEAM_DISPOSITIONS[s].disposition}', not fail-closed-stub`
       );
     }
   }

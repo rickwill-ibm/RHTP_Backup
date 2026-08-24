@@ -7,7 +7,7 @@ import {
   getSharedProjectionStores,
   _resetSharedProjectionStores,
 } from '@/lib/runtime/projectionRuntime';
-import { makeDevOutboxDeps } from '@/lib/runtime/devIngestion';
+import { makeDevOutboxDeps } from '@/lib/jobs/devOutbox';
 import { OutboxWriter } from '@/lib/outbox';
 import { runPipeline, cboSdohAdapter, defaultPipelineDeps } from '@/lib/pipeline';
 import { now } from '@/lib/clock';

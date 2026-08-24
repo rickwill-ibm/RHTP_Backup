@@ -20,6 +20,9 @@ import { devMockEnabled, devBulkStatus } from '@/lib/server/devStubs';
 import { getPatientById, resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
 import { audit } from '@/lib/server/audit';
+import { getDisclosureLog } from '@/lib/server/disclosure';
+import { getDataMode } from '@/lib/config/dataMode';
+import { now as clockNow } from '@/lib/clock';
 
 export const runtime = 'nodejs';
 
@@ -171,6 +174,12 @@ export async function GET(
         { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
       );
     }
+    // Break-glass over an opt-out is an ACCOUNTABLE disclosure (AUD-10): record it
+    // in the accounting-of-disclosures log the member/OCR can request.
+    await getDisclosureLog(getDataMode('wpcRecord') === 'production').record({
+      memberId: targetPid, recipient: actorId, resourceRef: `Patient/${targetPid}`,
+      purpose: 'break-glass', tsMs: clockNow(), actor: actorId, correlationId,
+    }).catch(() => { /* disclosure logging must never block a request */ });
   }
 
   // IDOR GATE: the Patient identity read (demographics) must be scoped to the

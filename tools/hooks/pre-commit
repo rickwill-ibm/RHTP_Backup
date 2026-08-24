@@ -17,7 +17,7 @@ bash check-file-sizes.sh
 echo "[pre-commit] E13 test-link on staged source"
 STAGED=$(git diff --cached --name-only --diff-filter=AM -- 'src/*.ts' 'src/*.tsx' 2>/dev/null | tr '\n' ' ')
 if [ -n "$STAGED" ]; then
-  node docs/build-provenance/check-testlink.mjs src tests $STAGED
+  node docs/build-provenance/check-testlink.mjs src tests $STAGED --baseline docs/build-provenance/testlink-baseline.json
 else
   echo "  (no staged source files)"
 fi

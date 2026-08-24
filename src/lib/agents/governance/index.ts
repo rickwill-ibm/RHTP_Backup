@@ -18,3 +18,13 @@ export {
   type DecisionProvenance,
   type BuildProvenanceInput,
 } from './decisionProvenance';
+export {
+  aggregate,
+  disparateImpact,
+  recordOutcome,
+  currentDisparateImpact,
+  _resetFairness,
+  type CohortOutcome,
+  type CohortStat,
+  type DisparateImpactResult,
+} from './fairness';

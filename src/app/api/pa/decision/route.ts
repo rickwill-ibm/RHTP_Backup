@@ -21,6 +21,7 @@ import {
   evaluateDecision,
   buildDecisionProvenance,
   isAdverseProvenanceComplete,
+  recordOutcome,
 } from '@/lib/agents/governance';
 import type { ProposedAction, HumanDecision } from '@/lib/agentRuntime/types';
 
@@ -46,6 +47,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     proposalId?: string; actionType?: string; decision?: 'approved' | 'rejected';
     priority?: 'routine' | 'high' | 'urgent'; refs?: Record<string, string>;
     firedRule?: string; ruleVersion?: string; memberFacingReason?: string; appealRef?: string;
+    /** A coarse, PHI-safe cohort label for disparate-impact monitoring (HW-AI-B). */
+    cohort?: string;
   } | null;
 
   if (!body?.proposalId || !body.actionType || (body.decision !== 'approved' && body.decision !== 'rejected')) {
@@ -98,6 +101,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // Disparate-impact monitoring (HW-AI-B): record the outcome by PHI-safe cohort.
+  if (body.cohort) recordOutcome({ cohort: body.cohort, favorable: provenance.decision === 'approved' });
   await audit({
     ts: new Date().toISOString(), actor: principal.userId, action: 'pa.decision.recorded',
     resourceRef: body.proposalId, correlationId, outcome: 'success',

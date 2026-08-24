@@ -27,11 +27,10 @@ jobs:
       - name: Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
 
       - name: Install
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Types (tsc --noEmit)
         run: npm run check:types

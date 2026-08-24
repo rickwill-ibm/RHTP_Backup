@@ -18,7 +18,7 @@ import { getPrincipal, isOpsPrincipal } from '@/lib/authz/principal';
 import { audit } from '@/lib/server/audit';
 import { now } from '@/lib/clock';
 import { runProjectionOnce } from '@/lib/graph/consumer';
-import { resolveProjectionStores } from '@/lib/graph/consumer/provider';
+import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
 
 export const runtime = 'nodejs';
 
@@ -48,11 +48,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const stores = resolveProjectionStores();
+    const stores = getSharedProjectionStores();
     // deterministic rng seed for envelope ids within a run (audited, not security-sensitive)
     let seed = 0x2545f491;
     const rng = () => {
-      seed = (Math.imul(seed, 0x01000193) >>> 0) || 1;
+      seed = Math.imul(seed, 0x01000193) >>> 0 || 1;
       return (seed >>> 8) / 0x01000000;
     };
     const result = await runProjectionOnce(stores.outbox, stores.graph, stores.checkpoint, {

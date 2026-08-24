@@ -10,7 +10,7 @@ import { getBreaker, type BreakerOptions } from './circuitBreaker';
 import { instrument } from '@/lib/observability';
 import { now } from '@/lib/clock';
 import { runProjectionOnce } from '@/lib/graph/consumer';
-import { resolveProjectionStores } from '@/lib/graph/consumer/provider';
+import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
 
 const PROJECTION_JOB = 'projection-drain';
 const RECON_JOB = 'reconciliation-sweep';
@@ -37,7 +37,7 @@ export function bootstrapReliability(): void {
       const breaker = getBreaker('graph-store', DEFAULT_BREAKER);
       await instrument('job.projection-drain', now, () =>
         breaker.call(async () => {
-          const stores = resolveProjectionStores();
+          const stores = getSharedProjectionStores();
           return runProjectionOnce(stores.outbox, stores.graph, stores.checkpoint, {
             now,
             rng: seededRng(),

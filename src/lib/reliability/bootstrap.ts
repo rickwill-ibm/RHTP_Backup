@@ -11,6 +11,7 @@ import { instrument } from '@/lib/observability';
 import { now } from '@/lib/clock';
 import { runProjectionOnce } from '@/lib/graph/consumer';
 import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
+import { registerProjectedGraphAggregator } from '@/lib/wpc/projectedAggregator';
 
 const PROJECTION_JOB = 'projection-drain';
 const RECON_JOB = 'reconciliation-sweep';
@@ -28,6 +29,11 @@ let registered = false;
 export function bootstrapReliability(): void {
   if (registered) return;
   const scheduler = getScheduler();
+
+  // Register the projected-graph holistic aggregator on the wpcRecord seam
+  // (WPC-01 Phase 3). Harmless in mock/seeded — it only sets the production
+  // aggregator, invoked solely when wpcRecord resolves to 'production'.
+  registerProjectedGraphAggregator();
 
   // The projection drain: runs the HW1 consumer under a breaker + observability.
   scheduler.register({

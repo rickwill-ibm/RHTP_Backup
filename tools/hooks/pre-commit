@@ -22,4 +22,13 @@ else
   echo "  (no staged source files)"
 fi
 
+echo "[pre-commit] lint (staged source)"
+if [ -n "$STAGED" ]; then
+  LINT_ARGS=""
+  for f in $STAGED; do LINT_ARGS="$LINT_ARGS --file $f"; done
+  npx next lint $LINT_ARGS
+else
+  echo "  (no staged source files)"
+fi
+
 echo "[pre-commit] OK"

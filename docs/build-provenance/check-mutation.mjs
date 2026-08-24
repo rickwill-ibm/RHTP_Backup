@@ -116,8 +116,27 @@ function applyMutation(src, site) {
   return head + replacement + tail;
 }
 
+// --- Framework v1.6 §6: crash-safe restore -----------------------------------
+// A JS `finally` does NOT run when the process is killed by a signal (e.g. a
+// `timeout` SIGTERM), which can leave a MUTANT on disk masquerading as real code.
+// Track the in-flight file + its pristine bytes and restore on ANY terminating
+// signal before exiting, so an interrupted run can never corrupt the tree.
+let INFLIGHT_FILE = null;
+let INFLIGHT_ORIGINAL = null;
+function restoreInflight() {
+  if (INFLIGHT_FILE != null && INFLIGHT_ORIGINAL != null) {
+    try { writeFileSync(INFLIGHT_FILE, INFLIGHT_ORIGINAL); } catch {}
+  }
+}
+for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+  process.on(sig, () => { restoreInflight(); process.exit(130); });
+}
+process.on('exit', restoreInflight);
+
 function runTarget(file, testCmd, maxMutants) {
   const original = readFileSync(file, 'utf8');
+  INFLIGHT_FILE = file;
+  INFLIGHT_ORIGINAL = original;
   const sites = sample(findSites(original), maxMutants);
   const result = { file, tested: 0, killed: 0, survived: [], sites: sites.length };
   if (sites.length === 0) {
@@ -144,6 +163,8 @@ function runTarget(file, testCmd, maxMutants) {
     }
   } finally {
     writeFileSync(file, original); // belt and suspenders
+    INFLIGHT_FILE = null;
+    INFLIGHT_ORIGINAL = null;
   }
   return result;
 }

@@ -16,10 +16,11 @@ if [ ! -f build_log.py ]; then
   say "FAIL E11.1: no build_log.py generator found - the log has no single source of truth."
   FAIL=1
 else
-  cp -f PROMPT_MASTER_LOG.csv .PROMPT_MASTER_LOG.committed 2>/dev/null || true
+  TMP_COMMITTED="$(mktemp)"; trap 'rm -f "$TMP_COMMITTED"' EXIT
+  cp -f PROMPT_MASTER_LOG.csv "$TMP_COMMITTED" 2>/dev/null || true
   python3 build_log.py >/dev/null 2>&1 || { say "FAIL E11.1: build_log.py did not run cleanly."; FAIL=1; }
-  if [ -f .PROMPT_MASTER_LOG.committed ]; then
-    if ! diff -q .PROMPT_MASTER_LOG.committed PROMPT_MASTER_LOG.csv >/dev/null 2>&1; then
+  if [ -f "$TMP_COMMITTED" ]; then
+    if ! diff -q "$TMP_COMMITTED" PROMPT_MASTER_LOG.csv >/dev/null 2>&1; then
       say "FAIL E11.1: committed PROMPT_MASTER_LOG.csv does not match generator output."
       say "           -> the CSV was hand-edited, or the generator was changed without re-syncing."
       say "           -> fix: edit build_log.py (never the CSV), re-run it, and commit the output."
@@ -27,7 +28,7 @@ else
     else
       say "ok E11.1: CSV matches its generator (single source of truth, no hand-edits)."
     fi
-    rm -f .PROMPT_MASTER_LOG.committed
+    rm -f "$TMP_COMMITTED"
   fi
 fi
 

@@ -7,15 +7,15 @@
 
 "Orchestration" means three different things in this platform. Conflating them is how a batch scheduler ends up wrongly wired to real-time or clinical paths.
 
-| Meaning | What it is | Right tool | Airflow? |
-|---|---|---|---|
-| **Agentic care orchestration** | The governed agent coalition running care plans (Layer 1) — consent-gated, human-in-the-loop clinical decisioning | The app's governed agent runtime | **No** — never a data-pipeline concern |
-| **Event / stream processing** | The outbox → `runProjectionOnce` → graph drain (Phase 1 shared stores; `bootstrap.ts` loop; ops route) | Durable queue + worker, or Temporal | **No** — sub-minute event work; DAG overhead is a poor fit |
-| **Batch data orchestration** | Nightly CBO SDOH SFTP pickups, FHIR bulk `$export` ingestion, projection rebuilds/backfills, DEQM/HEDIS measure runs, RADV/encounter extracts | **Airflow** (or Dagster/Prefect/cron) | **Yes** — this seam |
+| Meaning                        | What it is                                                                                                                                    | Right tool                            | Airflow?                                                   |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------------- |
+| **Agentic care orchestration** | The governed agent coalition running care plans (Layer 1) — consent-gated, human-in-the-loop clinical decisioning                             | The app's governed agent runtime      | **No** — never a data-pipeline concern                     |
+| **Event / stream processing**  | The outbox → `runProjectionOnce` → graph drain (Phase 1 shared stores; `bootstrap.ts` loop; ops route)                                        | Durable queue + worker, or Temporal   | **No** — sub-minute event work; DAG overhead is a poor fit |
+| **Batch data orchestration**   | Nightly CBO SDOH SFTP pickups, FHIR bulk `$export` ingestion, projection rebuilds/backfills, DEQM/HEDIS measure runs, RADV/encounter extracts | **Airflow** (or Dagster/Prefect/cron) | **Yes** — this seam                                        |
 
 This seam is **only** for the third row.
 
-## 2. Principle: Airflow *drives*, it does not *own*
+## 2. Principle: Airflow _drives_, it does not _own_
 
 The pipeline stays orchestrator-agnostic. Airflow is one **external caller** of an ops surface — never an import in the deployable app. That keeps two invariants true:
 
@@ -33,18 +33,18 @@ We already have the bodies (`runPipeline`, `runProjectionOnce`, measure computat
 ```ts
 export interface JobContext {
   now(): number;
-  stores: ProjectionStores;        // the process-shared stores (Phase 1)
+  stores: ProjectionStores; // the process-shared stores (Phase 1)
   dataMode: DataMode;
   logger: JobLogger;
 }
 export interface JobResult<O> {
   ok: boolean;
   output?: O;
-  idempotencyKey: string;          // e.g. sha256(fileBytes)+jobName — retries/backfills never double-apply
+  idempotencyKey: string; // e.g. sha256(fileBytes)+jobName — retries/backfills never double-apply
   metrics: Record<string, number>; // rowsLanded, edgesApplied, drainLagMs, members, quarantined
 }
 export interface Job<I, O> {
-  readonly name: string;           // stable id: 'ingest.cbo-sdoh', 'projection.drain', 'measures.deqm', 'projection.rebuild'
+  readonly name: string; // stable id: 'ingest.cbo-sdoh', 'projection.drain', 'measures.deqm', 'projection.rebuild'
   run(input: I, ctx: JobContext): Promise<JobResult<O>>;
 }
 ```
@@ -63,7 +63,7 @@ export interface JobDriver {
 
 Two implementations behind the seam:
 
-- **`InProcessJobDriver`** (mock/seeded default) — runs the job inline against the shared stores. This is what today's `bootstrap.ts` drain loop and Phase 2's `devIngestion` seeder *become*. Demo stays zero-infra.
+- **`InProcessJobDriver`** (mock/seeded default) — runs the job inline against the shared stores. This is what today's `bootstrap.ts` drain loop and Phase 2's `devIngestion` seeder _become_. Demo stays zero-infra.
 - **`HttpOpsJobDriver`** (production contract) — thin client for the ops job surface (below). Airflow does not use this class; **Airflow speaks HTTP to the same surface directly.** The class exists for in-cluster callers and tests.
 
 ### 3.3 `JobRegistry` + fail-closed registration
@@ -90,10 +90,10 @@ Every run emits structured metrics (`rowsLanded`, `edgesApplied`, `drainLagMs`, 
 
 ## 5. dataMode alignment
 
-| Mode | Driver | Job surface | Behavior |
-|---|---|---|---|
-| `mock` / `seeded` | `InProcessJobDriver` | inline | Jobs run in-process; demo green, zero infra |
-| `production` | ops surface live | `POST /api/ops/jobs/...` | Airflow drives on schedule; **fail-closed** if registry/stores unregistered |
+| Mode              | Driver               | Job surface              | Behavior                                                                    |
+| ----------------- | -------------------- | ------------------------ | --------------------------------------------------------------------------- |
+| `mock` / `seeded` | `InProcessJobDriver` | inline                   | Jobs run in-process; demo green, zero infra                                 |
+| `production`      | ops surface live     | `POST /api/ops/jobs/...` | Airflow drives on schedule; **fail-closed** if registry/stores unregistered |
 
 ## 6. Airflow, concretely (ops artifacts, not app code)
 
@@ -109,7 +109,7 @@ Because these are HTTP-only, Airflow never imports TypeScript and can be replace
 
 - **Dagster** — software-defined assets map cleanly onto "the projected graph" and "the DEQM measures" as materializable assets with lineage; lighter local-dev story. Strong technical fit.
 - **Prefect** — similar modern ergonomics.
-- **Temporal** — the better fit for the **event/stream** row (durable, stateful, retry-heavy) and for long-running saga-style care-plan actions — explicitly *not* this seam.
+- **Temporal** — the better fit for the **event/stream** row (durable, stateful, retry-heavy) and for long-running saga-style care-plan actions — explicitly _not_ this seam.
 - **Airflow** — chosen as the reference because it is the incumbent in most payer data-engineering shops; its edge here is organizational familiarity more than technical superiority. The HTTP-driven design means the choice is reversible.
 
 ## 8. Non-goals
@@ -133,3 +133,40 @@ Because these are HTTP-only, Airflow never imports TypeScript and can be replace
 - **Idempotency:** re-running a job over the same input applies zero net new mutations (tested against the shared graph).
 - **Demo-intact:** mock/seeded still runs jobs in-process; no ops-surface dependency in the demo path.
 - **Auth:** the ops job surface rejects unauthenticated/unauthorized calls (tested).
+
+## 11. Implemented surface (Phase 5)
+
+The in-process seam and the ops HTTP surface are built:
+
+- `src/lib/jobs/` — `Job`/`JobDriver`/`JobRegistry`, `InProcessJobDriver`, and the `projection.drain` + `ingest.cbo-sdoh` jobs. `bootstrap` and `devIngestion` orchestrate through the driver.
+- **`POST /api/ops/jobs/run`** — body `{ "name": "<job>", "input": { ... } }`; triggers the job through the process-shared ops driver; returns `{ runId, jobName, state, metrics, error }`. `200` succeeded, `500` failed, `404` unknown job.
+- **`GET /api/ops/jobs/status?runId=<id>`** — reads a run's terminal status back.
+- **Auth:** service token. Set `OPS_JOBS_TOKEN`; callers send `Authorization: Bearer <token>`. Fail-closed — `503` when the token is unset, `401` when missing/mismatched (timing-safe compare). This is the machine-caller auth (Airflow is not a session user).
+
+Not yet built (documented follow-ups): the `HttpOpsJobDriver` TS client (only needed by in-cluster callers; Airflow calls the HTTP endpoints directly, so it would be an unwired orphan until a caller exists), and production real-deps ingest bound under the `ingest.cbo-sdoh` name.
+
+### Example Airflow DAG (ops artifact, not app code)
+
+```python
+# sdoh_nightly — SFTP sensor -> ingest -> drain, via the ops HTTP surface.
+from airflow import DAG
+from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.sensors.filesystem import FileSensor
+import json, pendulum
+
+with DAG("sdoh_nightly", schedule="0 2 * * *", start_date=pendulum.datetime(2026, 1, 1), catchup=False) as dag:
+    wait = FileSensor(task_id="wait_for_drop", filepath="/sftp/cbo/sdoh/latest.csv")
+    ingest = SimpleHttpOperator(
+        task_id="ingest_cbo_sdoh", http_conn_id="rhtp_ops", endpoint="/api/ops/jobs/run",
+        method="POST", headers={"Authorization": "Bearer {{ var.value.OPS_JOBS_TOKEN }}"},
+        data=json.dumps({"name": "ingest.cbo-sdoh", "input": {"payload": "{{ ti.xcom_pull('read_drop') }}"}}),
+    )
+    drain = SimpleHttpOperator(
+        task_id="projection_drain", http_conn_id="rhtp_ops", endpoint="/api/ops/jobs/run",
+        method="POST", headers={"Authorization": "Bearer {{ var.value.OPS_JOBS_TOKEN }}"},
+        data=json.dumps({"name": "projection.drain"}),
+    )
+    wait >> ingest >> drain
+```
+
+Retries, SLAs, and backfill windows are configured in Airflow, not in app code.

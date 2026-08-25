@@ -22,24 +22,43 @@ function dockerAvailable(): boolean {
 }
 
 const HAS_DOCKER = dockerAvailable();
-const reason = HAS_DOCKER ? '' : 'skipped: no Docker daemon (pg-mem covers these paths in unit tests)';
+const reason = HAS_DOCKER
+  ? ''
+  : 'skipped: no Docker daemon (pg-mem covers these paths in unit tests)';
 
 function record(id: string): EvidenceRecord {
-  return createEvidenceRecord({ id, memberId: 'M1', order: { code: '72148' }, createdAt: '2026-08-22T00:00:00.000Z' });
+  return createEvidenceRecord({
+    id,
+    memberId: 'M1',
+    order: { code: '72148' },
+    createdAt: '2026-08-22T00:00:00.000Z',
+  });
 }
 
 // describe.skipIf keeps the file green (and honest) when Docker is absent.
 describe.skipIf(!HAS_DOCKER)('pg evidence ledger — real Postgres (testcontainers)', () => {
   let container: { getConnectionUri(): string; stop(): Promise<unknown> };
   let pool: PgLike & { end?: () => Promise<void> };
-  let rawPool: { query: (t: string, v?: unknown[]) => Promise<{ rows: unknown[] }>; end: () => Promise<void> };
+  let rawPool: {
+    query: (t: string, v?: unknown[]) => Promise<{ rows: unknown[] }>;
+    end: () => Promise<void>;
+  };
 
   beforeAll(async () => {
     const { PostgreSqlContainer } = await import('@testcontainers/postgresql');
     const { Pool } = await import('pg');
     container = await new PostgreSqlContainer('postgres:16-alpine').start();
-    rawPool = new Pool({ connectionString: container.getConnectionUri() }) as unknown as typeof rawPool;
+    rawPool = new Pool({
+      connectionString: container.getConnectionUri(),
+    }) as unknown as typeof rawPool;
     pool = rawPool as unknown as PgLike;
+    // Swallow the expected connection-termination error pg emits when the container
+    // is stopped in afterAll (Postgres 57P01). Without a listener pg promotes it to an
+    // uncaught exception that fails the run even though every assertion passed.
+    (rawPool as unknown as { on(e: string, cb: (err: unknown) => void): void }).on(
+      'error',
+      () => {}
+    );
     await applyMigrations(pool, { realPostgres: true }); // includes the .pg.sql trigger
   }, 120_000);
 
@@ -54,7 +73,13 @@ describe.skipIf(!HAS_DOCKER)('pg evidence ledger — real Postgres (testcontaine
     const ledger = createPgEvidenceLedger(pool);
     const v1 = record('int-1');
     await ledger.save(v1);
-    const v2 = appendEntry(v1, { id: 'e1', ts: '2026-08-22T00:01:00.000Z', stage: 'prior-auth', type: 'note', text: 'x' });
+    const v2 = appendEntry(v1, {
+      id: 'e1',
+      ts: '2026-08-22T00:01:00.000Z',
+      stage: 'prior-auth',
+      type: 'note',
+      text: 'x',
+    });
     await ledger.save(v2);
     const history = await ledger.readLedger('int-1');
     expect(history.map((h) => h.provenance.version)).toEqual([1, 2]);
@@ -74,13 +99,19 @@ describe.skipIf(!HAS_DOCKER)('pg evidence ledger — real Postgres (testcontaine
   it('the database refuses UPDATE (append-only trigger)', async () => {
     const ledger = createPgEvidenceLedger(pool);
     await ledger.save(record('immutable-1'));
-    await expect(pool.query(`UPDATE evidence_ledger SET actor = 'tamper' WHERE record_id = $1`, ['immutable-1'])).rejects.toThrow(/append-only/);
+    await expect(
+      pool.query(`UPDATE evidence_ledger SET actor = 'tamper' WHERE record_id = $1`, [
+        'immutable-1',
+      ])
+    ).rejects.toThrow(/append-only/);
   });
 
   it('the database refuses DELETE (append-only trigger)', async () => {
     const ledger = createPgEvidenceLedger(pool);
     await ledger.save(record('immutable-2'));
-    await expect(pool.query(`DELETE FROM evidence_ledger WHERE record_id = $1`, ['immutable-2'])).rejects.toThrow(/append-only/);
+    await expect(
+      pool.query(`DELETE FROM evidence_ledger WHERE record_id = $1`, ['immutable-2'])
+    ).rejects.toThrow(/append-only/);
   });
 });
 

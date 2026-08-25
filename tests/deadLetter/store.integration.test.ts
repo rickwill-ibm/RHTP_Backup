@@ -46,6 +46,13 @@ describe.skipIf(!HAS_DOCKER)('dead-letter store — real Postgres (testcontainer
       connectionString: container.getConnectionUri(),
     }) as unknown as typeof rawPool;
     pool = rawPool as unknown as PgLike;
+    // Swallow the expected connection-termination error pg emits when the container
+    // is stopped in afterAll (Postgres 57P01). Without a listener pg promotes it to an
+    // uncaught exception that fails the run even though every assertion passed.
+    (rawPool as unknown as { on(e: string, cb: (err: unknown) => void): void }).on(
+      'error',
+      () => {}
+    );
     await applyMigrations(pool, { realPostgres: true }); // includes the .pg.sql trigger
   }, 120_000);
 

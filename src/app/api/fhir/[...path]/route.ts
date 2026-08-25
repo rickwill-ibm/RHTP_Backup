@@ -234,8 +234,11 @@ export async function GET(
         actor: actorId,
         correlationId,
       })
-      .catch(() => {
-        /* disclosure logging must never block a request */
+      .catch((err) => {
+        // Never block a request, but a failed accounting-of-disclosures write (CMS-0057-F)
+        // must not vanish silently — fall back to the log, exactly as audit.ts does.
+        // eslint-disable-next-line no-console
+        console.warn('[disclosure] fallback:', `Patient/${targetPid}`, correlationId, String(err));
       });
   }
 

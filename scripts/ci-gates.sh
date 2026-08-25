@@ -47,15 +47,19 @@ g_unit()     { npx --no-install vitest run; }
 g_wiring()   { node docs/build-provenance/check-wiring.mjs src --baseline docs/build-provenance/wiring-baseline.json; }
 g_prov()     { bash docs/build-provenance/check-provenance.sh; }
 g_mutation() { node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json; }
+g_shuffle()  { npx --no-install vitest run --sequence.shuffle; }
 
 run "types (tsc --noEmit)"      g_types
 run "file sizes + ratchet"      g_sizes
 run "lint (changed files)"      g_lint
 run "test-link E13 (changed)"   g_testlink
-if [ "$TIER" = "push" ] || [ "$TIER" = "ci" ]; then
+if [ "$TIER" = "push" ] || [ "$TIER" = "pre-merge" ] || [ "$TIER" = "ci" ]; then
   run "unit tests (vitest)"     g_unit
   run "wired-path E14"          g_wiring
   run "provenance E11"          g_prov
+fi
+if [ "$TIER" = "pre-merge" ] || [ "$TIER" = "ci" ]; then
+  run "unit tests (shuffled order - isolation)" g_shuffle
 fi
 if [ "$TIER" = "ci" ]; then
   run "mutation E13 (full)"     g_mutation

@@ -2,7 +2,8 @@
  * BFF: $member-match — plan Slice 2 (Provider Access) / Slice 3 (P2P).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionAuthContext } from '@/lib/server/smartSession';
+import { getPrincipal } from '@/lib/authz/principal';
 import { memberMatch } from '@/lib/server/memberMatch';
 import { correlationFrom } from '@/lib/server/correlation';
 import { ooError } from '@/lib/fhir/operationOutcome';
@@ -29,6 +30,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!(await isAuthenticated().catch(() => false))) {
     return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401 });
   }
+
+  // Attributable audit (CMS-0057-F accounting-of-disclosures): the resolved acting
+  // principal, not a hardcoded 'session-user' placeholder.
+  const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
   const parameters = await req.json().catch(() => null);
   const pid = matchedMemberId(parameters);
 
@@ -40,7 +45,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (pid && getProviderAccessConsentStore().isOptedOut(pid)) {
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: breakGlass ? 'member-match.break-glass' : 'member-match.consent-denied',
       resourceRef: `Patient/${pid}`,
       correlationId,
@@ -61,7 +66,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!parameters) {
     return NextResponse.json(ooError('Parameters body required', 'required'), { status: 400 });
   }
-  const result = await memberMatch(parameters, { actor: 'session-user', correlationId });
+  const result = await memberMatch(parameters, { actor: actorId, correlationId });
   return NextResponse.json(
     result.ok ? result.result : ooError('member-match failed', 'processing'),
     {

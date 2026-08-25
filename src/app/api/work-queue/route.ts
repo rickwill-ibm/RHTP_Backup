@@ -9,7 +9,8 @@
  * clearance run, which requires a seed bundle — mock always shows the demo data).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionAuthContext } from '@/lib/server/smartSession';
+import { getPrincipal } from '@/lib/authz/principal';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { correlationFrom } from '@/lib/server/correlation';
 import { canReadMemberData } from '@/lib/authz/guard';
@@ -29,6 +30,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   if (!(await isAuthenticated().catch(() => false))) {
     return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401 });
   }
+
+  // Attributable audit (CMS-0057-F accounting-of-disclosures): the resolved acting
+  // principal, not a hardcoded 'session-user' placeholder.
+  const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
   const decision = canReadMemberData({ role: 'pa-reviewer', purpose: 'operations' });
   if (!decision.allow) {
     return NextResponse.json(ooError(decision.reason, 'forbidden'), { status: 403 });
@@ -39,15 +44,22 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // is empty on a fresh session unless financial-clearance has been run first.
     if (devMockEnabled()) {
       const seeded = devWorkQueueItems();
-      type QN = 'auto-cleared' | 'ready-to-submit' | 'high-risk-review' | 'denied-appeal' | 'more-info';
-      const groups: Record<QN, typeof seeded> = { 'auto-cleared': [], 'ready-to-submit': [], 'high-risk-review': [], 'denied-appeal': [], 'more-info': [] };
+      type QN =
+        'auto-cleared' | 'ready-to-submit' | 'high-risk-review' | 'denied-appeal' | 'more-info';
+      const groups: Record<QN, typeof seeded> = {
+        'auto-cleared': [],
+        'ready-to-submit': [],
+        'high-risk-review': [],
+        'denied-appeal': [],
+        'more-info': [],
+      };
       for (const it of seeded) groups[it.queue as QN].push(it);
       return NextResponse.json({ count: seeded.length, groups }, { status: 200 });
     }
     const items = await listWorkItems(getEvidenceStore());
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: 'work-queue.list',
       correlationId,
       outcome: 'success',

@@ -40,7 +40,7 @@
   },
   "scripts": {
     "dev": "next dev -p 4029",
-    "prepare": "git config core.hooksPath .githooks || true",
+    "prepare": "git config core.hooksPath tools/hooks || true",
     "build": "next build",
     "start": "next dev -p 4029",
     "lint": "next lint",
@@ -55,6 +55,7 @@
     "gen:cert": "vitest run tools/gen/certSummaries.gen.ts",
     "gate:fast": "bash scripts/ci-gates.sh fast",
     "gate:push": "bash scripts/ci-gates.sh push",
+    "gate:pre-merge": "bash scripts/ci-gates.sh pre-merge",
     "gate:ci": "bash scripts/ci-gates.sh ci",
     "test:contract": "newman run tools/contract/cms0057f.postman_collection.json -e tools/contract/local.postman_environment.json",
     "test:e2e": "playwright test",

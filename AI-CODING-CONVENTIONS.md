@@ -302,10 +302,22 @@ The size gate is ratchet-aware: `check-file-sizes.sh --write-baseline` records t
 current violation set to `quality-baseline.json`; ordinary runs fail only on NEW
 violations or on a baselined file that GREW. The baseline may only shrink.
 
-Enforcement surfaces: `.github/workflows/convention-gates.yml` (per PR: types →
-sizes+ratchet → lint → unit tests) · versioned pre-commit hook at
-`tools/hooks/pre-commit` (enable once per clone: `git config core.hooksPath
-tools/hooks`) · `AGENTS.md` as the ≤150-line session entry map.
+Enforcement surfaces: `.github/workflows/convention-gates.yml` runs the canonical gate at
+the `ci` tier (adds mutation E13 + shuffled-order isolation) on every push/PR. Locally the
+same gate has tiers: `npm run gate:fast` (types, sizes, lint, E13-link), `gate:push`
+(+ unit tests, E14, E11), and `gate:pre-merge` (+ a shuffled-order run — mirrors the CI
+`test:shuffle` job so test-isolation flakes are caught before CI, not after); run
+`gate:pre-merge` before merging to `main`.
+
+Git hooks are versioned under `tools/hooks/` and auto-enabled via the `prepare` npm script
+(`core.hooksPath tools/hooks` on `npm install`): `pre-commit` runs only the cheap rungs —
+prettier auto-format of staged code (so formatting can never fail the lint gate after the
+fact), the file-size ratchet, and E13 test-link — while `pre-push` runs the full
+`gate:push` so a red push is caught locally, not in CI (`git push --no-verify` bypasses).
+
+Local ⊊ CI: a clean `gate:push` is a strong signal, not a guarantee — the
+Docker/testcontainers integration specs and CI-only security scans run only in CI, so
+`gate:pre-merge` plus green CI is the real bar. · `AGENTS.md` remains the ≤150-line session entry map.
 
 Next npm session (needs registry access): install `eslint-plugin-boundaries` and add
 `check:boundaries` to `check:all` so the §4 public-surface rule moves from prose to

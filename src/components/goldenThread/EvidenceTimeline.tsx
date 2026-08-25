@@ -26,7 +26,7 @@ function summarizeEntry(e: EvidenceEntry): string {
     case 'dtr-response':
       return `DTR response (${e.itemCount} items)`;
     case 'pas-submission':
-      return `PAS submitted by ${e.approvedBy}`;
+      return `PAS submitted by ${e.approver.display} (${e.approver.reference})`;
     case 'pas-decision':
       return `Payer decision: ${e.decision}${e.reasons?.length ? ` — ${e.reasons.join('; ')}` : ''}`;
     case 'note':

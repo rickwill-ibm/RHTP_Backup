@@ -14,9 +14,7 @@ import {
   expectPhiSafeError,
 } from './_helpers';
 
-vi.mock('@/lib/server/smartSession', async () =>
-  (await import('./_helpers')).smartSessionMock()
-);
+vi.mock('@/lib/server/smartSession', async () => (await import('./_helpers')).smartSessionMock());
 
 import { POST as pasPOST } from '@/app/api/pas/submit/route';
 import { POST as webhookPOST } from '@/app/api/webhooks/claim-response/route';
@@ -86,7 +84,10 @@ describe('POST /api/pas/submit', () => {
     };
     expect(body.resourceType).toBe('ClaimResponse');
     expect(body.patient.reference).toBe('Patient/PAT-0042');
-    expect(body.disposition).toContain('Dr. Reviewer MD');
+    // approver of record is bound server-side from the authenticated session — the
+    // client-supplied string is NOT echoed into the ClaimResponse (spoof closed).
+    expect(body.disposition).toContain('reviewer-dev');
+    expect(body.disposition).not.toContain('Dr. Reviewer MD');
   });
 
   it('accepts the approver via the x-approved-by header as the route allows', async () => {

@@ -8,7 +8,7 @@
  */
 import { OutboxWriter } from '@/lib/outbox';
 import { cboSdohAdapter, defaultPipelineDeps, runPipeline } from '@/lib/pipeline';
-import { makeDevOutboxDeps } from './devOutbox';
+import { resolveOutboxDeps } from './outboxDeps';
 import type { Job, JobContext, JobResult } from './types';
 
 export interface CboSdohIngestInput {
@@ -22,7 +22,7 @@ export const ingestCboSdohJob: Job = {
     if (typeof payload !== 'string' || payload.length === 0) {
       throw new Error('ingest.cbo-sdoh: input.payload (CSV string) is required');
     }
-    const writer = new OutboxWriter(makeDevOutboxDeps(ctx.stores.outbox));
+    const writer = new OutboxWriter(resolveOutboxDeps(ctx.stores));
     await runPipeline(
       cboSdohAdapter,
       { source: cboSdohAdapter.source, format: cboSdohAdapter.format, payload },

@@ -8,6 +8,7 @@
  */
 import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
 import { makeInProcessJobDriver } from './inProcessDriver';
+import { makeHttpOpsJobDriver } from './httpOpsDriver';
 import { registerJob } from './registry';
 import { projectionDrainJob } from './projectionJobs';
 import { ingestCboSdohJob } from './ingestJobs';
@@ -17,7 +18,14 @@ let opsDriver: JobDriver | null = null;
 let coreRegistered = false;
 
 export function getSharedOpsJobDriver(): JobDriver {
-  if (opsDriver === null) opsDriver = makeInProcessJobDriver();
+  if (opsDriver === null) {
+    // Config-selected: forward to a remote job runner when OPS_JOBS_REMOTE_URL is
+    // set (a separate runner pod), else run jobs in this process. Both are real.
+    const remote = process.env.OPS_JOBS_REMOTE_URL;
+    opsDriver = remote
+      ? makeHttpOpsJobDriver({ baseUrl: remote, token: process.env.OPS_JOBS_TOKEN ?? '' })
+      : makeInProcessJobDriver();
+  }
   return opsDriver;
 }
 

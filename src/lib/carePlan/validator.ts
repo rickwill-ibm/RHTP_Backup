@@ -113,3 +113,21 @@ export function validateGeneratedPlan(
     dataLimitations: checkDataLimitations(input),
   };
 }
+
+/**
+ * Data-honesty (F5): surface care-team members whose contact block is synthesized
+ * placeholder data (not directory-sourced), so no caller mistakes it for real
+ * contact info. Additive check (not part of the P1/P3/P4 pass); mirrors the
+ * honest-data-limitation pattern of checkDataLimitations.
+ */
+export function checkCareTeamContactHonesty(plan: GeneratedCarePlan): string[] {
+  const flags: string[] = [];
+  for (const m of plan.careTeam) {
+    if (m.synthetic || m.contactProvenance === 'synthesized-placeholder') {
+      flags.push(
+        `care-team member ${m.id} (${m.role}) has synthesized placeholder contact data, not directory-sourced`
+      );
+    }
+  }
+  return flags;
+}

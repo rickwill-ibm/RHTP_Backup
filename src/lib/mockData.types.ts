@@ -2,7 +2,14 @@
 
 export type RiskTier = 'Critical' | 'High' | 'Moderate' | 'Low';
 export type AttributionStatus = 'Confirmed' | 'Provisional' | 'Disputed' | 'Dropped';
-export type HCCStatus = 'Surfaced' | 'Evidence Reviewed' | 'Clinician Review' | 'Documented' | 'Submitted' | 'Confirmed' | 'Rejected';
+export type HCCStatus =
+  | 'Surfaced'
+  | 'Evidence Reviewed'
+  | 'Clinician Review'
+  | 'Documented'
+  | 'Submitted'
+  | 'Confirmed'
+  | 'Rejected';
 export type GapStatus = 'Open' | 'In Progress' | 'Closed' | 'Excluded' | 'Expired';
 export type AlertTier = 'Critical' | 'Important' | 'Informational';
 export type ProgramType = 'MSSP ACO' | 'ACO REACH' | 'Commercial VBC' | 'Medicaid MCO';
@@ -97,7 +104,12 @@ export interface UtilizationAlert {
   id: string;
   patientId: string;
   tier: AlertTier;
-  type: 'Predicted ER Risk' | 'Avoidable Admission' | 'High-Cost Imaging' | 'Poly-Pharmacy' | 'SNF Readmission Risk';
+  type:
+    | 'Predicted ER Risk'
+    | 'Avoidable Admission'
+    | 'High-Cost Imaging'
+    | 'Poly-Pharmacy'
+    | 'SNF Readmission Risk';
   description: string;
   riskScore: number;
   estimatedCost: number;
@@ -159,7 +171,14 @@ export interface SpecialistProvider {
 export type CarePlanStatus = 'Active' | 'Draft' | 'Completed' | 'Cancelled' | 'On Hold';
 export type GoalStatus = 'In Progress' | 'Achieved' | 'Not Started' | 'Cancelled';
 export type InterventionStatus = 'Scheduled' | 'Active' | 'Completed' | 'Cancelled' | 'Pending';
-export type CarePlanTemplate = 'Cardiology' | 'Endocrinology' | 'Pulmonology' | 'Nephrology' | 'Orthopedics' | 'Neurology' | 'Custom';
+export type CarePlanTemplate =
+  | 'Cardiology'
+  | 'Endocrinology'
+  | 'Pulmonology'
+  | 'Nephrology'
+  | 'Orthopedics'
+  | 'Neurology'
+  | 'Custom';
 
 export interface CarePlanGoal {
   id: string;
@@ -195,6 +214,10 @@ export interface CareTeamMember {
   email?: string;
   networkTier?: NetworkTier;
   npi?: string;
+  /** Honesty markers (care-plan F5): true + provenance when the contact block is
+   *  synthesized placeholder data, not directory-sourced. */
+  synthetic?: boolean;
+  contactProvenance?: 'record-sourced' | 'synthesized-placeholder';
 }
 
 export interface CarePlan {
@@ -294,7 +317,8 @@ export interface GainshareRecord {
 // ── Episode types ────────────────────────────────────────────
 export type EpisodeStatus = 'Active' | 'Closed' | 'Maintenance';
 export type EpisodeCategory = 'Surgical' | 'Medical' | 'Chronic Care' | 'Preventive';
-export type EventType = 'ER' | 'Inpatient' | 'SNF' | 'Home Health' | 'Outpatient' | 'Procedure' | 'Lab' | 'Medication';
+export type EventType =
+  'ER' | 'Inpatient' | 'SNF' | 'Home Health' | 'Outpatient' | 'Procedure' | 'Lab' | 'Medication';
 
 export interface EpisodeEvent {
   id: string;

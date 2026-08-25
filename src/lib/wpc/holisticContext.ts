@@ -15,6 +15,7 @@
 import { getDataMode } from '@/lib/config/dataMode';
 import { holisticContextEngine } from '@/lib/services/holisticContextEngine';
 import type { HolisticPatientContext } from '@/lib/services/holisticContextEngine.types';
+import type { ConsentScope } from '@/lib/graph/lens/types';
 
 export type { HolisticPatientContext } from '@/lib/services/holisticContextEngine.types';
 
@@ -51,6 +52,38 @@ export function resolveHolisticContext(memberId: string): HolisticContextResult 
   if (getDataMode('wpcRecord') === 'production') {
     if (!productionAggregator) throw new HolisticContextNotConfiguredError();
     return { context: productionAggregator(memberId), source: 'projected-graph' };
+  }
+  return { context: holisticContextEngine.buildContext(memberId), source: 'authored' };
+}
+
+// ─── Async production seam (WPC-01 Phase 3) ──────────────────────────────────
+// The projected-graph aggregator reads an ASYNC GraphStore, so production needs
+// an async resolver. Added alongside (not replacing) the sync path so the mock
+// demo and existing sync callers are untouched; Phase 4 routes real read callers
+// (agents + WPC UI) onto `resolveHolisticContextAsync`.
+
+let productionAggregatorAsync:
+  ((memberId: string, scope?: ConsentScope) => Promise<HolisticPatientContext>) | null = null;
+
+/** Register (or clear) the async production graph-aggregation function. */
+export function setProductionHolisticAggregatorAsync(
+  fn: ((memberId: string, scope?: ConsentScope) => Promise<HolisticPatientContext>) | null
+): void {
+  productionAggregatorAsync = fn;
+}
+
+/**
+ * Async resolve. Seam-switched on `wpcRecord`: production awaits the registered
+ * projected-graph aggregator (fail-closed if none), consent-scoped; mock/seeded
+ * returns the authored engine's context (demo intact).
+ */
+export async function resolveHolisticContextAsync(
+  memberId: string,
+  scope?: ConsentScope
+): Promise<HolisticContextResult> {
+  if (getDataMode('wpcRecord') === 'production') {
+    if (!productionAggregatorAsync) throw new HolisticContextNotConfiguredError();
+    return { context: await productionAggregatorAsync(memberId, scope), source: 'projected-graph' };
   }
   return { context: holisticContextEngine.buildContext(memberId), source: 'authored' };
 }

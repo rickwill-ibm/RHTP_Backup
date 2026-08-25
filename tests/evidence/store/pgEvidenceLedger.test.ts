@@ -10,12 +10,7 @@ import {
   type PgEvidenceLedger,
   type PgLike,
 } from '@/lib/evidence/store';
-import {
-  createEvidenceRecord,
-  appendEntry,
-  withStatus,
-  type EvidenceRecord,
-} from '@/lib/evidence';
+import { createEvidenceRecord, appendEntry, withStatus, type EvidenceRecord } from '@/lib/evidence';
 import { setSessionDataMode, clearSessionDataModes } from '@/lib/config/dataMode';
 
 /** Fresh pg-mem pool with the portable migrations applied (no .pg.sql). */
@@ -43,8 +38,20 @@ describe('pg evidence ledger — round-trip + ordering', () => {
   it('save then get returns an equal record; entry order preserved', async () => {
     const { ledger } = await freshLedger();
     let r = record('ev-1');
-    r = appendEntry(r, { id: 'e1', ts: '2026-08-22T00:01:00.000Z', stage: 'eligibility', type: 'eligibility', requiresPA: true });
-    r = appendEntry(r, { id: 'e2', ts: '2026-08-22T00:02:00.000Z', stage: 'prior-auth', type: 'note', text: 'second' });
+    r = appendEntry(r, {
+      id: 'e1',
+      ts: '2026-08-22T00:01:00.000Z',
+      stage: 'eligibility',
+      type: 'eligibility',
+      requiresPA: true,
+    });
+    r = appendEntry(r, {
+      id: 'e2',
+      ts: '2026-08-22T00:02:00.000Z',
+      stage: 'prior-auth',
+      type: 'note',
+      text: 'second',
+    });
     await ledger.save(r);
     const got = await ledger.get('ev-1');
     expect(got).toEqual(r);
@@ -70,7 +77,16 @@ describe('pg evidence ledger — append-only versioned history', () => {
     const { ledger } = await freshLedger();
     const v1 = withStatus(record('ev-2'), 'open');
     await ledger.save(v1);
-    const v2 = withStatus(appendEntry(v1, { id: 'e1', ts: '2026-08-22T00:01:00.000Z', stage: 'prior-auth', type: 'pas-submission', approvedBy: 'rev-1' }), 'submitted');
+    const v2 = withStatus(
+      appendEntry(v1, {
+        id: 'e1',
+        ts: '2026-08-22T00:01:00.000Z',
+        stage: 'prior-auth',
+        type: 'pas-submission',
+        approver: { reference: 'Practitioner/rev-1', display: 'Reviewer rev-1' },
+      }),
+      'submitted'
+    );
     await ledger.save(v2);
 
     const history = await ledger.readLedger('ev-2');
@@ -92,7 +108,14 @@ describe('pg evidence ledger — append-only versioned history', () => {
     clock.setClock(() => Date.parse('2026-08-22T09:00:00.000Z'));
     const { ledger } = await freshLedger();
     let r = record('ev-3');
-    r = appendEntry(r, { id: 'e1', ts: '2026-08-22T00:01:00.000Z', stage: 'prior-auth', type: 'pas-submission', approvedBy: 'reviewer:42', actor: 'reviewer:42' });
+    r = appendEntry(r, {
+      id: 'e1',
+      ts: '2026-08-22T00:01:00.000Z',
+      stage: 'prior-auth',
+      type: 'pas-submission',
+      approver: { reference: 'reviewer:42', display: 'Reviewer 42' },
+      actor: 'reviewer:42',
+    });
     await ledger.save(r);
     const [entry] = await ledger.readLedger('ev-3');
     expect(entry.provenance.actor).toBe('reviewer:42');

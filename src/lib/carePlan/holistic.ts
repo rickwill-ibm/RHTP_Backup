@@ -11,7 +11,7 @@
  * comprehensive path on any error (F7, now with a structured warning).
  */
 import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
-import { holisticContextEngine } from '@/lib/services/holisticContextEngine';
+import { resolveHolisticContext } from '@/lib/wpc/holisticContext';
 import { rootCauseAnalyzer } from '@/lib/services/rootCauseAnalyzer';
 import {
   tieredInterventionGenerator,
@@ -35,6 +35,9 @@ import type {
 export type HolisticGeneratedCarePlan = GeneratedCarePlan & {
   holisticPlan?: HolisticCarePlan;
   rootCauseInsight?: string;
+  /** Set when the holistic path failed and fell over to the comprehensive plan
+   *  (F7): the fallback is now observable to the caller, not silent. */
+  fallback?: { used: boolean; reason: string };
 };
 
 /**
@@ -45,7 +48,12 @@ export type HolisticGeneratedCarePlan = GeneratedCarePlan & {
 export function generateHolisticCarePlan(input: ComprehensivePlanInput): HolisticGeneratedCarePlan {
   try {
     const { patient } = input;
-    const context = holisticContextEngine.buildContext(patient.id);
+    // Route through the holistic-context seam (WPC-01 Phase 4) instead of the
+    // engine directly: mock/seeded returns the authored context (demo intact);
+    // production fails over to the comprehensive plan below rather than silently
+    // serving authored data. (Client-side generation can't read the server graph;
+    // true projected care-plans need server-side generation — a documented follow-up.)
+    const context = resolveHolisticContext(patient.id).context;
     const analysis = rootCauseAnalyzer.analyze(context);
     const holisticPlan = tieredInterventionGenerator.generate(context, analysis);
     const standardPlan = convertHolisticToStandardPlan(holisticPlan, input);
@@ -59,7 +67,11 @@ export function generateHolisticCarePlan(input: ComprehensivePlanInput): Holisti
       patientId: input.patient.id,
       error: error instanceof Error ? error.name : 'unknown',
     });
-    return generateComprehensiveCarePlan(input);
+    const comprehensive = generateComprehensiveCarePlan(input);
+    return {
+      ...comprehensive,
+      fallback: { used: true, reason: error instanceof Error ? error.name : 'unknown' },
+    };
   }
 }
 

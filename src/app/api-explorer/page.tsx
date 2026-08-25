@@ -369,7 +369,7 @@ function buildEndpoints(patientId: string): Record<Exclude<TabId, 'postman-suite
         label: 'PAS — submission WITH human approver (approved)',
         mandate: 'CMS-0057-F §4 — Prior Authorization API (Da Vinci PAS)',
         annotation:
-          'Same payload as above but with approvedBy set. Returns patient-specific approved ClaimResponse. Proves the human-gate is the only difference between blocked and approved.',
+          'Same payload as above but WITH the approval signal set. The approver is NOT read from this field — the server binds the reviewer of record from the authenticated session (Practitioner/dev to Dr. Alex Rivera, UM Reviewer) and returns a patient-specific approved ClaimResponse. Proves the human-gate plus dynamic approver association.',
         buildBody: (pid) => ({
           patientId: pid,
           claimBundle: {
@@ -404,7 +404,7 @@ function buildEndpoints(patientId: string): Record<Exclude<TabId, 'postman-suite
               },
             ],
           },
-          approvedBy: 'Dr. Sarah Johnson MD',
+          approvedBy: 'session-approval-signal',
         }),
       },
       {

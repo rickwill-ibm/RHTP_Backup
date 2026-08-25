@@ -43,6 +43,18 @@ export interface OrderRef {
   providerNpi?: string;
 }
 
+/**
+ * The reviewer of record on a PA submission — a resolved, referenceable identity,
+ * NEVER a free-text name. Structurally mirrors ApproverIdentity
+ * (src/lib/authz/approvalAuthority.ts); kept inline so the audit-spine type has no
+ * upward dependency on the authz module. Because the entry carries this shape (not
+ * a bare string), a caller cannot stamp the golden thread with an unverified name.
+ */
+export interface EvidenceApprover {
+  reference: string; // e.g. 'Practitioner/rev-1'
+  display: string; // human-readable name derived from the reference
+}
+
 interface BaseEntry {
   id: string;
   ts: string; // ISO; caller-supplied
@@ -56,7 +68,7 @@ export type EvidenceEntry =
   | (BaseEntry & { type: 'gold-card'; exemption: GoldCardEvidence })
   | (BaseEntry & { type: 'dtr-response'; questionnaireRef?: string; itemCount: number })
   | (BaseEntry & { type: 'propensity'; score: number; band: 'low' | 'medium' | 'high' })
-  | (BaseEntry & { type: 'pas-submission'; approvedBy: string })
+  | (BaseEntry & { type: 'pas-submission'; approver: EvidenceApprover })
   | (BaseEntry & {
       type: 'pas-decision';
       decision: 'approved' | 'denied' | 'more-info';
@@ -132,6 +144,27 @@ export function recordGoldCard(
     actor: args.actor ?? 'system',
     type: 'gold-card',
     exemption: args.exemption,
+  });
+}
+
+/**
+ * Record a PAS submission on the evidence spine. The approver MUST be a resolved
+ * identity (EvidenceApprover) — there is no string overload — so the reviewer of
+ * record on the golden thread is always the authenticated, referenceable reviewer
+ * bound at the submit route, never a client-supplied name. The actor defaults to
+ * the approver's reference (the accountable identity).
+ */
+export function recordPasSubmission(
+  record: EvidenceRecord,
+  args: { id: string; ts: string; approver: EvidenceApprover; actor?: string }
+): EvidenceRecord {
+  return appendEntry(record, {
+    id: args.id,
+    ts: args.ts,
+    stage: 'prior-auth',
+    actor: args.actor ?? args.approver.reference,
+    type: 'pas-submission',
+    approver: { reference: args.approver.reference, display: args.approver.display },
   });
 }
 
@@ -227,6 +260,9 @@ export function toAuditEvents(record: EvidenceRecord, correlationId: string): Au
           ...base,
           detail: `${record.order.code} gold-card applied=${e.exemption.applied} basis=${e.exemption.basis ?? 'n/a'}`,
         };
+      case 'pas-submission':
+        // PHI-safe: the approver reference is a Practitioner id, not member data.
+        return { ...base, detail: `${record.order.code} submitted by ${e.approver.reference}` };
       case 'pas-decision':
         return { ...base, detail: `${record.order.code} decision=${e.decision}` };
       default:

@@ -11,6 +11,20 @@ export interface HolisticPatientContext {
   digitalProfile: DigitalProfile;
   psychosocialProfile: PsychosocialProfile;
   contextGeneratedAt: string;
+  /**
+   * Provenance (WPC-01 Phase 3): which sections were populated from the REAL
+   * projected graph vs. filled with neutral null-objects pending their domain
+   * mapper. Absent on the authored (mock) engine's contexts. Makes the
+   * fail-honest contract machine-readable — a neutral section is never silently
+   * presented as the member's real data.
+   */
+  contextProvenance?: HolisticContextProvenance;
+}
+
+export interface HolisticContextProvenance {
+  source: 'projected-graph';
+  projectedSections: string[];
+  neutralSections: string[];
 }
 
 export interface PatientBasicInfo {

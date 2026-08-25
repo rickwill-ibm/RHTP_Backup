@@ -41,6 +41,12 @@ function careManagerMember(careManager: string, id: string): CareTeamMember {
   };
 }
 
+/** Care-plan-assembled members carry synthesized placeholder contact data (F5):
+ *  labelled here instead of being passed off as directory-sourced. */
+function markSynthesizedContact(m: CareTeamMember): CareTeamMember {
+  return { ...m, synthetic: true, contactProvenance: 'synthesized-placeholder' };
+}
+
 export function assembleCareTeam(analysis: PatientAnalysis, patient: Patient): CareTeamMember[] {
   const team: CareTeamMember[] = [];
   let teamCounter = 1;
@@ -78,7 +84,7 @@ export function assembleCareTeam(analysis: PatientAnalysis, patient: Patient): C
     }
   });
 
-  return team;
+  return team.map(markSynthesizedContact);
 }
 
 /** Build care team from a holistic plan (verbatim legacy behavior). */
@@ -145,5 +151,5 @@ export function buildCareTeamFromHolisticPlan(
     });
   });
 
-  return team;
+  return team.map(markSynthesizedContact);
 }

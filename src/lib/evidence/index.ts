@@ -7,6 +7,7 @@ export {
   withStatus,
   recordDetermination,
   recordGoldCard,
+  recordPasSubmission,
   entriesForStage,
   latestOfType,
   summarize,
@@ -17,6 +18,7 @@ export {
   type EvidenceStage,
   type EvidenceStatus,
   type EvidenceSummary,
+  type EvidenceApprover,
   type GoldCardEvidence,
   type OrderRef,
 } from './evidenceRecord';

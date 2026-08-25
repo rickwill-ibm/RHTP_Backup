@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# ─────────────────────────────────────────────────────────────────────────────
+# Auto-format staged code with Prettier before every commit.
+#
+# Why: files authored by tools/agents aren't prettier-formatted on save, and the
+# lint gate enforces `prettier/prettier` as a hard ERROR — so formatting used to
+# fail the gate AFTER the fact, costing a full re-run each time. This hook makes
+# that impossible: staged code is formatted (to the repo's .prettierrc, the same
+# config the lint gate uses) and re-staged before the commit is written.
+#
+# Scope: the code types the lint gate actually checks (ts/tsx/js/jsx/mjs/cjs),
+# formatting only — fast, so commits stay snappy. The full gate
+# (types/tests/lint/E11-E14) stays a deliberate `npm run gate:push` before push.
+# Dependency-free: uses the repo's own prettier (no husky/lint-staged).
+#
+# Activated via `core.hooksPath=.githooks` (set by package.json "prepare" on
+# `npm install`, and once now). Assumes tracked paths have no spaces (true here).
+# ─────────────────────────────────────────────────────────────────────────────
+files=$(git diff --cached --name-only --diff-filter=ACMR -- \
+  '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs')
+[ -z "$files" ] && exit 0
+
+echo "$files" | xargs -r npx --no-install prettier --write --ignore-unknown
+echo "$files" | xargs -r git add
+exit 0

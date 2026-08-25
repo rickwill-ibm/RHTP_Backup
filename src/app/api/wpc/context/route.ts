@@ -15,6 +15,8 @@ import { getPrincipal } from '@/lib/authz/principal';
 import { canAccessMemberTenantAware } from '@/lib/security/tenant';
 import { audit } from '@/lib/server/audit';
 import { resolveHolisticContextAsync } from '@/lib/wpc/holisticContext';
+import { resolveConsentDecision } from '@/lib/consent/consentResolver';
+import { now } from '@/lib/clock';
 
 export const runtime = 'nodejs';
 
@@ -52,10 +54,25 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    // Consent scope defaults to the most restrictive (NO_CONSENT): restricted
-    // (42 CFR Part 2 / segmented) data is excluded until a principal->scope
-    // mapping is wired. Async because production reads the projected graph.
-    const result = await resolveHolisticContextAsync(memberId);
+    // Consent decision (Increment 1a): the read scope is decided by the member's
+    // Part 2 directives x recipient x purpose x validity window, seam-switched on
+    // the `consent` dataMode (mock fixture / production store; fail-closed). The
+    // decision is audited (PHI-safe). Async because production reads the graph.
+    const purpose = req.nextUrl.searchParams.get('purpose') || 'care-management';
+    const consent = resolveConsentDecision(
+      { memberId, recipient: principal.userId, purpose },
+      { now }
+    );
+    await audit({
+      ts: consent.audit.at,
+      actor: principal.userId,
+      action: `wpc.consent.${consent.audit.auditClass}`,
+      resourceRef: `Patient/${memberId}`,
+      correlationId,
+      outcome: consent.failClosed ? 'failure' : 'success',
+      detail: `${consent.audit.reason} | source=${consent.source} part2=${consent.scope.part2} disclosed=${consent.disclosed}`,
+    });
+    const result = await resolveHolisticContextAsync(memberId, consent.scope);
     await audit({
       ts: new Date().toISOString(),
       actor: principal.userId,

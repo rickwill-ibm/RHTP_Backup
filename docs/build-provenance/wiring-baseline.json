@@ -34,7 +34,6 @@
     "src/lib/certification/matrix.ts",
     "src/lib/certification/readinessRollup.ts",
     "src/lib/certification/types.ts",
-    "src/lib/consent/part2Consent.ts",
     "src/lib/dataSources/common.ts",
     "src/lib/dataSources/denialRateFeed.ts",
     "src/lib/dataSources/goldCardRoster.ts",

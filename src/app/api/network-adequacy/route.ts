@@ -9,7 +9,8 @@
  * `networkAdequacyAI` (not required -- the assistant is deterministic).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/server/smartSession';
+import { isAuthenticated, getSessionAuthContext } from '@/lib/server/smartSession';
+import { getPrincipal } from '@/lib/authz/principal';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { correlationFrom } from '@/lib/server/correlation';
 import { audit } from '@/lib/server/audit';
@@ -48,6 +49,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!(await isAuthenticated().catch(() => false))) {
     return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401 });
   }
+
+  // Attributable audit (CMS-0057-F accounting-of-disclosures): the resolved acting
+  // principal, not a hardcoded 'session-user' placeholder.
+  const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
   const body = (await req.json().catch(() => null)) as {
     query?: unknown;
     defaultState?: unknown;
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const response = runAssistant(body.query, loadMockNetwork(), { defaultState });
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: 'network-adequacy.assist',
       correlationId,
       outcome: 'success',

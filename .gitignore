@@ -65,3 +65,15 @@ docs/build-provenance/.PROMPT_MASTER_LOG.committed
 .audit/
 docs/build-provenance/PROMPT_MASTER_LOG.xlsx
 _to_delete/
+
+# Relocated scratch/working dirs (moved to _to_delete/ during repo cleanup)
+/_to_delete/
+/_backups/
+/_sync/
+/standalone-smart-app-temp/
+/New PA Plan Documents/
+/Project Knowledge Uploads/
+/Pricing/
+
+# Local-only client/RFI docs pulled out of the repo (never tracked)
+/_local-only/

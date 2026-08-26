@@ -29,7 +29,7 @@ import { resolveApprovalAuthority } from '@/lib/authz/approvalAuthority';
 import type { ApproverIdentity } from '@/lib/authz/approvalAuthority';
 import { submitPas } from '@/lib/server/pasClient';
 import { getEvidenceStore } from '@/lib/evidence/store';
-import { recordPasSubmission, withStatus } from '@/lib/evidence';
+import { createEvidenceRecord, recordPasSubmission, withStatus } from '@/lib/evidence';
 import { correlationFrom, newCorrelationId } from '@/lib/server/correlation';
 import { ooError, operationOutcome } from '@/lib/fhir/operationOutcome';
 import { audit } from '@/lib/server/audit';
@@ -50,9 +50,12 @@ function codeFromClaimBundle(bundle: unknown): string | undefined {
 }
 
 /**
- * Append a `pas-submission` entry (resolved approver) to the member's latest
- * Evidence Record. Best-effort — a missing record, an unconfigured production
- * ledger, or any store error is swallowed so it never blocks the submission.
+ * Record a `pas-submission` entry (resolved approver) on the member's Evidence
+ * Record — the golden-thread audit spine. Create-if-absent: appends to the member's
+ * latest record when one exists, otherwise MINTS a fresh record so every submission
+ * always lands on the spine (never a silent no-op). Still non-blocking: an
+ * unconfigured production ledger or any store error is swallowed so evidence
+ * recording can never fail the submission itself.
  */
 async function recordSubmissionOnEvidence(args: {
   memberId: string | undefined;
@@ -67,16 +70,23 @@ async function recordSubmissionOnEvidence(args: {
     const ids = await store.list();
     const byCode = code ? ids.filter((id) => id.startsWith(`ev-${memberId}-${code}-`)) : [];
     const pool = byCode.length ? byCode : ids.filter((id) => id.startsWith(`ev-${memberId}-`));
-    if (pool.length === 0) return; // no clearance record yet — nothing to append to
     const latest = pool
       .slice()
       .sort((a, b) => (Number(a.split('-').pop()) || 0) - (Number(b.split('-').pop()) || 0))
-      .pop() as string;
-    const rec = await store.get(latest);
-    if (!rec) return;
+      .pop();
+    // create-if-absent: a submission must ALWAYS land on the golden-thread spine, even when
+    // no prior financial-clearance run created a record — never a silent no-op.
+    const rec =
+      (latest ? await store.get(latest) : null) ??
+      createEvidenceRecord({
+        id: `ev-${memberId}-${code ?? 'pa'}-${Date.parse(ts)}`,
+        memberId,
+        order: { code: code ?? 'unknown' },
+        createdAt: ts,
+      });
     const updated = withStatus(
       recordPasSubmission(rec, {
-        id: `${latest}-pas-${Date.parse(ts)}`,
+        id: `${rec.id}-pas-${Date.parse(ts)}`,
         ts,
         approver: { reference: approver.reference, display: approver.display },
       }),

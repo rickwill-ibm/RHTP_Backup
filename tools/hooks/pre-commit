@@ -1,34 +1,35 @@
 #!/usr/bin/env bash
-# Versioned pre-commit hook — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework v1.4.
-# Enable once per clone:  git config core.hooksPath tools/hooks
-# Runs the cheapest rungs of the verification ladder locally before a commit.
-
+# Versioned pre-commit hook — AI-CODING-CONVENTIONS.md v2 §18 + Agentic Build Framework.
+# Enabled via `core.hooksPath tools/hooks` (package.json "prepare" sets it on npm install).
+#
+# The CHEAPEST rungs only, so commits stay fast. The EXPENSIVE rungs — tsc, full lint,
+# unit tests, E11/E14 — run at pre-push (tools/hooks/pre-push -> scripts/ci-gates.sh push)
+# and via `npm run gate:push` / `gate:pre-merge`. Running tsc here would make every commit
+# take minutes on this repo, which is why the heavy checks live at push, not commit.
 set -e
 cd "$(git rev-parse --show-toplevel)"
 
-echo "[pre-commit] tsc --noEmit"
-npx tsc --noEmit
+# 1) Auto-format staged code with Prettier (repo .prettierrc == the lint gate's config), so
+#    formatting can never fail the lint gate after the fact. Formatted files are re-staged.
+FILES=$(git diff --cached --name-only --diff-filter=ACMR -- \
+  '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs')
+if [ -n "$FILES" ]; then
+  echo "[pre-commit] prettier --write (staged)"
+  echo "$FILES" | xargs -r npx --no-install prettier --write --ignore-unknown
+  echo "$FILES" | xargs -r git add
+fi
 
+# 2) File-size + quality ratchet (fast).
 echo "[pre-commit] file sizes + quality ratchet"
 bash check-file-sizes.sh
 
-# E13 (test-effectiveness, cheap half): every staged new/changed source module must be
-# referenced by a test. The mutation sample is heavier and runs in CI / at iteration close.
-echo "[pre-commit] E13 test-link on staged source"
+# 3) E13 test-link on staged source (symbol-aware; the fast half — mutation runs in CI).
 STAGED=$(git diff --cached --name-only --diff-filter=AM -- 'src/*.ts' 'src/*.tsx' 2>/dev/null | tr '\n' ' ')
 if [ -n "$STAGED" ]; then
+  echo "[pre-commit] E13 test-link (staged source)"
   node docs/build-provenance/check-testlink.mjs src tests $STAGED --baseline docs/build-provenance/testlink-baseline.json
 else
   echo "  (no staged source files)"
 fi
 
-echo "[pre-commit] lint (staged source)"
-if [ -n "$STAGED" ]; then
-  LINT_ARGS=""
-  for f in $STAGED; do LINT_ARGS="$LINT_ARGS --file $f"; done
-  npx next lint $LINT_ARGS
-else
-  echo "  (no staged source files)"
-fi
-
-echo "[pre-commit] OK"
+echo "[pre-commit] OK — tsc + full lint + tests run at pre-push / npm run gate:push"

@@ -34,12 +34,57 @@ function memberIdFromEvidenceId(id: string): string {
 }
 
 // CPT code → procedure metadata — mirrors PATIENT_PA_SCENARIOS in api-explorer and devStubs
-const CPT_META: Record<string, { display: string; policyRef: string; deficiency: string; payer: string; propensity: number; propensityBand: string }> = {
-  '72148': { display: 'MRI Lumbar Spine w/o Contrast',          policyRef: 'Policy/MRI-LUMBAR-001',   deficiency: 'Neurological deficit documentation missing',                  payer: 'SD Medicaid',    propensity: 0.71, propensityBand: 'high'   },
-  '75561': { display: 'Cardiac MRI w/ and w/o contrast',        policyRef: 'Policy/CARDIAC-MRI-001',  deficiency: 'Clinical justification beyond echocardiogram missing',        payer: 'UHC Community',  propensity: 0.48, propensityBand: 'medium' },
-  '93306': { display: 'Echocardiogram (complete transthoracic)', policyRef: 'Policy/ECHO-001',         deficiency: 'None — all criteria met',                                     payer: 'Molina SD',      propensity: 0.12, propensityBand: 'low'    },
-  '99243': { display: 'Nephrology office consultation',          policyRef: 'Policy/SPECIALTY-001',    deficiency: 'None — all criteria met',                                     payer: 'Anthem BCBS SD', propensity: 0.08, propensityBand: 'low'    },
-  '99244': { display: 'Pulmonology office consultation',         policyRef: 'Policy/SPECIALTY-002',    deficiency: 'None — all criteria met',                                     payer: 'Meridian SD',    propensity: 0.18, propensityBand: 'low'    },
+const CPT_META: Record<
+  string,
+  {
+    display: string;
+    policyRef: string;
+    deficiency: string;
+    payer: string;
+    propensity: number;
+    propensityBand: string;
+  }
+> = {
+  '72148': {
+    display: 'MRI Lumbar Spine w/o Contrast',
+    policyRef: 'Policy/MRI-LUMBAR-001',
+    deficiency: 'Neurological deficit documentation missing',
+    payer: 'SD Medicaid',
+    propensity: 0.71,
+    propensityBand: 'high',
+  },
+  '75561': {
+    display: 'Cardiac MRI w/ and w/o contrast',
+    policyRef: 'Policy/CARDIAC-MRI-001',
+    deficiency: 'Clinical justification beyond echocardiogram missing',
+    payer: 'UHC Community',
+    propensity: 0.48,
+    propensityBand: 'medium',
+  },
+  '93306': {
+    display: 'Echocardiogram (complete transthoracic)',
+    policyRef: 'Policy/ECHO-001',
+    deficiency: 'None — all criteria met',
+    payer: 'Molina SD',
+    propensity: 0.12,
+    propensityBand: 'low',
+  },
+  '99243': {
+    display: 'Nephrology office consultation',
+    policyRef: 'Policy/SPECIALTY-001',
+    deficiency: 'None — all criteria met',
+    payer: 'Anthem BCBS SD',
+    propensity: 0.08,
+    propensityBand: 'low',
+  },
+  '99244': {
+    display: 'Pulmonology office consultation',
+    policyRef: 'Policy/SPECIALTY-002',
+    deficiency: 'None — all criteria met',
+    payer: 'Meridian SD',
+    propensity: 0.18,
+    propensityBand: 'low',
+  },
 };
 const DEFAULT_META = CPT_META['72148'];
 
@@ -54,7 +99,7 @@ function seededEvidenceRecord(id: string) {
   const ts = '2026-05-15T14:22:00Z';
   const withoutPrefix = id.startsWith('ev-') ? id.slice(3) : id;
   const parts = withoutPrefix.split('-');
-  const cptCode  = parts.length >= 3 ? parts[parts.length - 2] : '72148';
+  const cptCode = parts.length >= 3 ? parts[parts.length - 2] : '72148';
   const memberId = memberIdFromEvidenceId(id);
   const code = cptCode || '72148';
   const meta = CPT_META[code] ?? DEFAULT_META;
@@ -72,21 +117,64 @@ function seededEvidenceRecord(id: string) {
     createdAt: ts,
     status: 'open',
     entries: [
-      { id: `${id}-e1`, ts, stage: 'eligibility', actor: 'system', type: 'eligibility', coverageRef: `Coverage/cov-${memberId}`, requiresPA: true, note: coverageNote },
-      { id: `${id}-e2`, ts, stage: 'medical-necessity', actor: 'system', type: 'coverage-determination',
-        determination: { outcome: meta.propensity > 0.3 ? 'requires-review' : 'approved', requiresPA: meta.propensity > 0.3, propensityToDeny: meta.propensity,
-          deficiencies: meta.deficiency === 'None — all criteria met'
-            ? []
-            : [{ criterionId: 'C2', description: meta.deficiency, severity: 'required' }],
-          policyRef: meta.policyRef, evaluatedAt: ts } },
-      { id: `${id}-e3`, ts, stage: 'eligibility', actor: 'system', type: 'gold-card',
-        exemption: { applied: meta.propensity <= 0.1, providerNpi: patient?.pcp ?? '1730154783', code, payer: meta.payer,
-          approvalRate: meta.propensity, lookbackMonths: 12, sampleSize: 14,
+      {
+        id: `${id}-e1`,
+        ts,
+        stage: 'eligibility',
+        actor: 'system',
+        type: 'eligibility',
+        coverageRef: `Coverage/cov-${memberId}`,
+        requiresPA: true,
+        note: coverageNote,
+      },
+      {
+        id: `${id}-e2`,
+        ts,
+        stage: 'medical-necessity',
+        actor: 'system',
+        type: 'coverage-determination',
+        determination: {
+          outcome: meta.propensity > 0.3 ? 'requires-review' : 'approved',
+          requiresPA: meta.propensity > 0.3,
+          propensityToDeny: meta.propensity,
+          deficiencies:
+            meta.deficiency === 'None — all criteria met'
+              ? []
+              : [{ criterionId: 'C2', description: meta.deficiency, severity: 'required' }],
+          policyRef: meta.policyRef,
+          evaluatedAt: ts,
+        },
+      },
+      {
+        id: `${id}-e3`,
+        ts,
+        stage: 'eligibility',
+        actor: 'system',
+        type: 'gold-card',
+        exemption: {
+          applied: meta.propensity <= 0.1,
+          providerNpi: patient?.pcp ?? '1730154783',
+          code,
+          payer: meta.payer,
+          approvalRate: meta.propensity,
+          lookbackMonths: 12,
+          sampleSize: 14,
           basis: 'payer voluntary program',
-          reason: meta.propensity <= 0.1
-            ? `Approval rate ${Math.round((1 - meta.propensity) * 100)}% — gold-card threshold met`
-            : `Approval rate ${Math.round((1 - meta.propensity) * 100)}% — below 90% gold-card threshold` } },
-      { id: `${id}-e4`, ts, stage: 'prior-auth', actor: 'system', type: 'propensity', score: meta.propensity, band: meta.propensityBand },
+          reason:
+            meta.propensity <= 0.1
+              ? `Approval rate ${Math.round((1 - meta.propensity) * 100)}% — gold-card threshold met`
+              : `Approval rate ${Math.round((1 - meta.propensity) * 100)}% — below 90% gold-card threshold`,
+        },
+      },
+      {
+        id: `${id}-e4`,
+        ts,
+        stage: 'prior-auth',
+        actor: 'system',
+        type: 'propensity',
+        score: meta.propensity,
+        band: meta.propensityBand,
+      },
     ],
   };
 }
@@ -114,10 +202,14 @@ export async function GET(
   // always audited. SEAM: consent — lib/consent/providerAccessOptOut.ts.
   const memberId = memberIdFromEvidenceId(id);
   const breakGlass = req.headers.get('x-break-glass') === 'true';
+  // Attributable audit (CMS-0057-F accounting-of-disclosures): the acting principal,
+  // not a hardcoded placeholder. Resolved once here since the consent-gate audit below
+  // runs before the authz block derives its own principal.
+  const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
   if (getProviderAccessConsentStore().isOptedOut(memberId)) {
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: breakGlass ? 'evidence.read.break-glass' : 'evidence.read.consent-denied',
       resourceRef: `Evidence/${id}`,
       correlationId,
@@ -172,7 +264,14 @@ export async function GET(
     // on a fresh session, but we still want to demonstrate the audit spine.
     if (devMockEnabled()) {
       const seeded = seededEvidenceRecord(id);
-      await audit({ ts: new Date().toISOString(), actor: 'session-user', action: 'evidence.read', resourceRef: `Evidence/${id}`, correlationId, outcome: 'success' });
+      await audit({
+        ts: new Date().toISOString(),
+        actor: actorId,
+        action: 'evidence.read',
+        resourceRef: `Evidence/${id}`,
+        correlationId,
+        outcome: 'success',
+      });
       return NextResponse.json(seeded, { status: 200 });
     }
     const record = await getEvidenceStore().get(id);
@@ -183,7 +282,7 @@ export async function GET(
     }
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: actorId,
       action: 'evidence.read',
       resourceRef: `Evidence/${id}`,
       correlationId,

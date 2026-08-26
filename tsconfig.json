@@ -41,6 +41,9 @@
     "node_modules",
     "e2e",
     "playwright.config.ts",
-    "PA-Standalone-SmartApp"
+    "PA-Standalone-SmartApp",
+    "_to_delete",
+    "_backups",
+    "_local-only"
   ]
 }

@@ -82,10 +82,10 @@ Key domains: `policy/` (engine + 17-policy corpus), `identity/` (match engine),
 README updated · commit message says what changed, why, and which invariants/contracts
 were touched.
 
-## Coalition and iteration work — governed by the Agentic Build Framework v1.5
+## Coalition and iteration work — governed by the Agentic Build Framework v1.7
 
 ANY multi-agent build, hardening, or iteration work on this platform MUST load and follow
-the **Agentic Build Framework v1.5** at `docs/framework/` (`SKILL.md` + `personas.md` +
+the **Agentic Build Framework v1.7** at `docs/framework/` (`SKILL.md` + `personas.md` +
 `enforcement-kit.md` + `operating-model.md`). Read it before orchestrating agents. Essentials:
 
 - **Wave unit:** probe -> spine (publish the inter-wave INTERFACE first — interface-freeze)
@@ -95,7 +95,7 @@ the **Agentic Build Framework v1.5** at `docs/framework/` (`SKILL.md` + `persona
   -> the orchestrator's OWN authoritative gate -> provenance close-out -> one sync. The
   required adversarial LENS SET is DERIVED from the iteration's NFR + regulatory surface
   (lens-completeness doctrine), not a fixed panel.
-- **Composite Definition of Done = E1-E15** (enforcement-kit.md): fail-closed seams (E1),
+- **Composite Definition of Done = E1-E16** (enforcement-kit.md): fail-closed seams (E1),
   quality ratchet (E2), namespace + shared-file partitions (E3), DRY convergence (E4),
   authoritative gate (E5), artifact-existence probe (E6), fidelity ledgers (E7), living
   risk register (E8), fail-open lint run at BUILD TIME not just review (E9 shift-left),
@@ -104,7 +104,7 @@ the **Agentic Build Framework v1.5** at `docs/framework/` (`SKILL.md` + `persona
   + `check-mutation.mjs` on the critical set (E13), WIRED-PATH / integration ratchet
   `docs/build-provenance/check-wiring.mjs` — no unit-tested-but-unreachable module, new
   orphans fail against `wiring-baseline.json` (E14), and the seam MOCK<->PRODUCTION PARITY
-  gate — mock and production dispositions are shape-equivalent (E15).
+  gate — mock and production dispositions are shape-equivalent (E15), and the BUILD / BUNDLE-RESOLUTION gate - the real `next build` passes so no Node-only module bled into an edge/client bundle (E16, ci tier).
 - **Two-tier done (v1.5):** open each iteration with a Definition of READY (an NFR +
   regulatory manifest with acceptance criteria + a lens-coverage map); close with a
   Production-READINESS gate that VERIFIES that manifest — CI-green is not production-ready.
@@ -125,4 +125,4 @@ The framework's E11/E13/E14 checks are wired into CI (`.github/workflows/convent
 The `docs/production-plan/ACE_Production_Gap_Execution_Plan.md` remains the binding DOMAIN /
 governance plan (record model, ADRs, contracts, risk register); the framework above
 SUPERSEDES its generic orchestration guidance (the former "R1-R10 in section 11") with the
-v1.5 wave + E1-E15 model.
+v1.7 wave + E1-E16 model.

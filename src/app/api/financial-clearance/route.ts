@@ -12,7 +12,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { isAuthenticated, getSessionPatient, getSessionAuthContext } from '@/lib/server/smartSession';
+import {
+  isAuthenticated,
+  getSessionPatient,
+  getSessionAuthContext,
+} from '@/lib/server/smartSession';
 import { getPrincipal, canAccessMember, purposeForRole } from '@/lib/authz/principal';
 import { fhirSearch } from '@/lib/server/fhirServer';
 import { devMockEnabled } from '@/lib/server/devStubs';
@@ -80,7 +84,13 @@ function mockEntriesForPatient(patientId: string): BundleEntry[] {
       intent: 'order',
       subject: { reference: `Patient/${patientId}` },
       code: {
-        coding: [{ system: 'http://www.ama-assn.org/go/cpt', code: scenario.cptCode, display: scenario.procedureName }],
+        coding: [
+          {
+            system: 'http://www.ama-assn.org/go/cpt',
+            code: scenario.cptCode,
+            display: scenario.procedureName,
+          },
+        ],
         text: scenario.procedureName,
       },
       requester: { display: p.pcp },
@@ -103,14 +113,16 @@ function mockEntriesForPatient(patientId: string): BundleEntry[] {
 
 // Inline PA scenario map — mirrors PATIENT_PA_SCENARIOS in api-explorer/page.tsx
 // and devStubs.ts so mock mode is consistent across all three.
-function mockScenarios(): { PATIENT_PA_SCENARIOS: Record<string, { cptCode: string; procedureName: string }> } {
+function mockScenarios(): {
+  PATIENT_PA_SCENARIOS: Record<string, { cptCode: string; procedureName: string }>;
+} {
   return {
     PATIENT_PA_SCENARIOS: {
       MARIA_SD_001: { cptCode: '72148', procedureName: 'MRI Lumbar Spine w/o Contrast' },
-      'PAT-0042':   { cptCode: '75561', procedureName: 'Cardiac MRI w/ and w/o contrast' },
-      'PAT-0087':   { cptCode: '93306', procedureName: 'Echocardiogram (complete transthoracic)' },
-      'PAT-0103':   { cptCode: '99243', procedureName: 'Nephrology office consultation' },
-      'PAT-0156':   { cptCode: '99244', procedureName: 'Pulmonology office consultation' },
+      'PAT-0042': { cptCode: '75561', procedureName: 'Cardiac MRI w/ and w/o contrast' },
+      'PAT-0087': { cptCode: '93306', procedureName: 'Echocardiogram (complete transthoracic)' },
+      'PAT-0103': { cptCode: '99243', procedureName: 'Nephrology office consultation' },
+      'PAT-0156': { cptCode: '99244', procedureName: 'Pulmonology office consultation' },
     },
   };
 }
@@ -217,9 +229,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Fall back to the Maria seed bundle only if the patient isn't in the registry
       // (ensures the financial clearance thread runs against the right patient's conditions).
       const registryEntries = mockEntriesForPatient(patientId);
-      const entries = registryEntries.length > 0
-        ? registryEntries
-        : await readSeedBundle().catch(() => [] as BundleEntry[]);
+      const entries =
+        registryEntries.length > 0
+          ? registryEntries
+          : await readSeedBundle().catch(() => [] as BundleEntry[]);
       conditions = entries
         .filter((e) => e.resource.resourceType === 'Condition')
         .map((e) => asRes<Cond>(e.resource) as Cond);
@@ -292,7 +305,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 5) audit (PHI-safe: references + codes only)
     await audit({
       ts,
-      actor: 'session-user',
+      actor: principal.userId,
       action: 'financial-clearance.run',
       resourceRef: `Patient/${patientId}`,
       correlationId,
@@ -317,7 +330,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // never leak internals or PHI in the error body
     await audit({
       ts: new Date().toISOString(),
-      actor: 'session-user',
+      actor: principal.userId,
       action: 'financial-clearance.error',
       resourceRef: `Patient/${patientId}`,
       correlationId,

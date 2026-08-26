@@ -34,3 +34,24 @@ _*Client-delivery category (WPC-CD*):_* items that are correct as server-side/st
 Do the self-contained ones first when scheduled (HW6-2 ICD rollup, HW6-5 UCUM, HW6-7 tiebreak table),
 then the content-gated ones (HW6-1/3/4) as licensed releases are provisioned, then the privacy-depth
 items (HW6-8/9) alongside the HW2 audit/disclosure breadth follow-on.
+
+
+---
+
+## Framework / process backlog — from the `loading.tsx` stall (2026-08-26)
+
+Captured per the operator's decision to log-and-defer (not fix now). A `useSearchParams` Suspense
+fix was blocked by the quality ratchet → spawned a workaround `loading.tsx` → E13 required a test →
+the test tripped a `vitest` + `tsconfig jsx:"preserve"` transform trap → and the gate could not run
+locally (cloud sandbox / device bridge can't load the repo's native bindings), so fixes were verified
+by pushing to CI. Point fix shipped (`loading.tsx` authored via `createElement`, no JSX); these close
+the **class**. Ordered by leverage; #1, #2, #4 *reduce* ceremony, only #3 touches toolchain config.
+
+| ID   | Item                                             | Area                      | Status | Notes / where it plugs in                                                                                                                                                                                                                                                            |
+| ---- | ------------------------------------------------ | ------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FW-1 | Restore real local==CI gate parity (a runner)    | dev-productivity          | OPEN   | Highest leverage. Cloud sandbox + device bridge can't run `vitest`/`next build` against the Windows repo (native bindings), so fixes are verified by pushing (CI-as-compiler). Fix: clone the repo into a Linux runner matching CI (read token), or run the task on the user's computer for native `vitest`. |
+| FW-2 | Ratchet escape hatch for frozen-file micro-edits | framework/quality-ratchet | OPEN   | `// RATCHET-EXCEPTION: <reason> <approver>` honored by `check-file-sizes.sh` for a bounded delta, so a small correct in-place edit to a frozen/over-cap file beats spawning workaround files. `loading.tsx` was exactly such a workaround; each new file was new failure surface. Smallest-correct-edit-under-review > structurally larger detour. |
+| FW-3 | Kill the `vitest` JSX-transform class            | toolchain/test-config     | OPEN   | `tsconfig jsx:"preserve"` + a `vitest` config with no JSX transform means any `.tsx` imported into a node-env test can fail vite import-analysis. The `createElement` patch fixed `loading.tsx` only. Class fix: set `vitest` `esbuild.jsx` (or a scoped react plugin) so `.tsx` transforms regardless of tsconfig; add a lightweight "do changed `.tsx` transform?" smoke that runs in-sandbox even when the full gate can't. |
+| FW-4 | Discipline rule: no CI-as-compiler               | framework/operating-model | OPEN   | A fix is not proposed-for-push until it has passed the gate on a machine that *can* run it. If none can, that is a STOP — provision a runner or have the human run it once — never iterate by pushing to CI. Encodes the local==CI parity principle (FRAMEWORK_HARDENING v1.6) as an operator rule, not just gate config. |
+
+_These are not go-live blockers; they are productivity/robustness items. FW-1 and FW-3 are the two that would have prevented this specific stall._

@@ -74,3 +74,6 @@ _to_delete/
 /New PA Plan Documents/
 /Project Knowledge Uploads/
 /Pricing/
+
+# Local-only client/RFI docs pulled out of the repo (never tracked)
+/_local-only/

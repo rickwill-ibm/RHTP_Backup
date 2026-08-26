@@ -6,7 +6,7 @@ const nextConfig = {
   distDir: process.env.DIST_DIR || '.next',
   assetPrefix: process.env.ASSET_PREFIX || '',
 
-  serverExternalPackages: ['pg', 'pg-native'],
+  serverExternalPackages: ['pg', 'pg-native', 'newman'],
 
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },

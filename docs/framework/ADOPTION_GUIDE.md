@@ -10,6 +10,7 @@ The framework is packaged as `agentic-build-framework.skill` (a zip of SKILL.md 
 - **If your org disables in-chat skill save:** an admin adds it through the org skill/marketplace admin flow using the same `.skill` file. Confirm with whoever manages skills for the org.
 - **For a brand-new project session:** load the skill at the START of the build session, before the first fan-out, so the personas and gates are in context from the beginning.
 - **Team-wide:** commit `docs/framework/` (the unpacked docs) to a shared repo so the methodology is versioned and reviewable, and distribute the `.skill` through the org so every engineer's sessions have it.
+- **Repo-local auto-load (this repo):** the framework is mirrored into `.claude/skills/agentic-build-framework/` (generated from `docs/framework/` by `npm run gen:skill`, drift-gated in `ci-gates.sh`). Claude Code auto-discovers project skills there, so anyone who opens THIS repo gets the framework in-session with NO manual save - no per-developer install.
 
 ## Part 2 — Wire the enforcement gates into a repository (one-time per repo)
 

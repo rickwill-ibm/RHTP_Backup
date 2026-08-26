@@ -36,7 +36,7 @@
       "serve",
       "type-check"
     ],
-    "warning": "🚨 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
+    "warning": "\ud83d\udea8 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
   },
   "scripts": {
     "dev": "next dev -p 4029",
@@ -53,10 +53,12 @@
     "test:integration": "vitest run tests/integration",
     "test:shuffle": "vitest run --sequence.shuffle",
     "gen:cert": "vitest run tools/gen/certSummaries.gen.ts",
+    "gen:skill": "node tools/gen/genSkillMirror.mjs",
     "gate:fast": "bash scripts/ci-gates.sh fast",
     "gate:push": "bash scripts/ci-gates.sh push",
     "gate:pre-merge": "bash scripts/ci-gates.sh pre-merge",
     "gate:ci": "bash scripts/ci-gates.sh ci",
+    "ship": "bash scripts/ship.sh",
     "test:contract": "newman run tools/contract/cms0057f.postman_collection.json -e tools/contract/local.postman_environment.json",
     "test:e2e": "playwright test",
     "a11y": "playwright test e2e/a11y.spec.ts",

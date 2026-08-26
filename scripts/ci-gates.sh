@@ -10,7 +10,7 @@
 # "passed locally, failed CI" surprise this file exists to prevent.
 #
 # Tiers (each a superset of the previous):
-#   fast      : types, sizes+ratchet, lint(changed), test-link E13            (~seconds)
+#   fast      : types, sizes+ratchet, lint(changed), test-link E13, page-boundaries, skill-mirror (~seconds)
 #   push      : + unit tests, wiring E14, provenance E11                      (~1 min)
 #   pre-merge : + unit tests shuffled (isolation)                          (~1-2 min)
 #   ci        : + mutation E13 (full) + build/bundle-resolution E16          (minutes)
@@ -50,11 +50,15 @@ g_prov()     { bash docs/build-provenance/check-provenance.sh; }
 g_mutation() { node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json; }
 g_shuffle()  { npx --no-install vitest run --sequence.shuffle; }
 g_build()    { npx --no-install next build; }
+g_pageboundary() { node docs/build-provenance/check-page-boundaries.mjs; }
+g_skillmirror()  { node tools/gen/genSkillMirror.mjs --check; }
 
 run "types (tsc --noEmit)"      g_types
 run "file sizes + ratchet"      g_sizes
 run "lint (changed files)"      g_lint
 run "test-link E13 (changed)"   g_testlink
+run "page boundaries (E16 shift-left)" g_pageboundary
+run "skill mirror in sync"      g_skillmirror
 if [ "$TIER" = "push" ] || [ "$TIER" = "pre-merge" ] || [ "$TIER" = "ci" ]; then
   run "unit tests (vitest)"     g_unit
   run "wired-path E14"          g_wiring

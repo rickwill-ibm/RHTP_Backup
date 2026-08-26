@@ -47,7 +47,6 @@
     "src/lib/identity/survivorship/index.ts",
     "src/lib/identity/survivorship/rules.ts",
     "src/lib/identity/survivorship/types.ts",
-    "src/lib/policy/contractsPhase0.ts",
     "src/lib/sde/audit.ts",
     "src/lib/sde/consentGate.ts",
     "src/lib/sde/engine/dispositionEngine.ts",

@@ -41,15 +41,42 @@ function walk(dir, acc = []) {
 function exempt(file) {
   const b = basename(file);
   return (
-    b === 'index.ts' || b === 'types.ts' || b.endsWith('.d.ts') ||
-    b.endsWith('.json') || b.endsWith('.md') || b.endsWith('.css') ||
-    b.startsWith('_') || file.includes('/data/') || b.endsWith('.data.ts') ||
-    b.endsWith('.data1.ts') || b.endsWith('.data2.ts')
+    b === 'index.ts' ||
+    b === 'types.ts' ||
+    b.endsWith('.d.ts') ||
+    b.endsWith('.json') ||
+    b.endsWith('.md') ||
+    b.endsWith('.css') ||
+    b.startsWith('_') ||
+    file.includes('/data/') ||
+    b.endsWith('.data.ts') ||
+    b.endsWith('.data1.ts') ||
+    b.endsWith('.data2.ts') ||
+    isTypesOnly(file)
   );
 }
 
+// E13: a module that exports only types (interface/type) has no runtime to test - exempt it.
+function isTypesOnly(file) {
+  let src;
+  try {
+    src = readFileSync(file, 'utf8');
+  } catch {
+    return false;
+  }
+  if (!(/^\s*export\s+(type|interface)\b/m.test(src) || /^\s*export\s+type\s*\{/m.test(src)))
+    return false;
+  const runtime =
+    /^\s*export\s+(async\s+)?(function|const|let|var|class|enum|abstract\s+class)\b/m.test(src) ||
+    /^\s*export\s+default\b/m.test(src) ||
+    /^\s*export\s*\*/m.test(src) ||
+    /^\s*export\s*\{/m.test(src);
+  return !runtime;
+}
+
 // Exported symbol names from a module (function/const/class/interface/type/enum).
-const EXPORT_RE = /export\s+(?:async\s+)?(?:function|const|class|interface|type|enum)\s+([A-Za-z0-9_]+)/g;
+const EXPORT_RE =
+  /export\s+(?:async\s+)?(?:function|const|class|interface|type|enum)\s+([A-Za-z0-9_]+)/g;
 function exportedSymbols(src) {
   const names = new Set();
   let m;
@@ -83,31 +110,55 @@ function isLinked(file) {
   if (stemRe.test(testBlob) || testBlob.includes(stem)) return true;
   // symbol linkage: any exported symbol used by a test (follows barrel re-exports)
   let src;
-  try { src = readFileSync(file, 'utf8'); } catch { return false; }
+  try {
+    src = readFileSync(file, 'utf8');
+  } catch {
+    return false;
+  }
   for (const name of exportedSymbols(src)) {
     if (name.length >= 4 && new RegExp(`\\b${name}\\b`).test(testBlob)) return true;
   }
   return false;
 }
 
-const untested = candidates.map((f) => relative('.', f).replace(/\\/g, '/')).filter((f) => !isLinked(f)).sort();
+const untested = candidates
+  .map((f) => relative('.', f).replace(/\\/g, '/'))
+  .filter((f) => !isLinked(f))
+  .sort();
 
 if (WRITE) {
-  writeFileSync(BASELINE, JSON.stringify({ note: 'E13 test-link ratchet: known untested modules (the backlog). New modules not listed here fail the gate.', untested }, null, 2) + '\n');
+  writeFileSync(
+    BASELINE,
+    JSON.stringify(
+      {
+        note: 'E13 test-link ratchet: known untested modules (the backlog). New modules not listed here fail the gate.',
+        untested,
+      },
+      null,
+      2
+    ) + '\n'
+  );
   console.log(`E13 test-link: wrote ${BASELINE} with ${untested.length} known-untested modules.`);
   process.exit(0);
 }
 
 const baseSet = existsSync(BASELINE)
-  ? new Set((JSON.parse(readFileSync(BASELINE, 'utf8')).untested) || [])
+  ? new Set(JSON.parse(readFileSync(BASELINE, 'utf8')).untested || [])
   : new Set();
 
 const fresh = untested.filter((u) => !baseSet.has(u));
 const nowLinked = [...baseSet].filter((b) => !untested.includes(b));
 
-console.log('E13 test-link guard - every substantive module must be referenced by a test (symbol-aware)');
-console.log(`  candidates: ${candidates.length} | untested: ${untested.length} (baseline ${baseSet.size})`);
-if (nowLinked.length) console.log(`  ratchet: ${nowLinked.length} baseline module(s) are now TESTED - drop them from ${BASELINE}.`);
+console.log(
+  'E13 test-link guard - every substantive module must be referenced by a test (symbol-aware)'
+);
+console.log(
+  `  candidates: ${candidates.length} | untested: ${untested.length} (baseline ${baseSet.size})`
+);
+if (nowLinked.length)
+  console.log(
+    `  ratchet: ${nowLinked.length} baseline module(s) are now TESTED - drop them from ${BASELINE}.`
+  );
 if (fresh.length) {
   console.log(`FAIL (E13): ${fresh.length} NEW untested module(s) - shipped with no test:`);
   for (const u of fresh) console.log(`    ${u}`);

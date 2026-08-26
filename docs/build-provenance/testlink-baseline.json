@@ -161,7 +161,6 @@
     "src/lib/patientContext.fhirObs.tsx",
     "src/lib/patientContext.tsx",
     "src/lib/patientRegistry.data3.ts",
-    "src/lib/policy/contractsPhase0.ts",
     "src/lib/policy/ingest/aetnaCpb.ts",
     "src/lib/policy/ingest/genericPaList.ts",
     "src/lib/policy/ingest/uhcPaList.ts",

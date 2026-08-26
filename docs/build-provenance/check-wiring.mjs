@@ -23,11 +23,15 @@ import { join, dirname, resolve, relative } from 'node:path';
 const argv = process.argv.slice(2);
 const SRC = argv.find((a) => !a.startsWith('--')) || 'src';
 const WRITE = argv.includes('--write-baseline');
-const BASELINE = (() => { const i = argv.indexOf('--baseline'); return i >= 0 ? argv[i + 1] : 'wiring-baseline.json'; })();
+const BASELINE = (() => {
+  const i = argv.indexOf('--baseline');
+  return i >= 0 ? argv[i + 1] : 'wiring-baseline.json';
+})();
 
 function walk(dir, acc = []) {
   for (const e of readdirSync(dir)) {
-    const p = join(dir, e); const st = statSync(p);
+    const p = join(dir, e);
+    const st = statSync(p);
     if (st.isDirectory()) walk(p, acc);
     else if (/\.(ts|tsx|mjs)$/.test(p) && !/\.d\.ts$/.test(p)) acc.push(p.replace(/\\/g, '/'));
   }
@@ -40,16 +44,25 @@ function resolveSpec(spec, fromFile) {
   if (spec.startsWith('@/')) base = resolve(SRC, spec.slice(2));
   else if (spec.startsWith('./') || spec.startsWith('../')) base = resolve(dirname(fromFile), spec);
   else return null; // bare (node_modules) - ignore
-  const cands = [base + '.ts', base + '.tsx', base + '.mjs',
-    join(base, 'index.ts'), join(base, 'index.tsx')];
-  for (const c of cands) { const n = c.replace(/\\/g, '/'); if (existsSync(n)) return relative('.', n).replace(/\\/g, '/'); }
+  const cands = [
+    base + '.ts',
+    base + '.tsx',
+    base + '.mjs',
+    join(base, 'index.ts'),
+    join(base, 'index.tsx'),
+  ];
+  for (const c of cands) {
+    const n = c.replace(/\\/g, '/');
+    if (existsSync(n)) return relative('.', n).replace(/\\/g, '/');
+  }
   return null;
 }
 
-const IMPORT_RE = /(?:import|export)[\s\S]*?from\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)|require\(\s*['"]([^'"]+)['"]\s*\)/g;
+const IMPORT_RE =
+  /(?:import|export)[\s\S]*?from\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)|require\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 const files = walk(SRC);
-const graph = new Map();          // file -> Set(imported files)
+const graph = new Map(); // file -> Set(imported files)
 for (const f of files) {
   const src = readFileSync(f, 'utf8');
   const deps = new Set();
@@ -65,43 +78,88 @@ for (const f of files) {
 }
 
 // entry points: everything under src/app + middleware/instrumentation
-const isEntry = (f) => f.startsWith(`${SRC}/app/`) || /\/(middleware|instrumentation)\.(ts|tsx)$/.test(f);
+const isEntry = (f) =>
+  f.startsWith(`${SRC}/app/`) || /\/(middleware|instrumentation)\.(ts|tsx)$/.test(f);
 const reachable = new Set();
 const queue = files.filter(isEntry);
 for (const e of queue) reachable.add(e);
 while (queue.length) {
   const cur = queue.shift();
-  for (const dep of graph.get(cur) || []) if (!reachable.has(dep)) { reachable.add(dep); queue.push(dep); }
+  for (const dep of graph.get(cur) || [])
+    if (!reachable.has(dep)) {
+      reachable.add(dep);
+      queue.push(dep);
+    }
 }
 
 // candidate orphans: src/lib modules not reachable from any entry (exempt data/types-only barrels lightly)
 // demoPreservation/ is a CI GATE HARNESS (E14/E15 + demo golden) — reached only by tests
 // and the gate BY DESIGN, not unwired production code; it is a first-class exemption.
-const exempt = (f) => /\/data\//.test(f) || /\/_TEMPLATE|\.d\.ts$/.test(f) || /\/demoPreservation\//.test(f);
+// E14: a module that exports only types (interface/type) has no runtime to wire - exempt it.
+function isTypesOnly(f) {
+  let src;
+  try {
+    src = readFileSync(f, 'utf8');
+  } catch {
+    return false;
+  }
+  if (!(/^\s*export\s+(type|interface)\b/m.test(src) || /^\s*export\s+type\s*\{/m.test(src)))
+    return false;
+  const runtime =
+    /^\s*export\s+(async\s+)?(function|const|let|var|class|enum|abstract\s+class)\b/m.test(src) ||
+    /^\s*export\s+default\b/m.test(src) ||
+    /^\s*export\s*\*/m.test(src) ||
+    /^\s*export\s*\{/m.test(src);
+  return !runtime;
+}
+const exempt = (f) =>
+  /\/data\//.test(f) ||
+  /\/_TEMPLATE|\.d\.ts$/.test(f) ||
+  /\/demoPreservation\//.test(f) ||
+  isTypesOnly(f);
 const orphans = files
   .filter((f) => f.startsWith(`${SRC}/lib/`) && !reachable.has(f) && !exempt(f))
   .sort();
 
 if (WRITE) {
-  writeFileSync(BASELINE, JSON.stringify({ note: 'E14 wired-path ratchet: known unwired modules (the backlog). New orphans not listed here fail the gate.', orphans }, null, 2) + '\n');
+  writeFileSync(
+    BASELINE,
+    JSON.stringify(
+      {
+        note: 'E14 wired-path ratchet: known unwired modules (the backlog). New orphans not listed here fail the gate.',
+        orphans,
+      },
+      null,
+      2
+    ) + '\n'
+  );
   console.log(`E14: wrote ${BASELINE} with ${orphans.length} known-orphan modules.`);
   process.exit(0);
 }
 
 const baseSet = existsSync(BASELINE)
-  ? new Set((JSON.parse(readFileSync(BASELINE, 'utf8')).orphans) || [])
+  ? new Set(JSON.parse(readFileSync(BASELINE, 'utf8')).orphans || [])
   : new Set();
 
 const fresh = orphans.filter((o) => !baseSet.has(o));
 const nowWired = [...baseSet].filter((b) => !orphans.includes(b)); // baseline entries that got wired (ratchet can shrink)
 
 console.log('E14 wired-path gate - is every module reached by a real entry point?');
-console.log(`  entries: ${files.filter(isEntry).length} | reachable: ${reachable.size} | lib orphans: ${orphans.length} (baseline ${baseSet.size})`);
-if (nowWired.length) console.log(`  ratchet: ${nowWired.length} baseline module(s) are now WIRED - drop them from ${BASELINE}.`);
+console.log(
+  `  entries: ${files.filter(isEntry).length} | reachable: ${reachable.size} | lib orphans: ${orphans.length} (baseline ${baseSet.size})`
+);
+if (nowWired.length)
+  console.log(
+    `  ratchet: ${nowWired.length} baseline module(s) are now WIRED - drop them from ${BASELINE}.`
+  );
 if (fresh.length) {
-  console.log(`FAIL (E14): ${fresh.length} NEW unwired module(s) - built but reached by no real entry point:`);
+  console.log(
+    `FAIL (E14): ${fresh.length} NEW unwired module(s) - built but reached by no real entry point:`
+  );
   for (const o of fresh) console.log(`    ${o}`);
-  console.log('  Wire it to a production caller (route/job/consumer), or register it as an owned seam. Do not just unit-test it.');
+  console.log(
+    '  Wire it to a production caller (route/job/consumer), or register it as an owned seam. Do not just unit-test it.'
+  );
   process.exit(1);
 }
 console.log('PASS (E14): no new unwired module beyond the known backlog.');

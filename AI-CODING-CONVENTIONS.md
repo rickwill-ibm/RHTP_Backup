@@ -97,6 +97,18 @@ import each other. Layer rules live in config, not in memory.
 SMART tokens in encrypted httpOnly sessions; no secrets in `NEXT_PUBLIC_*`; every
 privileged action emits a PHI-safe audit event.
 
+**Runtime-boundary rule (new, enforced by E16 + `next build`):** a Node-only module — a DB
+driver (`pg`), `fs`/`path`/`net`, or a file-backed store like `evidenceStore` — must never be
+REACHABLE from a graph the bundler compiles for the Edge or client runtime, even through a
+guarded dynamic import. `instrumentation.ts` is compiled for BOTH the nodejs and edge runtimes,
+so a `NEXT_RUNTIME==='nodejs'` guard stops EXECUTION on edge but not BUNDLING — the bundler
+still must RESOLVE the whole reachable graph. A Node-only seam therefore needs BOTH: (a) a
+`NEXT_RUNTIME==='nodejs'` runtime guard at the entry, AND (b) a bundler exclusion at the seam
+(`serverExternalPackages` for the server; `resolve.alias` / `resolve.fallback:false` for the
+edge and client bundles in `next.config.mjs`). `INVARIANT:` the Node-only evidence/persistence
+graph is never bundled into the edge or client runtime. `SEAM:` `src/instrumentation.ts` →
+evidence-store composition. Gate: E16 (`next build`).
+
 ## 5. Types & Contracts
 
 1. **Strict TypeScript for new code.** `strict: true` plus `noUncheckedIndexedAccess`

@@ -1,28 +1,19 @@
 /**
  * S1 — CaptureProvider seam. Turns a RawDoc into a CanonicalDoc the S0 anchoring spine can
- * verify against. The BUILTIN provider is MANDATORY and offline: text, HTML, CSV natively;
- * and — through injected seams — scanned images (OcrEngine), PDFs (PdfTextEngine +
- * RasterizeProvider), and spreadsheets (WorkbookReader). Every derived text ends through the
- * one shared canonicalizeText (normalize.ts) so hashes and offsets are stable across OSes.
- * ibm-datacap / watsonx / generic-http remain OPTIONAL, config-selected vendor adapters.
- *
- * builtin@0.3: text/HTML/CSV now route through the shared normalizer and decode UTF-8
- * FATALLY (malformed bytes throw, no silent U+FFFD). Both shift offsets for edge inputs vs
- * 0.2, so mixed-version anchors fail closed through verifyAnchor — the intended safety.
+ * verify against. The BUILTIN provider is MANDATORY and offline (text, HTML, CSV, and — with
+ * the injected OCR engine — scanned images, processing Horizon/Elevance/Aetna with no external
+ * service). ibm-datacap / watsonx / generic-http are OPTIONAL, config-selected adapters for
+ * clients with an existing capture stack. Every provider emits the same CanonicalDoc shape.
  */
 import { hashText, type ProvenanceClass } from '../anchor/verify';
-import type { CanonicalDoc, LayoutBlock } from '../pipeline/contracts';
-import { canonicalizeText, assertCanonical, assertNonEmpty } from './normalize';
+import type { CanonicalDoc } from '../pipeline/contracts';
 import type { OcrEngine } from './ocr';
-import { loadPdf, type PdfTextEngine } from './pdf';
-import { loadXlsx, type WorkbookReader } from './xlsx';
-import type { RasterizeProvider } from './rasterize';
 
 export interface RawDoc {
   docId: string;
   sourceFile: string;
   bytes: Uint8Array;
-  mime: string; // 'text/plain' | 'text/html' | 'text/csv' | 'image/png' | 'application/pdf' | spreadsheet…
+  mime: string; // 'text/plain' | 'text/html' | 'text/csv' | 'image/png' | 'application/pdf' | ...
   provenanceClass: ProvenanceClass;
 }
 
@@ -40,35 +31,29 @@ export interface CaptureConfig {
   apiKeyRef?: string; // a credential REFERENCE, never the secret itself
 }
 
-/** Injected capability engines. Absent engine ⇒ its input class fails closed (never silent). */
 export interface BuiltinOptions {
-  ocr?: OcrEngine; // image/* and scanned-PDF pages
-  pdfText?: PdfTextEngine; // PDF embedded text layer
-  raster?: RasterizeProvider; // PDF page → image (scanned path)
-  workbook?: WorkbookReader; // XLSX/XLS
+  ocr?: OcrEngine; // required to load image/* inputs
 }
 
-export const BUILTIN_LOADER_VERSION = 'builtin@0.3';
+export const BUILTIN_LOADER_VERSION = 'builtin@0.2';
 
-const SPREADSHEET_MIME =
-  /spreadsheetml|ms-excel|^application\/vnd\.oasis\.opendocument\.spreadsheet/i;
-
-/** Fatal UTF-8 decode: malformed bytes throw instead of yielding U+FFFD (fail closed). */
 function decodeUtf8(bytes: Uint8Array): string {
-  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  return Buffer.from(bytes).toString('utf8');
 }
 
 /** Dependency-free HTML → canonical text (offsets index into the returned text). */
 export function htmlToCanonicalText(html: string): string {
-  const stripped = html
+  return html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
-  return canonicalizeText(stripped);
+    .replace(/&gt;/gi, '>')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\s*\n\s*/g, '\n')
+    .trim();
 }
 
 /** Dependency-free RFC4180-ish CSV parser. */
@@ -113,43 +98,30 @@ export function parseCsv(s: string): string[][] {
 
 /** CSV → canonical text: one row per line, cells joined by ' | ' (offsets index into this). */
 export function csvToCanonicalText(csv: string): string {
-  return canonicalizeText(
-    parseCsv(csv)
-      .map((r) => r.join(' | '))
-      .join('\n')
-  );
+  return parseCsv(csv)
+    .map((r) => r.join(' | '))
+    .join('\n');
 }
 
-/**
- * Assemble a CanonicalDoc from already-canonical text. Guards run here so EVERY loader path
- * fails closed on non-canonical or silent-empty output before a doc escapes the seam.
- */
-function toCanonicalDoc(raw: RawDoc, text: string, blocks?: LayoutBlock[]): CanonicalDoc {
-  assertNonEmpty(text, raw.bytes.length);
-  assertCanonical(text);
+function toCanonicalDoc(raw: RawDoc, text: string): CanonicalDoc {
   return {
     docId: raw.docId,
     sourceFile: raw.sourceFile,
     provenanceClass: raw.provenanceClass,
     text,
-    // Hash over SOURCE container bytes (OCR/parse-stable), not the derived text.
+    // Hash over SOURCE bytes (OCR-stable), not the derived text, per the plan's OCR hardening.
     sourceContentHash: hashText(Buffer.from(raw.bytes).toString('base64')),
     loaderVersion: BUILTIN_LOADER_VERSION,
-    blocks: blocks ?? [{ page: 1, text }],
+    blocks: [{ page: 1, text }],
   };
 }
 
-/** The mandatory builtin provider. text/HTML/CSV natively; image/PDF/spreadsheet via seams. */
+/** The mandatory builtin provider. Handles text/HTML/CSV, and image/* when an OCR engine is set. */
 export function makeBuiltinCapture(options: BuiltinOptions = {}): CaptureProvider {
   return {
     name: 'builtin',
-    supports: (mime: string) =>
-      /^text\/(plain|html|csv)\b/i.test(mime) ||
-      /^image\//i.test(mime) ||
-      /^application\/pdf\b/i.test(mime) ||
-      SPREADSHEET_MIME.test(mime),
+    supports: (mime: string) => /^text\/(plain|html|csv)\b/i.test(mime) || /^image\//i.test(mime),
     async load(raw: RawDoc): Promise<CanonicalDoc> {
-      // image/* → OCR seam
       if (/^image\//i.test(raw.mime)) {
         if (!options.ocr) {
           throw new Error(
@@ -157,31 +129,20 @@ export function makeBuiltinCapture(options: BuiltinOptions = {}): CaptureProvide
           );
         }
         const { text } = await options.ocr.recognize(raw.bytes, { mime: raw.mime });
-        return toCanonicalDoc(raw, canonicalizeText(text));
+        return toCanonicalDoc(raw, text);
       }
-      // application/pdf → PDF loader (text-layer or scanned handoff)
-      if (/^application\/pdf\b/i.test(raw.mime)) {
-        const { text, blocks } = await loadPdf(raw, options);
-        return toCanonicalDoc(raw, text, blocks);
-      }
-      // spreadsheet → XLSX loader
-      if (SPREADSHEET_MIME.test(raw.mime)) {
-        const { text, blocks } = await loadXlsx(raw, options);
-        return toCanonicalDoc(raw, text, blocks);
-      }
-      // text / HTML / CSV
       const s = decodeUtf8(raw.bytes);
       const text = /html/i.test(raw.mime)
         ? htmlToCanonicalText(s)
         : /csv/i.test(raw.mime)
           ? csvToCanonicalText(s)
-          : canonicalizeText(s);
+          : s;
       return toCanonicalDoc(raw, text);
     },
   };
 }
 
-/** The default builtin provider (text/HTML/CSV; image/PDF/spreadsheet require their engines). */
+/** The default builtin provider (text/HTML/CSV; image requires makeBuiltinCapture({ ocr })). */
 export const builtinCapture: CaptureProvider = makeBuiltinCapture();
 
 /** A typed seam for a vendor adapter; throws until an endpoint is configured + wired. */

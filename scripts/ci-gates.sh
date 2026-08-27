@@ -35,9 +35,16 @@ run() { # run <name> <cmd...>
 
 have_base() { git rev-parse --verify --quiet "$BASE" >/dev/null 2>&1; }
 changed_src() {
-  have_base || return 0
-  git diff --name-only --diff-filter=AM "$BASE"...HEAD -- \
-    'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'src/**/*.jsx' 2>/dev/null
+  # Union of everything about to land: committed-vs-base, staged, unstaged, AND untracked.
+  # (Previously only committed vs BASE, so a landing's uncommitted/new files escaped lint
+  #  until after commit — the gap FW-5 closes. See docs/framework/FRAMEWORK_HARDENING.md.)
+  local globs=('src/**/*.ts' 'src/**/*.tsx' 'src/**/*.js' 'src/**/*.jsx')
+  {
+    have_base && git diff --name-only --diff-filter=AM "$BASE"...HEAD -- "${globs[@]}" 2>/dev/null
+    git diff --cached --name-only --diff-filter=AM -- "${globs[@]}" 2>/dev/null
+    git diff --name-only --diff-filter=AM -- "${globs[@]}" 2>/dev/null
+    git ls-files --others --exclude-standard -- "${globs[@]}" 2>/dev/null
+  } | sort -u
 }
 
 g_types()    { npm run --silent check:types; }

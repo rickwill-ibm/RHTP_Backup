@@ -80,6 +80,20 @@ Enable the hooks once per clone: `git config core.hooksPath tools/hooks`.
   unrelated to the change. Consider splitting proactively or exempting formatting-only
   growth.
 
+- **FW-5 — a changed-file gate scoped to committed diffs is blind to a landing.**
+  `g_lint`/`g_testlink` computed the changed set from `BASE...HEAD` only, so files
+  extracted into the working tree (or staged) by a landing script were never linted
+  until *after* commit — `prettier/prettier` and `no-*` ESLint errors then surfaced
+  downstream (on the human's machine) instead of at the gate. **Fixed:** `changed_src`
+  now unions committed-vs-base **+ staged + unstaged + untracked** source files, so a
+  pre-commit/pre-push gate run lints exactly what is about to land. (This is the
+  "falsely green by checking nothing" lesson above — now *built*.)
+- **FW-5 corollary (restates FW-4) — verification must run the FULL gate, not a subset.**
+  `tsc + vitest` is not verification; `lint` (incl. `prettier/prettier`) and the E-gates
+  are gates too. A bundle "verified" with only types+tests has not faced the gate; any
+  offline/mirror verification MUST run `prettier --check` and the lint rules, or it will
+  hand formatting/lint defects downstream. The mirror verify now runs prettier.
+
 ## The meta-principle
 
 Assessment must be **mechanical, not judgment-based**: there is one command that IS

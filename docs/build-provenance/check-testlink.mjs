@@ -30,7 +30,7 @@ function walk(dir, acc = []) {
     const p = join(dir, e);
     const st = statSync(p);
     if (st.isDirectory()) walk(p, acc);
-    else acc.push(p);
+    else acc.push(p.replace(/\\/g, '/'));
   }
   return acc;
 }

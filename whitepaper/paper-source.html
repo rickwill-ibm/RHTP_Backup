@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Governed Medi-Cal Enterprise</title>
+<link rel="stylesheet" href="paper.css">
+</head>
+<body>
+
+<!-- ============================== PAGE 1 ============================== -->
+<section class="page page--cover">
+
+  <div class="cover-mark">A CIO Whitepaper · California Medicaid</div>
+
+  <h1 class="cover-title">The Governed<br>Medi-Cal Enterprise</h1>
+
+  <p class="cover-sub">From MITA maturity to governed delegation: holding every material Medi-Cal decision at a known, evidenced, revocable level of machine authority — and proving it.</p>
+
+  <div class="rule--short"></div>
+
+  <div class="grid g-2-1" style="margin-top:.30in">
+    <div>
+      <p class="lead" style="margin-bottom:.12in">Medi-Cal is about to be asked to do more determining, verifying and reconciling than at any time since the Affordable Care Act expansion — and to do it in the fiscal year its principal financing mechanism is dismantled. That is not an argument for automation. Automation is the easy half, and it is the half that has already failed in five other jurisdictions.</p>
+
+      <p>The hard half is <strong>delegation</strong>: deciding which decisions a machine may make, on what evidence, under whose authority, and by what mechanism that authority is taken back. California has no instrument for that. Neither does MITA — and CMS knows it, which is why the maturity model is being rebuilt around outcomes and metrics while its successor page still reads <em>Under Construction</em>.</p>
+
+      <p style="margin-bottom:0">This paper proposes the instrument: four rungs of machine authority, gated by four tiers of evidence, applied to one business process and one action class at a time. It says plainly what can never climb.</p>
+    </div>
+
+    <div>
+      <div class="card card--tint">
+        <div class="eyebrow eyebrow--muted">What this paper does not claim</div>
+        <p style="font-size:8.4pt"><strong>Not "substantially autonomous in five years."</strong> The gate arithmetic in §5 refutes it. The achievable state is A2-dominant with a narrow A3 tail.</p>
+        <p style="font-size:8.4pt"><strong>Not "already funded."</strong> 90/10 and 75/25 are match rates, not appropriations. The state share is real money. §10 publishes it.</p>
+        <p style="font-size:8.4pt; margin-bottom:0"><strong>Not a running system.</strong> The reference implementation cited in §5 has never processed a Medi-Cal transaction. Its live-integration count is zero.</p>
+      </div>
+    </div>
+  </div>
+
+  <figure style="margin-top:.22in">
+    <svg viewBox="0 0 720 300" width="92%" role="img" aria-label="The Medi-Cal North Star architecture">
+      <defs>
+        <marker id="ar" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 z" fill="#16223F"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="720" height="300" fill="#FBFAF7"/>
+
+      <!-- BAND A -->
+      <rect x="8" y="8" width="576" height="70" rx="4" fill="#F2F0EA" stroke="#DBE1EC"/>
+      <text x="16" y="24" font-family="TeX Gyre Heros, Arial" font-size="10.5" font-weight="600" letter-spacing="1.1" fill="#7C86A1">BUSINESS AREA → PROCESS → STEP → DECISION</text>
+      <g font-family="TeX Gyre Heros, Arial" font-size="10.5" fill="#16223F" text-anchor="middle">
+        <rect x="16"  y="34" width="105.6" height="36" rx="3" fill="#fff" stroke="#DBE1EC"/>
+        <text x="68.8" y="49">Eligibility &amp;</text><text x="68.8" y="62">Enrollment</text>
+        <rect x="129.6" y="34" width="105.6" height="36" rx="3" fill="#fff" stroke="#DBE1EC"/>
+        <text x="182.4" y="55">Authorization</text>
+        <rect x="243.2" y="34" width="105.6" height="36" rx="3" fill="#E4EDEA" stroke="#194A43" stroke-width="1.5"/>
+        <text x="296" y="49" fill="#194A43" font-weight="600">Claims &amp;</text><text x="296" y="62" fill="#194A43" font-weight="600">Encounters</text>
+        <rect x="356.8" y="34" width="105.6" height="36" rx="3" fill="#fff" stroke="#DBE1EC"/>
+        <text x="409.6" y="49">Care &amp;</text><text x="409.6" y="62">Community Supports</text>
+        <rect x="470.4" y="34" width="105.6" height="36" rx="3" fill="#fff" stroke="#DBE1EC"/>
+        <text x="523.2" y="49">Program</text><text x="523.2" y="62">Integrity</text>
+      </g>
+
+      <!-- BAND B -->
+      <rect x="8" y="90" width="576" height="126" rx="4" fill="#F2F0EA" stroke="#DBE1EC"/>
+      <text x="16" y="106" font-family="TeX Gyre Heros, Arial" font-size="10.5" font-weight="600" letter-spacing="1.1" fill="#7C86A1">GOVERNED ORCHESTRATION</text>
+      <rect x="16" y="116" width="560" height="44" rx="3" fill="#fff" stroke="#DBE1EC"/>
+      <text x="28" y="136" font-family="TeX Gyre Heros, Arial" font-size="12.5" font-weight="700" fill="#16223F">Orchestration Controller</text>
+      <text x="28" y="151" font-family="TeX Gyre Heros, Arial" font-size="10" fill="#7C86A1">sense · assemble evidence · decide within limits · route to a human · record</text>
+      <rect x="16" y="168" width="560" height="44" rx="3" fill="#fff" stroke="#DBE1EC"/>
+      <text x="28" y="188" font-family="TeX Gyre Heros, Arial" font-size="12.5" font-weight="700" fill="#16223F">Governed Agent Registry</text>
+      <text x="28" y="203" font-family="TeX Gyre Heros, Arial" font-size="10" fill="#7C86A1">scope · evidence required · data tier · autonomy rung · accountable owner</text>
+
+      <!-- BAND D -->
+      <rect x="8" y="228" width="576" height="64" rx="4" fill="#E4EDEA" stroke="#194A43" stroke-width="1.5"/>
+      <text x="24" y="256" font-family="TeX Gyre Heros, Arial" font-size="14" font-weight="700" fill="#16223F">MEDI-CAL EVIDENCE RECORD</text>
+      <text x="24" y="274" font-family="TeX Gyre Heros, Arial" font-size="10" fill="#5B6A66">state-owned · append-only · provenance-stamped · portable</text>
+
+      <!-- RAIL -->
+      <rect x="596" y="8" width="116" height="284" rx="4" fill="#fff" stroke="#194A43" stroke-width="1.5"/>
+      <text x="604" y="26" font-family="TeX Gyre Heros, Arial" font-size="10.5" font-weight="600" letter-spacing=".7" fill="#194A43">GOVERNANCE</text>
+      <text x="604" y="38" font-family="TeX Gyre Heros, Arial" font-size="10.5" font-weight="600" letter-spacing=".7" fill="#194A43">GATES</text>
+      <g font-family="TeX Gyre Heros, Arial" font-size="10.5" fill="#16223F" text-anchor="middle">
+        <rect x="604" y="52"  width="100" height="66" rx="3" fill="#E4EDEA" stroke="#194A43"/>
+        <text x="654" y="82">Consent &amp;</text><text x="654" y="96">disclosure</text>
+        <rect x="604" y="134" width="100" height="66" rx="3" fill="#E4EDEA" stroke="#194A43"/>
+        <text x="654" y="164">Physician-final</text><text x="654" y="178">(SB 1120)</text>
+        <rect x="604" y="216" width="100" height="66" rx="3" fill="#E4EDEA" stroke="#194A43"/>
+        <text x="654" y="246">Audit &amp; FFP</text><text x="654" y="260">certification</text>
+      </g>
+
+      <!-- connectors -->
+      <g stroke="#16223F" stroke-width="1" fill="none" marker-end="url(#ar)">
+        <path d="M200,88 L200,80"/><path d="M392,80 L392,88"/>
+        <path d="M200,226 L200,218"/><path d="M392,218 L392,226"/>
+      </g>
+      <path d="M590,8 L590,292" stroke="#194A43" stroke-width="1" stroke-dasharray="3 3"/>
+      <g stroke="#194A43" stroke-width="1.5">
+        <path d="M584,85 L596,85"/><path d="M584,167 L596,167"/><path d="M584,249 L596,249"/>
+      </g>
+    </svg>
+    <figcaption><b>Figure 1</b> The Medi-Cal North Star. One state-owned evidence record beneath everything; a controller that conducts the business processes above it and writes every action and its evidence back down; a registry in which each agent declares its scope, its data tier, its autonomy rung and its accountable owner; and governance gates that sit <em>in</em> the decision loop rather than after it.</figcaption>
+  </figure>
+
+  <div class="folio"><span>August 2026</span><span></span></div>
+</section>
+
+<!-- ============================== PAGE 2 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>Vision</span></div>
+
+  <div class="eyebrow">§1 · The Vision</div>
+  <h2>Eight things that become true</h2>
+  <p class="deck">Each is an operating outcome, not a technology. None of them is reached by buying a platform, and none of them is reached at once.</p>
+
+  <div class="grid g2" style="margin-top:.14in">
+
+    <div>
+      <h4>1 · Standing eligibility</h4>
+      <p class="small">Medi-Cal enrollment becomes a status the enterprise continuously evidences on the beneficiary's behalf, not a claim they must periodically re-prove to keep coverage they never lost. <span class="muted">From a renewal packet mailed on a calendar and worked by a county eligibility worker — with coverage lost for procedural rather than substantive reasons — to ex parte renewal as the default, and a human engaged where the evidence conflicts or the judgment is genuinely required.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>EE01–EE04 · ME01–ME02</p>
+
+      <h4>2 · The three-way match</h4>
+      <p class="small">Authorization, encounter and payment are held in continuous agreement as one reconciled thread, so what was authorized, what was delivered and what was paid are never three separate accounts that only a retrospective audit can reconcile. <span class="muted">This is the anchor, and §7 is its deep dive.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>OM07 · OM29 · OM14 · OM27 · FM</p>
+
+      <h4>3 · Physician-final, machine-fast</h4>
+      <p class="small">The evidence a medical-necessity decision requires is assembled and checked the moment the request arrives, so a clinician's time is spent only on requests that actually turn on clinical judgment — and every denial remains a clinician's act. <span class="muted">SB 1120 is not a limitation this paper concedes. It is the constraint that makes the element credible.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>CM07 · CM08 · CM09</p>
+
+      <h4>4 · Credential once, verified always</h4>
+      <p class="small">A provider or community-based organization proves itself once and is thereafter continuously verified against authoritative sources, rather than re-proving what the state already holds at every revalidation. <span class="muted">For a small Community Supports provider, administrative burden is a participation decision, not an inconvenience.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>PM01–PM03 · EE05–EE08</p>
+    </div>
+
+    <div>
+      <h4>5 · No one lost at the seam</h4>
+      <p class="small">The transitions where Medi-Cal loses people — release from custody, hospital discharge, plan transition, county move, the dual-eligible boundary — are watched continuously and closed by the enterprise, rather than discovered by whichever care manager happens to notice.</p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>CM01 · CM02 · CM06 · ME03</p>
+
+      <h4>6 · Integrity before payment</h4>
+      <p class="small">Improper payment is surfaced while the pattern is forming rather than recovered years later from providers who may no longer exist. <span class="muted">Recoveries return the federal share to CMS. This is an avoided-cost and error-rate outcome, and never a funding source — a distinction the Legislative Analyst will test first.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>PE01–PE05 · FM recovery</p>
+
+      <h4>7 · The state owns the proof</h4>
+      <p class="small">DHCS can evidence, contemporaneously and on demand, what it determined, authorized, substantiated and paid — and on what basis — independent of whichever vendor or application is running in a given budget cycle. <span class="muted">Stated as "a data platform," this is a procurement. Stated as "the state can prove what it did," it is audit defense, federal-match integrity and renewal defensibility.</span></p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>OM28 · cross-cutting</p>
+
+      <h4>8 · Earned, and revocable</h4>
+      <p class="small">No Medi-Cal business process operates at a higher rung of machine authority than its own accumulated evidence record supports, and every rung can be walked back on evidence — quickly, by one named person, without a committee.</p>
+      <p class="xsmall muted"><span class="dot dot--cap"></span>PL · PE · cross-cutting</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:.20in">
+    <div class="eyebrow eyebrow--teal">The one that is different</div>
+    <p style="margin-bottom:0">Seven of these are outcomes California would want in any decade. The eighth is the one that makes the other seven safe, and it is the only one that does not exist anywhere in American Medicaid today. <strong>A state that automates without it has not modernized; it has simply moved its judgment somewhere it cannot see.</strong></p>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>2</b></span></div>
+</section>
+
+<!-- ============================== PAGE 3 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>Why now</span></div>
+
+  <div class="eyebrow">§2 · The Clock</div>
+  <h2>Five obligations, one day, no new money</h2>
+  <p class="deck">The case for acting now is not that the technology arrived. It is that the workload arrives on a date certain, and the revenue leaves on the same date.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 260" width="100%" role="img" aria-label="California Medicaid mandate and funding clock, 2026 to 2032">
+      <rect x="0" y="0" width="720" height="260" fill="#FBFAF7"/>
+      <!-- convergence band -->
+      <rect x="141" y="18" width="16" height="212" fill="#F3EDDF"/>
+      <text x="149" y="14" font-family="TeX Gyre Heros, Arial" font-size="8" font-weight="700" fill="#6B5119" text-anchor="middle">1 JAN 2027</text>
+
+      <!-- axis -->
+      <line x1="45" y1="130" x2="690" y2="130" stroke="#16223F" stroke-width="1.5"/>
+      <g font-family="TeX Gyre Heros, Arial" font-size="8.5" fill="#7C86A1" text-anchor="middle">
+        <g stroke="#DBE1EC" stroke-width="1">
+          <line x1="45"  y1="126" x2="45"  y2="134"/><line x1="149" y1="126" x2="149" y2="134"/>
+          <line x1="253" y1="126" x2="253" y2="134"/><line x1="357" y1="126" x2="357" y2="134"/>
+          <line x1="461" y1="126" x2="461" y2="134"/><line x1="565" y1="126" x2="565" y2="134"/>
+          <line x1="669" y1="126" x2="669" y2="134"/>
+        </g>
+        <text x="45" y="146">2026</text><text x="149" y="146">2027</text><text x="253" y="146">2028</text>
+        <text x="357" y="146">2029</text><text x="461" y="146">2030</text><text x="565" y="146">2031</text><text x="669" y="146">2032</text>
+      </g>
+
+      <!-- FEDERAL lane — cascading up and to the right -->
+      <text x="45" y="22" font-family="TeX Gyre Heros, Arial" font-size="8" font-weight="600" letter-spacing="1" fill="#6B5119">FEDERAL OBLIGATION</text>
+      <g stroke="#6B5119" stroke-width="1" fill="none">
+        <path d="M149,124 L149,98 L155,98"/><path d="M253,124 L253,74 L259,74"/>
+        <path d="M357,124 L357,54 L363,54"/><path d="M435,124 L435,26 L441,26"/>
+      </g>
+      <g fill="#6B5119"><circle cx="149" cy="124" r="3.5"/><circle cx="253" cy="124" r="3"/><circle cx="357" cy="124" r="3"/><circle cx="435" cy="124" r="3"/></g>
+      <g font-family="TeX Gyre Heros, Arial" font-size="8.8">
+        <text x="159" y="95" font-weight="700" fill="#16223F">Five determination processes + four CMS-0057-F APIs</text>
+        <text x="159" y="106" fill="#7C86A1">§§71103, 71104, 71107, 71112, 71119 — DHCS and every plan</text>
+        <text x="263" y="71" font-weight="700" fill="#16223F">Appointment wait-time standards bite</text>
+        <text x="263" y="82" fill="#7C86A1">CMS-2439-F, on the calendar-year rating period</text>
+        <text x="367" y="51" font-weight="700" fill="#16223F">Quality Rating System live · secret-shopper validation</text>
+        <text x="445" y="23" font-weight="700" fill="#16223F">Eligibility error above 3% → disallowance</text>
+        <text x="445" y="34" fill="#7C86A1">§71106, October 2029; good-faith waiver restricted</text>
+      </g>
+
+      <!-- CALIFORNIA lane — cascading down and to the right -->
+      <text x="45" y="252" font-family="TeX Gyre Heros, Arial" font-size="8" font-weight="600" letter-spacing="1" fill="#194A43">CALIFORNIA AUTHORITY &amp; REVENUE</text>
+      <g stroke="#194A43" stroke-width="1" fill="none">
+        <path d="M123,136 L123,162 L129,162"/><path d="M149,136 L149,186 L155,186"/>
+        <path d="M201,136 L201,216 L207,216"/><path d="M253,136 L253,236 L259,236"/>
+      </g>
+      <g fill="#194A43"><circle cx="123" cy="136" r="3"/><circle cx="149" cy="136" r="3.5"/><circle cx="201" cy="136" r="3"/><circle cx="253" cy="136" r="3"/></g>
+      <g font-family="TeX Gyre Heros, Arial" font-size="8.8">
+        <text x="133" y="165" font-weight="700" fill="#16223F">Reentry reaches its final statewide wave</text>
+        <text x="159" y="183" font-weight="700" fill="#16223F">MCO tax expires · CalAIM 1115 and 1915(b) expire</text>
+        <text x="159" y="194" fill="#7C86A1">31 Dec 2026 · renewal filed May 2026, CMS action pending as of August 2026</text>
+        <text x="211" y="219" font-weight="700" fill="#16223F">DxF closes on the safety net — community and rural clinics</text>
+        <text x="263" y="239" font-weight="700" fill="#16223F">SB 306: prior authorization retired where approval already runs ≥90%</text>
+      </g>
+    </svg>
+    <figcaption><b>Figure 2</b> The obligations that dominate 2026–2032. Horizon extends to 2034; nothing material is scheduled after 2029. Every date shown is confirmed against the Federal Register, the eCFR, DHCS publications or the enacted Budget Act.</figcaption>
+  </figure>
+
+  <div class="grid g2" style="margin-top:.16in">
+    <div>
+      <h3>The convergence</h3>
+      <p class="small">On one day — 1 January 2027 — DHCS must have running community-engagement verification for the adult group, six-month redeterminations for that same group, shortened retroactive-coverage windows, address verification from reliable data sources, and quarterly Death Master File matching. On that same day the four CMS-0057-F APIs go live for fee-for-service and for every Medi-Cal managed care, mental health and drug Medi-Cal plan.</p>
+      <p class="small">There is no version of that date California staffs its way through. And the funder has already written the preference into its own guidance: a state <strong>must first attempt to use reliable information available to the state</strong> before asking a human being for a document. That sentence is an automation mandate in eligibility, issued by CMS.</p>
+
+      <h3>The pincer</h3>
+      <p class="small">The MCO tax expires 31 December 2026. The Legislative Analyst projects roughly $10 billion in annual operating deficits through 2029-30. The enacted 2026-27 Budget Act books a conforming replacement tax rising to $2.3 billion; the Analyst's own projection for the same instrument was in the mid-tens of millions. That spread — roughly $2 billion a year — rests on a federal approval this paper cannot verify, and it should be read as a range, not a number.</p>
+    </div>
+    <div>
+      <h3>The measurement regime</h3>
+      <p class="small">From 2028 CMS stops accepting attestations about California and starts testing them. Wait-time standards bite on the 2028 rating period. Secret-shopper surveys validate the network data on the 2029 one. The Quality Rating System publishes by December 2028. And from October 2029 an eligibility error rate above three percent triggers disallowance, with the good-faith waiver restricted.</p>
+      <p class="small">Read together, these are not four compliance items. They are an <strong>evidence regime</strong>. By 2029 the only claim California will be permitted to make about its own operations is one it can substantiate per process, with a measured error rate and a confidence interval. That is precisely the currency the ladder in §5 is denominated in — which is why building the instrument is not an addition to the compliance workload. It is the compliance workload, done once.</p>
+
+      <div class="note" style="margin-top:.14in">
+        <div class="eyebrow eyebrow--muted">And one thing that is not scheduled</div>
+        <p class="mb0" style="font-size:8.4pt">DHCS has published no dated modular roadmap for the Medi-Cal Enterprise System. The behavioral-health consolidation, MEDS modernization and PAVE all appear without go-live dates. <strong>The absence is the argument.</strong> A per-process evidence record is the cheapest thing that would fill it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>3</b></span></div>
+</section>
+
+<!-- ============================== PAGE 4 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>The ceiling</span></div>
+
+  <div class="eyebrow">§3 · The Ceiling</div>
+  <h2>What Medi-Cal may never automate</h2>
+  <p class="deck">Every serious proposal of this kind begins with what becomes possible. This one begins with what does not, because the limits are the reason to believe the rest.</p>
+
+  <div class="grid g-2-1">
+    <div>
+      <p>An <strong>adverse determination affecting a beneficiary's eligibility, coverage, or payment may never operate above human-in-the-loop.</strong> No volume of evidence promotes it, and no fiscal pressure justifies it. The rule is evaluated <em>before</em> the autonomy rung is read, and it overrides it — not as a policy preference the state could revisit in a harder budget year, but as the intersection of three independent legal constraints, each of which forecloses the question on its own.</p>
+
+      <h3>Constitutional due process</h3>
+      <p class="small"><em>Goldberg v. Kelly</em> is not merely echoed in Medicaid; it is incorporated by name — <strong>42 CFR § 431.205(d)</strong> requires the hearing system to meet that decision's due-process standards. Three mechanisms follow, each independently fatal to machine execution. <strong>§ 431.210</strong> requires "a clear statement of the specific reasons supporting the intended action": an adverse action whose actual causal basis cannot be stated as a reason to the beneficiary is not noticeable, and therefore not lawfully takeable. <strong>§ 431.211</strong> requires notice at least ten days before the date of action, which creates an irreducible human step. And <strong>§ 431.240(a)</strong> requires hearings by officials "who have not been directly involved in the initial determination" — which presupposes an identifiable initial determiner. <strong>Autonomy that erases the identity of the decider also erases the conflict check the regulation depends on.</strong></p>
+
+      <h3>Managed care carries the same structure</h3>
+      <p class="small">The cleanest federal text of all is <strong>§ 438.210(b)(3)</strong>: a decision to deny a service authorization, or to authorize less than requested, must be made <strong>by an individual</strong> with appropriate expertise. Not by a system configured by such an individual. By an individual. <strong>§ 438.400(b)</strong> supplies the definition and <strong>§ 438.406(b)(2)</strong> keeps the appeal separate from the decision it reviews.</p>
+
+      <h3>California has already legislated the answer</h3>
+      <p class="small"><strong>SB 1120</strong> (Stats. 2024, ch. 879, effective 1 January 2025) provides that an AI or algorithmic tool "shall not deny, delay, or modify health care services based, in whole or in part, on medical necessity," and that such a determination "shall be made only by a licensed physician or a licensed health care professional competent to evaluate the specific clinical issues involved."</p>
+      <p class="small">Read it precisely, because the precision is the gift. SB 1120 does not ban AI in utilization management. <strong>It bans AI from being the basis of an adverse outcome, and says nothing about favorable ones.</strong> That asymmetry by valence is the axis this paper's ladder is built on, and it is the legal reason approvals may climb while denials may not. "In whole or in part" is severe enough that for a medical-necessity denial the safe posture is stronger than human-in-the-loop: the machine assembles the evidence and does not propose the disposition at all. This paper names that rung <strong>A1-restricted</strong>.</p>
+      <p class="small mb0">§ 1367.01 reaches Medi-Cal managed care plans as Knox-Keene licensees, but not DHCS's own fee-for-service review — so <strong>DHCS should adopt the standard for its own operations as policy where the statute does not compel it.</strong></p>
+    </div>
+
+    <div>
+      <div class="card" style="background:#16223F; border-color:#16223F">
+        <div class="eyebrow" style="color:#C9B37E">The ceiling test</div>
+        <p class="xsmall" style="color:#D6DCE8">Evaluated <em>before</em> the autonomy rung is read. An action is ceiling-bound — maximum A1, or A1-restricted where SB 1120 applies — if <strong style="color:#fff">any</strong> of the following is true:</p>
+        <ol class="xsmall" style="color:#D6DCE8; padding-left:.14in">
+          <li>It is an adverse benefit determination within 42 CFR § 438.400(b).</li>
+          <li>It denies, terminates, reduces or suspends eligibility, or denies an application, under 42 CFR 431 Subpart E.</li>
+          <li>It creates or increases beneficiary financial liability.</li>
+          <li>It denies, delays or modifies a service based in whole or in part on medical necessity.</li>
+          <li><strong style="color:#fff">It shifts the burden of production to the beneficiary</strong>, or records a non-confirming result in an automated verification — an ex parte failure, a data-match discrepancy, a deadline non-response, or any action that starts a discontinuance clock.</li>
+          <li>It is functionally equivalent to any of the above by any other name.</li>
+        </ol>
+      </div>
+
+      <div class="note">
+        <div class="eyebrow eyebrow--teal">Why limb five exists</div>
+        <p class="mb0" style="font-size:8.2pt">A ceiling drawn around the <em>signature</em> on an adverse action is a story about a ceiling. Ex parte failure, non-confirmation, and a request for information with a deadline are all favorable-or-neutral by label — and every one of them is where people are actually lost. Limb five is why this is an adverse-<em>effect</em> gate, not an adverse-<em>action</em> gate.</p>
+      </div>
+
+      <div class="card card--tint">
+        <div class="eyebrow eyebrow--muted">Anti-circumvention</div>
+        <p class="xsmall"><strong>Pend-as-denial.</strong> A pend that produces the effect of a denial is a denial; auto-pend needs a hard cap and may never auto-resolve adversely on timeout.</p>
+        <p class="xsmall"><strong>Partial approval.</strong> Authorizing less than requested is adverse.</p>
+        <p class="xsmall"><strong>Denial-by-configuration.</strong> A generated notice with one confirm button is not a determination.</p>
+        <p class="xsmall mb0"><strong>Decomposition.</strong> The ceiling applies to the composed effect.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>4</b></span></div>
+</section>
+
+<!-- ============================== PAGE 5 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>Business architecture</span></div>
+
+  <div class="eyebrow">§4 · Business Architecture</div>
+  <h2>MITA's ladder, and the one CMS is already building</h2>
+
+  <div class="grid g2" style="margin-top:.10in">
+    <div>
+      <p class="small">MITA gave state Medicaid a common language — ten business areas, eighty business processes, and a maturity model rating each of them on six qualities. Read the qualities and notice what is absent. Timeliness, data accuracy, effort, cost effectiveness, accuracy of results, value to stakeholders: <strong>every one is a property of the output. None is a property of the decider.</strong> There is no quality for who or what made the decision, none for whether it can be reconstructed, and none for how much human judgment the process still consumes.</p>
+      <p class="small">The ladder itself confirms it. ML4 is about intrastate information exchange and quantitative measurement. ML5 speaks of "national (and international) interoperability improvements that maximize automation of routine operations." That is a real automation clause and this paper does not pretend otherwise — but its object is <em>routine operations</em>, the rule-determinate residue, and its organizing telos is interoperability. Nowhere across ML1 to ML5 is there a construct for who holds a decision, what evidence justifies moving that authority, or how it is taken back.</p>
+    </div>
+    <div>
+      <p class="small">That gap is not a problem for California. It is an opening — because CMS is rebuilding the model right now, and has said what it will be made of.</p>
+      <p class="small">MITA is not being retired: under <strong>42 CFR § 433.112(b)(11)</strong>, advancing in MITA maturity remains a condition of the 90 percent match, and CMS reaffirms that the State Self-Assessment is still required. But the Governance Board has been rebuilding the framework since 2023, MITA 4.0 has no release date, and the maturity-model page in CMS's own MITA 4.0 repository still reads <em>Under Construction</em>. Meanwhile CMS's live operational guidance — Streamlined Modular Certification, and the MES template set mandatory from July 2026 — has moved to outcomes and metrics and no longer cites MITA at all.</p>
+      <p class="small mb0">CMS has told states what the successor is built from: a maturity model "tied to outcomes and metrics," with each capability defined by outcomes, roles, business processes, information and technology. <strong>A governed autonomy ladder, evidenced per business process, is the most direct expression of that specification anyone has proposed.</strong> California can arrive at MITA 4.0 with the instrument already running.</p>
+    </div>
+  </div>
+
+  <div class="rule--ink"></div>
+  <div class="eyebrow eyebrow--teal">The capability model · 31 business capabilities in six layers</div>
+  <p class="xsmall muted" style="margin-bottom:.09in">The paper's own construct, not a MITA artifact. Layers are ordered by dependency, and each capability is something the enterprise can <em>do</em>, never a system it can buy. The boundary rule: <strong class="ink">E holds facts and policy · O moves work · D exercises judgment · G touches people · A watches D and O · F determines and moves money.</strong></p>
+
+  <div class="grid" style="grid-template-columns:repeat(3,1fr); gap:.14in">
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">E · Evidence &amp; Memory</div>
+      <p class="xsmall mb0"><strong>E1</strong> Entity Resolution<br><strong>E2</strong> Longitudinal Record Assembly<br><strong>E3</strong> Evidence Ledger<br><strong>E4</strong> Policy-as-Code Registry<br><strong>E5</strong> Decision Provenance &amp; Replay<br><strong>E6</strong> Consent &amp; Minimum-Necessary<br><strong>E7</strong> Disclosure Resistance</p>
+    </div>
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">O · Orchestration</div>
+      <p class="xsmall mb0"><strong>O1</strong> Case &amp; Work Orchestration<br><strong>O2</strong> Handoff Contract Enforcement<br><strong>O3</strong> Exception &amp; Escalation<br><strong>O4</strong> Autonomy Tier Control Plane<br><strong>O5</strong> Human Attention Allocation</p>
+    </div>
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">D · Decisioning</div>
+      <p class="xsmall mb0"><strong>D1</strong> Eligibility &amp; Benefit Determination<br><strong>D2</strong> Medical Necessity &amp; Authorization<br><strong>D3</strong> Claim &amp; Encounter Adjudication<br><strong>D4</strong> Anomaly &amp; Integrity Scoring<br><strong>D5</strong> Adverse-Effect Gate<br><strong>D6</strong> Policy Change Simulation</p>
+    </div>
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">G · Engagement</div>
+      <p class="xsmall mb0"><strong>G1</strong> Member Interaction<br><strong>G2</strong> Provider, Plan &amp; County Interaction<br><strong>G3</strong> Outreach &amp; Deadline Rescue<br><strong>G4</strong> Notice, Language &amp; Accessibility</p>
+    </div>
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">A · Assurance &amp; Governance</div>
+      <p class="xsmall mb0"><strong>A1</strong> Autonomy Evidence Record<br><strong>A2</strong> Continuous Control Monitoring<br><strong>A3</strong> Appeals &amp; Fair Hearing Support<br><strong>A4</strong> Disparate-Impact Surveillance<br><strong>A5</strong> Change Control &amp; Rollback<br><strong>A6</strong> Oversight &amp; Audit Interface</p>
+    </div>
+    <div class="card" style="padding:.10in .10in">
+      <div class="eyebrow eyebrow--teal" style="font-size:6.6pt">F · Financial</div>
+      <p class="xsmall mb0"><strong>F1</strong> Rate &amp; Capitation Administration<br><strong>F2</strong> Payment Execution &amp; Settlement<br><strong>F3</strong> Recovery &amp; Cost Avoidance<br><strong>F4</strong> Federal Claiming &amp; Match Defense</p>
+    </div>
+  </div>
+
+  <div class="grid g-2-1" style="margin-top:.14in">
+    <div>
+      <h3 style="margin-top:.10in">Where the value actually leaks</h3>
+      <p class="small mb0">Six end-to-end value chains cross these business areas: a person becomes covered and stays covered · a provider becomes trusted · a service is authorized and delivered · <strong>a claim or encounter becomes a settled, defensible payment</strong> · an integrity signal becomes a prevented loss · a policy change becomes operating reality. <strong>Value leaks at the handoffs</strong> — precisely the unit of analysis MITA's ladder does not have.</p>
+    </div>
+    <div class="note" style="margin:0">
+      <div class="eyebrow eyebrow--muted">Read this as design, not standard</div>
+      <p class="mb0" style="font-size:8pt">The capability model, the rungs, the tiers and every threshold here are the authors' construct, carrying no external authority — stated precisely so they can be argued with, not mistaken for framework content.</p>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>5</b></span></div>
+</section>
+
+<!-- ============================== PAGE 6 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>The twin ladder</span></div>
+
+  <div class="eyebrow">§5 · The Twin Ladder</div>
+  <h2>Authority on one axis, evidence on the other</h2>
+  <p class="deck">A business process may never operate above the autonomy rung that its data tier supports. That single rule converts "are we confident enough to automate this?" — an opinion — into "has this process's evidence reached the tier that permits the next rung?" — a fact that can be measured, published, and refused.</p>
+
+  <div class="grid g2">
+    <div>
+      <h3>Four rungs of machine authority</h3>
+      <table>
+        <thead><tr><th style="width:14%"></th><th>Machine produces</th><th>On human silence</th><th>Human's unit of work</th><th>In-band safety</th></tr></thead>
+        <tbody class="t-ink">
+          <tr><td><strong>A0</strong> Assist</td><td>an artifact</td><td>nothing</td><td>the decision</td><td>an independent human path</td></tr>
+          <tr><td><strong>A1</strong> HITL</td><td>a proposal</td><td>nothing</td><td>the instance</td><td>suspension</td></tr>
+          <tr><td><strong>A2</strong> HOTL</td><td>proposal + timer</td><td><strong>the action</strong></td><td>the population</td><td>window, stop, sampling</td></tr>
+          <tr><td><strong>A3</strong> Auto</td><td>the effect</td><td>the action</td><td>the policy</td><td><strong>none</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="xsmall" style="margin-top:.08in">The distinguishing test between A1 and A2 is the default on silence: at A1 silence means nothing happens; at A2 silence means the machine's action happens. Between A2 and A3 it is whether a stop window exists at all. <strong>A3 has no in-band safety whatsoever</strong> — which is why an action class may reach it only where the worst realistic failure is a recoverable error. If you cannot describe the compensating transaction, the class cannot be A3.</p>
+    </div>
+
+    <div>
+      <h3>Four tiers of evidence</h3>
+      <table>
+        <thead><tr><th style="width:26%"></th><th>The question the data can answer</th></tr></thead>
+        <tbody class="t-ink">
+          <tr><td><strong>D0</strong> Fragmented</td><td>What does system X say?</td></tr>
+          <tr><td><strong>D1</strong> Conformed</td><td>What is true about this entity — who said so, and when did we learn it?</td></tr>
+          <tr><td><strong>D2</strong> Reconciled &amp; contestable</td><td>What is true when the parties disagree, how wrong are we, and who has told us we are wrong?</td></tr>
+          <tr><td><strong>D3</strong> Settlement-grade</td><td>What was true at the moment of decision, provably, in a package an adjudicator will accept?</td></tr>
+        </tbody>
+      </table>
+      <p class="xsmall" style="margin-top:.08in">A tier is not an adjective about data quality. It is a claim about what interrogation the evidence survives. Three rules make it auditable: a process's tier is the <strong>minimum</strong> over its decision-critical inputs, never the average; tier is attained per <span class="nowrap">⟨process, action class, scope⟩</span>, so enterprise-wide tier claims are meaningless by construction; and <strong>tier is not monotone in time</strong> — a schema change, a new external match, or a policy change that makes a dormant field decision-critical can drop a tier, and must therefore drop the rung.</p>
+    </div>
+  </div>
+
+  <figure style="margin-top:.06in">
+    <svg viewBox="0 0 900 340" width="100%" role="img" aria-label="The twin ladder: data tier gates autonomy rung">
+      <rect x="0" y="0" width="900" height="340" fill="#FBFAF7"/>
+      <text x="150" y="24" font-family="TeX Gyre Heros, Arial" font-size="13" font-weight="600" fill="#16223F">The twin ladder: data tier gates autonomy rung</text>
+
+      <!-- forbidden region -->
+      <path d="M682.5,97.5 L860,97.5 L860,270 L327.5,270 L327.5,212.5 L505,212.5 L505,155 L682.5,155 Z" fill="#16223F" fill-opacity="0.07"/>
+      <text x="700" y="232" font-family="TeX Gyre Heros, Arial" font-size="11" font-weight="500" fill="#5B6472" text-anchor="middle">FORBIDDEN — rung exceeds</text>
+      <text x="700" y="246" font-family="TeX Gyre Heros, Arial" font-size="11" font-weight="500" fill="#5B6472" text-anchor="middle">the tier its evidence supports</text>
+
+      <!-- gridlines -->
+      <g stroke="#16223F" stroke-opacity="0.25" stroke-width="0.5">
+        <line x1="150" y1="40" x2="860" y2="40"/><line x1="150" y1="97.5" x2="860" y2="97.5"/>
+        <line x1="150" y1="155" x2="860" y2="155"/><line x1="150" y1="212.5" x2="860" y2="212.5"/>
+        <line x1="150" y1="270" x2="860" y2="270"/>
+        <line x1="150" y1="40" x2="150" y2="270"/><line x1="327.5" y1="40" x2="327.5" y2="270"/>
+        <line x1="505" y1="40" x2="505" y2="270"/><line x1="682.5" y1="40" x2="682.5" y2="270"/>
+        <line x1="860" y1="40" x2="860" y2="270"/>
+      </g>
+
+      <!-- frontier -->
+      <polyline points="327.5,270 327.5,212.5 505,212.5 505,155 682.5,155 682.5,97.5 860,97.5"
+                fill="none" stroke="#194A43" stroke-width="2.5"/>
+      <text x="690" y="91" font-family="TeX Gyre Heros, Arial" font-size="10" font-style="italic" fill="#194A43">the frontier: tier exactly supports rung</text>
+
+      <!-- axis labels -->
+      <g font-family="TeX Gyre Heros, Arial" font-size="11" font-weight="500" fill="#16223F" text-anchor="middle">
+        <text x="239" y="288">A0 Assist</text><text x="416" y="288">A1 HITL</text>
+        <text x="594" y="288">A2 HOTL</text><text x="771" y="288">A3 Autonomous</text>
+      </g>
+      <g font-family="TeX Gyre Heros, Arial" font-size="11" font-weight="500" fill="#16223F" text-anchor="end">
+        <text x="140" y="72">D3 Settlement-grade</text><text x="140" y="130">D2 Reconciled</text>
+        <text x="140" y="187">D1 Conformed</text><text x="140" y="245">D0 Fragmented</text>
+      </g>
+
+      <!-- shape key -->
+      <text x="170" y="64" font-family="TeX Gyre Heros, Arial" font-size="10" fill="#7C86A1">● 2026 &nbsp; ○ 2029 &nbsp; ▶ 2034</text>
+
+      <!-- tracks -->
+      <g stroke="#194A43" stroke-width="1.4" fill="none">
+        <path d="M378,103.75 V46.25 H809"/>
+        <path d="M378,170.25 V112.75 H632"/>
+        <path d="M378,179.25 V121.75 H650"/>
+        <path d="M378,188.25 V130.75 H594 V73.25 H809"/>
+        <path d="M201,197.25 V139.75 H632"/>
+        <path d="M201,263.75 V206.25 H454"/>
+      </g>
+      <!-- 2029 open circles -->
+      <g fill="#FBFAF7" stroke="#194A43" stroke-width="1.8">
+        <circle cx="594" cy="46.25" r="4.5"/><circle cx="594" cy="112.75" r="4.5"/><circle cx="594" cy="121.75" r="4.5"/>
+        <circle cx="594" cy="130.75" r="4.5"/><circle cx="416" cy="139.75" r="4.5"/><circle cx="239" cy="206.25" r="4.5"/>
+      </g>
+      <!-- 2034 triangles -->
+      <g fill="#194A43">
+        <path d="M798,40.75 L809,46.25 L798,51.75 Z"/><path d="M621,107.25 L632,112.75 L621,118.25 Z"/>
+        <path d="M639,116.25 L650,121.75 L639,127.25 Z"/><path d="M798,67.75 L809,73.25 L798,78.75 Z"/>
+        <path d="M621,134.25 L632,139.75 L621,145.25 Z"/><path d="M443,200.75 L454,206.25 L443,211.75 Z"/>
+      </g>
+      <!-- 2026 filled circles -->
+      <g fill="#194A43">
+        <circle cx="378" cy="103.75" r="4"/><circle cx="378" cy="170.25" r="4"/>
+        <circle cx="378" cy="179.25" r="4"/><circle cx="378" cy="188.25" r="4"/>
+        <circle cx="201" cy="197.25" r="4"/><circle cx="201" cy="263.75" r="4"/>
+      </g>
+      <g font-family="TeX Gyre Heros, Arial" font-size="9" font-weight="700" fill="#194A43" text-anchor="end">
+        <text x="370" y="107">1</text><text x="370" y="173.5">2</text><text x="370" y="182.5">3</text>
+        <text x="370" y="191.5">4</text><text x="193" y="200.5">5</text><text x="193" y="267">6</text>
+      </g>
+
+      <!-- process key -->
+      <g font-family="TeX Gyre Heros, Arial" font-size="9" fill="#16223F">
+        <text x="150" y="315"><tspan font-weight="700" fill="#194A43">1</tspan>  FFS clean claim line</text>
+        <text x="268" y="315"><tspan font-weight="700" fill="#194A43">2</tspan>  MCP encounter</text>
+        <text x="386" y="315"><tspan font-weight="700" fill="#194A43">3</tspan>  Ex parte renewal</text>
+        <text x="504" y="315"><tspan font-weight="700" fill="#194A43">4</tspan>  Provider enrolment</text>
+        <text x="622" y="315"><tspan font-weight="700" fill="#194A43">5</tspan>  FFS TAR approval</text>
+        <text x="740" y="315"><tspan font-weight="700" fill="#194A43">6</tspan>  ECM / behavioral health record</text>
+      </g>
+    </svg>
+    <figcaption><b>Figure 3</b> A process may occupy any cell on or above the frontier. Tracks show 2026 → 2029 → 2034; tier placements are design judgements from the current-state research, <em>not measurements</em> — replacing them with measured values is the whole purpose of the instrument in §9. Adverse determinations within processes 3 and 5 remain at A1 permanently under 42 CFR 431 Subpart E and SB 1120 regardless of tier attained; only the favourable and neutral action classes are plotted. Note process 6: the behavioral health record does not reach D2 by 2034, and the reasons are fiscal and legal rather than technical.</figcaption>
+  </figure>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>6</b></span></div>
+</section>
+
+<!-- ============================== PAGE 7 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>The record</span></div>
+
+  <div class="eyebrow">§6 · The Record</div>
+  <h2>Every catastrophe was an evidence failure, not a model failure</h2>
+  <p class="deck">Across five jurisdictions and two decades, the documented disasters of public-benefits automation share one structure — and in none of them was the automation sophisticated.</p>
+
+  <table class="dense" style="margin-top:.06in">
+    <thead><tr><th style="width:19%">Case</th><th style="width:44%">What the automation did</th><th style="width:36%">The evidence reading</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong class="ink">Michigan MiDAS</strong><br><span class="muted xsmall">2013–2015 · <em>Bauserman</em></span></td>
+        <td>Auto-adjudicated unemployment fraud from mismatches between claimant-reported earnings and employer wage records, flagging any discrepancy however trivial. Notice reached claimants only through a portal they had no reason to open; <strong>non-response defaulted to an adverse determination.</strong> The Auditor General reviewed 22,000 determinations and found 93 percent involved no fraud.</td>
+        <td>Two parties asserting the same fact at different temporal granularities, with no reconciliation layer, no versioned precedence rule, and a contest channel that structurally did not reach the affected person. <strong>D1 at best, run at A2</strong> — silence executing as consent.</td>
+      </tr>
+      <tr>
+        <td><strong class="ink">Australia, Robodebt</strong><br><span class="muted xsmall">2015–2019 · <em>Prygodicz (No 2)</em></span></td>
+        <td>Averaged an annual tax-office income figure across twenty-six fortnights, tested it against fortnightly reported income, raised a debt on the difference — and reversed the onus onto the recipient. The Federal Court found no proper legal basis; roughly 648,000 group members, about A$1.763 billion in debts withdrawn.</td>
+        <td>Averaging is a <em>conformance</em> operation — so this is a D1 failure, not a D0 one. The enterprise successfully assembled a record and, in assembling it, <strong>fabricated a fact no source had asserted.</strong> The debts had to be withdrawn wholesale because the Commonwealth could not tell the correct ones from the incorrect: the price of missing restatement lineage.</td>
+      </tr>
+      <tr>
+        <td><strong class="ink">Idaho</strong><br><span class="muted xsmall"><em>K.W. v. Armstrong</em>, 2016</span></td>
+        <td>An Excel budget tool set annual Medicaid service funding for roughly 4,000 people with developmental disabilities. The formula was fitted on <strong>733 of 3,512 participant records</strong> — the other 79 percent discarded as unreliable. Never recalibrated, never audited. The court held it unconstitutionally arbitrary.</td>
+        <td>The purest tier failure on record. <strong>No model improvement rescues a formula fitted on a corrupted remnant of its own population</strong> — the case to put in front of anyone proposing to solve an evidence problem with a better algorithm.</td>
+      </tr>
+      <tr>
+        <td><strong class="ink">Arkansas &amp; Indiana</strong><br><span class="muted xsmall"><em>Ledgerwood</em> 2017 · <em>Perdue</em> 2012</span></td>
+        <td>An algorithmic tool replaced nurse discretion in setting attendant-care hours, producing large reductions; the courts held the state must explain the specific factors that produced a cut. Indiana's automated eligibility processing issued denials carrying only generic reason codes.</td>
+        <td>Not data quality but <strong>provenance and contestability</strong>: neither state could say, in a notice, which inputs produced the outcome. The machine held the disposition but not <em>the reason as a data structure.</em> The same requirement binds DHCS under § 431.210 — <strong>a rationale that cannot become a notice is not a rationale.</strong></td>
+      </tr>
+      <tr>
+        <td><strong class="ink">Tennessee TEDS</strong><br><span class="muted xsmall"><em>A.M.C. v. Smith</em>, 2024</span></td>
+        <td>The system failed for months to load Social Security benefits, disability status and marital status, so it could not evaluate disability-related coverage categories; during migration, enrollees were sorted into wrong households or dropped entirely.</td>
+        <td><strong>D0 masquerading as D1.</strong> An assembled record, silently incomplete on exactly the fields deciding alternate-basis eligibility, with nothing detecting the incompleteness. This is ex parte redetermination — a D2 operation — run on data that had not attained D1 coverage. <strong>It is the same process California must run at six-month cadence from January 2027.</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="rule--ink" style="margin:.10in 0 .08in"></div>
+  <div class="grid g-2-1">
+    <div>
+      <h3 style="margin-top:.02in">The diagonal: A2 running on D1 evidence</h3>
+      <p class="small">The forbidden region is a staircase, not a gradient — a process at D1 attempting A2 is not "mostly safe," it is running the configuration above. <strong>Its circuit breaker cannot be calibrated:</strong> the breaker trips when the executed-action distribution moves beyond a pre-registered limit, which needs a stable baseline and a known error rate so the system can tell <em>the world changed</em> from <em>our data changed</em>. On D1 evidence a schema change or a mass restatement moves that distribution exactly as a real behavioral shift would — leaving limits so wide the breaker never trips, or so narrow it is switched off within a quarter. Since A2's failure mode is precisely that nobody is looking, a decorative breaker means no safety at all.</p>
+      <p class="small mb0"><strong>Silence becomes uninterpretable</strong>, and A2 runs on silence. <strong>Correlated errors defeat sampling</strong>, because a tier defect strikes every record sharing the defective attribute while the reviewer checks dispositions, not the data beneath them. And <strong>the compensating transaction works on one case and fails on the cohort.</strong></p>
+    </div>
+    <div>
+      <div class="card card--tint" style="margin-top:.12in">
+        <div class="eyebrow eyebrow--muted">The generalisation</div>
+        <p class="xsmall">Temporal misalignment between two sources describing one fact. An unusable population under a fitted rule. Provenance too thin for a lawful notice. Silently incomplete assembly presented as complete.</p>
+        <p class="xsmall mb0"><strong>Every one is an evidence-tier failure.</strong> The tier rule is the cheapest safety control available: it forbids, in advance and on inspectable evidence, the exact configuration that produced all of them.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>7</b></span></div>
+</section>
+
+<!-- ============================== PAGE 8 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>The anchor</span></div>
+
+  <div class="eyebrow">§7 · The Anchor</div>
+  <h2>A claim or encounter becomes a settled, defensible payment</h2>
+  <p class="deck">One value chain, two disciplines, six handoffs. Each discipline discovers the other's errors late — and the losses do not sit inside the decisions. They sit between them.</p>
+
+  <figure>
+    <svg viewBox="0 0 720 206" width="100%" role="img" aria-label="The claims and encounter value chain, with six leak points">
+      <rect x="0" y="0" width="720" height="206" fill="#FBFAF7"/>
+      <defs>
+        <marker id="a2" markerWidth="5" markerHeight="5" refX="4.2" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#7C86A1"/></marker>
+      </defs>
+
+      <text x="15" y="20" font-family="TeX Gyre Heros, Arial" font-size="9" font-weight="600" letter-spacing="1" fill="#7C86A1">FEE-FOR-SERVICE · CA-MMIS</text>
+      <g font-family="TeX Gyre Heros, Arial" font-size="9.5" fill="#16223F" text-anchor="middle">
+        <rect x="15"  y="30" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="67.5" y="53">Service delivered</text>
+        <rect x="132" y="30" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="184.5" y="53">Claim submitted</text>
+        <rect x="249" y="30" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="301.5" y="53">Edits &amp; audits</text>
+        <rect x="366" y="30" width="105" height="38" rx="3" fill="#E4EDEA" stroke="#194A43"/><text x="418.5" y="47">Suspense &amp;</text><text x="418.5" y="59">exception</text>
+        <rect x="483" y="30" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="535.5" y="47">Adjudicate</text><text x="535.5" y="59">&amp; price</text>
+        <rect x="600" y="30" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="652.5" y="47">Pay · claim</text><text x="652.5" y="59">federal share</text>
+      </g>
+      <g stroke="#7C86A1" stroke-width="1" marker-end="url(#a2)">
+        <line x1="120" y1="49" x2="129" y2="49"/><line x1="237" y1="49" x2="246" y2="49"/><line x1="354" y1="49" x2="363" y2="49"/>
+        <line x1="471" y1="49" x2="480" y2="49"/><line x1="588" y1="49" x2="597" y2="49"/>
+      </g>
+
+      <text x="15" y="118" font-family="TeX Gyre Heros, Arial" font-size="9" font-weight="600" letter-spacing="1" fill="#7C86A1">MANAGED CARE · ENCOUNTERS</text>
+      <g font-family="TeX Gyre Heros, Arial" font-size="9.5" fill="#16223F" text-anchor="middle">
+        <rect x="15"  y="128" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="67.5" y="151">Service delivered</text>
+        <rect x="132" y="128" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="184.5" y="145">Plan adjudicates</text><text x="184.5" y="157">and pays</text>
+        <rect x="249" y="128" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="301.5" y="151">Encounter submitted</text>
+        <rect x="366" y="128" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="418.5" y="145">DHCS accept</text><text x="418.5" y="157">or reject</text>
+        <rect x="483" y="128" width="105" height="38" rx="3" fill="#E4EDEA" stroke="#194A43"/><text x="535.5" y="151">Correction cycle</text>
+        <rect x="600" y="128" width="105" height="38" rx="3" fill="#fff" stroke="#DBE1EC"/><text x="652.5" y="145">Rate setting &amp;</text><text x="652.5" y="157">risk adjustment</text>
+      </g>
+      <g stroke="#7C86A1" stroke-width="1" marker-end="url(#a2)">
+        <line x1="120" y1="147" x2="129" y2="147"/><line x1="237" y1="147" x2="246" y2="147"/><line x1="354" y1="147" x2="363" y2="147"/>
+        <line x1="471" y1="147" x2="480" y2="147"/><line x1="588" y1="147" x2="597" y2="147"/>
+      </g>
+
+      <g font-family="TeX Gyre Heros, Arial" font-size="8" font-weight="700" fill="#fff" text-anchor="middle">
+        <circle cx="126" cy="82" r="8" fill="#6B5119"/><text x="126" y="85">1</text>
+        <circle cx="360" cy="82" r="8" fill="#6B5119"/><text x="360" y="85">2</text>
+        <circle cx="594" cy="82" r="8" fill="#6B5119"/><text x="594" y="85">3</text>
+        <circle cx="243" cy="180" r="8" fill="#6B5119"/><text x="243" y="183">4</text>
+        <circle cx="477" cy="180" r="8" fill="#6B5119"/><text x="477" y="183">5</text>
+        <circle cx="660" cy="180" r="8" fill="#6B5119"/><text x="660" y="183">6</text>
+      </g>
+    </svg>
+    <figcaption><b>Figure 4</b> Two disciplines that only meet in a rate cell. Numbered markers are the handoffs where value leaks, described opposite. The shaded boxes hold the enterprise's largest concentration of human judgment and its least-instrumented one.</figcaption>
+  </figure>
+
+  <div class="grid g2" style="margin-top:.08in">
+    <div>
+      <h3 style="margin-top:.06in">Where the value leaks</h3>
+      <p class="small"><strong class="gold">1 · Provider → claim.</strong> Billing error is manufactured before the enterprise ever sees the transaction, and the only feedback instrument is a denial arriving weeks later.</p>
+      <p class="small"><strong class="gold">2 · Edit → suspense.</strong> The suspended-claim queue is the largest concentration of human judgment in the program and its least-instrumented: cycle time, resolution consistency and rework rate are not first-class managed quantities.</p>
+      <p class="small"><strong class="gold">3 · Payment → federal claiming.</strong> Reconstructing <em>why</em> a specific dollar was claimed at a specific match rate, years later, is a project rather than a query. That is the deferred cost of an enterprise with no evidence ledger.</p>
+      <p class="small"><strong class="gold">4 · Plan adjudication → encounter.</strong> The plan pays on its own record and <em>then</em> reports, so the encounter is a derived artifact rather than the transaction — and the disagreement between what the plan adjudicated and what the state accepted is visible only in aggregate.</p>
+      <p class="small"><strong class="gold">5 · Rejection → correction.</strong> Rejected encounters loop back on a batch cadence. That loop's latency is the latency of the state's own view of what care was delivered.</p>
+      <p class="small mb0"><strong class="gold">6 · Encounters → rate setting.</strong> Incomplete or late encounters propagate into capitation rates. This is the most expensive leak in the chain, because the error compounds forward into every future payment.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:.06in">Why this is the right place to learn</h3>
+      <p class="small">Not because it is where the money is — because it is where the <em>evidence</em> is. Every claim is a labelled decision carrying a disposition, a remittance advice, and, decisively, <strong>a dispute channel in which the disputing party is motivated by money.</strong> That is the strongest ground-truth signal anywhere in the enterprise, and it accumulates faster here than anywhere else.</p>
+      <p class="small">So the claim is narrow and worth stating precisely: <strong>clean-line adjudication is where the method is proven, not where the value is.</strong> A paper that anchored on value would anchor on eligibility — and would be proposing to learn governance on the population least able to absorb a mistake.</p>
+
+      <div class="note">
+        <div class="eyebrow eyebrow--teal">And one thing this paper will not say</div>
+        <p class="mb0" style="font-size:8.2pt">It is true in law that a provider payment denial is not a beneficiary due-process event. It would be catastrophic to build on it. For a health centre a denied encounter is absorbed whole; for county behavioral health, a program that gets faster and more consistent at <em>not paying</em> is a solvency event. So the rule runs the other way: <strong>no action class that denies or reduces a payment to a provider climbs above A1</strong>, and the provider remedy chain — electronic appeal, a committed resolution date on suspended claims, a documentation loop that ends timeout denials — climbs first.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>8</b></span></div>
+</section>
+
+<!-- ============================== PAGE 9 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>The climb</span></div>
+
+  <div class="eyebrow">§8 · The Climb</div>
+  <h2>One decision, four rungs, eight years</h2>
+  <p class="deck">Take the highest-volume decision in the program — the payment disposition on a single line of a fee-for-service professional claim — and walk it up. The ceiling analysis comes first, because that is the order the instrument runs in.</p>
+
+  <table class="dense">
+    <thead><tr><th style="width:23%">Disposition</th><th style="width:14%">Ceiling-bound?</th><th style="width:11%">Max rung</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td><strong class="ink">Pay as billed</strong> — clean line</td><td>No</td><td><strong class="teal">A3</strong> eligible</td><td>Favorable or neutral; no adverse determination; reversible by recoupment within the cycle</td></tr>
+      <tr><td><strong class="ink">Pay adjusted</strong> — pricing or edit</td><td>Only if no beneficiary liability results</td><td><strong class="teal">A2</strong></td><td>Provider-facing adjustment; verify no cost-sharing effect. A reduction to provider payment is separately floored at A1 by policy</td></tr>
+      <tr><td><strong class="ink">Pend for information</strong></td><td>No — with a hard cap</td><td><strong class="teal">A2</strong></td><td>Auto-pend permitted only with a maximum cumulative duration; on expiry it routes to a human and may <em>never</em> auto-resolve adversely on timeout</td></tr>
+      <tr><td><strong class="ink">Deny</strong> — adverse benefit determination</td><td><strong>Yes</strong></td><td><strong class="gold">A1</strong> permanently</td><td>42 CFR § 438.400(b); 42 CFR 431 Subpart E where eligibility-linked</td></tr>
+      <tr><td><strong class="ink">Deny on medical necessity</strong></td><td><strong>Yes</strong></td><td><strong class="gold">A1-restricted</strong></td><td>SB 1120 — the tool may not deny, delay or modify based in whole or in part on medical necessity, so it may not even propose the disposition</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid g2" style="margin-top:.18in">
+    <div>
+      <h3 style="margin-top:0">Years 1–2 · A0, and the year that produces no autonomy</h3>
+      <p class="small">For each suspended line the machine assembles the adjudication packet — eligibility on date of service, benefit and authorization status, provider enrollment, pricing reference, duplicate history, edit rationale — and produces a ranked candidate disposition with a stated reason. It writes nothing to the claims system, and the examiner may ignore it entirely.</p>
+      <p class="small">What matters is the instrumentation, not the assistance: <strong>every machine candidate is paired with the examiner's actual disposition and written to the evidence ledger.</strong> A0 without recorded pairs can never earn A1, because the concordance evidence cannot be reconstructed afterwards.</p>
+      <p class="small mb0">And here the least comfortable admission belongs. The baselines the gate depends on — suspense disposition mix, appeal overturn, human-to-human concordance on the same line — <strong>are not published in California, and in at least one case have never been measured.</strong> No action class enters the ladder until its own baseline is. <strong>Year one delivers a number, not a capability</strong> — which is also the only Year One deliverable in this field the Legislative Analyst can check.</p>
+
+      <h3>Years 3–4 · A1</h3>
+      <p class="small mb0">The machine emits a complete, executable proposed disposition and suspends; the examiner's work flips from production to review. Silence produces nothing. And reviewers whose modification rate is statistically indistinguishable from zero have their decisions <strong>excluded from the promotion evidence pool</strong>, with the exclusion count printed in the package — because without that control, "the human agreed" degenerates into "the human clicked."</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Year 5 · the fork, and the refusal</h3>
+      <p class="small">Two promotion packages are prepared. Only one can succeed.</p>
+      <p class="small"><strong>Clean-line pay-as-billed → A2.</strong> Granted on evidence: sustained concordance with a confidence bound, calibration with no over-confident decile, no subpopulation disparity outside the pre-registered band holding case-mix constant, an overturn rate non-inferior to the human baseline, and a reversibility attestation naming a recoupment path that has actually executed.</p>
+      <p class="small"><strong>Denials → A2. Denied, and denied permanently.</strong> Not for want of evidence. The ceiling test fires before the tier or the rung is read. A denial constituting an adverse benefit determination stays at A1 at ninety-nine percent concordance, and stays at A1 at one hundred.</p>
+      <p class="small">There is also a technical precondition that must not be waved through. A2's entire safety rests on an intervention timer firing. <strong>No action class may be promoted to A2 until the durable execution substrate is running in production and its timer-survival property has been verified under restart.</strong> A timer that dies on deploy converts A2 into A3 silently, and nobody finds out until the quarter closes.</p>
+
+      <h3>Years 6–8 · A2, and a narrow A3</h3>
+      <p class="small">Cycle time decouples from headcount for the qualified clean line, and the throughput ceiling stops being reviewer capacity. Every other disposition — every denial, every partial, every medical-necessity question — continues to route to A1 in the same process and the same transaction.</p>
+      <p class="small mb0">That is the honest picture of Medi-Cal in 2034: <strong>A2-dominant, with an A3 tail, and a permanent floor under every decision that defines the program's relationship to a person.</strong> It is a smaller claim than the one usually made in this field. It is also the only one this paper's own gate arithmetic supports.</p>
+    </div>
+  </div>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>9</b></span></div>
+</section>
+
+<!-- ============================== PAGE 10 ============================== -->
+<section class="page">
+  <div class="runhead"><span>The Governed Medi-Cal Enterprise</span><span>What to do</span></div>
+
+  <div class="eyebrow">§9 · The Instrument, the Money, the Next Twelve Months</div>
+  <h2>What California would actually do</h2>
+
+  <div class="grid g2" style="margin-top:.04in">
+    <div>
+      <h3 style="margin-top:.04in">The measurement instrument</h3>
+      <p class="small">One page per <span class="nowrap">⟨process, action class, scope⟩</span> — the same unit the ladder tiers — carrying twelve indicators, three per tier: false-merge and false-split rates reported separately and never netted; lineage completeness; source-to-record latency per feed; conflicts detected and closed under a versioned precedence rule; field-level error with a confidence interval; challenges per thousand decisions and the proportion upheld; chain-verification date; replay fidelity; and appeal-package assembly time from an unannounced drill.</p>
+      <p class="small"><strong>Nine of the twelve are views over data DHCS already produces</strong> — payment error measurement, encounter quality measurement, the prior-authorization metrics already published under CMS-0057-F, grievance and appeal reporting, and interface SLAs. The instrument is a lens, not a collection, and it rides an operational reporting vehicle that is already mandatory. <strong>One indicator — replay fidelity — is genuinely new and costs real money.</strong> It should be justified on appeal defence and audit economics rather than dressed in a mandate that does not carry it.</p>
+      <p class="small mb0">One interpretive rule travels with the contestability indicator, and it reverses the sign on the metric that failed in Australia. <strong>A falling challenge rate is a warning, not an achievement.</strong> Automation that produces less comprehensible notices, or moves faster than people can respond, lowers the appeal rate — and a gate rewarding that would promote a process for silencing its own critics. So appeal overturn is demoted to monitoring and replaced, as gate evidence, by independent shadow adjudication on a sample that includes decisions nobody appealed.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:.04in">The money, as a budget analyst would state it</h3>
+      <p class="small">Enhanced federal match is real and intact: 90 percent for design and development of an approved system, 75 percent for its operation, both unchanged in the current eCFR, with modularity, reuse and no proprietary lock-in as conditions — and MITA advancement itself a condition of the ninety. But <strong>90/10 and 75/25 are match rates, not appropriations.</strong> California must appropriate the state share first; the 75 applies only after certification; and the governance apparatus this paper spends most of its words on — promotion authority, sampling, shadow adjudication, drills, oversight — is program administration at <strong>50/50</strong>.</p>
+      <p class="small">The honest framing is <em>already at ninety cents on the federal dollar, and already inside an advance planning document California must file anyway.</em> It is not free — and the state share competes directly with the enacted reductions to Enhanced Care Management and Community Supports, which should be said in the first meeting rather than discovered in the third.</p>
+      <p class="small mb0">And the return should be described precisely. <strong>This program does not produce General Fund savings inside its horizon, because DHCS does not hold the labor.</strong> The work sits with counties, with the fiscal intermediary, and inside capitation. What it produces is avoided disenrollment, avoided disallowance once the three-percent error threshold binds in 2029, and avoided cutover failure. Anyone promising headcount is promising what the org chart cannot deliver.</p>
+    </div>
+  </div>
+
+  <div class="rule--ink" style="margin:.14in 0 .10in"></div>
+
+  <div class="grid g3">
+    <div>
+      <div class="eyebrow eyebrow--teal">1 · Put it in the contract</div>
+      <p class="small mb0">The fiscal intermediary contract determines whether California can ever see its own claims decisions. Per-decision provenance emission as a deliverable on a state-owned schema; state ownership of suspense-queue telemetry as a reported performance measure; a contractual right to place a state-owned ceiling gate in the disposition path; portability of the evidence record on exit. <strong>The requirement costs almost nothing in a solicitation and almost everything as a change order</strong> — and no rung above A0 is reachable in claims processing until it lands.</p>
+    </div>
+    <div>
+      <div class="eyebrow eyebrow--teal">2 · Publish the register</div>
+      <p class="small mb0">Every action class with its data tier, its rung, its evidence volume, its concordance estimate and interval, its rubber-stamp exclusion count, its demotion events and its next gate date — quarterly to the Legislature, with a four-line portfolio scorecard above it. The number that proves the instrument is real is not the count of promotions granted. <strong>It is the count refused</strong>, and publishing it costs nothing.</p>
+    </div>
+    <div>
+      <div class="eyebrow eyebrow--teal">3 · Bargain before you build</div>
+      <p class="small mb0">No promotion touching a represented classification proceeds without completed meet-and-confer. A document carrying thirty-one capabilities and an eight-year roadmap that never mentions the workforce performing every A0 and A1 step is a labor program in a governance costume. Make the reinvestment promise falsifiable: publish a <strong>human attention floor</strong> in measured minutes per ceiling-bound case, pre-registered before any promotion, with automatic demotion if measured review time falls beneath it.</p>
+    </div>
+  </div>
+
+  <p class="pull" style="margin-top:.13in">California will be measured on the accuracy of its own evidence from 2029, on a schedule it does not control. The only open question is whether it measures itself first.</p>
+
+  <p class="src"><b>On sources and status.</b> Dates, regulations and cases were verified against primary sources; figures that could not be were omitted rather than softened. The capability model, the rungs, the tiers and every threshold are this paper's own construct and carry no external authority. CalAIM's 1115 and 1915(b) renewals, and CMS action on California's conforming managed-care tax, were both pending as of 27 August 2026.</p>
+
+  <div class="folio"><span>The Governed Medi-Cal Enterprise</span><span><b>10</b></span></div>
+</section>
+
+</body>
+</html>

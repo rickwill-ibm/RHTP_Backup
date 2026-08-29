@@ -6,13 +6,27 @@
 import { postJson } from '@/lib/client/bff';
 import type { DtrMatchResult } from '@/lib/pa/pa-types';
 import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
+import { flag } from '@/lib/flags/flags';
+import { engineDtrMatchForCode } from '@/lib/pa/policyEngineBridge';
 
 export async function runDtrMatch(
   patientId: string,
   cptCode: string,
   procedureName: string
 ): Promise<DtrMatchResult> {
-  const r = await postJson<DtrMatchResult>('/api/dtr/evaluate', { patientId, cptCode, procedureName });
+  // Engine first (behind the richCrdDtr flag): the DTR criteria are projected from the policy
+  // engine's PUBLISHED Questionnaire — the same authored policy the CRD card read. The BFF/mock
+  // path below remains the fallback for codes the engine has not published, or when the flag is off.
+  if (flag('richCrdDtr')) {
+    const fromEngine = engineDtrMatchForCode(cptCode);
+    if (fromEngine) return fromEngine;
+  }
+
+  const r = await postJson<DtrMatchResult>('/api/dtr/evaluate', {
+    patientId,
+    cptCode,
+    procedureName,
+  });
 
   if (r.ok && r.data) {
     return r.data;
@@ -77,10 +91,22 @@ function getMockDtrResult(
           sourceExcerpt:
             'Advanced imaging is appropriate when neurological deficit, radiculopathy, or a red flag symptom is documented in the clinical record.',
           candidateCodes: [
-            { code: 'M54.4', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Lumbago with sciatica — right side' },
+            {
+              code: 'M54.4',
+              system: 'http://hl7.org/fhir/sid/icd-10-cm',
+              label: 'Lumbago with sciatica — right side',
+            },
             { code: 'M54.3', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Sciatica' },
-            { code: 'G55',   system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Nerve root and plexus compressions in diseases classified elsewhere' },
-            { code: 'M47.816', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Spondylosis with radiculopathy — lumbar region' },
+            {
+              code: 'G55',
+              system: 'http://hl7.org/fhir/sid/icd-10-cm',
+              label: 'Nerve root and plexus compressions in diseases classified elsewhere',
+            },
+            {
+              code: 'M47.816',
+              system: 'http://hl7.org/fhir/sid/icd-10-cm',
+              label: 'Spondylosis with radiculopathy — lumbar region',
+            },
           ],
         },
         {

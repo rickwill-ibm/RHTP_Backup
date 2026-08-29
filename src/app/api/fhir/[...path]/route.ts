@@ -46,9 +46,15 @@ function normalizePatientId(rawId: string | null): string | null {
   return resolveFhirToPlatformId(rawId) ?? rawId;
 }
 
-function mockFhirGet(resourceType: string, search: string): unknown {
-  const pid = normalizePatientId(extractPatientId(search));
-  const patient = pid ? (getPatientById(pid) ?? null) : null;
+function mockFhirGet(resourceType: string, search: string, pathId?: string | null): unknown {
+  // Patient reads come in by PATH (Patient/<id>); other resources by ?patient= query.
+  // Resolve robustly: a raw id may be a platform id OR a FHIR id — try it as-is first, then
+  // normalized, so any patient loads regardless of which id form the caller used.
+  const rawId = extractPatientId(search) ?? pathId ?? null;
+  const patient = rawId
+    ? (getPatientById(rawId) ?? getPatientById(normalizePatientId(rawId) ?? '') ?? null)
+    : null;
+  const pid = patient?.platformId ?? (rawId ? (normalizePatientId(rawId) ?? rawId) : null);
 
   if (resourceType === 'Patient' && pid) {
     return patient
@@ -301,7 +307,8 @@ export async function GET(
 
   // Mock bypass — build response from registry data, no FHIR server needed
   if (devMockEnabled()) {
-    return NextResponse.json(mockFhirGet(resourceType, search), {
+    const pathId = resourceType === 'Patient' && path[1] ? decodeURIComponent(path[1]) : null;
+    return NextResponse.json(mockFhirGet(resourceType, search, pathId), {
       status: 200,
       headers: { [CORRELATION_HEADER]: correlationId },
     });

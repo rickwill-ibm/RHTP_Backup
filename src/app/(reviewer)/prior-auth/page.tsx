@@ -12,6 +12,7 @@ import { usePaStore, type AppView } from '@/lib/pa/usePaStore';
 import { flag } from '@/lib/flags/flags';
 import OrderView from '@/components/pa/OrderView';
 import CrdChecklistView from '@/components/pa/CrdChecklistView';
+import CrdCoverageView from '@/components/pa/CrdCoverageView';
 import DtrTreeView from '@/components/pa/DtrTreeView';
 import ReviewSubmitView from '@/components/pa/ReviewSubmitView';
 import PaPortalView from '@/components/pa/PaPortalView';
@@ -20,20 +21,22 @@ import PatientRecordDrawer from '@/components/pa/PatientRecordDrawer';
 import { PaHandoffBanner } from '@/components/goldenThread/PaHandoffBanner';
 
 const NAV_STEPS: { view: AppView; label: string; step: number }[] = [
-  { view: 'order',    label: 'Order & Coverage Check', step: 1 },
+  { view: 'order', label: 'Order & Coverage Check', step: 1 },
   { view: 'checklist', label: 'Coverage Requirements', step: 2 },
-  { view: 'dtr',      label: 'Clinical Documentation', step: 3 },
-  { view: 'review',   label: 'Review & Submit',        step: 4 },
-  { view: 'portal',   label: 'Authorizations',         step: 5 },
+  { view: 'dtr', label: 'Clinical Documentation', step: 3 },
+  { view: 'review', label: 'Review & Submit', step: 4 },
+  { view: 'portal', label: 'Authorizations', step: 5 },
 ];
 
+// The Da Vinci-conformant CRD screen is served behind the `richCrdDtr` flag; the classic
+// checklist view remains the fallback when the flag is off.
 const VIEW_COMPONENT: Record<AppView, React.ComponentType> = {
-  order:     OrderView,
-  checklist: CrdChecklistView,
-  dtr:       DtrTreeView,
-  review:    ReviewSubmitView,
-  portal:    PaPortalView,
-  case:      CaseDetailView,
+  order: OrderView,
+  checklist: flag('richCrdDtr') ? CrdCoverageView : CrdChecklistView,
+  dtr: DtrTreeView,
+  review: ReviewSubmitView,
+  portal: PaPortalView,
+  case: CaseDetailView,
 };
 
 export default function PriorAuthPage(): React.ReactElement {
@@ -62,7 +65,8 @@ export default function PriorAuthPage(): React.ReactElement {
           <div>
             <h1 className="text-lg font-bold text-gray-900">Prior Authorization</h1>
             <p className="text-xs text-gray-500">
-              Coverage check · Clinical documentation · Human-gated submission · CMS-0057-F compliant
+              Coverage check · Clinical documentation · Human-gated submission · CMS-0057-F
+              compliant
             </p>
           </div>
           <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-blue-700">

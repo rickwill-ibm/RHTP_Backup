@@ -167,3 +167,20 @@ still works. Every Critical fix must pass three checks before it is marked close
    the unit test.
 Only then does E12 (claim-vs-evidence) accept the finding as CLOSED. This is mandatory for
 Critical; recommended for High.
+
+## The adversarial testing lenses — unit-level manifestation of the panel (added v1.8)
+
+R1–R5 run as a separate phase, by an independent adversary, after the build. The **adversarial
+testing lens kit** (`ADVERSARIAL_TESTING_LENSES.md`) is the same defect classes applied by the
+MODULE AUTHOR at write-time — 8 unit-level lenses, each derived from a real defect a green gate
+missed, that give the tests catch-power before the panel ever runs. The mapping:
+
+- L1 Precision-not-recall, L8 Degenerate-inputs → R1 / R4 (correctness/domain)
+- L2 Guards-fail-closed, L7 Claims-enforced → R3 / R4 (stub-legitimacy / security-adversary); pairs with E9
+- L3 Order-independence → R4 (determinism)
+- L4 Target-contract, L5 Round-trip/encoding → R1 / R3 (contract/interface)
+- L6 No-silent-degradation → R2 / R5 (negative-space / observability)
+
+The chain is lens-kit → E13 → R5: the author picks the adversarial tests (lenses), E13's mutation
+sampling proves they kill mutants, and R5 judges whether the surviving assertion is deep enough. See
+`ADVERSARIAL_TESTING_LENSES.md` for the full kit and its reconciliation with E12/E13/E14/E16.

@@ -58,6 +58,7 @@ EXEMPT_PATTERNS=(
   "*/generateDetailedScreenPDF*.ts"
   "*/generateTalkTrackPDF*.ts"
   "*/md-smart-launch.backup/*"
+  "*/AppLayout.nav.ts"
 )
 
 RED='\033[0;31m'

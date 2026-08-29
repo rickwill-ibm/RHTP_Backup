@@ -81,15 +81,15 @@ export interface PasSubmission {
   payerEndpoint: string;
   payloadType: string;
   timestamp: string;
+  /** Truthful transport result (M2): the payer accepted (submitted), pended (202), or errored.
+   *  Absent ⇒ legacy/optimistic path. */
+  outcome?: 'submitted' | 'pended' | 'error';
+  /** Human note about the outcome (e.g. the error reason) for honest UI. */
+  disposition?: string;
 }
 
 export type PaStatus =
-  | 'Submitted'
-  | 'Pended'
-  | 'Approved'
-  | 'Partially Approved / Modified'
-  | 'Denied'
-  | 'Pending';
+  'Submitted' | 'Pended' | 'Approved' | 'Partially Approved / Modified' | 'Denied' | 'Pending';
 
 export interface PaCase {
   authId: string;
@@ -102,7 +102,13 @@ export interface PaCase {
   channel: 'FHIR' | 'EDI';
   status: PaStatus;
   checklist: CheckItem[];
-  dtr: { title: string; status: 'met' | 'gap'; evidence: string; source: 'emr' | 'pa' | 'upload' | null }[];
+  dtr: {
+    title: string;
+    /** 'attached' = evidence uploaded, pending payer review (NOT a failure). Distinct from 'gap'. */
+    status: 'met' | 'gap' | 'attached';
+    evidence: string;
+    source: 'emr' | 'pa' | 'upload' | null;
+  }[];
   submission: PasSubmission;
   timeline: TimelineEntry[];
 }
@@ -117,7 +123,8 @@ export interface TimelineEntry {
 
 export interface OrderProcedure {
   cpt: string;
-  cptSystem: 'http://www.ama-assn.org/go/cpt' | 'https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets';
+  cptSystem:
+    'http://www.ama-assn.org/go/cpt' | 'https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets';
   cptDesc: string;
 }
 

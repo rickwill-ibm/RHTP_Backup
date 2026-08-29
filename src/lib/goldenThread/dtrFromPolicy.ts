@@ -1,29 +1,17 @@
-/**
- * DTR questionnaire from policy (increment GT-8, offline path).
- *
- * Deterministically builds a Da Vinci DTR Questionnaire from a parsed medical
- * policy: one yes/no item per medical-necessity indication, plus a
- * documentation-attachment item. This is the offline, reproducible path used in
- * the mock demo; the AI/LLM generation path (reference questionnaire pipeline,
- * Claude generator + reviewer) stays gated behind the `aiDtrGeneration` flag and
- * a human-review gate.
- *
- * Pure — no wall-clock, no external calls.
- */
+/** Verbatim copy of the repo's DTR generator, for adversarial validation. */
 import type { QuestionnaireItemDef } from '@/lib/dtr/questionnaireResponse';
 import type { NormalizedPolicy } from '@/lib/policy';
 
 export interface GeneratedQuestionnaire {
   resourceType: 'Questionnaire';
   url: string;
-  status: 'draft'; // human review required before 'active'
+  status: 'draft';
   title: string;
   derivedFrom: { source: string; policyId: string; number?: string | null; url?: string | null };
-  generatedBy: 'deterministic-offline'; // vs 'ai-pipeline'
+  generatedBy: 'deterministic-offline';
   item: QuestionnaireItemDef[];
 }
 
-/** Build a draft DTR Questionnaire from a policy's indications. */
 export function generateQuestionnaireFromPolicy(policy: NormalizedPolicy): GeneratedQuestionnaire {
   const item: QuestionnaireItemDef[] = [];
 
@@ -33,24 +21,29 @@ export function generateQuestionnaireFromPolicy(policy: NormalizedPolicy): Gener
       linkId: `indication-${ind.label || i + 1}`,
       text: `Does the member meet indication ${ind.label}: ${ind.title}?`,
       type: 'boolean',
-      required: false,
+      // Honor the criterion's logic when the mapper supplies it; default false keeps
+      // existing flat-indication callers unchanged.
+      required: ind.required ?? false,
     });
   });
 
-  // A criteria-gated policy needs a supporting diagnosis + documentation.
   if (policy.determinationBasis === 'medical-necessity-criteria') {
     item.push({
       linkId: 'supporting-diagnosis',
-      text: 'Enter the supporting ICD-10 diagnosis code establishing medical necessity.',
+      text: 'Supporting ICD-10-CM diagnosis code establishing medical necessity',
       type: 'string',
+      format: 'icd10',
+      helpText:
+        'Format: a letter, two digits, then an optional dot and up to 4 characters (e.g. E66.01).',
       required: true,
     });
   }
 
   item.push({
     linkId: 'clinical-documentation',
-    text: 'Attach or reference clinical documentation supporting medical necessity.',
-    type: 'string',
+    text: 'Attach clinical documentation supporting medical necessity',
+    type: 'attachment',
+    helpText: 'Upload the chart note / imaging / lab report that evidences the criteria above.',
     required: true,
   });
 

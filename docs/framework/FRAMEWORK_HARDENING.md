@@ -94,6 +94,41 @@ Enable the hooks once per clone: `git config core.hooksPath tools/hooks`.
   offline/mirror verification MUST run `prettier --check` and the lint rules, or it will
   hand formatting/lint defects downstream. The mirror verify now runs prettier.
 
+## Rule: no unrequested structural refactor of a working file to satisfy a mechanical cap
+
+**Prohibited.** A file that PASSES the gate suite (types · tests · lint) and trips only a
+**mechanical cap** (E2 file-size, E13 test-link) is remediated by the **smallest correct action** —
+the sanctioned exemption or baseline (`check-file-sizes` `EXEMPT_PATTERNS` / `quality-baseline.json`;
+`testlink-baseline.json`; see FW-2). **Decomposing, re-architecting, or otherwise restructuring a
+working, gate-green file to get under a cap is NOT permitted on the agent's own initiative.**
+
+Why this is a hardening rule, not a style preference:
+
+- **Splitting is a module-graph change, and a module-graph change can break the running app in ways
+  the gate suite does not catch** — hydration/event-handler wiring, chunk loading, client/server
+  boundary — the exact R-D / `ChunkLoadError` class this document exists for. "types + tests + build
+  are green" is *necessary, not sufficient*: a decomposed-but-green component can still silently fail
+  to hydrate (a file input that "does nothing on select"), and a running `dev` server on a stale
+  `.next` makes it worse. Every avoidable split is avoidable runtime risk.
+- **It is churn the user did not ask for.** Restructuring working code the user did not request is
+  the recurring source of "why did you regress a thing that worked."
+
+The rule:
+
+1. **Cap-only failure on a working file → exempt/baseline it** (the mechanism the framework already
+   ships), do not decompose. Be consistent: if one over-cap file is exempted, a sibling over-cap file
+   is exempted the same way — never one exempted and one decomposed.
+2. **A structural refactor of a working, gate-green file requires (a) explicit user approval AND
+   (b) a runtime/boot verification** (E16 build + a boot/hydration smoke on the affected screen),
+   never just unit + build. No approval or no runtime check → do not refactor.
+3. **Smallest-correct-edit-under-review beats spawning files** (restates FW-2). Prefer an in-place
+   edit or an exemption to new modules whose only justification is a line count.
+
+Grounded: this session decomposed a working, framework-passing 680-line workbench purely to clear the
+E2 cap; it type-checked, built, and passed 212 tests, yet the file upload "did nothing" in the running
+app (stale/hydration), while a sibling over-cap file was correctly *exempted* instead. Exemption was
+the right call for both.
+
 ## The meta-principle
 
 Assessment must be **mechanical, not judgment-based**: there is one command that IS

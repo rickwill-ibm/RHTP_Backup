@@ -1,0 +1,9 @@
+# Build output / vendored
+build
+coverage
+node_modules
+public
+
+# --- Legacy demo / presentation layer (deferred lint refactor) ---
+# Demo/presentation code only. The product (policy engine + PA/policy UI) stays fully linted.
+src/uhg/

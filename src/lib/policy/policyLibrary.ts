@@ -9,6 +9,7 @@
  */
 import type { NormalizedPolicy } from './types';
 import { ingestRecords, type RawPolicyRecord } from './ingest';
+import { extractAndIngest, type TextSource, type FieldProvenance } from './extract';
 import seed from './data/policy-library.seed.json';
 
 export interface LoadedLibrary {
@@ -75,6 +76,25 @@ export function ingestLibrary(records: RawPolicyRecord[]): {
 } {
   const { policies, skipped } = ingestRecords(records);
   return { library: index(policies), skipped };
+}
+
+export interface IngestDocumentsResult {
+  library: LoadedLibrary;
+  skipped: number;
+  provenance: FieldProvenance[];
+  warnings: string[];
+}
+
+/**
+ * Build a library directly from policy DOCUMENTS (already read into text) — the
+ * runtime path that turns an uploaded Aetna CPB or payer/agency PA list into
+ * governing policies. Extraction runs through the same ingestion adapters as the
+ * seed, so a document-sourced policy evaluates identically to a seed-sourced one.
+ * Provenance is returned so a reviewer can trace every code back to source text.
+ */
+export function ingestDocuments(sources: readonly TextSource[]): IngestDocumentsResult {
+  const { policies, skipped, provenance, warnings } = extractAndIngest(sources);
+  return { library: index(policies), skipped, provenance, warnings };
 }
 
 let mockCache: LoadedLibrary | null = null;

@@ -8,21 +8,21 @@ import { usePaStore } from '@/lib/pa/usePaStore';
 import type { PaCase, TimelineEntry } from '@/lib/pa/pa-types';
 
 const STATUS_STYLE: Record<string, string> = {
-  Approved:                     'bg-green-50 text-green-700 border-green-200',
-  Pended:                       'bg-amber-50 text-amber-700 border-amber-200',
+  Approved: 'bg-green-50 text-green-700 border-green-200',
+  Pended: 'bg-amber-50 text-amber-700 border-amber-200',
   'Partially Approved / Modified': 'bg-teal-50 text-teal-700 border-teal-200',
-  Denied:                       'bg-red-50 text-red-700 border-red-200',
-  Submitted:                    'bg-blue-50 text-blue-700 border-blue-200',
-  Pending:                      'bg-gray-100 text-gray-500 border-gray-200',
+  Denied: 'bg-red-50 text-red-700 border-red-200',
+  Submitted: 'bg-blue-50 text-blue-700 border-blue-200',
+  Pending: 'bg-gray-100 text-gray-500 border-gray-200',
 };
 
 const TIMELINE_COLOR: Record<string, string> = {
-  blue:  'bg-blue-500',
+  blue: 'bg-blue-500',
   green: 'bg-green-500',
   amber: 'bg-amber-400',
-  teal:  'bg-teal-500',
-  red:   'bg-red-500',
-  gray:  'bg-gray-400',
+  teal: 'bg-teal-500',
+  red: 'bg-red-500',
+  gray: 'bg-gray-400',
 };
 
 export default function CaseDetailView() {
@@ -33,7 +33,10 @@ export default function CaseDetailView() {
     return (
       <div className="text-center py-16 text-sm text-gray-400">
         Case not found.{' '}
-        <button onClick={() => setView('portal')} className="text-[#1669c1] font-semibold hover:underline">
+        <button
+          onClick={() => setView('portal')}
+          className="text-[#1669c1] font-semibold hover:underline"
+        >
           ← Back to Authorizations
         </button>
       </div>
@@ -74,23 +77,25 @@ export default function CaseDetailView() {
           { label: 'Channel', value: c.channel },
         ].map((item) => (
           <div key={item.label} className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{item.label}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              {item.label}
+            </p>
             <p className="mt-0.5 text-sm font-semibold text-gray-800">{item.value}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-
         {/* Left column: checklist + DTR */}
         <div className="lg:col-span-2 flex flex-col gap-5">
-
           {/* Coverage Requirements */}
           <Section title="Coverage Requirements">
             <div className="divide-y divide-gray-100">
               {c.checklist.map((item, i) => (
                 <div key={i} className="flex items-start gap-3 py-3">
-                  <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${item.pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${item.pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+                  >
                     {item.pass ? '✓' : '✗'}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -112,12 +117,29 @@ export default function CaseDetailView() {
             <div className="divide-y divide-gray-100">
               {c.dtr.map((item, i) => (
                 <div key={i} className="flex items-start gap-3 py-3">
-                  <span className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${item.status === 'met' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                    {item.status === 'met' ? '✓' : '✗'}
+                  <span
+                    title={
+                      item.status === 'met'
+                        ? 'Met'
+                        : item.status === 'attached'
+                          ? 'Attached — pending payer review'
+                          : 'Gap — not satisfied'
+                    }
+                    className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                      item.status === 'met'
+                        ? 'bg-green-100 text-green-700'
+                        : item.status === 'attached'
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'bg-red-100 text-red-600'
+                    }`}
+                  >
+                    {item.status === 'met' ? '✓' : item.status === 'attached' ? '●' : '✗'}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-800">{item.title}</p>
-                    <p className="text-xs text-gray-500">{item.evidence || 'No evidence on record'}</p>
+                    <p className="text-xs text-gray-500">
+                      {item.evidence || 'No evidence on record'}
+                    </p>
                   </div>
                   {item.source && (
                     <span className="flex-shrink-0 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase text-gray-400">
@@ -133,13 +155,15 @@ export default function CaseDetailView() {
           <Section title="Submission Details">
             <div className="divide-y divide-gray-100 text-sm">
               {[
-                { label: 'Auth Number',    value: c.submission.paNumber },
-                { label: 'Channel',        value: c.submission.payloadType },
-                { label: 'Submitted',      value: c.submission.timestamp },
+                { label: 'Auth Number', value: c.submission.paNumber },
+                { label: 'Channel', value: c.submission.payloadType },
+                { label: 'Submitted', value: c.submission.timestamp },
                 { label: 'Payer Endpoint', value: c.submission.payerEndpoint },
               ].map((row) => (
                 <div key={row.label} className="flex gap-3 py-2.5">
-                  <span className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-wide pt-0.5">{row.label}</span>
+                  <span className="w-32 flex-shrink-0 text-xs font-bold text-gray-400 uppercase tracking-wide pt-0.5">
+                    {row.label}
+                  </span>
                   <span className="font-mono text-xs text-gray-700 break-all">{row.value}</span>
                 </div>
               ))}
@@ -157,7 +181,6 @@ export default function CaseDetailView() {
             </ol>
           </Section>
         </div>
-
       </div>
     </div>
   );
@@ -177,7 +200,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function TimelineItem({ entry, isLast }: { entry: TimelineEntry; isLast: boolean }) {
   return (
     <li className="mb-5 ml-5">
-      <span className={`absolute -left-2 flex h-4 w-4 items-center justify-center rounded-full ${TIMELINE_COLOR[entry.color] ?? 'bg-gray-400'}`} />
+      <span
+        className={`absolute -left-2 flex h-4 w-4 items-center justify-center rounded-full ${TIMELINE_COLOR[entry.color] ?? 'bg-gray-400'}`}
+      />
       <p className="text-sm font-semibold text-gray-800">{entry.status}</p>
       <p className="text-xs text-gray-400">{entry.ts}</p>
       {!isLast && <div className="mt-1" />}

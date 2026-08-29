@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getPatientByFhirId, getPatientById, FHIR_ID_MAP } from '@/lib/patientRegistry';
 
 const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
-const APP_URL   = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:4029';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:4029';
 
 async function fhirGet<T>(path: string): Promise<T | null> {
   try {
@@ -44,22 +44,21 @@ interface MedBundle {
 // Known DDI pairs: medication name fragment → interacting drug fragments
 // This list supplements any DDI flags stored in FHIR extensions.
 const DDI_PAIRS: [string, string[]][] = [
-  ['sertraline',    ['tramadol', 'linezolid', 'methylene blue', 'selegiline']],
-  ['warfarin',      ['aspirin', 'ibuprofen', 'naproxen', 'fluconazole', 'amiodarone']],
-  ['metformin',     ['contrast', 'iodine']],
-  ['lisinopril',    ['potassium', 'spironolactone', 'trimethoprim']],
-  ['carvedilol',    ['verapamil', 'diltiazem', 'clonidine']],
-  ['furosemide',    ['gentamicin', 'tobramycin', 'lithium']],
-  ['fluticasone',   ['ritonavir', 'ketoconazole', 'itraconazole']],
+  ['sertraline', ['tramadol', 'linezolid', 'methylene blue', 'selegiline']],
+  ['warfarin', ['aspirin', 'ibuprofen', 'naproxen', 'fluconazole', 'amiodarone']],
+  ['metformin', ['contrast', 'iodine']],
+  ['lisinopril', ['potassium', 'spironolactone', 'trimethoprim']],
+  ['carvedilol', ['verapamil', 'diltiazem', 'clonidine']],
+  ['furosemide', ['gentamicin', 'tobramycin', 'lithium']],
+  ['fluticasone', ['ritonavir', 'ketoconazole', 'itraconazole']],
 ];
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const contextPatientId: string = body?.context?.patientId ?? '';
-    const draftOrders: DraftOrder[] = body?.context?.draftOrders?.entry?.map(
-      (e: { resource: DraftOrder }) => e.resource
-    ) ?? [];
+    const draftOrders: DraftOrder[] =
+      body?.context?.draftOrders?.entry?.map((e: { resource: DraftOrder }) => e.resource) ?? [];
 
     // Resolve platform patient for link building
     const patient =
@@ -67,7 +66,7 @@ export async function POST(req: NextRequest) {
       getPatientById(contextPatientId) ??
       getPatientById(FHIR_ID_MAP[contextPatientId] ?? '');
 
-    const platformId  = patient?.platformId ?? contextPatientId;
+    const platformId = patient?.platformId ?? contextPatientId;
     const patientLink = `${APP_URL}/patient-detail?id=${platformId}`;
     const fhirPatientId = patient?.fhirId?.replace(/^patient\//, '') ?? contextPatientId;
 
@@ -78,8 +77,12 @@ export async function POST(req: NextRequest) {
     );
     if (medBundle?.entry && medBundle.entry.length > 0) {
       activeMedNames = medBundle.entry
-        .map((e) => e.resource?.medicationCodeableConcept?.text ??
-                    e.resource?.medicationCodeableConcept?.coding?.[0]?.display ?? '')
+        .map(
+          (e) =>
+            e.resource?.medicationCodeableConcept?.text ??
+            e.resource?.medicationCodeableConcept?.coding?.[0]?.display ??
+            ''
+        )
         .filter(Boolean)
         .map((n) => n.toLowerCase());
     } else if (patient?.medications) {
@@ -91,9 +94,7 @@ export async function POST(req: NextRequest) {
 
     // DDI check against live medication list
     for (const order of draftOrders) {
-      const orderName = (
-        order.code?.text ?? order.code?.coding?.[0]?.display ?? ''
-      ).toLowerCase();
+      const orderName = (order.code?.text ?? order.code?.coding?.[0]?.display ?? '').toLowerCase();
       if (!orderName) continue;
 
       for (const [existingFrag, interactFrags] of DDI_PAIRS) {
@@ -139,7 +140,8 @@ export async function POST(req: NextRequest) {
         cards.push({
           uuid: `stat-note-${Date.now()}`,
           summary: 'STAT order missing required clinical indication note',
-          detail: 'STAT orders require a clinical indication note per policy. Please add a note before signing.',
+          detail:
+            'STAT orders require a clinical indication note per policy. Please add a note before signing.',
           indicator: 'warning',
           source: { label: 'TCOC Order Validation', url: '' },
           suggestions: [],
@@ -151,7 +153,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ cards });
   } catch (err) {
-    console.error('[CDS Hooks order-sign] Error:', err);
+    // A malformed request body (bad JSON) is expected client input, not a server fault:
+    // log it concisely and still fail closed to an empty, PHI-safe card list.
+    if (err instanceof SyntaxError) {
+      console.warn('[CDS Hooks order-sign] malformed request body — returning empty card list');
+    } else {
+      console.error('[CDS Hooks order-sign] Error:', err);
+    }
     return NextResponse.json({ cards: [] }, { status: 500 });
   }
 }

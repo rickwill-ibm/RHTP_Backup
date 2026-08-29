@@ -9,7 +9,8 @@ export type FeatureFlag =
   | 'priorAuth'
   | 'aiDtrGeneration'
   | 'goldenThread'
-  | 'networkAdequacy';
+  | 'networkAdequacy'
+  | 'richCrdDtr';
 
 const DEFAULTS: Record<FeatureFlag, boolean> = {
   patientAccess: true,
@@ -19,6 +20,7 @@ const DEFAULTS: Record<FeatureFlag, boolean> = {
   aiDtrGeneration: false, // off until human-review gate is wired (Slice 5)
   goldenThread: true, // Financial Clearance thread (GT-*) -- demoable on mock data
   networkAdequacy: true, // Network adequacy analytics + analyst copilot (NA-*)
+  richCrdDtr: true, // Da Vinci-conformant CRD/DTR runtime screens; classic views are the fallback
 };
 
 const ENV_KEY: Record<FeatureFlag, string> = {
@@ -29,6 +31,7 @@ const ENV_KEY: Record<FeatureFlag, string> = {
   aiDtrGeneration: 'NEXT_PUBLIC_FLAG_AI_DTR',
   goldenThread: 'NEXT_PUBLIC_FLAG_GOLDEN_THREAD',
   networkAdequacy: 'NEXT_PUBLIC_FLAG_NETWORK_ADEQUACY',
+  richCrdDtr: 'NEXT_PUBLIC_FLAG_RICH_CRD_DTR',
 };
 
 export function flag(name: FeatureFlag): boolean {

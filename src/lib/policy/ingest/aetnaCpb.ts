@@ -42,6 +42,10 @@ export const aetnaCpbAdapter: PolicyIngestionAdapter = {
   sourceType: 'medical-clinical-policy-bulletin',
 
   canIngest(raw: RawPolicyRecord): boolean {
+    // A record explicitly typed as a PA-requirement list belongs to the PA-list
+    // adapters, even when its source is Aetna — otherwise an Aetna PA list would be
+    // mis-normalized as a bulletin with no codes and requiresPA=false.
+    if (raw?.sourceType === 'prior-authorization-requirements-list') return false;
     return (
       raw?.sourceType === 'medical-clinical-policy-bulletin' ||
       raw?.source === 'Aetna' ||

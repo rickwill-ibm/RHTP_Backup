@@ -33,6 +33,22 @@ One-time per clone: `git config core.hooksPath tools/hooks` (enables the pre-com
 Search before assuming location: `rg "symbolName" src/`. Grep anchors:
 `rg "SEAM:"` (swap points) · `rg "INVARIANT:"` · `rg "CONTRACT:"`.
 
+## Pre-flight: Coalition Trigger (MANDATORY — do this FIRST, not a judgment call)
+
+Before writing code, CLASSIFY the change in one line. If it hits ANY trigger, the
+architect + software-engineer + adversarial COALITION is REQUIRED:
+
+- a change under `src/lib/**` domain logic (esp. `policy/ identity/ consent/ goldenThread/`), OR
+- a NEW module/file, a NEW capability, or > 40 changed lines in one module, OR
+- anything touching a safety invariant (`rg "INVARIANT:"`), a fail-closed default, or a
+  coverage / eligibility / medical-necessity decision.
+
+Order: architect design → SWE plan → adversarial BEFORE coding → build → adversarial AFTER
+coding (each via `Agent`/subagents; log prompts per the provenance rule). Default to the
+coalition — do NOT decide case-by-case. A core change is NOT DONE without an entry in
+`docs/build-provenance/coalition-log.md` (detail: `docs/framework/coalition-protocol.md`).
+Enforced by `g_coalition` in `scripts/ci-gates.sh` — a core change with no log entry FAILS the gate.
+
 ## Repo map
 
 ```

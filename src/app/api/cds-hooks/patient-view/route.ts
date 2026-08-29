@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getPatientByFhirId, getPatientById, FHIR_ID_MAP } from '@/lib/patientRegistry';
 
 const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
-const APP_URL   = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:4029';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:4029';
 
 // ── Low-level fetch helper (server-side) ──────────────────────────────────────
 async function fhirGet<T>(path: string): Promise<T | null> {
@@ -28,7 +28,14 @@ async function fhirGet<T>(path: string): Promise<T | null> {
 }
 
 interface FhirObsBundle {
-  entry?: { resource?: { id?: string; status?: string; code?: { text?: string }; extension?: { url: string; valueString?: string; valueInteger?: number }[] } }[];
+  entry?: {
+    resource?: {
+      id?: string;
+      status?: string;
+      code?: { text?: string };
+      extension?: { url: string; valueString?: string; valueInteger?: number }[];
+    };
+  }[];
 }
 
 export async function POST(req: NextRequest) {
@@ -42,7 +49,7 @@ export async function POST(req: NextRequest) {
       getPatientById(contextPatientId) ??
       getPatientById(FHIR_ID_MAP[contextPatientId] ?? '');
 
-    const platformId  = patient?.platformId ?? contextPatientId;
+    const platformId = patient?.platformId ?? contextPatientId;
     const patientLink = `${APP_URL}/patient-detail?id=${platformId}`;
 
     // 2. Resolve the FHIR patient ID to query HAPI FHIR directly
@@ -68,12 +75,14 @@ export async function POST(req: NextRequest) {
       .map((r) => {
         const ext = (url: string) => r.extension?.find((x) => x.url === url);
         const statusRaw = ext(`${BASE_EXT}/care-gap-status`)?.valueString ?? '';
-        const domain    = ext(`${BASE_EXT}/care-gap-domain`)?.valueString ?? 'Clinical';
-        const daysOpen  = ext(`${BASE_EXT}/care-gap-days-open`)?.valueInteger ?? 0;
+        const domain = ext(`${BASE_EXT}/care-gap-domain`)?.valueString ?? 'Clinical';
+        const daysOpen = ext(`${BASE_EXT}/care-gap-days-open`)?.valueInteger ?? 0;
         return {
-          id:       ext(`${BASE_EXT}/tcoc-gap-id`)?.valueString ?? r.id ?? '',
-          name:     r.code?.text ?? 'Care Gap',
-          status:   statusRaw || (r.status === 'final' ? 'Closed' : r.status === 'preliminary' ? 'Open' : 'In Progress'),
+          id: ext(`${BASE_EXT}/tcoc-gap-id`)?.valueString ?? r.id ?? '',
+          name: r.code?.text ?? 'Care Gap',
+          status:
+            statusRaw ||
+            (r.status === 'final' ? 'Closed' : r.status === 'preliminary' ? 'Open' : 'In Progress'),
           domain,
           daysOpen,
         };
@@ -97,12 +106,17 @@ export async function POST(req: NextRequest) {
       }
     } else if (patient) {
       // Fall back to registry CDS cards if FHIR returned nothing
-      for (const c of (patient.cdsCards ?? [])) {
+      for (const c of patient.cdsCards ?? []) {
         cards.push({
           uuid: c.id,
           summary: c.summary,
           detail: c.detail,
-          indicator: c.indicator === 'critical' ? 'critical' : c.indicator === 'warning' ? 'warning' : 'info',
+          indicator:
+            c.indicator === 'critical'
+              ? 'critical'
+              : c.indicator === 'warning'
+                ? 'warning'
+                : 'info',
           source: { label: 'TCOC Care Management Platform', url: patientLink },
           suggestions: [],
           links: [{ label: 'View Patient Detail', url: patientLink, type: 'absolute' }],
@@ -112,7 +126,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ cards });
   } catch (err) {
-    console.error('[CDS Hooks patient-view] Error:', err);
+    // A malformed request body (bad JSON) is expected client input, not a server fault:
+    // log it concisely and still fail closed to an empty, PHI-safe card list.
+    if (err instanceof SyntaxError) {
+      console.warn('[CDS Hooks patient-view] malformed request body — returning empty card list');
+    } else {
+      console.error('[CDS Hooks patient-view] Error:', err);
+    }
     return NextResponse.json({ cards: [] }, { status: 500 });
   }
 }

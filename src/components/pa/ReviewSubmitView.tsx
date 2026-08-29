@@ -12,7 +12,8 @@ import { useState } from 'react';
 import { usePaStore } from '@/lib/pa/usePaStore';
 import { submitPriorAuth } from '@/lib/pa/pasService';
 import { toast } from 'sonner';
-import type { PaCase, TimelineEntry } from '@/lib/pa/pa-types';
+import type { PaCase, PaStatus, TimelineEntry } from '@/lib/pa/pa-types';
+import { dtrSubmitReadiness } from '@/lib/pa/dtrReadiness';
 
 export default function ReviewSubmitView() {
   const {
@@ -37,6 +38,12 @@ export default function ReviewSubmitView() {
       toast.error('Confirm the human-approval attestation before submitting.');
       return;
     }
+    // Gate on genuine DTR resolution, not mere presence (E2/M3): every required group met or attached.
+    const readiness = dtrSubmitReadiness(dtrResults);
+    if (!readiness.ready) {
+      toast.error(`Resolve ${readiness.blocking.length} required DTR group(s) before submitting.`);
+      return;
+    }
     setSubmitLoading(true);
     try {
       const submission = await submitPriorAuth({
@@ -46,6 +53,14 @@ export default function ReviewSubmitView() {
         crd: crdResults,
         dtr: dtrResults,
       });
+      // Truthful status (M2/A5): an errored transport does not become a green success or a fake PA #.
+      const outcome = submission.outcome ?? 'submitted';
+      if (outcome === 'error') {
+        toast.error(submission.disposition ?? 'Submission failed — not accepted by the payer.');
+        return;
+      }
+      const caseStatus: PaStatus = outcome === 'pended' ? 'Pended' : 'Submitted';
+      const timelineColor: TimelineEntry['color'] = outcome === 'pended' ? 'amber' : 'blue';
       const serviceSummary = order.procedures.map((p) => p.cptDesc).join('; ');
       const cptSummary = order.procedures.map((p) => p.cpt).join(', ');
       const multi = order.procedures.length > 1;
@@ -58,7 +73,7 @@ export default function ReviewSubmitView() {
         procedures: order.procedures,
         dateRequested: new Date().toLocaleDateString('en-US'),
         channel: channel === 'fhir' ? 'FHIR' : 'EDI',
-        status: 'Submitted',
+        status: caseStatus,
         checklist: crdResults.flatMap((entry) =>
           Object.values(entry.result).map((c) => ({
             label: multi ? `${c.label} (CPT ${entry.cpt})` : c.label,
@@ -70,18 +85,25 @@ export default function ReviewSubmitView() {
         dtr: dtrResults.flatMap((dtr) =>
           dtr.groups.map((g) => ({
             title: multi ? `${g.title} (CPT ${dtr.cptCode})` : g.title,
-            status: (g.status === 'pending' ? 'gap' : g.status) as 'met' | 'gap',
+            // Three honest states: met; attached (evidence uploaded, pending payer review); gap
+            // (genuinely missing). NEVER collapse attached into gap — they are opposite dispositions.
+            status: (g.status === 'met'
+              ? 'met'
+              : g.uploadedDocumentReference || g.uploadedEvidence
+                ? 'attached'
+                : 'gap') as 'met' | 'gap' | 'attached',
             evidence: g.uploadedEvidence ?? g.leaf?.evidence ?? '',
-            source: g.status === 'met' && !g.leaf ? 'upload' : (g.leaf?.source ?? null),
+            source:
+              g.status === 'pending' && g.uploadedDocumentReference
+                ? 'upload'
+                : (g.leaf?.source ?? null),
           }))
         ),
         submission,
-        timeline: [
-          { status: 'Submitted', ts: submission.timestamp, color: 'blue' as const },
-        ] as TimelineEntry[],
+        timeline: [{ status: caseStatus, ts: submission.timestamp, color: timelineColor }],
       };
       setSubmittedCase(newCase);
-      toast.success(`Prior Authorization submitted — ${submission.paNumber}`);
+      toast.success(`Prior Authorization ${caseStatus.toLowerCase()} — ${submission.paNumber}`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Submission failed');
     } finally {
@@ -118,6 +140,12 @@ export default function ReviewSubmitView() {
     (n, d) => n + d.groups.filter((g) => g.status === 'met').length,
     0
   );
+  const readiness = dtrSubmitReadiness(dtrResults);
+  const resolvedDtr = dtrResults.reduce(
+    (n, d) => n + d.groups.filter((g) => g.status !== 'gap').length,
+    0
+  );
+  const submittedPended = submittedCase?.status === 'Pended';
 
   return (
     <div>
@@ -147,24 +175,31 @@ export default function ReviewSubmitView() {
         </div>
       )}
 
-      <SummaryCard title="Part I · CRD Checklist" pill={`${passedCrd} of ${totalCrd}`} green>
-        <p className="text-xs text-gray-400">
-          All coverage checks passed across {crdResults.length} procedure
-          {crdResults.length > 1 ? 's' : ''}.
+      <SummaryCard
+        title="Part I · CRD Checklist"
+        pill={`${passedCrd} of ${totalCrd}`}
+        green={passedCrd === totalCrd}
+      >
+        <p
+          className={`text-xs ${passedCrd === totalCrd ? 'text-gray-400' : 'text-amber-600 font-semibold'}`}
+        >
+          {passedCrd === totalCrd
+            ? `All coverage checks passed across ${crdResults.length} procedure${crdResults.length > 1 ? 's' : ''}.`
+            : `${totalCrd - passedCrd} of ${totalCrd} coverage checks did not pass — review before submitting.`}
         </p>
       </SummaryCard>
 
       <SummaryCard
         title="Part II · DTR Match Results"
-        pill={`${metDtr} of ${totalDtr}`}
-        green={metDtr === totalDtr}
+        pill={`${resolvedDtr} of ${totalDtr} resolved`}
+        green={readiness.ready}
       >
         <p
-          className={`text-xs ${metDtr < totalDtr ? 'text-amber-600 font-semibold' : 'text-gray-400'}`}
+          className={`text-xs ${!readiness.ready ? 'text-amber-600 font-semibold' : 'text-gray-400'}`}
         >
-          {metDtr < totalDtr
-            ? `${totalDtr - metDtr} gap(s) remain — upload supporting documentation in DTR.`
-            : `All medical necessity requirement groups met.`}
+          {!readiness.ready
+            ? `${readiness.blocking.length} required group(s) unresolved — upload supporting documentation in DTR.`
+            : `${metDtr} met, ${resolvedDtr - metDtr} attached for payer review — all required groups resolved.`}
         </p>
       </SummaryCard>
 
@@ -240,8 +275,14 @@ export default function ReviewSubmitView() {
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm text-center">
         {submittedCase ? (
           <div>
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-green-200 bg-green-50">
-              <svg className="h-6 w-6 text-green-600" viewBox="0 0 16 16" fill="none">
+            <div
+              className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 ${submittedPended ? 'border-amber-200 bg-amber-50' : 'border-green-200 bg-green-50'}`}
+            >
+              <svg
+                className={`h-6 w-6 ${submittedPended ? 'text-amber-600' : 'text-green-600'}`}
+                viewBox="0 0 16 16"
+                fill="none"
+              >
                 <path
                   d="M3 8.5L6.2 11.5L13 4.5"
                   stroke="currentColor"
@@ -251,20 +292,16 @@ export default function ReviewSubmitView() {
                 />
               </svg>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Prior Authorization Submitted</p>
+            <p className="text-xs text-gray-400 mb-1">Prior Authorization {submittedCase.status}</p>
             <p className="text-2xl font-bold text-[#1669c1] mb-1">{submittedCase.authId}</p>
             <p className="text-xs text-gray-400 mb-4">{submittedCase.submission.timestamp}</p>
-            <div className="inline-flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 mb-5">
-              <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M3 8.5L6.2 11.5L13 4.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Case added to PA Portal with status Submitted
+            {submittedCase.submission.disposition && (
+              <p className="text-xs text-gray-500 mb-3">{submittedCase.submission.disposition}</p>
+            )}
+            <div
+              className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold mb-5 ${submittedPended ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-green-200 bg-green-50 text-green-700'}`}
+            >
+              Case added to PA Portal with status {submittedCase.status}
             </div>
             <br />
             <button
@@ -287,12 +324,18 @@ export default function ReviewSubmitView() {
             </p>
             <button
               onClick={handleSubmit}
-              disabled={!approvalConfirmed}
+              disabled={!approvalConfirmed || !readiness.ready}
               className="inline-flex items-center gap-2 rounded-lg bg-[#1669c1] px-7 py-3.5 text-sm font-bold text-white hover:bg-[#0f52a0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Approve &amp; Submit Prior Authorization
             </button>
-            {!approvalConfirmed && (
+            {!readiness.ready && (
+              <p className="mt-2 text-xs text-amber-600">
+                {readiness.blocking.length} required DTR group(s) unresolved — resolve them in DTR
+                first.
+              </p>
+            )}
+            {readiness.ready && !approvalConfirmed && (
               <p className="mt-2 text-xs text-gray-400">
                 Confirm the attestation above to enable submission.
               </p>

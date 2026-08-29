@@ -39,6 +39,8 @@ export interface PolicyCodeBuckets {
 export interface PolicyIndication {
   label: string; // "A", "B", …
   title: string;
+  /** Individually required (all-of) vs. one of several alternatives (one-of). */
+  required?: boolean;
 }
 
 /** A category → codes group from a payer PA-requirement list (UHC). */

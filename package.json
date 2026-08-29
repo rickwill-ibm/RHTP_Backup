@@ -36,7 +36,7 @@
       "serve",
       "type-check"
     ],
-    "warning": "\ud83d\udea8 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
+    "warning": "🚨 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for Next.js 15 TypeScript app functionality"
   },
   "scripts": {
     "dev": "next dev -p 4029",
@@ -92,6 +92,7 @@
     "react-redux": "^9.2.0",
     "recharts": "^2.15.2",
     "sonner": "^1.7.1",
+    "unpdf": "^1.8.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

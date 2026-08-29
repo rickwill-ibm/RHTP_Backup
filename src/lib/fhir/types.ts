@@ -44,6 +44,14 @@ export interface FhirExtension {
   valueDecimal?: number;
   valueString?: string;
   valueBoolean?: boolean;
+  valueCanonical?: string; // e.g. cqf-library → Library canonical
+  valueExpression?: FhirExpression; // e.g. SDC initialExpression
+}
+
+/** A typed expression (e.g. CQL) used by SDC population extensions. */
+export interface FhirExpression {
+  language: string; // e.g. 'text/cql'
+  expression: string;
 }
 
 export interface FhirHumanName {
@@ -58,7 +66,7 @@ export interface FhirHumanName {
 export interface FhirResource {
   resourceType: string;
   id?: string;
-  meta?: { lastUpdated?: string; versionId?: string };
+  meta?: { lastUpdated?: string; versionId?: string; profile?: string[] };
   extension?: FhirExtension[];
 }
 
@@ -68,6 +76,20 @@ export interface FhirBundle<T extends FhirResource = FhirResource> extends FhirR
   total?: number;
   entry?: Array<{ fullUrl?: string; resource?: T; request?: { method?: string; url?: string } }>;
 }
+
+/* ---- DTR package resource types (Questionnaire / ValueSet / Library) ---- */
+// Split into `dtrPackageTypes.ts` for the file-size cap; re-exported so importers are unchanged.
+export type {
+  FhirPublicationStatus,
+  FhirQuestionnaireEnableWhen,
+  FhirQuestionnaireAnswerOption,
+  FhirQuestionnaireItemType,
+  FhirQuestionnaireItem,
+  FhirQuestionnaire,
+  FhirValueSetConcept,
+  FhirValueSet,
+  FhirLibrary,
+} from './dtrPackageTypes';
 
 export interface FhirPatient extends FhirResource {
   resourceType: 'Patient';
@@ -190,7 +212,11 @@ export interface FhirGoal extends FhirResource {
   lifecycleStatus?: string;
   description?: FhirCodeableConcept;
   subject?: FhirReference;
-  target?: Array<{ measure?: FhirCodeableConcept; detailQuantity?: FhirQuantity; dueDate?: string }>;
+  target?: Array<{
+    measure?: FhirCodeableConcept;
+    detailQuantity?: FhirQuantity;
+    dueDate?: string;
+  }>;
 }
 
 export interface FhirCarePlan extends FhirResource {
@@ -324,7 +350,7 @@ export function interpCode(obs: FhirObservation): string | undefined {
 /** Adherence PDC from the RHTP extension, as 0–100 */
 export function adherencePdc(res: FhirResource): number | undefined {
   const ext = res.extension?.find(
-    (e) => e.url === 'https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc',
+    (e) => e.url === 'https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc'
   );
   return ext?.valueDecimal !== undefined ? Math.round(ext.valueDecimal * 100) : undefined;
 }

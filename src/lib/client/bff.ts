@@ -11,10 +11,15 @@ export interface BffResult<T> {
   error?: OperationOutcome;
 }
 
+const REQUEST_TIMEOUT_MS = 12000;
+
 async function request<T>(path: string, init?: RequestInit): Promise<BffResult<T>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     const res = await fetch(path, {
       ...init,
+      signal: controller.signal,
       headers: { Accept: 'application/json', ...(init?.headers ?? {}) },
     });
     const text = await res.text();
@@ -33,6 +38,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<BffResult<T
         issue: [{ severity: 'error', code: 'exception', diagnostics: String(err) }],
       },
     };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

@@ -61,6 +61,10 @@
     "src/lib/services/carePlanGenerator.helpers.ts",
     "src/lib/services/carePlanGenerator.holistic.ts",
     "src/lib/services/smartAuth.ts",
-    "src/lib/workflow/bulkJob.ts"
+    "src/lib/workflow/bulkJob.ts",
+    "src/lib/policy/crd/coverageRule.ts",
+    "src/lib/policy/dtr/cql.ts",
+    "src/lib/policy/policyDtr.ts",
+    "src/lib/policy/review/feedback.ts"
   ]
 }

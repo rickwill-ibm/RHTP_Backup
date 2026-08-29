@@ -7,9 +7,9 @@ import Icon from '@/components/ui/AppIcon';
 import { useAppContext, PHYSICIAN_PROFILES } from '@/lib/appContext';
 import type { PhysicianPersona } from '@/lib/appContext';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
-import PatientSwitcherDropdown from '@/components/PatientSwitcherDropdown';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 import { DEMO_USERS, navItems, groupOrder } from './AppLayout.nav';
+import AppTopBarActions from '@/components/AppTopBarActions';
 
 // ─── Authorship ────────────────────────────────────────────────────────────────
 // Author: Richard Hennessy — TCOC Total Cost of Care Clinical Platform
@@ -23,14 +23,29 @@ interface AppLayoutProps {
   contextBanner?: React.ReactNode;
 }
 
-export default function AppLayout({ children, pageTitle, breadcrumbs, contextBanner }: AppLayoutProps) {
+export default function AppLayout({
+  children,
+  pageTitle,
+  breadcrumbs,
+  contextBanner,
+}: AppLayoutProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backupCollapsed, setBackupCollapsed] = useState(true);
   const [agenticCollapsed, setAgenticCollapsed] = useState(false);
   const [isInitialMount, setIsInitialMount] = useState(true);
-  const { user, setUser, entryContext, setEntryContext, physicianPersona, setPhysicianPersona, activePhysician, useMockData, setUseMockData, activePatientId, setActivePatientId } = useAppContext();
+  const {
+    user,
+    setUser,
+    entryContext,
+    setEntryContext,
+    physicianPersona,
+    setPhysicianPersona,
+    activePhysician,
+    activePatientId,
+    setActivePatientId,
+  } = useAppContext();
   useFhirModeSync(); // keeps fhirClient singleton in sync with the UI toggle
 
   // Ref for nav container to enable scrollIntoView
@@ -38,21 +53,19 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
 
   // Auto-expand Backup and Agentic sections if active item is inside
   useEffect(() => {
-    const normalizedPathname = pathname.endsWith('/') && pathname !== '/'
-      ? pathname.slice(0, -1)
-      : pathname;
-    
-    const activeItem = navItems.find(item => {
-      const normalizedHref = item.href.endsWith('/') && item.href !== '/'
-        ? item.href.slice(0, -1)
-        : item.href;
+    const normalizedPathname =
+      pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname;
+
+    const activeItem = navItems.find((item) => {
+      const normalizedHref =
+        item.href.endsWith('/') && item.href !== '/' ? item.href.slice(0, -1) : item.href;
       return normalizedPathname === normalizedHref;
     });
-    
+
     if (activeItem && activeItem.group === 'Backup' && backupCollapsed) {
       setBackupCollapsed(false);
     }
-    
+
     if (activeItem && activeItem.group === 'Agentic_Orchestrate-Screens' && agenticCollapsed) {
       setAgenticCollapsed(false);
     }
@@ -65,9 +78,9 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
       setIsInitialMount(false);
       return;
     }
-    
+
     if (!navRef.current) return;
-    
+
     // Delay to ensure DOM updates and Backup section expands if needed
     const timer = setTimeout(() => {
       const activeLink = navRef.current?.querySelector('.sidebar-item-active');
@@ -75,25 +88,25 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
         // Find the section header (parent group div)
         const sectionDiv = activeLink.closest('div[class*="mb-4"]');
         const sectionHeader = sectionDiv?.querySelector('p, button');
-        
+
         // Scroll section header to top for better context
         if (sectionHeader) {
           sectionHeader.scrollIntoView({
             behavior: 'smooth',
             block: 'start', // Scroll section to top
-            inline: 'nearest'
+            inline: 'nearest',
           });
         } else {
           // Fallback: scroll active item into view
           activeLink.scrollIntoView({
             behavior: 'smooth',
             block: 'nearest',
-            inline: 'nearest'
+            inline: 'nearest',
           });
         }
       }
     }, 200);
-    
+
     return () => clearTimeout(timer);
   }, [pathname, isInitialMount]);
 
@@ -126,12 +139,16 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
         `}
       >
         {/* Logo */}
-        <div className={`flex items-center gap-3 px-4 py-4 border-b border-carbon-gray-80 min-h-[56px] ${collapsed ? 'justify-center px-2' : ''}`}>
+        <div
+          className={`flex items-center gap-3 px-4 py-4 border-b border-carbon-gray-80 min-h-[56px] ${collapsed ? 'justify-center px-2' : ''}`}
+        >
           <AppLogo size={28} />
           {!collapsed && (
             <div>
               <span className="font-semibold text-white text-sm tracking-tight">RHTP</span>
-              <p className="text-2xs text-carbon-gray-30 leading-none">Rural Health Transformation</p>
+              <p className="text-2xs text-carbon-gray-30 leading-none">
+                Rural Health Transformation
+              </p>
             </div>
           )}
         </div>
@@ -143,58 +160,74 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
               <div key={`group-${group}`} className="mb-4">
                 {!collapsed && (group === 'Backup' || group === 'Agentic_Orchestrate-Screens') ? (
                   <button
-                    onClick={() => group === 'Backup' ? setBackupCollapsed(!backupCollapsed) : setAgenticCollapsed(!agenticCollapsed)}
+                    onClick={() =>
+                      group === 'Backup'
+                        ? setBackupCollapsed(!backupCollapsed)
+                        : setAgenticCollapsed(!agenticCollapsed)
+                    }
                     className="w-full flex items-center justify-between px-4 mb-1 text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest hover:text-carbon-gray-30 transition-colors"
                   >
-                    <span>{group === 'Agentic_Orchestrate-Screens' ? 'AGENTIC ORCHESTRATE' : group}</span>
-                    <Icon name={(group === 'Backup' ? backupCollapsed : agenticCollapsed) ? 'ChevronRightIcon' : 'ChevronDownIcon'} size={14} />
+                    <span>
+                      {group === 'Agentic_Orchestrate-Screens' ? 'AGENTIC ORCHESTRATE' : group}
+                    </span>
+                    <Icon
+                      name={
+                        (group === 'Backup' ? backupCollapsed : agenticCollapsed)
+                          ? 'ChevronRightIcon'
+                          : 'ChevronDownIcon'
+                      }
+                      size={14}
+                    />
                   </button>
                 ) : !collapsed ? (
                   <p className="px-4 mb-1 text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest">
                     {group === 'Agentic_Orchestrate-Screens' ? 'AGENTIC ORCHESTRATE' : group}
                   </p>
                 ) : null}
-                {((group !== 'Backup' || !backupCollapsed) && (group !== 'Agentic_Orchestrate-Screens' || !agenticCollapsed)) && items.map((item) => {
-                  // Improved path matching with normalization
-                  const normalizedPathname = pathname.endsWith('/') && pathname !== '/'
-                    ? pathname.slice(0, -1)
-                    : pathname;
-                  // For the MD Smart Launch nav item, append the active patient's FHIR ID
-                  // so the SMART App always launches with the patient currently selected
-                  // in the RHTP patient switcher dropdown.
-                  const resolvedHref = item.key === 'nav-md-smart-launch'
-                    ? `/md-smart-launch?patientId=${PLATFORM_TO_FHIR_ID_MAP[activePatientId] ?? activePatientId}`
-                    : item.href;
-                  const normalizedHref = resolvedHref.split('?')[0].endsWith('/') && resolvedHref.split('?')[0] !== '/'
-                    ? resolvedHref.split('?')[0].slice(0, -1)
-                    : resolvedHref.split('?')[0];
-                  const isActive = normalizedPathname === normalizedHref;
-                  
-                  return (
-                    <Link
-                      key={item.key}
-                      href={resolvedHref}
-                      title={item.label}
-                      className={`
+                {(group !== 'Backup' || !backupCollapsed) &&
+                  (group !== 'Agentic_Orchestrate-Screens' || !agenticCollapsed) &&
+                  items.map((item) => {
+                    // Improved path matching with normalization
+                    const normalizedPathname =
+                      pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname;
+                    // For the MD Smart Launch nav item, append the active patient's FHIR ID
+                    // so the SMART App always launches with the patient currently selected
+                    // in the RHTP patient switcher dropdown.
+                    const resolvedHref =
+                      item.key === 'nav-md-smart-launch'
+                        ? `/md-smart-launch?patientId=${PLATFORM_TO_FHIR_ID_MAP[activePatientId] ?? activePatientId}`
+                        : item.href;
+                    const normalizedHref =
+                      resolvedHref.split('?')[0].endsWith('/') && resolvedHref.split('?')[0] !== '/'
+                        ? resolvedHref.split('?')[0].slice(0, -1)
+                        : resolvedHref.split('?')[0];
+                    const isActive = normalizedPathname === normalizedHref;
+
+                    return (
+                      <Link
+                        key={item.key}
+                        href={resolvedHref}
+                        title={item.label}
+                        className={`
                         flex items-center gap-3 px-4 py-2.5 mx-2 my-0.5 text-sm font-medium
                         transition-colors duration-150 relative group
                         ${isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'}
                         ${collapsed ? 'justify-center px-2' : ''}
                       `}
-                    >
-                      <Icon name={item.icon as any} size={18} />
-                      {!collapsed && <span className="flex-1">{item.label}</span>}
-                      {!collapsed && item.badge && item.badge > 0 ? (
-                        <span className="bg-carbon-red text-white text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center">
-                          {item.badge}
-                        </span>
-                      ) : null}
-                      {collapsed && item.badge && item.badge > 0 ? (
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-carbon-red rounded-full" />
-                      ) : null}
-                    </Link>
-                  );
-                })}
+                      >
+                        <Icon name={item.icon as any} size={18} />
+                        {!collapsed && <span className="flex-1">{item.label}</span>}
+                        {!collapsed && item.badge && item.badge > 0 ? (
+                          <span className="bg-carbon-red text-white text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center">
+                            {item.badge}
+                          </span>
+                        ) : null}
+                        {collapsed && item.badge && item.badge > 0 ? (
+                          <span className="absolute top-1 right-1 w-2 h-2 bg-carbon-red rounded-full" />
+                        ) : null}
+                      </Link>
+                    );
+                  })}
               </div>
             )
           )}
@@ -205,9 +238,15 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
           {/* Physician persona switcher — Rick (PCP) vs Jon (Specialist) */}
           {!collapsed && (
             <div className="space-y-1.5">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold px-1">Physician View</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold px-1">
+                Physician View
+              </p>
               <div className="flex gap-1">
-                {(Object.values(PHYSICIAN_PROFILES) as typeof PHYSICIAN_PROFILES[PhysicianPersona][]).map((p) => (
+                {(
+                  Object.values(
+                    PHYSICIAN_PROFILES
+                  ) as (typeof PHYSICIAN_PROFILES)[PhysicianPersona][]
+                ).map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setPhysicianPersona(p.id)}
@@ -232,7 +271,9 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
           {/* Role switcher */}
           {!collapsed && (
             <div className="space-y-1.5">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold px-1">Demo Role</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold px-1">
+                Demo Role
+              </p>
               <div className="flex gap-1">
                 {DEMO_USERS.map((u) => (
                   <button
@@ -240,7 +281,8 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
                     onClick={() => setUser(u)}
                     className={`flex-1 text-2xs py-1 px-1.5 font-medium transition-colors ${
                       user.userId === u.userId
-                        ? 'bg-carbon-blue text-white' :'bg-carbon-gray-80 text-carbon-gray-30 hover:bg-carbon-gray-70'
+                        ? 'bg-carbon-blue text-white'
+                        : 'bg-carbon-gray-80 text-carbon-gray-30 hover:bg-carbon-gray-70'
                     }`}
                     title={u.email}
                   >
@@ -274,8 +316,12 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
             <Icon name={collapsed ? 'ChevronRightIcon' : 'ChevronLeftIcon'} size={16} />
             {!collapsed && <span className="text-xs">Collapse</span>}
           </button>
-          <div className={`flex items-center gap-2 px-2 py-2 mt-1 ${collapsed ? 'justify-center' : ''}`}>
-            <div className={`w-7 h-7 rounded-full ${roleColor} flex items-center justify-center flex-shrink-0`}>
+          <div
+            className={`flex items-center gap-2 px-2 py-2 mt-1 ${collapsed ? 'justify-center' : ''}`}
+          >
+            <div
+              className={`w-7 h-7 rounded-full ${roleColor} flex items-center justify-center flex-shrink-0`}
+            >
               <span className="text-white text-xs font-semibold">{user.initials}</span>
             </div>
             {!collapsed && (
@@ -306,7 +352,9 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
                     <React.Fragment key={`bc-${i}`}>
                       {i > 0 && <span>/</span>}
                       {b.href ? (
-                        <Link href={b.href} className="hover:text-carbon-blue">{b.label}</Link>
+                        <Link href={b.href} className="hover:text-carbon-blue">
+                          {b.label}
+                        </Link>
                       ) : (
                         <span className="text-carbon-gray-70">{b.label}</span>
                       )}
@@ -319,59 +367,15 @@ export default function AppLayout({ children, pageTitle, breadcrumbs, contextBan
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* FHIR / Mock data toggle */}
-            <button
-              onClick={() => setUseMockData(!useMockData)}
-              title={useMockData ? 'Switch to live FHIR data' : 'Switch to mock data'}
-              className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold border transition-colors ${
-                useMockData
-                  ? 'bg-[#fff1e0] text-[#8a3800] border-[#f1c21b] hover:bg-[#fdf6dd]'
-                  : 'bg-[#defbe6] text-[#198038] border-[#a7f0ba] hover:bg-[#c6efcd]'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${useMockData ? 'bg-[#b45309]' : 'bg-[#24a148]'}`} />
-              {useMockData ? 'Mock Data' : 'Live FHIR'}
-            </button>
-            {/* Role + context indicator */}
-            <div className="hidden md:flex items-center gap-1.5 mr-2">
-              <span className={`text-2xs font-semibold px-2 py-1 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}>
-                {user.role === 'physician' ? 'Physician' : 'Care Manager'}
-              </span>
-              <span className={`text-2xs font-medium px-2 py-1 ${entryContext === 'cerner-launch' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-carbon-gray-10 text-carbon-gray-50'}`}>
-                {entryContext === 'cerner-launch' ? '⚡ Cerner' : 'Browse'}
-              </span>
-            </div>
-            {/* Patient switcher */}
-            <PatientSwitcherDropdown />
-            <div className="w-px h-6 bg-carbon-gray-20 mx-1" />
-            <button className="p-2 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10 transition-colors relative">
-              <Icon name="BellIcon" size={18} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-carbon-red rounded-full" />
-            </button>
-            <button className="p-2 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10 transition-colors">
-              <Icon name="QuestionMarkCircleIcon" size={18} />
-            </button>
-            <div className="w-px h-6 bg-carbon-gray-20 mx-1" />
-            <div className="flex items-center gap-2 text-sm">
-              <div className={`w-7 h-7 rounded-full ${roleColor} flex items-center justify-center`}>
-                <span className="text-white text-xs font-semibold">{user.initials}</span>
-              </div>
-              <span className="text-carbon-gray-70 text-xs hidden md:block">{user.name}</span>
-            </div>
-          </div>
+          <AppTopBarActions roleColor={roleColor} />
         </header>
 
         {/* Context banner */}
-        {contextBanner && (
-          <div className="flex-shrink-0">{contextBanner}</div>
-        )}
+        {contextBanner && <div className="flex-shrink-0">{contextBanner}</div>}
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 py-6">
-            {children}
-          </div>
+          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 py-6">{children}</div>
           {/* Immutable authorship attribution */}
           {/* © Richard Hennessy — Austin, Texas 78726. All rights reserved. TCOC Total Cost of Care Clinical Platform. */}
         </main>

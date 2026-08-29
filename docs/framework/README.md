@@ -4,7 +4,7 @@ A reusable, project-agnostic framework for building software with a coalition of
 
 Share this folder with your team. Everything needed to adopt the framework is here.
 
-**Release: v1.5** (see "What's new in v1.5" below). Earlier enhancements (v1.1–v1.4) are retained and summarized further down.
+**Release: v1.8** (see "What's new in v1.8" below; v1.6–v1.7 hardening in `FRAMEWORK_HARDENING.md` + `SKILL.md`). Earlier enhancements (v1.1–v1.5) are retained and summarized further down.
 
 ---
 
@@ -56,6 +56,12 @@ agentic-build-framework/
 The red-team panel is not optional, and every persona must produce findings — "looks fine" is a failed review. Findings route to the register: fix the Unacceptable now, schedule the Critical/High.
 
 ---
+
+## What's new in v1.8 (this release adds)
+
+The unit-level testing discipline beneath the R1–R5 panel — the layer that gives the mutation gate something worth measuring:
+
+- **Adversarial Testing Lens Kit (`ADVERSARIAL_TESTING_LENSES.md`).** 8 write-time test lenses — precision-not-recall, guards-fail-closed, order-independence, target-contract conformance, round-trip/encoding, no-silent-degradation, claims-enforced, degenerate-inputs — each **derived from a real defect a fully green gate missed**. Applied by the module author before the adversarial panel runs. Reconciled with the existing machinery rather than duplicating it: the lenses feed **E13** (which proves the tests kill mutants) and **R5** (which judges their depth); the finding→regression-lock rule is **E8 + E12 + the Critical-finding protocol**; the testability boundary is **E14** + pure-core/thin-shell; and the build-boot integration complement is already **E16**. Mapped onto R1–R5 in `personas.md`. Validated in-session on freshly-written code (caught 3 author defects before push). Ships a candidate mechanization — a negative-fixture meta-check — registered as **FW-5** in `HW6_BACKLOG_REGISTER.md` (landed green or backlogged, never half-added).
 
 ## What's new in v1.5 (this release adds)
 

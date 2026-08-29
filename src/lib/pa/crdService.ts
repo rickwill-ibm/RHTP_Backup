@@ -1,70 +1,105 @@
 /**
  * CRD service — Coverage Requirements Discovery.
- * Wired to RHTP's /api/cds BFF route (postJson). No SmartContext.
+ *
+ * Patient-aware (findings C1/C2/C3/H3): the checklist is DERIVED from the member's coverage
+ * context + the PUBLISHED coverage rule for the code (`deriveCrdResult`), not a canned mock. Real
+ * CDS-Hooks cards from `/api/cds`, when present, refine the determination via `parseCrdCards`.
+ * Wired to RHTP's /api/cds BFF route.
  */
 import { postJson } from '@/lib/client/bff';
 import type { CrdCheckResult } from '@/lib/pa/pa-types';
+import { getPatientContext } from '@/lib/pa/patientContext';
+import { coverageRuleForCode } from '@/lib/pa/publishedCoverage';
+import { deriveCrdResult, parseCrdCards, type CrdCard } from '@/lib/pa/crdDerivation';
 
-export async function runCrdChecks(cptCode: string): Promise<CrdCheckResult> {
-  const r = await postJson<{ cards?: { summary?: string; indicator?: string; source?: { label?: string } }[] }>(
-    '/api/cds',
-    {
+export interface RunCrdOptions {
+  /** Date of service (eligibility is checked against it). */
+  serviceDate?: string;
+  /** Ordering provider display, for the network-check detail. */
+  orderingProvider?: string;
+  /** Explicit in-network signal for the ordering provider (demo: seeded network is verified). */
+  orderingProviderInNetwork?: boolean;
+}
+
+export async function runCrdChecks(
+  patientId: string,
+  cptCode: string,
+  opts: RunCrdOptions = {}
+): Promise<CrdCheckResult> {
+  const ctx = getPatientContext(patientId);
+  const rule = coverageRuleForCode(cptCode);
+
+  // Try the real CDS-Hooks endpoint; its cards (when present) refine the PA determination.
+  let cardSignal;
+  try {
+    const r = await postJson<{ cards?: CrdCard[] }>('/api/cds', {
       hookId: 'order-sign',
       hookRequest: {
         hook: 'order-sign',
         context: {
+          patientId,
           draftOrders: {
             entry: [
-              { resource: { resourceType: 'ServiceRequest', code: { coding: [{ code: cptCode }] } } },
+              {
+                resource: { resourceType: 'ServiceRequest', code: { coding: [{ code: cptCode }] } },
+              },
             ],
           },
         },
       },
-    }
-  );
-
-  if (!r.ok || !r.data) {
-    // BFF unavailable or auth not set up — return mock result so demo stays live
-    return getMockCrdResult(cptCode);
+    });
+    if (r.ok && r.data) cardSignal = parseCrdCards(r.data.cards);
+  } catch {
+    // BFF unreachable — fall through to the context+rule derivation.
   }
 
-  // In dev-mock mode the BFF returns canned cards; parse or fall back to mock
-  return getMockCrdResult(cptCode);
+  if (!ctx) {
+    // No known member context — fail honest: eligibility unverified, PA required by rule.
+    return unverifiedCrdResult(cptCode, rule.priorAuthRequired);
+  }
+
+  return deriveCrdResult(ctx, cptCode, rule, {
+    serviceDate: opts.serviceDate,
+    orderingProvider: opts.orderingProvider,
+    orderingProviderInNetwork: opts.orderingProviderInNetwork,
+    cardSignal,
+  });
 }
 
-// ── Mock (used in dev / when BFF returns non-parseable CDS cards) ─────────────
-
-export function getMockCrdResult(cptCode: string): CrdCheckResult {
+/** Honest placeholder when no member context is resolvable: nothing is asserted as verified. */
+function unverifiedCrdResult(cptCode: string, priorAuthRequired: boolean): CrdCheckResult {
   return {
     patientEnrolled: {
-      pass: true,
+      pass: false,
       label: 'Patient Enrolled',
-      detail: 'Active Medicaid coverage verified — South Dakota DHSS',
+      detail: 'No member context resolved — enrollment unverified',
       source: 'pa',
     },
     patientEligible: {
-      pass: true,
+      pass: false,
       label: 'Patient Eligible',
-      detail: 'Eligibility confirmed for date of service',
+      detail: 'Eligibility unverified — no coverage on file for this patient',
       source: 'pa',
     },
     providerInNetwork: {
-      pass: true,
+      pass: false,
       label: 'Provider In-Network',
-      detail: 'Dr. James Whitfield MD confirmed in-network (FQHC)',
+      detail: 'Network status not verified',
       source: 'emr',
     },
     noConflictingGuideline: {
       pass: true,
       label: 'No Conflicting Milliman/InterQual Guideline',
-      detail: 'Reviewed — no additional mitigating guideline found',
+      detail: 'No conflicting guideline identified',
       source: 'guideline',
     },
     paRequired: {
       pass: true,
-      required: true,
-      label: 'Prior Authorization Required',
-      detail: `YES — CPT ${cptCode} requires prior authorization under this plan`,
+      required: priorAuthRequired,
+      label: 'Prior Authorization Determination',
+      detail: priorAuthRequired
+        ? `Prior authorization REQUIRED (CPT ${cptCode})`
+        : `Prior authorization NOT required (CPT ${cptCode})`,
       source: null,
     },
   };

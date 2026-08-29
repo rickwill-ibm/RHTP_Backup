@@ -15,11 +15,24 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Route-group path prefixes that are NOT part of the CMS-0057-F / FSIPAP scope and must be
 // excluded from any HCA-facing deployment.
-export const OUT_OF_SCOPE_PREFIXES = ['/uhg-orchestrate', '/md-smart-launch', '/care-manager', '/admin-console', '/stars-hedis-mips', '/patient-detail'];
+export const OUT_OF_SCOPE_PREFIXES = [
+  '/uhg-orchestrate',
+  '/md-smart-launch',
+  '/care-manager',
+  '/admin-console',
+  '/stars-hedis-mips',
+  '/patient-detail',
+];
 
-export function isOutOfScopePath(pathname: string, prefixes: string[] = OUT_OF_SCOPE_PREFIXES): boolean {
+export function isOutOfScopePath(
+  pathname: string,
+  prefixes: string[] = OUT_OF_SCOPE_PREFIXES
+): boolean {
   return prefixes.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(`/api${prefix}`)
+    (prefix) =>
+      pathname === prefix ||
+      pathname.startsWith(`${prefix}/`) ||
+      pathname.startsWith(`/api${prefix}`)
   );
 }
 
@@ -38,5 +51,5 @@ export function middleware(req: NextRequest): NextResponse {
 
 export const config = {
   // Run on every route except static assets and Next.js internals.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!api/policy/dtr|_next/static|_next/image|favicon.ico).*)'],
 };

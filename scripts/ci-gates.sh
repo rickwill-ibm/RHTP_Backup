@@ -59,6 +59,21 @@ g_shuffle()  { npx --no-install vitest run --sequence.shuffle; }
 g_build()    { npx --no-install next build; }
 g_pageboundary() { node docs/build-provenance/check-page-boundaries.mjs; }
 g_skillmirror()  { node tools/gen/genSkillMirror.mjs --check; }
+# g_coalition (v1.7 §13.6): a core-logic change MUST carry a logged architect+SWE+adversarial
+# coalition. Mechanical teeth for the Coalition Trigger Protocol (AGENTS.md). It cannot verify an
+# agent ran, but it BLOCKS landing a core change with no coalition-log entry — making a skip visible.
+CORE_RE='^src/lib/(policy|identity|consent|goldenThread|networkAdequacy)/'
+g_coalition() {
+  local core; core="$(changed_src | grep -E "$CORE_RE" || true)"
+  [ -z "$core" ] && { echo "(no core-logic changes — coalition not required)"; return 0; }
+  local logf='docs/build-provenance/coalition-log.md' all
+  all="$( { have_base && git diff --name-only "$BASE"...HEAD 2>/dev/null; git diff --cached --name-only 2>/dev/null; git diff --name-only 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null; } | sort -u )"
+  if printf '%s\n' "$all" | grep -qx "$logf"; then echo "core-logic change + coalition log updated"; return 0; fi
+  echo "CORE-LOGIC CHANGE without a coalition-log entry:"; printf '%s\n' "$core" | sed 's/^/  /'
+  echo "  -> run architect + SWE design + adversarial (before & after); append an entry to $logf."
+  echo "  -> see AGENTS.md 'Coalition Trigger' + docs/framework/coalition-protocol.md."
+  return 1
+}
 
 run "types (tsc --noEmit)"      g_types
 run "file sizes + ratchet"      g_sizes
@@ -70,6 +85,7 @@ if [ "$TIER" = "push" ] || [ "$TIER" = "pre-merge" ] || [ "$TIER" = "ci" ]; then
   run "unit tests (vitest)"     g_unit
   run "wired-path E14"          g_wiring
   run "provenance E11"          g_prov
+  run "coalition (core-logic design+adversarial)" g_coalition
 fi
 if [ "$TIER" = "pre-merge" ] || [ "$TIER" = "ci" ]; then
   run "unit tests (shuffled order - isolation)" g_shuffle

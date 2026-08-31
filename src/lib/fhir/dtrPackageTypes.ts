@@ -36,7 +36,9 @@ export type FhirQuestionnaireItemType =
   | 'open-choice'
   | 'attachment'
   | 'quantity'
-  | 'reference';
+  | 'reference'
+  // Non-answerable section header (used to title each medical-necessity determination pathway).
+  | 'display';
 
 export interface FhirQuestionnaireItem {
   linkId: string;

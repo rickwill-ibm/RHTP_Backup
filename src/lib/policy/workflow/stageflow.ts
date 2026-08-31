@@ -61,15 +61,20 @@ export function stageIndex(stage: WorkbenchStage): number {
 
 /**
  * Whether a stage is reachable. FAIL-CLOSED at the generation gate: `generate` and `promote` are
- * locked until the checker has approved. `review`/`signoff` require a promotable document.
+ * locked until the checker has approved. `review` requires a promotable document; `signoff` also
+ * requires the maker to have submitted (so the checker can never approve an un-submitted encoding).
  */
 export function isStageUnlocked(state: WorkbenchState, stage: WorkbenchStage): boolean {
   switch (stage) {
     case 'ingest':
       return true;
     case 'review':
-    case 'signoff':
       return state.hasPromotableDoc;
+    case 'signoff':
+      // Fail-closed: the checker can only approve a maker-SUBMITTED encoding. Locked until the maker
+      // has submitted (from the review Submit action), so the stepper cannot skip the submit and
+      // drive an illegal in-review → approved transition. Mirrors generate/promote-until-approved.
+      return state.hasPromotableDoc && state.submitted;
     case 'generate':
     case 'promote':
       // Fail-closed: approval already implies a reviewed document, but require BOTH so an

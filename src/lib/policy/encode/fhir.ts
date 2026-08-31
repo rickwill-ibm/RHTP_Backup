@@ -13,11 +13,42 @@
  */
 import type { CodedValueSet, EncodedCriterion, Measure, PolicyLogic } from './ir';
 import { repairGlyphs } from './text';
+import { isNegationHeading } from './procedure';
+
+// A DTR Questionnaire asks the POSITIVE medical-necessity criteria a provider attests to. A coverage
+// EXCLUSION ("… is investigational", "… does not meet criteria for coverage", "not covered") is a
+// payer coverage rule, NOT an attestation item — rendering it asks the provider to "check" an
+// exclusion, which is meaningless and asserts the opposite of coverage.
+// INVARIANT: an exclusion criterion is never emitted as a Questionnaire item. It stays in the
+// criteria registry (evaluation + CRD still see it); only the DTR questionnaire omits it.
+function isExclusionCriterion(crit: EncodedCriterion): boolean {
+  if (crit.negate === true) return true;
+  const ms = crit.measures ?? (crit.measure ? [crit.measure] : []);
+  if (ms.some((m) => m.negatedLocally === true)) return true;
+  const t = crit.sourceText.toLowerCase();
+  return (
+    isNegationHeading(crit.sourceText) ||
+    /\bdoes not meet\b|\bdo not meet\b|\bnot eligible\b|\b(is|are) excluded\b|\bconsidered cosmetic\b/.test(
+      t
+    )
+  );
+}
 
 /** Display text for a questionnaire label: OCR-repaired (Ill.→III, necessaryfor→necessary for),
  *  trimmed. The verbatim source stays on the criterion for provenance; only the label is de-noised. */
 function clean(s: string): string {
-  return repairGlyphs(s).repaired.replace(/\s+/g, ' ').trim();
+  return (
+    repairGlyphs(s)
+      .repaired.replace(/\s+/g, ' ')
+      .trim()
+      // Drop a dangling list conjunction/punctuation left on an item or option label when a
+      // "…; or" / "…; and" enumeration is split into typed items ("Sleeve gastrectomy; or" →
+      // "Sleeve gastrectomy"). Trailing only — a mid-sentence "or"/"and" is untouched. Display
+      // only; the verbatim sourceText is kept for provenance.
+      .replace(/\s*[;,]?\s*\b(?:or|and)\s*$/i, '')
+      .replace(/\s*[;:]\s*$/, '')
+      .trim()
+  );
 }
 
 export interface FhirCoding {
@@ -42,14 +73,48 @@ export interface FhirItem {
     | 'choice'
     | 'open-choice'
     | 'string'
+    | 'date'
     | 'attachment';
   required?: boolean;
   repeats?: boolean;
   enableWhen?: FhirEnableWhen[];
   enableBehavior?: 'all' | 'any';
   answerOption?: { valueCoding: FhirCoding }[];
+  /** Terminology binding for the concept being measured (e.g. LOINC for BMI). */
+  code?: FhirCoding[];
   item?: FhirItem[];
 }
+
+/** Standard LOINC codes for the engine's typed measure fields, so a measured item is a coded
+ *  Observation concept (Da Vinci DTR expects coded, pre-populatable items — not bare text). Codes a
+ *  field only when there is a well-established LOINC concept; unmapped fields stay uncoded (honest). */
+const MEASURE_LOINC: Record<string, FhirCoding> = {
+  age: { system: 'http://loinc.org', code: '30525-0', display: 'Age' },
+  bmi: { system: 'http://loinc.org', code: '39156-5', display: 'Body mass index (BMI)' },
+  systolicBP: { system: 'http://loinc.org', code: '8480-6', display: 'Systolic blood pressure' },
+  diastolicBP: { system: 'http://loinc.org', code: '8462-4', display: 'Diastolic blood pressure' },
+  weight: { system: 'http://loinc.org', code: '29463-7', display: 'Body weight' },
+  height: { system: 'http://loinc.org', code: '8302-2', display: 'Body height' },
+  hba1c: { system: 'http://loinc.org', code: '4548-4', display: 'Hemoglobin A1c' },
+  glucose: { system: 'http://loinc.org', code: '2339-0', display: 'Glucose' },
+  egfr: { system: 'http://loinc.org', code: '33914-3', display: 'eGFR' },
+  ldl: { system: 'http://loinc.org', code: '18262-6', display: 'LDL cholesterol' },
+  hdl: { system: 'http://loinc.org', code: '2085-9', display: 'HDL cholesterol' },
+  totalCholesterol: { system: 'http://loinc.org', code: '2093-3', display: 'Total cholesterol' },
+  triglycerides: { system: 'http://loinc.org', code: '2571-8', display: 'Triglycerides' },
+  lvef: {
+    system: 'http://loinc.org',
+    code: '10230-1',
+    display: 'Left ventricular ejection fraction',
+  },
+};
+
+/** LOINC codings for a measure's field, if a standard concept exists. */
+function measureCoding(m: Measure | undefined): FhirCoding[] | undefined {
+  const c = m?.field ? MEASURE_LOINC[m.field] : undefined;
+  return c ? [c] : undefined;
+}
+
 export interface FhirQuestionnaire {
   resourceType: 'Questionnaire';
   url: string;
@@ -82,31 +147,38 @@ function isDecimalMeasure(m: Measure): boolean {
 
 function measureItem(crit: EncodedCriterion): FhirItem {
   const decimal = crit.measure ? isDecimalMeasure(crit.measure) : false;
+  const code = measureCoding(crit.measure);
   return {
     linkId: crit.id,
     text: clean(crit.sourceText),
     type: decimal ? 'decimal' : 'integer',
     required: true,
+    ...(code ? { code } : {}),
   };
 }
 
 /** One typed item per measure in a multi-threshold criterion, each with a UNIQUE linkId. The suffix is
  *  INDEX-based (`${crit.id}::0`, `::1`) so uniqueness holds even if two measures ever share a field. */
 function measureItemsMulti(crit: EncodedCriterion, measures: Measure[]): FhirItem[] {
-  return measures.map((m, i) => ({
-    linkId: `${crit.id}::${i}`,
-    text: clean(crit.sourceText),
-    type: isDecimalMeasure(m) ? ('decimal' as const) : ('integer' as const),
-    required: true,
-  }));
+  return measures.map((m, i) => {
+    const code = measureCoding(m);
+    return {
+      linkId: `${crit.id}::${i}`,
+      text: clean(crit.sourceText),
+      type: isDecimalMeasure(m) ? ('decimal' as const) : ('integer' as const),
+      required: true,
+      ...(code ? { code } : {}),
+    };
+  });
 }
 
 function choiceItem(crit: EncodedCriterion, vs: CodedValueSet): FhirItem[] {
   // Display-only options get a deterministic local code so answerOption ↔ enableWhen(answerCoding)
   // matching works (an undefined code makes the gated follow-up unreachable). (red-team finding #4)
   const optSystem = (o: CodedValueSet['options'][number]): string => o.system ?? 'urn:rhtp:vs';
+  const optDisplay = (o: CodedValueSet['options'][number]): string => clean(o.display);
   const optCode = (o: CodedValueSet['options'][number]): string =>
-    o.code ?? `opt-${slug(o.display)}`;
+    o.code ?? `opt-${slug(optDisplay(o))}`;
   const item: FhirItem = {
     linkId: crit.id,
     text: clean(crit.sourceText),
@@ -114,7 +186,7 @@ function choiceItem(crit: EncodedCriterion, vs: CodedValueSet): FhirItem[] {
     repeats: true,
     required: true,
     answerOption: vs.options.map((o) => ({
-      valueCoding: { system: optSystem(o), code: optCode(o), display: o.display },
+      valueCoding: { system: optSystem(o), code: optCode(o), display: optDisplay(o) },
     })),
   };
   // Options with follow-ups ⇒ sibling items gated by enableWhen(answerCoding).
@@ -130,7 +202,7 @@ function choiceItem(crit: EncodedCriterion, vs: CodedValueSet): FhirItem[] {
           {
             question: crit.id,
             operator: '=',
-            answerCoding: { system: optSystem(o), code: optCode(o), display: o.display },
+            answerCoding: { system: optSystem(o), code: optCode(o), display: optDisplay(o) },
           },
         ],
       };
@@ -140,16 +212,61 @@ function choiceItem(crit: EncodedCriterion, vs: CodedValueSet): FhirItem[] {
   return [item, ...siblings];
 }
 
+/** A documentation requirement → a DISCRETE item set: an attestation boolean (which still gates the
+ *  determination), its OWN targeted attachment gated on the attestation, and an optional typed datum
+ *  (completion date / evaluating provider / named complication). Replaces the single shared catch-all. */
+function docItems(crit: EncodedCriterion): FhirItem[] {
+  const spec = crit.docSpec;
+  if (!spec) return [{ linkId: crit.id, text: clean(crit.sourceText), type: 'boolean' }];
+  const gate: FhirEnableWhen = { question: crit.id, operator: '=', answerBoolean: true };
+  const items: FhirItem[] = [
+    { linkId: crit.id, text: clean(spec.attestationText), type: 'boolean', required: true },
+    {
+      linkId: `${crit.id}.evidence`,
+      text: clean(spec.attachmentText),
+      type: 'attachment',
+      required: true,
+      enableWhen: [gate],
+    },
+  ];
+  const d = spec.datum;
+  if (d) {
+    const datum: FhirItem = {
+      linkId: `${crit.id}.datum`,
+      text: d.label,
+      type: d.kind === 'date' ? 'date' : d.kind === 'provider' ? 'string' : 'open-choice',
+      enableWhen: [gate],
+    };
+    if (d.kind === 'complication-type' && d.options) {
+      datum.answerOption = d.options.map((o) => ({
+        valueCoding: {
+          system: 'urn:rhtp:vs',
+          code: `opt-${slug(clean(o.display))}`,
+          display: clean(o.display),
+        },
+      }));
+    }
+    items.push(datum);
+  }
+  return items;
+}
+
 function critItems(crit: EncodedCriterion, vsById: Map<string, CodedValueSet>): FhirItem[] {
   if (crit.kind === 'measure' && crit.measure) {
-    return crit.measures && crit.measures.length > 1
-      ? measureItemsMulti(crit, crit.measures)
-      : [measureItem(crit)];
+    const base =
+      crit.measures && crit.measures.length > 1
+        ? measureItemsMulti(crit, crit.measures)
+        : [measureItem(crit)];
+    // A measure node MAY carry a child enumeration ("BMI ≥ 35 WITH a qualifying comorbidity"): render
+    // the threshold AND the child choice, so the band's comorbidity requirement is never dropped.
+    if (crit.children) return [...base, ...crit.children.flatMap((c) => critItems(c, vsById))];
+    return base;
   }
   if (crit.kind === 'choice' && crit.choice) {
     const vs = vsById.get(crit.choice.valueSetId);
     if (vs) return choiceItem(crit, vs);
   }
+  if (crit.kind === 'documentation') return docItems(crit);
   // attestation / documentation / freetext
   const item: FhirItem = {
     linkId: crit.id,
@@ -175,7 +292,9 @@ export function toQuestionnaire(policy: PolicyLogic): FhirQuestionnaire {
     const groupItems: FhirItem[] = [];
     const group: FhirItem = {
       linkId: p.id,
-      text: p.population ? `Pathway (${p.population.concept})` : 'Eligibility',
+      // The determination heading titles the pathway; falls back to the population label, then a
+      // generic "Eligibility" only when the policy stated no heading.
+      text: p.label ?? (p.population ? `Pathway (${p.population.concept})` : 'Eligibility'),
       type: 'group',
       item: groupItems,
     };
@@ -194,6 +313,9 @@ export function toQuestionnaire(policy: PolicyLogic): FhirQuestionnaire {
       const crit = policy.criteria[id];
       if (!crit || seen.has(id)) continue;
       seen.add(id);
+      // Coverage exclusions are payer rules, never provider-attestation questions — omit them from
+      // the DTR questionnaire (they remain in the registry for evaluation + CRD).
+      if (isExclusionCriterion(crit)) continue;
       groupItems.push(...critItems(crit, vsById));
     }
     items.push(group);

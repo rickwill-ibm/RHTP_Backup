@@ -1,4 +1,13 @@
 /**
+ * NOTE: MOCK-CORPUS SEED-RECORD ADAPTER — not a real payer ingestion path.
+ *
+ * Adapts an ALREADY-PARSED seed record from the bundled mock library (loadMockLibrary, used only by the
+ * financial-clearance demo) into a NormalizedPolicy. The `raw.source === '<payer>'` check reads the
+ * seed record's own field, NOT document content — do NOT copy this pattern for real ingestion. Real
+ * per-payer/state adaptation belongs in the PolicyProfile seam (src/lib/policy/profile/policyProfile.ts).
+ */
+
+/**
  * UnitedHealthcare Prior-Authorization requirement-list ingestion adapter
  * (Policy Engine PE-2).
  *

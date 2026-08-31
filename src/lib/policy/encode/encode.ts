@@ -31,6 +31,16 @@ import {
   parseThresholdVariant,
 } from './population';
 import { isNegationHeading } from './procedure';
+import { classifyDocumentation, buildDocDatum, buildDocSpec } from './documentation';
+
+/** A heading that introduces documentation REQUIREMENTS (so its children are documentation by
+ *  structure), e.g. "The following documentation is required:", "Provide documentation of:". NOT a
+ *  clinical-necessity heading ("medically necessary when all of the following are met"). */
+function opensDocContext(text: string): boolean {
+  return /\bdocumentation\b[^.]*\bfollowing\b|\bfollowing\s+documentation\b|provide\s+documentation|submit\s+documentation/i.test(
+    text
+  );
+}
 
 const SPAN0: Span = { start: 0, end: 0 };
 function spanOf(n: CriterionNode): Span {
@@ -72,7 +82,8 @@ function encodeNode(
   path: string,
   section: string,
   registry: Record<string, EncodedCriterion>,
-  valueSets: CodedValueSet[]
+  valueSets: CodedValueSet[],
+  inDocContext = false
 ): string {
   // Unlabeled criteria (bullet lists with no A./1. marker) get a stable, unique positional id so
   // siblings never collide in the registry, and their names render verbatim (no synthetic prefix).
@@ -114,9 +125,16 @@ function encodeNode(
   const diab = diabetesPopulation(text);
   if (diab) crit.population = diab;
 
-  // E4 choice: a "one or more of" heading with child options.
+  // E4 choice: a FLAT option list that is a one-of-N enumeration ("one of the following …",
+  // "one or more of …") OR an open enumeration ("including but not limited to", "such as"). A node
+  // whose options THEMSELVES have children is not flattened into a choice — it recurses, so nested
+  // content (e.g. a comorbidity sub-list under a BMI branch) is preserved and forms its own inner
+  // choice rather than being dropped.
   const min = detectChoiceMin(text);
-  if (node.children.length && min !== null && min >= 1) {
+  const flatOptions =
+    node.children.length > 0 && node.children.every((c) => c.children.length === 0);
+  const oneOfN = min !== null && min >= 1;
+  if (flatOptions && (oneOfN || isOpenSet(text))) {
     const vsId = `${id}:vs`;
     const options: OptionInput[] = node.children.map((child) => {
       const opt: OptionInput = { display: child.text, sourceText: child.text };
@@ -148,17 +166,61 @@ function encodeNode(
       return opt;
     });
     valueSets.push(buildValueSet(vsId, `${id} options`, text, options, 'inclusion', 'eligibility'));
-    crit.kind = 'choice';
-    crit.choice = { valueSetId: vsId, min: 1 };
-    // note the open-set flag lives on the value set (isOpenSet applied inside buildValueSet)
-    void isOpenSet;
+    if (crit.kind === 'measure') {
+      // The node carries BOTH a threshold AND an enumeration — e.g. "BMI 35 or greater WITH a
+      // qualifying comorbidity". The old code overwrote kind to 'choice' and SILENTLY DROPPED the
+      // threshold. Keep the measure (so BMI ≥ 35 is still asked + evaluated) and attach the
+      // enumeration as a distinct CHILD choice, so both surface and both are required together.
+      const comorbId = `${id}.comorbidity`;
+      const comorbChild: EncodedCriterion = {
+        id: comorbId,
+        label: node.label,
+        sourceText: node.text,
+        sourceSpan: spanOf(node),
+        sourceSection: section,
+        labelSource: 'inferred-by-position',
+        kind: 'choice',
+        choice: { valueSetId: vsId, min: 1 },
+      };
+      // Register the child so registry consumers (provenance, review-element extraction) see it as its
+      // own element — DTR/eval already reach it by reference, but the review UI must list it too.
+      registry[comorbId] = comorbChild;
+      crit.children = [comorbChild];
+    } else {
+      crit.kind = 'choice';
+      crit.choice = { valueSetId: vsId, min: 1 };
+    }
+    // (the open-set flag lives on the value set — isOpenSet is applied inside buildValueSet)
   } else {
     // Recurse into children as sub-criteria (AND under this node), if any and not a choice.
     for (const child of node.children) {
-      const childId = encodeNode(child, id, section, registry, valueSets);
+      const childId = encodeNode(
+        child,
+        id,
+        section,
+        registry,
+        valueSets,
+        inDocContext || opensDocContext(text)
+      );
       crit.children = crit.children ?? [];
       crit.children.push(registry[childId]);
     }
+  }
+
+  // E-doc: a RESIDUAL attestation LEAF that is a documentation requirement (evidence of a completed
+  // activity) — by generic cue, or by sitting under a documentation heading — becomes a discrete item
+  // set (attestation boolean + its own attachment + optional typed datum). This runs strictly AFTER
+  // measure/choice classification, so an eligibility threshold or an enumeration is never softened; the
+  // attestation boolean still gates the determination (it stays a BoolExpr leaf) — it is made MORE
+  // evaluable, never dropped.
+  if (
+    crit.kind === 'attestation' &&
+    !crit.children &&
+    (inDocContext || classifyDocumentation(text))
+  ) {
+    crit.kind = 'documentation';
+    const datum = buildDocDatum(text, crit.timeWindow);
+    crit.docSpec = buildDocSpec(text, datum);
   }
 
   registry[id] = crit;
@@ -217,12 +279,19 @@ export function encodePolicy(
     // become a satisfiable pathway — an empty AND would auto-approve. The manual-review pathway (if
     // any) already carries the routing. (red-team finding #1)
     if (topIds.length > 0) {
+      // The determination heading titles the pathway's DTR section (repaired + de-noised, trailing
+      // punctuation trimmed) so multiple determinations render as distinct, titled sections.
+      const label = repairGlyphs(group.heading)
+        .repaired.replace(/\s+/g, ' ')
+        .replace(/[:\s]+$/, '')
+        .trim();
       const pathway: Pathway = {
         id: `pathway.${gi}`,
         role: 'eligibility',
         logic: groupExpr(group, topIds),
         valueSets,
       };
+      if (label) pathway.label = label;
       if (population) pathway.population = population;
       pathways.push(pathway);
     }

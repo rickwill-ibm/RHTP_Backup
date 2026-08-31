@@ -24,6 +24,7 @@ const fresh: WorkbenchState = {
   promoted: false,
 };
 const reviewing: WorkbenchState = { ...fresh, hasPromotableDoc: true };
+const submittedState: WorkbenchState = { ...reviewing, submitted: true };
 const approved: WorkbenchState = {
   hasPromotableDoc: true,
   submitted: true,
@@ -38,26 +39,32 @@ describe('stageflow — gates', () => {
     expect(isStageUnlocked(approved, 'generate')).toBe(true);
     expect(isStageUnlocked(approved, 'promote')).toBe(true);
   });
-  it('locks review + signoff until a promotable document exists; ingest always open', () => {
+  it('locks review until a promotable document exists; locks signoff until the maker submits', () => {
     expect(isStageUnlocked(fresh, 'ingest')).toBe(true);
     expect(isStageUnlocked(fresh, 'review')).toBe(false);
     expect(isStageUnlocked(reviewing, 'review')).toBe(true);
-    expect(isStageUnlocked(reviewing, 'signoff')).toBe(true);
+    // signoff is fail-closed until the maker has submitted — a promotable doc alone is not enough,
+    // so the stepper can't skip the submit and drive an illegal in-review → approved transition.
+    expect(isStageUnlocked(reviewing, 'signoff')).toBe(false);
+    expect(isStageUnlocked(submittedState, 'signoff')).toBe(true);
   });
   it('stageStatus: active wins, locked beats todo, complete shows done', () => {
     expect(stageStatus(reviewing, 'review', 'review')).toBe('active');
     expect(stageStatus(reviewing, 'generate', 'review')).toBe('locked');
     expect(stageStatus(reviewing, 'ingest', 'review')).toBe('done'); // hasPromotableDoc completes ingest
-    expect(stageStatus(reviewing, 'signoff', 'review')).toBe('todo');
+    expect(stageStatus(reviewing, 'signoff', 'review')).toBe('locked'); // locked until submitted
+    expect(stageStatus(submittedState, 'signoff', 'signoff')).toBe('active');
   });
   it('resolveActiveStage never returns a locked stage', () => {
     expect(resolveActiveStage(fresh, 'generate')).toBe('ingest');
-    expect(resolveActiveStage(reviewing, 'generate')).toBe('signoff'); // furthest unlocked
+    expect(resolveActiveStage(reviewing, 'generate')).toBe('review'); // signoff still locked (not submitted)
+    expect(resolveActiveStage(submittedState, 'generate')).toBe('signoff'); // furthest unlocked
     expect(resolveActiveStage(approved, 'generate')).toBe('generate');
   });
   it('furthestUnlocked advances with state', () => {
     expect(furthestUnlocked(fresh)).toBe('ingest');
-    expect(furthestUnlocked(reviewing)).toBe('signoff');
+    expect(furthestUnlocked(reviewing)).toBe('review');
+    expect(furthestUnlocked(submittedState)).toBe('signoff');
     expect(furthestUnlocked(approved)).toBe('promote');
   });
   it('STAGE_ORDER is the five stages in order', () => {

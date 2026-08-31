@@ -54,17 +54,42 @@ function tokenInText(code: string, text: string): boolean {
   return new RegExp(`(?:^|[^A-Za-z0-9])${esc}(?:[^A-Za-z0-9]|$)`).test(text);
 }
 
-/** Find the first not-medically-necessary statement that names this code, if any. */
-function excludingStatement(code: string, statements: string[]): string | undefined {
+/** The ONE wording rule set for "this text reads as an exclusion / investigational determination."
+ *  Shared by the prose-statement matcher (which additionally requires the code token) and the
+ *  descriptor-cue matcher (where the code is the implicit subject of its own descriptor), so there is
+ *  never a second, drifting copy of the wording. */
+// Cues for a PROSE statement (already exclusion-context): stems are safe here, plus the common payer
+// determination phrasings ("not reasonable and necessary", "does not meet coverage criteria").
+const STATEMENT_EXCLUSION =
+  /investigation|experiment|unproven|not (?:considered )?medically necessary|not medically indicated|not reasonable and necessary|does not meet[\w\s]{0,20}criteria|non-?covered/i;
+// Cues for a raw CPT/HCPCS DESCRIPTOR (the code is the implicit subject): EXPLICIT adjectival
+// determinations only — never the loose stems `investigation`/`experiment`/`exclud`, which appear
+// benignly in descriptors ("intestine, except rectum"; a diagnostic "investigation" procedure).
+const DESCRIPTOR_EXCLUSION =
+  /investigational|experimental|unproven|not (?:considered )?medically necessary|not reasonable and necessary|non-?covered/i;
+
+/** Does a code's OWN descriptor flag it as an exclusion? Explicit determination cues only (see above). */
+export function descriptorFlagsExclusion(desc: string | undefined): boolean {
+  return !!desc && DESCRIPTOR_EXCLUSION.test(desc);
+}
+
+/** Does a PROSE statement read as an exclusion? The negation heading and the looser `exclud`
+ *  ("excluded under the plan") are safe here on top of the statement cues. Shared by the prose-statement
+ *  matcher and the default-disposition classifier. */
+export function readsAsExclusion(text: string | undefined): boolean {
+  return (
+    !!text && (isNegationHeading(text) || STATEMENT_EXCLUSION.test(text) || /\bexclud/i.test(text))
+  );
+}
+
+/** Find the first not-medically-necessary statement that names this code, if any. Exported so the
+ *  default-disposition classifier reuses the SAME structural matcher (no second wording rule set). */
+export function excludingStatement(code: string, statements: string[]): string | undefined {
   for (const s of statements) {
     if (!s) continue;
     // Only a genuine negation/exclusion statement counts — a code merely mentioned in prose that is
     // NOT a negation heading must not be routed excluded (fail-safe to `assign`).
-    if (
-      !isNegationHeading(s) &&
-      !/investigation|experiment|unproven|not medically necessary|exclud/i.test(s)
-    )
-      continue;
+    if (!readsAsExclusion(s)) continue;
     if (tokenInText(code, s)) return s;
   }
   return undefined;
@@ -80,16 +105,28 @@ export function routeGuidelineCodes(review: PolicyReview): Record<string, Routin
   const out: Record<string, RoutingHint> = {};
   for (const c of review.guidelineCodes ?? []) {
     const stmt = statements.length > 0 ? excludingStatement(c.code, statements) : undefined;
-    if (stmt) {
+    // A code's OWN descriptor can carry the exclusion cue — e.g. an unlisted code qualified
+    // "[when specified as … identified as not medically necessary …]". There the code is the implicit
+    // subject, so no token match is needed; the descriptor IS the statement. This is the signal the
+    // prose-only matcher missed, letting a not-medically-necessary code default to covered.
+    const descExcludes = !stmt && descriptorFlagsExclusion(c.description);
+    if (stmt || descExcludes) {
+      const evidence = stmt ?? c.description;
       out[c.code] = {
         bucket: 'excluded',
         label: LABEL.excluded,
-        basis: classifyBasis(stmt),
-        provenance: { excerpt: stmt.replace(/\s+/g, ' ').trim().slice(0, 240) },
+        basis: classifyBasis(evidence),
+        provenance: {
+          excerpt: evidence.replace(/\s+/g, ' ').trim().slice(0, 240),
+        },
         requiresAssignment: true,
       };
     } else {
-      out[c.code] = { bucket: 'assign', label: LABEL.assign, requiresAssignment: true };
+      out[c.code] = {
+        bucket: 'assign',
+        label: LABEL.assign,
+        requiresAssignment: true,
+      };
     }
   }
   return out;

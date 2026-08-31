@@ -28,7 +28,7 @@ export type DocFormat = 'rtf' | 'docx' | 'ole-doc' | 'other';
 /** Classify an uploaded word-processor file from its bytes, then its filename. Content magic is
  *  authoritative: a `.doc` that is really RTF (a common "save as Word" result) is detected as rtf. */
 export function detectDocFormat(bytes: Uint8Array, filename: string): DocFormat {
-  const head = latin1(bytes.subarray(0, 8)).replace(/^﻿/, '');
+  const head = latin1(bytes.subarray(0, 8)).replace(/^\uFEFF/, '');
   if (head.startsWith('{\\rtf')) return 'rtf';
   if (bytesStartWith(bytes, [0x50, 0x4b, 0x03, 0x04])) return 'docx'; // "PK\x03\x04" zip
   if (bytesStartWith(bytes, [0xd0, 0xcf, 0x11, 0xe0])) return 'ole-doc'; // legacy OLE binary .doc

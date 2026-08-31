@@ -132,6 +132,9 @@ describe('reviewProgress + sign-off gating', () => {
     // only 1 of 5 decided → below 0.6 but meets 0.2
     expect(reviewProgress(secs, 0.2).canSubmit).toBe(true);
     expect(reviewProgress(secs, 0.6).canSubmit).toBe(false);
+    // minDecided is the canonical threshold the UI shows ("decide N more"): ceil(total*fraction).
+    expect(reviewProgress(secs, 0.6).minDecided).toBe(Math.ceil(5 * 0.6));
+    expect(reviewProgress(secs, 0.2).minDecided).toBe(Math.ceil(5 * 0.2));
   });
 });
 

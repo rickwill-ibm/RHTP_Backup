@@ -91,6 +91,16 @@ export type {
   FhirLibrary,
 } from './dtrPackageTypes';
 
+/* ---- Da Vinci PAS resource types (Claim / Organization) ---- */
+// Split into `pasTypes.ts` for the file-size cap; re-exported so importers are unchanged.
+export type {
+  FhirClaim,
+  FhirClaimItem,
+  FhirClaimInsurance,
+  FhirClaimSupportingInfo,
+  FhirOrganization,
+} from './pasTypes';
+
 export interface FhirPatient extends FhirResource {
   resourceType: 'Patient';
   identifier?: Array<{ type?: FhirCodeableConcept; system?: string; value?: string }>;

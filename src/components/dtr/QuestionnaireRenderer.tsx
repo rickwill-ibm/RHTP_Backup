@@ -67,6 +67,17 @@ export function QuestionnaireRenderer({
     >
       {items.map((item) => {
         if (!isItemActive(item, answers)) return null;
+        // A section header (`display`) groups the following items under one determination pathway —
+        // it is not a form field, so the two determinations read as distinct sections, not repeats.
+        if (item.type === 'display') {
+          return (
+            <div key={item.linkId} className="pt-4 first:pt-0">
+              <h4 className="border-t border-slate-200 pt-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                {item.text}
+              </h4>
+            </div>
+          );
+        }
         const val = answers[item.linkId];
         const isMissing = missing.includes(item.linkId);
         // Live format feedback for typed fields (e.g. ICD-10), plus whatever the last submit flagged.
@@ -81,6 +92,33 @@ export function QuestionnaireRenderer({
               {item.required ? <span className="text-red-600"> *</span> : null}
             </label>
             {item.helpText ? <p className="text-xs text-slate-500">{item.helpText}</p> : null}
+            {(item.code?.length ?? 0) > 0 || item.answerValueSet ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(item.code ?? []).map((c) => (
+                  <span
+                    key={c.code}
+                    title={c.display}
+                    className="inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500"
+                  >
+                    <span className="font-semibold text-indigo-600">
+                      {c.system.includes('loinc')
+                        ? 'LOINC'
+                        : c.system.includes('snomed')
+                          ? 'SNOMED'
+                          : c.system.includes('icd')
+                            ? 'ICD-10'
+                            : 'code'}
+                    </span>
+                    {c.code}
+                  </span>
+                ))}
+                {item.answerValueSet ? (
+                  <span className="rounded-full bg-violet-50 px-2 py-0.5 font-mono text-[10px] font-semibold text-violet-700">
+                    answerValueSet
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
 
             {item.type === 'boolean' ? (
               <input

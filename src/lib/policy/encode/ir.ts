@@ -138,12 +138,40 @@ export interface CodedValueSet {
 // The encoded criterion. (spec §3)
 // ---------------------------------------------------------------------------
 export type CriterionKind =
-  'measure' | 'boolean' | 'choice' | 'attestation' | 'exclusion' | 'reference' | 'freetext';
+  | 'measure'
+  | 'boolean'
+  | 'choice'
+  | 'attestation'
+  | 'documentation'
+  | 'exclusion'
+  | 'reference'
+  | 'freetext';
 
 export interface CrossRef {
   rawLabel: string;
   resolved?: string;
   status: 'resolved' | 'unresolved-fail-closed';
+}
+
+/** A discrete typed datum a documentation requirement asks for beyond the attestation + attachment —
+ *  a completion date, an evaluating provider, or a named complication type. Detected STRUCTURALLY
+ *  (payer-agnostic), never fabricated. */
+export interface DocDatum {
+  kind: 'date' | 'provider' | 'complication-type';
+  label: string;
+  /** For `complication-type`: the enumerated options drawn from the criterion's own named tokens. */
+  options?: CodedOption[];
+  /** True when the enumeration is open ("… or other"). */
+  open?: boolean;
+}
+
+/** How a documentation-requirement criterion becomes a DISCRETE, machine-evaluable item set: an
+ *  attestation boolean + its own targeted attachment + an optional typed datum — instead of draining
+ *  into one shared catch-all attachment. */
+export interface DocItemSpec {
+  attestationText: string;
+  attachmentText: string;
+  datum?: DocDatum;
 }
 
 export interface EncodedCriterion {
@@ -169,6 +197,8 @@ export interface EncodedCriterion {
   crossRefs?: CrossRef[];
   /** Low-confidence parse ⇒ human review. Never dropped, never guessed. (spec §1.9) */
   reviewFlag?: { reason: string };
+  /** For `kind:'documentation'`: how to emit the discrete attestation + attachment (+ datum) item set. */
+  docSpec?: DocItemSpec;
   children?: EncodedCriterion[];
 }
 
@@ -189,7 +219,9 @@ export interface ProcedureRule {
   system: 'CPT' | 'HCPCS' | 'ICD10PCS';
   /** "[when specified as Billroth II]" — part of the identity key, not a footnote. */
   contextQualifier?: string;
-  coverageCode: CoverageCode;
+  /** Omitted when coverage is UNDETERMINED (pre-review): the code is policy-referenced, not asserted
+   *  covered. Never fabricate 'covered' — that is a determination only a human/coding-map layer makes. */
+  coverageCode?: CoverageCode;
   /** Orthogonal reason: experimental is preserved distinctly from a bare not-covered. */
   basis?: CoverageBasis;
   /** Conditional-coverage predicate. */
@@ -221,6 +253,9 @@ export interface FieldProvenanceRef {
 
 export interface Pathway {
   id: string;
+  /** Human determination heading for this pathway (the medical-necessity intro sentence), so the DTR
+   *  renders each determination as a titled section — two determinations never read as duplicates. */
+  label?: string;
   /** `manual-review` carries no criteria tree — only a routing instruction. (spec F10/§1.8) */
   role: 'eligibility' | 'manual-review';
   population?: PopulationPredicate;

@@ -1,227 +1,74 @@
 // ─── devStubs.dtr.ts ──────────────────────────────────────────────────────────
-// DTR (Documentation Templates and Rules) evaluation stubs plus
-// questionnaire-package definitions.
+// DTR (Documentation Templates and Rules) evaluation dispatcher.
+//
+// The per-patient scenario DATA + the questionnaire-package definitions live in
+// `devStubs.dtr.data.json` (AI-CODING-CONVENTIONS v2 §2-3: data → *.json), so this
+// file stays a thin dispatcher well under the size cap regardless of formatting.
+// The only LOGIC here is routing patient/CPT → scenario, and the bariatric branch,
+// which evaluates the CG-SURG-83 criteria against a patient's real FHIR record.
 
 import { profileFor } from './devStubs.profiles';
+import { evaluateDtr } from '@/lib/policy/dtr/evaluate/patientEvaluation';
+import { bariatricPatientBundle } from '@/lib/policy/dtr/evaluate/patientData';
+import {
+  BARIATRIC_DTR_CRITERIA,
+  BARIATRIC_CPT_CODES,
+} from '@/lib/policy/dtr/evaluate/bariatricCriteria';
+import data from './devStubs.dtr.data.json';
 
-/** DTR policy evaluation — full per-patient scenarios. */
+const SCENARIOS = data.scenarios;
+
+/** DTR policy evaluation — full per-patient scenarios (data-driven), plus the bariatric FHIR evaluation. */
 export function devDtrEvaluation(patientId: string, cptCode: string): unknown {
   profileFor(patientId); // ensure valid patient
 
-  if (patientId === 'PAT-0042' || cptCode === '75561') {
-    return {
-      policyTitle: 'Cardiac MRI — Medical Necessity Policy (CPT 75561)',
-      cptCode, allMet: false,
-      groups: [
-        {
-          id: 1, title: 'Echocardiogram Performed First', status: 'met', required: true,
-          description: 'Standard echocardiogram must be attempted before advanced cardiac imaging.',
-          fhirQuery: { resourceType: 'Procedure', searchParam: 'code', system: 'http://www.ama-assn.org/go/cpt', codes: ['93306', '93307'] },
-          sourceExcerpt: 'Cardiac MRI is appropriate when echocardiogram has been performed and clinical question remains unanswered.',
-          leaf: { code: 'CPT 93306', label: 'Echocardiogram — complete', evidence: 'Echocardiogram performed 2026-03-12, EF 35%', source: 'emr', recordedDate: '2026-03-12', performerName: 'Dr. Nakamura' },
-        },
-        {
-          id: 2, title: 'Documented Cardiac Condition (CHF / CAD / Cardiomyopathy)', status: 'met', required: true,
-          description: 'A documented cardiac diagnosis must be present justifying advanced imaging.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['I50.32', 'I25.10', 'I42.0'] },
-          sourceExcerpt: 'Cardiac MRI is indicated for patients with known or suspected structural heart disease.',
-          leaf: { code: 'I50.32', label: 'Chronic diastolic heart failure', evidence: 'Active diagnosis since 2019-03', source: 'emr' },
-        },
-        {
-          id: 3, title: 'Clinical Justification — Beyond Echocardiogram', status: 'gap', required: true,
-          description: 'Documentation must explain why echocardiogram is insufficient and what clinical question MRI will answer.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['I50.32'] },
-          sourceExcerpt: 'Clinical note must document specific question that requires cardiac MRI beyond echocardiogram findings.',
-          candidateCodes: [
-            { code: 'I50.32', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Chronic diastolic CHF — EF 35%' },
-            { code: 'I25.10', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Atherosclerotic heart disease' },
-          ],
-        },
-      ],
-    };
+  // Bariatric codes: evaluate the CG-SURG-83 computable criteria against a fixed SAMPLE patient bundle
+  // (Maria) through the shared engine — real age/BMI/comorbidity reads, not a hardcoded literal. This is
+  // a fixed demo fixture (the workbench's PatientPrepopPanel evaluates the LIVE authored review).
+  if (BARIATRIC_CPT_CODES.has(cptCode)) {
+    return evaluateDtr(
+      { ...BARIATRIC_DTR_CRITERIA, cptCode },
+      bariatricPatientBundle,
+      new Date('2026-08-30')
+    );
   }
 
-  if (patientId === 'PAT-0087' || cptCode === '93306') {
-    return {
-      policyTitle: 'Echocardiogram — Medical Necessity Policy (CPT 93306)',
-      cptCode, allMet: true,
-      groups: [
-        {
-          id: 1, title: 'Documented Heart Failure or Cardiac Symptom', status: 'met', required: true,
-          description: 'Echocardiogram is appropriate for documented CHF or new cardiac symptoms.',
-          leaf: { code: 'I50.9', label: 'Heart failure, unspecified', evidence: 'CHF active since 2021-06-11', source: 'emr' },
-          sourceExcerpt: 'Echocardiogram indicated for evaluation and monitoring of known or suspected heart failure.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['I50.9', 'I50.32', 'I50.1'] },
-        },
-        {
-          id: 2, title: 'Not Repeated Within 12 Months Without New Indication', status: 'met', required: true,
-          description: 'Repeat echocardiogram requires new clinical indication if performed within 12 months.',
-          leaf: { code: 'CPT 93306', label: 'Last echo: 2025-06-01', evidence: 'Prior echo > 12 months ago', source: 'claims' },
-          sourceExcerpt: 'Routine repeat echocardiogram within 12 months of prior study requires documentation of changed clinical status.',
-          fhirQuery: { resourceType: 'Procedure', searchParam: 'code', system: 'http://www.ama-assn.org/go/cpt', codes: ['93306'] },
-        },
-      ],
-    };
-  }
-
-  if (patientId === 'PAT-0103' || cptCode === '99243') {
-    return {
-      policyTitle: 'Specialty Consult — Medical Necessity Policy (CPT 99243)',
-      cptCode, allMet: true,
-      groups: [
-        {
-          id: 1, title: 'Documented Chronic Kidney Disease (CKD Stage ≥ 3)', status: 'met', required: true,
-          description: 'Nephrology referral is appropriate for CKD Stage 3 or greater with eGFR < 45.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['N18.3', 'N18.4', 'N18.5'] },
-          sourceExcerpt: 'Nephrology consultation is indicated when eGFR falls below 45 mL/min or there is evidence of CKD progression.',
-          leaf: { code: 'N18.3', label: 'CKD Stage 3b — eGFR 42', evidence: 'eGFR 42 mL/min confirmed 2026-02-28', source: 'emr', recordedDate: '2026-02-28', performerName: 'Dr. Castillo' },
-        },
-        {
-          id: 2, title: 'Hypertension Poorly Controlled Despite Therapy', status: 'met', required: true,
-          description: 'BP > 140/90 despite ≥ 2 antihypertensive agents supports nephrology referral.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['I10'] },
-          sourceExcerpt: 'Resistant hypertension contributing to CKD progression is a standard indication for nephrology specialist evaluation.',
-          leaf: { code: 'I10', label: 'Essential hypertension', evidence: 'BP 158/96 on 2 agents (Amlodipine + Losartan)', source: 'emr' },
-        },
-        {
-          id: 3, title: 'Specialist Not Seen Within Prior 12 Months', status: 'met', required: false,
-          description: 'Confirms this is not a duplicate referral within the policy lookback window.',
-          fhirQuery: { resourceType: 'Encounter', searchParam: 'type', system: 'http://snomed.info/sct', codes: ['11429006'] },
-          sourceExcerpt: 'Routine follow-up nephrology visits within 12 months do not require re-authorization.',
-          leaf: { code: 'NPI 9876543210', label: 'No nephrology encounter in prior 12 months', evidence: 'Claims history reviewed — last nephrology 2022-08-30', source: 'claims' },
-        },
-      ],
-    };
-  }
-
-  if (patientId === 'PAT-0156' || cptCode === '99244') {
-    return {
-      policyTitle: 'Specialty Consult — Medical Necessity Policy (CPT 99244)',
-      cptCode, allMet: true,
-      groups: [
-        {
-          id: 1, title: 'Documented Severe Persistent Asthma', status: 'met', required: true,
-          description: 'Pulmonology referral is appropriate for severe persistent asthma not controlled on standard therapy.',
-          fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['J45.50', 'J45.51'] },
-          sourceExcerpt: 'Pulmonology consultation is indicated for severe persistent asthma requiring step-up therapy or biologic evaluation.',
-          leaf: { code: 'J45.50', label: 'Severe persistent asthma, uncomplicated', evidence: 'Active diagnosis since 2012-03 — GINA Step 4', source: 'emr', recordedDate: '2026-03-28', performerName: 'Dr. Torres' },
-        },
-        {
-          id: 2, title: 'Step 3–4 Controller Therapy Active', status: 'met', required: true,
-          description: 'Patient must be on high-dose ICS/LABA before biologic or specialist escalation.',
-          fhirQuery: { resourceType: 'MedicationRequest', searchParam: 'code', system: 'http://www.nlm.nih.gov/research/umls/rxnorm', codes: ['1945274', '896218'] },
-          sourceExcerpt: 'Specialist referral for biologic therapy requires documented failure on ICS/LABA combination therapy.',
-          leaf: { code: 'RxNorm 1945274', label: 'Fluticasone/Salmeterol 250/50mcg BID', evidence: 'Active since 2024-01, adherence 76%', source: 'emr' },
-        },
-        {
-          id: 3, title: 'Spirometry Confirms Obstruction', status: 'met', required: false,
-          description: 'FEV1/FVC < 0.70 supports severity classification and specialist referral.',
-          fhirQuery: { resourceType: 'Observation', searchParam: 'code', system: 'http://loinc.org', codes: ['19926-5'] },
-          sourceExcerpt: 'Spirometry confirming fixed obstruction strengthens the medical necessity case for specialist management.',
-          leaf: { code: 'LOINC 19926-5', label: 'FEV1/FVC ratio', evidence: 'Spirometry overdue — last result FEV1/FVC 0.64 (2025-03)', source: 'claims' },
-        },
-      ],
-    };
-  }
-
-  // Default: Maria's lumbar MRI
-  return mariaMock(cptCode);
+  const scenario =
+    patientId === 'PAT-0042' || cptCode === '75561'
+      ? SCENARIOS.cardiacMri
+      : patientId === 'PAT-0087' || cptCode === '93306'
+        ? SCENARIOS.echo
+        : patientId === 'PAT-0103' || cptCode === '99243'
+          ? SCENARIOS.nephrology
+          : patientId === 'PAT-0156' || cptCode === '99244'
+            ? SCENARIOS.pulmonology
+            : SCENARIOS.mariaMock; // default: Maria's lumbar MRI
+  return { ...scenario, cptCode };
 }
-
-// ─── DTR Questionnaire Package ────────────────────────────────────────────────
-
-const DTR_QUESTIONNAIRES: Record<string, { id: string; url: string; title: string; item: unknown[] }> = {
-  '72148': {
-    id: 'Q_MRI_LUMBAR', url: 'http://example.org/Questionnaire/mri-lumbar',
-    title: 'MRI Lumbar Spine — Documentation Requirements (DTR)',
-    item: [
-      { linkId: 'q1', text: 'Conservative therapy attempted (>= 6 weeks)?', type: 'boolean', required: true },
-      { linkId: 'q2', text: 'Neurological deficit present?', type: 'boolean', required: true },
-      { linkId: 'q3', text: 'Relevant clinical notes', type: 'string' },
-    ],
-  },
-  '75561': {
-    id: 'Q_CARDIAC_MRI', url: 'http://example.org/Questionnaire/cardiac-mri',
-    title: 'Cardiac MRI — Documentation Requirements (DTR)',
-    item: [
-      { linkId: 'q1', text: 'Standard echocardiogram performed prior to this order?', type: 'boolean', required: true },
-      { linkId: 'q2', text: 'Echocardiogram date (YYYY-MM-DD)', type: 'date', required: true },
-      { linkId: 'q3', text: 'Documented cardiac condition (CHF / CAD / cardiomyopathy)?', type: 'boolean', required: true },
-      { linkId: 'q4', text: 'Clinical question that echocardiogram could not answer', type: 'string', required: true },
-    ],
-  },
-  '93306': {
-    id: 'Q_ECHO', url: 'http://example.org/Questionnaire/echo',
-    title: 'Echocardiogram — Documentation Requirements (DTR)',
-    item: [
-      { linkId: 'q1', text: 'Documented heart failure or cardiac symptom?', type: 'boolean', required: true },
-      { linkId: 'q2', text: 'Prior echocardiogram within 12 months? If yes, describe new indication.', type: 'string' },
-    ],
-  },
-  '99243': {
-    id: 'Q_NEPHROLOGY_CONSULT', url: 'http://example.org/Questionnaire/nephrology-consult',
-    title: 'Nephrology Consultation — Documentation Requirements (DTR)',
-    item: [
-      { linkId: 'q1', text: 'CKD Stage 3 or greater documented (eGFR < 45)?', type: 'boolean', required: true },
-      { linkId: 'q2', text: 'Most recent eGFR value and date', type: 'string', required: true },
-      { linkId: 'q3', text: 'Hypertension not controlled on ≥ 2 agents?', type: 'boolean' },
-    ],
-  },
-  '99244': {
-    id: 'Q_PULMONOLOGY_CONSULT', url: 'http://example.org/Questionnaire/pulmonology-consult',
-    title: 'Pulmonology Consultation — Documentation Requirements (DTR)',
-    item: [
-      { linkId: 'q1', text: 'Documented severe persistent asthma (GINA Step 3–4)?', type: 'boolean', required: true },
-      { linkId: 'q2', text: 'ICS/LABA combination therapy currently active?', type: 'boolean', required: true },
-      { linkId: 'q3', text: 'Spirometry confirming obstruction (FEV1/FVC < 0.70)?', type: 'boolean' },
-      { linkId: 'q4', text: 'Date of most recent spirometry', type: 'date' },
-    ],
-  },
-};
 
 /**
  * Patient/CPT-aware DTR $questionnaire-package Bundle.
- * Falls back to lumbar MRI questionnaire if CPT not mapped.
+ * Falls back to the lumbar MRI questionnaire if the CPT is not mapped.
  */
 export function devQuestionnairePackage(cptCode?: string): unknown {
-  const q = DTR_QUESTIONNAIRES[cptCode ?? '72148'] ?? DTR_QUESTIONNAIRES['72148'];
+  const questionnaires = data.questionnaires as Record<
+    string,
+    { id: string; url: string; title: string; item: unknown[] }
+  >;
+  const q = questionnaires[cptCode ?? '72148'] ?? questionnaires['72148'];
   return {
-    resourceType: 'Bundle', type: 'collection',
-    entry: [{ resource: { resourceType: 'Questionnaire', id: q.id, url: q.url, status: 'active', title: q.title, item: q.item } }],
-  };
-}
-
-// ─── Maria lumbar MRI (legacy default) ───────────────────────────────────────
-
-function mariaMock(cptCode: string): unknown {
-  return {
-    policyTitle: 'MRI Lumbar Spine — Medical Necessity Policy (CPT 72148)',
-    cptCode, allMet: false,
-    groups: [
+    resourceType: 'Bundle',
+    type: 'collection',
+    entry: [
       {
-        id: 1, title: '≥ 6 Weeks Conservative Therapy', status: 'met', required: true,
-        description: 'Patient must have completed at least 6 weeks of conservative therapy without adequate relief prior to advanced imaging.',
-        fhirQuery: { resourceType: 'Procedure', searchParam: 'code', system: 'http://snomed.info/sct', codes: ['229070002', '229070003'], valueComparison: '>= 6 weeks documented' },
-        sourceExcerpt: 'Coverage is available for lumbar MRI when the member has completed a minimum 6-week trial of conservative therapy without satisfactory improvement.',
-        leaf: { code: 'SNOMED 229070002', label: 'Physical therapy — lumbar region', evidence: 'PT sessions documented 02/10/2026 – 03/28/2026 (7 weeks)', source: 'emr', recordedDate: '2026-03-28', performerName: 'Dr. James Whitfield MD' },
-      },
-      {
-        id: 2, title: 'Neurological Deficit or Red Flag Symptom', status: 'gap', required: true,
-        description: 'Documentation must include at least one qualifying neurological deficit (radiculopathy, motor weakness, numbness/tingling) or a recognized red flag symptom.',
-        fhirQuery: { resourceType: 'Condition', searchParam: 'code', system: 'http://hl7.org/fhir/sid/icd-10-cm', codes: ['M54.4', 'M54.3', 'G55', 'M47.816'] },
-        sourceExcerpt: 'Advanced imaging is appropriate when neurological deficit, radiculopathy, or a red flag symptom is documented in the clinical record.',
-        candidateCodes: [
-          { code: 'M54.4', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Lumbago with sciatica — right side' },
-          { code: 'M54.3', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Sciatica' },
-          { code: 'G55', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Nerve root and plexus compressions' },
-          { code: 'M47.816', system: 'http://hl7.org/fhir/sid/icd-10-cm', label: 'Spondylosis with radiculopathy — lumbar region' },
-        ],
-      },
-      {
-        id: 3, title: 'Ordering Provider Specialty Appropriate', status: 'met', required: false,
-        description: 'Ordering provider must be a PCP, orthopedic surgeon, neurologist, or physiatrist.',
-        sourceExcerpt: 'Requests from out-of-specialty providers are subject to additional review. PCP ordering is standard.',
-        leaf: { code: 'NPI 1234567890', label: 'Dr. James Whitfield MD — Family Medicine / FQHC', evidence: 'PCP ordering — specialty confirmed in-network', source: 'emr' },
+        resource: {
+          resourceType: 'Questionnaire',
+          id: q.id,
+          url: q.url,
+          status: 'active',
+          title: q.title,
+          item: q.item,
+        },
       },
     ],
   };

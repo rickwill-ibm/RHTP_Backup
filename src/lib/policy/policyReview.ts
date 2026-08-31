@@ -17,6 +17,7 @@ import type { QuestionnaireItemDef } from '@/lib/dtr/questionnaireResponse';
 import { engineQuestionnaireItems } from '@/lib/policy/dtr/engineQuestionnaireItems';
 import type { TextSource } from './extract/types';
 import type { FieldProvenance } from './extract/provenance';
+import { applyProfile } from './profile/policyProfile';
 import type { NormalizedPolicy } from './types';
 import { extractStructuredPolicy, structuredToNormalized } from './extract/structured';
 import {
@@ -28,6 +29,9 @@ import {
 import { buildProductReview, type ProductReviewSection } from './productReview';
 import type { CoverageRule } from '@/lib/policy/crd/coverageRule';
 import { engineCoverageRulesForReview } from '@/lib/policy/crd/engineCoverageRules';
+import { codeTableCoverage } from '@/lib/policy/crd/codeTableCoverage';
+import { defaultDispositions } from './review/codeDisposition';
+import type { CodeDisposition } from '@/lib/policy/crd/coverageDisposition';
 
 export type PolicyFormat = 'code-table' | 'criteria' | 'unknown';
 
@@ -67,6 +71,9 @@ export interface PolicyReview {
   coverageRules?: CoverageRule[];
   /** The single DTR Questionnaire canonical URL the CRD rules point at (== the package Questionnaire.url). */
   questionnaireCanonical?: string;
+  /** The section-inferred DEFAULT coverage disposition per code (payer-agnostic; see
+   *  review/codeDisposition.ts). Seeds the maker's starting decision; the human confirms or overrides. */
+  dispositions?: Record<string, CodeDisposition>;
   provenance: FieldProvenance[];
   warnings: string[];
   stats: {
@@ -107,6 +114,9 @@ export function detectPolicyFormat(src: TextSource): PolicyFormat {
 
 /** Process a document into a unified, reviewable draft DTR, in the context of a tenant. */
 export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}): PolicyReview {
+  // Optional per-payer / per-state PRE-NORMALIZATION seam. With no profile registered the generic
+  // identity profile runs, so the general payer-agnostic path is unchanged (see profile/policyProfile.ts).
+  src = applyProfile(src).src;
   const kind = detectPolicyFormat(src);
   const tenant = opts.tenant?.trim() ? opts.tenant.trim() : null;
 
@@ -141,11 +151,21 @@ export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}
         ]
       : [];
     const baseId = `${slug(title)}${structured.policyNumber ? `-${slug(structured.policyNumber)}` : ''}`;
+    const policyId = scopeToTenant(tenant ?? undefined, baseId);
+    // Parity with the criteria path: a "Requirements By Product" table IS a covered·PA procedure set,
+    // so emit CRD coverage rules (deduped, covered·PA) + their section-inferred default dispositions.
+    // The maker's overrides flow to Generate the same way (via projectCoverageRules) as the criteria path.
+    const ctCanonical = `urn:rhtp:dtr/Questionnaire/${slug(policyId)}`;
+    const { rules: coverageRules, dispositions } = codeTableCoverage(review.sections, {
+      policyId,
+      policyTitle: title,
+      canonical: ctCanonical,
+    });
     return {
       kind,
       tenant,
       title,
-      policyId: scopeToTenant(tenant ?? undefined, baseId),
+      policyId,
       guidelineId: null,
       source: title,
       sourceFile: structured.sourceFile,
@@ -153,6 +173,9 @@ export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}
       promotable: review.stats.codes > 0,
       productSections: review.sections,
       item,
+      coverageRules,
+      questionnaireCanonical: ctCanonical,
+      dispositions,
       provenance: structured.provenance,
       warnings: structured.warnings,
       stats: {
@@ -167,6 +190,25 @@ export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}
 
   if (kind === 'criteria') {
     const cp = extractCriteriaPolicy(src);
+    // Silent under-extraction guard: a substantial document that yields very few criteria may be
+    // prose- or table-based and only partially parsed. Warn (never fabricate) so a thin extraction
+    // cannot masquerade as fully authored — the count alone must not read as "done". Payer-agnostic:
+    // keys off document size + medical-necessity cue density, never any payer's wording.
+    const bodyChars = src.text.replace(/\s+/g, ' ').trim().length;
+    const mnCues = (src.text.match(/medical(?:ly)?\s+necess/gi) ?? []).length;
+    // Count TOTAL criteria including nested children (not just top-level) so a complete but deeply
+    // nested policy — few top-level items, many sub-criteria — is not falsely flagged as thin.
+    const countNodes = (nodes: { children: unknown[] }[]): number =>
+      nodes.reduce(
+        (s, c) => s + 1 + countNodes((c.children as { children: unknown[] }[]) ?? []),
+        0
+      );
+    const totalCriteria = cp.medicallyNecessary.reduce((s, g) => s + countNodes(g.criteria), 0);
+    if (totalCriteria <= 2 && (bodyChars > 6000 || mnCues >= 3)) {
+      cp.warnings.push(
+        'Extraction looks thin — the document is substantial but few medical-necessity criteria were parsed. It may be prose- or table-based; review carefully before promoting.'
+      );
+    }
     const normalized = criteriaToNormalized(cp);
     const title = normalized.title;
     // Criteria → the policy ENGINE's typed questionnaire (BMI decimal, age integer, choice sets,
@@ -180,15 +222,23 @@ export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}
       }) ?? [];
     // CRD sibling artifact from the ENGINE — coverage rules for each authored code, sharing the DTR
     // Questionnaire canonical (Da Vinci: CRD card references the DTR Questionnaire). No codes ⇒ no rules.
+    // Seed each code's DEFAULT coverage disposition from the section it was harvested under, so the CRD
+    // rules arrive at review classified (covered·PA / not-covered / investigational / pending) rather
+    // than uniformly pending-review. Payer-agnostic: keys off structural section + negation statements.
+    const dispositions = defaultDispositions(cp.codes, cp.notMedicallyNecessary);
     const coverageRules =
       engineCoverageRulesForReview(cp.medicallyNecessary, cp.codes, {
         service: title,
         guidelineId: cp.guidelineId ?? undefined,
         policyId: normalized.policyId,
         policyTitle: title,
+        dispositions,
       }) ?? [];
+    // Use the first rule that actually carries a pathway — a not-covered/investigational rule now
+    // emits an EMPTY canonical, so `coverageRules[0]` could blank the policy-level canonical if the
+    // first harvested code happened to be excluded. Find the first non-empty one instead.
     const questionnaireCanonical =
-      coverageRules[0]?.questionnaireCanonical ??
+      coverageRules.find((r) => r.questionnaireCanonical)?.questionnaireCanonical ??
       `urn:rhtp:dtr/Questionnaire/${slug(normalized.policyId)}`;
     return {
       kind,
@@ -206,6 +256,7 @@ export function processPolicyDocument(src: TextSource, opts: ProcessOptions = {}
       item,
       coverageRules,
       questionnaireCanonical,
+      dispositions,
       provenance: cp.provenance,
       warnings: cp.warnings,
       stats: { format: kind, criteria: cp.stats.criteria, codes: cp.stats.codes },

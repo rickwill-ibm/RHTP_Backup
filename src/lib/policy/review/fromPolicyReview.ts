@@ -143,6 +143,13 @@ export function reviewElementsFromPolicy(
 ): ReviewElementInput[] {
   const elements: ReviewElementInput[] = [];
 
+  // The byte-anchored source excerpt per code (provenance), so a reviewer can research each code in the
+  // row's drawer — first excerpt wins, matching how the assistant cites a code.
+  const snippetByCode = new Map<string, string>();
+  for (const p of review.provenance ?? []) {
+    if (!snippetByCode.has(p.value)) snippetByCode.set(p.value, p.snippet);
+  }
+
   for (const c of review.guidelineCodes ?? []) {
     elements.push({
       id: `proc-${c.codeSystem}-${c.code}`,
@@ -154,6 +161,8 @@ export function reviewElementsFromPolicy(
       confidence: c.confidence ?? 'explicit',
       flag: codingMap.flags?.[c.code],
       routing: codingMap.routing?.[c.code],
+      source: snippetByCode.get(c.code),
+      sourceSection: c.sourceSection,
     });
   }
 

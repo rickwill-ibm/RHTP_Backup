@@ -8,6 +8,7 @@
  */
 import { useState } from 'react';
 import { decide, type ReviewElement } from '@/lib/policy/review/encodingReview';
+import { ORIGIN_TEXT } from '@/lib/policy/review/reviewRowText';
 
 function flagClass(sev: 'defect' | 'ambiguous' | 'verify'): string {
   if (sev === 'defect') return 'bg-rose-50 text-rose-800';
@@ -38,10 +39,13 @@ export function ElementRow({
   el,
   gated,
   onDecide,
+  onExplainCode,
 }: {
   el: ReviewElement;
   gated: boolean;
   onDecide: (id: string, action: Parameters<typeof decide>[2]) => void;
+  /** Seed the Encoding Assistant with this element's code (from the research disclosure). */
+  onExplainCode?: (code: string) => void;
 }): React.ReactElement {
   const [editing, setEditing] = useState(false);
   const [reason, setReason] = useState('');
@@ -89,14 +93,28 @@ export function ElementRow({
               {flagIcon(el.flag.severity)} {el.flag.message}
             </div>
           )}
-          {el.source && (
+          {(el.source || el.sourceSection || el.code) && (
             <details className="mt-1.5 text-xs text-slate-500">
               <summary className="cursor-pointer font-medium text-indigo-600">
-                Source evidence
+                Research this {el.code ? 'code' : 'criterion'}
               </summary>
-              <blockquote className="mt-1 border-l-2 border-slate-200 bg-slate-50 px-2.5 py-1.5 italic">
-                {el.source}
-              </blockquote>
+              {el.source && (
+                <blockquote className="mt-1 break-words border-l-2 border-slate-200 bg-slate-50 px-2.5 py-1.5 italic">
+                  “{el.source}”
+                </blockquote>
+              )}
+              {el.sourceSection && (
+                <div className="mt-1 text-slate-500">{ORIGIN_TEXT[el.sourceSection]}</div>
+              )}
+              {el.code && onExplainCode && (
+                <button
+                  type="button"
+                  onClick={() => onExplainCode(el.code as string)}
+                  className="mt-1.5 rounded border border-teal-300 bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-700 hover:bg-teal-100"
+                >
+                  Explain {el.code} in the assistant →
+                </button>
+              )}
             </details>
           )}
           {editing && (

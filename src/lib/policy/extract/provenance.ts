@@ -21,11 +21,15 @@ export interface FieldProvenance {
   value: string;
   /** Character offsets into the source `TextSource.text`. */
   span: Span;
-  /** A small window of surrounding source text, for human display. */
+  /** A window of surrounding source text, for human display (the research drawer + the assistant
+   *  citation). Wide enough that a reviewer can read the code IN CONTEXT — the sentence/table row it
+   *  sits in — not just a few characters either side. Display-only; verification is span-based. */
   snippet: string;
 }
 
-const SNIPPET_PAD = 24;
+// A code in a coding table or an inline sentence needs a full line of context on each side for a
+// reviewer to actually verify it — 24 chars showed barely three words and sliced words in half.
+const SNIPPET_PAD = 100;
 
 /** Build and validate a span against the text it indexes into. Throws if out of range. */
 export function makeSpan(text: string, start: number, end: number): Span {
@@ -41,9 +45,24 @@ export function makeSpan(text: string, start: number, end: number): Span {
 function snippetAround(text: string, span: Span): string {
   const from = Math.max(0, span.start - SNIPPET_PAD);
   const to = Math.min(text.length, span.end + SNIPPET_PAD);
-  const prefix = from > 0 ? '…' : '';
-  const suffix = to < text.length ? '…' : '';
-  return `${prefix}${text.slice(from, to)}${suffix}`.replace(/\s+/g, ' ').trim();
+  // Only a truncated side gets an ellipsis; a side that reaches the text edge is whole.
+  const leftCut = from > 0;
+  const rightCut = to < text.length;
+  // If a cut lands INSIDE a word, the edge token is a fragment ("roux" → "ux"). Snap it away so the
+  // excerpt begins/ends on a whole word. Decide from the raw neighbour chars (positions shift once
+  // whitespace is collapsed). The code sits centred in the window, so snapping never touches it.
+  const leftMidWord = leftCut && /\S/.test(text[from - 1] ?? '') && /\S/.test(text[from] ?? '');
+  const rightMidWord = rightCut && /\S/.test(text[to - 1] ?? '') && /\S/.test(text[to] ?? '');
+  let body = text.slice(from, to).replace(/\s+/g, ' ').trim();
+  if (leftMidWord) {
+    const sp = body.indexOf(' ');
+    if (sp > 0) body = body.slice(sp + 1);
+  }
+  if (rightMidWord) {
+    const sp = body.lastIndexOf(' ');
+    if (sp > 0) body = body.slice(0, sp);
+  }
+  return `${leftCut ? '…' : ''}${body}${rightCut ? '…' : ''}`.trim();
 }
 
 /**

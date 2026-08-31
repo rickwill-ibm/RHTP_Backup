@@ -9,11 +9,18 @@
  */
 import type { CodedOption, CodedValueSet, EncodedCriterion } from './ir';
 
-/** "one or more of" / "at least one of" ⇒ min 1. "all of the following" ⇒ min = all (n). */
+/** "one or more of" / "at least one of" / "one of the following" ⇒ min 1. "all of the following" ⇒
+ *  require all (AND). "all/each of the following" is checked FIRST so the broad "one of the following"
+ *  clause below can never mis-classify an AND list as a one-of-N choice. */
 export function detectChoiceMin(headingText: string): number | null {
   const t = headingText.toLowerCase();
-  if (/one or more of|at least one of|any (?:one )?of the following|either/.test(t)) return 1;
   if (/all of the following|each of the following/.test(t)) return -1; // sentinel: require all
+  if (
+    /one or more of|at least one of|any (?:one )?of the following|one of the following|either/.test(
+      t
+    )
+  )
+    return 1;
   return null;
 }
 

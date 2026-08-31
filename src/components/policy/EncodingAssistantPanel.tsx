@@ -9,7 +9,7 @@
  * answer logic + the citation contract live in the tested `@/lib/policy/assistant/encodingAssistant`
  * module; this is a thin renderer. Type-only import keeps the server seam out of the client bundle.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PolicyReview } from '@/lib/policy/policyReview';
 import type { AssistantAnswer, AssistantCitation } from '@/lib/policy/assistant/encodingAssistant';
 
@@ -35,14 +35,40 @@ function buildSuggestions(review: PolicyReview): string[] {
 
 export function EncodingAssistantPanel({
   review,
+  seededQuestion,
 }: {
   review: PolicyReview | null;
+  /** When set (from a review-row "Explain <code>" click), the assistant asks about that code. The
+   *  nonce lets the same code be re-asked. */
+  seededQuestion?: { code: string; nonce: number };
 }): React.ReactElement {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // "Bring your own key" — the endpoint + key the demonstrator supplies to enable the live LLM.
+  // SESSION-ONLY: held in memory for this tab, sent per-request to our own BFF, never written to
+  // storage and never logged. Cleared on refresh (re-enter each session) or by Disconnect.
+  const [aiCfg, setAiCfg] = useState<{ endpoint: string; apiKey: string } | null>(null);
+  const [epInput, setEpInput] = useState('');
+  const [keyInput, setKeyInput] = useState('');
+  const [showConfig, setShowConfig] = useState(false);
+
   const suggestions = review ? buildSuggestions(review) : [];
+
+  function enableAssistant(): void {
+    const endpoint = epInput.trim();
+    const apiKey = keyInput.trim();
+    if (!endpoint || !apiKey) return;
+    setAiCfg({ endpoint, apiKey });
+    setKeyInput(''); // don't retain the secret in an input's state once applied
+    setShowConfig(false);
+  }
+  function disconnectAssistant(): void {
+    setAiCfg(null);
+    setEpInput('');
+    setKeyInput('');
+  }
 
   async function ask(question: string): Promise<void> {
     const q = question.trim();
@@ -54,7 +80,7 @@ export function EncodingAssistantPanel({
       const res = await fetch('/api/policy/assistant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, review }),
+        body: JSON.stringify({ question: q, review, assistantConfig: aiCfg ?? undefined }),
       });
       const a = (await res.json()) as AssistantAnswer;
       setMessages((m) => [
@@ -81,18 +107,106 @@ export function EncodingAssistantPanel({
     }
   }
 
+  // Keep a ref to the latest `ask` so the seed effect fires with current review/config without
+  // depending on `ask` (which changes every render) — that would otherwise re-fire on every message.
+  const askRef = useRef(ask);
+  useEffect(() => {
+    askRef.current = ask;
+  });
+  // Fire ONLY when the seed nonce changes (a new "Explain <code>" click) — never on message updates.
+  useEffect(() => {
+    if (seededQuestion) void askRef.current(`Explain ${seededQuestion.code}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seededQuestion?.nonce]);
+
   return (
     <aside className="flex h-full flex-col rounded-lg border border-slate-200 bg-slate-50">
       <div className="border-b border-slate-200 px-4 py-3">
-        <h3 className="flex items-center gap-2 text-sm font-semibold">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
-          Encoding Assistant
-        </h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <span
+              className={`h-2 w-2 rounded-full ring-2 ${
+                aiCfg ? 'bg-emerald-500 ring-emerald-100' : 'bg-slate-400 ring-slate-200'
+              }`}
+            />
+            Encoding Assistant
+          </h3>
+          <div className="flex items-center gap-2">
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                aiCfg ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+              }`}
+              title={
+                aiCfg
+                  ? 'Live LLM enabled with your endpoint + key (session only)'
+                  : 'Deterministic grounded retrieval — runs offline'
+              }
+            >
+              {aiCfg ? 'Live LLM · your key' : 'Deterministic · offline'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowConfig((s) => !s)}
+              className="rounded border border-slate-300 px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-white"
+            >
+              {aiCfg ? 'Change' : 'Connect'}
+            </button>
+          </div>
+        </div>
         <p className="mt-1 text-[11px] leading-snug text-slate-500">
-          LLM · temp 0 (deterministic) · grounded in <b>this policy + the coding map</b> · cites
-          every source · never invents criteria
+          temp 0 (deterministic) · grounded in <b>this policy + the coding map</b> · cites every
+          source · never invents criteria
         </p>
       </div>
+
+      {(showConfig || !aiCfg) && (
+        <div className="border-b border-slate-200 bg-white px-4 py-3">
+          <p className="text-[11px] font-semibold text-slate-700">
+            Step 1 — Connect your model{' '}
+            <span className="font-normal text-slate-400">(optional)</span>
+          </p>
+          <p className="mt-0.5 text-[10px] leading-snug text-slate-500">
+            Enter an endpoint + Anthropic API key to run the live assistant. Held in memory for this
+            session only — never saved or logged. Skip to use the offline deterministic assistant.
+          </p>
+          <div className="mt-2 space-y-1.5">
+            <input
+              type="text"
+              value={epInput}
+              onChange={(e) => setEpInput(e.target.value)}
+              placeholder="AI_CODING_ENDPOINT — e.g. https://…/v1/messages"
+              className="w-full rounded border border-slate-300 px-2 py-1 text-[11px]"
+            />
+            <input
+              type="password"
+              value={keyInput}
+              onChange={(e) => setKeyInput(e.target.value)}
+              autoComplete="off"
+              placeholder="ANTHROPIC_API_KEY"
+              className="w-full rounded border border-slate-300 px-2 py-1 text-[11px] font-mono"
+            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={!epInput.trim() || !keyInput.trim()}
+                onClick={enableAssistant}
+                className="rounded bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-40"
+              >
+                Enable assistant
+              </button>
+              {aiCfg && (
+                <button
+                  type="button"
+                  onClick={disconnectAssistant}
+                  className="rounded border border-slate-300 px-2.5 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (

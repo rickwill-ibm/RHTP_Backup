@@ -25,9 +25,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-  let body: { question?: unknown; review?: unknown };
+  let body: { question?: unknown; review?: unknown; assistantConfig?: unknown };
   try {
-    body = (await req.json()) as { question?: unknown; review?: unknown };
+    body = (await req.json()) as {
+      question?: unknown;
+      review?: unknown;
+      assistantConfig?: unknown;
+    };
   } catch (err) {
     return NextResponse.json(ooError(`invalid JSON body: ${String(err)}`, 'invalid'), {
       status: 400,
@@ -44,20 +48,35 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const ctx = buildAssistantContext(review);
 
-  // Deterministic path (no AI configured): grounded retrieval, offline.
-  if (selectAssistantMode() === 'deterministic') {
+  // "Bring your own key": a demonstrator may enable the live assistant from the UI by supplying an
+  // endpoint + key on the request (held in their browser for the session only — never persisted here,
+  // never logged). Request config takes precedence; otherwise fall back to the server env gate. Both
+  // paths still FAIL SAFE to the deterministic answer, so the panel always gets a cited response.
+  const reqCfg = body.assistantConfig as { endpoint?: unknown; apiKey?: unknown } | undefined;
+  const reqEndpoint = typeof reqCfg?.endpoint === 'string' ? reqCfg.endpoint.trim() : '';
+  const reqKey = typeof reqCfg?.apiKey === 'string' ? reqCfg.apiKey.trim() : '';
+  const byoConfigured = reqEndpoint.length > 0 && reqKey.length > 0;
+
+  const envConfig = aiCodingConfigFromEnv();
+  const effectiveConfig = byoConfigured
+    ? { endpoint: reqEndpoint, hasKey: true, configured: true }
+    : envConfig;
+
+  // Deterministic path (neither a request key nor the server env gate configured): grounded, offline.
+  if (selectAssistantMode(effectiveConfig) === 'deterministic') {
     return NextResponse.json(deterministicAnswer(question, ctx));
   }
 
   // AI path (temperature 0), grounded strictly in this policy + coding map. Fails safe.
   const request = buildAssistantRequest(question, ctx);
-  const config = aiCodingConfigFromEnv();
+  const endpoint = byoConfigured ? reqEndpoint : (envConfig.endpoint ?? '');
+  const apiKey = byoConfigured ? reqKey : (process.env.ANTHROPIC_API_KEY ?? '');
   try {
-    const res = await fetch(config.endpoint ?? '', {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.ANTHROPIC_API_KEY ?? ''}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         system: request.system,

@@ -225,6 +225,12 @@
     "src/components/policy/workbench/IngestStage.tsx",
     "src/components/policy/workbench/CodeTableReviewStage.tsx",
     "src/components/policy/workbench/SignoffStage.tsx",
+    "src/components/policy/workbench/PromoteStage.tsx",
+    "src/components/policy/workbench/AssistantDock.tsx",
+    "src/components/policy/EncodingReviewAiRow.tsx",
+    "src/components/policy/EncodingReviewCodeDrawer.tsx",
+    "src/components/policy/workbench/PasPreviewPanel.tsx",
+    "src/components/policy/workbench/PatientPrepopPanel.tsx",
     "src/lib/policy/extract/criteriaParse.ts",
     "src/lib/policy/server/docIntakeRtfTables.ts",
     "src/components/AppTopBarActions.tsx",
@@ -234,6 +240,7 @@
     "src/components/policy/workbench/GenerateArtifactsStage.tsx",
     "src/lib/policy/authoring/criteriaPolicy.ts",
     "src/lib/policy/encode/crossref.ts",
-    "src/lib/policy/encode/measureScan.ts"
+    "src/lib/policy/encode/measureScan.ts",
+    "src/app/(reviewer)/policy-engine/conformance-demo/page.tsx"
   ]
 }

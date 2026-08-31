@@ -34,7 +34,7 @@ function sanitizeIdentifier(name: string): string {
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join('');
-  return /^[A-Za-z]/.test(camel) ? camel : `Lib${camel}` || 'Lib';
+  return /^[A-Za-z]/.test(camel) ? camel : `Lib${camel}`;
 }
 
 /**

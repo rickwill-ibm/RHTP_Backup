@@ -35,7 +35,12 @@ describe('engine-sourced authoring CRD coverage rules', () => {
     const sleeve = req(rules.find((r) => r.code === '43775'));
     expect(sleeve.codeSystem).toBe('CPT');
     expect(sleeve.priorAuthRequired).toBe(true);
-    expect(sleeve.role).toBe('covered');
+    // Pre-review coverage is UNDETERMINED — honest 'referenced' (pending review), never a fake 'covered'.
+    expect(sleeve.role).toBe('referenced');
+    // …and it carries a coded coverage-information classification (pending-review, not "covered").
+    expect(sleeve.coverageInfo?.some((c) => c.code === 'pending-review')).toBe(true);
+    expect(sleeve.coverageInfo?.some((c) => c.code === 'prior-auth-required')).toBe(true);
+    expect(sleeve.coverageInfo?.some((c) => c.code === 'covered')).toBe(false);
     expect(sleeve.questionnaireCanonical).toContain('urn:rhtp:dtr/Questionnaire/');
     const band = req(rules.find((r) => r.code === 'S2083'));
     expect(band.codeSystem).toBe('HCPCS');

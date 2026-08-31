@@ -41,6 +41,9 @@ export interface ReviewElementInput {
   routing?: RoutingHint;
   /** Source-evidence snippet (provenance-anchored). */
   source?: string;
+  /** WHERE in the document a procedure code was harvested — surfaced in the research drawer as the
+   *  plain-English origin (and why it defaulted to a given disposition). Payer-agnostic. */
+  sourceSection?: 'coding-appendix' | 'requirements-table' | 'inline-prose';
 }
 
 export interface ReviewElement extends ReviewElementInput {
@@ -78,7 +81,12 @@ export function buildEncodingReview(inputs: ReviewElementInput[]): ReviewSection
   for (const kind of SECTION_ORDER) {
     const elements = byKind.get(kind);
     if (!elements || elements.length === 0) continue;
-    sections.push({ key: kind, title: SECTION_TITLES[kind], gated: kind === 'gated', elements });
+    sections.push({
+      key: kind,
+      title: SECTION_TITLES[kind],
+      gated: kind === 'gated',
+      elements,
+    });
   }
   return sections;
 }
@@ -115,7 +123,11 @@ export function decide(
         case 'confirm':
           return { ...el, state: 'confirmed' as const };
         case 'correct':
-          return { ...el, state: 'edited' as const, correction: action.correction };
+          return {
+            ...el,
+            state: 'edited' as const,
+            correction: action.correction,
+          };
         case 'reset':
           return { ...el, state: 'open' as const, correction: undefined };
       }
@@ -141,6 +153,9 @@ export interface ReviewProgress {
   decided: number;
   openDefects: number;
   openAmbiguities: number;
+  /** The minimum number of elements that must be decided to submit (the canonical 60% threshold),
+   *  exposed so the UI can show an honest "decide N more" gate without re-deriving the fraction. */
+  minDecided: number;
   /** Maker may submit only when no defect is unresolved and enough of the set is decided. */
   canSubmit: boolean;
 }
@@ -162,9 +177,138 @@ export function reviewProgress(
       if (el.flag?.severity === 'ambiguous' && el.state === 'open') openAmbiguities += 1;
     }
   }
-  const canSubmit =
-    total > 0 && openDefects === 0 && decided >= Math.ceil(total * minDecidedFraction);
-  return { total, decided, openDefects, openAmbiguities, canSubmit };
+  const minDecided = Math.ceil(total * minDecidedFraction);
+  const canSubmit = total > 0 && openDefects === 0 && decided >= minDecided;
+  return {
+    total,
+    decided,
+    openDefects,
+    openAmbiguities,
+    minDecided,
+    canSubmit,
+  };
+}
+
+/**
+ * Two-list routing. The reviewer sees ONE list of genuine exceptions to decide, and ONE list of
+ * everything the AI resolved (to sample-check). Human-gated documentation and real exceptions
+ * (defect/ambiguous) go to `needs-review`; everything else the AI decided — clean explicit codes,
+ * AI-mapped codes, and the generic "assign coverage role" verify — is `ai-decided`.
+ */
+export type ReviewBucket = 'needs-review' | 'ai-decided';
+export function reviewBucket(el: ReviewElement, gatedSection: boolean): ReviewBucket {
+  if (gatedSection || el.gated === true) return 'needs-review';
+  if (el.flag?.severity === 'defect' || el.flag?.severity === 'ambiguous') return 'needs-review';
+  // A code named in a not-medically-necessary / investigational statement is a genuine coverage
+  // decision (covered vs investigational) — the human makes that call, not the AI.
+  if (el.routing?.bucket === 'excluded') return 'needs-review';
+  return 'ai-decided';
+}
+
+/** Pre-accept every still-open AI-decided element (the editor sample-checks rather than clicking each).
+ *  Pure; genuine exceptions (needs-review) are left OPEN for a human decision. */
+export function acceptAiDecided(sections: ReviewSection[]): ReviewSection[] {
+  let changed = false;
+  const next = sections.map((section) => {
+    let secChanged = false;
+    const elements = section.elements.map((el) => {
+      if (el.state === 'open' && reviewBucket(el, section.gated) === 'ai-decided') {
+        secChanged = true;
+        changed = true;
+        return { ...el, state: 'accepted' as const };
+      }
+      return el;
+    });
+    return secChanged ? { ...section, elements } : section;
+  });
+  return changed ? next : sections;
+}
+
+/** Two-list submit gate: the editor may submit the whole policy once there are NO open defects and
+ *  every needs-review exception is decided. (The panel additionally requires an explicit
+ *  "I've reviewed the AI-decided items" acknowledgement.) */
+export interface SubmitReadiness {
+  needsReviewTotal: number;
+  needsReviewOpen: number;
+  aiDecidedTotal: number;
+  /** AI-recommended items the maker has not personally accepted/modified/rejected yet. Every AI call
+   *  is a RECOMMENDATION, not a pre-accepted decision — this is what "Accept all safe" and the per-row
+   *  Accept/Reject controls clear. */
+  aiDecidedOpen: number;
+  openDefects: number;
+  /** No open defect and no undecided exception — the exceptions the AI could not resolve are cleared.
+   *  (Retained for callers that only care about the exception queue; the submit gate is stricter.) */
+  exceptionsCleared: boolean;
+  /** Every element in BOTH lists that no human has decided. The real submit blocker: nothing ships on
+   *  the AI's say-so — the maker personally dispositions (accept / modify / reject) every item. */
+  openTotal: number;
+  /** No open element anywhere AND no open defect. Replaces the old "tick one box" gate. */
+  everyItemDecided: boolean;
+}
+export function submitReadiness(sections: ReviewSection[]): SubmitReadiness {
+  let needsReviewTotal = 0;
+  let needsReviewOpen = 0;
+  let aiDecidedTotal = 0;
+  let aiDecidedOpen = 0;
+  let openDefects = 0;
+  let openTotal = 0;
+  for (const section of sections) {
+    for (const el of section.elements) {
+      if (reviewBucket(el, section.gated) === 'needs-review') {
+        needsReviewTotal += 1;
+        if (el.state === 'open') needsReviewOpen += 1;
+      } else {
+        aiDecidedTotal += 1;
+        if (el.state === 'open') aiDecidedOpen += 1;
+      }
+      if (el.state === 'open') openTotal += 1;
+      if (isOpenDefect(el)) openDefects += 1;
+    }
+  }
+  return {
+    needsReviewTotal,
+    needsReviewOpen,
+    aiDecidedTotal,
+    aiDecidedOpen,
+    openDefects,
+    exceptionsCleared: openDefects === 0 && needsReviewOpen === 0,
+    openTotal,
+    // Guard total>0 so an EMPTY review set never reads as "all decided" and opens the gate on nothing
+    // (mirrors reviewProgress.canSubmit). A promotable policy that extracted no reviewable element
+    // stays un-submittable rather than failing open.
+    everyItemDecided: needsReviewTotal + aiDecidedTotal > 0 && openDefects === 0 && openTotal === 0,
+  };
+}
+
+/**
+ * Explicit, affirmative bulk accept of the SAFE remainder — high-confidence (explicit), unflagged,
+ * AI-decided-bucket items only. Low-confidence (mapped) codes and anything the policy text conflicts
+ * with (routed `excluded` → needs-review) are deliberately LEFT OPEN so a human dispositions them one
+ * at a time. This is the pressure valve that keeps "decide every item" usable at 40+ codes WITHOUT
+ * letting the risky ones through on a single click. Pure.
+ */
+export function bulkAcceptRecommended(sections: ReviewSection[]): {
+  sections: ReviewSection[];
+  count: number;
+} {
+  let count = 0;
+  const next = sections.map((section) => {
+    if (section.gated) return section;
+    const elements = section.elements.map((el) => {
+      if (
+        el.state === 'open' &&
+        reviewBucket(el, section.gated) === 'ai-decided' &&
+        el.confidence === 'explicit' &&
+        !el.flag
+      ) {
+        count += 1;
+        return { ...el, state: 'accepted' as const };
+      }
+      return el;
+    });
+    return elements === section.elements ? section : { ...section, elements };
+  });
+  return { sections: count > 0 ? next : sections, count };
 }
 
 /** An element "needs review" when it is flagged (defect/ambiguous) or is an undecided mapped/verify

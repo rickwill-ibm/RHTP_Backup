@@ -8,6 +8,22 @@ import type { Line, CriteriaGroup, CriterionNode } from './criteria';
 
 const CONNECTOR_RE = /^(and|or)$/i;
 
+/** A line that OPENS a medical-necessity determination ("… following …:" with a necessity/following
+ *  cue). Shared by the region opener and the continuation-boundary lookahead. Payer-agnostic. */
+function isGroupStartLine(t: string): boolean {
+  return /following.*:?\s*$/i.test(t) && /necessary|following/i.test(t);
+}
+
+/** The next meaningful (non-blank, non-connector) line's trimmed text after index `from`, or null. */
+function nextMeaningful(lines: Line[], from: number): string | null {
+  for (let k = from + 1; k < lines.length; k += 1) {
+    const s = lines[k].text.trim();
+    if (s.length === 0 || CONNECTOR_RE.test(s)) continue;
+    return s;
+  }
+  return null;
+}
+
 export function logicOf(s: string): 'all' | 'any' | null {
   if (/all of the following/i.test(s)) return 'all';
   if (/one of the following|either of the following|any of the following/i.test(s)) return 'any';
@@ -90,14 +106,15 @@ export function parseCriteria(lines: Line[]): CriteriaGroup[] {
     return g;
   };
 
-  for (const line of lines) {
+  for (let li = 0; li < lines.length; li += 1) {
+    const line = lines[li];
     const t = line.text.trim();
     if (t.length === 0 || CONNECTOR_RE.test(t)) continue;
 
     const marker = markerOf(t, !firstMarkerSeen);
 
     // A "…following:" intro (not itself a marker) starts a group.
-    if (!marker && /following.*:?\s*$/i.test(t) && /necessary|following/i.test(t)) {
+    if (!marker && isGroupStartLine(t)) {
       group = startGroup(t);
       continue;
     }
@@ -106,6 +123,17 @@ export function parseCriteria(lines: Line[]): CriteriaGroup[] {
     }
 
     if (!marker) {
+      // A footnote line (*, †, ‡, §) is a policy note, never criterion text — don't fold it.
+      if (/^[*†‡§]\s/.test(t)) continue;
+      // A SHORT standalone heading that introduces the NEXT determination (e.g. "Reoperation" right
+      // before "… is considered medically necessary …") is a section label, not continuation of the
+      // previous criterion — skip it so it never bleeds onto the last item. Guarded tightly (≤40 chars,
+      // ≤3 words, title-case, no sentence-ending punctuation, and the next line opens a determination)
+      // so a genuinely wrapped criterion fragment is never dropped.
+      const looksLikeHeading =
+        t.length <= 40 && /^[A-Z]/.test(t) && !/[.,:;]$/.test(t) && t.split(/\s+/).length <= 3;
+      const next = nextMeaningful(lines, li);
+      if (looksLikeHeading && next !== null && isGroupStartLine(next)) continue;
       // Continuation line — fold into the deepest open criterion.
       const top = stack[stack.length - 1];
       if (top) top.text = `${top.text} ${t}`.trim();

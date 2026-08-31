@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { fileToTextSource } from '@/lib/policy/server/pdfIntake';
 import { processPolicyDocument } from '@/lib/policy/policyReview';
+import { hydrateExpansions } from '@/lib/policy/dtr/engineQuestionnaireItems';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const src = await fileToTextSource(bytes, file.name, file.type);
     const review = processPolicyDocument(src, { tenant });
-    return NextResponse.json(review);
+    // Bind terminology: $expand every answerValueSet-bound choice item to its authoritative codings
+    // via the offline inline provider (fail-safe — an unconfigured/missing set leaves the item intact).
+    // So the delivered DTR items ship with canonical-coded options, not just the ValueSet URI.
+    const hydrated = { ...review, item: await hydrateExpansions(review.item) };
+    return NextResponse.json(hydrated);
   } catch (err) {
     return NextResponse.json(ooError(String(err), 'exception'), { status: 500 });
   }

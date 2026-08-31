@@ -140,11 +140,19 @@ export function evalCriterion(crit: EncodedCriterion, facts: PatientFacts): Tri 
       m = evalMeasure(crit.measure, facts);
     }
     if (m !== 'met') return m;
+    const parts: Tri[] = [];
     // A measure with an attached time window also needs the window attested.
     if (crit.timeWindow) {
       const b = facts.booleans?.[crit.id];
-      return b === undefined ? 'unknown' : b ? 'met' : 'not-met';
+      parts.push(b === undefined ? 'unknown' : b ? 'met' : 'not-met');
     }
+    // A measure node carrying child criteria (e.g. a BMI band WITH a comorbidity choice) requires the
+    // children too — three-valued AND, so the threshold and the enumeration must BOTH be satisfied.
+    if (crit.children && crit.children.length) {
+      parts.push(...crit.children.map((c) => evalCriterion(c, facts)));
+    }
+    if (parts.includes('not-met')) return 'not-met';
+    if (parts.includes('unknown')) return 'unknown';
     return 'met';
   }
   if (crit.kind === 'choice' && crit.choice) {

@@ -109,6 +109,7 @@ The organizing rule: **all mock/seeded build work proceeds now in the order belo
 | HW6-4 real HCC V28 set | Licensed CMS content (hard block); keep HCC/ICD coding logic **out of the care-delivery path** until this lands with lineage |
 | HW6-6 Gravity SDOH real-feed depth | Gravity feed access (modeling code-only; real data gated) |
 | Iteration 8A — terminology + external identity + value-set governance console | Terminology server + VSAC/CMS/Gravity + reference MPI (PIX/PDQ) + SME (GB-3) |
+| **DTR terminology Phase 2 — live VSAC `$expand`** (resolution seam BUILT + inert; inline corpus is the committed posture; Phases 1+3 shipped & green) | UMLS/VSAC API key + license. Activation only: wire `vsac.ts` `$expand`; `selectExpansionProvider` already routes CPT + `urn:rhtp:*` inline, so only non-RHTP canonicals ever hit VSAC. No other code change. |
 | Iteration 9 — cloud | Cloud accounts |
 | Iteration 10 — certification (Inferno Da Vinci CRD/DTR/PAS, US Core, CARIN, X12; k6 1K/5K/10K; pen-test) | Live backbone (GB-4), Docker for CI, conformance + pen-test calendars |
 

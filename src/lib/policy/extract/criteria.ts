@@ -41,6 +41,11 @@ export interface GuidelineCode {
    *  `mapped` = a standard code assigned to a concept the policy states in prose (a coding-layer decision
    *  a reviewer validates). The deterministic extractor only ever emits `explicit`. */
   confidence?: 'explicit' | 'mapped';
+  /** WHERE in the document the code was harvested — the structural signal a default coverage disposition
+   *  is inferred from (payer-agnostic; see review/codeDisposition.ts). `coding-appendix` = the policy's
+   *  own CPT/HCPCS coding table; `requirements-table` = a prior-authorization requirements table;
+   *  `inline-prose` = a bare "CPT NNNNN" mention. Absent when the origin is not tracked. */
+  sourceSection?: 'coding-appendix' | 'requirements-table' | 'inline-prose';
 }
 
 export interface CriteriaPolicy {
@@ -255,6 +260,7 @@ export function extractCriteriaPolicy(src: TextSource): CriteriaPolicy {
         codeSystem: /^\d{5}$/.test(code) ? 'CPT' : 'HCPCS',
         description,
         confidence: 'explicit',
+        sourceSection: 'coding-appendix',
       });
     }
   }

@@ -19,6 +19,8 @@ export interface CoverageRule {
   /** Canonical URL of the DTR questionnaire to launch for this code (matches the DTR package). */
   questionnaireCanonical: string;
   role: CoverageRole | 'referenced';
+  /** Da Vinci CRD `coverage-information` codings — the coded coverage classification for the card. */
+  coverageInfo?: { system: string; code: string; display: string }[];
   reason: string;
 }
 

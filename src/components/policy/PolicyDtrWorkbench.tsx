@@ -14,6 +14,7 @@ import { useAppContext } from '@/lib/appContext';
 import type { PolicyReview } from '@/lib/policy/policyReview';
 import type { ReviewProgress } from '@/lib/policy/review/encodingReview';
 import { applyTransition, type PolicyWorkflowRecord } from '@/lib/policy/workflow/lifecycle';
+import { buildReleaseSummary, type ReleaseSummary } from '@/lib/policy/workflow/release';
 import {
   approvalFromRecord,
   checkerApprove,
@@ -24,7 +25,9 @@ import {
 } from '@/lib/policy/workflow/stageflow';
 import { GenerateArtifactsStage } from '@/components/policy/workbench/GenerateArtifactsStage';
 import { EncodingReviewPanel } from '@/components/policy/EncodingReviewPanel';
-import { EncodingAssistantPanel } from '@/components/policy/EncodingAssistantPanel';
+import { AssistantDock } from '@/components/policy/workbench/AssistantDock';
+import { projectCoverageRules } from '@/components/policy/workbench/generateInputs';
+import type { CodeDisposition } from '@/lib/policy/crd/coverageDisposition';
 import { WorkflowStepper } from '@/components/policy/WorkflowStepper';
 import {
   Pill,
@@ -35,6 +38,8 @@ import {
 import { IngestStage } from '@/components/policy/workbench/IngestStage';
 import { CodeTableReviewStage } from '@/components/policy/workbench/CodeTableReviewStage';
 import { SignoffStage } from '@/components/policy/workbench/SignoffStage';
+import { summarizeDispositions, defaultDispositions } from '@/lib/policy/review/codeDisposition';
+import { PromoteStage } from '@/components/policy/workbench/PromoteStage';
 
 interface OoIssue {
   issue?: { diagnostics?: string }[];
@@ -49,6 +54,14 @@ export function PolicyDtrWorkbench(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [threshold, setThreshold] = useState(50);
   const [reviewState, setReviewState] = useState<Record<string, ReviewState>>({});
+  // The maker's FINAL per-code coverage decisions, seeded from the section-inferred defaults and
+  // overridden in the review panel. These — not the frozen ingest snapshot — drive the generated CRD.
+  const [dispositions, setDispositions] = useState<Record<string, CodeDisposition>>({});
+  // Seed for the Encoding Assistant when a reviewer clicks "Explain <code>" in a row's research drawer.
+  // The nonce lets the same code be re-asked (re-fires the assistant's effect).
+  const [assistantSeed, setAssistantSeed] = useState<{ code: string; nonce: number } | null>(null);
+  const explainCode = (code: string): void =>
+    setAssistantSeed((s) => ({ code, nonce: (s?.nonce ?? 0) + 1 }));
   const [record, setRecord] = useState<PolicyWorkflowRecord>({
     policyId: '',
     status: 'in-review',
@@ -57,6 +70,10 @@ export function PolicyDtrWorkbench(): React.ReactElement {
   const [, setProgress] = useState<ReviewProgress | null>(null);
   const [approver, setApprover] = useState('');
   const [signError, setSignError] = useState<string | null>(null);
+  // The operational conclusion of a promotion — version, release window, effective date, change id,
+  // and the queued stakeholder notifications. Computed once, when the policy is published.
+  const [release, setRelease] = useState<ReleaseSummary | null>(null);
+  const [showRollback, setShowRollback] = useState(false);
   const { user } = useAppContext();
   // The encoding / DTR-authoring workbench is a payer MEDICAL-POLICY function — not patient care
   // coordination. Whoever operates it encodes medical-necessity criteria and coverage codes and acts
@@ -94,6 +111,7 @@ export function PolicyDtrWorkbench(): React.ReactElement {
       }
       const parsed = body as PolicyReview;
       setReview(parsed);
+      setDispositions(parsed.dispositions ?? {});
       setRecord({ policyId: parsed.policyId, status: 'in-review' });
       setRequested('ingest');
       if (parsed.kind === 'code-table' && parsed.productSections) {
@@ -119,6 +137,7 @@ export function PolicyDtrWorkbench(): React.ReactElement {
     setReview(null);
     setError(null);
     setReviewState({});
+    setDispositions({});
     setRecord({ policyId: '', status: 'in-review' });
     setRequested('ingest');
     setApprover('');
@@ -176,7 +195,19 @@ export function PolicyDtrWorkbench(): React.ReactElement {
   }
   function promote(): void {
     try {
-      setRecord((rec) => applyTransition(rec, 'published', 'system', 'system'));
+      const published = applyTransition(record, 'published', 'system', 'system');
+      setRecord(published);
+      // Stamp the release: a versioned, queued change with a future effective date — not "live now".
+      setRelease(
+        buildReleaseSummary({
+          now: new Date(),
+          policyId: published.policyId || (review?.guidelineId ?? 'authored-policy'),
+          guidelineId: review?.guidelineId ?? undefined,
+          priorVersion: null, // first authored release in this demo session
+          submittedBy: published.submittedBy,
+          approvedBy: published.approvedBy,
+        })
+      );
     } catch {
       /* published is a legal system transition from approved; ignore otherwise */
     }
@@ -192,7 +223,9 @@ export function PolicyDtrWorkbench(): React.ReactElement {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
-      <div className="space-y-5">
+      {/* min-w-0: without it this 1fr grid item defaults to min-width:auto and won't shrink below its
+          content's min-content width, so a long truncating descriptor forces the page to scroll sideways. */}
+      <div className="min-w-0 space-y-5">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
             Policy encoding workbench
@@ -240,6 +273,11 @@ export function PolicyDtrWorkbench(): React.ReactElement {
                 </Pill>
               )}
               <Pill tone="bg-slate-100 text-slate-600">{review.stats.codes} codes</Pill>
+              {review.warnings.length > 0 && (
+                <Pill tone="bg-amber-100 text-amber-800">
+                  ⚠ {review.warnings.length} warning{review.warnings.length > 1 ? 's' : ''}
+                </Pill>
+              )}
             </div>
           </section>
         )}
@@ -276,6 +314,9 @@ export function PolicyDtrWorkbench(): React.ReactElement {
             {review.kind === 'criteria' && (
               <EncodingReviewPanel
                 review={review}
+                dispositions={dispositions}
+                onDispositionsChange={setDispositions}
+                onExplainCode={explainCode}
                 onSubmit={submitForSignoff}
                 onProgressChange={setProgress}
               />
@@ -307,15 +348,26 @@ export function PolicyDtrWorkbench(): React.ReactElement {
             signError={signError}
             onBack={() => setRequested('review')}
             onContinue={() => setRequested('generate')}
+            summary={summarizeDispositions(
+              dispositions,
+              defaultDispositions(review?.guidelineCodes, review?.notMedicallyNecessary)
+            )}
           />
         )}
 
         {/* ===== ④ GENERATE — two sibling artifacts: CRD coverage rules + DTR package ===== */}
         {active === 'generate' && review && (
           <GenerateArtifactsStage
-            coverageRules={review.coverageRules}
+            coverageRules={projectCoverageRules(
+              review.coverageRules ?? [],
+              dispositions,
+              review.questionnaireCanonical
+            )}
             questionnaireCanonical={review.questionnaireCanonical}
             items={review.item}
+            policyTitle={review.title}
+            policyId={review.policyId}
+            review={review}
             onBack={() => setRequested('signoff')}
             onContinue={() => setRequested('promote')}
           />
@@ -323,36 +375,17 @@ export function PolicyDtrWorkbench(): React.ReactElement {
 
         {/* ===== ⑤ PROMOTE ===== */}
         {active === 'promote' && review && (
-          <section className="space-y-3 rounded-lg border border-slate-300 bg-slate-50 p-4">
-            <h3 className="text-sm font-semibold">Promote to tenant</h3>
-            <p className="text-sm text-slate-600">
-              Publish the signed-off policy version so the CRD/DTR artifacts go live
-              {review.tenant ? ` for ${review.tenant}` : ''}. Versioned and audited.
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-500">
-                {approvals.promoted
-                  ? 'Promoted — live for the tenant. The CRD→DTR→PAS flow now serves these criteria.'
-                  : 'Signed off and ready to publish.'}
-              </span>
-              <button
-                type="button"
-                disabled={approvals.promoted}
-                onClick={promote}
-                className="ml-auto rounded bg-blue-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {approvals.promoted ? '✓ Promoted' : 'Promote to production'}
-              </button>
-            </div>
-          </section>
+          <PromoteStage
+            review={review}
+            release={release}
+            onSubmit={promote}
+            showRollback={showRollback}
+            onToggleRollback={() => setShowRollback((v) => !v)}
+          />
         )}
       </div>
 
-      <div className="lg:sticky lg:top-4 lg:self-start">
-        <div className="h-[70vh] lg:h-[calc(100vh-6rem)]">
-          <EncodingAssistantPanel review={review} />
-        </div>
-      </div>
+      <AssistantDock review={review} seededQuestion={assistantSeed ?? undefined} />
     </div>
   );
 }

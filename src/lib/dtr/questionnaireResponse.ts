@@ -10,14 +10,33 @@
  */
 
 export type QuestionnaireItemType =
-  'string' | 'boolean' | 'integer' | 'decimal' | 'choice' | 'date' | 'attachment';
+  | 'string'
+  | 'boolean'
+  | 'integer'
+  | 'decimal'
+  | 'choice'
+  | 'date'
+  | 'attachment'
+  // A non-answerable section header (FHIR `display`) — groups the following items under a heading
+  // (e.g. one medical-necessity determination pathway). Carries no answer; excluded from the
+  // QuestionnaireResponse and from required/valid accounting.
+  | 'display';
 
 /** A value constraint the renderer enforces so a typed field can't accept arbitrary text. */
 export type QuestionnaireItemFormat = 'icd10';
 
+/** A terminology binding: the code system + code + display for a coded concept. */
+export interface QuestionnaireCoding {
+  system: string;
+  code: string;
+  display?: string;
+}
+
 export interface QuestionnaireAnswerOption {
   value: string;
   label?: string;
+  /** The coded concept this option represents (system + code), when it is value-set-bound. */
+  coding?: QuestionnaireCoding;
 }
 
 /** Gate: this item is active only when answers[question] === answerBoolean (all conditions, AND). */
@@ -35,6 +54,10 @@ export interface QuestionnaireItemDef {
   format?: QuestionnaireItemFormat;
   /** Fixed option set for `choice` items. */
   answerOption?: QuestionnaireAnswerOption[];
+  /** Terminology binding for the concept this item measures (e.g. LOINC for BMI). */
+  code?: QuestionnaireCoding[];
+  /** Canonical URL of the value set a `choice` answer binds to (Da Vinci `answerValueSet`). */
+  answerValueSet?: string;
   /** Show/require this item only when these conditions (AND) hold. */
   enableWhen?: QuestionnaireEnableWhen[];
   /** Optional helper text rendered under the label. */
@@ -119,7 +142,10 @@ export function buildQuestionnaireResponse(params: {
 }): { response: QuestionnaireResponse; missingRequired: string[]; invalid: string[] } {
   const missingRequired: string[] = [];
   const invalid: string[] = [];
-  const item: QuestionnaireResponseItem[] = params.items.map((def) => {
+  // Section headers (`display`) are not answerable — they never appear in the QuestionnaireResponse
+  // and never count toward required/invalid.
+  const answerable = params.items.filter((def) => def.type !== 'display');
+  const item: QuestionnaireResponseItem[] = answerable.map((def) => {
     const active = isItemActive(def, params.answers);
     const val = active ? params.answers[def.linkId] : undefined;
     if (active && def.required && (val === undefined || val === ''))

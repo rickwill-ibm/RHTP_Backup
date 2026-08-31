@@ -1,4 +1,15 @@
 /**
+ * ⚠ LEGACY — OFF THE DTR AUTHORING PATH. DO NOT WIRE INTO NEW CODE.
+ *
+ * This is the older payer-CLASSIFYING extractor (classifies documents as aetna-cpb vs pa-list, detects
+ * payer by name). It is NOT used by the authoring workbench, which runs the payer-AGNOSTIC structural
+ * path: processPolicyDocument -> extractCriteriaPolicy / extractStructuredPolicy. Per-payer/state
+ * adaptation now belongs in the PolicyProfile seam (src/lib/policy/profile/policyProfile.ts), which
+ * pre-normalizes INPUT into the general shape instead of branching on a payer name. Scheduled for
+ * physical removal in a dedicated refactor-only change (it still carries test coverage today).
+ */
+
+/**
  * Structural segmentation — find the labeled regions a policy document is built
  * from, each tied to a character offset so downstream code extraction can anchor
  * provenance. Deterministic and heuristic: it recognizes the common shapes of

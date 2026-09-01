@@ -10,7 +10,8 @@
 # "passed locally, failed CI" surprise this file exists to prevent.
 #
 # Tiers (each a superset of the previous):
-#   fast      : types, sizes+ratchet, lint(changed), test-link E13, page-boundaries, skill-mirror (~seconds)
+#   fast      : format(changed), types, sizes+ratchet, lint(changed), test-link E13, page-boundaries, skill-mirror (~seconds)
+#               (format runs FIRST — same as the pre-commit — so size/lint see the committed form; no drift.)
 #   push      : + unit tests, wiring E14, provenance E11                      (~1 min)
 #   pre-merge : + unit tests shuffled (isolation)                          (~1-2 min)
 #   ci        : + mutation E13 (full) + build/bundle-resolution E16          (minutes)
@@ -47,6 +48,12 @@ changed_src() {
   } | sort -u
 }
 
+# g_format (v1.8 §2): format changed files with the repo .prettierrc FIRST — exactly what the
+# pre-commit hook (tools/hooks/pre-commit) does before it checks sizes. Without this, ci-gates.sh
+# measured the on-disk (possibly hand-compacted) line count and PASSED, while the pre-commit
+# reformatted-then-checked and FAILED — the precise "gate said green, commit blocked on size" drift
+# this single-source-of-truth file exists to prevent. A file's size is its FORMATTED size, always.
+g_format()   { local f; f="$(changed_src | tr '\n' ' ')"; [ -z "$f" ] && { echo "(no changed source files)"; return 0; }; npx --no-install prettier --write --ignore-unknown $f && echo "formatted changed files with the repo .prettierrc"; }
 g_types()    { npm run --silent check:types; }
 g_sizes()    { npm run --silent check:sizes; }
 g_lint()     { local f; f="$(changed_src | sed 's/^/--file /')"; if [ -z "$f" ]; then echo "(no changed source files)"; return 0; fi; npx --no-install next lint $f; }
@@ -75,6 +82,7 @@ g_coalition() {
   return 1
 }
 
+run "format (prettier, changed files)" g_format
 run "types (tsc --noEmit)"      g_types
 run "file sizes + ratchet"      g_sizes
 run "lint (changed files)"      g_lint

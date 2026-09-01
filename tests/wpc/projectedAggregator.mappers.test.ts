@@ -9,9 +9,12 @@ import {
   NEUTRAL_SECTIONS,
   PROJECTED_SECTIONS,
   mapBarriers,
+  mapCareTeam,
   mapClinical,
+  mapPart2,
   mapPatient,
-  neutralAccess,
+  mapAccess,
+  unknownAccess,
   neutralCaregiver,
   neutralDigital,
   neutralFinancial,
@@ -130,10 +133,162 @@ describe('projected-graph mappers (WPC-01 Phase 3)', () => {
   it('neutral null-objects and provenance section lists', () => {
     expect(neutralFinancial().insuranceCoverage.type).toBe('Uninsured');
     expect(neutralCaregiver().isCaregiverForOthers).toBe(false);
-    expect(neutralAccess().ruralStatus).toBe('urban');
+    expect(unknownAccess().ruralStatus).toBe('unknown');
     expect(neutralDigital().hasSmartphone).toBe(false);
     expect(neutralPsychosocial().socialIsolation).toBe(false);
     expect(PROJECTED_SECTIONS).toContain('barriers');
     expect(NEUTRAL_SECTIONS).toContain('financialProfile');
+  });
+});
+
+describe('mapCareTeam', () => {
+  it('counts CareTeamMember nodes and de-dupes roles (order-stable)', () => {
+    const l = lens(
+      'care-team',
+      'M1',
+      [
+        node('Member', 'M1'),
+        node('CareTeamMember', 'ct1', { role: 'Care Manager' }),
+        node('Practitioner', 'pr1', { role: 'PCP' }),
+        // NPI-converged treating physician — a ProviderIdentity node, NOT CareTeamMember;
+        // it must still be counted (the bug the fix closes).
+        node('ProviderIdentity', 'npi-123', { role: 'Cardiologist' }),
+        node('CareTeamMember', 'ct2', { role: 'Care Manager' }),
+      ],
+      []
+    );
+    const out = mapCareTeam(l);
+    expect(out.memberCount).toBe(4);
+    expect(out.roles).toEqual(['Care Manager', 'PCP', 'Cardiologist']);
+  });
+
+  it('is empty (not fabricated) when the lens has no team nodes', () => {
+    const out = mapCareTeam(lens('care-team', 'M1', [node('Member', 'M1')], []));
+    expect(out).toEqual({ memberCount: 0, roles: [] });
+  });
+});
+
+describe('mapPart2 (42 CFR Part 2 enforcement is surfaced, not dropped)', () => {
+  it('no Part 2 scope -> zero restricted, disclosed=false (an ENFORCED restriction)', () => {
+    const out = mapPart2(lens('part2-restricted', 'M1', [], []), { part2: false, segments: [] });
+    // count is UNKNOWN (null), never 0 — 0 would misread as 'no Part 2 data'
+    expect(out).toEqual({ restrictedNodeCount: null, disclosed: false });
+  });
+
+  it('with a Part 2 grant -> restricted nodes counted, disclosed=true', () => {
+    const l = lens(
+      'part2-restricted',
+      'M1',
+      [node('Diagnosis', 'd1', {}, true), node('Diagnosis', 'd2', {}, true)],
+      []
+    );
+    const out = mapPart2(l, { part2: true, segments: [] });
+    expect(out).toEqual({ restrictedNodeCount: 2, disclosed: true });
+  });
+});
+
+describe('provenance declares the newly surfaced lenses as projected', () => {
+  it('careTeam + part2Restricted are projected, not neutral', () => {
+    expect(PROJECTED_SECTIONS).toContain('careTeam');
+    expect(PROJECTED_SECTIONS).toContain('part2Restricted');
+    expect(NEUTRAL_SECTIONS).not.toContain('careTeam');
+    expect(NEUTRAL_SECTIONS).not.toContain('part2Restricted');
+  });
+});
+
+describe('mapAccess (first FHIR-fed dimension, fail-closed)', () => {
+  const wp = (props?: Record<string, PropVal>) =>
+    lens(
+      'whole-person',
+      'M1',
+      props ? [node('Member', 'M1'), node('AccessContext', 'M1', props)] : [node('Member', 'M1')],
+      []
+    );
+
+  it('maps a fully-reported AccessContext', () => {
+    const out = mapAccess(
+      wp({
+        ruralStatus: 'rural',
+        distanceToProviderMiles: 45,
+        publicTransitAvailable: false,
+        broadbandAvailable: true,
+        cellularCoverage: 'good',
+        nearestPharmacyMiles: 12,
+        nearestERMiles: 35,
+        nearestFacilityMiles: 45,
+        nearestLabLocation: 'Rapid City',
+      })
+    );
+    expect(out.ruralStatus).toBe('rural');
+    expect(out.dataAvailability).toBe('reported');
+    expect(out.distanceToProvider).toBe(45);
+    expect(out.publicTransitAvailable).toBe(false);
+    expect(out.broadbandAccess).toBe(true);
+    expect(out.cellularCoverage).toBe('good');
+    expect(out.nearestPharmacy).toBe(12);
+    expect(out.nearestER).toBe(35);
+    expect(out.distanceToNearestFacility).toBe(45);
+    expect(out.nearestLabLocation).toBe('Rapid City');
+  });
+
+  it('NO access node -> honest unknown, NEVER a fabricated urban/0/false', () => {
+    const out = mapAccess(wp());
+    expect(out).toEqual({ ruralStatus: 'unknown', dataAvailability: 'unknown' });
+    expect('distanceToProvider' in out).toBe(false);
+    expect('publicTransitAvailable' in out).toBe(false);
+  });
+
+  it('partial node (rural only): present fields map, dataAvailability is partial', () => {
+    const out = mapAccess(wp({ ruralStatus: 'frontier' }));
+    expect(out.ruralStatus).toBe('frontier');
+    expect(out.dataAvailability).toBe('partial'); // one field known, not enough for 'reported'
+    expect('nearestER' in out).toBe(false);
+    expect('publicTransitAvailable' in out).toBe(false);
+  });
+
+  it('present-but-EMPTY node is NOT reported (honest availability)', () => {
+    const out = mapAccess(wp({}));
+    expect(out.ruralStatus).toBe('unknown');
+    expect(out.dataAvailability).toBe('unknown'); // node exists but nothing resolved -> not a lie
+  });
+
+  it('unrecognised enum value fails closed (not passed through)', () => {
+    const out = mapAccess(wp({ ruralStatus: 'exurban', cellularCoverage: 'spotty' }));
+    expect(out.ruralStatus).toBe('unknown');
+    expect('cellularCoverage' in out).toBe(false);
+  });
+
+  it('non-numeric distance fails closed to omitted', () => {
+    const out = mapAccess(
+      wp({ ruralStatus: 'urban', distanceToProviderMiles: 'far' as unknown as PropVal })
+    );
+    expect(out.ruralStatus).toBe('urban');
+    expect('distanceToProvider' in out).toBe(false);
+  });
+
+  it('ignores foreign node kinds on the whole-person lens', () => {
+    const l = lens(
+      'whole-person',
+      'M1',
+      [
+        node('Member', 'M1'),
+        node('Condition', 'c1', { name: 'x' }),
+        node('AccessContext', 'M1', { ruralStatus: 'suburban' }),
+      ],
+      []
+    );
+    expect(mapAccess(l).ruralStatus).toBe('suburban');
+  });
+});
+
+describe('access provenance + unknownAccess', () => {
+  it('accessProfile is now PROJECTED, not NEUTRAL', () => {
+    expect(PROJECTED_SECTIONS).toContain('accessProfile');
+    expect(NEUTRAL_SECTIONS).not.toContain('accessProfile');
+  });
+  it('unknownAccess is honest (no fabricated fields)', () => {
+    expect(unknownAccess().ruralStatus).toBe('unknown');
+    expect(unknownAccess().dataAvailability).toBe('unknown');
+    expect('distanceToProvider' in unknownAccess()).toBe(false);
   });
 });

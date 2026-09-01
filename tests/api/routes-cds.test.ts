@@ -18,14 +18,13 @@ import {
   expectPhiSafeError,
 } from './_helpers';
 
-vi.mock('@/lib/server/smartSession', async () =>
-  (await import('./_helpers')).smartSessionMock()
-);
+vi.mock('@/lib/server/smartSession', async () => (await import('./_helpers')).smartSessionMock());
 
 import { POST as cdsPOST } from '@/app/api/cds/route';
 import { GET as discoveryGET } from '@/app/api/cds-hooks/route';
 import { POST as patientViewPOST } from '@/app/api/cds-hooks/patient-view/route';
 import { POST as orderSignPOST } from '@/app/api/cds-hooks/order-sign/route';
+import { POST as orderSelectPOST } from '@/app/api/cds-hooks/order-select/route';
 
 beforeEach(() => {
   resetSessionState();
@@ -209,5 +208,139 @@ describe('POST /api/cds-hooks/order-sign', () => {
       })
     );
     expect(res.status).toBe(200);
+  });
+});
+
+describe('POST /api/cds-hooks/order-select (hosted CRD coverage service)', () => {
+  const cptOrder = (id: string, code: string, display: string) => ({
+    resource: {
+      resourceType: 'ServiceRequest',
+      id,
+      code: { coding: [{ system: 'http://www.ama-assn.org/go/cpt', code, display }] },
+    },
+  });
+
+  it('200 returns coverage cards for a known patient + selected order (happy path)', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', {
+        method: 'POST',
+        body: {
+          hook: 'order-select',
+          context: {
+            patientId: 'MARIA_SD_001',
+            selections: ['ServiceRequest/sr1'],
+            draftOrders: { entry: [cptOrder('sr1', '72148', 'MRI Lumbar Spine')] },
+          },
+        },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = (await readJson(res)) as {
+      cards: { summary: string; uuid: string; indicator: string; source: unknown }[];
+    };
+    const pa = body.cards.find((c) =>
+      c.summary.toLowerCase().includes('prior authorization required')
+    );
+    expect(pa).toBeTruthy();
+    expect(pa!.summary).toContain('72148');
+    expect(pa!.indicator).toBe('critical');
+    expect(pa!.uuid).toBeTruthy();
+    expect(pa!.source).toBeDefined();
+  });
+
+  it('FAIL-CLOSED: unknown patient returns a warning card, never an empty list', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', {
+        method: 'POST',
+        body: {
+          context: {
+            patientId: 'NOT-A-REAL-PATIENT',
+            draftOrders: { entry: [cptOrder('sr1', '72148', 'x')] },
+          },
+        },
+      })
+    );
+    expect(res.status).toBe(200);
+    const body = (await readJson(res)) as { cards: { summary: string }[] };
+    expect(body.cards.length).toBeGreaterThan(0); // NOT [] — [] would read as "no PA needed"
+    expect(body.cards[0].summary.toLowerCase()).toContain('could not be determined');
+  });
+
+  it('FAIL-CLOSED: missing patientId returns the indeterminate card', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', { method: 'POST', body: { context: {} } })
+    );
+    const body = (await readJson(res)) as { cards: unknown[] };
+    expect(body.cards.length).toBeGreaterThan(0);
+  });
+
+  it('FAIL-CLOSED: an order with only free-text (no coding) does not silently pass', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', {
+        method: 'POST',
+        body: {
+          context: {
+            patientId: 'MARIA_SD_001',
+            draftOrders: {
+              entry: [
+                {
+                  resource: {
+                    resourceType: 'ServiceRequest',
+                    id: 'sr1',
+                    code: { text: 'MRI Lumbar' },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+    );
+    const body = (await readJson(res)) as { cards: { summary: string }[] };
+    expect(body.cards.length).toBeGreaterThan(0);
+    expect(body.cards[0].summary.toLowerCase()).toContain('could not be determined');
+  });
+
+  it('assigns DISTINCT uuids when two selected orders share the same CPT', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', {
+        method: 'POST',
+        body: {
+          context: {
+            patientId: 'MARIA_SD_001',
+            selections: ['ServiceRequest/sr1', 'ServiceRequest/sr2'],
+            draftOrders: {
+              entry: [cptOrder('sr1', '72148', 'MRI'), cptOrder('sr2', '72148', 'MRI')],
+            },
+          },
+        },
+      })
+    );
+    const body = (await readJson(res)) as { cards: { uuid: string }[] };
+    const uuids = body.cards.map((c) => c.uuid);
+    expect(uuids.length).toBe(4);
+    expect(new Set(uuids).size).toBe(uuids.length); // no collision (CDS Hooks correlates by uuid)
+  });
+
+  it('400 + fail-closed card (not empty) on a malformed body', async () => {
+    const res = await orderSelectPOST(
+      makeRequest('/api/cds-hooks/order-select', { method: 'POST', rawBody: '<oops>' })
+    );
+    expect(res.status).toBe(400);
+    const body = (await readJson(res)) as { cards: unknown[] };
+    expect(body.cards.length).toBeGreaterThan(0);
+  });
+});
+
+describe('GET /api/cds-hooks discovery lists the hosted CRD order-select service', () => {
+  it('advertises the order-select hook with an id and prefetch', async () => {
+    const res = await discoveryGET();
+    const body = (await readJson(res)) as {
+      services: { hook: string; id: string; prefetch?: unknown }[];
+    };
+    const svc = body.services.find((s) => s.hook === 'order-select');
+    expect(svc).toBeTruthy();
+    expect(svc!.id).toBe('rhtp-crd-order-select');
+    expect(svc!.prefetch).toBeDefined();
   });
 });

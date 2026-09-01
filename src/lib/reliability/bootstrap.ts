@@ -64,14 +64,17 @@ export function bootstrapReliability(): void {
     },
   });
 
-  // The reconciliation sweep placeholder job — a real recurring hook (the sweep
-  // logic exists in lib/outbox/sweep.ts; this schedules it as a job).
+  // Reconciliation sweep — a reserved recurring hook. The sweep logic exists
+  // (lib/outbox/sweep.ts, OutboxSweeper) but is NOT yet wired here: it needs the
+  // outbox apply/publish deps (the FHIR write + C2 publish seam), which are composed
+  // per-deployment. This slot keeps the schedule present and observable now; wiring
+  // the sweeper against those deps is the next hardening batch.
   scheduler.register({
     id: RECON_JOB,
     intervalMs: 300_000,
     run: async () => {
       await instrument('job.reconciliation', now, async () => {
-        /* reconciliation sweep runs here against the durable store in production */
+        /* reserved: OutboxSweeper(deps).sweep() — pending deps composition (see above) */
       });
     },
   });

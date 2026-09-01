@@ -134,3 +134,32 @@ the right call for both.
 Assessment must be **mechanical, not judgment-based**: there is one command that IS
 the assessment (`npm run gate:ci`), so no one — human or agent — ever reasons about
 "did I check the relevant things". Running it is the definition of done.
+
+## FW-8: the gate and the pre-commit hook drifted on FORMATTING (same root cause, new symptom)
+
+Exactly the drift this document was written to kill, resurfaced one layer down. The
+**pre-commit hook** runs `prettier --write` on staged files and *then* `check-file-sizes.sh`.
+But `scripts/ci-gates.sh` ran `check:sizes` with **no preceding format** — so it measured the
+on-disk line count. An agent hand-compacted a data-heavy file (many properties per line) to sit
+at ~240 lines; `ci-gates.sh push` measured 240 and printed **ALL GATES PASS**; the human ran
+`git commit`; the pre-commit reformatted the file to 541 lines and the ratchet **blocked the
+commit**. "Gate said green, commit failed on size" — the canonical failure mode, via formatting.
+
+The fix:
+
+1. **`ci-gates.sh` formats changed files FIRST** (`g_format`, run before `g_sizes`/`g_lint`), using
+   the repo `.prettierrc` — identical to the pre-commit. Size and lint now see the committed form,
+   so the canonical gate and the hook can no longer disagree. *Prevents: "passed the gate, commit
+   blocked on size/lint after prettier".*
+2. **Convention made explicit** (`AI-CODING-CONVENTIONS.md` §2): a file's size is its *formatted*
+   size; never hand-compact to fit; move data to `*.json` (uncounted) rather than packing lines.
+3. **The agent environment must carry `.prettierrc`.** A cloud/sandbox checkout that lacks the
+   repo `.prettierrc` makes bare `prettier --write` fall back to prettier's defaults (double quotes,
+   different wrapping) — silently corrupting a whole file's formatting. Either mirror `.prettierrc`
+   into the working copy, or invoke prettier with the repo's exact options; never bare defaults.
+
+Grounded: this session's `devStubs.dtr.ts` — hand-compacted to 240 lines to clear the cap, expanded
+to 541 by the pre-commit's prettier, blocking the commit after `ci-gates.sh` had reported green. The
+data was moved to `devStubs.dtr.data.json` (a 75-line dispatcher remained), and `g_format` was added
+so the gate would have caught it. Separately, a bare `prettier --write` in a checkout missing
+`.prettierrc` reformatted several files to double quotes and had to be re-run with the repo options.

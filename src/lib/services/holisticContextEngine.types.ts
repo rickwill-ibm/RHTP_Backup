@@ -19,12 +19,46 @@ export interface HolisticPatientContext {
    * presented as the member's real data.
    */
   contextProvenance?: HolisticContextProvenance;
+  /**
+   * Care-team summary from the care-team lens. Previously the lens was computed on
+   * every read and dropped; now surfaced on the projected-graph path (absent on the
+   * authored engine, which has no lens bundle).
+   */
+  careTeam?: CareTeamSummary;
+  /**
+   * 42 CFR Part 2 restriction status from the part2-restricted lens — proves consent
+   * enforcement is surfaced end-to-end, not silently computed and discarded. Present
+   * on the projected-graph path.
+   */
+  part2Restricted?: Part2RestrictionSummary;
 }
 
 export interface HolisticContextProvenance {
   source: 'projected-graph';
   projectedSections: string[];
   neutralSections: string[];
+}
+
+/** Care-team composition surfaced from the care-team lens (consent-filtered). */
+export interface CareTeamSummary {
+  memberCount: number;
+  roles: string[];
+}
+
+/**
+ * 42 CFR Part 2 restriction status. `restrictedNodeCount` is how many restricted
+ * nodes the consent-filtered lens returned; `disclosed` is whether the read scope
+ * actually granted Part 2 data — so (disclosed=false, count=0) is an ENFORCED
+ * restriction, not merely an absence of restricted data.
+ */
+export interface Part2RestrictionSummary {
+  /**
+   * Restricted nodes surfaced under the read scope. `null` when the scope did NOT
+   * grant Part 2 — the count is then UNKNOWN (restricted data may exist, withheld),
+   * and is never asserted as zero. Authoritative only when `disclosed` is true.
+   */
+  restrictedNodeCount: number | null;
+  disclosed: boolean;
 }
 
 export interface PatientBasicInfo {
@@ -140,15 +174,19 @@ export interface InsuranceCoverage {
 }
 
 export interface AccessProfile {
-  ruralStatus: 'urban' | 'suburban' | 'rural' | 'frontier';
-  distanceToProvider: number; // miles
-  publicTransitAvailable: boolean;
-  broadbandAccess: boolean;
-  cellularCoverage: 'excellent' | 'good' | 'fair' | 'poor' | 'none';
-  nearestPharmacy: number; // miles
-  nearestER: number; // miles
+  // Honest defaults (WPC Unit 1): 'unknown' / optional fields let an absent fact be
+  // ABSENT rather than a fabricated 'urban'/0/false. `dataAvailability` discriminates
+  // a real reading from a fail-closed unknown.
+  ruralStatus: 'urban' | 'suburban' | 'rural' | 'frontier' | 'unknown';
+  distanceToProvider?: number; // miles
+  publicTransitAvailable?: boolean;
+  broadbandAccess?: boolean;
+  cellularCoverage?: 'excellent' | 'good' | 'fair' | 'poor' | 'none';
+  nearestPharmacy?: number; // miles
+  nearestER?: number; // miles
   distanceToNearestFacility?: number;
   nearestLabLocation?: string;
+  dataAvailability?: 'reported' | 'partial' | 'unknown';
 }
 
 export interface DigitalProfile {

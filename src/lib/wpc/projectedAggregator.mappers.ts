@@ -10,29 +10,39 @@
  * mapper yet — the aggregator declares which is which in `contextProvenance`.
  */
 import type { GraphNodeRecord, PropVal } from '@/lib/graph/types';
-import type { LensResult } from '@/lib/graph/lens/types';
+import type { ConsentScope, LensResult } from '@/lib/graph/lens/types';
+import { MEMBER_KIND } from '@/lib/graph/mapping/spec';
+import { ACCESS_CONTEXT_KIND } from '@/lib/graph/mapping/access';
 import type {
   AccessProfile,
   BarrierDetail,
   BarrierProfile,
   CareGap,
   CaregiverStatus,
+  CareTeamSummary,
   ChronicCondition,
   ClinicalProfile,
   DigitalProfile,
   FinancialProfile,
   Medication,
   PatientBasicInfo,
+  Part2RestrictionSummary,
   PsychosocialProfile,
 } from '@/lib/services/holisticContextEngine.types';
 
 /** Sections built from the real projected graph. */
-export const PROJECTED_SECTIONS = ['patient', 'clinicalProfile', 'barriers'];
+export const PROJECTED_SECTIONS = [
+  'patient',
+  'clinicalProfile',
+  'barriers',
+  'careTeam',
+  'part2Restricted',
+  'accessProfile',
+];
 /** Sections filled with neutral null-objects (no domain mapper yet). */
 export const NEUTRAL_SECTIONS = [
   'caregiverStatus',
   'financialProfile',
-  'accessProfile',
   'digitalProfile',
   'psychosocialProfile',
 ];
@@ -257,16 +267,63 @@ export function neutralFinancial(): FinancialProfile {
     financialStressScore: 0,
   };
 }
-export function neutralAccess(): AccessProfile {
-  return {
-    ruralStatus: 'urban',
-    distanceToProvider: 0,
-    publicTransitAvailable: false,
-    broadbandAccess: false,
-    cellularCoverage: 'none',
-    nearestPharmacy: 0,
-    nearestER: 0,
+const RURAL_STATUS = new Set(['urban', 'suburban', 'rural', 'frontier']);
+const CELL_COVERAGE = new Set(['excellent', 'good', 'fair', 'poor', 'none']);
+
+function strOrU(v: PropVal | undefined): string | undefined {
+  return typeof v === 'string' && v.length > 0 ? v : undefined;
+}
+function numOrU(v: PropVal | undefined): number | undefined {
+  return typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+}
+function boolOrU(v: PropVal | undefined): boolean | undefined {
+  return typeof v === 'boolean' ? v : undefined;
+}
+
+/** Honest fail-closed access profile — no access data resolved for this member. */
+export function unknownAccess(): AccessProfile {
+  return { ruralStatus: 'unknown', dataAvailability: 'unknown' };
+}
+
+/**
+ * Access dimension from the whole-person lens (the AccessContext node rides the
+ * superset lens off the member — no dedicated lens needed). EVERY field fails
+ * closed: an absent/unknown value is OMITTED or 'unknown', NEVER a fabricated
+ * 'urban'/0/false. An unrecognised enum value also fails closed to unknown.
+ */
+export function mapAccess(whole: LensResult): AccessProfile {
+  const node = nodesOfKind(whole.nodes, ACCESS_CONTEXT_KIND)[0];
+  if (!node) return unknownAccess(); // no access node at all
+  const p = node.properties;
+  const rural = strOrU(p.ruralStatus);
+  const cell = strOrU(p.cellularCoverage);
+  const knownRural = !!(rural && RURAL_STATUS.has(rural));
+  const out: AccessProfile = {
+    ruralStatus: knownRural ? (rural as AccessProfile['ruralStatus']) : 'unknown',
   };
+  let resolved = knownRural ? 1 : 0;
+  const set = <K extends keyof AccessProfile>(k: K, v: AccessProfile[K] | undefined) => {
+    if (v !== undefined) {
+      out[k] = v;
+      resolved += 1;
+    }
+  };
+  set('distanceToProvider', numOrU(p.distanceToProviderMiles));
+  set('publicTransitAvailable', boolOrU(p.publicTransitAvailable));
+  set('broadbandAccess', boolOrU(p.broadbandAvailable));
+  set(
+    'cellularCoverage',
+    cell && CELL_COVERAGE.has(cell) ? (cell as AccessProfile['cellularCoverage']) : undefined
+  );
+  set('nearestPharmacy', numOrU(p.nearestPharmacyMiles));
+  set('nearestER', numOrU(p.nearestERMiles));
+  set('distanceToNearestFacility', numOrU(p.nearestFacilityMiles));
+  set('nearestLabLocation', strOrU(p.nearestLabLocation));
+  // Honest availability: a present-but-empty node is NOT 'reported'. 'reported'
+  // requires a known rural status plus at least one more resolved field.
+  out.dataAvailability =
+    resolved === 0 ? 'unknown' : knownRural && resolved >= 2 ? 'reported' : 'partial';
+  return out;
 }
 export function neutralDigital(): DigitalProfile {
   return {
@@ -285,4 +342,39 @@ export function neutralPsychosocial(): PsychosocialProfile {
     socialIsolation: false,
     stressLevel: 'low',
   };
+}
+
+// ─── care-team + Part 2 (previously computed by the lens bundle, then dropped) ──
+
+/**
+ * Care-team composition from the care-team lens. The lens returns every participant
+ * reached via HAS_CARE_TEAM — a participant may be a CareTeamMember, a Practitioner,
+ * or an NPI-converged ProviderIdentity node (the treating physician), so we count
+ * everything that is NOT the member node rather than a single kind (which would drop
+ * the physician). Role travels as a node property on every participant kind. Roles
+ * are de-duped, order-stable.
+ */
+export function mapCareTeam(careTeam: LensResult): CareTeamSummary {
+  const members = careTeam.nodes.filter((n) => n.kind !== MEMBER_KIND);
+  const roles: string[] = [];
+  for (const m of members) {
+    const role = s(m.properties.role);
+    if (role && !roles.includes(role)) roles.push(role);
+  }
+  return { memberCount: members.length, roles };
+}
+
+/**
+ * 42 CFR Part 2 restriction status. The lens already consent-filters, so a scope
+ * without Part 2 yields zero restricted nodes; `disclosed` records the scope grant
+ * so an enforced restriction is distinguishable from a genuine absence of data.
+ */
+export function mapPart2(part2: LensResult, scope: ConsentScope): Part2RestrictionSummary {
+  const disclosed = scope.part2 === true;
+  // The lens consent-filters: without a Part 2 grant it returns ZERO restricted nodes
+  // even when restricted data exists and is being WITHHELD. Reporting 0 there would
+  // read as "no Part 2 data" — the opposite of the truth. So the count is authoritative
+  // ONLY when disclosed; otherwise it is null (unknown), never asserted as zero.
+  const restrictedNodeCount = disclosed ? part2.nodes.filter((n) => n.restricted).length : null;
+  return { restrictedNodeCount, disclosed };
 }

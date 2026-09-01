@@ -40,8 +40,8 @@ export const DATA_MODE_SEAMS = Object.freeze([
   'consent', //     wired: provider-access opt-out consent store (lib/consent/providerAccessOptOut.ts)
   'graph', //       registered: whole-person graph (SEAM anchor in lib/careTeam/graph/resources.ts)
   'sde', //         registered: SD community-resource data (SEAM anchor in lib/sdResourceData.ts)
-  'signalDisposition', // registered: Signal Disposition Engine policy + demo seam (lib/sde/)
-  'wpcRecord', //   registered: whole-person care record
+  'signalDisposition', // wired: Signal Disposition Engine — authored disposition (mock) vs the real engine over the seeded batch (production); switched in lib/sde/index.ts
+  'wpcRecord', //   wired: whole-person holistic context — authored engine (mock) vs projected-graph aggregator (production, fail-closed); switched in lib/wpc/holisticContext.ts
   'carePlan', //    registered: care plan source
   'evidence', //    wired: evidence store seam — mock vs pg append-only ledger (lib/evidence/store/index.ts)
   'adequacy', //    registered: network adequacy input (lib/networkAdequacy/network.ts)
@@ -71,7 +71,7 @@ export type DataModeSeam = (typeof DATA_MODE_SEAMS)[number];
 
 /** Built-in defaults — one per registered seam, frozen (the ratchet's floor). */
 export const DEFAULT_DATA_MODES: Readonly<Record<DataModeSeam, DataMode>> = Object.freeze(
-  Object.fromEntries(DATA_MODE_SEAMS.map((s) => [s, 'mock'])) as Record<DataModeSeam, DataMode>,
+  Object.fromEntries(DATA_MODE_SEAMS.map((s) => [s, 'mock'])) as Record<DataModeSeam, DataMode>
 );
 
 const DEFAULT_MODE: DataMode = 'mock';
@@ -118,13 +118,18 @@ const sessionOverrides = new Map<string, DataMode>();
  * Fails loud on an invalid mode: a programmatic override is a code path, not
  * env config, so a bad value must never silently change data-mode resolution.
  */
-export function setSessionDataMode(seam: DataModeSeam | string, mode: DataMode | null | undefined): void {
+export function setSessionDataMode(
+  seam: DataModeSeam | string,
+  mode: DataMode | null | undefined
+): void {
   if (mode === null || mode === undefined) {
     sessionOverrides.delete(seam);
     return;
   }
   if (!isDataMode(mode)) {
-    throw new TypeError(`setSessionDataMode: invalid mode '${String(mode)}' for seam '${seam}' (valid: ${DATA_MODES.join(', ')})`);
+    throw new TypeError(
+      `setSessionDataMode: invalid mode '${String(mode)}' for seam '${seam}' (valid: ${DATA_MODES.join(', ')})`
+    );
   }
   sessionOverrides.set(seam, mode);
 }
@@ -204,7 +209,7 @@ export function setGraphBackend(backend: GraphBackend | null | undefined): void 
   }
   if (!isGraphBackend(backend)) {
     throw new TypeError(
-      `setGraphBackend: invalid backend '${String(backend)}' (valid: ${GRAPH_BACKENDS.join(', ')})`,
+      `setGraphBackend: invalid backend '${String(backend)}' (valid: ${GRAPH_BACKENDS.join(', ')})`
     );
   }
   graphBackendOverride.value = backend;

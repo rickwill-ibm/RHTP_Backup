@@ -7,6 +7,10 @@
  * surface. Production never seeds demo data (durable stores populate via real feeds).
  */
 import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
+import { project } from '@/lib/graph';
+import { defaultPipelineDeps } from '@/lib/pipeline';
+import { now } from '@/lib/clock';
+import type { C2Event } from '@/lib/outbox';
 import { makeInProcessJobDriver } from '@/lib/jobs/inProcessDriver';
 import { registerJob } from '@/lib/jobs/registry';
 import { ingestCboSdohJob } from '@/lib/jobs/ingestJobs';
@@ -27,6 +31,28 @@ const DEMO_SDOH_CSV = [
   'WPC-DEMO-02,2026-04-05,housing-instability,Z59.0,positive,general',
 ].join('\n');
 
+// WPC Unit 1: a demo access-geography drop for the demo member, projected through the
+// SAME project() write path (demo only — production populates via real FHIR feeds).
+function demoAccessEvent(memberId: string, payload: Record<string, unknown>): C2Event {
+  const at = new Date(now()).toISOString();
+  return {
+    eventId: `access-${memberId}`,
+    eventType: 'access.geographic.recorded',
+    eventVersion: '1.0',
+    occurredAt: at,
+    recordedAt: at,
+    memberId,
+    partitionKey: memberId,
+    class: 'batch',
+    sequence: 0,
+    correlationId: `access-${memberId}`,
+    idempotencyKey: `access:${memberId}`,
+    source: { system: 'demo', feed: 'access-geography', tier: 'T1' },
+    consentContext: { part2Restricted: false, segmentLabels: [] },
+    payload,
+  };
+}
+
 let seeded = false;
 
 /**
@@ -41,6 +67,29 @@ export async function seedDevProjection(): Promise<{ applied: number; members: n
   await driver.trigger('ingest.cbo-sdoh', { payload: DEMO_SDOH_CSV });
   const handle = await driver.trigger('projection.drain');
   const status = await driver.status(handle);
+
+  // WPC Unit 1: seed the demo member's access-geography (rural SD) so the projected
+  // holistic context surfaces a REAL accessProfile. Same project() write path; the
+  // member id is resolved exactly as the CBO feed resolves it.
+  const demoId = defaultPipelineDeps({ now }).resolveIdentity('WPC-DEMO-01', {
+    feed: 'access-geography',
+  });
+  await getSharedProjectionStores().graph.apply(
+    project(
+      [
+        demoAccessEvent(demoId, {
+          ruralStatus: 'rural',
+          distanceToProviderMiles: 45,
+          publicTransitAvailable: false,
+          broadbandAvailable: true,
+          cellularCoverage: 'good',
+          nearestPharmacyMiles: 12,
+          nearestERMiles: 35,
+        }),
+      ],
+      { now }
+    )
+  );
   seeded = true;
 
   const m: Record<string, number> = status?.result?.metrics ?? {};

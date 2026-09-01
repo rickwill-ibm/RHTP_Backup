@@ -43,5 +43,10 @@
     "file": "src/lib/measures/deqmIngest.ts",
     "test": "npx vitest run tests/measures/deqmIngest.test.ts",
     "maxMutants": 6
+  },
+  {
+    "file": "src/lib/policy/crd/coverageRequirementCards.ts",
+    "test": "npx vitest run tests/policy/crd/coverageRequirementCards.test.ts",
+    "maxMutants": 8
   }
 ]

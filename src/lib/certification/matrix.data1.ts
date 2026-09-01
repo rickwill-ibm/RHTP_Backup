@@ -40,7 +40,8 @@ export const MATRIX_PART_1: readonly StandardEntry[] = [
         id: 'uscdi-dataclass-mapping',
         capability: 'USCDI data-class mapping via ingest adapters',
         evidence: {
-          codePath: 'src/lib/pipeline/adapters (allergy, medication, immunization, lab, procedure, ...)',
+          codePath:
+            'src/lib/pipeline/adapters (allergy, medication, immunization, lab, procedure, ...)',
           testId: 'tests/pipeline/adapters.test.ts',
           status: 'partial',
           note: 'Adapters map source feeds to US Core resource shapes and are tested; produced resources are not $validate-verified against US Core profiles (see uscore-profile-validate).',
@@ -76,7 +77,8 @@ export const MATRIX_PART_1: readonly StandardEntry[] = [
         id: 'pas-claimresponse-webhook',
         capability: 'PAS ClaimResponse webhook ingestion + lifecycle projection',
         evidence: {
-          codePath: 'src/app/api/webhooks/claim-response + src/lib/pipeline/adapters/priorAuthLifecycle.ts',
+          codePath:
+            'src/app/api/webhooks/claim-response + src/lib/pipeline/adapters/priorAuthLifecycle.ts',
           testId: 'tests/pipeline/priorAuthLifecycle.test.ts',
           status: 'supported',
           note: 'Async ClaimResponse webhook maps into the prior-auth lifecycle; adapter + route both tested (also tests/api/routes-pas-webhook.test.ts).',
@@ -90,12 +92,14 @@ export const MATRIX_PART_1: readonly StandardEntry[] = [
     capabilities: [
       {
         id: 'crd-order-sign',
-        capability: 'CRD coverage-requirements via CDS Hooks order-sign',
+        capability:
+          'CRD coverage-requirements CARD PRODUCTION via the shared buildCrdCards producer — exposed outbound through the /api/cds client and inbound through the hosted /api/cds-hooks/order-select CDS Hooks service',
         evidence: {
-          codePath: 'src/lib/pa/crdService.ts + src/app/api/cds + src/app/api/cds-hooks/order-sign',
-          testId: 'tests/api/routes-cds.test.ts',
+          codePath:
+            'src/lib/policy/crd/coverageRequirementCards.ts + src/lib/pa/crdService.ts + src/app/api/cds + src/app/api/cds-hooks/order-select',
+          testId: 'tests/policy/crd/coverageRequirementCards.test.ts',
           status: 'partial',
-          note: 'CRD checks run through the CDS Hooks order-sign BFF route backed by the policy engine; route + card shaping are tested (cards returned, STAT-order flagged). Demoted from supported (R1 overclaim: the cited test proves CDS-Hooks card plumbing, NOT Da Vinci CRD card/system-action profile conformance or coverage-requirements semantics). Partial.',
+          note: 'Coverage-requirements CARD SHAPING only, from a single shared producer (buildCrdCards); card CONTENT is demo/scenario-table data, NOT live payer coverage adjudication. NOT validated against Da Vinci CRD card/system-action profiles and emits NO coverage-information system-actions. Tests assert the producer card contract (summary/indicator/source/links) + the hosted order-select request/response envelope + fail-closed behaviour (never an empty card list). Partial. (Corrected: formerly attributed to /api/cds-hooks/order-sign — that route is DDI/STAT-safety only. Id retained to preserve the R1-10-2 demotion trail.)',
         },
       },
     ],
@@ -184,12 +188,23 @@ export const MATRIX_PART_1: readonly StandardEntry[] = [
       },
       {
         id: 'cdshooks-order-sign',
-        capability: 'order-sign hook',
+        capability: 'order-sign hook (medication-safety CDS)',
         evidence: {
           codePath: 'src/app/api/cds-hooks/order-sign',
           testId: 'tests/api/routes-cds.test.ts',
-          status: 'supported',
-          note: 'order-sign hook implemented and tested; drives the CRD coverage-requirements path.',
+          status: 'partial',
+          note: 'Medication-safety CDS only: drug-drug interaction checks against active MedicationRequests (HAPI FHIR, registry fallback) + STAT-order-missing-note validation. Does NOT perform coverage/CRD (that is the davinci-crd claim). Route envelope + STAT-flag card shaping are tested; live-FHIR DDI is skip-gated (needs Docker HAPI) and therefore ci-pending. Partial.',
+        },
+      },
+      {
+        id: 'cdshooks-order-select',
+        capability: 'order-select hook (hosted CRD coverage service) — transport/discovery',
+        evidence: {
+          codePath:
+            'src/app/api/cds-hooks/order-select + src/app/api/cds-hooks (discovery registration)',
+          testId: 'tests/api/routes-cds.test.ts',
+          status: 'partial',
+          note: 'CDS Hooks transport + discovery wiring for the hosted CRD service: the service is registered in the discovery endpoint and returns a spec-shaped {cards} response (with fail-closed cards on unknown/malformed input). Coverage SEMANTICS are claimed under davinci-crd, not here (no double-count). Da Vinci CRD profile conformance / coverage-information system-actions are NOT implemented. Partial.',
         },
       },
     ],
@@ -269,7 +284,8 @@ export const MATRIX_PART_1: readonly StandardEntry[] = [
         id: 'pixpdq-message-logic',
         capability: 'PIX QBP^Q23 / PDQ QBP^Q22 build + RSP parse',
         evidence: {
-          codePath: 'src/lib/identity/external/pixPdqResolver.ts + src/lib/identity/external/hl7v2.ts',
+          codePath:
+            'src/lib/identity/external/pixPdqResolver.ts + src/lib/identity/external/hl7v2.ts',
           testId: 'tests/identity/externalEmpi.test.ts',
           status: 'partial',
           note: 'HL7v2 query build + RSP parse logic is real and verified against a fake MPI transport, including E9 HELD-not-anchored behavior; the live MLLP endpoint is ci-pending. Partial.',

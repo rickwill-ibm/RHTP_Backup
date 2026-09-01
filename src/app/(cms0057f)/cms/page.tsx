@@ -47,6 +47,11 @@ const LINKS = [
     desc: 'Adequacy analytics + analyst copilot (GA + SD/Maria)',
     flag: 'networkAdequacy' as const,
   },
+  {
+    href: '/api-explorer',
+    title: 'CMS-0057-F API Explorer',
+    desc: 'Live BFF endpoint testing -- Postman collection: build, download & run',
+  },
 ];
 
 export default function CmsHubPage(): React.ReactElement {
@@ -59,44 +64,47 @@ export default function CmsHubPage(): React.ReactElement {
 
   return (
     <AppLayout>
-    <main className="mx-auto max-w-3xl space-y-6 p-6">
-      <header>
-        <h1 className="text-2xl font-semibold">CMS-0057-F -- native experience</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Patient Access · Provider Access · Payer-to-Payer · Prior Authorization
-        </p>
-      </header>
+      <main className="mx-auto max-w-3xl space-y-6 p-6">
+        <header>
+          <h1 className="text-2xl font-semibold">CMS-0057-F -- native experience</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Patient Access · Provider Access · Payer-to-Payer · Prior Authorization
+          </p>
+        </header>
 
-      <div className="rounded border border-slate-200 p-3 text-sm">
-        {authed === null ? (
-          'Checking session...'
-        ) : authed ? (
-          <span className="text-green-700">Signed in.</span>
-        ) : (
-          <span>
-            Not signed in.{' '}
-            <a href="/api/auth/login" className="text-blue-600 underline">
-              Sign in (SMART / dev)
-            </a>
-          </span>
-        )}
-      </div>
+        <div className="rounded border border-slate-200 p-3 text-sm">
+          {authed === null ? (
+            'Checking session...'
+          ) : authed ? (
+            <span className="text-green-700">Signed in.</span>
+          ) : (
+            <span>
+              Not signed in.{' '}
+              <a href="/api/auth/login" className="text-blue-600 underline">
+                Sign in (SMART / dev)
+              </a>
+            </span>
+          )}
+        </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {LINKS.map((l) => (
-          <a
-            key={l.href}
-            href={l.href}
-            aria-disabled={!flag(l.flag)}
-            className={`block rounded border p-4 transition ${flag(l.flag) ? 'border-slate-200 hover:border-blue-400' : 'border-slate-100 opacity-50'}`}
-          >
-            <div className="font-semibold">{l.title}</div>
-            <div className="mt-1 text-sm text-slate-600">{l.desc}</div>
-            {!flag(l.flag) ? <div className="mt-1 text-xs text-amber-700">disabled</div> : null}
-          </a>
-        ))}
-      </div>
-    </main>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {LINKS.map((l) => {
+            const isOn = l.flag ? flag(l.flag) : true;
+            return (
+              <a
+                key={l.href}
+                href={l.href}
+                aria-disabled={!isOn}
+                className={`block rounded border p-4 transition ${isOn ? 'border-slate-200 hover:border-blue-400' : 'border-slate-100 opacity-50'}`}
+              >
+                <div className="font-semibold">{l.title}</div>
+                <div className="mt-1 text-sm text-slate-600">{l.desc}</div>
+                {!isOn ? <div className="mt-1 text-xs text-amber-700">disabled</div> : null}
+              </a>
+            );
+          })}
+        </div>
+      </main>
     </AppLayout>
   );
 }

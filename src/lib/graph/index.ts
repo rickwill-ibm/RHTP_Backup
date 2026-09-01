@@ -15,7 +15,11 @@ import type { PgQueryable } from '@/lib/outbox';
 import { type GraphBackend, getGraphBackend, graphBackendKind } from '@/lib/config/dataMode';
 import type { GraphStore } from './types';
 import { createPostgresGraphStore } from './adapters/postgres';
-import { createNeo4jFakeGraphStore, createNeo4jGraphStore, type Neo4jRunner } from './adapters/neo4j';
+import {
+  createNeo4jFakeGraphStore,
+  createNeo4jGraphStore,
+  type Neo4jRunner,
+} from './adapters/neo4j';
 
 export * from './types';
 export { project, projectEvent } from './projector';
@@ -45,6 +49,7 @@ export {
 } from './lens';
 export {
   MAPPING_SPECS,
+  ENRICHMENT_SPECS,
   specFor,
   mutationsFor,
   MEMBER_KIND,
@@ -78,7 +83,7 @@ export interface GraphStoreConnections {
  */
 export function createGraphStore(
   conn: GraphStoreConnections,
-  backend: GraphBackend = getGraphBackend(),
+  backend: GraphBackend = getGraphBackend()
 ): GraphStore {
   if (graphBackendKind(backend) === 'postgres') {
     if (!conn.postgres) throw new Error(`graph backend '${backend}' needs a Postgres connection`);

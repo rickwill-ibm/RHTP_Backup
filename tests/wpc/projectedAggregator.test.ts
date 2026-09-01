@@ -51,6 +51,13 @@ describe('projected-graph holistic aggregator (WPC-01 Phase 3)', () => {
     expect(ctx.patient.id).toBe(id);
     expect(ctx.patient.name).not.toBe('Maria Redhawk');
 
+    // WPC Unit 1: the seeded access-geography surfaces a REAL accessProfile (this
+    // binds seed -> drain -> whole-person lens -> mapAccess; if the identity resolution
+    // ever diverges the access node orphans and this asserts 'unknown' instead of 'rural').
+    expect(ctx.accessProfile.dataAvailability).toBe('reported');
+    expect(ctx.accessProfile.ruralStatus).toBe('rural');
+    expect(ctx.accessProfile.distanceToProvider).toBe(45);
+
     // WPC-DEMO-01 screened POSITIVE for transportation + food
     expect(ctx.barriers.transportation.status).toBe('identified');
     expect(ctx.barriers.transportation.severity).toBe('high');
@@ -109,5 +116,34 @@ describe('projected-graph holistic aggregator (WPC-01 Phase 3)', () => {
       const { source } = await resolveHolisticContextAsync('patient-001');
       expect(source).toBe('authored');
     });
+  });
+});
+
+describe('projected context surfaces the care-team + Part 2 lenses (WPC hardening)', () => {
+  beforeEach(() => {
+    _resetSharedProjectionStores();
+    _resetDevProjectionSeed();
+    clearSessionDataModes();
+  });
+  afterEach(() => {
+    clearSessionDataModes();
+  });
+
+  it('includes careTeam + part2Restricted and lists them in provenance', async () => {
+    await seedDevProjection();
+    const store = getSharedProjectionStores().graph;
+    const id = demo01();
+    const ctx = await buildHolisticContextFromGraph(store, id);
+
+    expect(ctx.careTeam).toBeDefined();
+    expect(typeof ctx.careTeam!.memberCount).toBe('number');
+    expect(Array.isArray(ctx.careTeam!.roles)).toBe(true);
+
+    // default read scope grants no Part 2 -> restriction is ENFORCED, not merely absent
+    expect(ctx.part2Restricted).toBeDefined();
+    expect(ctx.part2Restricted!.disclosed).toBe(false);
+
+    expect(ctx.contextProvenance!.projectedSections).toContain('careTeam');
+    expect(ctx.contextProvenance!.projectedSections).toContain('part2Restricted');
   });
 });

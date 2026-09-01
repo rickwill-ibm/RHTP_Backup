@@ -98,6 +98,11 @@ Key domains: `policy/` (engine + 17-policy corpus), `identity/` (match engine),
 README updated · commit message says what changed, why, and which invariants/contracts
 were touched.
 
+**Commit messages carry NO co-authoring or tool-attribution trailers** — no
+`Co-Authored-By:` line, no "Generated with", no assistant/tool name anywhere in the
+message. The message describes the change; authorship is the committer. This applies to
+every commit an agent proposes or a human runs from an agent's suggestion.
+
 ## Coalition and iteration work — governed by the Agentic Build Framework v1.7
 
 ANY multi-agent build, hardening, or iteration work on this platform MUST load and follow

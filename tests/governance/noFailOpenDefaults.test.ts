@@ -127,5 +127,7 @@ describe('U1 — static guard: no fail-open flag defaults to true in src/', () =
     // The known flag must be present (guards against the scan silently matching nothing).
     expect(sawTheFlag, `${FLAG} default not found in src/ — scan may be broken`).toBe(true);
     expect(offenders, `fail-open flag defaults found:\n${offenders.join('\n')}`).toEqual([]);
-  });
+    // Walks the entire src/ tree reading every file; give it a generous timeout so a
+    // slow/cold filesystem (e.g. Windows + AV) doesn't produce a false 5s timeout.
+  }, 30_000);
 });

@@ -57,6 +57,19 @@ No `helpers.ts` / `utils.ts` / `misc.ts` dumping grounds — purposeful modules 
 The cap is not bureaucracy; it is a **context-window guarantee**: any file in this repo
 can be read whole by an agent alongside its types and README without evicting the task.
 
+**A file's size is its PRETTIER-FORMATTED size — always.** The pre-commit hook and
+`scripts/ci-gates.sh` both run `prettier --write` on changed files *before* the size
+ratchet, so the number that counts is the committed form, not what happens to be on disk.
+Two consequences, both mandatory:
+
+- **Never hand-compact code to fit under the cap** (multiple properties per line, collapsed
+  objects). Prettier expands it on commit and the ratchet then fails — the "gate said green,
+  commit blocked on size" trap. If a file is over cap *when formatted*, it is over cap.
+- **Data goes to `*.json`, not inline TS.** The size gate counts only `ts/tsx/js/jsx`; a
+  large table of scenario/fixture/seed objects belongs in a co-located `*.json` loaded by a
+  thin module. This is the sanctioned way to take a data-heavy file under the cap — split
+  domain *logic* by responsibility; move *data* to JSON.
+
 ## 3. Quality Ratchet (legacy policy, replaces v1 §14 policy text)
 
 Existing violations are **frozen, not fixed, in this pass.**

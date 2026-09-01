@@ -11,7 +11,8 @@ export async function GET() {
       {
         hook: 'patient-view',
         title: 'TCOC Patient View',
-        description: 'Surfaces care gaps, BH risk, and social needs when a patient record is opened.',
+        description:
+          'Surfaces care gaps, BH risk, and social needs when a patient record is opened.',
         id: 'tcoc-patient-view',
         prefetch: {
           patient: 'Patient/{{context.patientId}}',
@@ -30,8 +31,19 @@ export async function GET() {
       {
         hook: 'order-sign',
         title: 'TCOC Order Sign',
-        description: 'Validates orders against the patient care plan and flags DDI risks.',
+        description:
+          'Medication-safety CDS: drug-drug interaction checks + STAT-order validation (NOT coverage/CRD).',
         id: 'tcoc-order-sign',
+        prefetch: {
+          patient: 'Patient/{{context.patientId}}',
+        },
+      },
+      {
+        hook: 'order-select',
+        title: 'RHTP Coverage Requirements (CRD)',
+        description:
+          'Surfaces prior-authorization / coverage-requirement cards when a clinician selects an order. Advisory CDS Hooks card delivery — not Da Vinci CRD coverage-information system-actions.',
+        id: 'rhtp-crd-order-select',
         prefetch: {
           patient: 'Patient/{{context.patientId}}',
         },

@@ -24,8 +24,17 @@ import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
-import { DATA_MODE_SEAMS, setSessionDataMode, clearSessionDataModes, type DataModeSeam } from '@/lib/config/dataMode';
-import { SEAM_DISPOSITIONS, dispositionSeamIds, seamsWithDisposition } from '@/lib/config/seamDispositions';
+import {
+  DATA_MODE_SEAMS,
+  setSessionDataMode,
+  clearSessionDataModes,
+  type DataModeSeam,
+} from '@/lib/config/dataMode';
+import {
+  SEAM_DISPOSITIONS,
+  dispositionSeamIds,
+  seamsWithDisposition,
+} from '@/lib/config/seamDispositions';
 
 // ── Seam production resolvers under test ────────────────────────────────────────
 import {
@@ -70,7 +79,11 @@ import { DataSourceNotConfiguredError } from '@/lib/dataSources/common';
 import { getFhirMockMode } from '@/lib/services/fhirClient';
 import { agentRuntimeMode } from '@/lib/agentRuntime';
 import { getAgentDemoActions, authoredAgentActions } from '@/lib/agents/demo';
-import { loadAgentManifests, setProductionManifestLoader, defaultRegistry } from '@/lib/agents/manifest';
+import {
+  loadAgentManifests,
+  setProductionManifestLoader,
+  defaultRegistry,
+} from '@/lib/agents/manifest';
 // I8A wave C (F5 provider identity) — appended import block.
 import {
   getProviderDirectory,
@@ -92,9 +105,22 @@ import {
 } from '@/lib/terminology/governance';
 import type { NormalizedRecord } from '@/lib/pipeline/types';
 import { resolveActorTenantScope } from '@/lib/security/tenant';
-import { getCareGapView, setProductionMeasuresFeedLoader, MeasuresFeedNotConfiguredError } from '@/lib/measures';
-import { resolveProjectionStores, ProjectionStoresNotConfiguredError, setProductionOutboxFactory, setProductionGraphFactory } from '@/lib/graph/consumer/provider';
-import { getRecordLifecycleStore, RecordLifecycleNotConfiguredError, setProductionRecordLifecycleFactory } from '@/lib/lifecycle';
+import {
+  getCareGapView,
+  setProductionMeasuresFeedLoader,
+  MeasuresFeedNotConfiguredError,
+} from '@/lib/measures';
+import {
+  resolveProjectionStores,
+  ProjectionStoresNotConfiguredError,
+  setProductionOutboxFactory,
+  setProductionGraphFactory,
+} from '@/lib/graph/consumer/provider';
+import {
+  getRecordLifecycleStore,
+  RecordLifecycleNotConfiguredError,
+  setProductionRecordLifecycleFactory,
+} from '@/lib/lifecycle';
 
 // A structurally-complete record (so the mock/seeded validators pass — proving the
 // production throw is production-specific, not a shape rejection).
@@ -124,22 +150,26 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     setSessionDataMode('terminology', 'production');
     const prod = selectTerminologyService();
     expect(() => (prod.validateCode as (...a: unknown[]) => unknown)('RxNorm', '1')).toThrow(
-      TerminologyServiceNotConfiguredError,
+      TerminologyServiceNotConfiguredError
     );
     setSessionDataMode('terminology', 'seeded');
     // Seed service resolves a known-good code without throwing.
-    expect(() => (selectTerminologyService().validateCode as (...a: unknown[]) => unknown)('RxNorm', '1')).not.toThrow();
+    expect(() =>
+      (selectTerminologyService().validateCode as (...a: unknown[]) => unknown)('RxNorm', '1')
+    ).not.toThrow();
   },
   profileValidation: () => {
     setSessionDataMode('profileValidation', 'production');
     // The declared production service fails LOUD when invoked directly …
     expect(() => productionProfileValidationService.validate(COMPLETE_RECORD)).toThrow(
-      ProfileValidatorNotConfiguredError,
+      ProfileValidatorNotConfiguredError
     );
     // … and the gate turns that into a fail-CLOSED quarantine (never admits).
     const prodGate = selectProfileValidator().validate(COMPLETE_RECORD);
     expect(prodGate.ok).toBe(false);
-    expect(prodGate.issues.some((i) => i.reasonCode === 'profile-validation-unavailable')).toBe(true);
+    expect(prodGate.issues.some((i) => i.reasonCode === 'profile-validation-unavailable')).toBe(
+      true
+    );
     // mock/seeded: the same complete record passes the structural pre-flight.
     setSessionDataMode('profileValidation', 'seeded');
     expect(selectProfileValidator().validate(COMPLETE_RECORD).ok).toBe(true);
@@ -214,19 +244,25 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
   },
   goldCardRoster: async () => {
     setSessionDataMode('goldCardRoster', 'production');
-    await expect(getGoldCardRosterLoader().load('2026-01-01')).rejects.toThrow(DataSourceNotConfiguredError);
+    await expect(getGoldCardRosterLoader().load('2026-01-01')).rejects.toThrow(
+      DataSourceNotConfiguredError
+    );
     setSessionDataMode('goldCardRoster', 'seeded');
     await expect(getGoldCardRosterLoader().load('2026-01-01')).resolves.toBeTruthy();
   },
   denialRateFeed: async () => {
     setSessionDataMode('denialRateFeed', 'production');
-    await expect(getDenialRateFeedLoader().load('2026-01-01')).rejects.toThrow(DataSourceNotConfiguredError);
+    await expect(getDenialRateFeedLoader().load('2026-01-01')).rejects.toThrow(
+      DataSourceNotConfiguredError
+    );
     setSessionDataMode('denialRateFeed', 'seeded');
     await expect(getDenialRateFeedLoader().load('2026-01-01')).resolves.toBeTruthy();
   },
   providerDirectory: async () => {
     setSessionDataMode('providerDirectory', 'production');
-    await expect(getProviderDirectoryLoader().load('2026-01-01')).rejects.toThrow(DataSourceNotConfiguredError);
+    await expect(getProviderDirectoryLoader().load('2026-01-01')).rejects.toThrow(
+      DataSourceNotConfiguredError
+    );
     setSessionDataMode('providerDirectory', 'seeded');
     await expect(getProviderDirectoryLoader().load('2026-01-01')).resolves.toBeTruthy();
   },
@@ -300,7 +336,7 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     setSessionDataMode('tenancy', 'production');
     const prod = resolveActorTenantScope(
       { userId: 'Practitioner/x', role: 'pa-reviewer', authorizedMemberScope: { kind: 'org' } },
-      { fhirUser: 'Practitioner/x' },
+      { fhirUser: 'Practitioner/x' }
     );
     expect(prod.kind).not.toBe('demo');
     expect(prod.tenantIds).toEqual([]);
@@ -308,7 +344,7 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     setSessionDataMode('tenancy', 'mock');
     const demo = resolveActorTenantScope(
       { userId: 'x', role: 'pa-reviewer', authorizedMemberScope: { kind: 'org' } },
-      {},
+      {}
     );
     expect(demo.kind).toBe('demo');
   },
@@ -360,7 +396,10 @@ describe('governance: disposition manifest completeness', () => {
   it('every registered seam has a disposition entry (a new seam with none FAILS)', () => {
     const declared = new Set(dispositionSeamIds());
     const missing = DATA_MODE_SEAMS.filter((s) => !declared.has(s));
-    expect(missing, `seams missing a disposition in seamDispositions.ts: ${missing.join(', ')}`).toEqual([]);
+    expect(
+      missing,
+      `seams missing a disposition in seamDispositions.ts: ${missing.join(', ')}`
+    ).toEqual([]);
   });
 
   it('every disposition entry names a registered seam (no stale entries)', () => {
@@ -386,17 +425,25 @@ describe('governance: no unregistered seam is consumed in code', () => {
   it('every getDataMode(literal) seam in src/ is registered in DATA_MODE_SEAMS', () => {
     const registered = new Set<string>(DATA_MODE_SEAMS);
     const unregistered = [...literalConsumedSeams()].filter((s) => !registered.has(s));
-    expect(unregistered, `getDataMode() called with unregistered seam ids: ${unregistered.join(', ')}`).toEqual([]);
-  });
+    expect(
+      unregistered,
+      `getDataMode() called with unregistered seam ids: ${unregistered.join(', ')}`
+    ).toEqual([]);
+    // Walks the entire src/ tree reading every file; give it a generous timeout so a
+    // slow/cold filesystem (e.g. Windows + AV) doesn't produce a false 5s timeout.
+  }, 30_000);
 });
 
 describe('governance: proof coverage', () => {
   it('every load-bearing seam (real-impl | fail-closed-stub) has a prober', () => {
-    const loadBearing = [...seamsWithDisposition('fail-closed-stub'), ...seamsWithDisposition('real-impl')];
+    const loadBearing = [
+      ...seamsWithDisposition('fail-closed-stub'),
+      ...seamsWithDisposition('real-impl'),
+    ];
     const missing = loadBearing.filter((s) => typeof PROBERS[s] !== 'function');
     expect(
       missing,
-      `load-bearing seams with no fail-closed/no-fallback proof registered: ${missing.join(', ')}`,
+      `load-bearing seams with no fail-closed/no-fallback proof registered: ${missing.join(', ')}`
     ).toEqual([]);
   });
 });
@@ -424,7 +471,7 @@ describe('governance: mock-only seams have no production decision consumer', () 
       expect(
         consumed.has(seam),
         `${seam} is declared mock-only but is now consumed on a decision path — ` +
-          `reclassify it real-impl or fail-closed-stub and add a prober`,
+          `reclassify it real-impl or fail-closed-stub and add a prober`
       ).toBe(false);
     });
   }

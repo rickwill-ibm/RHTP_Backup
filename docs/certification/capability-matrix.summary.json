@@ -123,8 +123,8 @@
         "cds-hooks"
       ],
       "capabilityStatuses": {
-        "supported": 2,
-        "partial": 0,
+        "supported": 1,
+        "partial": 2,
         "ci-pending": 0,
         "absent": 0
       }

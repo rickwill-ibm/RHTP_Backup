@@ -618,3 +618,105 @@ patient's FHIR record, and show what prepopulates vs what stays a documentation 
 **Result:** new `dtrPatientEvaluation.test.ts` + `dtrCriteriaFromPolicy.test.ts` (12 tests) pin age/BMI/band/
 comorbidity/documentation status, provenance, the required-logic fix, and the derivation. tsc + lint clean;
 full suite green; all files under the size cap; `PatientPrepopPanel.tsx` baselined in testlink.
+
+## 2026-08-31 — CRD single-source: one coverage-card producer + a spec-shaped hosted service
+
+**Owner intent:** the CRD/DTR/PAS review found CRD had TWO look-alike surfaces. Confirmed by
+tracing: `/api/cds` (client → external gateway, mock = `devCrdCards`) does real coverage cards;
+`/api/cds-hooks/order-sign` does drug-drug-interaction + STAT-note safety, NOT coverage — yet the
+certification matrix attributed CRD to it. Two asks: (A) relabel so CRD ≠ DDI and fix the matrix;
+(B) give CRD a spec-conventional hosted CDS Hooks service that shares ONE card producer with the
+client mock, so all CRD coverage-card logic finally has a single source.
+
+**Architect → SWE:**
+1. `src/lib/policy/crd/coverageRequirementCards.ts` (NEW) — the single producer: `buildCrdCards`
+   (pure, deterministic id seam), `crdIndeterminateCards` (fail-closed), `crdInputFromOrder`
+   (structured-coding-only extraction). CrdCoverageCard carries uuid + source so both surfaces
+   emit an identical shape.
+2. `devStubs.cds.ts` — `devCrdCards` now delegates to `buildCrdCards` (demo default scenario stays
+   confined to the client mock).
+3. `src/app/api/cds-hooks/order-select/route.ts` (NEW) — hosted CRD service; resolves the SELECTED
+   orders, builds cards via the producer, registered in discovery.
+4. `cds-hooks/route.ts` — registers `order-select`; order-sign description corrected to DDI/safety.
+5. `certification/matrix.data1.ts` — `crd-order-sign` (id kept for the R1-10-2 history) repointed to
+   the producer + order-select with an honest "card production, not adjudication / no coverage-
+   information system-actions" note; `cdshooks-order-sign` corrected to medication-safety (demoted to
+   partial, live-DDI ci-pending); `cdshooks-order-select` added as a distinct transport claim (no
+   coverage double-count).
+
+**Adversarial red-team (pre-build, findings folded in):**
+- R2 BLOCKER (fail-open): returning `{cards:[]}` on error would read to an EHR as "no PA needed".
+  Fixed: every error / unknown-patient / no-CPT path emits the fail-closed indeterminate warning card;
+  never an empty list.
+- R2 BLOCKER (wrong-patient/PHI): the hosted service must not fall back to the demo (Maria) scenario.
+  Fixed: it resolves via the production registry only; a miss → fail-closed card. Demo default stays
+  in `devCrdCards`, structurally unreachable from the hosted route.
+- R1/R2 (parity E15 + determinism): the producer owns uuid + source and uses a deterministic id seam,
+  so mock and hosted outputs are shape-identical and byte-assertable.
+- R1/R2 (PHI/injection): procedureName is derived from structured coding display only, never from
+  `code.text`/notes; a free-text-only order fails closed rather than echoing clinician text.
+- R1 flagged PA-required as `warning`; on running the FULL vitest suite this broke the platform's
+  established CRD-card contract (tests/api/api-patient-context) — reverted to `critical`. (Lesson: the
+  node gates + browser passed; only the full suite caught the contract break.)
+- R1 (selections): order-select keys off `context.selections`, not the whole draft bundle.
+- R4 (governance): id `crd-order-sign` KEPT (referenced by risk-register R1-10-2); Partial status held;
+  no silent upgrade; coverage-semantics vs transport claims kept disjoint.
+- Verified against source: R4's "crdService.ts is dead / always returns a mock" was a MISREAD — the
+  file feeds `parseCrdCards(r.data.cards)` into `deriveCrdResult`; not treated as a finding.
+
+**Scope not taken (documented, not silently dropped):** hosting CRD on `order-sign` too (sign-time
+determination) and emitting Da Vinci `coverage-information` system-actions remain gaps; the note says so.
+order-sign's own `[]`-on-error DDI behaviour is unchanged (out of this change's scope) and logged as a
+follow-up risk rather than altered here.
+
+**Tests:** `tests/policy/crd/coverageRequirementCards.test.ts` (producer contract, fail-closed,
+structured-coding-only, parity) + `tests/api/routes-cds.test.ts` extended (order-select happy path,
+every fail-closed branch, malformed→400, discovery registration). vitest to be run natively on Windows
+(rolldown native binding blocks vitest under the Linux device bridge); tsc/lint/testlink/wiring run here.
+
+**Post-build red-team (verification on the shipped diff):** B1 fail-open, B2 wrong-patient, B3
+parity, and PHI-echo all re-confirmed CLOSED by tracing every return path. One MAJOR new defect
+found and FIXED: two selected orders sharing a CPT produced colliding card uuids (CDS Hooks
+correlates feedback by uuid) — the order-select route now folds each order's id/index into a
+deterministic id seam, so uuids are unique per order while card SHAPE parity with the mock holds.
+Verified `getPatientById('')`/`getPatientByFhirId(<unknown>)` both return undefined (no demo
+fallback — B2 fully closed). Residual minor (documented, not blocking): a non-CPT coding fallback in
+`crdInputFromOrder` labels any coded order "(CPT <code>)" — over-warns in the fail-closed direction.
+
+## 2026-08-31 — WPC core hardening (batch 1): startup wiring + lens surfacing
+
+**Owner intent:** close the tractable, correctness-critical items from the WPC intelligence-core
+hardening assessment as one gate-green batch: (P0) the production cold-start, (P1) the two lenses
+computed-then-dropped, (P2) catalog accuracy. Feature-scale items (durable serverless projection,
+5-dimension projection from FHIR feeds, hosted-CRD parity, sweep wiring) deferred to later batches.
+
+**Changes:**
+1. `src/instrumentation.ts` — the existing nodejs-guarded `register()` now also dynamic-imports and
+   calls `bootstrapReliability()` at process start, so the projected-graph aggregator is registered
+   and the projection drain scheduled without waiting for a first `/api/ops/health` hit. Closes the
+   production 503 cold-start. (Guard + dynamic import keep Node-only reliability code off the edge bundle.)
+2. `HolisticPatientContext` gains optional `careTeam` + `part2Restricted`; `mapCareTeam` / `mapPart2`
+   (new pure mappers) surface the two previously-dropped lenses; the aggregator populates them and
+   declares them in `contextProvenance.projectedSections`. Optional so the authored engine is untouched.
+3. `dataMode.ts` — `wpcRecord` and `signalDisposition` seam labels corrected `registered`→`wired`
+   (both have real production switch points). `reliability/bootstrap.ts` recon-placeholder comment made
+   honest (the sweep is reserved, not yet wired — it needs the outbox apply/publish deps).
+
+**Adversarial red-team (post-build, on the diff) — two MAJOR semantic defects found and FIXED:**
+- `mapCareTeam` filtered on a single node kind (`CareTeamMember`), which DROPS the NPI-converged
+  treating physician (a `ProviderIdentity` node) and `Practitioner` participants — the care-team lens
+  returns all three via `HAS_CARE_TEAM`. Fixed to count every non-Member participant; role travels as a
+  node property on all kinds. Test now seeds Practitioner + ProviderIdentity to pin it.
+- `mapPart2` derived `restrictedNodeCount` from the consent-FILTERED lens output, so a no-consent read
+  returned `0` even when restricted Part 2 data existed and was being WITHHELD — reading as "no Part 2
+  data" on a 42 CFR Part 2 surface. Fixed: count is `null` (UNKNOWN) unless the scope actually disclosed
+  Part 2; never asserted as zero. Type widened to `number | null`.
+- Verified premises the reviewer raised that did NOT hold: edge-bundling is safe (guard + dynamic import,
+  same pattern as the file's evidence-store import); the scheduler starts no background timer (jobs run
+  only on an authenticated ops tick) so there is no timer leak in mock/build/serverless; running bootstrap
+  in all modes is harmless (the aggregator is read only under `wpcRecord=production`).
+
+**Tests:** `projectedAggregator.mappers.test.ts` (+ mapCareTeam multi-kind counting/dedupe, mapPart2
+enforced-vs-disclosed + null-when-withheld, provenance) and `projectedAggregator.test.ts` (+ context
+surfaces careTeam/part2Restricted with provenance). Node gates green on device (sizes, testlink E13,
+wiring E14, page-boundaries, skill-mirror, provenance E11); tsc/lint/vitest to run natively on Windows.

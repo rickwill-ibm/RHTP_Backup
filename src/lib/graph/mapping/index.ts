@@ -28,6 +28,8 @@ import { documentSpec } from './document';
 import { conditionsSpec } from './conditions';
 import { diagnosticReportsSpec } from './diagnosticReports';
 import { familyHistorySpec } from './familyHistory';
+// ── WPC Unit 1 (append-only): access-geography (first FHIR-fed person dimension).
+import { accessSpec } from './access';
 
 /** Ordered spec registry. First match wins (specs are disjoint by eventType). */
 export const MAPPING_SPECS: readonly MappingSpec[] = Object.freeze([
@@ -54,9 +56,19 @@ export const MAPPING_SPECS: readonly MappingSpec[] = Object.freeze([
   familyHistorySpec,
 ]);
 
-/** The spec that owns an event type, or undefined (an unmapped event is skipped). */
+/**
+ * Enrichment projections (WPC Unit 1) — DERIVED graph projections that are NOT C9
+ * FHIR record domains (they have no ingestion adapter of their own; they enrich the
+ * graph from already-landed data). Kept OUT of MAPPING_SPECS so the C9 record-domain
+ * count stays a truthful 20/20, but consulted by specFor/project so they still land.
+ */
+export const ENRICHMENT_SPECS: readonly MappingSpec[] = Object.freeze([accessSpec]);
+
+const ALL_SPECS: readonly MappingSpec[] = [...MAPPING_SPECS, ...ENRICHMENT_SPECS];
+
+/** The spec (record OR enrichment) that owns an event type, or undefined. */
 export function specFor(eventType: string): MappingSpec | undefined {
-  return MAPPING_SPECS.find((s) => s.matches(eventType));
+  return ALL_SPECS.find((s) => s.matches(eventType));
 }
 
 /** Map one event to mutations via its spec; [] when no spec claims it. */

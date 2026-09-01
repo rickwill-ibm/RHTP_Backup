@@ -77,3 +77,6 @@ _to_delete/
 
 # Local-only client/RFI docs pulled out of the repo (never tracked)
 /_local-only/
+
+# Never commit real env — only .env.example
+.env

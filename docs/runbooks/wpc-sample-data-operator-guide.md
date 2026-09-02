@@ -13,6 +13,7 @@ A hands-on, copy-paste runbook for the whole-person (WPC) sample data. It covers
 - **§9** the remediation / reprocessing round trip
 - **§10** batch vs. stream ingest (the FHIR-Subscription worked example)
 - **§11 — running this as an AI agent** (Claude / Codex / IBM watsonx "Bob"): a precise, self-checking checklist
+- **§12** Da Vinci Risk Adjustment coding gaps (the projected coding-gap dimension)
 
 This is the operational companion to the conceptual `wpc-record-load-runbook.md`. Every command below has been run against this repo; expected outputs are the real numbers.
 
@@ -305,7 +306,29 @@ RULES:
 
 ---
 
-## 12. Troubleshooting
+## 12. Da Vinci Risk Adjustment coding gaps
+
+The platform projects the **Da Vinci Risk Adjustment (RA) Coding Gap** as a first-class knowledge-graph dimension (`hl7.org/fhir/us/davinci-ra`). A payer's RA engine produces a Coding Gap `MeasureReport` — one per member **per risk-model version** — where each `group` is a condition category (HCC) carrying an evidence status (`open-gap`/`closed-gap`/`pending`), a suspect type (`historic`/`suspected`/`net-new`), a hierarchical status, and links to the supporting evidence it cites. Ingest one like any other resource (in a bundle with the member's Patient); it projects to a `CodingGap` node with `HAS_CODING_GAP` and `SUPPORTED_BY` edges.
+
+What "correct" looks like, and the safety properties this dimension guarantees:
+
+- **Model-version aware.** A member legitimately has several gap reports at once (CMS-HCC V24 and V28 through the PY2026 blend). Nodes are keyed by `(measureReportId, model, version, group, condition category)`, so V24 and V28 gaps coexist and never collapse.
+- **Coding-intensity firewall (the central compliance rule).** A coding gap — especially a `suspected` one — is a payer HYPOTHESIS, never an asserted diagnosis. The dimension is NOT code-carrying (it never runs the clinical semantic-binding gate), its edges are associative (never causal), and it NEVER mints a `Condition`: a cited `Condition/x` reference is recorded on a neutral `Evidence` node (join back via `evidenceRef`), so a hypothesis can never materialize as a diagnosis.
+- **RADV-defensibility gate (the intended next step).** The existing `assessRadvDefensibility` (`src/lib/finance/riskAdjustment/`) is the standard a gap must meet before it is "closed" for capture (MEAT + face-to-face DOS + rendering-provider NPI + source-document linkage). Wire the projected gap + its `SUPPORTED_BY` evidence into `HccCapture` to close the loop evidence → gap → RADV-defensible submission.
+- **42 CFR Part 2.** A SUD-linked HCC gap (V24 HCC54/55; V28 HCC135-138) projects as a RESTRICTED node and is filtered by the consent lens exactly like a Part 2 Condition/Flag — excluded under `NO_CONSENT`, disclosed under a covering scope.
+- **Honest census.** A Da Vinci-RA MeasureReport PROJECTS; any other MeasureReport is a loud by-design non-projection (`MeasureReport:non-ra`), never silently absorbed. An ungoverned status/suspect QUARANTINES (never guessed).
+
+Run the worked example (both graph backends):
+
+```bash
+npx vitest run tests/wpc/codingGapDimension.test.ts
+```
+
+Read a member's gaps from the projected graph via the holistic context: `codingGaps` (a `CodingGapSummary` with `openCount` = actionable recapture backlog and `suspectedCount` = hypotheses needing clinical confirmation). Programmatic API: the `codingGapReportAdapter` (`src/lib/pipeline/adapters/codingGapReport.ts`) + `codingGapSpec` (`src/lib/graph/mapping/codingGap.ts`).
+
+---
+
+## 13. Troubleshooting
 
 | Symptom | Cause | Fix |
 |--------|-------|-----|

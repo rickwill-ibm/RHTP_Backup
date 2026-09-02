@@ -6,6 +6,69 @@ a landing that touches a core-logic path with no new entry here FAILS the gate.
 
 Newest first. One entry per qualifying change.
 
+## 2026-09-02 — WPC Da Vinci Risk Adjustment: the CODING GAP as a first-class projected dimension
+
+**Context:** the platform owned both ends of the risk-adjustment value chain — a RADV-defensibility /
+submission-scrub module (`src/lib/finance/riskAdjustment/`) and an "HCC Suspects" clinician UI — but had NO
+standards-based artifact connecting the ingested clinical evidence to them. The coding gap (the central object of
+payer risk adjustment) was *dropped* on ingestion (care-gap Observations → non-projected census) and absent from
+the graph (the generic `RiskAssessment` node has no HCC category, gap status, suspect type, hierarchy, or model
+version). This wave implements the **Da Vinci Risk Adjustment IG** (`hl7.org/fhir/us/davinci-ra`) Coding Gap
+MeasureReport as a NEW projected dimension. Record-domain count moves **22 → 23**
+(`tests/pipeline/domainRecordCount.test.ts` 23/23).
+
+**Architect + SWE.** New adapter `src/lib/pipeline/adapters/codingGapReport.ts` FLATTENS a Da Vinci-RA Coding Gap
+`MeasureReport` (one per member per model version) into one record per `group` (condition category), parsing the
+HCC code + code system, evidence status (open/closed/pending), suspect type (historic/suspected/net-new),
+hierarchical status, evidence-status-date (date-only), model+version, and the group's supporting-evidence
+references (`evaluatedResource` + `ra-groupReference`). New spec `src/lib/graph/mapping/codingGap.ts` projects a
+`CodingGap` node keyed by `(measureReportId, model, version, groupId, conditionCategory)` — so concurrent
+CMS-HCC **V24 and V28** gaps coexist through the blend — with `HAS_CODING_GAP` (Member→CodingGap, associative,
+dated) and `SUPPORTED_BY` (CodingGap→Evidence) edges. Routing: a Da Vinci-RA `MeasureReport` PROJECTS; any other
+MeasureReport is a loud by-design non-projection (`MeasureReport:non-ra`). Surfaced through the holistic lens via
+`mapCodingGaps` (`CodingGapSummary`: openCount + suspectedCount), consent-filtered like every other dimension.
+
+**The coding-intensity firewall (the P0 safety property).** A coding gap — especially a `suspected` one — is a
+payer-analytics HYPOTHESIS, never a clinical assertion. Enforced three ways: (1) `coding-gap` is OUT of
+`CODE_CARRYING_DOMAINS`, so it never runs the clinical semantic-binding gate; (2) both edges are ASSOCIATIVE, never
+causal; (3) the adapter NEVER emits a Condition — it only CITES evidence via a neutral `Evidence` node. An
+ungoverned evidence status / suspect type QUARANTINES (never guessed). 42 CFR Part 2: SUD-linked HCC gaps carry a
+Part 2 label (segmentation-at-transform) and the consent lens filters them uniformly (DP-1).
+
+**Adversarial red-team (independent agent, tree-of-thought; six findings, all closed before delivery).** An
+independent red-team agent attacked the build against the platform's own safety posture:
+
+- **FINDING 1 — HIGH (closed): the firewall was unenforced — SUPPORTED_BY minted a `Condition`.** Both graph
+  stores auto-create an edge's endpoints, so a `SUPPORTED_BY` edge to `Condition/x` MINTED a `Condition` node from
+  an unverified reference — a hypothesis materialized as a diagnosis, and the firewall test passed only because its
+  fixture cited no evidence. Fix: `SUPPORTED_BY` now targets a NEUTRAL `Evidence` node (keyed by the reference,
+  carrying `{evidenceRef, resourceType}` for join-back), never a clinical kind; the firewall test was strengthened
+  to a `suspected` gap CITING `Condition/hypothesis` and asserts ZERO Condition nodes minted.
+- **FINDING 2 — HIGH (closed): 42 CFR Part 2 under-restriction (SUD leak).** SUD detection matched a literal digit
+  set against `coding[0]` with no leading-zero normalization, so `HCC055`, a co-listed ICD in `coding[0]`, or a
+  version mismatch would leave a SUD gap unrestricted and DISCLOSED under NO_CONSENT. Fix: version-aware
+  `SUD_HCC_BY_VERSION` (V24 {54,55} / V28 {135-138}, UNION fail-closed default), `hccDigits` strips leading zeros,
+  and `pickConditionCategory` scans ALL codings for the HCC-system coding; a digit-less HCC code FAILS CLOSED.
+- **FINDING 3 — MEDIUM (closed): PHI leak via evidenceStatusDate.** The date field fell through to a free-text
+  `valueString`. Fix: `dateExtValue` reads only `valueDate`/`valueDateTime`, ISO-validated.
+- **FINDING 4 — MEDIUM (closed): node-key collision.** The key omitted model+version+group, so a repeated category
+  in one report (or a reused report id across versions) collapsed two gaps onto one node. Fix: the key now folds in
+  model, version, and group id; a duplicate-category test asserts two distinct nodes.
+- **FINDING 5 — MEDIUM (closed): evidence mis-linkage.** The report-wide evidence fallback fanned every citation to
+  every group, cross-linking a co-reported (possibly SUD) gap's evidence. Fix: the fallback fires ONLY for a
+  single-group report; multi-group reports without `ra-groupReference` leave evidence unlinked (never guessed).
+- **FINDING 6 — LOW (closed): discriminator brittleness.** The `ra-` regex missed the canonical `davinci-ra/`
+  namespace. Fix: the discriminator now matches `davinci-ra` and `ra/`.
+
+Re-review by the same agent confirmed both HIGH blockers closed with the consent posture intact (the Evidence node
+inherits the envelope's restriction; restriction only ratchets up in both stores).
+
+**Adversarial coverage** (`tests/wpc/codingGapDimension.test.ts`, BOTH backends — pg-mem + Neo4j fake): projection
+of the RA fields, V24/V28 non-collision, Evidence-node citation (no Condition minted), the suspected-gap firewall,
+Part 2 SUD restriction (incl. zero-padded HCC055), duplicate-category non-collision, ungoverned-value quarantine,
+non-RA MeasureReport by-design non-projection, PHI-minimal node, and version-aware fail-closed SUD detection. E14:
+the adapter is reached via routing and the spec via the registry — both WIRED (not orphans).
+
 ## 2026-09-02 — WPC FHIR-Subscription streaming ingest (worked example)
 
 **Context:** the 5-patient load path is BATCH only — a FHIR transaction bundle through `ingestBundle`

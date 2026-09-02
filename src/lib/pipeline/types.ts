@@ -49,7 +49,13 @@ export type WpcDomain =
   // tests/pipeline/domainRecordCount.test.ts). Coverage/Encounter are NOT new here —
   // they already exist above and only gain FHIR-JSON adapters. Do NOT reorder.
   | 'risk-assessment'
-  | 'flag';
+  | 'flag'
+  // ── WPC Da Vinci Risk Adjustment (append-only): the coding gap becomes a
+  // first-class PROJECTED dimension (its own record domain + mapping spec), moving
+  // the C9 record-domain count 22 -> 23 (asserted 23/23 by
+  // tests/pipeline/domainRecordCount.test.ts). NOT code-carrying: a coding gap is a
+  // payer-analytics hypothesis, never an asserted clinical code. Do NOT reorder.
+  | 'coding-gap';
 
 export type Tier = 'T1' | 'T2' | 'T3';
 

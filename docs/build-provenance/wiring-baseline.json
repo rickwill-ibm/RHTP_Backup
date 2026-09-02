@@ -50,6 +50,7 @@
     "src/lib/policy/review/feedback.ts",
     "src/lib/runtime/ingestBundle.ts",
     "src/lib/runtime/ingestPatientContext.ts",
+    "src/lib/runtime/ingestStreamEvent.ts",
     "src/lib/runtime/ingestRouting.ts",
     "src/lib/runtime/reconciliation.ts",
     "src/lib/runtime/remediation.ts",

@@ -14,6 +14,7 @@ import type { GraphNodeRecord, PropVal } from '@/lib/graph/types';
 import type { LensResult } from '@/lib/graph/lens/types';
 import type {
   AlertSummary,
+  CodingGapSummary,
   CoverageSummary,
   RiskProfileSummary,
   UtilizationSummary,
@@ -74,4 +75,26 @@ export function mapAlerts(whole: LensResult): AlertSummary {
     if (cat && !categories.includes(cat)) categories.push(cat);
   }
   return { activeCount, categories };
+}
+
+/**
+ * Da Vinci Risk Adjustment coding gaps from the whole-person lens's CodingGap nodes
+ * (consent-filtered — a SUD-linked/Part 2 gap the scope does not cover is already
+ * absent). PHI-minimal: HCC category codes, statuses, and suspect types only. An
+ * `open-gap`/`pending` is actionable recapture; a `suspected` gap is a hypothesis.
+ */
+export function mapCodingGaps(whole: LensResult): CodingGapSummary {
+  const gaps = nodesOfKind(whole.nodes, 'CodingGap').map((node) => ({
+    conditionCategory: s(node.properties.conditionCategory),
+    model: s(node.properties.model),
+    modelVersion: s(node.properties.modelVersion),
+    evidenceStatus: s(node.properties.evidenceStatus),
+    suspectType: s(node.properties.suspectType),
+    hierarchicalStatus: s(node.properties.hierarchicalStatus),
+  }));
+  const openCount = gaps.filter(
+    (g) => g.evidenceStatus === 'open-gap' || g.evidenceStatus === 'pending'
+  ).length;
+  const suspectedCount = gaps.filter((g) => g.suspectType === 'suspected').length;
+  return { gaps, openCount, suspectedCount };
 }

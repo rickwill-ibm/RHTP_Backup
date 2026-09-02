@@ -5,10 +5,13 @@ import type { IdentityTraits } from '@/lib/identity/mpiTypes';
 
 describe('resolveIdentityWithAudit (Dev Plan Workstream A3 — server integration)', () => {
   it('resolves a known member and emits a PHI-safe audit event', async () => {
+    // R2 Option B: deterministic consolidation is via the genuine global medicaidId
+    // the payer + state-agency records carry — not name+dob (which is HELD).
     const input: IdentityTraits = {
       firstName: 'Maria',
       lastName: 'Redhawk',
       dob: '1985-04-12',
+      medicaidId: 'SD-MEDICAID-88213',
     };
     const result = await resolveIdentityWithAudit(input, 'emr', {
       actor: 'system:test',
@@ -34,7 +37,11 @@ describe('resolveIdentityWithAudit (Dev Plan Workstream A3 — server integratio
   });
 
   it('does not throw for an unresolved identity, and reports failure outcome semantics via tier', async () => {
-    const stranger: IdentityTraits = { firstName: 'Nobody', lastName: 'Unknown', dob: '1900-01-01' };
+    const stranger: IdentityTraits = {
+      firstName: 'Nobody',
+      lastName: 'Unknown',
+      dob: '1900-01-01',
+    };
     const result = await resolveIdentityWithAudit(stranger, 'emr', { actor: 'system:test' });
     expect(result.bestMatch.tier).toBe('no-match');
     expect(result.resolvedId).toBe('');

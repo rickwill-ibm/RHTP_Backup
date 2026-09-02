@@ -2045,6 +2045,69 @@
         "method": "POST",
         "url": "Flag"
       }
+    },
+    {
+      "fullUrl": "urn:uuid:alex-kirby-codinggap-1",
+      "resource": {
+        "resourceType": "MeasureReport",
+        "id": "alex-kirby-codinggap-1",
+        "status": "complete",
+        "type": "individual",
+        "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "period": {
+          "start": "2026-01-01",
+          "end": "2026-09-30"
+        },
+        "group": [
+          {
+            "id": "g1",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC",
+                  "code": "HCC38",
+                  "display": "Diabetes with Glycemic, Unspecified, or No Complications"
+                }
+              ]
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-evidencestatus-cs",
+                      "code": "open-gap"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-suspectType",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-suspecttype-cs",
+                      "code": "suspected"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatusDate",
+                "valueDate": "2026-04-01"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MeasureReport"
+      }
     }
   ]
 }

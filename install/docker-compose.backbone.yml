@@ -18,6 +18,13 @@ services:
     environment:
       hapi.fhir.fhir_version: R4
       hapi.fhir.allow_multiple_delete: 'true'
+      # Da Vinci-RA Coding Gap MeasureReports cite evidence by logical id
+      # (Condition/<id>, Encounter/<id>) so the linkage resolves in the KNOWLEDGE GRAPH
+      # (keyed by logical id). Those are the only non-urn:uuid references in the seed
+      # bundles; allow them so the HAPI transaction load is not rejected. Evidence
+      # linkage is materialized in the graph (Path A/C), not on the FHIR server.
+      hapi.fhir.allow_external_references: 'true'
+      hapi.fhir.enforce_referential_integrity_on_write: 'false'
     healthcheck:
       test: ['CMD', 'sh', '-c', "wget -qO- http://localhost:8080/fhir/metadata || exit 1"]
       interval: 15s

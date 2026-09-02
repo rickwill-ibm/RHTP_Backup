@@ -41,6 +41,13 @@ export interface HolisticPatientContext {
   coverage?: CoverageSummary;
   utilization?: UtilizationSummary;
   alerts?: AlertSummary;
+  /**
+   * Da Vinci Risk Adjustment coding gaps (projected-graph path only). PHI-minimal and
+   * consent-filtered — a SUD-linked (Part 2) coding gap is excluded unless the read
+   * scope covers it. A coding gap is a payer-analytics HYPOTHESIS, never an asserted
+   * diagnosis, so `suspectType` is surfaced alongside `evidenceStatus`.
+   */
+  codingGaps?: CodingGapSummary;
 }
 
 /** Risk-stratification summary from RiskAssessment nodes (PHI-minimal: numbers + codes). */
@@ -70,6 +77,25 @@ export interface UtilizationSummary {
 export interface AlertSummary {
   activeCount: number;
   categories: string[];
+}
+
+/**
+ * Coding-gap summary from CodingGap nodes (Da Vinci Risk Adjustment). PHI-minimal:
+ * HCC condition-category codes, statuses, and suspect types only — never narrative.
+ */
+export interface CodingGapSummary {
+  gaps: {
+    conditionCategory: string;
+    model: string;
+    modelVersion: string;
+    evidenceStatus: string;
+    suspectType: string;
+    hierarchicalStatus: string;
+  }[];
+  /** Count of open-gaps (open + pending) — the actionable recapture backlog. */
+  openCount: number;
+  /** Count of gaps flagged `suspected` — hypotheses requiring clinical confirmation. */
+  suspectedCount: number;
 }
 
 export interface HolisticContextProvenance {

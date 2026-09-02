@@ -43,6 +43,8 @@ export const PROJECTED_SECTIONS = [
   'coverage',
   'utilization',
   'alerts',
+  // ── WPC Da Vinci Risk Adjustment (projected-graph path only).
+  'codingGaps',
 ];
 /** Sections filled with neutral null-objects (no domain mapper yet). */
 export const NEUTRAL_SECTIONS = [

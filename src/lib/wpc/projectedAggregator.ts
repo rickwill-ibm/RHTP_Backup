@@ -49,6 +49,7 @@ import {
 } from './projectedAggregator.mappers';
 import {
   mapAlerts,
+  mapCodingGaps,
   mapCoverage,
   mapRiskProfile,
   mapUtilization,
@@ -129,6 +130,7 @@ export async function buildHolisticContextFromGraph(
     coverage: mapCoverage(bundle.wholePerson),
     utilization: mapUtilization(bundle.wholePerson),
     alerts: mapAlerts(bundle.wholePerson),
+    codingGaps: mapCodingGaps(bundle.wholePerson),
     caregiverStatus: neutralCaregiver(),
     financialProfile: neutralFinancial(),
     accessProfile: mapAccess(bundle.wholePerson),

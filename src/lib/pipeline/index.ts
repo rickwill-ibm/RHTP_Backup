@@ -96,6 +96,15 @@ export { encounterFhirAdapter, type EncounterFhirPayload } from './adapters/enco
 export { riskAssessmentAdapter, type RiskAssessmentPayload } from './adapters/riskAssessment';
 export { flagAdapter, type FlagPayload } from './adapters/flag';
 export {
+  codingGapReportAdapter,
+  isRaCodingGapReport,
+  isSudConditionCategory,
+  RA_EVIDENCE_STATUS,
+  RA_SUSPECT_TYPE,
+  RA_HIERARCHICAL_STATUS,
+  type CodingGapPayload,
+} from './adapters/codingGapReport';
+export {
   medicationAdapter,
   type MedicationPayload,
   type MedicationDispensePayload,

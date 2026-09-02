@@ -34,6 +34,9 @@ import { familyHistorySpec } from './familyHistory';
 // adapters, so they add NO spec here — the record-domain count moves 20 -> 22, not 24.
 import { riskAssessmentSpec } from './riskAssessment';
 import { flagSpec } from './flag';
+// ── WPC Da Vinci Risk Adjustment (append-only): the coding gap becomes a first-class
+// PROJECTED dimension (a new record domain + spec), moving the count 22 -> 23.
+import { codingGapSpec } from './codingGap';
 // ── WPC Unit 1 (append-only): access-geography (first FHIR-fed person dimension).
 import { accessSpec } from './access';
 
@@ -63,6 +66,8 @@ export const MAPPING_SPECS: readonly MappingSpec[] = Object.freeze([
   // ── WPC payer dimensions (append-only): 20 -> 22 record domains.
   riskAssessmentSpec,
   flagSpec,
+  // ── WPC Da Vinci Risk Adjustment (append-only): 22 -> 23 record domains.
+  codingGapSpec,
 ]);
 
 /**

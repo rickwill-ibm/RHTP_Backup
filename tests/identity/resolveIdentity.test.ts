@@ -4,7 +4,9 @@ import { mockIdentitySource } from '@/lib/identity/identitySource';
 import type { IdentityTraits } from '@/lib/identity/mpiTypes';
 
 describe('resolveIdentity — cross-source resolution (Dev Plan Workstream A3)', () => {
-  it('resolves a known member deterministically via the payer and state-agency sources', () => {
+  it('resolves a known member deterministically via the genuine global medicaidId', () => {
+    // R2 Option B: cross-source consolidation is anchored on a GENUINE GLOBAL key
+    // (the Medicaid id the payer + state-agency records carry) — never name+dob.
     const input: IdentityTraits = {
       firstName: 'Maria',
       lastName: 'Redhawk',
@@ -12,6 +14,7 @@ describe('resolveIdentity — cross-source resolution (Dev Plan Workstream A3)',
       sex: 'female',
       zip: '57104',
       phone: '605-555-0142',
+      medicaidId: 'SD-MEDICAID-88213',
     };
     const result = resolveIdentity(input, 'emr', mockIdentitySource);
     expect(result.resolvedId).toMatch(/^mpi-/);

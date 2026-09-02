@@ -472,6 +472,163 @@ const COVERAGE_TYPE = {
   MEDICARE: { code: 'MR', display: 'Medicare' },
 };
 
+// ── Da Vinci Risk Adjustment Coding Gap demo data (per hl7.org/fhir/us/davinci-ra).
+// AUTHORED, pre-computed gaps exactly as a payer's RA engine emits them — the platform
+// is a CONSUMER of the report, never a producer: there is NO gap measurement/detection
+// engine here. Covers the full vocabulary (open/closed/pending · historic/suspected/
+// net-new · the four hierarchical statuses), CMS-HCC V24<->V28 coexistence (Dorothy),
+// and 42 CFR Part 2 (Robert HCC135 SUD). Evidence is resolved by ICD code to the
+// Condition the generator built, so refs stay correct across regeneration. HCC codes
+// are representative demo values.
+const RA_SD = 'http://hl7.org/fhir/us/davinci-ra/StructureDefinition';
+const RA_CS = 'http://hl7.org/fhir/us/davinci-ra/CodeSystem';
+const HCC_SYS =
+  'https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC';
+const CODING_GAPS = {
+  'dorothy-simmons': [
+    {
+      ver: '28',
+      hcc: 'HCC38',
+      disp: 'Diabetes with Glycemic, Unspecified, or No Complications',
+      status: 'closed-gap',
+      suspect: 'historic',
+      hier: 'applied-not-superseded',
+      ev: ['E11.65'],
+      enc: true,
+    },
+    {
+      ver: '24',
+      hcc: 'HCC19',
+      disp: 'Diabetes without Complication',
+      status: 'closed-gap',
+      suspect: 'historic',
+      hier: 'applied-not-superseded',
+      ev: ['E11.65'],
+      enc: true,
+    },
+  ],
+  'james-wilson': [
+    {
+      ver: '28',
+      hcc: 'HCC226',
+      disp: 'Heart Failure',
+      status: 'pending',
+      suspect: 'historic',
+      hier: 'not-applicable',
+      ev: ['I50.32'],
+      enc: true,
+    },
+    {
+      ver: '28',
+      hcc: 'HCC38',
+      disp: 'Diabetes with Glycemic, Unspecified, or No Complications',
+      status: 'closed-gap',
+      suspect: 'net-new',
+      hier: 'applied-not-superseded',
+      ev: ['E11.9'],
+      enc: true,
+    },
+  ],
+  'robert-chen': [
+    {
+      ver: '28',
+      hcc: 'HCC135',
+      disp: 'Substance Use Disorder, Moderate/Severe',
+      status: 'open-gap',
+      suspect: 'suspected',
+      hier: 'applied-not-superseded',
+      ev: ['F10.10'],
+      enc: true,
+    },
+    {
+      ver: '28',
+      hcc: 'HCC329',
+      disp: 'Chronic Kidney Disease, Stage 3',
+      status: 'closed-gap',
+      suspect: 'historic',
+      hier: 'applied-not-superseded',
+      ev: ['N18.32'],
+      enc: false,
+    },
+  ],
+  'lisa-thompson': [
+    {
+      ver: '28',
+      hcc: 'HCC277',
+      disp: 'Chronic Obstructive Pulmonary Disease',
+      status: 'open-gap',
+      suspect: 'suspected',
+      hier: 'applied-not-superseded',
+      ev: ['J45.50'],
+      enc: true,
+    },
+  ],
+  'alex-kirby': [
+    {
+      ver: '28',
+      hcc: 'HCC38',
+      disp: 'Diabetes with Glycemic, Unspecified, or No Complications',
+      status: 'open-gap',
+      suspect: 'suspected',
+      hier: '',
+      ev: [],
+    },
+  ],
+};
+
+function buildCodingGap(slug, patientUuid, entries, g, idx) {
+  const ext = [
+    {
+      url: `${RA_SD}/ra-evidenceStatus`,
+      valueCodeableConcept: {
+        coding: [{ system: `${RA_CS}/ra-evidencestatus-cs`, code: g.status }],
+      },
+    },
+    {
+      url: `${RA_SD}/ra-suspectType`,
+      valueCodeableConcept: { coding: [{ system: `${RA_CS}/ra-suspecttype-cs`, code: g.suspect }] },
+    },
+  ];
+  if (g.hier)
+    ext.push({
+      url: `${RA_SD}/ra-hierarchicalStatus`,
+      valueCodeableConcept: {
+        coding: [{ system: `${RA_CS}/ra-hierarchicalstatus-cs`, code: g.hier }],
+      },
+    });
+  ext.push({ url: `${RA_SD}/ra-evidenceStatusDate`, valueDate: '2026-04-01' });
+  const condIdByIcd = {};
+  for (const en of entries)
+    if (en.resource.resourceType === 'Condition')
+      condIdByIcd[en.resource.code?.coding?.[0]?.code] = en.resource.id;
+  const encId = entries.find((en) => en.resource.resourceType === 'Encounter')?.resource.id;
+  const evRefs = [];
+  for (const icd of g.ev) if (condIdByIcd[icd]) evRefs.push(`Condition/${condIdByIcd[icd]}`);
+  if (g.enc && encId) evRefs.push(`Encounter/${encId}`);
+  const mr = {
+    resourceType: 'MeasureReport',
+    id: `${slug}-codinggap-${idx + 1}`,
+    status: 'complete',
+    type: 'individual',
+    measure: `http://tcoc.example.org/Measure/RA-CMS-HCC|${g.ver}`,
+    subject: { reference: patientUuid },
+    period: { start: '2026-01-01', end: '2026-09-30' },
+    group: [
+      {
+        id: 'g1',
+        code: { coding: [{ system: HCC_SYS, code: g.hcc, display: g.disp }] },
+        extension: ext,
+      },
+    ],
+  };
+  if (evRefs.length)
+    mr.evaluatedResource = evRefs.map((r) => ({
+      reference: r,
+      extension: [{ url: `${RA_SD}/ra-groupReference`, valueString: 'g1' }],
+    }));
+  return mr;
+}
+
 function buildBundle(pid) {
   const e = ENRICH[pid];
   const entries = [];
@@ -996,6 +1153,12 @@ function buildBundle(pid) {
     else if (res.resourceType === 'Flag') finalizeFlag(res);
     add(res);
   }
+
+  // Da Vinci-RA Coding Gap MeasureReports (authored demo data; evidence resolved by
+  // ICD code against the Conditions built above, so refs stay valid across regen).
+  (CODING_GAPS[e.slug] || []).forEach((g, i) =>
+    add(buildCodingGap(e.slug, patientUuid, entries, g, i))
+  );
 
   return { resourceType: 'Bundle', type: 'transaction', entry: entries };
 }

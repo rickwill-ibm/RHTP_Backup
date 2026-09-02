@@ -361,5 +361,86 @@ for (const backend of BACKENDS) {
         expect(covered.part2Restricted.nodes.some((n) => n.restricted)).toBe(true);
       });
     });
+
+    // ── 7. Da Vinci Risk Adjustment coding gaps PROJECT (seed demo data) ─────────
+    describe('7. coding gaps project from the seed MeasureReports (KG data, not computed)', () => {
+      it('each patient admits its authored coding gaps; conservation still holds', () => {
+        // one single-group MeasureReport -> one projected CodingGap, so the balance
+        // invariant (admitted + quarantined + nonProjected === countIn) is preserved.
+        const expected: Record<Slug, number> = {
+          'dorothy-simmons': 2,
+          'james-wilson': 2,
+          'robert-chen': 2,
+          'lisa-thompson': 1,
+          'alex-kirby': 1,
+        };
+        for (const slug of SLUGS) {
+          const n = expected[slug];
+          const res = L.results.get(slug)!;
+          expect(res.admittedByDomain['coding-gap'] ?? 0).toBe(n);
+          const admitted = Object.values(res.admittedByDomain).reduce((a, b) => a + b, 0);
+          const nonProjected = Object.values(res.nonProjected).reduce((a, b) => a + b, 0);
+          expect(admitted + res.quarantined.length + nonProjected).toBe(res.totalResources);
+          // MeasureReport is NOT in the non-projected census — it projects.
+          expect(res.nonProjected['MeasureReport'] ?? 0).toBe(0);
+          expect(res.nonProjected['MeasureReport:non-ra'] ?? 0).toBe(0);
+        }
+      });
+
+      it('dorothy shows CMS-HCC V24 AND V28 coding gaps coexisting (the blend)', async () => {
+        const res = L.results.get('dorothy-simmons')!;
+        const lb = await readMemberLensBundle(L.graph, res.memberId, NO_CONSENT);
+        const gaps = lb.wholePerson.nodes.filter((n) => n.kind === 'CodingGap');
+        expect(gaps.length).toBe(2); // V24 + V28, never collapsed onto one node
+        expect(gaps.map((g) => String(g.properties.modelVersion)).sort()).toEqual(['V24', 'V28']);
+        // both are diabetes gaps, PHI-minimal (codes/status only, no rationale narrative).
+        for (const g of gaps) {
+          expect(String(g.properties.evidenceStatus)).toBe('closed-gap');
+          expect(JSON.stringify(g.properties)).not.toMatch(/rationale|narrative|note/i);
+        }
+      });
+
+      it('robert: the SUD coding gap is Part 2-restricted; the CKD gap is not', async () => {
+        const res = L.results.get('robert-chen')!;
+        const noConsent = await readMemberLensBundle(L.graph, res.memberId, NO_CONSENT);
+        const covered = await readMemberLensBundle(L.graph, res.memberId, { part2: true });
+        const gapsNo = noConsent.wholePerson.nodes.filter((n) => n.kind === 'CodingGap');
+        const gapsCov = covered.wholePerson.nodes.filter((n) => n.kind === 'CodingGap');
+        // under NO_CONSENT only the non-SUD CKD gap shows; the SUD gap is hidden.
+        expect(gapsNo.map((g) => String(g.properties.conditionCategory))).toEqual(['HCC329']);
+        // under a Part 2 grant BOTH show, and the SUD gap is flagged restricted.
+        expect(gapsCov.length).toBe(2);
+        const sud = gapsCov.find((g) => String(g.properties.conditionCategory) === 'HCC135');
+        expect(sud).toBeDefined();
+        expect(sud!.restricted).toBe(true);
+        expect(String(sud!.properties.suspectType)).toBe('suspected');
+      });
+
+      it('a coding gap CITES evidence via a neutral Evidence node — never mints a Condition', async () => {
+        const res = L.results.get('dorothy-simmons')!;
+        // the V28 diabetes gap cites dorothy's real Condition + Encounter.
+        const gapKey = 'CodingGap/dorothy-simmons-codinggap-1:CMS-HCC-V28:g1:HCC38';
+        const edges = await L.graph.listEdges({ fromKey: gapKey });
+        const supported = edges.filter((e) => e.type === 'SUPPORTED_BY');
+        expect(supported.length).toBe(2); // Condition + Encounter citations
+        for (const e of supported) expect(e.to.kind).toBe('Evidence'); // never a clinical kind
+        expect(supported.some((e) => e.to.key === 'Condition/dorothy-simmons-condition-2')).toBe(
+          true
+        );
+      });
+
+      it('alex: the suspected gap projects but mints no Condition (firewall on the uncoded fixture)', async () => {
+        const res = L.results.get('alex-kirby')!;
+        const lb = await readMemberLensBundle(L.graph, res.memberId, NO_CONSENT);
+        const gaps = lb.wholePerson.nodes.filter((n) => n.kind === 'CodingGap');
+        expect(gaps.length).toBe(1);
+        expect(String(gaps[0].properties.suspectType)).toBe('suspected');
+        expect(String(gaps[0].properties.evidenceStatus)).toBe('open-gap');
+        // the holistic context surfaces it as a hypothesis (suspectedCount), not a dx.
+        const ctx = await buildHolisticContextFromGraph(L.graph, res.memberId);
+        expect(ctx.codingGaps!.suspectedCount).toBeGreaterThanOrEqual(1);
+        expect(ctx.codingGaps!.openCount).toBeGreaterThanOrEqual(1);
+      });
+    });
   });
 }

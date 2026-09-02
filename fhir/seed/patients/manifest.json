@@ -3,7 +3,7 @@
     "pid": "patient-dorothy-042",
     "slug": "dorothy-simmons",
     "file": "fhir/seed/patients/dorothy-simmons.bundle.json",
-    "entries": 50,
+    "entries": 52,
     "resourceTypes": {
       "Organization": 4,
       "Patient": 1,
@@ -20,14 +20,15 @@
       "CareTeam": 1,
       "CarePlan": 1,
       "Flag": 2,
-      "RiskAssessment": 1
+      "RiskAssessment": 1,
+      "MeasureReport": 2
     }
   },
   {
     "pid": "patient-james-087",
     "slug": "james-wilson",
     "file": "fhir/seed/patients/james-wilson.bundle.json",
-    "entries": 42,
+    "entries": 44,
     "resourceTypes": {
       "Organization": 3,
       "Patient": 1,
@@ -44,14 +45,15 @@
       "CareTeam": 1,
       "CarePlan": 1,
       "Flag": 2,
-      "RiskAssessment": 1
+      "RiskAssessment": 1,
+      "MeasureReport": 2
     }
   },
   {
     "pid": "patient-robert-103",
     "slug": "robert-chen",
     "file": "fhir/seed/patients/robert-chen.bundle.json",
-    "entries": 38,
+    "entries": 40,
     "resourceTypes": {
       "Organization": 3,
       "Patient": 1,
@@ -69,14 +71,15 @@
       "CareTeam": 1,
       "CarePlan": 1,
       "Flag": 2,
-      "RiskAssessment": 1
+      "RiskAssessment": 1,
+      "MeasureReport": 2
     }
   },
   {
     "pid": "patient-lisa-156",
     "slug": "lisa-thompson",
     "file": "fhir/seed/patients/lisa-thompson.bundle.json",
-    "entries": 36,
+    "entries": 37,
     "resourceTypes": {
       "Organization": 3,
       "Patient": 1,
@@ -93,14 +96,15 @@
       "CareTeam": 1,
       "CarePlan": 1,
       "Flag": 2,
-      "RiskAssessment": 1
+      "RiskAssessment": 1,
+      "MeasureReport": 1
     }
   },
   {
     "pid": "patient-alex-kirby",
     "slug": "alex-kirby",
     "file": "fhir/seed/patients/alex-kirby.bundle.json",
-    "entries": 51,
+    "entries": 52,
     "resourceTypes": {
       "Organization": 2,
       "Patient": 1,
@@ -109,7 +113,8 @@
       "Condition": 5,
       "ServiceRequest": 2,
       "Task": 6,
-      "Flag": 1
+      "Flag": 1,
+      "MeasureReport": 1
     }
   }
 ]

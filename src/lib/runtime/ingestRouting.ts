@@ -37,6 +37,8 @@ import {
   encounterFhirAdapter,
   riskAssessmentAdapter,
   flagAdapter,
+  codingGapReportAdapter,
+  isRaCodingGapReport,
   isSocialHistory,
   isSurvey,
   isBehavioralHealthDiagnosis,
@@ -194,6 +196,14 @@ export function route(resources: FhirResource[]): {
         break;
       case 'CareTeam':
         put(careTeamAdapter as DomainAdapter<unknown>, r);
+        break;
+      case 'MeasureReport':
+        // A Da Vinci-RA Coding Gap MeasureReport PROJECTS (coding-gap dimension); any
+        // OTHER MeasureReport (e.g. a quality measure) is by-design non-projected under
+        // a distinct, loud census key so an RA report can never be silently absorbed
+        // into it, nor a quality report silently routed to the coding-gap lane.
+        if (isRaCodingGapReport(r)) put(codingGapReportAdapter as DomainAdapter<unknown>, r);
+        else drop(r, 'MeasureReport:non-ra');
         break;
       default:
         drop(r);

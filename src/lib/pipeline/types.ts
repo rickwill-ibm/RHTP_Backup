@@ -10,11 +10,7 @@
  */
 
 export type PipelineStage =
-  | 'land'
-  | 'stage-validate'
-  | 'transform-enrich'
-  | 'conform-load'
-  | 'project-propagate';
+  'land' | 'stage-validate' | 'transform-enrich' | 'conform-load' | 'project-propagate';
 
 /** The three arrival modes §4A names; the transform is identical across them. */
 export type ArrivalMode = 'batch' | 'stream' | 'micro-batch';
@@ -46,7 +42,14 @@ export type WpcDomain =
   // tests/pipeline/domainRecordCount.test.ts). Do NOT reorder the block above.
   | 'conditions'
   | 'diagnostic-reports'
-  | 'family-history';
+  | 'family-history'
+  // ── WPC payer dimensions (append-only): RiskAssessment + Flag become first-class
+  // PROJECTED dimensions, each a NEW record domain with its own mapping spec, moving
+  // the C9 record-domain count 20 -> 22 (asserted 22/22 by
+  // tests/pipeline/domainRecordCount.test.ts). Coverage/Encounter are NOT new here —
+  // they already exist above and only gain FHIR-JSON adapters. Do NOT reorder.
+  | 'risk-assessment'
+  | 'flag';
 
 export type Tier = 'T1' | 'T2' | 'T3';
 
@@ -80,6 +83,13 @@ export interface DemographicTraits {
   medicaidId?: string;
   zip?: string;
   phone?: string;
+  /**
+   * A source-LOCAL identifier (e.g. an MRN), scoped to its assigning authority.
+   * Mirrors IdentityTraits.localId (lib/identity/mpiTypes.ts). NEVER a cross-source
+   * deterministic key: only a same-authority + same-value pair agrees — a reused
+   * value under a different authority is a different person and must not merge.
+   */
+  localId?: { assigningAuthority: string; value: string };
 }
 
 /**
@@ -91,6 +101,14 @@ export interface DemographicTraits {
 export interface ResolveIdentityTraits {
   feed?: string;
   demographics?: DemographicTraits;
+  /**
+   * Namespace for the raw source id in the cross-reference index. Defaults to a
+   * single shared 'global' namespace (backward-compatible: feed-only callers all
+   * share it, so the same id under two feeds still consolidates). A source-scoped
+   * caller passes a per-authority scope so a REUSED id value across authorities
+   * does not collide in the xref (R2 Option B; empiResolver scopeKey).
+   */
+  idScope?: string;
 }
 
 /**
@@ -101,10 +119,7 @@ export interface ResolveIdentityTraits {
  * silently; runTransform catches it and routes the record to the held-for-review
  * lane. Id-only calls (no demographics) always resolve deterministically.
  */
-export type IdentityResolver = (
-  sourceMemberId: string,
-  traits?: ResolveIdentityTraits,
-) => string;
+export type IdentityResolver = (sourceMemberId: string, traits?: ResolveIdentityTraits) => string;
 
 /** Stage 1 output: immutable, cataloged landing of one payload. Nothing transformed. */
 export interface LandedBatch {
@@ -181,8 +196,7 @@ export interface QuarantineRecord {
 }
 
 export type TransformOutcome =
-  | { ok: true; record: NormalizedRecord }
-  | { ok: false; quarantine: QuarantineRecord };
+  { ok: true; record: NormalizedRecord } | { ok: false; quarantine: QuarantineRecord };
 
 /** Reconciliation gate output (§4A stage 4): counts in = loaded + rejected. */
 export interface ReconciliationReport {

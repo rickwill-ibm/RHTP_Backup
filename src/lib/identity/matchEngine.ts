@@ -67,7 +67,20 @@ export interface DeterministicResult {
   rule: string | null;
 }
 
-/** Deterministic rules, in priority order. Any hit is treated as a certain match. */
+/**
+ * Deterministic rules, in priority order. Any hit is treated as a certain match.
+ *
+ * Only GLOBAL deterministic keys auto-merge across sources:
+ *   - medicaidId-exact            — a genuinely enterprise-global id.
+ *   - ssnLast4+dob-exact          — global.
+ *   - localId-same-source-exact   — a source-LOCAL id (e.g. an MRN) agrees ONLY
+ *       when BOTH the value AND the assigning authority match. A reused id value
+ *       under a DIFFERENT authority is a different person and must not merge.
+ *
+ * name+dob is deliberately NOT deterministic (R2 Option B): identical name+dob
+ * with no other agreeing trait is a possible-match, HELD for steward review —
+ * never an automatic cross-person merge (the PHI-comingling defect this closes).
+ */
 export function runDeterministicRules(a: IdentityTraits, b: IdentityTraits): DeterministicResult {
   if (bothPresentAndEqual(a.medicaidId, b.medicaidId)) {
     return { hit: true, rule: 'medicaidId-exact' };
@@ -75,12 +88,15 @@ export function runDeterministicRules(a: IdentityTraits, b: IdentityTraits): Det
   if (bothPresentAndEqual(a.ssnLast4, b.ssnLast4) && bothPresentAndEqual(a.dob, b.dob)) {
     return { hit: true, rule: 'ssnLast4+dob-exact' };
   }
+  // Source-local id: same value AND same assigning authority (both-present-and-equal
+  // on each). Different-authority reuse of the same value never fires.
   if (
-    bothPresentAndEqual(a.dob, b.dob) &&
-    bothPresentAndEqual(a.firstName, b.firstName) &&
-    bothPresentAndEqual(a.lastName, b.lastName)
+    a.localId &&
+    b.localId &&
+    bothPresentAndEqual(a.localId.value, b.localId.value) &&
+    bothPresentAndEqual(a.localId.assigningAuthority, b.localId.assigningAuthority)
   ) {
-    return { hit: true, rule: 'name+dob-exact' };
+    return { hit: true, rule: 'localId-same-source-exact' };
   }
   return { hit: false, rule: null };
 }
@@ -120,7 +136,10 @@ export function scoreProbabilisticMatch(a: IdentityTraits, b: IdentityTraits): P
     ruleHits.push({ rule: 'phone-match', weight: 10 });
   }
 
-  const score = Math.min(100, ruleHits.reduce((sum, h) => sum + h.weight, 0));
+  const score = Math.min(
+    100,
+    ruleHits.reduce((sum, h) => sum + h.weight, 0)
+  );
   return { score, ruleHits };
 }
 

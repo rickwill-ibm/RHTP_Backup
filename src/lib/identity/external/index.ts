@@ -38,7 +38,7 @@ export function setIdentityResolverKind(kind: IdentityResolverKind | null | unde
   }
   if (!isKind(kind)) {
     throw new TypeError(
-      `setIdentityResolverKind: invalid kind '${String(kind)}' (valid: ${IDENTITY_RESOLVER_KINDS.join(', ')})`,
+      `setIdentityResolverKind: invalid kind '${String(kind)}' (valid: ${IDENTITY_RESOLVER_KINDS.join(', ')})`
     );
   }
   override.value = kind;
@@ -90,7 +90,14 @@ export type {
   FhirTransportResponse,
 } from './types';
 export { ExternalEmpiNotConfiguredError } from './types';
-export { createPixPdqResolver, pixPdqResolver, pixPdqIdentityResolver } from './pixPdqResolver';
+export {
+  createPixPdqResolver,
+  pixPdqResolver,
+  pixPdqIdentityResolver,
+  setProductionPixPdqConfig,
+  getProductionPixPdqResolver,
+  assigningAuthorityToScope,
+} from './pixPdqResolver';
 export {
   createPixmPdqmResolver,
   pixmPdqmResolver,

@@ -1,0 +1,2118 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Ozark Regional FQHC",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-organization-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c04f6d57-22fd-4d9e-8dc5-d6465126de29",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Medicare (CMS)",
+        "id": "dorothy-simmons-organization-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e",
+      "resource": {
+        "resourceType": "Patient",
+        "active": true,
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://tcoc.example.org/fhir/sid/mrn",
+            "value": "MRN-0042"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Simmons",
+            "given": [
+              "Dorothy"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1951-03-14",
+        "managingOrganization": {
+          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+        },
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(417) 555-0198",
+            "use": "home"
+          }
+        ],
+        "address": [
+          {
+            "use": "home",
+            "city": "Ozark",
+            "state": "MO",
+            "country": "US"
+          }
+        ],
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "system": "urn:ietf:bcp:47",
+                  "code": "en"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ],
+        "id": "dorothy-simmons"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0",
+      "resource": {
+        "resourceType": "Practitioner",
+        "active": true,
+        "name": [
+          {
+            "family": "Whitfield",
+            "given": [
+              "—"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-practitioner-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dfa28d4c-5358-43ba-9bfa-9264c1317375",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "practitioner": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "organization": {
+          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+                "code": "doctor",
+                "display": "Doctor"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-practitionerrole-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d8c5c63f-57af-4328-a572-7f2f9b5fd362",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MR",
+              "display": "Medicare"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:c04f6d57-22fd-4d9e-8dc5-d6465126de29"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "dorothy-simmons-coverage-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Coverage"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:694394f7-bc7e-4455-9c22-939a0a6da485",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+        },
+        "period": {
+          "start": "2026-04-15T09:00:00Z",
+          "end": "2026-04-15T09:40:00Z"
+        },
+        "id": "dorothy-simmons-encounter-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4043684c-41eb-4c4b-9403-0624c412976b",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I50.32",
+              "display": "Chronic diastolic (congestive) heart failure"
+            }
+          ],
+          "text": "Chronic diastolic (congestive) heart failure"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2019-03-01",
+        "id": "dorothy-simmons-condition-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:eec307c5-4c1d-4a34-b34f-df23e4f8ad7e",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.65",
+              "display": "Type 2 diabetes mellitus with hyperglycemia"
+            }
+          ],
+          "text": "Type 2 diabetes mellitus with hyperglycemia"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2014-07-01",
+        "id": "dorothy-simmons-condition-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d4b41790-3981-4435-9461-d94d101ec068",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "J44.1",
+              "display": "COPD with (acute) exacerbation"
+            }
+          ],
+          "text": "COPD with (acute) exacerbation"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2021-11-01",
+        "id": "dorothy-simmons-condition-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4795ec01-effb-4963-9a11-ab06365838ad",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            }
+          ],
+          "text": "Essential (primary) hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2012-03-01",
+        "id": "dorothy-simmons-condition-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b66fb18a-1575-457c-933a-f05033cad471",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E66.01",
+              "display": "Morbid (severe) obesity due to excess calories"
+            }
+          ],
+          "text": "Morbid (severe) obesity due to excess calories"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2016-05-01",
+        "id": "dorothy-simmons-condition-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:31d33f5f-8c34-4b60-9e3d-7bb085ac62ae",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "N18.3",
+              "display": "Chronic kidney disease, stage 3 (moderate)"
+            }
+          ],
+          "text": "Chronic kidney disease, stage 3 (moderate)"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2022-09-01",
+        "id": "dorothy-simmons-condition-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d818e6d3-f37f-4d89-9d09-06fbb865c3c1",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "F32.1",
+              "display": "Major depressive disorder, single episode, moderate"
+            }
+          ],
+          "text": "Major depressive disorder, single episode, moderate"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2023-02-01",
+        "id": "dorothy-simmons-condition-7"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fd57e108-c867-4a66-9847-31114f314f85",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "4603",
+              "display": "Furosemide"
+            }
+          ],
+          "text": "Furosemide 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "40 mg once daily"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fd239b64-cee9-43f6-994e-f99eb437084f",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "6809",
+              "display": "Metformin"
+            }
+          ],
+          "text": "Metformin hydrochloride 1000 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1000 mg twice daily"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fa90d570-c0db-4018-bf11-00a01cbcd6b4",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "11289",
+              "display": "Warfarin"
+            }
+          ],
+          "text": "Warfarin sodium 5 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "5 mg once daily"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0e37ff63-bb4d-45ca-830f-850a1b3d3517",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "69120",
+              "display": "Tiotropium"
+            }
+          ],
+          "text": "Tiotropium bromide 18 mcg inhalation powder"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "18 mcg once daily, inhaled"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d29189a3-362f-41db-bfed-56e1dd0a483d",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "29046",
+              "display": "Lisinopril"
+            }
+          ],
+          "text": "Lisinopril 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "20 mg once daily"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7cc9dd8e-708c-4664-8b79-66f5204dd845",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "83367",
+              "display": "Atorvastatin"
+            }
+          ],
+          "text": "Atorvastatin 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "dosageInstruction": [
+          {
+            "text": "40 mg once nightly"
+          }
+        ],
+        "id": "dorothy-simmons-medicationrequest-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7329d16a-6560-4c06-896f-b9aeff94a656",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c"
+            }
+          ],
+          "text": "Hemoglobin A1c"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 9.2,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-observation-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:527e48cc-e1dc-4dee-96b1-761bf6096acf",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "30934-4",
+              "display": "Natriuretic peptide B (BNP)"
+            }
+          ],
+          "text": "Natriuretic peptide B (BNP)"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-28",
+        "valueQuantity": {
+          "value": 842,
+          "unit": "pg/mL",
+          "system": "http://unitsofmeasure.org",
+          "code": "pg/mL"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "HH"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-observation-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1449c168-a1cd-4bbd-8e36-d2b041ed14d9",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33914-3",
+              "display": "eGFR"
+            }
+          ],
+          "text": "eGFR"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 38,
+          "unit": "mL/min/1.73m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL/min/1.73m2"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "L"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-observation-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1eb013d1-a97f-4c69-a5b0-09af9d84e125",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "10230-1",
+              "display": "Left ventricular ejection fraction"
+            }
+          ],
+          "text": "Left ventricular ejection fraction"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-12",
+        "valueQuantity": {
+          "value": 35,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "L"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-observation-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3955d2eb-c60b-4545-8bd6-f920739b8dbc",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "71802-3",
+              "display": "Housing status"
+            }
+          ],
+          "text": "Housing status"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Stable"
+        },
+        "id": "dorothy-simmons-observation-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:63833525-f398-438d-8338-dcaa32df509d",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "88122-7",
+              "display": "Food insecurity risk"
+            }
+          ],
+          "text": "Food insecurity risk"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Screened — no food insecurity"
+        },
+        "id": "dorothy-simmons-observation-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:aca47096-0da7-4fc7-a6f4-517388b3a1fd",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93030-5",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Barrier — kept from care"
+        },
+        "id": "dorothy-simmons-observation-7"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5926afa4-24ad-4b05-852f-8377a384d61e",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76513-1",
+              "display": "Financial resource strain"
+            }
+          ],
+          "text": "Financial resource strain"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Not flagged"
+        },
+        "id": "dorothy-simmons-observation-8"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1162406e-82f1-49c1-9f09-9dd6d0fa3958",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes",
+                "code": "sdoh-category-unspecified",
+                "display": "SDOH Category Unspecified"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z59.82",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "onsetDateTime": "2026-02-14",
+        "id": "dorothy-simmons-condition-8"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Unite Us Transportation Network",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "other",
+                "display": "Community-Based Organization"
+              }
+            ],
+            "text": "Community-Based Organization (CBO)"
+          }
+        ],
+        "id": "dorothy-simmons-organization-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:02a9b59e-cf9f-47fd-9ffe-db6ae2a510a4",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Non-emergency medical transportation",
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "T2003",
+              "display": "Non-emergency transportation; encounter/trip"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-02-14",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08"
+          }
+        ],
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:1162406e-82f1-49c1-9f09-9dd6d0fa3958"
+          }
+        ],
+        "id": "dorothy-simmons-servicerequest-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:db88af15-1741-4cf2-aa15-414e42bcac94",
+      "resource": {
+        "resourceType": "Task",
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill",
+              "display": "Fulfill the focal request"
+            }
+          ]
+        },
+        "description": "Closed-loop CBO referral: Non-emergency medical transportation",
+        "focus": {
+          "reference": "urn:uuid:02a9b59e-cf9f-47fd-9ffe-db6ae2a510a4"
+        },
+        "for": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "owner": {
+          "reference": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08"
+        },
+        "authoredOn": "2026-02-14",
+        "businessStatus": {
+          "text": "In progress — referral #TU-48821"
+        },
+        "id": "dorothy-simmons-task-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5e481b32-1b97-4908-86fe-66fc83d8fd07",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 14,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H"
+              }
+            ]
+          }
+        ],
+        "id": "dorothy-simmons-observation-9"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:485bf06f-dea0-416b-8cdd-8ac17d874f9b",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C total score"
+            }
+          ],
+          "text": "AUDIT-C total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 2,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "id": "dorothy-simmons-observation-10"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Cascade Valley Behavioral Health",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ],
+            "text": "Behavioral Health Provider"
+          }
+        ],
+        "id": "dorothy-simmons-organization-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7d0038ed-3fdf-4d0f-8870-65ecfe2b5c53",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Behavioral health referral",
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "90791",
+              "display": "Psychiatric diagnostic evaluation"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "authoredOn": "2026-03-15",
+        "requester": {
+          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f"
+          }
+        ],
+        "reasonCode": [
+          {
+            "text": "Moderate depression (PHQ-9 14)"
+          }
+        ],
+        "id": "dorothy-simmons-servicerequest-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ffa4abc0-8dc8-4316-aa01-1ef1608f627a",
+      "resource": {
+        "resourceType": "Task",
+        "status": "requested",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill"
+            }
+          ]
+        },
+        "description": "Closed-loop behavioral-health referral",
+        "focus": {
+          "reference": "urn:uuid:7d0038ed-3fdf-4d0f-8870-65ecfe2b5c53"
+        },
+        "for": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "owner": {
+          "reference": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f"
+        },
+        "authoredOn": "2026-03-15",
+        "businessStatus": {
+          "text": "Referred — awaiting engagement"
+        },
+        "id": "dorothy-simmons-task-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b146c480-5373-4a22-8ca6-9cf64b83fcf1",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c"
+            }
+          ],
+          "text": "A1C < 8.0% by Q3 2026"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-goal-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:665ed6c8-d97c-4475-8a66-63c250d76ade",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel"
+            }
+          ],
+          "text": "Blood pressure < 130/80 by Q2 2026"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-goal-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:82399483-2986-44d4-80d8-ad3505d7a962",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "734163000",
+              "display": "Care plan"
+            }
+          ],
+          "text": "Spirometry completed by May 2026"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-goal-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b25558fc-7b46-4793-8fd3-74ab015a5b6f",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 score < 10 by Q3 2026"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-goal-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3eb76341-3326-4e22-b50e-6752aa9e8042",
+      "resource": {
+        "resourceType": "CareTeam",
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "participant": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "446050000",
+                    "display": "Primary care physician"
+                  }
+                ]
+              }
+            ],
+            "member": {
+              "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+            }
+          }
+        ],
+        "managingOrganization": [
+          {
+            "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+          }
+        ],
+        "id": "dorothy-simmons-careteam-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "CareTeam"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9fcdf991-2fbc-4301-9fae-c99631b696f2",
+      "resource": {
+        "resourceType": "CarePlan",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "careTeam": [
+          {
+            "reference": "urn:uuid:3eb76341-3326-4e22-b50e-6752aa9e8042"
+          }
+        ],
+        "addresses": [
+          {
+            "reference": "urn:uuid:4043684c-41eb-4c4b-9403-0624c412976b"
+          },
+          {
+            "reference": "urn:uuid:eec307c5-4c1d-4a34-b34f-df23e4f8ad7e"
+          },
+          {
+            "reference": "urn:uuid:d4b41790-3981-4435-9461-d94d101ec068"
+          },
+          {
+            "reference": "urn:uuid:4795ec01-effb-4963-9a11-ab06365838ad"
+          },
+          {
+            "reference": "urn:uuid:b66fb18a-1575-457c-933a-f05033cad471"
+          },
+          {
+            "reference": "urn:uuid:31d33f5f-8c34-4b60-9e3d-7bb085ac62ae"
+          },
+          {
+            "reference": "urn:uuid:d818e6d3-f37f-4d89-9d09-06fbb865c3c1"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "urn:uuid:b146c480-5373-4a22-8ca6-9cf64b83fcf1"
+          },
+          {
+            "reference": "urn:uuid:665ed6c8-d97c-4475-8a66-63c250d76ade"
+          },
+          {
+            "reference": "urn:uuid:82399483-2986-44d4-80d8-ad3505d7a962"
+          },
+          {
+            "reference": "urn:uuid:b25558fc-7b46-4793-8fd3-74ab015a5b6f"
+          }
+        ],
+        "id": "dorothy-simmons-careplan-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "CarePlan"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7cdf340e-a6b2-410f-a65f-fca7ac1fd3f0",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 42
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "gap-1"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Spirometry (COPD)"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "valueInteger": 42,
+        "note": [
+          {
+            "text": "Care gap open for 42 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "dorothy-simmons-observation-11"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e7a7f266-fe26-4654-9356-f63379ad815f",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 61
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "gap-4"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "A1C Recheck"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "valueInteger": 61,
+        "note": [
+          {
+            "text": "Care gap open for 61 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "dorothy-simmons-observation-12"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d40362cc-2b00-496f-a067-414f6059379a",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "BH"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "In Progress"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 21
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "gap-7"
+          }
+        ],
+        "status": "registered",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75626-2",
+                "display": "BH Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "PHQ-9 Follow-up"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "valueInteger": 21,
+        "note": [
+          {
+            "text": "Care gap open for 21 days. Domain: BH. Status: In Progress."
+          }
+        ],
+        "id": "dorothy-simmons-observation-13"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:516b009d-a98d-4827-8fc2-2d1cc9a83256",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Social"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "In Progress"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 18
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "gap-9"
+          }
+        ],
+        "status": "registered",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75630-4",
+                "display": "Social Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Transport Referral — Active"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "valueInteger": 18,
+        "note": [
+          {
+            "text": "Care gap open for 18 days. Domain: Social. Status: In Progress."
+          }
+        ],
+        "id": "dorothy-simmons-observation-14"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:10fe1bef-88dd-4f01-b183-6d4cbaa36b32",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "Moderate depression. BH referral to Cascade Valley BH sent Mar 15 — not engaged."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-dorothy-1"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "critical",
+              "display": "error"
+            }
+          ],
+          "text": "PHQ-9 14 — BH referral open since Mar 15, not engaged"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-flag-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Flag"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:19dc2549-9b4d-4741-aa7f-2791e176922e",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "Active COPD exacerbation episode. Follow-up within 7 days required per care plan."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-dorothy-2"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "warning",
+              "display": "warning"
+            }
+          ],
+          "text": "COPD Exacerbation — spirometry overdue 42 days"
+        },
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "id": "dorothy-simmons-flag-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Flag"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c2840782-375b-4f29-be24-42cba0798afb",
+      "resource": {
+        "resourceType": "RiskAssessment",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/raf-score",
+            "valueDecimal": 3.42
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-suspects",
+            "valueInteger": 4
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-value",
+            "valueDecimal": 24800
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+        },
+        "prediction": [
+          {
+            "outcome": {
+              "text": "Emergency Room Visit"
+            },
+            "probabilityDecimal": 0.84,
+            "rationale": "Predicted ER risk 84% based on RAF score 3.42 and clinical profile."
+          }
+        ],
+        "id": "dorothy-simmons-riskassessment-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "RiskAssessment"
+      }
+    }
+  ]
+}

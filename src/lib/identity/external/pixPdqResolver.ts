@@ -12,7 +12,10 @@
  * alone is not a live MPI, so the default (unwired) resolver still fails loud.
  */
 import type { IdentityResolver } from '@/lib/pipeline/types';
+import { getDataMode } from '@/lib/config/dataMode';
 import { buildPdqQuery, buildPixQuery, parsePdqResponse, parsePixResponse } from './hl7v2';
+import { identityResolverKind } from './index';
+import { GLOBAL_SCOPE } from '../empiResolver';
 import {
   ExternalEmpiNotConfiguredError,
   type ExternalIdentityResolver,
@@ -67,7 +70,7 @@ function controlIdFor(seed: string): string {
  */
 export function createPixPdqResolver(
   config?: PixPdqConfig,
-  transport?: Hl7v2Transport,
+  transport?: Hl7v2Transport
 ): ExternalIdentityResolver {
   return {
     id: 'external-pixpdq-hl7v2',
@@ -75,7 +78,9 @@ export function createPixPdqResolver(
     async crossReference(query: PixQuery): Promise<PixResponse> {
       const cfg = requireConfig('PIX cross-reference (QBP^Q23 / RSP^K23)', config);
       const send = requireTransport('PIX cross-reference (QBP^Q23 / RSP^K23)', transport);
-      const controlId = controlIdFor(`Q23:${query.sourceAssigningAuthority}:${query.sourcePatientId}`);
+      const controlId = controlIdFor(
+        `Q23:${query.sourceAssigningAuthority}:${query.sourcePatientId}`
+      );
       const request = buildPixQuery(query, cfg, controlId);
       const raw = await send(request);
       return parsePixResponse(raw, cfg.assigningAuthorityOid);
@@ -94,6 +99,55 @@ export function createPixPdqResolver(
 
 /** Default PIX/PDQ resolver with no config/transport (throws until wired). */
 export const pixPdqResolver: ExternalIdentityResolver = createPixPdqResolver();
+
+// ─── Production composition-root wiring (fail-closed) ─────────────────────────
+/**
+ * Registered production PIX/PDQ config + MLLP transport. Analogous to
+ * setProductionIdentitySource (identitySource.ts): the composition root wires a
+ * REAL endpoint here; nothing else may reach the network. Held null until wired,
+ * so the default fails closed. A config shape WITHOUT a transport stays null — a
+ * shape alone is not a live MPI.
+ */
+let productionPixPdq: { config: PixPdqConfig; transport: Hl7v2Transport } | null = null;
+
+/** Register (or clear, with null) the production PIX/PDQ endpoint (composition root / tests). */
+export function setProductionPixPdqConfig(
+  config: PixPdqConfig | null,
+  transport?: Hl7v2Transport
+): void {
+  productionPixPdq = config && transport ? { config, transport } : null;
+}
+
+/**
+ * The production PIX/PDQ resolver, GATED. Returns a wired resolver only when ALL
+ * hold: identity dataMode is production, the resolver kind is external-pixpdq, and
+ * a complete config + transport are registered. Otherwise it fails closed —
+ * returns an unwired resolver whose every call throws ExternalEmpiNotConfiguredError
+ * (never a default identity — E9). Never touches the network itself.
+ */
+export function getProductionPixPdqResolver(): ExternalIdentityResolver {
+  if (
+    getDataMode('identity') === 'production' &&
+    identityResolverKind() === 'external-pixpdq' &&
+    productionPixPdq
+  ) {
+    return createPixPdqResolver(productionPixPdq.config, productionPixPdq.transport);
+  }
+  return createPixPdqResolver(); // fail closed
+}
+
+/**
+ * Map an assigning-authority OID onto the cross-reference SCOPE for an id from
+ * that authority (R2 Option B). The MPI ENTERPRISE domain owns the anchored
+ * member, so its ids live in the shared 'global' namespace; a peer/source domain's
+ * ids are source-LOCAL, so they scope by their own authority (becoming a
+ * localId.assigningAuthority downstream). The enterprise OID is taken from the
+ * explicit arg, else the registered production config.
+ */
+export function assigningAuthorityToScope(oid: string, enterpriseOid?: string): string {
+  const enterprise = enterpriseOid ?? productionPixPdq?.config.assigningAuthorityOid;
+  return enterprise && oid === enterprise ? GLOBAL_SCOPE : oid;
+}
 
 /**
  * The PIX/PDQ family as the pipeline's synchronous IdentityResolver seam. A real

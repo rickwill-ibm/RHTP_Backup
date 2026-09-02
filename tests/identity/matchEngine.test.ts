@@ -25,15 +25,86 @@ describe('MPI matching engine — deterministic rules (Dev Plan Workstream A1/A2
   });
 
   it('matches on ssnLast4 + dob', () => {
-    const a: IdentityTraits = { firstName: 'A', lastName: 'B', dob: '1990-01-01', ssnLast4: '1234' };
-    const b: IdentityTraits = { firstName: 'X', lastName: 'Y', dob: '1990-01-01', ssnLast4: '1234' };
+    const a: IdentityTraits = {
+      firstName: 'A',
+      lastName: 'B',
+      dob: '1990-01-01',
+      ssnLast4: '1234',
+    };
+    const b: IdentityTraits = {
+      firstName: 'X',
+      lastName: 'Y',
+      dob: '1990-01-01',
+      ssnLast4: '1234',
+    };
     expect(runDeterministicRules(a, b)).toEqual({ hit: true, rule: 'ssnLast4+dob-exact' });
   });
 
-  it('matches on exact name + dob (case-insensitive)', () => {
+  it('name + dob alone is NOT deterministic (R2 Option B: no auto cross-person merge)', () => {
+    // Identical name + dob with no other agreeing trait must NOT fire a
+    // deterministic rule — it is a possible-match, HELD for steward review. This
+    // is the PHI-comingling fix: name+dob-exact was DEMOTED out of the rules.
     const a: IdentityTraits = { firstName: 'maria', lastName: 'redhawk', dob: '1985-04-12' };
     const b: IdentityTraits = { firstName: 'Maria', lastName: 'Redhawk', dob: '1985-04-12' };
-    expect(runDeterministicRules(a, b).hit).toBe(true);
+    const result = runDeterministicRules(a, b);
+    expect(result.hit).toBe(false);
+    expect(result.rule).toBeNull();
+    // And it scores in the possible-match band (30+20+25 = 75), so it is HELD.
+    const { score } = scoreProbabilisticMatch(a, b);
+    expect(score).toBe(75);
+    expect(tierForScore(score, false)).toBe('possible-match');
+  });
+
+  it('localId-same-source-exact fires when value AND assigning authority agree', () => {
+    const a: IdentityTraits = {
+      firstName: 'Al',
+      lastName: 'B',
+      dob: '1990-01-01',
+      localId: { assigningAuthority: 'emr-oak', value: 'MRN-777' },
+    };
+    const b: IdentityTraits = {
+      firstName: 'Different',
+      lastName: 'Person',
+      dob: '1900-01-01',
+      localId: { assigningAuthority: 'emr-oak', value: 'MRN-777' },
+    };
+    const result = runDeterministicRules(a, b);
+    expect(result.hit).toBe(true);
+    expect(result.rule).toBe('localId-same-source-exact');
+  });
+
+  it('localId does NOT fire when the SAME value is under a DIFFERENT authority (reused MRN)', () => {
+    // The crux of R2 Option B: an MRN reused across two source systems is two
+    // different people's ids that merely collide — it must never merge them.
+    const a: IdentityTraits = {
+      firstName: 'Al',
+      lastName: 'B',
+      dob: '1990-01-01',
+      localId: { assigningAuthority: 'emr-oak', value: 'MRN-777' },
+    };
+    const b: IdentityTraits = {
+      firstName: 'Al',
+      lastName: 'B',
+      dob: '1990-01-01',
+      localId: { assigningAuthority: 'clinic-pine', value: 'MRN-777' },
+    };
+    expect(runDeterministicRules(a, b).hit).toBe(false);
+  });
+
+  it('localId does NOT fire on same authority but different value', () => {
+    const a: IdentityTraits = {
+      firstName: 'Al',
+      lastName: 'B',
+      dob: '1990-01-01',
+      localId: { assigningAuthority: 'emr-oak', value: 'MRN-777' },
+    };
+    const b: IdentityTraits = {
+      firstName: 'Al',
+      lastName: 'B',
+      dob: '1990-01-01',
+      localId: { assigningAuthority: 'emr-oak', value: 'MRN-888' },
+    };
+    expect(runDeterministicRules(a, b).hit).toBe(false);
   });
 
   it('does not fire on partial overlap alone', () => {
@@ -107,7 +178,12 @@ describe('MPI matching engine — probabilistic scoring', () => {
   });
 
   it('scores a near-miss name (typo) below an exact match but still substantial', () => {
-    const typo: IdentityTraits = { ...MARIA, firstName: 'Marai', lastName: 'Redhwak', medicaidId: undefined };
+    const typo: IdentityTraits = {
+      ...MARIA,
+      firstName: 'Marai',
+      lastName: 'Redhwak',
+      medicaidId: undefined,
+    };
     const { score } = scoreProbabilisticMatch(MARIA, typo);
     expect(score).toBeGreaterThan(50);
     expect(score).toBeLessThan(100);

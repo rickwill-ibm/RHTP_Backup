@@ -80,15 +80,9 @@ export const RECOGNIZED_NON_PART2_PROGRAM_TYPES: ReadonlySet<string> = new Set([
  *  - `ambiguous`: the program context is missing, empty, unrecognized, OR a SUD
  *    program whose federal-assistance status is unknown -> FAIL SAFE (restrict).
  */
-export type ProgramClass =
-  | 'federally-assisted-sud-program'
-  | 'recognized-non-part2'
-  | 'ambiguous';
+export type ProgramClass = 'federally-assisted-sud-program' | 'recognized-non-part2' | 'ambiguous';
 
-export function classifyProgram(
-  facilityType: string,
-  federallyAssisted?: boolean,
-): ProgramClass {
+export function classifyProgram(facilityType: string, federallyAssisted?: boolean): ProgramClass {
   const type = facilityType.trim();
   if (FEDERALLY_ASSISTED_SUD_PROGRAM_TYPES.has(type)) {
     if (federallyAssisted === true) return 'federally-assisted-sud-program';
@@ -116,6 +110,45 @@ export function isSudDiagnosis(code: string, system?: string): boolean {
 }
 
 /**
+ * SNOMED CT substance-use-disorder concepts. A CURATED starter allowlist — in
+ * production this must be bound to a governed SNOMED SUD reference set / value set,
+ * not a hand-list. It exists because SUD content on an `Encounter.type` /
+ * `Encounter.reasonCode` / `Flag` is routinely coded in SNOMED rather than ICD-10,
+ * and `isSudDiagnosis` (ICD-10 F10–F19 only) would miss it — projecting a Part 2
+ * encounter/flag UNRESTRICTED (a 42 CFR Part 2 disclosure). Extend as the governed
+ * set grows; every id here is a substance dependence/abuse concept.
+ */
+const SNOMED_SUD_CONCEPTS: ReadonlySet<string> = new Set([
+  '7200002', // Alcoholism (alcohol dependence)
+  '66590003', // Alcohol dependence syndrome
+  '15167005', // Alcohol abuse
+  '191816009', // Opioid dependence
+  '5602001', // Opioid abuse
+  '26416006', // Drug abuse
+  '191840005', // Drug dependence
+  '78267003', // Combined drug dependence
+  '85005007', // Cocaine dependence
+  '75544000', // Cannabis dependence
+]);
+
+function isSnomed(system: string): boolean {
+  return /snomed/i.test(system) || system.includes('snomed.info/sct');
+}
+
+/**
+ * SUD CONTENT test across coding systems (the segmentation seam for resources whose
+ * SUD signal may be ICD-10 OR SNOMED — Encounter, Flag). True for ICD-10-CM F10–F19
+ * OR a governed SNOMED SUD concept. Use THIS (not `isSudDiagnosis`, which is ICD-only)
+ * wherever a resource can carry SNOMED-coded SUD content, so Part 2 restriction is
+ * never bypassed by the coding system in use.
+ */
+export function isSudCoding(code: string, system?: string): boolean {
+  if (isSudDiagnosis(code, system)) return true;
+  if (system && isSnomed(system) && SNOMED_SUD_CONCEPTS.has(norm(code))) return true;
+  return false;
+}
+
+/**
  * Behavioral-health content test. ICD-10-CM F01-F99 = "mental, behavioral and
  * neurodevelopmental disorders". SUD (F10-F19) is the sensitive subset of this;
  * the rest (mood, anxiety, psychotic, etc.) is behavioral health but NOT Part 2.
@@ -132,7 +165,7 @@ function isIcd10(system: string): boolean {
 /** True when the program context is a federally-assisted SUD program (both facts). */
 export function isFederallyAssistedSudProgram(
   facilityType: string,
-  federallyAssisted: boolean,
+  federallyAssisted: boolean
 ): boolean {
   return federallyAssisted && FEDERALLY_ASSISTED_SUD_PROGRAM_TYPES.has(facilityType.trim());
 }
@@ -172,7 +205,10 @@ export interface Part2BasisResult {
  * hint to the durable 42-CFR-Part-2 label carried on the envelope and the node.
  */
 export function evaluatePart2Basis(ctx: Part2BasisContext): Part2BasisResult {
-  const sudContent = isSudDiagnosis(ctx.code, ctx.system);
+  // SUD content is recognized across ICD-10 (F10–F19) AND governed SNOMED SUD
+  // concepts, so a SNOMED-coded SUD encounter/flag/condition cannot bypass the Part 2
+  // basis by coding system (the red-team leak: SNOMED SUD projected UNRESTRICTED).
+  const sudContent = isSudCoding(ctx.code, ctx.system);
   const behavioralHealth = isBehavioralHealthDiagnosis(ctx.code, ctx.system);
 
   // Non-SUD content is never Part 2, whatever the program context.
@@ -203,7 +239,8 @@ export function evaluatePart2Basis(ctx: Part2BasisContext): Part2BasisResult {
     return {
       part2: true,
       behavioralHealth,
-      reason: 'part2 (fail-safe): SUD content with missing or ambiguous program context - restricted on ambiguity',
+      reason:
+        'part2 (fail-safe): SUD content with missing or ambiguous program context - restricted on ambiguity',
     };
   }
   return {

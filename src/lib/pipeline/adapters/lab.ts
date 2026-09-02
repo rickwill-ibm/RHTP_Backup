@@ -11,7 +11,13 @@
  *
  * C9.2 yield: labs/vitals feed -> labs-vitals T1 (coded Observation).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR Observation pulled from the bundle. */
 interface ObsResource {
@@ -43,7 +49,11 @@ function num(v: unknown, fallback = 0): number {
 }
 
 /** code.coding[0] as a LOINC coding triple (code may be ''). */
-function loinc(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function loinc(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -58,6 +68,28 @@ function categoryOf(resource: Record<string, unknown>): string {
   const first = Array.isArray(cat) ? obj(cat[0]) : {};
   const coding = Array.isArray(first.coding) ? obj(first.coding[0]) : {};
   return str(coding.code, 'laboratory');
+}
+/**
+ * R3 (SDOH/BH routing): this adapter OWNS only true clinical results — Observations
+ * whose category is `laboratory` or `vital-signs`. SDOH (`social-history`) and BH
+ * survey (`survey`) Observations belong to the sdohObservation / bhObservation
+ * adapters and their own domains; keeping them here mis-routed every screening into
+ * labs-vitals. Scans EVERY category coding (not just coding[0]) so a care-gap or
+ * gravity-tagged Observation whose first coding is not the observation-category
+ * axis is still classified correctly. A category-less Observation defaults to
+ * laboratory (mirrors `categoryOf`) so nothing already relied on is dropped.
+ */
+function isLabOrVital(resource: Record<string, unknown>): boolean {
+  const cat = resource.category;
+  if (!Array.isArray(cat) || cat.length === 0) return true; // no category -> default laboratory
+  const codes: string[] = [];
+  for (const c of cat) {
+    const coding = obj(c).coding;
+    if (!Array.isArray(coding)) continue;
+    for (const cc of coding) codes.push(str(obj(cc).code));
+  }
+  if (codes.length === 0) return true; // category present but codeless -> default laboratory
+  return codes.some((code) => code === 'laboratory' || code === 'vital-signs');
 }
 /** subject.reference "Patient/LAB-MEM-01" -> the source member id component. */
 function subjectSourceId(resource: Record<string, unknown>): string {
@@ -80,6 +112,9 @@ function parse(payload: string): RawRecord<ObsResource>[] {
   for (const entry of entries) {
     const resource = obj(obj(entry).resource);
     if (str(resource.resourceType) !== 'Observation') continue;
+    // R3: skip social-history / survey (and any non lab/vital) Observations — they
+    // are owned by the sdohObservation / bhObservation adapters, not labs-vitals.
+    if (!isLabOrVital(resource)) continue;
     const id = str(resource.id) || `obs-${out.length + 1}`;
     out.push({ sourceRef: id, data: { resource } });
   }
@@ -89,8 +124,10 @@ function parse(payload: string): RawRecord<ObsResource>[] {
 function validate(raw: RawRecord<ObsResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!loinc(resource).code) issues.push({ reasonCode: 'missing-observation-code', fieldPath: 'code.coding' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!loinc(resource).code)
+    issues.push({ reasonCode: 'missing-observation-code', fieldPath: 'code.coding' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -124,7 +161,9 @@ function normalize(raw: RawRecord<ObsResource>, deps: PipelineDeps): NormalizedR
     provenance,
     consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
-    occurredAt: effectiveDateTime ? `${effectiveDateTime}T00:00:00Z` : new Date(deps.now()).toISOString(),
+    occurredAt: effectiveDateTime
+      ? `${effectiveDateTime}T00:00:00Z`
+      : new Date(deps.now()).toISOString(),
     payload: payload as unknown as Record<string, unknown>,
   };
 }

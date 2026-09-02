@@ -14,7 +14,13 @@
  *
  * C9.2 yield: referrals feed -> referrals T1 (referring-provider order).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR ServiceRequest pulled from the bundle. */
 interface ServiceRequestResource {
@@ -44,7 +50,20 @@ export interface ReferralPayload {
   performerNpi: string;
   /** Carried onto the referral node/edge as the referring source (PHI-safe). */
   provenance: string;
+  /**
+   * True when the source ServiceRequest carries a `needs-coding-review` extension —
+   * a governed code could not be confidently assigned (e.g. an SDOH financial-
+   * navigation referral whose Gravity code is still TBD), so it is routed to a human
+   * coder rather than silently coded. PHI-safe: a flag + a code-TBD reason, never
+   * clinical narrative.
+   */
+  reviewRequired?: boolean;
+  reviewReason?: string;
 }
+
+/** The review-routing extension url (a governed code needs human assignment). */
+const NEEDS_CODING_REVIEW_EXT =
+  'http://tcoc.example.org/fhir/StructureDefinition/needs-coding-review';
 
 const SOURCE = { system: 'referral-hub', feed: 'referrals-fhir' } as const;
 
@@ -54,9 +73,22 @@ function obj(v: unknown): Record<string, unknown> {
 function str(v: unknown, fallback = ''): string {
   return typeof v === 'string' ? v : fallback;
 }
+/** The `needs-coding-review` extension's valueString, or undefined when absent. */
+function reviewReasonOf(resource: Record<string, unknown>): string | undefined {
+  const ext = Array.isArray(resource.extension) ? resource.extension : [];
+  for (const e of ext) {
+    if (str(obj(e).url) === NEEDS_CODING_REVIEW_EXT)
+      return str(obj(e).valueString) || 'needs-coding-review';
+  }
+  return undefined;
+}
 
 /** code.coding[0] as a SNOMED/CPT coding triple (code may be ''). */
-function serviceCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function serviceCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -111,8 +143,10 @@ function parse(payload: string): RawRecord<ServiceRequestResource>[] {
 function validate(raw: RawRecord<ServiceRequestResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!serviceCode(resource).code) issues.push({ reasonCode: 'missing-service-code', fieldPath: 'code.coding' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!serviceCode(resource).code)
+    issues.push({ reasonCode: 'missing-service-code', fieldPath: 'code.coding' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -132,6 +166,11 @@ function normalize(raw: RawRecord<ServiceRequestResource>, deps: PipelineDeps): 
     performerNpi: performerNpiOf(resource),
     provenance: 'referring-provider',
   };
+  const reviewReason = reviewReasonOf(resource);
+  if (reviewReason !== undefined) {
+    payload.reviewRequired = true;
+    payload.reviewReason = reviewReason;
+  }
   return {
     domain: 'referrals',
     memberId,

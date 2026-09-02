@@ -21,7 +21,14 @@
  *
  * C9.2 yield: conditions feed -> conditions T1 (coded problem list, HCC-relevant).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
+import { isBehavioralHealthDiagnosis } from '../part2Basis';
 
 /** One tagged FHIR Condition pulled from the bundle. */
 interface ConditionResource {
@@ -75,11 +82,27 @@ function codingForSystem(resource: Record<string, unknown>, systemUri: string): 
   }
   return undefined;
 }
+/** R1: the ICD-10-CM behavioral-health (F-code) coding in ANY position (by system, not
+ *  array index) — the ownership discriminator mirrored in behavioralHealth.ts. */
+function icd10FCoding(resource: Record<string, unknown>): Coding | undefined {
+  const coding = obj(resource.code).coding;
+  if (!Array.isArray(coding)) return undefined;
+  for (const c of coding) {
+    const cc = obj(c);
+    const system = str(cc.system);
+    const code = str(cc.code);
+    if (isBehavioralHealthDiagnosis(code, system))
+      return { system, code, display: str(cc.display) };
+  }
+  return undefined;
+}
 /** The HCC coding block (a synthetic, source-attached risk-adjustment coding). */
 function hccCoding(resource: Record<string, unknown>): Coding | undefined {
   const hcc = obj(resource.hcc);
   const code = str(hcc.code);
-  return code ? { system: str(hcc.system, 'urn:cms:risk-adjustment:hcc'), code, display: str(hcc.display) } : undefined;
+  return code
+    ? { system: str(hcc.system, 'urn:cms:risk-adjustment:hcc'), code, display: str(hcc.display) }
+    : undefined;
 }
 /** The first coding's `code` from a CodeableConcept-shaped status field. */
 function statusCode(field: unknown, fallback: string): string {
@@ -107,6 +130,13 @@ function parse(payload: string): RawRecord<ConditionResource>[] {
   for (const entry of entries) {
     const resource = obj(obj(entry).resource);
     if (str(resource.resourceType) !== 'Condition') continue;
+    // R1 (segmentation integrity): a Condition carrying an ICD-10 F-code in ANY coding
+    // position is OWNED by the behavioral-health adapter (42 CFR Part 2 basis). Excluding
+    // it here prevents a double-owned Condition node whose `restricted` flag would be
+    // projection-order dependent (a last-writer clear could disclose Part 2 SUD data), and
+    // — resolving by system, not coding[0] — closes the SNOMED-first dual-coding leak.
+    // Coding-less Conditions are kept (and quarantined) so the missing-code guarantee holds.
+    if (icd10FCoding(resource)) continue;
     const id = str(resource.id) || `cond-${out.length + 1}`;
     out.push({ sourceRef: id, data: { resource } });
   }
@@ -116,7 +146,8 @@ function parse(payload: string): RawRecord<ConditionResource>[] {
 function validate(raw: RawRecord<ConditionResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
   // The ICD-10-CM diagnosis coding is the required identity of a problem-list entry.
   if (!codingForSystem(resource, ICD10_URI)) {
     issues.push({ reasonCode: 'missing-condition-code', fieldPath: 'code.coding' });

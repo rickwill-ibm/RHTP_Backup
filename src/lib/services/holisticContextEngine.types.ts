@@ -31,6 +31,45 @@ export interface HolisticPatientContext {
    * on the projected-graph path.
    */
   part2Restricted?: Part2RestrictionSummary;
+  /**
+   * WPC payer dimensions (optional, projected-graph path only — the authored engine
+   * has no lens bundle). Each is consent-filtered like every other lens-derived
+   * section: a restricted (Part 2) Encounter/Flag is excluded from utilization/alerts
+   * unless the read scope covers it. All PHI-minimal (codes + numbers, never narrative).
+   */
+  riskProfile?: RiskProfileSummary;
+  coverage?: CoverageSummary;
+  utilization?: UtilizationSummary;
+  alerts?: AlertSummary;
+}
+
+/** Risk-stratification summary from RiskAssessment nodes (PHI-minimal: numbers + codes). */
+export interface RiskProfileSummary {
+  assessments: {
+    predictedOutcome: string;
+    probability: number;
+    rafScore: number;
+    method: string;
+  }[];
+  /** The highest RAF score across the member's assessments (0 when none). */
+  highestRaf: number;
+}
+
+/** Coverage summary from Coverage nodes (PHI-minimal: plan code + status + period). */
+export interface CoverageSummary {
+  plans: { planCode: string; status: string; periodStart: string; periodEnd: string }[];
+}
+
+/** Utilization summary from Encounter nodes (PHI-minimal: count + encounter classes). */
+export interface UtilizationSummary {
+  encounterCount: number;
+  classes: string[];
+}
+
+/** Alert summary from Flag nodes (PHI-minimal: active count + category codes). */
+export interface AlertSummary {
+  activeCount: number;
+  categories: string[];
 }
 
 export interface HolisticContextProvenance {

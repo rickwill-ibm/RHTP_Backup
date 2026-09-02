@@ -4,9 +4,21 @@
     "RxNorm": {
       "uri": "http://www.nlm.nih.gov/research/umls/rxnorm",
       "codes": {
-        "310798": "Hydrochlorothiazide 25 MG Oral Tablet",
+        "435": "Albuterol",
+        "4603": "Furosemide",
+        "6809": "Metformin",
+        "7980": "Penicillin G",
+        "11289": "Warfarin",
+        "17767": "Amlodipine",
+        "20352": "Carvedilol",
+        "29046": "Lisinopril",
+        "41126": "Fluticasone",
+        "52175": "Losartan",
+        "69120": "Tiotropium",
+        "83367": "Atorvastatin",
+        "88249": "Montelukast",
         "197361": "Amlodipine 5 MG Oral Tablet",
-        "7980": "Penicillin G"
+        "310798": "Hydrochlorothiazide 25 MG Oral Tablet"
       }
     },
     "LOINC": {
@@ -17,16 +29,45 @@
         "2339-0": "Glucose [Mass/volume] in Blood",
         "34133-9": "Summary of episode note",
         "18842-5": "Discharge summary",
-        "11506-3": "Progress note"
+        "11506-3": "Progress note",
+        "10230-1": "Left ventricular Ejection fraction",
+        "1558-6": "Fasting glucose [Mass/volume] in Serum or Plasma",
+        "1742-6": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma",
+        "18262-6": "Cholesterol in LDL [Mass/volume] in Serum or Plasma",
+        "2085-9": "Cholesterol in HDL [Mass/volume] in Serum or Plasma",
+        "2160-0": "Creatinine [Mass/volume] in Serum or Plasma",
+        "2571-8": "Triglyceride [Mass/volume] in Serum or Plasma",
+        "30934-4": "Natriuretic peptide B [Mass/volume] in Serum or Plasma",
+        "33914-3": "Glomerular filtration rate/1.73 sq M.predicted",
+        "39156-5": "Body mass index (BMI) [Ratio]",
+        "85354-9": "Blood pressure panel with all children optional",
+        "8462-4": "Diastolic blood pressure",
+        "89270-3": "Waist-height ratio",
+        "44249-1": "PHQ-9 quick depression assessment panel total score",
+        "75626-2": "Total score [AUDIT-C]",
+        "71802-3": "Housing status",
+        "88122-7": "Within the last year, were you worried that your food would run out [AHC-HRSN]",
+        "93030-5": "Has a lack of transportation kept you from appointments or daily living [AHC-HRSN]",
+        "76513-1": "How hard is it to pay for the very basics [PRAPARE]",
+        "11503-0": "Clinical care gap",
+        "75630-4": "Social care gap",
+        "59284-0": "Patient Consent",
+        "9318-7": "Microalbumin/Creatinine [Mass Ratio] in Urine"
       }
     },
     "SNOMED-CT": {
       "uri": "http://snomed.info/sct",
       "codes": {
-        "227493005": "Cashew nuts",
+        "3457005": "Patient referral",
         "44054006": "Type 2 diabetes mellitus",
         "80146002": "Appendectomy",
-        "103696004": "Patient referral to specialist"
+        "103696004": "Patient referral to specialist",
+        "108252007": "Laboratory procedure",
+        "185349003": "Encounter for check up",
+        "227493005": "Cashew nuts",
+        "306163007": "Referral to dietetics service",
+        "446050000": "Primary care physician",
+        "734163000": "Care plan"
       }
     },
     "ICD-10-CM": {
@@ -41,15 +82,31 @@
         "F11.20": "Opioid dependence, uncomplicated",
         "F10.20": "Alcohol dependence, uncomplicated",
         "F32.1": "Major depressive disorder, single episode, moderate",
-        "F41.1": "Generalized anxiety disorder"
+        "F41.1": "Generalized anxiety disorder",
+        "E11.65": "Type 2 diabetes mellitus with hyperglycemia",
+        "E66.01": "Morbid (severe) obesity due to excess calories",
+        "E66.9": "Obesity, unspecified",
+        "I10": "Essential (primary) hypertension",
+        "I50.32": "Chronic diastolic (congestive) heart failure",
+        "J44.1": "Chronic obstructive pulmonary disease with (acute) exacerbation",
+        "J45.50": "Severe persistent asthma, uncomplicated",
+        "N18.3": "Chronic kidney disease, stage 3 (moderate)",
+        "N18.32": "Chronic kidney disease, stage 3b",
+        "F10.10": "Alcohol use disorder, mild, uncomplicated",
+        "F32.0": "Major depressive disorder, single episode, mild",
+        "Z59.86": "Financial insecurity"
       }
     },
     "CPT-HCPCS": {
       "uri": "http://www.ama-assn.org/go/cpt",
       "codes": {
-        "99213": "Office/outpatient visit, established patient",
         "45378": "Colonoscopy, flexible; diagnostic",
-        "99242": "Office consultation, new or established patient"
+        "90791": "Psychiatric diagnostic evaluation",
+        "94010": "Spirometry",
+        "99213": "Office/outpatient visit, established patient",
+        "99242": "Office consultation, new or established patient",
+        "T2003": "Non-emergency transportation; encounter/trip",
+        "2022F": "Dilated retinal eye exam"
       }
     },
     "HCC": {
@@ -63,39 +120,97 @@
   },
   "conceptMap": {
     "_comment": "Minimal $translate stub pairs, keyed sourceSystem->targetSystem then source code.",
-    "ICD-10-CM->SNOMED-CT": { "E11.9": "44054006" },
-    "SNOMED-CT->ICD-10-CM": { "44054006": "E11.9" }
+    "ICD-10-CM->SNOMED-CT": {
+      "E11.9": "44054006"
+    },
+    "SNOMED-CT->ICD-10-CM": {
+      "44054006": "E11.9"
+    }
   },
   "valueSets": {
-    "sdoh-z-codes": ["Z59.82", "Z59.41", "Z71.41"],
-    "chronic-conditions": ["E11.9", "I50.9", "N18.6"]
+    "sdoh-z-codes": [
+      "Z59.82",
+      "Z59.41",
+      "Z71.41",
+      "Z59.86"
+    ],
+    "chronic-conditions": [
+      "E11.9",
+      "I50.9",
+      "N18.6",
+      "E11.65",
+      "I10",
+      "I50.32",
+      "J44.1",
+      "J45.50",
+      "N18.3",
+      "N18.32",
+      "E66.01",
+      "E66.9"
+    ]
   },
   "membership": {
     "_comment": "Wave A (I8A-ii) versioned value-set membership. The CURRENT-version members of each governed system are the keys of codeSystems[system].codes (single source of truth, DRY). This block adds ONLY the version deltas: retiredInCurrent = codes removed as of the current bound version (valid in a prior version, invalid now), and priorVersions = how an older version's membership differs from current (adds/removes), so $expand can enumerate a specific version and a retired code is provable. Codes here are ILLUSTRATIVE STUBS, not the full authority release.",
     "systems": {
       "ICD-10-CM": {
         "currentVersion": "FY2026",
-        "retiredInCurrent": ["R51"],
+        "retiredInCurrent": [
+          "R51"
+        ],
         "priorVersions": {
-          "FY2025": { "adds": ["R51"], "removes": [] }
+          "FY2025": {
+            "adds": [
+              "R51"
+            ],
+            "removes": []
+          }
         }
       },
       "HCC": {
         "currentVersion": "V28",
-        "retiredInCurrent": ["HCC58"],
+        "retiredInCurrent": [
+          "HCC58"
+        ],
         "priorVersions": {
-          "V24": { "adds": ["HCC58"], "removes": [] }
+          "V24": {
+            "adds": [
+              "HCC58"
+            ],
+            "removes": []
+          }
         }
       }
     }
   },
   "ucum": {
     "_comment": "Wave A (I8A-ii) UCUM unit validation for LOINC quantitative results. validUnits is an illustrative allowlist of well-formed UCUM unit atoms (a real server parses the UCUM grammar); loincUnits maps a quantitative LOINC to the units appropriate for it. A LOINC absent from loincUnits is treated as non-quantitative (no unit check). NOT the full UCUM registry.",
-    "validUnits": ["mg/dL", "mmol/L", "%", "mmol/mol", "mm[Hg]", "g/dL", "/min", "10*3/uL", "fL", "pg", "mL/min/{1.73_m2}", "U/L", "ng/mL"],
+    "validUnits": [
+      "mg/dL",
+      "mmol/L",
+      "%",
+      "mmol/mol",
+      "mm[Hg]",
+      "g/dL",
+      "/min",
+      "10*3/uL",
+      "fL",
+      "pg",
+      "mL/min/{1.73_m2}",
+      "U/L",
+      "ng/mL"
+    ],
     "loincUnits": {
-      "4548-4": ["%", "mmol/mol"],
-      "8480-6": ["mm[Hg]"],
-      "2339-0": ["mg/dL", "mmol/L"]
+      "4548-4": [
+        "%",
+        "mmol/mol"
+      ],
+      "8480-6": [
+        "mm[Hg]"
+      ],
+      "2339-0": [
+        "mg/dL",
+        "mmol/L"
+      ]
     }
   }
 }

@@ -53,7 +53,13 @@ export { PROVIDER_IDENTITY_KIND } from '@/lib/identity/provider';
  * active -> on-hold -> completed | revoked | entered-in-error. The three below are
  * TERMINAL — they end the referral. A referral that never reaches one is still open.
  */
-export const REFERRAL_STATUSES = ['active', 'on-hold', 'completed', 'revoked', 'entered-in-error'] as const;
+export const REFERRAL_STATUSES = [
+  'active',
+  'on-hold',
+  'completed',
+  'revoked',
+  'entered-in-error',
+] as const;
 export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
 const TERMINAL_REFERRAL_STATUSES = new Set<string>(['completed', 'revoked', 'entered-in-error']);
 
@@ -112,7 +118,11 @@ export const referralSpec = {
     // Status LIFECYCLE. E9: the default is 'active' (open) — a missing status must
     // NEVER silently mark a referral completed/revoked. The dated phase trail proves
     // the lifecycle is captured as transitions, not a single overwritten snapshot.
-    const phases = statusPhases(p.statusHistory, str(p.status, 'active'), str(p.authoredOn) || start);
+    const phases = statusPhases(
+      p.statusHistory,
+      str(p.status, 'active'),
+      str(p.authoredOn) || start
+    );
     const status = str(p.status) || phases[phases.length - 1]?.status || 'active';
     const statusTrail = phases.map((ph) => `${ph.status}@${ph.at}`);
     const statusTerminal = TERMINAL_REFERRAL_STATUSES.has(status);
@@ -137,7 +147,12 @@ export const referralSpec = {
         loopClosed,
         loopReached,
         provenance: str(p.provenance),
-      }),
+        // Human-review routing: a governed code could not be confidently assigned,
+        // so the referral is VISIBLY tagged on the node (not silently coded). The
+        // reason is a PHI-safe code-TBD string, never clinical narrative.
+        reviewRequired: p.reviewRequired === true,
+        reviewReason: str(p.reviewReason),
+      })
     );
     // The member was REFERRED_VIA this ServiceRequest — a factual order link
     // (associative), dated from the authoredOn date. Provenance is carried as an
@@ -187,7 +202,7 @@ export const referralSpec = {
           ...resourceNode(event, kind, performerRef, {
             rawRef: performerRef,
             providerResolution: 'deferred-I8A',
-          }),
+          })
         );
         out.push({
           op: 'UpsertEdge',

@@ -55,11 +55,7 @@ export {
   type BatchStepResult,
 } from './transform';
 
-export {
-  HeldIdentityError,
-  isHeldIdentityError,
-  type HeldIdentitySignal,
-} from './heldIdentity';
+export { HeldIdentityError, isHeldIdentityError, type HeldIdentitySignal } from './heldIdentity';
 
 export {
   applySegmentation,
@@ -93,12 +89,32 @@ export { runPipeline, type PipelineRunResult } from './pipeline';
 export { eligibility834Adapter } from './adapters/eligibility834';
 export { adtEncounterAdapter } from './adapters/adtEncounter';
 export { cboSdohAdapter } from './adapters/cboSdoh';
+// ── WPC payer dimensions (append-only): FHIR-JSON front doors for Coverage /
+// Encounter (reuse existing specs) + NEW RiskAssessment / Flag projected domains.
+export { coverageFhirAdapter, type CoverageFhirPayload } from './adapters/coverageFhir';
+export { encounterFhirAdapter, type EncounterFhirPayload } from './adapters/encounterFhir';
+export { riskAssessmentAdapter, type RiskAssessmentPayload } from './adapters/riskAssessment';
+export { flagAdapter, type FlagPayload } from './adapters/flag';
 export {
   medicationAdapter,
   type MedicationPayload,
   type MedicationDispensePayload,
 } from './adapters/medication';
 export { labAdapter, type ObservationPayload } from './adapters/lab';
+// ── R3 (append-only): route SDOH (social-history) + BH-survey (survey) Observations
+// to their OWN domains via new adapters over the EXISTING sdoh / behavioral-health
+// specs. No new mapping spec or WpcDomain is introduced (20/20 record domains hold).
+export {
+  sdohObservationAdapter,
+  isSocialHistory,
+  classifyScreenResult,
+  type SdohObservationPayload,
+} from './adapters/sdohObservation';
+export {
+  bhObservationAdapter,
+  isSurvey,
+  type BhObservationPayload,
+} from './adapters/bhObservation';
 export { allergyAdapter, type AllergyPayload } from './adapters/allergy';
 export { procedureAdapter, type ProcedurePayload } from './adapters/procedure';
 export {
@@ -106,11 +122,7 @@ export {
   type CareTeamPayload,
   type CareTeamParticipant,
 } from './adapters/careTeam';
-export {
-  goalTaskAdapter,
-  type GoalPayload,
-  type TaskPayload,
-} from './adapters/goalTask';
+export { goalTaskAdapter, type GoalPayload, type TaskPayload } from './adapters/goalTask';
 export { referralAdapter, type ReferralPayload } from './adapters/referral';
 export { immunizationAdapter, type ImmunizationPayload } from './adapters/immunization';
 export {
@@ -125,14 +137,12 @@ export {
   type PaStatusPhase,
   type PriorAuthLifecyclePayload,
 } from './adapters/priorAuthLifecycle';
-export {
-  behavioralHealthAdapter,
-  type BehavioralHealthPayload,
-} from './adapters/behavioralHealth';
+export { behavioralHealthAdapter, type BehavioralHealthPayload } from './adapters/behavioralHealth';
 export {
   evaluatePart2Basis,
   part2Applies,
   isSudDiagnosis,
+  isSudCoding,
   isBehavioralHealthDiagnosis,
   isFederallyAssistedSudProgram,
   classifyProgram,
@@ -148,11 +158,7 @@ export {
   type AssessmentItem,
 } from './adapters/assessment';
 export { caregiverAdapter, type CaregiverPayload } from './adapters/caregiver';
-export {
-  documentAdapter,
-  type DocumentPayload,
-  type DocumentPointer,
-} from './adapters/document';
+export { documentAdapter, type DocumentPayload, type DocumentPointer } from './adapters/document';
 
 // ── Iteration 11 Wave B (append-only): conditions + diagnostic-reports + family-history.
 export { conditionsAdapter, type ConditionPayload } from './adapters/conditions';

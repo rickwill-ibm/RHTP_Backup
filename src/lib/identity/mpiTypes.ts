@@ -7,6 +7,21 @@
  * of that match, despite V3 claiming an MPI-based identity layer existed.
  */
 
+/**
+ * A patient identifier scoped to one assigning authority (an EMR MRN, a payer
+ * member id, a state-agency case id). The pair (assigningAuthority, value) is
+ * meaningful ONLY within that authority: the SAME value under two different
+ * authorities is two different people's ids that merely collide. It is therefore
+ * NEVER a cross-source deterministic key on its own — only same-authority +
+ * same-value agrees (R2 Option B). Contrast medicaidId / ssnLast4, which are
+ * genuinely global deterministic keys.
+ */
+export interface ScopedIdentifier {
+  /** Assigning-authority id (OID / system uri / source system name). */
+  assigningAuthority: string;
+  value: string;
+}
+
 export interface IdentityTraits {
   firstName: string;
   lastName: string;
@@ -16,6 +31,13 @@ export interface IdentityTraits {
   medicaidId?: string;
   zip?: string;
   phone?: string;
+  /**
+   * A source-LOCAL identifier (e.g. an MRN). Source-scoped, NEVER a cross-source
+   * deterministic key: only fires a match when BOTH the value AND the assigning
+   * authority agree (matchEngine 'localId-same-source-exact'). A reused value under
+   * a different authority is a different person — it must not merge.
+   */
+  localId?: ScopedIdentifier;
 }
 
 export type SourceSystem = 'emr' | 'payer' | 'state-agency';

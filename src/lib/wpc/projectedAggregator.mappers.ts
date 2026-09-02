@@ -38,6 +38,11 @@ export const PROJECTED_SECTIONS = [
   'careTeam',
   'part2Restricted',
   'accessProfile',
+  // ── WPC payer dimensions (projected-graph path only).
+  'riskProfile',
+  'coverage',
+  'utilization',
+  'alerts',
 ];
 /** Sections filled with neutral null-objects (no domain mapper yet). */
 export const NEUTRAL_SECTIONS = [

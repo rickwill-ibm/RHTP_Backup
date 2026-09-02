@@ -47,6 +47,12 @@ import {
   neutralFinancial,
   neutralPsychosocial,
 } from './projectedAggregator.mappers';
+import {
+  mapAlerts,
+  mapCoverage,
+  mapRiskProfile,
+  mapUtilization,
+} from './projectedAggregator.payerMappers';
 
 /** A member with no node in the projected graph — fail closed, do not fabricate. */
 export class MemberNotInProjectedGraphError extends Error {
@@ -117,6 +123,12 @@ export async function buildHolisticContextFromGraph(
     barriers: mapBarriers(bundle.sdohBarrier),
     careTeam: mapCareTeam(bundle.careTeam),
     part2Restricted: mapPart2(bundle.part2Restricted, scope),
+    // WPC payer dimensions — optional, consent-filtered (the whole-person lens has
+    // already excluded any restricted Encounter/Flag the scope does not cover).
+    riskProfile: mapRiskProfile(bundle.wholePerson),
+    coverage: mapCoverage(bundle.wholePerson),
+    utilization: mapUtilization(bundle.wholePerson),
+    alerts: mapAlerts(bundle.wholePerson),
     caregiverStatus: neutralCaregiver(),
     financialProfile: neutralFinancial(),
     accessProfile: mapAccess(bundle.wholePerson),

@@ -1,0 +1,2050 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:6e720e3e-6e00-4b05-8c30-a1cfde5432d2",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "RHTP Community Health",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "alex-kirby-organization-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8d340409-7f68-4913-8873-de4fc25bc912",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "State Medicaid Agency",
+        "id": "alex-kirby-organization-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "urn:mrn",
+            "value": "FJVV987654321"
+          },
+          {
+            "system": "urn:nhs",
+            "value": "943 476 5829"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Kirby",
+            "given": [
+              "Alex"
+            ],
+            "prefix": [
+              "Mrs."
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(617) 555-0142",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "(617) 555-0198",
+            "use": "mobile"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1956-06-14",
+        "address": [
+          {
+            "line": [
+              "2847 Oak Avenue"
+            ],
+            "city": "Boston",
+            "state": "MA",
+            "postalCode": "02108",
+            "country": "US"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "text": "Eldest Daughter"
+              }
+            ],
+            "name": {
+              "family": "Kirby",
+              "given": [
+                "Sarah"
+              ]
+            },
+            "telecom": [
+              {
+                "system": "phone",
+                "value": "(617) 555-0142"
+              }
+            ]
+          },
+          {
+            "relationship": [
+              {
+                "text": "Husband"
+              }
+            ],
+            "name": {
+              "family": "Kirby",
+              "given": [
+                "John"
+              ]
+            },
+            "telecom": [
+              {
+                "system": "phone",
+                "value": "(617) 555-0267"
+              }
+            ]
+          }
+        ],
+        "managingOrganization": {
+          "reference": "urn:uuid:6e720e3e-6e00-4b05-8c30-a1cfde5432d2"
+        },
+        "id": "alex-kirby"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f43c5a34-908b-4e1a-9d8c-4a7ea571eb81",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MC",
+              "display": "Medicaid"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:8d340409-7f68-4913-8873-de4fc25bc912"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "alex-kirby-coverage-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Coverage"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1b927efa-de36-46b6-a871-ff834b5fbcd6",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Total Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 5.2,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 5.2,
+              "unit": "mmol/L"
+            },
+            "text": "<5.2 mmol/L"
+          }
+        ],
+        "id": "alex-kirby-observation-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5849a390-d788-40b9-b5fa-cf92ba9b185e",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Triglycerides"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 1.8,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 1.7,
+              "unit": "mmol/L"
+            },
+            "text": "<1.7 mmol/L"
+          }
+        ],
+        "id": "alex-kirby-observation-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47b45f5d-d84f-439e-a053-acc5c534dbc0",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Creatinine"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 78,
+          "unit": "µmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 60,
+              "unit": "µmol/L"
+            },
+            "high": {
+              "value": 110,
+              "unit": "µmol/L"
+            },
+            "text": "60-110 µmol/L"
+          }
+        ],
+        "id": "alex-kirby-observation-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d90490b8-4afc-444d-8aa7-c9b4bedb6805",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "TSH"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-10",
+        "valueQuantity": {
+          "value": 2.3,
+          "unit": "mIU/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.4,
+              "unit": "mIU/L"
+            },
+            "high": {
+              "value": 4,
+              "unit": "mIU/L"
+            },
+            "text": "0.4-4.0 mIU/L"
+          }
+        ],
+        "id": "alex-kirby-observation-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0a032369-0d25-4517-b5fc-0b670123be52",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Social Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueQuantity": {
+          "value": 63,
+          "unit": "score"
+        },
+        "id": "alex-kirby-observation-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:59b5efcb-55a0-464e-85cd-82c05f2281c8",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Food Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "High",
+        "id": "alex-kirby-observation-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b7c73b9e-bcfa-4079-9315-53fb986dded2",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Housing Stability Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "High",
+        "id": "alex-kirby-observation-7"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:84ff3087-5599-4b15-85dc-a452b9e1d3b4",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Smoking Status"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Ex-smoker (Quit 15 years ago)",
+        "id": "alex-kirby-observation-8"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:10ed7062-cd37-4723-ae54-2b3c969f84fa",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: History"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "20 pack-years (1976-2011)",
+        "id": "alex-kirby-observation-9"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ab7d36da-7e6a-401e-a614-ad55430b2dd5",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Alcohol Consumption"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Moderate - 6 units per week",
+        "id": "alex-kirby-observation-10"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2eecb6dd-e109-4eac-a3f5-077f73c9f715",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Typical"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Usually wine with evening meals",
+        "id": "alex-kirby-observation-11"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4d603894-b11e-466e-8762-e4452ccd0849",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Exercise"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Light to moderate activity",
+        "id": "alex-kirby-observation-12"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6c1a9a88-73e2-4a0a-82aa-0793d1a6a424",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Routine"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Walking 30 minutes, 4-5 days/week",
+        "id": "alex-kirby-observation-13"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a761d6c7-0a69-424c-9ffb-74b0f99261b8",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Diet"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Following diabetic diet plan",
+        "id": "alex-kirby-observation-14"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7ec59f70-0702-4891-a09c-b6a6c163be68",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Note"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Reduced carbohydrate intake since diagnosis",
+        "id": "alex-kirby-observation-15"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0f806410-726b-44fd-aef0-d48c5163bff7",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Marital Status"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Married",
+        "id": "alex-kirby-observation-16"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0d26cbb2-fbf1-4186-af5a-0d9e8ff8c15e",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Living Arrangements"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Lives with husband in own home",
+        "id": "alex-kirby-observation-17"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bdaeceb7-ebb6-407a-a73f-e9f9279ef7d0",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Home"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "2-story house, stairs manageable",
+        "id": "alex-kirby-observation-18"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:edcf25f4-becb-4929-a366-1b57fe776008",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Support Network"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Good family support",
+        "id": "alex-kirby-observation-19"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:79e125a0-9395-47b1-8edc-325fad78b78c",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Family"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Husband, 2 adult children nearby",
+        "id": "alex-kirby-observation-20"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6a87cd00-6012-4436-921e-23aae15a43e1",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Occupation"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Retired Primary School Teacher",
+        "id": "alex-kirby-observation-21"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d870ccfb-35c4-4269-b17a-40909e84ccf1",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Retired"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "June 2021",
+        "id": "alex-kirby-observation-22"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ca85de95-3db3-47d5-884c-3bd9922374c5",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI) [Ratio]"
+            }
+          ],
+          "text": "BMI"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 32,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 18.5,
+              "unit": "kg/m2"
+            },
+            "high": {
+              "value": 25,
+              "unit": "kg/m2"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-23"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bf1e38d8-b64a-4f96-876a-68364d1c6469",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel with all children optional"
+            }
+          ],
+          "text": "Blood Pressure"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "referenceRange": [
+          {
+            "low": {
+              "value": 90,
+              "unit": "mmHg"
+            },
+            "high": {
+              "value": 140,
+              "unit": "mmHg"
+            },
+            "text": "Systolic"
+          }
+        ],
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 145,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 100,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-24"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9933fc54-42a2-4622-a7e8-211e20e3210a",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "89270-3",
+              "display": "Waist-height ratio"
+            }
+          ],
+          "text": "Waist/Height Ratio"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 0.8,
+          "unit": "ratio",
+          "system": "http://unitsofmeasure.org",
+          "code": "{ratio}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.4,
+              "unit": "ratio"
+            },
+            "high": {
+              "value": 0.5,
+              "unit": "ratio"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-25"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e88d4802-a723-4bc3-8281-4875bd2110e3",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2571-8",
+              "display": "Triglyceride [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Triglycerides"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 200,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 150,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-26"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:807888f9-e1d4-495e-b58b-8f200a156e1b",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1742-6",
+              "display": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Liver Function Test (ALT/AST, U/L)"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 30,
+          "unit": "U/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "U/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 7,
+              "unit": "U/L"
+            },
+            "high": {
+              "value": 56,
+              "unit": "U/L"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-27"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:529ff6f0-5adf-4a8f-910c-7470887feea5",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diabetes Complication Screening Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "9318-7",
+              "display": "Albumin/Creatinine [Mass Ratio] in Urine"
+            }
+          ],
+          "text": "Urine Albumin/Creatine Ratio (UACR)"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 95,
+          "unit": "mg/g",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/g"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 30,
+              "unit": "mg/g"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-28"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a6cbfe1b-b5a7-47db-b4a3-9870b5d49bb8",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diagnostic and Glycemic Control Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "HbA1c"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 9.8,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%"
+            },
+            "high": {
+              "value": 7,
+              "unit": "%"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-29"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a54b914c-5885-4b30-a9ba-4ac018bfb7d8",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diagnostic and Glycemic Control Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1558-6",
+              "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Fasting Plasma Glucose (FPG)"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 125,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 70,
+              "unit": "mg/dL"
+            },
+            "high": {
+              "value": 100,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-30"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3fce39ff-c82f-4d99-869f-24d0741d0524",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18262-6",
+              "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "LDL Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 280,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 100,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-31"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bc3bd2a3-b90e-40fb-95ea-dacacc9003d9",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2085-9",
+              "display": "Cholesterol in HDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "HDL Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 40,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 40,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-32"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:318e380f-bac4-497e-bd8d-2866b1071bce",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diabetes Complication Screening Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2160-0",
+              "display": "Creatinine [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Serum Creatinine/eGFR"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 1.7,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.7,
+              "unit": "mg/dL"
+            },
+            "high": {
+              "value": 1.3,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "alex-kirby-observation-33"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7d066d07-b173-40f7-8b50-3cd354123d0e",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "High Priority"
+        },
+        "code": {
+          "text": "Type 2 Diabetes Mellitus"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 12/03/2023 | Status: Active - Under Treatment"
+          },
+          {
+            "text": "Current HbA1c: 7.8% (Target: <7.0%)"
+          }
+        ],
+        "id": "alex-kirby-condition-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9d25a00b-76c0-4b1f-8828-08f4c8268ab3",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "High Priority"
+        },
+        "code": {
+          "text": "Essential Hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 08/01/2022 | Status: Active - Controlled"
+          },
+          {
+            "text": "Current BP: 138/86 mmHg (Target: <140/90 mmHg)"
+          }
+        ],
+        "id": "alex-kirby-condition-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f950584e-82a9-4c77-adf4-713c216c37e4",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 22/09/2021 | Status: Active - Well Controlled"
+          },
+          {
+            "text": "Last exacerbation: None in 12 months"
+          }
+        ],
+        "id": "alex-kirby-condition-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9f731b48-915d-46a0-a1da-992b52ecc92f",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Obesity (BMI 31.2)"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "note": [
+          {
+            "text": "Ongoing management | Status: Active - Weight Loss Program"
+          },
+          {
+            "text": "Progress: -2.3kg since 12/03/2026"
+          }
+        ],
+        "id": "alex-kirby-condition-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3900ba3c-8de6-4980-8baf-ee82cf406711",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Coronary artery disease"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "note": [
+          {
+            "text": "History of unstable angina and stent placement"
+          },
+          {
+            "text": "Ongoing management"
+          }
+        ],
+        "id": "alex-kirby-condition-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f1e47bd1-6f47-4241-9af5-e9676228bd1b",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "basedOn": [
+          {
+            "display": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "text": "Endocrinologist",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "103696004",
+              "display": "Patient referral to specialist"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "authoredOn": "2026-04-15T16:48:53.221Z",
+        "requester": {
+          "display": "Dr. Sarah Mitchell"
+        },
+        "performer": [
+          {
+            "display": "Dr. Olivia Chen"
+          }
+        ],
+        "reasonCode": [
+          {
+            "text": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "note": [
+          {
+            "text": "Dear Dr. Jones,\nThis referral is being sent to you for patient Mrs. Alex Kirby. She is being treated for chronic conditions for which we are conducting additional preventative measures to ensure co-morbidity conditions are not caused as a result of her condition or recent gap in care. We have already ordered labs and are addressing other social impacts that may affect her condition. Please refer to her patient record to reference other actions that have been taken for her ongoing care.\nSincerely,\nDr. Smith"
+          }
+        ],
+        "id": "alex-kirby-servicerequest-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2fbb3e3c-8e72-41e2-97ab-910c85f05c6d",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "basedOn": [
+          {
+            "display": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "text": "Labs",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "108252007",
+              "display": "Laboratory procedure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "authoredOn": "2026-04-15T16:48:53.221Z",
+        "requester": {
+          "display": "Dr. Sarah Mitchell"
+        },
+        "performer": [
+          {
+            "display": "Quest Diagnostic"
+          }
+        ],
+        "reasonCode": [
+          {
+            "text": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "note": [
+          {
+            "text": "Dear Dr. Jones,\nThis referral is being sent to you for patient Mrs. Alex Kirby. She is being treated for chronic conditions for which we are conducting additional preventative measures to ensure co-morbidity conditions are not caused as a result of her condition or recent gap in care. We have already ordered labs and are addressing other social impacts that may affect her condition. Please refer to her patient record to reference other actions that have been taken for her ongoing care.\nSincerely,\nDr. Smith"
+          }
+        ],
+        "id": "alex-kirby-servicerequest-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8c9b3021-c64c-4928-b2f1-f0bbffca156a",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "001"
+          }
+        ],
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "001"
+            }
+          ],
+          "text": "A1C for diabetes"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f72591f0-9d87-4387-a474-3b2c7b05f2b3",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "487"
+          }
+        ],
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "487"
+            }
+          ],
+          "text": "Screening for SDoH"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:21c0af17-e885-4fd1-a281-4d0bd5be46c1",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "134"
+          }
+        ],
+        "status": "ready",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "134"
+            }
+          ],
+          "text": "Mental/Behavioral Health (Clinical)"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e8932ad7-e333-4674-855a-3715499fe80c",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "438"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "438"
+            }
+          ],
+          "text": "Statin Therapy for the Prevention and Treatment of Cardiovascular Disease"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2210702d-b7d3-4827-95ed-e0e71622af6d",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "236"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "236"
+            }
+          ],
+          "text": "Control of Hypertension"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b01b3811-4b45-47ca-8fd2-411be2be0c79",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "008"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "008"
+            }
+          ],
+          "text": "Preventive Care and Screening"
+        },
+        "for": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-task-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e4fb1a2d-e132-4f5c-bd7d-cb5a4bb1d7d1",
+      "resource": {
+        "resourceType": "Flag",
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ],
+            "text": "Alert"
+          }
+        ],
+        "code": {
+          "text": "Patient seen in ER (08/2025)"
+        },
+        "subject": {
+          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+        },
+        "id": "alex-kirby-flag-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Flag"
+      }
+    }
+  ]
+}

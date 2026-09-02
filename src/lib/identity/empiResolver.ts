@@ -20,12 +20,22 @@
  * from the IdentitySource seam (identitySource.ts) — the same mock-vs-real EMPI
  * boundary the platform already defines; swap it for HCA's MPI in production.
  */
-import type { DemographicTraits, IdentityResolver, ResolveIdentityTraits } from '@/lib/pipeline/types';
+import type {
+  DemographicTraits,
+  IdentityResolver,
+  ResolveIdentityTraits,
+} from '@/lib/pipeline/types';
 import { HeldIdentityError } from '@/lib/pipeline/heldIdentity';
 import { MATCH_THRESHOLDS } from './matchEngine';
 import { findBestMatch } from './resolveIdentity';
 import { getIdentitySource, mockIdentitySource, type IdentitySource } from './identitySource';
-import type { IdentityMatchResult, IdentityTraits, MatchTier, SourceIdentityRecord, SourceSystem } from './mpiTypes';
+import type {
+  IdentityMatchResult,
+  IdentityTraits,
+  MatchTier,
+  SourceIdentityRecord,
+  SourceSystem,
+} from './mpiTypes';
 import type { XrefIndex, XrefReader } from './crossReference/xref';
 
 const ALL_SOURCE_SYSTEMS: SourceSystem[] = ['emr', 'payer', 'state-agency'];
@@ -71,7 +81,29 @@ function toIdentityTraits(d: DemographicTraits): IdentityTraits {
     medicaidId: d.medicaidId,
     zip: d.zip,
     phone: d.phone,
+    localId: d.localId,
   };
+}
+
+/** The default cross-reference namespace (see scopeKey). */
+export const GLOBAL_SCOPE = 'global' as const;
+
+/**
+ * The key a raw source id occupies in the cross-reference index. Scope DEFAULTS
+ * to a single shared 'global' namespace so all existing feed-only callers share
+ * one namespace (backward compatible — the same id under two feeds consolidates),
+ * and the global namespace leaves the id UNCHANGED. A source-scoped caller passes
+ * a per-authority scope so a REUSED id value across authorities does not collide
+ * (R2 Option B). The authority is embedded in the key, making it source-scoped.
+ */
+/** Escape the ':' key delimiter inside a component (e.g. a URI/OID assigning authority)
+ *  so two distinct component-pairs can never collapse into one key — an L1 delimiter-
+ *  injection guard that prevents a cross-person false-merge. */
+const escKey = (x: string): string => x.replace(/:/g, '%3A');
+
+export function scopeKey(scope: string | undefined, sourceMemberId: string): string {
+  const s = scope ?? GLOBAL_SCOPE;
+  return s === GLOBAL_SCOPE ? sourceMemberId : `${escKey(s)}:${escKey(sourceMemberId)}`;
 }
 
 /**
@@ -81,10 +113,19 @@ function toIdentityTraits(d: DemographicTraits): IdentityTraits {
  */
 function canonicalPersonKey(c: SourceIdentityRecord): string {
   const t = c.traits;
-  if (t.medicaidId && t.medicaidId.trim()) return `mid:${t.medicaidId.trim().toLowerCase()}`;
-  if (t.ssnLast4 && t.dob) return `ssn:${t.ssnLast4}:${t.dob}`;
-  if (t.lastName && t.dob) return `nm:${t.lastName.trim().toLowerCase()}:${(t.firstName ?? '').trim().toLowerCase()}:${t.dob}`;
-  return `rec:${c.sourceRecordId}`;
+  if (t.medicaidId && t.medicaidId.trim())
+    return `mid:${escKey(t.medicaidId.trim().toLowerCase())}`;
+  if (t.ssnLast4 && t.dob) return `ssn:${escKey(t.ssnLast4)}:${escKey(t.dob)}`;
+  // Source-local id: the assigning authority is embedded, so the key is
+  // source-scoped — the same value under a different authority anchors a DIFFERENT
+  // member. Normalized to mirror the matchEngine 'localId-same-source-exact' guard.
+  // Components are delimiter-escaped so a ':' inside a URI/OID authority cannot collide.
+  if (t.localId && t.localId.assigningAuthority.trim() && t.localId.value.trim()) {
+    return `loc:${escKey(t.localId.assigningAuthority.trim().toLowerCase())}:${escKey(t.localId.value.trim().toLowerCase())}`;
+  }
+  if (t.lastName && t.dob)
+    return `nm:${escKey(t.lastName.trim().toLowerCase())}:${escKey((t.firstName ?? '').trim().toLowerCase())}:${escKey(t.dob)}`;
+  return `rec:${escKey(c.sourceRecordId)}`;
 }
 
 /** Anchored member id for a matched person — stable across their source records. */
@@ -117,17 +158,22 @@ export function resolveEmpi(
   sourceMemberId: string,
   traits: ResolveIdentityTraits | undefined,
   source: IdentitySource = mockIdentitySource,
-  xref?: XrefReader,
+  xref?: XrefReader
 ): EmpiResolution {
   const feed = traits?.feed ?? 'unknown-feed';
   const demographics = traits?.demographics;
+  // The xref namespace for this raw source id (defaults to the shared 'global'
+  // namespace; a source-scoped caller passes traits.idScope). Every xref lookup
+  // and link below goes through this key so reused id values across authorities
+  // never collide (R2 Option B).
+  const xrefKey = scopeKey(traits?.idScope, sourceMemberId);
 
   // Id-only (no demographics): nothing to match probabilistically. F3 fix — consult
   // the cross-reference FIRST so a source id already linked (by an earlier feed)
   // resolves to the EXISTING member instead of minting a fresh, fragmenting id.
   if (!demographics) {
     if (xref) {
-      const look = xref.lookup(sourceMemberId);
+      const look = xref.lookup(xrefKey);
       // E9: distinct members claim this source id with no merge relating them —
       // HOLD for review, never fail open by picking one wrong member.
       if (look.status === 'ambiguous') {
@@ -162,7 +208,7 @@ export function resolveEmpi(
       confidence: 0,
       reasonCode: 'empi-minted-id-only',
       provenance: 'empi-minted-new',
-      link: { sourceId: sourceMemberId, memberId: minted },
+      link: { sourceId: xrefKey, memberId: minted },
       auditSummary: auditSummary('minted', null),
     };
   }
@@ -171,7 +217,10 @@ export function resolveEmpi(
   const match = findBestMatch(input, allCandidates(source));
 
   // Deterministic hit or probabilistic score at/above the auto-link threshold.
-  if (match.candidate && (match.tier === 'deterministic' || match.confidence >= MATCH_THRESHOLDS.autoLinkMin)) {
+  if (
+    match.candidate &&
+    (match.tier === 'deterministic' || match.confidence >= MATCH_THRESHOLDS.autoLinkMin)
+  ) {
     const memberId = anchoredIdFor(match.candidate);
     return {
       memberId,
@@ -179,10 +228,11 @@ export function resolveEmpi(
       matchTier: match.tier,
       confidence: match.confidence,
       reasonCode: 'empi-linked',
-      provenance: match.tier === 'deterministic' ? 'empi-linked-deterministic' : 'empi-linked-probabilistic',
-      // Link the raw source id to the anchored member so later id-only records for
-      // the same id resolve here rather than fragmenting.
-      link: { sourceId: sourceMemberId, memberId },
+      provenance:
+        match.tier === 'deterministic' ? 'empi-linked-deterministic' : 'empi-linked-probabilistic',
+      // Link the raw source id (in its xref namespace) to the anchored member so
+      // later id-only records for the same id resolve here rather than fragmenting.
+      link: { sourceId: xrefKey, memberId },
       auditSummary: auditSummary('linked', match),
     };
   }
@@ -209,7 +259,7 @@ export function resolveEmpi(
     confidence: match.confidence,
     reasonCode: 'empi-minted-no-match',
     provenance: 'empi-minted-new',
-    link: { sourceId: sourceMemberId, memberId: minted },
+    link: { sourceId: xrefKey, memberId: minted },
     auditSummary: auditSummary('minted', match),
   };
 }
@@ -260,10 +310,7 @@ export const empiResolver: IdentityResolver = createEmpiResolver();
  * index performs emits a memberId-partitioned C2 event (xref.events()) so the
  * graph rekeys by REPLAY (DP-7) — never an in-place key rewrite.
  */
-export function createXrefEmpiResolver(
-  xref: XrefIndex,
-  source?: IdentitySource,
-): IdentityResolver {
+export function createXrefEmpiResolver(xref: XrefIndex, source?: IdentitySource): IdentityResolver {
   return (sourceMemberId, traits) => {
     const src = source ?? getIdentitySource();
     const res = resolveEmpi(sourceMemberId, traits, src, xref);

@@ -31,6 +31,9 @@ describe('UC-01 | Cross-source anchor at enrollment', () => {
     firstName: 'Maria',
     lastName: 'Redhawk',
     dob: '1985-04-12',
+    // R2-B: the EMR record carries Maria's GLOBAL Medicaid id — cross-source
+    // consolidation is on that global key, never on name+dob (now held, not deterministic).
+    medicaidId: 'SD-MEDICAID-88213',
   };
 
   it('anchors an enrollee to one identity, deterministically, across feeds', () => {
@@ -39,7 +42,7 @@ describe('UC-01 | Cross-source anchor at enrollment', () => {
     expect(resolved.resolvedId).toMatch(/^mpi-/);
     expect(resolved.bestMatch.tier).toBe('deterministic');
     // The decision path is captured: the rule that fired and the tier.
-    expect(resolved.bestMatch.ruleHits.map((h) => h.rule)).toContain('name+dob-exact');
+    expect(resolved.bestMatch.ruleHits.map((h) => h.rule)).toContain('medicaidId-exact');
     // Both OTHER feeds (payer + state-agency) recognize her → not two people.
     expect(resolved.matchedSources.sort()).toEqual(['payer', 'state-agency']);
   });
@@ -68,7 +71,7 @@ describe('UC-01 | Cross-source anchor at enrollment', () => {
     // The audit summary carries tier + confidence + rule path, no raw PHI.
     expect(resolved.auditSummary).toMatch(/tier=deterministic/);
     expect(resolved.auditSummary).toMatch(/confidence=100/);
-    expect(resolved.auditSummary).toMatch(/name\+dob-exact/);
+    expect(resolved.auditSummary).toMatch(/medicaidId-exact/);
     expect(resolved.auditSummary).not.toMatch(/Maria|Redhawk|1985-04-12/);
     // It passes the same PHI-safety gate the audit sink itself enforces.
     expect(() =>
@@ -85,7 +88,11 @@ describe('UC-01 | Cross-source anchor at enrollment', () => {
   });
 
   it('does NOT anchor a stranger (never silently guesses a member)', () => {
-    const stranger: IdentityTraits = { firstName: 'Nobody', lastName: 'Elsewhere', dob: '1900-01-01' };
+    const stranger: IdentityTraits = {
+      firstName: 'Nobody',
+      lastName: 'Elsewhere',
+      dob: '1900-01-01',
+    };
     const resolved = resolveIdentity(stranger, 'emr', mockIdentitySource);
     expect(resolved.resolvedId).toBe('');
     expect(resolved.bestMatch.tier).toBe('no-match');
@@ -138,10 +145,7 @@ describe('UC-03 | Wrong merge unmerged (twins) — identity DEFENSE the engine s
       ['Sofia', 'Sophia'],
     ];
     for (const [a, b] of firstNamePairs) {
-      const s = scoreProbabilisticMatch(
-        { ...twinA, firstName: a },
-        { ...twinB, firstName: b }
-      );
+      const s = scoreProbabilisticMatch({ ...twinA, firstName: a }, { ...twinB, firstName: b });
       expect(s.score).toBeGreaterThanOrEqual(MATCH_THRESHOLDS.possibleMatchMin);
       expect(s.score).toBeLessThan(MATCH_THRESHOLDS.autoLinkMin);
       expect(tierForScore(s.score, false)).toBe('possible-match');
@@ -175,16 +179,19 @@ describe('UC-06 | Re-entry identity continuity', () => {
       sex: 'male',
     };
     const result = findBestMatch(reEntry, [priorIdentity]);
-    // Above threshold and certain: continuity of record at day one of re-entry.
-    expect(result.tier).toBe('deterministic');
-    expect(result.confidence).toBe(100);
-    expect(result.ruleHits.map((h) => h.rule)).toContain('name+dob-exact');
+    // R2-B safety: a re-entrant with a NEW subscriber id and only name+dob+sex agreement
+    // (score 80) is a POSSIBLE match — HELD for human confirmation, never an automatic
+    // cross-person merge (two different people can share name+dob). The prior record is
+    // still surfaced as the best candidate for the reviewer.
+    expect(result.tier).toBe('possible-match');
     expect(result.candidate?.sourceRecordId).toBe('pre-incarceration-9931');
   });
 
-  it('a changed subscriber id alone does not manufacture a new person', () => {
-    // Same person, different CIN — the engine still anchors to the prior record
-    // rather than treating the new id as a stranger.
+  it('a changed subscriber id + name/dob alone is HELD for review, not auto-merged and not minted as a stranger', () => {
+    // R2-B safety: name+dob-only agreement (score 75) is a POSSIBLE match — the engine
+    // neither mints a stranger nor auto-links; it holds for human confirmation. This is
+    // the deliberate change from the old name+dob-exact deterministic auto-merge that
+    // could comingle two different same-named people across sources.
     const reEntry: IdentityTraits = {
       firstName: 'Andre',
       lastName: 'Blacksmith',
@@ -192,7 +199,8 @@ describe('UC-06 | Re-entry identity continuity', () => {
       medicaidId: 'SD-CIN-NEW-99999',
     };
     const result = findBestMatch(reEntry, [priorIdentity]);
-    expect(result.tier === 'deterministic' || result.tier === 'probabilistic-auto').toBe(true);
+    expect(result.tier).toBe('possible-match');
+    expect(result.candidate?.sourceRecordId).toBe('pre-incarceration-9931');
   });
 
   it('a genuinely different person does not re-anchor to the prior record', () => {

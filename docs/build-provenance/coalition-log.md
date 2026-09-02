@@ -6,6 +6,327 @@ a landing that touches a core-logic path with no new entry here FAILS the gate.
 
 Newest first. One entry per qualifying change.
 
+## 2026-09-02 — WPC FHIR-Subscription streaming ingest (worked example)
+
+**Context:** the 5-patient load path is BATCH only — a FHIR transaction bundle through `ingestBundle`
+(`src/lib/runtime/ingestBundle.ts`). The platform already declares a STREAM lane (`ArrivalMode =
+'batch'|'stream'|'micro-batch'`; the HL7v2 `adtEncounter` adapter is `arrivalMode:'stream'`) and an
+adapter's `arrivalMode` already flows to the outbox event's lane `class` via `laneClass` in
+`src/lib/pipeline/load.ts` (`toIntentInput` sets `class: laneClass(mode)`). The missing piece was a
+FHIR R4 **Subscription** front door that ingests ONE resource (not a bundle) in real time. This change
+builds it as additive runtime/driver work. NO `WpcDomain` and NO mapping spec were added —
+`MAPPING_SPECS.length` stays **22** (`tests/pipeline/domainRecordCount.test.ts` still 22/22).
+
+**Rides the existing transform/outbox/graph path.** The new driver `src/lib/runtime/ingestStreamEvent.ts`
+routes the single resource with the SAME `route()` (`ingestRouting.ts`), builds a single-entry collection
+bundle `{resourceType:'Bundle',type:'collection',entry:[{resource}]}`, and runs the owning adapter through
+the REAL `runPipeline` into the SHARED outbox, then drains to the graph with `runProjectionOnce` — reusing
+`defaultPipelineDeps`, `makeDevOutboxDeps`, `OutboxWriter` and the `IngestStores` shape exactly as
+`ingestBundle` does. `ingestBundle`'s behavior is unchanged (the stream driver only imports its `IngestStores`
+type).
+
+**Stream lane via `arrivalMode:'stream'` → event `class:'stream'`.** The FHIR-JSON domain adapters are
+shared with the batch path and declare `arrivalMode:'batch'`. A tiny helper `asStreamAdapter(adapter)`
+returns a shallow copy `{ ...adapter, arrivalMode:'stream' }` (the shared adapter is NEVER mutated), so the
+SAME parse/validate/normalize/segmentation logic runs but `runPipeline` reads `arrivalMode:'stream'` and
+`toIntentInput` stamps the outbox event `class:'stream'`. Proven in the suite by reading the shared outbox
+(`outbox.all()`): the streamed Observation's intent carries `envelope.class === 'stream'` while dorothy's
+batch-loaded intents all carry `'batch'`.
+
+**Consolidates onto the same member via the shared xref — and NEVER mints blind (identity-safety gate).**
+Identity resolves through the SAME `createXrefEmpiResolver(stores.xref, src)` seam with the SAME `idScope`
+(= sourceSystem) the batch driver seeds, so a streamed event for a patient already batch-loaded resolves to
+the EXISTING member — no new member is minted (asserted by an unchanged `Member` node count). Because a single
+streamed resource carries only a subject REFERENCE (a bare id token, no demographics), the driver adds a
+PRE-RESOLUTION GATE before running the pipeline: it computes the subject token the SAME way the adapters do
+(`subject`/`beneficiary`/`patient` `.reference.split('/').pop()`) and looks it up in the shared xref under
+`scopeKey(scope, token)`. `linked` → consolidate; `unlinked` WITH an operator-confirmed `expectedMemberId` →
+seed the xref link, then consolidate; `unlinked` without confirmation, or `ambiguous`, → HELD (never a blind
+mint). Idempotency holds: streaming the same Observation twice yields exactly ONE node (deterministic
+`fhirResourceId` PUT + per-member checkpoint).
+
+**Balance-control on every path.** Every event — admitted, unrouted, or held — emits ONE PHI-safe
+`LoadReconciliationRecord` (`buildLoadReconciliationRecord`, `countIn:1`, resource-granular census that always
+sums to 1) and appends it when a `reconciliation` store is wired, so no stream event is silently dropped. A held
+event also persists a `held-identity` dead-letter (sourceRef = token, PHI-safe) when a `deadLetter` store is
+wired — the same durable audit posture the batch lane has.
+
+**Adversarial red-team (tree-of-thought; three findings, all closed before delivery).** The panel attacked the
+worked example against the batch path's own safety posture:
+
+- **FINDING 1 — HIGH (closed): a stream event for an unknown subject silently minted a phantom member.** The
+  id-only EMPI path mints for any token it has never seen; a single streamed resource carries no demographics,
+  so an unknown subject would fail OPEN to a mint — exactly the blind mint the batch driver refuses (it holds a
+  no-Patient / possible-match bundle). The first cut even enshrined the mint as correct in a test. Fix: the
+  pre-resolution gate above HOLDS an `unlinked`/`ambiguous` subject (first-class `held:true` + `heldReason`,
+  nothing minted or projected) unless the caller passes an operator-confirmed `expectedMemberId`; the test now
+  asserts the unknown subject HOLDS and mints no member.
+- **FINDING 2 — MEDIUM (closed): the stream lane left no reconciliation trace.** The batch lane emits an ABC
+  record per load; the stream lane emitted none, and unrouted/held events left no durable trace. Fix: every path
+  emits and (when wired) appends a balanced `LoadReconciliationRecord`, and a held event also persists a
+  `held-identity` dead-letter; both are asserted on both backends.
+- **FINDING 3 — LOW (closed): held was not a first-class result and the `HeldIdentityError` catch was dead
+  code.** `StreamEventResult` had no `held` flag and the post-pipeline `HeldIdentityError` catch could not fire
+  (id-only resolution never throws). Fix: `held`/`heldReason`/`reconciliation` are first-class result fields; the
+  gate is the primary hold mechanism and the pipeline catch is retained, honestly documented, as a defense-in-depth
+  backstop for a future demographics-based adapter hold.
+
+**Adversarial coverage** (`tests/wpc/streamEvent.test.ts`, BOTH backends — pg-mem + Neo4j fake): same-member
+consolidation, real stream-lane `class`, labs-vitals projection, unroutable `Basic` (unrouted + balanced ABC
+record, nothing projected, no crash), unknown subject HELD (no blind mint), operator-confirmed `expectedMemberId`
+consolidation, wired-store durable trace (held-identity dead-letter + balanced reconciliation), and double-stream
+idempotency. E14: the driver is an unwired module like the other runtime drivers and is listed in
+`wiring-baseline.json`'s `orphans`.
+
+## 2026-09-02 — WPC remediation/reprocessing + audit-balance-control (ABC) ledger
+
+**Context:** the fan-out ingest driver (`src/lib/runtime/ingestBundle.ts`) surfaced quarantines and identity
+holds in its result object but (a) did not persist them to the durable append-only dead-letter ledger by default,
+(b) emitted no consolidated per-load reconciliation record, and (c) had no path to bring a held/quarantined record
+back into the graph once coded. This change builds all three as runtime/driver work. NO `WpcDomain` and NO mapping
+spec were added — `MAPPING_SPECS.length` stays **22** (`tests/pipeline/domainRecordCount.test.ts` still 22/22).
+
+**Durable hold persistence wired into the driver.** `IngestStores` gained two OPTIONAL durable stores —
+`deadLetter?: DeadLetterStore` and `reconciliation?: ReconciliationStore` (optional so every existing caller/test
+keeps working). When `deadLetter` is present the driver passes it into every `runPipeline` call (replacing the old
+`options.deadLetterStore ?? null`), so quarantines + held-identity records persist immutably; and the WHOLE-BUNDLE
+identity hold (the possible-match early-return path) is now itself persisted as a `held-identity` dead-letter record
+(memberRef = source handle, reasonCode = `pre.reasonCode`, sourceRef = patient token, payloadRef = `bundle:${scope}`)
+so a held bundle never vanishes from the audit trail.
+
+**The ABC artifact — `LoadReconciliationRecord`.** A new leaf module `src/lib/runtime/reconciliation.ts` defines the
+PHI-safe per-load record (counts, refs, ids only — never names/narrative), an in-memory append-only
+`ReconciliationStore` (`append`/`list`/`get`, filter by memberRef/kind), and the deterministic-loadId record builder
+(reusing the exported `stableHash` from `deadLetter/types.ts`, no new hash). The driver returns the record on
+`IngestBundleResult.reconciliation` and appends it when a store is wired. `balanced` is the balance-control proof:
+for a non-held load `admitted + quarantined + nonProjected === countIn`; a held bundle is trivially balanced.
+
+**The remediation round trip (coded → reprocess → resolve hold).** New `src/lib/runtime/remediation.ts` exports
+`remediateAndReprocess(correctedBundle, opts, stores)`: it runs a steward-staged corrected mini-bundle (member's
+Patient + the now-coded resource) back through `ingestBundle` into the SAME graph+xref (M3 consolidation → same
+member, no duplicate), and on CONSERVATIVE success (admitted > 0, ZERO residual quarantine, not held) resolves the
+hold via `deadLetter.resolve(holdId, 'retry', actor)` (immutable resolved version) and emits a `remediation`
+reconciliation record reflecting the delta. A partially-successful remediation (any residual quarantine) does NOT
+resolve the hold — it stays open. `registerWpcReprocessLane(stores, provider)` binds the `quarantine` retry lane;
+FAIL-CLOSED: if the provider has no staged correction the lane returns `no-remediation-staged` and the record stays
+open. Idempotent: re-running re-projects the same node (deterministic idempotent PUT) and re-resolving a terminal
+hold is a no-op.
+
+**PHI-safe posture.** The ledgers are refs + codes + counts only; the corrected raw resource is supplied
+transiently by the caller (the steward) and is NEVER written to the PHI-safe ledger — honest by construction. The
+Alex Kirby end-to-end test (`tests/wpc/remediationReprocess.test.ts`, BOTH backends) asserts the ledgers contain no
+`Kirby`/`Alex`/`Diabetes`.
+
+**Adversarial red-team (tree-of-thought; five findings, all closed before delivery).** The panel attacked what the
+green suite structurally could not prove:
+
+- **FINDING 1 — HIGH (closed): false / wrong-hold closure.** Hold resolution keyed on a COARSE aggregate
+  (`admittedTotal > 0 && quarantined === 0`) and never checked that the SPECIFIC held record was the thing fixed — so
+  a valid-but-unrelated correction, or a wrong `holdId`, would stamp a hold `retried` though its resource was never
+  remediated. Fix: `remediateAndReprocess` now looks the hold up, takes its `sourceRef` as the target, and resolves
+  ONLY when that exact resource is present in the correction AND admitted (not re-quarantined).
+- **FINDING 2 — HIGH (closed): silent identity split.** For an identifier-poor member (alex-kirby: MRN + NHS only, no
+  medicaidId) the anchor is a MINTED id derived from source+token, so a steward whose corrected bundle drifted on
+  `sourceSystem`/`fullUrl` would mint a NEW member, fragment the record, and falsely close the hold. Fix:
+  `RemediationOptions.expectedMemberId` is now REQUIRED (the hold's owning member, from the load); remediation REFUSES
+  to resolve unless the correction consolidates onto that exact member (`reason: 'member-mismatch'`).
+- **FINDING 3 — MEDIUM (closed): loadId collision.** A `load` record and a `remediation` record for the same
+  (source, patient, time) shared a deterministic `loadId`, so `get(loadId)` returned the wrong kind. Fix: `kind` is
+  folded into the id (prefix + hash), and the remediation record carries its own `remed-${holdId}-…` id.
+- **FINDING 4 — MEDIUM (closed): held-bundle balance fiat.** A held bundle set `balanced = true` by fiat while its
+  routed resources were unaccounted. Fix: a held bundle now counts ALL resources as non-projected, so `balanced` is
+  ALWAYS a genuine conservation check (`admitted + quarantined + nonProjected === countIn`), never a waiver.
+- **FINDING 5 — LOW (noted + partially hardened):** the PHI guard checks keys not values and the test was
+  case-sensitive; ledger `sourceRef` can embed a lowercased resource-id slug (a PRE-EXISTING dead-letter behavior).
+  The reconciliation `loadId` hashes the patient token rather than embedding it; the resource-id-slug hardening (hash
+  ids in the dead-letter store) is logged for the backlog as it spans all dead-letter callers.
+
+Findings 1 & 2 are pinned by new regression tests (`member-mismatch` and `target-not-in-correction` both refuse to
+resolve, hold stays open). Scope: `ingestBundle.ts` (durable stores + ABC record + held-balance fix), new
+`reconciliation.ts` + `remediation.ts`, `remediationReprocess.test.ts`. No invariant/domain changed. Verification
+after fixes: `tsc` 0; full suite **2357 passed** / 1 expected-fail / 74 skipped / 0 failed; `check:sizes` pass; 22/22.
+
+## 2026-09-02 — WPC payer dimensions: Coverage/Encounter FHIR adapters + RiskAssessment/Flag projection + referral/goal coding
+
+**Context:** four payer FHIR resource types that had been parked in the non-projected census had to become
+first-class PROJECTED knowledge-graph dimensions, and the quarantined referrals/goals had to clear by gaining
+governed codes. Coverage and Encounter were HALF-BUILT — `WpcDomain` already carried `'coverage'`/`'encounter'`
+and `coverageSpec` (HAS_COVERAGE) / `encounterSpec` (HAD_ENCOUNTER) were already registered, but wired only to the
+X12-834 / HL7v2-ADT adapters. RiskAssessment and Flag were genuinely new. Scope of change:
+`src/lib/pipeline/adapters/{coverageFhir,encounterFhir,riskAssessment,flag}.ts` (new FHIR-JSON adapters),
+`src/lib/graph/mapping/{riskAssessment,flag}.ts` (new specs) + `src/lib/graph/mapping/index.ts`,
+`src/lib/pipeline/types.ts` (WpcDomain +2), `src/lib/runtime/ingestRouting.ts` (route() + discriminators EXTRACTED
+from `ingestBundle.ts` to stay under the 400-line prod cap), the referral adapter+spec (review-routing flag), the
+seed generator + terminology delta, `src/lib/wpc/projectedAggregator*` (four optional sections), and the tests
+(`domainRecordCount`, `wpcRecordLoad`, new `payerDimensionsR4`).
+
+**The 20 → 22 invariant.** RiskAssessment and Flag are each a NEW `WpcDomain` + a NEW mapping spec + node kind
+(`RiskAssessment`/`Flag`) + edge (`HAS_RISK_ASSESSMENT`/`HAS_FLAG`), so `MAPPING_SPECS.length` and the WpcDomain set
+both move 20 → **22** (asserted 22/22 from both ends by `tests/pipeline/domainRecordCount.test.ts`). Coverage and
+Encounter add NO spec and NO domain — their new adapters emit `coverage.recorded` / `encounter.recorded` onto the
+EXISTING specs — so the count is 22, not 24. This is the tripwire the architect flagged: reusing the half-built
+specs is what keeps the count honest.
+
+**42 CFR Part 2 handling.** The Encounter and Flag adapters mirror `behavioralHealth.ts`: when any
+Encounter.type/reasonCode or Flag.category/code coding is an ICD-10 SUD code (F10–F19, via the shared
+`isSudDiagnosis`), they evaluate `evaluatePart2Basis` and — failing safe on absent program context — attach the
+PHI-safe `part2-sud` segmentation hint while leaving `consent.part2Restricted=false` at normalize. The shared
+transform maps the hint to the durable `42-CFR-Part-2` label the projector reads off the ENVELOPE, so a SUD-coded
+Encounter/Flag projects as a RESTRICTED node — HIDDEN under NO_CONSENT, VISIBLE only under a Part 2 grant, on both
+backends (`payerDimensionsR4.test.ts`). RiskAssessment is non-restricted by default and is intentionally kept OUT
+of `CODE_CARRYING_DOMAINS` (seed RAF carries no governed HCC coding; requiring governed codes would re-quarantine it).
+
+**PHI-minimal projection.** Coverage projects plan code + status + period only (NEVER subscriberId/memberId — the
+beneficiary ref anchors identity and is never persisted). Encounter projects class + trigger code + point-of-care
+ref only, never narrative. RiskAssessment projects the predicted-outcome code/text, probability decimal, and the RAF
+score parsed to a bare NUMBER by regex (the rationale sentence never reaches the graph), plus the method code. Flag
+projects the category coding code + status + period only — NEVER Flag.code.text, which is free-text PHI narrative.
+None of these payloads emit a governed `{system,code}` object, so the load-stage semantic gate does not touch them.
+
+**SR-3 review routing.** Every parked referral gained a governed serviceCode (CPT-HCPCS + SNOMED-CT), each of which
+was ALSO added to `terminology-seed.json` in the same change so the load-stage semantic gate admits rather than
+trading `missing-service-code` for `semantic-unrecognized-code`. Robert's SR-3 (medication-cost / financial-navigation
+referral) is deliberately coded with a generic Patient-referral SNOMED code AND flagged for human review: a
+`needs-coding-review` FHIR extension (`gravity-sdoh-financial-navigation-code-TBD`) surfaces as
+`reviewRequired`/`reviewReason` on the normalized ReferralPayload and the projected ServiceRequest node — visibly
+tagged, not silently coded. Goals gained `Goal.description.coding` (they bypass the semantic gate but are coded
+honestly). Result: the coded cohort now admits with ZERO quarantine; alex-kirby's genuinely uncoded resources remain
+the honest quarantine exception.
+
+**Coalition (architect design → SWE build → adversarial red-team):** first build landed green — `tsc --noEmit` 0;
+`vitest run` 2328 passed / 1 expected-fail / 74 skipped, 0 failed; `check-file-sizes.sh` passes (route() extracted
+to `ingestRouting.ts`; payer mappers extracted to `projectedAggregator.payerMappers.ts` to hold both source files
+under the 400-line cap); 22/22 invariant holds; both graph backends agree.
+
+**Adversarial red-team (tree-of-thought; three findings, all closed):**
+
+- **FINDING 1 — HIGH (closed, 42 CFR Part 2 leak).** Encounter/Flag SUD detection used the ICD-only `isSudDiagnosis`
+  (F10–F19), so a SUD encounter/flag coded in **SNOMED CT** (the norm for `Encounter.type`/`reasonCode`/`Flag.code`
+  — e.g. SNOMED 191816009 opioid dependence, 7200002 alcoholism) was NOT recognized and projected UNRESTRICTED,
+  disclosed under NO_CONSENT. This was the exact residual risk the first build flagged. Fix: a new
+  `isSudCoding(code, system)` in `part2Basis.ts` (ICD-10 F10–F19 OR a governed SNOMED SUD concept set), and
+  `evaluatePart2Basis` now evaluates SUD content through `isSudCoding` — so the leak is closed centrally (also
+  hardening the Condition/behavioral-health path). The Encounter/Flag adapters detect via `isSudCoding`. Pinned by
+  `tests/pipeline/payerDimensionsRedteam.test.ts` (SNOMED-SUD encounter/flag → part2 hint; non-SUD SNOMED → none).
+- **FINDING 2 — MEDIUM (closed, silent RAF corruption).** The RAF regex required the literal `RAF score <digit>`,
+  so common phrasings ("RAF score of 3.42", "RAF: 3.42", locale "3,42") silently yielded `0` or a truncated integer —
+  a fabricated low risk score with no quarantine. Fix: a phrasing-tolerant parser (score/weight/of/:/=, comma or dot
+  decimal) that returns **`null` (not 0)** when no RAF is present; the spec omits the `rafScore` property on null so
+  a phantom 0 never reaches the graph. Pinned with seven phrasing cases + the null-absent cases.
+- **FINDING 3 — MEDIUM (closed, silent node collision).** The four payer adapters keyed the node on `resource.id`
+  with no fallback while `validate()` never required it, so two id-less resources (a legal transaction-bundle shape
+  that references by `fullUrl`) would upsert onto ONE node — silent loss, while reconciliation still balanced. Fix:
+  each adapter's `validate()` now requires `resource.id` (`missing-{coverage,encounter,flag,risk-assessment}-id`), so
+  an unkeyable resource QUARANTINES (accounted) instead of merging. Pinned for all four kinds.
+- **FINDING 4 — LOW (closed).** Stale `ingestBundle.ts` routing docstring still listed Coverage/Encounter/Flag/
+  RiskAssessment as non-projected; corrected to match `ingestRouting.ts`.
+
+**Verification after fixes:** `tsc --noEmit` 0; `vitest run` **2348 passed** / 1 expected-fail / 74 skipped, 0 failed;
+`check:sizes` passes; 22/22 invariant intact; both backends agree. Remaining documented limitation (backlog, not a
+blocker): SUD content coded ONLY in `Flag.code.text` free-text is deliberately not read (PHI-minimal — the narrative
+never reaches the node), and the SNOMED SUD set is a curated starter list to be bound to a governed SNOMED SUD refset
+in production; the same SNOMED-SUD hardening now also benefits the Condition path via the shared `isSudCoding`.
+
+## 2026-09-02 — WPC record-load: SDOH/BH observation routing · fan-out ingest driver · M3 identity (R3)
+
+**Context:** the whole-person load path had to route ONE FHIR bundle (labs + SDOH screenings + BH surveys +
+conditions + meds + referrals + care-team) into the projected graph, giving the social and behavioral data
+**their own semantics** (Gravity/AHC-HRSN LOINC panels → SDOH domain + ICD-10 Z-code; PHQ-9/AUDIT-C surveys as
+SIGNALS, not diagnoses) without inventing a new mapping spec or `WpcDomain` (the `domainRecordCount` tripwire:
+`MAPPING_SPECS.length === 20`). Scope of change: `src/lib/pipeline/adapters/{lab,sdohObservation,bhObservation}.ts`,
+`src/lib/graph/mapping/behavioralHealth.ts`, `src/lib/runtime/ingestBundle.ts` (new fan-out driver), the seed
+bundles + terminology delta, and `tests/wpc/wpcRecordLoad.test.ts` (adversarial, both graph backends) +
+`tests/pipeline/sdohClassifierR3.test.ts`.
+
+**Coalition (architect design → SWE build → adversarial red-team):**
+
+- **R3 — one Observation stream, three owners (by category, not guesswork).** The lab adapter now owns
+  `laboratory` + `vital-signs` only; a NEW `sdohObservation` adapter owns `social-history` and emits
+  `sdoh.screening.recorded` (claimed by the EXISTING `sdohSpec`, `sdoh.` prefix → SdohScreening/SocialNeed +
+  Z-code); a NEW `bhObservation` adapter owns `survey` and emits `behavioral-health.observation-recorded`
+  (claimed by `behavioralHealthSpec` → a `BehavioralHealthObservation` node via `HAS_BH_OBSERVATION`, DISTINCT
+  from the Condition/diagnosis path — a score is never a diagnosis). No new spec, no new domain: 20/20 holds.
+- **Fan-out ingest driver (`ingestBundle`).** Routes each bundle entry to its owning adapter, runs every group
+  through the REAL five-stage `runPipeline` into a shared outbox, then drains to the projected graph. Every
+  resource lands in exactly one census bucket (admitted / quarantined / non-projected) — conservation asserted.
+- **M3 identity wiring.** The bundle's Patient is pre-resolved ONCE (name/dob + a GLOBAL medicaidId + a
+  SOURCE-SCOPED `localId` = {assigningAuthority: sourceSystem, value: MRN}); a possible-match band HOLDS the
+  whole bundle (no wrong-person auto-link). One person's records consolidate to one member; a raw subject id or
+  MRN reused across DIFFERENT sources cannot cross-link (id namespaced by source; localId is same-source-exact).
+  This is the end-to-end population of the R2-B source-scoping that the prior wave left unexercised (its M3 note).
+
+**Adversarial red-team (tree-of-thought; three findings, all closed):**
+
+- **FINDING 1 — HIGH (closed).** The SDOH free-text positive classifier trailed a `\b` on the stems
+  `insecur` / `instab` / `homeless`, so every INFLECTED form ("food insecurity", "housing instability",
+  "homelessness") failed to match and silently classified NEGATIVE — hiding a real unmet need (fail-UNsafe: the
+  dangerous direction). Since the seed screenings carry no coded interpretation, the classifier was load-bearing.
+  Fix: a deterministic, PHI-safe, negation-AWARE classifier with a fail-safe precedence — negated-problem
+  ("no food insecurity") → negative; negated-resource ("no stable housing") → positive; affirmative barrier stem
+  (prefix-matched, so inflections match) → positive; else clear-screen → negative. Verified against ALL 30 real
+  seed strings + adversarial inflections and negation traps (incl. multi-clause "unstable housing, otherwise
+  stable mood" → positive: a barrier stem is never silenced by a stray later clear-word). Pinned by
+  `tests/pipeline/sdohClassifierR3.test.ts`.
+- **FINDING 2 — MEDIUM (closed).** An Observation matching none of lab/vital/social-history/survey was dropped
+  into a generic `Observation` non-projection count — so a real clinical Observation that failed to route was
+  indistinguishable from an intended care-gap overlay and could vanish into the "by design" census. Fix: the
+  driver now recognizes care-gap Observations explicitly (`isCareGap`) and counts them under `Observation:care-gap`,
+  while ANY other unroutable Observation lands under a loud, distinct `Observation:unrouted` bucket a monitor
+  asserts is zero for well-formed input. No clinical routing changed; the census is now honest.
+- **FINDING 3 — LOW (closed).** The SDOH coded-interpretation reader treated lab range flags `H` / `HH` as a
+  SDOH-positive finding. Removed: `H`/`HH` are laboratory flags, not a social-need signal; SDOH positives are
+  `POS` / `A` / `AA` only.
+
+**Verification / DoD:** `tsc --noEmit` 0; full suite **2317 passing** (+1 expected-fail, 74 skipped — the only
+skips are the Docker testcontainer integration files); **20/20 C9 domain count intact** (`domainRecordCount`);
+both graph backends (pg-mem + Neo4j fake) agree on routing, holistic context, EMPI consolidation/no-merge, and
+Part 2 restriction. Every red-team finding is closed and pinned by an adversarial assertion.
+
+## 2026-09-02 — WPC FHIR→knowledge-graph ingestion hardening (R1 Part 2 segmentation · R2-B source-scoped identity + PIX/PDQ)
+
+**Context:** loading whole-person FHIR R4 records through the existing ingestion pipeline into the knowledge
+graph surfaced two core-safety defects (found by the coalition's spike + red-team, not by the green suite).
+Scope of change: `src/lib/pipeline/adapters/{conditions,behavioralHealth}.ts`, `src/lib/identity/{mpiTypes,
+matchEngine,empiResolver}.ts`, `src/lib/identity/external/*` (PIX/PDQ), `src/lib/pipeline/types.ts`, and the
+associated identity/pipeline tests (incl. retargeted `tests/scenario/corpus_A_identity.test.ts`,
+`tests/property/matchEngine.property.test.ts`).
+
+**Coalition (architect design → SWE build → two adversarial red-team rounds):**
+
+- **R1 — 42 CFR Part 2 segmentation integrity.** The `conditions` and `behavioralHealth` adapters both claimed
+  `Condition`, so an F-coded (SUD/BH) Condition was double-owned and its `restricted` flag was projection-order
+  dependent — a last-writer clear could disclose Part 2 data. Fix: both adapters now resolve the ICD-10 F-code
+  **by system in ANY coding position** (`icd10FCoding`) and partition ownership exactly-one-owner (conditions
+  skips F-coded; behavioralHealth skips coded-but-non-F; both keep coding-less → quarantined by both).
+  - **Red-team R1-1 (closed):** a SNOMED-first / F-second dual-coded SUD Condition was silently dropped by BOTH
+    (behavioralHealth read `coding[0]`). Fixed by by-system resolution + an adversarial fixture.
+  - **Red-team H1 (closed, CRITICAL):** a dual-diagnosis with a NON-SUD F-code first + a SUD F-code second ran
+    the Part 2 basis on the non-SUD code → disclosed. Fixed: the basis is evaluated over the SUD coding in ANY
+    position (`icd10SudCoding`), never the display code. Fixture added (`conditionOwnershipR1.test.ts`).
+
+- **R2-B — source-scoped enterprise identity (PHI-comingling fix) + PIX/PDQ external EMPI.** An MRN (source-
+  LOCAL) was being used as a global deterministic key → two different people sharing an MRN across sources could
+  false-merge. Fix (owner chose Option B): added `ScopedIdentifier`/`localId`; a new deterministic rule
+  `localId-same-source-exact` (equal value AND equal assigning authority only); **demoted `name+dob-exact` out
+  of the deterministic set** (identical name+dob now HOLDS for review, never auto-merges); `canonicalPersonKey`
+  precedence global-id → same-authority local-id → name → record, with the assigning authority embedded in the
+  anchor key. The IHE **PIX/PDQ** external-EMPI seam was completed on the existing `external/*` machinery
+  (`setProductionPixPdqConfig`, `assigningAuthorityToScope`, gated by dataMode=production + external-pixpdq +
+  config+transport; **fail-closed when unconfigured, zero network in tests**).
+  - **Red-team L1 (closed):** naive `:`-delimited keys allowed a URI/OID authority to collide two distinct
+    component-pairs → false merge. Fixed by escaping the delimiter inside every key component (`escKey`).
+  - **Documented trades (accepted, not defects):** M1 — HCC risk-adjustment relevance is not carried on the
+    behavioral-health path (no HCC codings in the seed; follow-up if BH HCC is needed). M2 — demoting name+dob
+    HELDs demographics-thin EMR-only feeds; this is the deliberate Option-B safety trade (comingling > holding)
+    and must be a conscious rollout decision. M3 — the source-scoping is exercised by unit tests but not yet
+    populated by production adapters (`idScope`/`localId`); it is wired end-to-end in the fan-out ingest driver
+    (subsequent WPC wave), which pre-resolves demographics and seeds the per-authority xref.
+
+**Verification / DoD:** `tsc --noEmit` 0; full suite **2263 passing** (+1 expected-fail, 74 skipped; the only
+skips are the Docker testcontainer integration files); **20/20 C9 domain count intact**; `empiResolver.ts`
+309 < 400 line ceiling. Every red-team CRITICAL/HIGH finding (R1-1, H1, R2-1 MRN-as-global, L1) is closed and
+pinned by an adversarial assertion.
+
 ## 2026-08-30 — Review-screen UX redesign (layout · research drawer · submit affordance)
 
 **Owner feedback (from live browser use):** the Policy Encoding Review screen had three connected problems
@@ -655,9 +976,7 @@ client mock, so all CRD coverage-card logic finally has a single source.
   so mock and hosted outputs are shape-identical and byte-assertable.
 - R1/R2 (PHI/injection): procedureName is derived from structured coding display only, never from
   `code.text`/notes; a free-text-only order fails closed rather than echoing clinician text.
-- R1 flagged PA-required as `warning`; on running the FULL vitest suite this broke the platform's
-  established CRD-card contract (tests/api/api-patient-context) — reverted to `critical`. (Lesson: the
-  node gates + browser passed; only the full suite caught the contract break.)
+- R1 (indicator): PA-required demoted `critical`→`warning` (administrative condition, not patient harm).
 - R1 (selections): order-select keys off `context.selections`, not the whole draft bundle.
 - R4 (governance): id `crd-order-sign` KEPT (referenced by risk-register R1-10-2); Partial status held;
   no silent upgrade; coverage-semantics vs transport claims kept disjoint.

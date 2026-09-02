@@ -1,0 +1,1625 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Rapid City Regional Health",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "robert-chen-organization-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6890b3bd-34d4-4e5f-b516-828c01829362",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "State Medicaid Agency",
+        "id": "robert-chen-organization-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54",
+      "resource": {
+        "resourceType": "Patient",
+        "active": true,
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://tcoc.example.org/fhir/sid/mrn",
+            "value": "MRN-0103"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Chen",
+            "given": [
+              "Robert"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1964-11-03",
+        "managingOrganization": {
+          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+        },
+        "address": [
+          {
+            "use": "home",
+            "city": "Rapid City",
+            "state": "SD",
+            "country": "US"
+          }
+        ],
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "system": "urn:ietf:bcp:47",
+                  "code": "en"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ],
+        "id": "robert-chen"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Patient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938",
+      "resource": {
+        "resourceType": "Practitioner",
+        "active": true,
+        "name": [
+          {
+            "family": "Castillo",
+            "given": [
+              "—"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ],
+        "id": "robert-chen-practitioner-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b3b218d4-661f-49f5-9d6e-6697ca28cc89",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "practitioner": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "organization": {
+          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+                "code": "doctor",
+                "display": "Doctor"
+              }
+            ]
+          }
+        ],
+        "id": "robert-chen-practitionerrole-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d2497c96-9e96-42e4-aaca-19baa21b16bb",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MC",
+              "display": "Medicaid"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:6890b3bd-34d4-4e5f-b516-828c01829362"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "robert-chen-coverage-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Coverage"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3125c147-0cec-42f0-ae15-6528733fb2e8",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+        },
+        "period": {
+          "start": "2026-04-15T09:00:00Z",
+          "end": "2026-04-15T09:40:00Z"
+        },
+        "id": "robert-chen-encounter-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fd2868b9-5be2-4c29-8f0d-c523963848fd",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            }
+          ],
+          "text": "Essential (primary) hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "onsetDateTime": "2014-06-01",
+        "id": "robert-chen-condition-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:02d7cde7-b205-40f0-bb3f-2d4e9d4663b6",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "N18.32",
+              "display": "Chronic kidney disease, stage 3b"
+            }
+          ],
+          "text": "Chronic kidney disease, stage 3b"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "onsetDateTime": "2020-10-01",
+        "id": "robert-chen-condition-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:70273f4d-c1b1-4412-8382-e6f8eb026f5f",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "F10.10",
+              "display": "Alcohol use disorder, mild"
+            }
+          ],
+          "text": "Alcohol use disorder, mild"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "onsetDateTime": "2023-05-01",
+        "id": "robert-chen-condition-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:30701d4f-39aa-4d5b-8fef-2ec9df38616f",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "17767",
+              "display": "Amlodipine"
+            }
+          ],
+          "text": "Amlodipine 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "dosageInstruction": [
+          {
+            "text": "10 mg once daily"
+          }
+        ],
+        "id": "robert-chen-medicationrequest-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8cc8d3e9-6f1c-4c22-8e1d-2e2afb0a3c24",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "52175",
+              "display": "Losartan"
+            }
+          ],
+          "text": "Losartan potassium 100 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "dosageInstruction": [
+          {
+            "text": "100 mg once daily"
+          }
+        ],
+        "id": "robert-chen-medicationrequest-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cb433f85-1ad3-4969-8890-bae312b92dca",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "83367",
+              "display": "Atorvastatin"
+            }
+          ],
+          "text": "Atorvastatin 40 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "dosageInstruction": [
+          {
+            "text": "40 mg once nightly"
+          }
+        ],
+        "id": "robert-chen-medicationrequest-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c85e4465-46e7-42d1-82f1-c9c69c1b85f6",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel"
+            }
+          ],
+          "text": "Blood pressure panel"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ],
+              "text": "Systolic blood pressure"
+            },
+            "valueQuantity": {
+              "value": 158,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ],
+              "text": "Diastolic blood pressure"
+            },
+            "valueQuantity": {
+              "value": 96,
+              "unit": "mm[Hg]",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ],
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H"
+              }
+            ]
+          }
+        ],
+        "id": "robert-chen-observation-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d1c1210a-bfa6-405d-bbdd-e45a7233d393",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33914-3",
+              "display": "eGFR"
+            }
+          ],
+          "text": "eGFR"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-02-28",
+        "valueQuantity": {
+          "value": 42,
+          "unit": "mL/min/1.73m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL/min/1.73m2"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "L"
+              }
+            ]
+          }
+        ],
+        "id": "robert-chen-observation-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:979632f5-ef6d-4dcf-9283-20bc16e2678e",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "108252007",
+                "display": "Laboratory procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "9318-7",
+              "display": "Urine albumin/creatinine ratio"
+            }
+          ],
+          "text": "Urine albumin/creatinine ratio"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-02-15",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "id": "robert-chen-servicerequest-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:91c99f8b-5327-4151-82a4-8118a9b0ee57",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "103696004",
+              "display": "Patient referral to specialist"
+            }
+          ],
+          "text": "Nephrology referral"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-04-10",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "id": "robert-chen-servicerequest-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b7fa3bf5-6107-48f0-b2e1-27bc2f4e0458",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "71802-3",
+              "display": "Housing status"
+            }
+          ],
+          "text": "Housing status"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Stable — rents apartment"
+        },
+        "id": "robert-chen-observation-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:69590b24-5d73-4957-a8fd-cba877dcbf30",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "88122-7",
+              "display": "Food insecurity risk"
+            }
+          ],
+          "text": "Food insecurity risk"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "No flag"
+        },
+        "id": "robert-chen-observation-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:17a4c440-8ce2-484a-96fe-5118789e830b",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93030-5",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Adequate — urban"
+        },
+        "id": "robert-chen-observation-5"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cde9130f-e5d4-4081-bcc8-f7e810a4ec8c",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76513-1",
+              "display": "Financial resource strain"
+            }
+          ],
+          "text": "Financial resource strain"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Medication cost barrier"
+        },
+        "id": "robert-chen-observation-6"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d4e5ba72-d9f7-4d34-b324-18a40aead7c2",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes",
+                "code": "sdoh-category-unspecified",
+                "display": "SDOH Category Unspecified"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z59.86",
+              "display": "Financial insecurity"
+            }
+          ],
+          "text": "Financial insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "onsetDateTime": "2026-04-01",
+        "id": "robert-chen-condition-4"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Black Hills Medication Assistance Program",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "other",
+                "display": "Community-Based Organization"
+              }
+            ],
+            "text": "Community-Based Organization (CBO)"
+          }
+        ],
+        "id": "robert-chen-organization-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:07a8a20f-acd9-42f6-98e6-ed74ed6c189e",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Medication cost assistance / patient-assistance program",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "3457005",
+              "display": "Patient referral"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "authoredOn": "2026-04-01",
+        "requester": {
+          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c"
+          }
+        ],
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:d4e5ba72-d9f7-4d34-b324-18a40aead7c2"
+          }
+        ],
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/needs-coding-review",
+            "valueString": "gravity-sdoh-financial-navigation-code-TBD"
+          }
+        ],
+        "id": "robert-chen-servicerequest-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4c790aa1-9a0a-4c34-910c-16e4daad0017",
+      "resource": {
+        "resourceType": "Task",
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill",
+              "display": "Fulfill the focal request"
+            }
+          ]
+        },
+        "description": "Closed-loop CBO referral: Medication cost assistance / patient-assistance program",
+        "focus": {
+          "reference": "urn:uuid:07a8a20f-acd9-42f6-98e6-ed74ed6c189e"
+        },
+        "for": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "owner": {
+          "reference": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c"
+        },
+        "authoredOn": "2026-04-01",
+        "businessStatus": {
+          "text": "In progress"
+        },
+        "id": "robert-chen-task-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Task"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cd66376e-f7c7-4d71-9048-d88ef688c1b3",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C total score"
+            }
+          ],
+          "text": "AUDIT-C total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 4,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "A"
+              }
+            ]
+          }
+        ],
+        "id": "robert-chen-observation-7"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3b0b5f8b-f5ab-48f7-9b40-db43271cb439",
+      "resource": {
+        "resourceType": "Consent",
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "patient-privacy",
+              "display": "Privacy Consent"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "59284-0",
+                "display": "Consent Document"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "dateTime": "2026-04-15",
+        "policy": [
+          {
+            "uri": "https://www.ecfr.gov/current/title-42/chapter-I/subchapter-A/part-2"
+          }
+        ],
+        "provision": {
+          "type": "permit",
+          "securityLabel": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "42CFRPart2",
+              "display": "42 CFR Part 2"
+            }
+          ],
+          "purpose": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "TREAT",
+              "display": "Treatment"
+            }
+          ]
+        },
+        "id": "robert-chen-consent-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Consent"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c043d530-d142-499b-a51e-e256d170126d",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel"
+            }
+          ],
+          "text": "Blood pressure control"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "id": "robert-chen-goal-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:96ebe86f-6c23-4f7a-8542-38dd12212a1b",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33914-3",
+              "display": "GFR predicted"
+            }
+          ],
+          "text": "eGFR / creatinine monitoring (CKD 3b)"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "id": "robert-chen-goal-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1858a465-4aa5-408c-975a-8903e0328411",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C total score"
+            }
+          ],
+          "text": "AUDIT-C follow-up counseling"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "id": "robert-chen-goal-3"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Goal"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bc2e8f50-7438-488c-a639-82881047e8ff",
+      "resource": {
+        "resourceType": "CareTeam",
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "participant": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "446050000",
+                    "display": "Primary care physician"
+                  }
+                ]
+              }
+            ],
+            "member": {
+              "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+            }
+          }
+        ],
+        "managingOrganization": [
+          {
+            "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+          }
+        ],
+        "id": "robert-chen-careteam-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "CareTeam"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d7a9e2e3-4ef4-4e28-a604-84dbeab7a8f5",
+      "resource": {
+        "resourceType": "CarePlan",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "careTeam": [
+          {
+            "reference": "urn:uuid:bc2e8f50-7438-488c-a639-82881047e8ff"
+          }
+        ],
+        "addresses": [
+          {
+            "reference": "urn:uuid:fd2868b9-5be2-4c29-8f0d-c523963848fd"
+          },
+          {
+            "reference": "urn:uuid:02d7cde7-b205-40f0-bb3f-2d4e9d4663b6"
+          },
+          {
+            "reference": "urn:uuid:70273f4d-c1b1-4412-8382-e6f8eb026f5f"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "urn:uuid:c043d530-d142-499b-a51e-e256d170126d"
+          },
+          {
+            "reference": "urn:uuid:96ebe86f-6c23-4f7a-8542-38dd12212a1b"
+          },
+          {
+            "reference": "urn:uuid:1858a465-4aa5-408c-975a-8903e0328411"
+          }
+        ],
+        "id": "robert-chen-careplan-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "CarePlan"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ca4509b0-510c-4703-abd2-e4fee231aba9",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 28
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "rc-1"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "BP Control Check"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "valueInteger": 28,
+        "note": [
+          {
+            "text": "Care gap open for 28 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "robert-chen-observation-8"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3433913b-83b7-461d-a390-16aa6120d135",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 42
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "rc-2"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "eGFR / Creatinine (CKD)"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "valueInteger": 42,
+        "note": [
+          {
+            "text": "Care gap open for 42 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "robert-chen-observation-9"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:267467c2-be6d-43b4-9a3c-f5c76de8cd33",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "BH"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 21
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "rc-4"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75626-2",
+                "display": "BH Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "AUDIT-C Follow-up Counseling"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "valueInteger": 21,
+        "note": [
+          {
+            "text": "Care gap open for 21 days. Domain: BH. Status: Open."
+          }
+        ],
+        "id": "robert-chen-observation-10"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c9fdb70d-6cab-4450-8114-148a10fc68de",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "Last BP reading 158/96. Target <130/80. CKD makes BP control critical."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-robert-1"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "warning",
+              "display": "warning"
+            }
+          ],
+          "text": "BP control check overdue 28 days — hypertension gap"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "id": "robert-chen-flag-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Flag"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c52e9a67-0787-4ae2-ae44-6f314be99e49",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "CKD monitoring labs overdue. Last eGFR 42 (Stage 3b). Nephrology referral recommended."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-robert-2"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "warning",
+              "display": "warning"
+            }
+          ],
+          "text": "eGFR overdue 42 days — CKD monitoring gap"
+        },
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "id": "robert-chen-flag-2"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Flag"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1791ed1c-654b-4368-b37d-2f890bb3111a",
+      "resource": {
+        "resourceType": "RiskAssessment",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/raf-score",
+            "valueDecimal": 1.9
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-suspects",
+            "valueInteger": 2
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-value",
+            "valueDecimal": 11200
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+        },
+        "prediction": [
+          {
+            "outcome": {
+              "text": "Emergency Room Visit"
+            },
+            "probabilityDecimal": 0.52,
+            "rationale": "Predicted ER risk 52% based on RAF score 1.9 and clinical profile."
+          }
+        ],
+        "id": "robert-chen-riskassessment-1"
+      },
+      "request": {
+        "method": "POST",
+        "url": "RiskAssessment"
+      }
+    }
+  ]
+}

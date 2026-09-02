@@ -1,0 +1,115 @@
+[
+  {
+    "pid": "patient-dorothy-042",
+    "slug": "dorothy-simmons",
+    "file": "fhir/seed/patients/dorothy-simmons.bundle.json",
+    "entries": 50,
+    "resourceTypes": {
+      "Organization": 4,
+      "Patient": 1,
+      "Practitioner": 1,
+      "PractitionerRole": 1,
+      "Coverage": 1,
+      "Encounter": 1,
+      "Condition": 8,
+      "MedicationRequest": 6,
+      "Observation": 14,
+      "ServiceRequest": 2,
+      "Task": 2,
+      "Goal": 4,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Flag": 2,
+      "RiskAssessment": 1
+    }
+  },
+  {
+    "pid": "patient-james-087",
+    "slug": "james-wilson",
+    "file": "fhir/seed/patients/james-wilson.bundle.json",
+    "entries": 42,
+    "resourceTypes": {
+      "Organization": 3,
+      "Patient": 1,
+      "Practitioner": 1,
+      "PractitionerRole": 1,
+      "Coverage": 1,
+      "Encounter": 1,
+      "Condition": 5,
+      "MedicationRequest": 5,
+      "ServiceRequest": 5,
+      "Observation": 10,
+      "Task": 1,
+      "Goal": 3,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Flag": 2,
+      "RiskAssessment": 1
+    }
+  },
+  {
+    "pid": "patient-robert-103",
+    "slug": "robert-chen",
+    "file": "fhir/seed/patients/robert-chen.bundle.json",
+    "entries": 38,
+    "resourceTypes": {
+      "Organization": 3,
+      "Patient": 1,
+      "Practitioner": 1,
+      "PractitionerRole": 1,
+      "Coverage": 1,
+      "Encounter": 1,
+      "Condition": 4,
+      "MedicationRequest": 3,
+      "Observation": 10,
+      "ServiceRequest": 3,
+      "Task": 1,
+      "Consent": 1,
+      "Goal": 3,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Flag": 2,
+      "RiskAssessment": 1
+    }
+  },
+  {
+    "pid": "patient-lisa-156",
+    "slug": "lisa-thompson",
+    "file": "fhir/seed/patients/lisa-thompson.bundle.json",
+    "entries": 36,
+    "resourceTypes": {
+      "Organization": 3,
+      "Patient": 1,
+      "Practitioner": 1,
+      "PractitionerRole": 1,
+      "Coverage": 1,
+      "Encounter": 1,
+      "Condition": 2,
+      "MedicationRequest": 3,
+      "Observation": 11,
+      "ServiceRequest": 3,
+      "Task": 1,
+      "Goal": 3,
+      "CareTeam": 1,
+      "CarePlan": 1,
+      "Flag": 2,
+      "RiskAssessment": 1
+    }
+  },
+  {
+    "pid": "patient-alex-kirby",
+    "slug": "alex-kirby",
+    "file": "fhir/seed/patients/alex-kirby.bundle.json",
+    "entries": 51,
+    "resourceTypes": {
+      "Organization": 2,
+      "Patient": 1,
+      "Coverage": 1,
+      "Observation": 33,
+      "Condition": 5,
+      "ServiceRequest": 2,
+      "Task": 6,
+      "Flag": 1
+    }
+  }
+]

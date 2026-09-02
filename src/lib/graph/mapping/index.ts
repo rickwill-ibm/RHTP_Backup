@@ -28,6 +28,12 @@ import { documentSpec } from './document';
 import { conditionsSpec } from './conditions';
 import { diagnosticReportsSpec } from './diagnosticReports';
 import { familyHistorySpec } from './familyHistory';
+// ── WPC payer dimensions (append-only): RiskAssessment + Flag become first-class
+// PROJECTED knowledge-graph dimensions (each a new WpcDomain + spec). Coverage and
+// Encounter reuse their EXISTING specs (already registered above) via new FHIR-JSON
+// adapters, so they add NO spec here — the record-domain count moves 20 -> 22, not 24.
+import { riskAssessmentSpec } from './riskAssessment';
+import { flagSpec } from './flag';
 // ── WPC Unit 1 (append-only): access-geography (first FHIR-fed person dimension).
 import { accessSpec } from './access';
 
@@ -54,6 +60,9 @@ export const MAPPING_SPECS: readonly MappingSpec[] = Object.freeze([
   conditionsSpec,
   diagnosticReportsSpec,
   familyHistorySpec,
+  // ── WPC payer dimensions (append-only): 20 -> 22 record domains.
+  riskAssessmentSpec,
+  flagSpec,
 ]);
 
 /**

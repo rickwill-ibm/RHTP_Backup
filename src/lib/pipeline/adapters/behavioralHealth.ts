@@ -20,8 +20,14 @@
  *
  * C9.2 yield: behavioral-health feed -> behavioral-health T1 (BH + Part 2 SUD subset).
  */
-import { evaluatePart2Basis } from '../part2Basis';
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import { evaluatePart2Basis, isBehavioralHealthDiagnosis, isSudDiagnosis } from '../part2Basis';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** Synthetic, PHI-free program context carried on the source Condition. */
 interface ProgramContext {
@@ -64,7 +70,11 @@ function triBool(v: unknown): boolean | undefined {
 }
 
 /** code.coding[0] as a coding triple (code may be ''). */
-function conditionCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function conditionCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -72,6 +82,45 @@ function conditionCode(resource: Record<string, unknown>): { system: string; cod
     code: str(first.code),
     display: str(first.display),
   };
+}
+/**
+ * R1 (segmentation integrity): the ICD-10-CM behavioral-health (F-code) coding in ANY
+ * position — resolved BY SYSTEM, not by array index. Ownership and the Part 2 basis both
+ * key off this so a SNOMED-first / F-second dual-coded SUD Condition is neither silently
+ * dropped nor mis-classified as disclosable. Returns undefined when no ICD-10 F-code exists.
+ */
+function icd10FCoding(
+  resource: Record<string, unknown>
+): { system: string; code: string; display: string } | undefined {
+  const coding = obj(resource.code).coding;
+  if (!Array.isArray(coding)) return undefined;
+  for (const c of coding) {
+    const cc = obj(c);
+    const system = str(cc.system);
+    const code = str(cc.code);
+    if (isBehavioralHealthDiagnosis(code, system))
+      return { system, code, display: str(cc.display) };
+  }
+  return undefined;
+}
+/**
+ * H1 (segmentation integrity): the ICD-10-CM SUD (F10–F19) coding in ANY position. The
+ * Part 2 basis is evaluated off THIS, not the first F-code, so a dual-diagnosis Condition
+ * (a non-SUD F-code ordered first, a SUD F-code second) is still recognized as SUD content
+ * and restricted — never disclosed by coding-array order. Undefined when no SUD coding exists.
+ */
+function icd10SudCoding(
+  resource: Record<string, unknown>
+): { system: string; code: string; display: string } | undefined {
+  const coding = obj(resource.code).coding;
+  if (!Array.isArray(coding)) return undefined;
+  for (const c of coding) {
+    const cc = obj(c);
+    const system = str(cc.system);
+    const code = str(cc.code);
+    if (isSudDiagnosis(code, system)) return { system, code, display: str(cc.display) };
+  }
+  return undefined;
 }
 /** The first coding's `code` from a CodeableConcept-shaped field (e.g. clinicalStatus). */
 function codingCode(field: unknown, fallback: string): string {
@@ -101,6 +150,12 @@ function parse(payload: string): RawRecord<ConditionResource>[] {
   for (const entry of entries) {
     const resource = obj(obj(entry).resource);
     if (str(resource.resourceType) !== 'Condition') continue;
+    // R1 (segmentation integrity): this adapter OWNS a Condition that carries an ICD-10
+    // F-code in ANY coding position. A resource that HAS a code but no ICD-10 F-code
+    // belongs to the conditions adapter — exclude it so a diagnosis is never double-owned.
+    // Coding-less Conditions are kept (still quarantined here) so the missing-code guarantee holds.
+    const anyCode = conditionCode(resource).code;
+    if (anyCode && !icd10FCoding(resource)) continue;
     const id = str(resource.id) || `bh-${out.length + 1}`;
     out.push({ sourceRef: id, data: { resource } });
   }
@@ -110,8 +165,10 @@ function parse(payload: string): RawRecord<ConditionResource>[] {
 function validate(raw: RawRecord<ConditionResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!conditionCode(resource).code) issues.push({ reasonCode: 'missing-condition-code', fieldPath: 'code.coding' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!conditionCode(resource).code)
+    issues.push({ reasonCode: 'missing-condition-code', fieldPath: 'code.coding' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -120,16 +177,21 @@ function normalize(raw: RawRecord<ConditionResource>, deps: PipelineDeps): Norma
   const conditionId = str(resource.id);
   const memberId = deps.resolveIdentity(subjectSourceId(resource), { feed: SOURCE.feed });
   const conditionRef = `Condition/${conditionId}`;
-  const code = conditionCode(resource);
+  // R1: classify + evaluate the Part 2 basis off the ICD-10 F-coding (by system, any
+  // position), NOT coding[0] — otherwise a SNOMED-first dual-coded SUD code would run the
+  // basis with a non-ICD system and fail-open to disclosable. Coding-less falls back (quarantined).
+  const code = icd10FCoding(resource) ?? conditionCode(resource);
   const pc = programContext(resource);
   const recordedDate = str(resource.recordedDate);
 
-  // F2: the Part 2 basis is the two-factor rule, NOT the diagnosis code alone.
+  // F2 + H1: the Part 2 basis is the two-factor rule, evaluated over SUD content in ANY
+  // coding (a dual-dx with a non-SUD F-code first must still restrict), not the display code.
+  const basisCoding = icd10SudCoding(resource) ?? code;
   const basis = evaluatePart2Basis({
     facilityType: pc.facilityType,
     federallyAssisted: pc.federallyAssisted,
-    code: code.code,
-    system: code.system,
+    code: basisCoding.code,
+    system: basisCoding.system,
   });
 
   const payload: BehavioralHealthPayload = {

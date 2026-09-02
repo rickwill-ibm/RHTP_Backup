@@ -58,8 +58,10 @@ describe('matchEngine properties', () => {
       const b2: IdentityTraits = { ...b, [field]: a[field] };
 
       const after = scoreProbabilisticMatch(a, b2).score;
-      expect(after, `case ${i}: agreeing '${field}' lowered score ${before} -> ${after}`)
-        .toBeGreaterThanOrEqual(before);
+      expect(
+        after,
+        `case ${i}: agreeing '${field}' lowered score ${before} -> ${after}`
+      ).toBeGreaterThanOrEqual(before);
     });
   });
 
@@ -76,9 +78,13 @@ describe('matchEngine properties', () => {
         a.ssnLast4 = str(rng, '0123456789', 4, 4);
         b = { ...b, ssnLast4: a.ssnLast4, dob: a.dob };
       } else {
-        a.firstName = genName(rng, FIRSTS) || 'x';
-        a.lastName = genName(rng, LASTS) || 'y';
-        b = { ...b, firstName: a.firstName, lastName: a.lastName, dob: a.dob };
+        // R2-B: name+dob is no longer a deterministic rule (it holds, never auto-merges).
+        // The third deterministic rule is localId-same-source-exact: same assigning
+        // authority AND same value.
+        const auth = `AUTH-${str(rng, 'ABCDEF', 3, 3)}`;
+        const val = `MRN-${str(rng, '0123456789', 6, 6)}`;
+        a.localId = { assigningAuthority: auth, value: val };
+        b = { ...b, localId: { assigningAuthority: auth, value: val } };
       }
       const det = runDeterministicRules(a, b);
       expect(det.hit, `case ${i}: deterministic rule ${which} did not fire`).toBe(true);
@@ -152,15 +158,23 @@ describe('matchEngine properties', () => {
       const { ruleHits } = scoreProbabilisticMatch(a, b);
       for (const h of ruleHits) {
         const cap =
-          h.rule === 'lastName-similarity' ? 30
-          : h.rule === 'firstName-similarity' ? 20
-          : h.rule === 'dob-exact' ? 25
-          : h.rule === 'sex-match' ? 5
-          : 10; // zip-match / phone-match
-        expect(h.weight, `case ${i}: ${h.rule} weight ${h.weight} out of [0, ${cap}]`)
-          .toBeGreaterThanOrEqual(0);
-        expect(h.weight, `case ${i}: ${h.rule} weight ${h.weight} out of [0, ${cap}]`)
-          .toBeLessThanOrEqual(cap);
+          h.rule === 'lastName-similarity'
+            ? 30
+            : h.rule === 'firstName-similarity'
+              ? 20
+              : h.rule === 'dob-exact'
+                ? 25
+                : h.rule === 'sex-match'
+                  ? 5
+                  : 10; // zip-match / phone-match
+        expect(
+          h.weight,
+          `case ${i}: ${h.rule} weight ${h.weight} out of [0, ${cap}]`
+        ).toBeGreaterThanOrEqual(0);
+        expect(
+          h.weight,
+          `case ${i}: ${h.rule} weight ${h.weight} out of [0, ${cap}]`
+        ).toBeLessThanOrEqual(cap);
       }
     });
   });

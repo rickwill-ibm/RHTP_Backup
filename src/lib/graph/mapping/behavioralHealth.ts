@@ -28,9 +28,20 @@ import { associative, isRestricted, memberNode, resourceNode } from './spec';
 export const BEHAVIORAL_HEALTH_DOMAIN = 'behavioral-health';
 export const CONDITION_KIND = 'Condition';
 export const HAS_CONDITION = 'HAS_CONDITION';
+/**
+ * R3: a scored BH SURVEY (PHQ-9 / AUDIT-C) is a behavioral-health SIGNAL, not a
+ * diagnosis, so it projects as its own node kind off a distinct associative edge.
+ * The spec is EXTENDED to claim `behavioral-health.observation-recorded` — no new
+ * spec or domain — and the Condition path (condition-recorded) is left unchanged.
+ */
+export const BH_OBSERVATION_KIND = 'BehavioralHealthObservation';
+export const HAS_BH_OBSERVATION = 'HAS_BH_OBSERVATION';
 
 function str(v: unknown, fallback = ''): string {
   return typeof v === 'string' ? v : fallback;
+}
+function numOrNull(v: unknown): number | null {
+  return typeof v === 'number' ? v : null;
 }
 function dxCode(p: Record<string, unknown>): string {
   const code = (p.code ?? {}) as Record<string, unknown>;
@@ -43,6 +54,10 @@ export const behavioralHealthSpec = {
     return eventType.startsWith('behavioral-health.');
   },
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
+    // R3: scored-survey branch — a distinct signal node, NEVER a Condition.
+    if (event.eventType === 'behavioral-health.observation-recorded') {
+      return bhObservationMutations(event, deps);
+    }
     const p = event.payload;
     const conditionRef = str(p.conditionRef, `Condition/${event.memberId}`);
     const start = str(p.recordedDate) || event.occurredAt || new Date(deps.now()).toISOString();
@@ -57,7 +72,7 @@ export const behavioralHealthSpec = {
         clinicalStatus: str(p.clinicalStatus, 'active'),
         // The re-disclosure prohibition travels with a Part 2 node (42 CFR 2.32).
         reDisclosureProhibited: restricted,
-      }),
+      })
     );
     out.push({
       op: 'UpsertEdge',
@@ -71,3 +86,37 @@ export const behavioralHealthSpec = {
     return out;
   },
 };
+
+/**
+ * R3: project a scored BH survey (PHQ-9 / AUDIT-C) as a BehavioralHealthObservation
+ * node linked by an associative HAS_BH_OBSERVATION edge — a signal, not a diagnosis.
+ * A survey is not SUD program content, so it is not Part-2 labeled here; restriction
+ * is still read from the envelope (via resourceNode) so a segmented survey would
+ * honor its label, never over-restricted by code guess.
+ */
+function bhObservationMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
+  const p = event.payload;
+  const observationRef = str(p.observationRef, `Observation/${event.memberId}`);
+  const start = event.occurredAt || new Date(deps.now()).toISOString();
+  const codeObj = (p.code ?? {}) as Record<string, unknown>;
+  const out: Mutation[] = [memberNode(event)];
+  out.push(
+    ...resourceNode(event, BH_OBSERVATION_KIND, observationRef, {
+      code: str(codeObj.code),
+      display: str(codeObj.display),
+      instrument: str(p.instrument),
+      score: numOrNull(p.score),
+      category: 'survey',
+    })
+  );
+  out.push({
+    op: 'UpsertEdge',
+    type: HAS_BH_OBSERVATION,
+    from: { kind: 'Member', key: event.memberId },
+    to: { kind: BH_OBSERVATION_KIND, key: observationRef },
+    properties: { instrument: str(p.instrument) },
+    validity: { start, end: null },
+    semantics: associative,
+  });
+  return out;
+}

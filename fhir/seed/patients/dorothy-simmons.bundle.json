@@ -125,7 +125,13 @@
             ]
           }
         ],
-        "id": "dorothy-simmons-practitioner-1"
+        "id": "dorothy-simmons-practitioner-1",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1487654321"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -236,7 +242,17 @@
           "start": "2026-04-15T09:00:00Z",
           "end": "2026-04-15T09:40:00Z"
         },
-        "id": "dorothy-simmons-encounter-1"
+        "id": "dorothy-simmons-encounter-1",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-renderingProviderNpi",
+            "valueString": "1487654321"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-sourceDocument",
+            "valueString": "DocumentReference/dorothy-simmons-visitdoc-1"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -340,7 +356,30 @@
           "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
         },
         "onsetDateTime": "2014-07-01",
-        "id": "dorothy-simmons-condition-2"
+        "id": "dorothy-simmons-condition-2",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-meat",
+            "extension": [
+              {
+                "url": "monitored",
+                "valueBoolean": true
+              },
+              {
+                "url": "evaluated",
+                "valueBoolean": true
+              },
+              {
+                "url": "assessed",
+                "valueBoolean": true
+              },
+              {
+                "url": "treated",
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
       },
       "request": {
         "method": "POST",

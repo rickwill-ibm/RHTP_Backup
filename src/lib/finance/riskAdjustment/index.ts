@@ -23,3 +23,21 @@ export {
   rollupWithheldByCategory,
   type CategoryRollup,
 } from './icdRollup';
+export { materializeCandidateCaptures, type CandidateCapture } from './codingGapBridge';
+export {
+  assembleCodingGapReports,
+  assembleCodingGapReportBundle,
+  type CodingGapMeasureReport,
+  type CodingGapReportBundle,
+} from './codingGapReportOut';
+export {
+  computeHierarchicalRaf,
+  setRafModelData,
+  type HierarchicalRaf,
+  type RafModelData,
+} from './raf';
+export {
+  resolveIcdToHcc,
+  setHccCrosswalkProvider,
+  type HccCrosswalkProvider,
+} from './hccCrosswalk';

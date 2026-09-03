@@ -40,6 +40,12 @@ export interface EncounterFhirPayload {
   trigger: string;
   /** serviceProvider / location reference (opaque), or '' — the point of care. */
   pointOfCare: string;
+  /** RADV: face-to-face date of service (Encounter.period.start), PHI-safe. */
+  dateOfService: string;
+  /** RADV: rendering-provider NPI, authored on the Encounter (extension), PHI-safe. */
+  providerNpi: string;
+  /** RADV: opaque source-document reference (extension), never a narrative. */
+  sourceDocumentRef: string;
   /** Present only when the two-factor Part 2 basis is met (SUD-coded encounter). */
   segmentationHints?: string[];
 }
@@ -55,6 +61,15 @@ function str(v: unknown, fallback = ''): string {
 /** subject.reference "Patient/ENC-MEM-01" -> the source member id component. */
 function subjectSourceId(resource: Record<string, unknown>): string {
   return str(obj(resource.subject).reference).split('/').pop() ?? '';
+}
+/** An Encounter extension's string value, matched by a URL substring (RADV fields). */
+function extString(resource: Record<string, unknown>, urlPart: string): string {
+  const ext = Array.isArray(resource.extension) ? resource.extension : [];
+  for (const e of ext) {
+    if (str(obj(e).url).toLowerCase().includes(urlPart.toLowerCase()))
+      return str(obj(e).valueString);
+  }
+  return '';
 }
 /** Encounter.type[0].coding[0].code (the PHI-safe trigger code). */
 function triggerCode(resource: Record<string, unknown>): string {
@@ -124,6 +139,9 @@ function normalize(raw: RawRecord<EncounterResource>, deps: PipelineDeps): Norma
     encounterClass: str(obj(resource.class).code, 'IMP'),
     trigger: triggerCode(resource),
     pointOfCare,
+    dateOfService: start,
+    providerNpi: extString(resource, 'renderingprovidernpi'),
+    sourceDocumentRef: extString(resource, 'sourcedocument'),
   };
 
   // PART 2: a SUD-coded encounter (ICD-10 F10–F19 OR a governed SNOMED SUD concept,

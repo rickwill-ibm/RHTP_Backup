@@ -118,7 +118,13 @@
             ]
           }
         ],
-        "id": "james-wilson-practitioner-1"
+        "id": "james-wilson-practitioner-1",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1598765432"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -229,7 +235,17 @@
           "start": "2026-04-15T09:00:00Z",
           "end": "2026-04-15T09:40:00Z"
         },
-        "id": "james-wilson-encounter-1"
+        "id": "james-wilson-encounter-1",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-renderingProviderNpi",
+            "valueString": "1598765432"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-sourceDocument",
+            "valueString": "DocumentReference/james-wilson-visitdoc-1"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -333,7 +349,30 @@
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
         },
         "onsetDateTime": "2015-04-01",
-        "id": "james-wilson-condition-2"
+        "id": "james-wilson-condition-2",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-meat",
+            "extension": [
+              {
+                "url": "monitored",
+                "valueBoolean": true
+              },
+              {
+                "url": "evaluated",
+                "valueBoolean": true
+              },
+              {
+                "url": "assessed",
+                "valueBoolean": true
+              },
+              {
+                "url": "treated",
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
       },
       "request": {
         "method": "POST",

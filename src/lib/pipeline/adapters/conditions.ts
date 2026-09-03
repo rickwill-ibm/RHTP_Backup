@@ -57,6 +57,12 @@ export interface ConditionPayload {
   recordedDate: string;
   /** True iff a CMS-HCC coding is present — honest, source-driven, never inferred. */
   hccRelevant: boolean;
+  /**
+   * RADV MEAT documentation signal (Monitored/Evaluated/Assessed/Treated) when the
+   * source attaches an `ra-meat` extension — PHI-safe booleans, never narrative.
+   * Absent (all false) on a Condition with no MEAT documentation.
+   */
+  meat?: { monitored: boolean; evaluated: boolean; assessed: boolean; treated: boolean };
   /** Carried onto the graph edge as the asserter (PHI-safe). */
   provenance: string;
 }
@@ -103,6 +109,25 @@ function hccCoding(resource: Record<string, unknown>): Coding | undefined {
   return code
     ? { system: str(hcc.system, 'urn:cms:risk-adjustment:hcc'), code, display: str(hcc.display) }
     : undefined;
+}
+/** Parse the RADV `ra-meat` nested-boolean extension (undefined when absent). PHI-safe. */
+function meatEvidence(
+  resource: Record<string, unknown>
+): { monitored: boolean; evaluated: boolean; assessed: boolean; treated: boolean } | undefined {
+  const ext = Array.isArray(resource.extension) ? resource.extension : [];
+  const meat = ext.map(obj).find((e) => str(e.url).toLowerCase().endsWith('ra-meat'));
+  if (!meat) return undefined;
+  const flags: Record<string, boolean> = {};
+  for (const sub of Array.isArray(meat.extension) ? meat.extension : []) {
+    const s = obj(sub);
+    flags[str(s.url)] = s.valueBoolean === true;
+  }
+  return {
+    monitored: Boolean(flags.monitored),
+    evaluated: Boolean(flags.evaluated),
+    assessed: Boolean(flags.assessed),
+    treated: Boolean(flags.treated),
+  };
 }
 /** The first coding's `code` from a CodeableConcept-shaped status field. */
 function statusCode(field: unknown, fallback: string): string {
@@ -163,6 +188,7 @@ function normalize(raw: RawRecord<ConditionResource>, deps: PipelineDeps): Norma
   const icd = codingForSystem(resource, ICD10_URI)!; // validate() guaranteed it
   const snomed = codingForSystem(resource, SNOMED_URI);
   const hcc = hccCoding(resource);
+  const meat = meatEvidence(resource);
   const recordedDate = str(resource.recordedDate);
 
   const payload: ConditionPayload = {
@@ -170,6 +196,7 @@ function normalize(raw: RawRecord<ConditionResource>, deps: PipelineDeps): Norma
     code: icd,
     ...(snomed ? { snomed } : {}),
     ...(hcc ? { hcc } : {}),
+    ...(meat ? { meat } : {}),
     clinicalStatus: statusCode(resource.clinicalStatus, 'active'),
     verificationStatus: statusCode(resource.verificationStatus, 'confirmed'),
     category: 'problem-list-item',

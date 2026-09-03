@@ -60,6 +60,25 @@ export interface RiskProfileSummary {
   }[];
   /** The highest RAF score across the member's assessments (0 when none). */
   highestRaf: number;
+  /**
+   * Hierarchy-aware RAF (Wave D) computed from the member's ASSERTED (coded) HCCs, with
+   * disease-hierarchy suppression applied — never a naive sum. Absent when the member
+   * has no coded HCCs. Shape mirrors `HierarchicalRaf` (kept inline so this types module
+   * stays free of runtime imports).
+   */
+  hierarchicalRaf?: {
+    raf: number;
+    version: string;
+    includedHccs: string[];
+    suppressedHccs: string[];
+    unweightedHccs: string[];
+  };
+  /**
+   * ADVISORY RAF uplift SUGGESTED by the ICD→HCC crosswalk for conditions coded with an
+   * ICD but no HCC — for human review, NEVER an asserted diagnosis. Absent when nothing
+   * is suggested. `fromIcds` names the ICDs that produced the suggestion.
+   */
+  suggestedRaf?: { raf: number; version: string; fromIcds: string[] };
 }
 
 /** Coverage summary from Coverage nodes (PHI-minimal: plan code + status + period). */

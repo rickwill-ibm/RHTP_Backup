@@ -43,6 +43,14 @@ function hccCode(p: Record<string, unknown>): string {
   const c = (p.hcc ?? {}) as Record<string, unknown>;
   return str(c.code);
 }
+/** One MEAT flag off the (optional) payload `meat` object — PHI-safe boolean, false when absent. */
+function meatFlag(
+  p: Record<string, unknown>,
+  flag: 'monitored' | 'evaluated' | 'assessed' | 'treated'
+): boolean {
+  const m = (p.meat ?? {}) as Record<string, unknown>;
+  return m[flag] === true;
+}
 
 export const conditionsSpec = {
   domain: CONDITIONS_DOMAIN,
@@ -63,7 +71,13 @@ export const conditionsSpec = {
         clinicalStatus: str(p.clinicalStatus, 'active'),
         verificationStatus: str(p.verificationStatus, 'confirmed'),
         category: str(p.category, 'problem-list-item'),
-      }),
+        // RADV MEAT documentation signal (PHI-safe booleans) — what a closed-gap-cited
+        // Condition must carry to be RADV-defensible. All false on an unMEATed Condition.
+        meatMonitored: meatFlag(p, 'monitored'),
+        meatEvaluated: meatFlag(p, 'evaluated'),
+        meatAssessed: meatFlag(p, 'assessed'),
+        meatTreated: meatFlag(p, 'treated'),
+      })
     );
     // The member HAS this problem — a factual problem-list link (associative),
     // dated from the recorded date. Not an asserted causal claim.

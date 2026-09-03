@@ -1,0 +1,21 @@
+{
+  "_note": "ILLUSTRATIVE stub CMS-HCC disease hierarchy, keyed by model version. Each key is an HCC; its array lists the LESS-severe HCCs it SUPERSEDES (which are dropped when the key HCC is also present). NOT the licensed CMS hierarchy — swap via setRafModelData().",
+  "V28": {
+    "HCC37": ["HCC38"],
+    "HCC224": ["HCC225", "HCC226"],
+    "HCC225": ["HCC226"],
+    "HCC135": ["HCC136", "HCC137", "HCC138"],
+    "HCC136": ["HCC137", "HCC138"],
+    "HCC137": ["HCC138"],
+    "HCC326": ["HCC327", "HCC328", "HCC329"],
+    "HCC327": ["HCC328", "HCC329"],
+    "HCC328": ["HCC329"]
+  },
+  "V24": {
+    "HCC18": ["HCC19"],
+    "HCC54": ["HCC55"],
+    "HCC136": ["HCC137", "HCC138", "HCC139"],
+    "HCC137": ["HCC138", "HCC139"],
+    "HCC138": ["HCC139"]
+  }
+}

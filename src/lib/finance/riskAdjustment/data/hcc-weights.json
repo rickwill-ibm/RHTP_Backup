@@ -1,0 +1,31 @@
+{
+  "_note": "ILLUSTRATIVE stub CMS-HCC RAF increments (community, non-dual aged), keyed by model version. NOT the licensed CMS weights — swap via setRafModelData(). Values are placeholders for demo/graph rendering only.",
+  "V28": {
+    "HCC37": 0.318,
+    "HCC38": 0.19,
+    "HCC135": 0.394,
+    "HCC136": 0.394,
+    "HCC137": 0.313,
+    "HCC138": 0.15,
+    "HCC224": 0.331,
+    "HCC225": 0.279,
+    "HCC226": 0.14,
+    "HCC277": 0.284,
+    "HCC326": 0.451,
+    "HCC327": 0.289,
+    "HCC328": 0.127,
+    "HCC329": 0.069
+  },
+  "V24": {
+    "HCC18": 0.302,
+    "HCC19": 0.105,
+    "HCC54": 0.443,
+    "HCC55": 0.383,
+    "HCC85": 0.323,
+    "HCC111": 0.335,
+    "HCC136": 0.435,
+    "HCC137": 0.237,
+    "HCC138": 0.288,
+    "HCC139": 0.211
+  }
+}

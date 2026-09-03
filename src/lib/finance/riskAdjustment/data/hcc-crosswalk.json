@@ -1,0 +1,23 @@
+{
+  "_note": "ILLUSTRATIVE stub ICD-10-CM -> CMS-HCC crosswalk, keyed by model version. ADVISORY ONLY: suggests a candidate HCC for an ICD; it never asserts a diagnosis. NOT the licensed CMS mapping — swap via setHccCrosswalkProvider().",
+  "V28": {
+    "E11.9": "HCC38",
+    "E11.65": "HCC37",
+    "E11.22": "HCC37",
+    "N18.32": "HCC329",
+    "N18.4": "HCC328",
+    "N18.5": "HCC326",
+    "I50.30": "HCC226",
+    "I50.22": "HCC224",
+    "J44.9": "HCC277",
+    "F11.20": "HCC135"
+  },
+  "V24": {
+    "E11.9": "HCC19",
+    "E11.65": "HCC18",
+    "N18.32": "HCC138",
+    "N18.4": "HCC137",
+    "N18.5": "HCC136",
+    "F11.20": "HCC55"
+  }
+}

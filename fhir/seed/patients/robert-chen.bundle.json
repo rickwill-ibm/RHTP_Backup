@@ -118,7 +118,13 @@
             ]
           }
         ],
-        "id": "robert-chen-practitioner-1"
+        "id": "robert-chen-practitioner-1",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1609876543"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -229,7 +235,17 @@
           "start": "2026-04-15T09:00:00Z",
           "end": "2026-04-15T09:40:00Z"
         },
-        "id": "robert-chen-encounter-1"
+        "id": "robert-chen-encounter-1",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-renderingProviderNpi",
+            "valueString": "1609876543"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-sourceDocument",
+            "valueString": "DocumentReference/robert-chen-visitdoc-1"
+          }
+        ]
       },
       "request": {
         "method": "POST",
@@ -333,7 +349,30 @@
           "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
         },
         "onsetDateTime": "2020-10-01",
-        "id": "robert-chen-condition-2"
+        "id": "robert-chen-condition-2",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-meat",
+            "extension": [
+              {
+                "url": "monitored",
+                "valueBoolean": true
+              },
+              {
+                "url": "evaluated",
+                "valueBoolean": true
+              },
+              {
+                "url": "assessed",
+                "valueBoolean": true
+              },
+              {
+                "url": "treated",
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
       },
       "request": {
         "method": "POST",

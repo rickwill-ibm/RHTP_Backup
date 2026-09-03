@@ -35,7 +35,13 @@ export const encounterSpec = {
         encounterClass: str(p.encounterClass, 'IMP'),
         trigger: str(p.trigger),
         pointOfCare: str(p.pointOfCare),
-      }),
+        // RADV evidence (PHI-safe): the F2F date, rendering-provider NPI, and an opaque
+        // source-document ref — what a coding gap's cited Encounter must supply to be
+        // RADV-defensible. Empty on encounters that carry none.
+        dateOfService: str(p.dateOfService),
+        providerNpi: str(p.providerNpi),
+        sourceDocumentRef: str(p.sourceDocumentRef),
+      })
     );
     out.push({
       op: 'UpsertEdge',

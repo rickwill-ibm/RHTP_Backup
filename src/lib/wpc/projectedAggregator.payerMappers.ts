@@ -19,6 +19,11 @@ import type {
   RiskProfileSummary,
   UtilizationSummary,
 } from '@/lib/services/holisticContextEngine.types';
+import { computeHierarchicalRaf } from '@/lib/finance/riskAdjustment/raf';
+import { resolveIcdToHcc } from '@/lib/finance/riskAdjustment/hccCrosswalk';
+
+/** The payment-year risk model the hierarchy-aware RAF uses (PY2026 = 100% CMS-HCC V28). */
+const RAF_MODEL_VERSION = 'V28';
 
 function s(v: PropVal | undefined, fallback = ''): string {
   return typeof v === 'string' ? v : fallback;
@@ -39,7 +44,44 @@ export function mapRiskProfile(whole: LensResult): RiskProfileSummary {
     method: s(node.properties.method),
   }));
   const highestRaf = assessments.reduce((max, a) => Math.max(max, a.rafScore), 0);
-  return { assessments, highestRaf };
+
+  // Wave D — hierarchy-aware RAF from the member's ASSERTED (coded) HCCs. Only Condition
+  // nodes that carry a source-attached HCC contribute (honest, never inferred here).
+  const conditions = nodesOfKind(whole.nodes, 'Condition');
+  const assertedHccs = conditions.map((c) => s(c.properties.hcc)).filter(Boolean);
+  const hierarchicalRaf = assertedHccs.length
+    ? computeHierarchicalRaf(assertedHccs, RAF_MODEL_VERSION)
+    : undefined;
+
+  // ADVISORY uplift — the ICD→HCC crosswalk SUGGESTS HCCs for conditions coded with an
+  // ICD but NO HCC. Never asserted; surfaced separately for human review. Only genuinely
+  // NEW HCCs (not already asserted) count toward the suggested uplift.
+  const assertedSet = new Set(assertedHccs.map((h) => h.replace(/\D/g, '')));
+  const fromIcds: string[] = [];
+  const suggestedHccs: string[] = [];
+  for (const c of conditions) {
+    if (s(c.properties.hcc)) continue; // already has an asserted HCC
+    const icd = s(c.properties.code);
+    const hcc = icd ? resolveIcdToHcc(icd, RAF_MODEL_VERSION) : undefined;
+    if (hcc && !assertedSet.has(hcc.replace(/\D/g, ''))) {
+      suggestedHccs.push(hcc);
+      fromIcds.push(icd);
+    }
+  }
+  const suggestedRaf = suggestedHccs.length
+    ? {
+        raf: computeHierarchicalRaf(suggestedHccs, RAF_MODEL_VERSION).raf,
+        version: RAF_MODEL_VERSION,
+        fromIcds: [...new Set(fromIcds)].sort(),
+      }
+    : undefined;
+
+  return {
+    assessments,
+    highestRaf,
+    ...(hierarchicalRaf ? { hierarchicalRaf } : {}),
+    ...(suggestedRaf ? { suggestedRaf } : {}),
+  };
 }
 
 /** Coverage summary from the whole-person lens's Coverage nodes (PHI-minimal). */

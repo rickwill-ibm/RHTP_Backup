@@ -21,14 +21,21 @@
  *
  * Sources (no fabricated facts): fhir/fhir-state.json + patientRegistry.data{1,2,3}.ts.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
-const state = JSON.parse(readFileSync(path.join(ROOT, 'fhir/fhir-state.json'), 'utf8')).resources;
+// Lazy so that importing this module (e.g. the drift-guard test reading CODING_GAPS) is
+// TRULY side-effect-free — nothing touches the filesystem until buildBundle actually runs.
+let _state;
+function getState() {
+  if (!_state)
+    _state = JSON.parse(readFileSync(path.join(ROOT, 'fhir/fhir-state.json'), 'utf8')).resources;
+  return _state;
+}
 
 const MRN_SYS = 'http://tcoc.example.org/fhir/sid/mrn';
 const ICD10 = 'http://hl7.org/fhir/sid/icd-10-cm';
@@ -168,7 +175,7 @@ const ENRICH = {
     address: { city: 'Ozark', state: 'MO', country: 'US' },
     language: 'en',
     org: 'Ozark Regional FQHC',
-    pcp: { given: ['—'], family: 'Whitfield', prefix: 'Dr.' },
+    pcp: { given: ['—'], family: 'Whitfield', prefix: 'Dr.', npi: '1487654321' },
     coverage: 'MEDICARE',
     conditions: [
       ['I50.32', 'Chronic diastolic (congestive) heart failure', '2019-03-01'],
@@ -270,7 +277,7 @@ const ENRICH = {
     address: { city: 'Winner', state: 'SD', country: 'US' },
     language: 'en',
     org: 'Winner Regional Medical Center',
-    pcp: { given: ['—'], family: 'Okonkwo', prefix: 'Dr.' },
+    pcp: { given: ['—'], family: 'Okonkwo', prefix: 'Dr.', npi: '1598765432' },
     coverage: 'MEDICAID',
     conditions: [
       ['I50.32', 'Chronic diastolic (congestive) heart failure', '2022-01-01'],
@@ -330,7 +337,7 @@ const ENRICH = {
     address: { city: 'Rapid City', state: 'SD', country: 'US' },
     language: 'en',
     org: 'Rapid City Regional Health',
-    pcp: { given: ['—'], family: 'Castillo', prefix: 'Dr.' },
+    pcp: { given: ['—'], family: 'Castillo', prefix: 'Dr.', npi: '1609876543' },
     coverage: 'MEDICAID',
     conditions: [
       ['I10', 'Essential (primary) hypertension', '2014-06-01'],
@@ -406,7 +413,7 @@ const ENRICH = {
     address: { city: 'Sioux Falls', state: 'SD', country: 'US' },
     language: 'en',
     org: 'Sioux Falls Community Health',
-    pcp: { given: ['—'], family: 'Torres', prefix: 'Dr.' },
+    pcp: { given: ['—'], family: 'Torres', prefix: 'Dr.', npi: '1710987654' },
     coverage: 'MEDICAID',
     conditions: [
       ['J45.50', 'Severe persistent asthma, uncomplicated', '2012-03-01'],
@@ -484,7 +491,7 @@ const RA_SD = 'http://hl7.org/fhir/us/davinci-ra/StructureDefinition';
 const RA_CS = 'http://hl7.org/fhir/us/davinci-ra/CodeSystem';
 const HCC_SYS =
   'https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC';
-const CODING_GAPS = {
+export const CODING_GAPS = {
   'dorothy-simmons': [
     {
       ver: '28',
@@ -666,7 +673,7 @@ function buildBundle(pid) {
     name: e.coverage === 'MEDICARE' ? 'Medicare (CMS)' : 'State Medicaid Agency',
   });
 
-  const statePatient = (state.Patient || []).find((p) => p.id === pid);
+  const statePatient = (getState().Patient || []).find((p) => p.id === pid);
   let patient;
   if (e.fromStateOnly && statePatient) {
     patient = JSON.parse(JSON.stringify(statePatient));
@@ -734,6 +741,9 @@ function buildBundle(pid) {
           prefix: e.pcp.prefix ? [e.pcp.prefix] : undefined,
         },
       ],
+      identifier: e.pcp.npi
+        ? [{ system: 'http://hl7.org/fhir/sid/us-npi', value: e.pcp.npi }]
+        : undefined,
     });
     add({
       resourceType: 'PractitionerRole',
@@ -777,12 +787,40 @@ function buildBundle(pid) {
       type: [{ coding: [{ system: SCT, code: '185349003', display: 'Encounter for check up' }] }],
       subject: { reference: patientUuid },
       participant: pcpUuid ? [{ individual: { reference: pcpUuid } }] : undefined,
+      // RADV enrichment: rendering-provider NPI + source-document ref authored ON the
+      // Encounter (the ingest driver hands the Encounter adapter an Encounter-only
+      // sub-bundle, so a Practitioner reference cannot be resolved for the NPI). DOS =
+      // period.start. `visitdoc` (not `note`) so the PHI-minimal sweep never matches.
+      extension:
+        e.pcp && e.pcp.npi
+          ? [
+              { url: `${RA_SD}/ra-renderingProviderNpi`, valueString: e.pcp.npi },
+              {
+                url: `${RA_SD}/ra-sourceDocument`,
+                valueString: `DocumentReference/${e.slug}-visitdoc-1`,
+              },
+            ]
+          : undefined,
       serviceProvider: { reference: orgUuid },
       period: { start: `${now}T09:00:00Z`, end: `${now}T09:40:00Z` },
     });
   }
 
   const condUuids = [];
+  // ICDs cited by a CLOSED-gap coding gap get a MEAT extension so the RADV bridge can
+  // assess them defensible (Monitored/Evaluated/Assessed/Treated booleans — PHI-minimal).
+  const closedGapIcds = new Set(
+    (CODING_GAPS[e.slug] || []).filter((g) => g.status === 'closed-gap').flatMap((g) => g.ev || [])
+  );
+  const MEAT_EXT = {
+    url: `${RA_SD}/ra-meat`,
+    extension: [
+      { url: 'monitored', valueBoolean: true },
+      { url: 'evaluated', valueBoolean: true },
+      { url: 'assessed', valueBoolean: true },
+      { url: 'treated', valueBoolean: true },
+    ],
+  };
   const mkCondition = (code, text, onset, extraCat) =>
     add({
       resourceType: 'Condition',
@@ -795,6 +833,7 @@ function buildBundle(pid) {
       code: { coding: [{ system: ICD10, code, display: text }], text },
       subject: { reference: patientUuid },
       onsetDateTime: onset,
+      ...(closedGapIcds.has(code) ? { extension: [MEAT_EXT] } : {}),
     });
   for (const [code, text, onset] of e.conditions || [])
     condUuids.push(mkCondition(code, text, onset));
@@ -1118,7 +1157,7 @@ function buildBundle(pid) {
 
   // Carry over existing per-patient fhir-state resources
   const carry = [];
-  for (const [type, arr] of Object.entries(state)) {
+  for (const [type, arr] of Object.entries(getState())) {
     if (type === 'Patient') continue;
     for (const res of Array.isArray(arr) ? arr : []) {
       const ref =
@@ -1163,28 +1202,44 @@ function buildBundle(pid) {
   return { resourceType: 'Bundle', type: 'transaction', entry: entries };
 }
 
-const outDir = path.join(ROOT, 'fhir/seed/patients');
-mkdirSync(outDir, { recursive: true });
-const manifest = [];
-for (const pid of Object.keys(ENRICH)) {
-  const bundle = buildBundle(pid);
-  const slug = ENRICH[pid].slug;
-  const counts = {};
-  for (const en of bundle.entry)
-    counts[en.resource.resourceType] = (counts[en.resource.resourceType] || 0) + 1;
-  writeFileSync(path.join(outDir, `${slug}.bundle.json`), JSON.stringify(bundle, null, 2));
-  manifest.push({
-    pid,
-    slug,
-    file: `fhir/seed/patients/${slug}.bundle.json`,
-    entries: bundle.entry.length,
-    resourceTypes: counts,
-  });
-  console.log(
-    `✔ ${slug}: ${bundle.entry.length} entries  {${Object.entries(counts)
-      .map(([k, v]) => `${k}:${v}`)
-      .join(', ')}}`
-  );
+// Driver — runs ONLY when executed directly (`node gen-patient-bundles.mjs`), NEVER on
+// import. Without this guard, importing CODING_GAPS (e.g. from the drift-guard test)
+// would re-run generation and OVERWRITE the committed, hand-maintained bundles as a
+// side effect. Guard: this module's path === the script node was invoked with.
+function isMainModule() {
+  if (!process.argv[1]) return false;
+  try {
+    // realpath both sides so a symlinked invocation still resolves as main (and an
+    // import — argv[1] is the test runner — never does). Fails safe to false on error.
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
 }
-writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
-console.log(`\nWrote ${manifest.length} bundles + manifest.json`);
+if (isMainModule()) {
+  const outDir = path.join(ROOT, 'fhir/seed/patients');
+  mkdirSync(outDir, { recursive: true });
+  const manifest = [];
+  for (const pid of Object.keys(ENRICH)) {
+    const bundle = buildBundle(pid);
+    const slug = ENRICH[pid].slug;
+    const counts = {};
+    for (const en of bundle.entry)
+      counts[en.resource.resourceType] = (counts[en.resource.resourceType] || 0) + 1;
+    writeFileSync(path.join(outDir, `${slug}.bundle.json`), JSON.stringify(bundle, null, 2));
+    manifest.push({
+      pid,
+      slug,
+      file: `fhir/seed/patients/${slug}.bundle.json`,
+      entries: bundle.entry.length,
+      resourceTypes: counts,
+    });
+    console.log(
+      `✔ ${slug}: ${bundle.entry.length} entries  {${Object.entries(counts)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(', ')}}`
+    );
+  }
+  writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  console.log(`\nWrote ${manifest.length} bundles + manifest.json`);
+}

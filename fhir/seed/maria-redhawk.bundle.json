@@ -1,0 +1,800 @@
+{
+  "resourceType": "Bundle",
+  "id": "seed-maria-redhawk",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "Patient/patient-maria-001",
+      "request": { "method": "PUT", "url": "Patient/patient-maria-001" },
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-maria-001",
+        "identifier": [
+          { "type": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v2-0203", "code": "MR" }], "text": "MRN" }, "system": "urn:rhtp:mrn", "value": "SD-448291" }
+        ],
+        "name": [{ "family": "Redhawk", "given": ["Maria"], "use": "official" }],
+        "gender": "female",
+        "birthDate": "1975-03-14",
+        "telecom": [{ "system": "phone", "value": "605-555-0147", "use": "mobile" }],
+        "address": [{ "line": ["214 Prairie Wind Rd"], "city": "Mission", "state": "SD", "postalCode": "57555" }],
+        "communication": [{ "language": { "coding": [{ "system": "urn:ietf:bcp:47", "code": "en-US", "display": "English" }] }, "preferred": true }]
+      }
+    },
+    {
+      "fullUrl": "Practitioner/practitioner-001",
+      "request": { "method": "PUT", "url": "Practitioner/practitioner-001" },
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "practitioner-001",
+        "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1093817465" }],
+        "name": [{ "family": "Whitfield", "given": ["James"], "prefix": ["Dr."], "suffix": ["MD"] }]
+      }
+    },
+    {
+      "fullUrl": "Practitioner/practitioner-002",
+      "request": { "method": "PUT", "url": "Practitioner/practitioner-002" },
+      "resource": { "resourceType": "Practitioner", "id": "practitioner-002", "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1275834920" }], "name": [{ "family": "Chen", "given": ["Sarah"], "prefix": ["Dr."], "suffix": ["MD"] }] }
+    },
+    {
+      "fullUrl": "Practitioner/practitioner-003",
+      "request": { "method": "PUT", "url": "Practitioner/practitioner-003" },
+      "resource": { "resourceType": "Practitioner", "id": "practitioner-003", "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1467291038" }], "name": [{ "family": "Rodriguez", "given": ["Michael"], "prefix": ["Dr."], "suffix": ["MD"] }] }
+    },
+    {
+      "fullUrl": "Practitioner/practitioner-004",
+      "request": { "method": "PUT", "url": "Practitioner/practitioner-004" },
+      "resource": { "resourceType": "Practitioner", "id": "practitioner-004", "identifier": [{ "system": "http://hl7.org/fhir/sid/us-npi", "value": "1558203947" }], "name": [{ "family": "Wilson", "given": ["James"], "prefix": ["Dr."], "suffix": ["MD"] }] }
+    },
+    {
+      "fullUrl": "Encounter/encounter-maria-today",
+      "request": { "method": "PUT", "url": "Encounter/encounter-maria-today" },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-maria-today",
+        "status": "in-progress",
+        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB", "display": "ambulatory" },
+        "type": [{ "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "99214", "display": "Office visit, established patient" }], "text": "Office Visit — Established" }],
+        "subject": { "reference": "Patient/patient-maria-001", "display": "Maria Redhawk" },
+        "participant": [{ "type": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType", "code": "ATND", "display": "attender" }] }], "individual": { "reference": "Practitioner/practitioner-001", "display": "Dr. James Whitfield, MD" } }],
+        "period": { "start": "2026-07-19T09:00:00-05:00" },
+        "reasonCode": [
+          { "coding": [{ "system": "http://snomed.info/sct", "code": "185349003", "display": "Encounter for check up" }], "text": "Diabetes Follow-Up" },
+          { "text": "Post-acute follow-up — HF exacerbation (ER 03/29/2026)" }
+        ],
+        "location": [{ "location": { "display": "Rosebud Family Clinic — Exam 3" } }],
+        "serviceProvider": { "display": "Rosebud Family Clinic" }
+      }
+    },
+    {
+      "fullUrl": "Encounter/encounter-maria-er-0329",
+      "request": { "method": "PUT", "url": "Encounter/encounter-maria-er-0329" },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-maria-er-0329",
+        "status": "finished",
+        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "EMER", "display": "emergency" },
+        "type": [{ "text": "Emergency Department Visit" }],
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "period": { "start": "2026-03-29T21:40:00-05:00", "end": "2026-03-30T04:15:00-05:00" },
+        "reasonCode": [{ "coding": [{ "system": "http://snomed.info/sct", "code": "56675007", "display": "Acute heart failure" }], "text": "Acute HF exacerbation" }],
+        "serviceProvider": { "display": "Winner Regional Healthcare ED" }
+      }
+    },
+    {
+      "fullUrl": "Encounter/encounter-maria-er-0214",
+      "request": { "method": "PUT", "url": "Encounter/encounter-maria-er-0214" },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-maria-er-0214",
+        "status": "finished",
+        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "EMER", "display": "emergency" },
+        "type": [{ "text": "Emergency Department Visit" }],
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "period": { "start": "2026-02-14T15:10:00-06:00", "end": "2026-02-14T20:50:00-06:00" },
+        "reasonCode": [{ "text": "Hyperglycemia, dizziness" }],
+        "serviceProvider": { "display": "Winner Regional Healthcare ED" }
+      }
+    },
+    {
+      "fullUrl": "Encounter/encounter-maria-ov-1210",
+      "request": { "method": "PUT", "url": "Encounter/encounter-maria-ov-1210" },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-maria-ov-1210",
+        "status": "finished",
+        "class": { "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "AMB", "display": "ambulatory" },
+        "type": [{ "text": "Office Visit" }],
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "participant": [{ "individual": { "reference": "Practitioner/practitioner-001", "display": "Dr. James Whitfield, MD" } }],
+        "period": { "start": "2025-12-10T10:00:00-06:00", "end": "2025-12-10T10:40:00-06:00" },
+        "reasonCode": [{ "text": "CKD monitoring, med review" }],
+        "serviceProvider": { "display": "Rosebud Family Clinic" }
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-t2dm-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-t2dm-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-t2dm-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }] }],
+        "severity": { "coding": [{ "system": "http://snomed.info/sct", "code": "24484000", "display": "Severe" }] },
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.65", "display": "Type 2 diabetes mellitus with hyperglycemia" }, { "system": "http://snomed.info/sct", "code": "44054006", "display": "Type 2 diabetes mellitus" }], "text": "Type 2 Diabetes Mellitus with hyperglycemia (E11.65)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "onsetDateTime": "2018-06-12",
+        "recordedDate": "2018-06-12",
+        "recorder": { "reference": "Practitioner/practitioner-003", "display": "Dr. Michael Rodriguez, MD" },
+        "note": [{ "text": "A1C 9.2% (2026-02-10), worsening from 8.8% (2025-08). Target <8%. Metformin PDC 61%. CKD co-management." }]
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-ckd-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-ckd-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-ckd-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }] }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.32", "display": "Chronic kidney disease, stage 3b" }, { "system": "http://snomed.info/sct", "code": "700379002", "display": "CKD stage 3B" }], "text": "Chronic Kidney Disease, Stage 3b (N18.32)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "onsetDateTime": "2023-02-20",
+        "recordedDate": "2023-02-20",
+        "note": [{ "text": "eGFR 42 (2026-03-15), declining from 48 (2025-12). K+ 5.1 — hyperkalemia risk. Nephrology consult recommended. Avoid NSAIDs/nephrotoxics." }]
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-hf-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-hf-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-hf-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }] }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I50.32", "display": "Chronic diastolic (congestive) heart failure" }], "text": "Heart Failure, chronic diastolic (I50.32)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "onsetDateTime": "2024-07-05",
+        "recordedDate": "2024-07-05",
+        "note": [{ "text": "Acute exacerbation → ED 03/29/2026. BNP 210 (03/20/2026). Echo 03/2026: EF 45%. Furosemide 20 mg QD." }]
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-htn-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-htn-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-htn-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status", "code": "confirmed" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }] }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential (primary) hypertension" }], "text": "Essential Hypertension (I10)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "onsetDateTime": "2016-04-02",
+        "recordedDate": "2016-04-02",
+        "note": [{ "text": "BP 158/96 (04/01/2026) — above 130/80 goal. Lisinopril 10 mg QD, PDC 78%." }]
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-housing-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-housing-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-housing-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }], "text": "SDOH" }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "Z59.0", "display": "Homelessness" }], "text": "Housing instability (Z59.0)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "recordedDate": "2026-01-22"
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-food-maria",
+      "request": { "method": "PUT", "url": "Condition/condition-food-maria" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-food-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "problem-list-item", "display": "Problem List Item" }], "text": "SDOH" }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "Z59.4", "display": "Lack of adequate food and safe drinking water" }], "text": "Food insecurity (Z59.4)" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "recordedDate": "2026-01-22"
+      }
+    },
+    {
+      "fullUrl": "Condition/condition-encdx-maria-today",
+      "request": { "method": "PUT", "url": "Condition/condition-encdx-maria-today" },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "condition-encdx-maria-today",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-category", "code": "encounter-diagnosis", "display": "Encounter Diagnosis" }] }],
+        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.65", "display": "Type 2 diabetes mellitus with hyperglycemia" }], "text": "T2DM with hyperglycemia — visit diagnosis" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "recordedDate": "2026-07-19"
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-a1c-maria-20250210",
+      "request": { "method": "PUT", "url": "Observation/obs-a1c-maria-20250210" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-maria-20250210",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }], "text": "HbA1c" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2025-02-10",
+        "valueQuantity": { "value": 8.5, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "text": "<7.0%" }],
+        "performer": [{ "display": "Labcorp" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-a1c-maria-20250812",
+      "request": { "method": "PUT", "url": "Observation/obs-a1c-maria-20250812" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-maria-20250812",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }], "text": "HbA1c" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2025-08-12",
+        "valueQuantity": { "value": 8.8, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "text": "<7.0%" }],
+        "performer": [{ "display": "Labcorp" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-a1c-maria-20260210",
+      "request": { "method": "PUT", "url": "Observation/obs-a1c-maria-20260210" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-maria-20260210",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }], "text": "HbA1c" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-02-10",
+        "valueQuantity": { "value": 9.2, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "text": "<7.0%" }],
+        "performer": [{ "display": "Labcorp" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-egfr-maria-20251210",
+      "request": { "method": "PUT", "url": "Observation/obs-egfr-maria-20251210" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-egfr-maria-20251210",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "62238-1", "display": "GFR/1.73 sq M.predicted [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)" }], "text": "eGFR" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2025-12-10",
+        "valueQuantity": { "value": 48, "unit": "mL/min/1.73m2", "system": "http://unitsofmeasure.org", "code": "mL/min/{1.73_m2}" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "L", "display": "Low" }] }],
+        "referenceRange": [{ "text": ">60" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-egfr-maria-20260315",
+      "request": { "method": "PUT", "url": "Observation/obs-egfr-maria-20260315" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-egfr-maria-20260315",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "62238-1", "display": "GFR/1.73 sq M.predicted (CKD-EPI)" }], "text": "eGFR" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": { "value": 42, "unit": "mL/min/1.73m2", "system": "http://unitsofmeasure.org", "code": "mL/min/{1.73_m2}" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "L", "display": "Low" }] }],
+        "referenceRange": [{ "text": ">60" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-k-maria-20260401",
+      "request": { "method": "PUT", "url": "Observation/obs-k-maria-20260401" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-k-maria-20260401",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "2823-3", "display": "Potassium [Moles/volume] in Serum or Plasma" }], "text": "Potassium" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-04-01",
+        "valueQuantity": { "value": 5.1, "unit": "mEq/L", "system": "http://unitsofmeasure.org", "code": "meq/L" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "low": { "value": 3.5 }, "high": { "value": 5.0 }, "text": "3.5–5.0 mEq/L" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-ldl-maria-20260210",
+      "request": { "method": "PUT", "url": "Observation/obs-ldl-maria-20260210" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-ldl-maria-20260210",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "13457-7", "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation" }], "text": "LDL Cholesterol" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-02-10",
+        "valueQuantity": { "value": 118, "unit": "mg/dL", "system": "http://unitsofmeasure.org", "code": "mg/dL" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "text": "<100 mg/dL" }],
+        "performer": [{ "display": "Labcorp" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-bnp-maria-20260320",
+      "request": { "method": "PUT", "url": "Observation/obs-bnp-maria-20260320" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bnp-maria-20260320",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory", "display": "Laboratory" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "30934-4", "display": "Natriuretic peptide B [Mass/volume] in Serum or Plasma" }], "text": "BNP" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": { "value": 210, "unit": "pg/mL", "system": "http://unitsofmeasure.org", "code": "pg/mL" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "referenceRange": [{ "text": "<100 pg/mL" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-bp-maria-20260401",
+      "request": { "method": "PUT", "url": "Observation/obs-bp-maria-20260401" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bp-maria-20260401",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel with all children optional" }], "text": "Blood Pressure" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-04-01T10:15:00-05:00",
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "component": [
+          { "code": { "coding": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure" }] }, "valueQuantity": { "value": 158, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]" } },
+          { "code": { "coding": [{ "system": "http://loinc.org", "code": "8462-4", "display": "Diastolic blood pressure" }] }, "valueQuantity": { "value": 96, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]" } }
+        ],
+        "referenceRange": [{ "text": "<130/80" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-bp-maria-20260719",
+      "request": { "method": "PUT", "url": "Observation/obs-bp-maria-20260719" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bp-maria-20260719",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "85354-9", "display": "Blood pressure panel with all children optional" }], "text": "Blood Pressure" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "effectiveDateTime": "2026-07-19T09:05:00-05:00",
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }],
+        "component": [
+          { "code": { "coding": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic blood pressure" }] }, "valueQuantity": { "value": 152, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]" } },
+          { "code": { "coding": [{ "system": "http://loinc.org", "code": "8462-4", "display": "Diastolic blood pressure" }] }, "valueQuantity": { "value": 92, "unit": "mmHg", "system": "http://unitsofmeasure.org", "code": "mm[Hg]" } }
+        ],
+        "referenceRange": [{ "text": "<130/80" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-hr-maria-20260719",
+      "request": { "method": "PUT", "url": "Observation/obs-hr-maria-20260719" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-hr-maria-20260719",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "8867-4", "display": "Heart rate" }], "text": "Heart Rate" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "effectiveDateTime": "2026-07-19T09:05:00-05:00",
+        "valueQuantity": { "value": 82, "unit": "beats/min", "system": "http://unitsofmeasure.org", "code": "/min" },
+        "referenceRange": [{ "text": "60–100" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-spo2-maria-20260719",
+      "request": { "method": "PUT", "url": "Observation/obs-spo2-maria-20260719" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-spo2-maria-20260719",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "59408-5", "display": "Oxygen saturation in Arterial blood by Pulse oximetry" }], "text": "SpO2" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "effectiveDateTime": "2026-07-19T09:05:00-05:00",
+        "valueQuantity": { "value": 96, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" },
+        "referenceRange": [{ "text": ">94%" }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-weight-maria-20260719",
+      "request": { "method": "PUT", "url": "Observation/obs-weight-maria-20260719" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-weight-maria-20260719",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "29463-7", "display": "Body weight" }], "text": "Weight" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "effectiveDateTime": "2026-07-19T09:05:00-05:00",
+        "valueQuantity": { "value": 84.4, "unit": "kg", "system": "http://unitsofmeasure.org", "code": "kg" }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-bmi-maria-20260719",
+      "request": { "method": "PUT", "url": "Observation/obs-bmi-maria-20260719" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bmi-maria-20260719",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "vital-signs", "display": "Vital Signs" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "39156-5", "display": "Body mass index (BMI) [Ratio]" }], "text": "BMI" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "encounter": { "reference": "Encounter/encounter-maria-today" },
+        "effectiveDateTime": "2026-07-19T09:05:00-05:00",
+        "valueQuantity": { "value": 31.9, "unit": "kg/m2", "system": "http://unitsofmeasure.org", "code": "kg/m2" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "H", "display": "High" }] }]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-hvs-maria-20260122",
+      "request": { "method": "PUT", "url": "Observation/obs-hvs-maria-20260122" },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-hvs-maria-20260122",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "social-history", "display": "Social History" }], "text": "SDOH" }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "88122-7", "display": "Within the past 12 months we worried whether our food would run out before we got money to buy more" }], "text": "Hunger Vital Sign" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-01-22",
+        "valueCodeableConcept": { "coding": [{ "system": "http://loinc.org", "code": "LA28397-0", "display": "Often true" }], "text": "Often true — food insecurity positive" },
+        "interpretation": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation", "code": "A", "display": "Abnormal" }] }]
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/medreq-lisinopril-maria",
+      "request": { "method": "PUT", "url": "MedicationRequest/medreq-lisinopril-maria" },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-lisinopril-maria",
+        "extension": [{ "url": "https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc", "valueDecimal": 0.78 }],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "314076", "display": "lisinopril 10 MG Oral Tablet" }, { "system": "http://hl7.org/fhir/sid/ndc", "code": "68180-0513-01" }], "text": "Lisinopril 10 mg tablet" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "authoredOn": "2024-08-15",
+        "requester": { "reference": "Practitioner/practitioner-002", "display": "Dr. Sarah Chen, MD" },
+        "reasonReference": [{ "reference": "Condition/condition-htn-maria" }],
+        "dosageInstruction": [{ "text": "10 mg PO once daily", "timing": { "code": { "text": "QD" } } }],
+        "dispenseRequest": { "numberOfRepeatsAllowed": 3, "quantity": { "value": 90, "unit": "tablets" } }
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/medreq-metformin-maria",
+      "request": { "method": "PUT", "url": "MedicationRequest/medreq-metformin-maria" },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-metformin-maria",
+        "extension": [{ "url": "https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc", "valueDecimal": 0.61 }],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "861007", "display": "metformin hydrochloride 500 MG Oral Tablet" }, { "system": "http://hl7.org/fhir/sid/ndc", "code": "00093-7214-01" }], "text": "Metformin 500 mg tablet" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "authoredOn": "2024-06-20",
+        "requester": { "reference": "Practitioner/practitioner-003", "display": "Dr. Michael Rodriguez, MD" },
+        "reasonReference": [{ "reference": "Condition/condition-t2dm-maria" }],
+        "dosageInstruction": [{ "text": "500 mg PO twice daily", "timing": { "code": { "text": "BID" } } }],
+        "dispenseRequest": { "numberOfRepeatsAllowed": 2, "quantity": { "value": 180, "unit": "tablets" } },
+        "note": [{ "text": "PDC 61% — adherence intervention recommended." }]
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/medreq-atorvastatin-maria",
+      "request": { "method": "PUT", "url": "MedicationRequest/medreq-atorvastatin-maria" },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-atorvastatin-maria",
+        "extension": [{ "url": "https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc", "valueDecimal": 0.84 }],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "617312", "display": "atorvastatin 40 MG Oral Tablet" }, { "system": "http://hl7.org/fhir/sid/ndc", "code": "00071-0156-23" }], "text": "Atorvastatin 40 mg tablet" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "authoredOn": "2024-09-10",
+        "requester": { "reference": "Practitioner/practitioner-002", "display": "Dr. Sarah Chen, MD" },
+        "dosageInstruction": [{ "text": "40 mg PO at bedtime", "timing": { "code": { "text": "QHS" } } }],
+        "dispenseRequest": { "numberOfRepeatsAllowed": 5, "quantity": { "value": 90, "unit": "tablets" } }
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/medreq-furosemide-maria",
+      "request": { "method": "PUT", "url": "MedicationRequest/medreq-furosemide-maria" },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-furosemide-maria",
+        "extension": [{ "url": "https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc", "valueDecimal": 0.72 }],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "310429", "display": "furosemide 20 MG Oral Tablet" }, { "system": "http://hl7.org/fhir/sid/ndc", "code": "00054-3280-25" }], "text": "Furosemide 20 mg tablet" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "authoredOn": "2024-07-05",
+        "requester": { "reference": "Practitioner/practitioner-004", "display": "Dr. James Wilson, MD" },
+        "reasonReference": [{ "reference": "Condition/condition-hf-maria" }],
+        "dosageInstruction": [{ "text": "20 mg PO once daily", "timing": { "code": { "text": "QD" } } }],
+        "dispenseRequest": { "numberOfRepeatsAllowed": 4, "quantity": { "value": 90, "unit": "tablets" } }
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/medreq-kcl-maria",
+      "request": { "method": "PUT", "url": "MedicationRequest/medreq-kcl-maria" },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medreq-kcl-maria",
+        "extension": [{ "url": "https://rhtp.example.org/fhir/StructureDefinition/adherence-pdc", "valueDecimal": 0.55 }],
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "628953", "display": "potassium chloride 20 MEQ Extended Release Oral Tablet" }, { "system": "http://hl7.org/fhir/sid/ndc", "code": "00054-4109-25" }], "text": "Potassium Chloride 20 mEq ER tablet" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "authoredOn": "2024-07-05",
+        "requester": { "reference": "Practitioner/practitioner-004", "display": "Dr. James Wilson, MD" },
+        "dosageInstruction": [{ "text": "20 mEq PO once daily", "timing": { "code": { "text": "QD" } } }],
+        "dispenseRequest": { "numberOfRepeatsAllowed": 1, "quantity": { "value": 90, "unit": "tablets" } },
+        "note": [{ "text": "PDC 55% — review need given K+ 5.1 on 2026-04-01. Possible discontinue." }]
+      }
+    },
+    {
+      "fullUrl": "AllergyIntolerance/allergy-pcn-maria",
+      "request": { "method": "PUT", "url": "AllergyIntolerance/allergy-pcn-maria" },
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-pcn-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "confirmed" }] },
+        "type": "allergy",
+        "category": ["medication"],
+        "criticality": "high",
+        "code": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "7980", "display": "penicillin" }], "text": "Penicillin" },
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "recordedDate": "2015-09-01",
+        "reaction": [{ "manifestation": [{ "coding": [{ "system": "http://snomed.info/sct", "code": "39579001", "display": "Anaphylaxis" }], "text": "Anaphylaxis" }], "severity": "severe" }]
+      }
+    },
+    {
+      "fullUrl": "AllergyIntolerance/allergy-shellfish-maria",
+      "request": { "method": "PUT", "url": "AllergyIntolerance/allergy-shellfish-maria" },
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-shellfish-maria",
+        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "code": "active" }] },
+        "verificationStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "code": "confirmed" }] },
+        "type": "allergy",
+        "category": ["food"],
+        "criticality": "low",
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "44027008", "display": "Seafood" }], "text": "Shellfish" },
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "recordedDate": "2019-04-15",
+        "reaction": [{ "manifestation": [{ "text": "Hives" }], "severity": "moderate" }]
+      }
+    },
+    {
+      "fullUrl": "Immunization/imm-flu-maria-2025",
+      "request": { "method": "PUT", "url": "Immunization/imm-flu-maria-2025" },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-flu-maria-2025",
+        "status": "completed",
+        "vaccineCode": { "coding": [{ "system": "http://hl7.org/fhir/sid/cvx", "code": "140", "display": "Influenza, seasonal, injectable, preservative free" }], "text": "Influenza (2025–26 season)" },
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "occurrenceDateTime": "2025-10-08",
+        "primarySource": true
+      }
+    },
+    {
+      "fullUrl": "Immunization/imm-covid-maria-2024",
+      "request": { "method": "PUT", "url": "Immunization/imm-covid-maria-2024" },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-covid-maria-2024",
+        "status": "completed",
+        "vaccineCode": { "coding": [{ "system": "http://hl7.org/fhir/sid/cvx", "code": "308", "display": "COVID-19 vaccine, 2024-2025 formula" }], "text": "COVID-19 booster (2024–25)" },
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "occurrenceDateTime": "2024-11-14",
+        "primarySource": true
+      }
+    },
+    {
+      "fullUrl": "Immunization/imm-ppsv23-maria-2024",
+      "request": { "method": "PUT", "url": "Immunization/imm-ppsv23-maria-2024" },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-ppsv23-maria-2024",
+        "status": "completed",
+        "vaccineCode": { "coding": [{ "system": "http://hl7.org/fhir/sid/cvx", "code": "33", "display": "pneumococcal polysaccharide PPV23" }], "text": "Pneumococcal PPSV23" },
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "occurrenceDateTime": "2024-05-20",
+        "primarySource": true
+      }
+    },
+    {
+      "fullUrl": "Flag/flag-high-risk-maria",
+      "request": { "method": "PUT", "url": "Flag/flag-high-risk-maria" },
+      "resource": {
+        "resourceType": "Flag",
+        "id": "flag-high-risk-maria",
+        "status": "active",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/flag-category", "code": "safety", "display": "Safety" }] }],
+        "code": { "text": "High-Risk Transition — 2 ER visits in 60 days; post-acute follow-up overdue. Urgency 82/100." },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "period": { "start": "2026-03-30" }
+      }
+    },
+    {
+      "fullUrl": "Coverage/coverage-maria-medicaid",
+      "request": { "method": "PUT", "url": "Coverage/coverage-maria-medicaid" },
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "coverage-maria-medicaid",
+        "status": "active",
+        "type": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode", "code": "MCPOL", "display": "managed care policy" }], "text": "South Dakota Medicaid" },
+        "subscriberId": "SDMC-7742913",
+        "beneficiary": { "reference": "Patient/patient-maria-001" },
+        "payor": [{ "display": "South Dakota Medicaid" }]
+      }
+    },
+    {
+      "fullUrl": "CareTeam/careteam-maria",
+      "request": { "method": "PUT", "url": "CareTeam/careteam-maria" },
+      "resource": {
+        "resourceType": "CareTeam",
+        "id": "careteam-maria",
+        "status": "active",
+        "name": "Maria Redhawk Care Team",
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "participant": [
+          { "role": [{ "text": "Primary Care Physician" }], "member": { "reference": "Practitioner/practitioner-001", "display": "Dr. James Whitfield, MD" } },
+          { "role": [{ "text": "Cardiology" }], "member": { "reference": "Practitioner/practitioner-004", "display": "Dr. James Wilson, MD" } },
+          { "role": [{ "text": "RN Care Coordinator" }], "member": { "display": "Dana Featherman, RN" } },
+          { "role": [{ "text": "Community Health Worker" }], "member": { "display": "Leon Swift Eagle, CHW" } }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Goal/goal-a1c-maria",
+      "request": { "method": "PUT", "url": "Goal/goal-a1c-maria" },
+      "resource": {
+        "resourceType": "Goal",
+        "id": "goal-a1c-maria",
+        "lifecycleStatus": "active",
+        "description": { "text": "HbA1c below 8.0% by December 2026" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "target": [{ "measure": { "coding": [{ "system": "http://loinc.org", "code": "4548-4" }] }, "detailQuantity": { "value": 8.0, "unit": "%", "comparator": "<" }, "dueDate": "2026-12-31" }]
+      }
+    },
+    {
+      "fullUrl": "Goal/goal-bp-maria",
+      "request": { "method": "PUT", "url": "Goal/goal-bp-maria" },
+      "resource": {
+        "resourceType": "Goal",
+        "id": "goal-bp-maria",
+        "lifecycleStatus": "active",
+        "description": { "text": "Blood pressure below 130/80" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "target": [{ "dueDate": "2026-10-31" }]
+      }
+    },
+    {
+      "fullUrl": "CarePlan/careplan-maria",
+      "request": { "method": "PUT", "url": "CarePlan/careplan-maria" },
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "careplan-maria",
+        "status": "active",
+        "intent": "plan",
+        "title": "Chronic Disease Management — T2DM / CKD / HF",
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "period": { "start": "2026-04-01" },
+        "addresses": [
+          { "reference": "Condition/condition-t2dm-maria" },
+          { "reference": "Condition/condition-ckd-maria" },
+          { "reference": "Condition/condition-hf-maria" }
+        ],
+        "goal": [{ "reference": "Goal/goal-a1c-maria" }, { "reference": "Goal/goal-bp-maria" }],
+        "activity": [
+          { "detail": { "status": "in-progress", "description": "Metformin adherence intervention — pharmacist outreach" } },
+          { "detail": { "status": "scheduled", "description": "Nephrology consult — referral pending" } },
+          { "detail": { "status": "in-progress", "description": "Transitional care outreach — post-ED follow-up" } },
+          { "detail": { "status": "not-started", "description": "Repeat BMP in 2 weeks — recheck K+" } }
+        ]
+      }
+    },
+    {
+      "fullUrl": "ServiceRequest/sr-nephrology-maria",
+      "request": { "method": "PUT", "url": "ServiceRequest/sr-nephrology-maria" },
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-nephrology-maria",
+        "status": "active",
+        "intent": "order",
+        "category": [{ "coding": [{ "system": "http://snomed.info/sct", "code": "3457005", "display": "Patient referral" }], "text": "referral" }],
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "306285006", "display": "Referral to nephrology service" }], "text": "Nephrology consult — CKD 3b, declining eGFR" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "requester": { "reference": "Practitioner/practitioner-001", "display": "Dr. James Whitfield, MD" },
+        "authoredOn": "2026-04-02",
+        "reasonReference": [{ "reference": "Condition/condition-ckd-maria" }],
+        "note": [{ "text": "Awaiting scheduling — Sanford Nephrology, Sioux Falls." }]
+      }
+    },
+    {
+      "fullUrl": "DiagnosticReport/dr-echo-maria-202603",
+      "request": { "method": "PUT", "url": "DiagnosticReport/dr-echo-maria-202603" },
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-echo-maria-202603",
+        "status": "final",
+        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v2-0074", "code": "CUS", "display": "Cardiac Ultrasound" }] }],
+        "code": { "coding": [{ "system": "http://loinc.org", "code": "34552-0", "display": "US Echocardiogram" }], "text": "Transthoracic Echocardiogram" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "effectiveDateTime": "2026-03-31",
+        "conclusion": "EF 45%. Grade II diastolic dysfunction. Mild LVH. No significant valvular disease."
+      }
+    },
+    {
+      "fullUrl": "DocumentReference/docref-ed-summary-maria",
+      "request": { "method": "PUT", "url": "DocumentReference/docref-ed-summary-maria" },
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "docref-ed-summary-maria",
+        "status": "current",
+        "type": { "coding": [{ "system": "http://loinc.org", "code": "18842-5", "display": "Discharge summary" }], "text": "ED Discharge Summary" },
+        "category": [{ "coding": [{ "system": "http://loinc.org", "code": "18842-5" }], "text": "Discharge Summary" }],
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "date": "2026-03-30T05:00:00-05:00",
+        "author": [{ "display": "Winner Regional Healthcare ED" }],
+        "description": "ED discharge — acute HF exacerbation, diuresed, discharged home with follow-up instructions.",
+        "content": [{ "attachment": { "contentType": "text/plain", "data": "RUQgRGlzY2hhcmdlIFN1bW1hcnkgLSBBY3V0ZSBIRiBleGFjZXJiYXRpb24uIElWIGZ1cm9zZW1pZGUgZ2l2ZW4sIHN5bXB0b21zIGltcHJvdmVkLiBEaXNjaGFyZ2VkIGhvbWUuIEZvbGxvdy11cCB3aXRoIFBDUCBpbiA3IGRheXMu", "title": "ED Discharge Summary 2026-03-29" } }],
+        "context": { "encounter": [{ "reference": "Encounter/encounter-maria-er-0329" }] }
+      }
+    },
+    {
+      "fullUrl": "FamilyMemberHistory/fmh-mother-maria",
+      "request": { "method": "PUT", "url": "FamilyMemberHistory/fmh-mother-maria" },
+      "resource": {
+        "resourceType": "FamilyMemberHistory",
+        "id": "fmh-mother-maria",
+        "status": "completed",
+        "patient": { "reference": "Patient/patient-maria-001" },
+        "relationship": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode", "code": "MTH", "display": "mother" }], "text": "Mother" },
+        "condition": [
+          { "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "44054006", "display": "Type 2 diabetes mellitus" }], "text": "Type 2 Diabetes" } },
+          { "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "38341003", "display": "Hypertension" }], "text": "Hypertension" } }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Procedure/proc-echo-maria-202603",
+      "request": { "method": "PUT", "url": "Procedure/proc-echo-maria-202603" },
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-echo-maria-202603",
+        "status": "completed",
+        "code": { "coding": [{ "system": "http://snomed.info/sct", "code": "40701008", "display": "Echocardiography" }], "text": "Transthoracic Echocardiogram" },
+        "subject": { "reference": "Patient/patient-maria-001" },
+        "performedDateTime": "2026-03-31"
+      }
+    }
+  ]
+}

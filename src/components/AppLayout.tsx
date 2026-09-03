@@ -41,6 +41,9 @@ const navItems: NavItem[] = [
   { key: 'nav-care-manager', label: 'Care Manager Dashboard', icon: 'ClipboardDocumentListIcon', href: '/care-manager', group: 'Care Team Workflows' },
   { key: 'nav-chw-workflow', label: 'CHW Workflow', icon: 'UserIcon', href: '/chw-workflow', group: 'Care Team Workflows' },
   { key: 'nav-specialist-inbox', label: 'Specialist Inbox', icon: 'EnvelopeIcon', href: '/specialist-inbox', group: 'Care Team Workflows' },
+  // ⚠️  DO NOT CHANGE THIS ROUTE — /md-smart-launch serves the Cerner PowerChart
+  // MD SmartApp (SMART on FHIR). Source: src/app/md-smart-launch/ + components/cerner/.
+  // Backed up in GitHub RHTP_Backup branch: Cerner-MDSmartApp-090326.
   { key: 'nav-md-smart-launch', label: 'MD Smart Launch', icon: 'BoltIcon', href: '/md-smart-launch', group: 'Care Team Workflows' },
   // Whole Person Care
   { key: 'nav-whole-person-graph', label: 'Whole Person Care View', icon: 'CircleStackIcon', href: '/whole-person-care-summary', group: 'Whole Person Care' },

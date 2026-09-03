@@ -40,7 +40,7 @@ describe('useDataModeFromUrl — URL param parsing logic', () => {
 
   it('recognises "live" param — should result in mock mode false', () => {
     // Simulate what the hook does for ?dataMode=live
-    const param = 'live';
+    const param: string = 'live';
     const wantMock = param === 'mock';
     setFhirMockMode(wantMock);
     expect(getFhirMockMode()).toBe(false);
@@ -49,7 +49,7 @@ describe('useDataModeFromUrl — URL param parsing logic', () => {
   it('ignores unknown param values — fhirClient state unchanged', () => {
     setFhirMockMode(true); // set known state
     // Simulate hook with an unknown param — no-op
-    const param = 'unknown';
+    const param: string = 'unknown';
     if (param === 'mock' || param === 'live') {
       setFhirMockMode(param === 'mock');
     }

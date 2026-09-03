@@ -15,10 +15,23 @@ import * as clock from '@/lib/clock'; // deterministic time/rng seam (test sette
  */
 import type { FhirBundle, FhirResource } from './types';
 import mariaBundle from '../../../fhir/seed/maria-redhawk.bundle.json';
+import dorothyBundle from '../../../fhir/seed/patients/dorothy-simmons.bundle.json';
+import jamesBundle from '../../../fhir/seed/patients/james-wilson.bundle.json';
+import alexBundle from '../../../fhir/seed/patients/alex-kirby.bundle.json';
+import lisaBundle from '../../../fhir/seed/patients/lisa-thompson.bundle.json';
+import robertBundle from '../../../fhir/seed/patients/robert-chen.bundle.json';
 
 type AnyResource = FhirResource & Record<string, unknown>;
 
-const SEED_BUNDLES: FhirBundle[] = [mariaBundle as unknown as FhirBundle];
+// All whole-person patients — mock mode renders any patient that HAPI serves.
+const SEED_BUNDLES: FhirBundle[] = [
+  mariaBundle as unknown as FhirBundle,
+  dorothyBundle as unknown as FhirBundle,
+  jamesBundle as unknown as FhirBundle,
+  alexBundle as unknown as FhirBundle,
+  lisaBundle as unknown as FhirBundle,
+  robertBundle as unknown as FhirBundle,
+];
 
 // resourceType -> id -> resource
 let db: Map<string, Map<string, AnyResource>> | null = null;
@@ -45,13 +58,18 @@ function refMatches(value: unknown, target: string): boolean {
   const ref = (value as { reference?: string } | undefined)?.reference;
   if (!ref) return false;
   const bare = target.includes('/') ? target : target;
-  return ref === bare || ref.endsWith(`/${target}`) || ref === `Patient/${target}` || ref === target;
+  return (
+    ref === bare || ref.endsWith(`/${target}`) || ref === `Patient/${target}` || ref === target
+  );
 }
 
 function ccMatchesToken(cc: unknown, token: string): boolean {
   if (!cc) return false;
   const list = Array.isArray(cc) ? cc : [cc];
-  for (const c of list as Array<{ coding?: Array<{ code?: string; system?: string }>; text?: string }>) {
+  for (const c of list as Array<{
+    coding?: Array<{ code?: string; system?: string }>;
+    text?: string;
+  }>) {
     if (c?.text?.toLowerCase() === token.toLowerCase()) return true;
     for (const coding of c?.coding ?? []) {
       // token may be "code" or "system|code"
@@ -94,8 +112,12 @@ function matchesParam(res: AnyResource, key: string, raw: string): boolean {
     case 'status':
       return res.status === value || res.lifecycleStatus === value;
     case 'code':
-      return ccMatchesToken(res.code, value) || ccMatchesToken(res.medicationCodeableConcept, value)
-        || ccMatchesToken(res.vaccineCode, value) || ccMatchesToken(res.type, value);
+      return (
+        ccMatchesToken(res.code, value) ||
+        ccMatchesToken(res.medicationCodeableConcept, value) ||
+        ccMatchesToken(res.vaccineCode, value) ||
+        ccMatchesToken(res.type, value)
+      );
     case '_id':
       return res.id === value;
     default:
@@ -112,13 +134,13 @@ export function storeRead<T = unknown>(resourceType: string, id: string): T | un
 
 export function storeSearch<T = unknown>(
   resourceType: string,
-  params: Record<string, string | number | boolean>,
+  params: Record<string, string | number | boolean>
 ): T {
   const all = Array.from(load().get(resourceType)?.values() ?? []);
   const { _sort, _count, _include: _ignored, ...filters } = params as Record<string, string>;
 
   let results = all.filter((res) =>
-    Object.entries(filters).every(([k, v]) => matchesParam(res, k, String(v))),
+    Object.entries(filters).every(([k, v]) => matchesParam(res, k, String(v)))
   );
 
   if (_sort) {

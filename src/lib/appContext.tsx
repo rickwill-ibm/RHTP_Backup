@@ -4,6 +4,38 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { UserRole } from './mockData';
+
+// ─── Physician Personas ───────────────────────────────────────────────────────
+export type PhysicianPersona = 'rick' | 'jon';
+
+export interface PhysicianProfile {
+  id: PhysicianPersona;
+  fhirId: string;          // FHIR Practitioner resource id
+  displayName: string;
+  role: 'PCP' | 'Specialist';
+  specialty: string;
+  color: string;           // accent color for UI distinction
+}
+
+export const PHYSICIAN_PROFILES: Record<PhysicianPersona, PhysicianProfile> = {
+  rick: {
+    id: 'rick',
+    fhirId: 'practitioner-rick',
+    displayName: 'Dr. Rick',
+    role: 'PCP',
+    specialty: 'Primary Care',
+    color: '#0043ce',
+  },
+  jon: {
+    id: 'jon',
+    fhirId: 'practitioner-jon',
+    displayName: 'Dr. Jon',
+    role: 'Specialist',
+    specialty: 'Specialist',
+    color: '#6929c4',
+  },
+};
+
 import type { EntryContext, ScreenScope } from './actionRegistry';
 import { getAvailableActions } from './actionRegistry';
 import type { ActionDefinition, ActionContext, PatientTab } from './actionRegistry';
@@ -52,6 +84,15 @@ interface AppContextValue {
   // Current user
   user: UserSession;
   setUser: (user: UserSession) => void;
+
+  // Active physician persona for two-physician demo (Rick=PCP / Jon=Specialist)
+  physicianPersona: PhysicianPersona;
+  setPhysicianPersona: (persona: PhysicianPersona) => void;
+  activePhysician: PhysicianProfile;
+
+  // Runtime data source toggle — overrides NEXT_PUBLIC_USE_MOCK_DATA
+  useMockData: boolean;
+  setUseMockData: (val: boolean) => void;
 
   // The roster member the logged-in user maps to (single identity model).
   currentMemberId: string | null;
@@ -117,6 +158,10 @@ const AppContext = createContext<AppContextValue | null>(null);
 // ─── Provider ─────────────────────────────────────────────────────────────────
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserSession>(defaultUser);
+  const [physicianPersona, setPhysicianPersona] = useState<PhysicianPersona>('rick');
+  const [useMockData, setUseMockData] = useState<boolean>(
+    (process.env.NEXT_PUBLIC_USE_MOCK_DATA ?? 'true').toLowerCase() === 'true'
+  );
   const [entryContext, setEntryContext] = useState<EntryContext>('browse');
   const [selectedContractId, setSelectedContractId] = useState<string | null>('contract-001');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>('patient-001');
@@ -183,6 +228,11 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
       value={{
         user,
         setUser,
+        physicianPersona,
+        setPhysicianPersona,
+        activePhysician: PHYSICIAN_PROFILES[physicianPersona],
+        useMockData,
+        setUseMockData,
         currentMemberId: USER_TO_MEMBER[user.userId] || null,
         entryContext,
         setEntryContext,

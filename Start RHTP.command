@@ -34,16 +34,15 @@ if [ ! -d node_modules ]; then
   npm install
 fi
 
-# 4 — App (free port 4029 if a stale dev server holds it)
-if lsof -ti :4029 >/dev/null 2>&1; then
-  echo "→ Port 4029 in use — stopping the existing dev server…"
-  lsof -ti :4029 | xargs kill 2>/dev/null
+# 4 — App on port 4032
+if lsof -ti :4032 >/dev/null 2>&1; then
+  echo "→ Port 4032 in use — stopping the existing dev server…"
+  lsof -ti :4032 | xargs kill 2>/dev/null
   sleep 2
 fi
 # Clear the Next.js build cache — prevents stale-chunk hydration failures
-# (blank d3/graph panels) after heavy file changes.
 echo "→ Clearing .next build cache…"
 rm -rf .next
-echo "→ Starting RHTP dev server on http://localhost:4029 …"
-(sleep 8 && open "http://localhost:4029/md-smart-launch") &
+echo "→ Starting RHTP dev server on http://localhost:4032 …"
+(sleep 8 && open "http://localhost:4032/md-smart-launch") &
 npm run dev

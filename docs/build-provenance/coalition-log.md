@@ -6,6 +6,43 @@ a landing that touches a core-logic path with no new entry here FAILS the gate.
 
 Newest first. One entry per qualifying change.
 
+## 2026-09-03 — Coalition deployment: AGENTS.md roster + SESSION-START-PROMPT.md
+
+**Scope:** docs-only change — no `src/lib/**` domain logic touched. Coalition trigger
+classification: new file (`docs/build-provenance/SESSION-START-PROMPT.md`) + >40 lines
+changed in `AGENTS.md`. Trigger met on "new file" and ">40 changed lines" criteria.
+
+**Change summary:**
+- `AGENTS.md`: replaced the verbose coalition-prose section with the full agent roster
+  (B0–B3, R1–R5, ON-DEMAND Scale) embedded as a copyable SESSION START deployment prompt,
+  keeping the file at ≤150 lines. Pre-flight trigger table, reasoning-mode rules, gate
+  command, and Definition of Done preserved. Added `npm run gate:push` to the commands
+  section. Added `coalition-log.md` entry requirement to the Definition of Done.
+- `docs/build-provenance/SESSION-START-PROMPT.md` (NEW): standalone, fully self-contained
+  session-start prompt with the complete coalition roster, per-agent mandates and must-ask
+  questions, reasoning-mode rules (CoT default / ToT injection points), pre-flight
+  checklist, gate commands, Definition of Done, and stop conditions. Intended to be copied
+  verbatim and sent as the first message to any AI agent starting an RHTP session.
+
+**Architect pass (B1):** docs-only; no ADR required. The prompt mirrors the canonical
+persona definitions in `docs/framework/personas.md` and the trigger rules in
+`docs/framework/coalition-protocol.md` verbatim — no new design decisions.
+
+**Adversarial pass (pre-delivery):** R5 cross-examination applied to the prompt itself:
+- Claim "coalition is active" — UPHELD: the prompt forces the agent to name each persona
+  and confirm before proceeding; it does not merely assert activation.
+- Claim "reasoning mode enforced" — UPHELD: CoT/ToT injection points are explicit and the
+  prohibition on ToT for mechanical tasks is stated.
+- Claim "gate enforced" — UPHELD: `npm run check:all` and `npm run gate:push` are named
+  explicitly; the commit-message no-attribution rule is restated.
+- Risk R3 (stub): the prompt is a doc artifact, not a seam — no stub grading applies.
+- Risk R2 (negative-space): the pre-flight checklist covers all five trigger classes; the
+  stop-and-report rules cover the four stop conditions from `AGENTS.md`. No absent item
+  found that was present in the canonical framework docs.
+
+**Verification:** `tsc --noEmit` 0 · `check:sizes` PASS ratchet intact · no src/ files
+changed · `AGENTS.md` line count 138 (≤ 150 cap).
+
 ## 2026-09-02 — WPC Da Vinci Risk Adjustment: the CODING GAP as a first-class projected dimension
 
 **Context:** the platform owned both ends of the risk-adjustment value chain — a RADV-defensibility /

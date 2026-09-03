@@ -1,0 +1,2113 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:41787f1e-03e3-446b-90cb-2c4ae71409e3",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "RHTP Community Health",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "41787f1e-03e3-446b-90cb-2c4ae71409e3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/41787f1e-03e3-446b-90cb-2c4ae71409e3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0ec9cc7e-735b-4bb8-a66b-0a5029061b61",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "State Medicaid Agency",
+        "id": "0ec9cc7e-735b-4bb8-a66b-0a5029061b61"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/0ec9cc7e-735b-4bb8-a66b-0a5029061b61"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f",
+      "resource": {
+        "resourceType": "Patient",
+        "identifier": [
+          {
+            "system": "urn:mrn",
+            "value": "FJVV987654321"
+          },
+          {
+            "system": "urn:nhs",
+            "value": "943 476 5829"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Kirby",
+            "given": [
+              "Alex"
+            ],
+            "prefix": [
+              "Mrs."
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(617) 555-0142",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "(617) 555-0198",
+            "use": "mobile"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1956-06-14",
+        "address": [
+          {
+            "line": [
+              "2847 Oak Avenue"
+            ],
+            "city": "Boston",
+            "state": "MA",
+            "postalCode": "02108",
+            "country": "US"
+          }
+        ],
+        "contact": [
+          {
+            "relationship": [
+              {
+                "text": "Eldest Daughter"
+              }
+            ],
+            "name": {
+              "family": "Kirby",
+              "given": [
+                "Sarah"
+              ]
+            },
+            "telecom": [
+              {
+                "system": "phone",
+                "value": "(617) 555-0142"
+              }
+            ]
+          },
+          {
+            "relationship": [
+              {
+                "text": "Husband"
+              }
+            ],
+            "name": {
+              "family": "Kirby",
+              "given": [
+                "John"
+              ]
+            },
+            "telecom": [
+              {
+                "system": "phone",
+                "value": "(617) 555-0267"
+              }
+            ]
+          }
+        ],
+        "managingOrganization": {
+          "reference": "urn:uuid:41787f1e-03e3-446b-90cb-2c4ae71409e3"
+        },
+        "id": "98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2c8d7bc0-b063-4e9b-84fa-baa6c3105d23",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MC",
+              "display": "Medicaid"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:0ec9cc7e-735b-4bb8-a66b-0a5029061b61"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "2c8d7bc0-b063-4e9b-84fa-baa6c3105d23"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/2c8d7bc0-b063-4e9b-84fa-baa6c3105d23"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:eaa7cd37-09d9-4e9d-8e2e-d772f9d11fae",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Total Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 5.2,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 5.2,
+              "unit": "mmol/L"
+            },
+            "text": "<5.2 mmol/L"
+          }
+        ],
+        "id": "eaa7cd37-09d9-4e9d-8e2e-d772f9d11fae"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/eaa7cd37-09d9-4e9d-8e2e-d772f9d11fae"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3aa0395e-3a60-4e39-83aa-f10d61fe23ba",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Triglycerides"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 1.8,
+          "unit": "mmol/L"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 1.7,
+              "unit": "mmol/L"
+            },
+            "text": "<1.7 mmol/L"
+          }
+        ],
+        "id": "3aa0395e-3a60-4e39-83aa-f10d61fe23ba"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/3aa0395e-3a60-4e39-83aa-f10d61fe23ba"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:02927e29-0c0a-48aa-9a1c-9f56e3a1a6a5",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Creatinine"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-20",
+        "valueQuantity": {
+          "value": 78,
+          "unit": "µmol/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 60,
+              "unit": "µmol/L"
+            },
+            "high": {
+              "value": 110,
+              "unit": "µmol/L"
+            },
+            "text": "60-110 µmol/L"
+          }
+        ],
+        "id": "02927e29-0c0a-48aa-9a1c-9f56e3a1a6a5"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/02927e29-0c0a-48aa-9a1c-9f56e3a1a6a5"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:57605346-3834-48de-8567-4a9819ebf2f3",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "TSH"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-10",
+        "valueQuantity": {
+          "value": 2.3,
+          "unit": "mIU/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.4,
+              "unit": "mIU/L"
+            },
+            "high": {
+              "value": 4,
+              "unit": "mIU/L"
+            },
+            "text": "0.4-4.0 mIU/L"
+          }
+        ],
+        "id": "57605346-3834-48de-8567-4a9819ebf2f3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/57605346-3834-48de-8567-4a9819ebf2f3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9978111c-f134-4bc9-8ebd-190ea5e3f247",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Social Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueQuantity": {
+          "value": 63,
+          "unit": "score"
+        },
+        "id": "9978111c-f134-4bc9-8ebd-190ea5e3f247"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/9978111c-f134-4bc9-8ebd-190ea5e3f247"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c12947a0-a522-4edd-9e75-d0f686b82b17",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Food Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "High",
+        "id": "c12947a0-a522-4edd-9e75-d0f686b82b17"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/c12947a0-a522-4edd-9e75-d0f686b82b17"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8ccc85b6-dca6-4df5-81b1-ed272d176fb7",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Housing Stability Risk Score"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "High",
+        "id": "8ccc85b6-dca6-4df5-81b1-ed272d176fb7"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/8ccc85b6-dca6-4df5-81b1-ed272d176fb7"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7dcabb85-4ff9-435b-bbbd-c4773a77bfae",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Smoking Status"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Ex-smoker (Quit 15 years ago)",
+        "id": "7dcabb85-4ff9-435b-bbbd-c4773a77bfae"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/7dcabb85-4ff9-435b-bbbd-c4773a77bfae"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d1c735a5-7089-4292-94af-49db0517daa6",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: History"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "20 pack-years (1976-2011)",
+        "id": "d1c735a5-7089-4292-94af-49db0517daa6"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d1c735a5-7089-4292-94af-49db0517daa6"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:22295961-895f-498b-9600-d9078ba7049b",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Alcohol Consumption"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Moderate - 6 units per week",
+        "id": "22295961-895f-498b-9600-d9078ba7049b"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/22295961-895f-498b-9600-d9078ba7049b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f0d4fee1-b365-4cdb-9755-d55bd960125c",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Typical"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Usually wine with evening meals",
+        "id": "f0d4fee1-b365-4cdb-9755-d55bd960125c"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/f0d4fee1-b365-4cdb-9755-d55bd960125c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c230771d-76d0-409e-b409-c3ba1aa8b297",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Exercise"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Light to moderate activity",
+        "id": "c230771d-76d0-409e-b409-c3ba1aa8b297"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/c230771d-76d0-409e-b409-c3ba1aa8b297"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:61a3cf72-b8a9-4037-b4eb-c9720cfbb177",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Routine"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Walking 30 minutes, 4-5 days/week",
+        "id": "61a3cf72-b8a9-4037-b4eb-c9720cfbb177"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/61a3cf72-b8a9-4037-b4eb-c9720cfbb177"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bf41201f-2137-4d2e-86c2-59953c67c440",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Diet"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Following diabetic diet plan",
+        "id": "bf41201f-2137-4d2e-86c2-59953c67c440"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/bf41201f-2137-4d2e-86c2-59953c67c440"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:95813f97-1327-4f39-b692-7dfcc4312b2c",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Lifestyle: Note"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Reduced carbohydrate intake since diagnosis",
+        "id": "95813f97-1327-4f39-b692-7dfcc4312b2c"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/95813f97-1327-4f39-b692-7dfcc4312b2c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ea0bf383-1170-47f7-ad95-7a5be7275488",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Marital Status"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Married",
+        "id": "ea0bf383-1170-47f7-ad95-7a5be7275488"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/ea0bf383-1170-47f7-ad95-7a5be7275488"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:40ab360c-1c8a-4520-83e7-6d53e08fb866",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Living Arrangements"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Lives with husband in own home",
+        "id": "40ab360c-1c8a-4520-83e7-6d53e08fb866"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/40ab360c-1c8a-4520-83e7-6d53e08fb866"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ad9bd4ec-9537-4a94-b673-0eedf091b118",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Home"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "2-story house, stairs manageable",
+        "id": "ad9bd4ec-9537-4a94-b673-0eedf091b118"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/ad9bd4ec-9537-4a94-b673-0eedf091b118"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7a0ae777-b99f-4b2d-a1b6-3ea07db9f479",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Support Network"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Good family support",
+        "id": "7a0ae777-b99f-4b2d-a1b6-3ea07db9f479"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/7a0ae777-b99f-4b2d-a1b6-3ea07db9f479"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ceef9d47-5b97-4de3-96cf-563a71a64759",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Family"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Husband, 2 adult children nearby",
+        "id": "ceef9d47-5b97-4de3-96cf-563a71a64759"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/ceef9d47-5b97-4de3-96cf-563a71a64759"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:175ca151-8cc4-4cb7-93ef-1c73275e7e2f",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Occupation"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "Retired Primary School Teacher",
+        "id": "175ca151-8cc4-4cb7-93ef-1c73275e7e2f"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/175ca151-8cc4-4cb7-93ef-1c73275e7e2f"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b1c217a2-1bd1-4f84-8830-b0fe41e3248e",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "code": "social-history"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Living Situation: Retired"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-27",
+        "valueString": "June 2021",
+        "id": "b1c217a2-1bd1-4f84-8830-b0fe41e3248e"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/b1c217a2-1bd1-4f84-8830-b0fe41e3248e"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:954cad03-52bd-4832-ab07-387dc8aa8bda",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI) [Ratio]"
+            }
+          ],
+          "text": "BMI"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 32,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 18.5,
+              "unit": "kg/m2"
+            },
+            "high": {
+              "value": 25,
+              "unit": "kg/m2"
+            }
+          }
+        ],
+        "id": "954cad03-52bd-4832-ab07-387dc8aa8bda"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/954cad03-52bd-4832-ab07-387dc8aa8bda"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d882534a-675f-4cdb-851b-5bb87d2c34a7",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel with all children optional"
+            }
+          ],
+          "text": "Blood Pressure"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "referenceRange": [
+          {
+            "low": {
+              "value": 90,
+              "unit": "mmHg"
+            },
+            "high": {
+              "value": 140,
+              "unit": "mmHg"
+            },
+            "text": "Systolic"
+          }
+        ],
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 145,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 100,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ],
+        "id": "d882534a-675f-4cdb-851b-5bb87d2c34a7"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d882534a-675f-4cdb-851b-5bb87d2c34a7"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d2b4ee66-f448-4efc-9320-88784185fc72",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Physical and Anthropometric Measurements"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "89270-3",
+              "display": "Waist-height ratio"
+            }
+          ],
+          "text": "Waist/Height Ratio"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 0.8,
+          "unit": "ratio",
+          "system": "http://unitsofmeasure.org",
+          "code": "{ratio}"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.4,
+              "unit": "ratio"
+            },
+            "high": {
+              "value": 0.5,
+              "unit": "ratio"
+            }
+          }
+        ],
+        "id": "d2b4ee66-f448-4efc-9320-88784185fc72"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d2b4ee66-f448-4efc-9320-88784185fc72"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b8cb2003-d20c-44db-a480-ad0dd0b2c19b",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2571-8",
+              "display": "Triglyceride [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Triglycerides"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 200,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 150,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "b8cb2003-d20c-44db-a480-ad0dd0b2c19b"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/b8cb2003-d20c-44db-a480-ad0dd0b2c19b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:616f8e5d-860d-4bd9-8dee-64391e716139",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1742-6",
+              "display": "Alanine aminotransferase [Enzymatic activity/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Liver Function Test (ALT/AST, U/L)"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 30,
+          "unit": "U/L",
+          "system": "http://unitsofmeasure.org",
+          "code": "U/L"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 7,
+              "unit": "U/L"
+            },
+            "high": {
+              "value": 56,
+              "unit": "U/L"
+            }
+          }
+        ],
+        "id": "616f8e5d-860d-4bd9-8dee-64391e716139"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/616f8e5d-860d-4bd9-8dee-64391e716139"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:447ca74e-1837-401e-8bee-a530cf059986",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diabetes Complication Screening Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "9318-7",
+              "display": "Albumin/Creatinine [Mass Ratio] in Urine"
+            }
+          ],
+          "text": "Urine Albumin/Creatine Ratio (UACR)"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 95,
+          "unit": "mg/g",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/g"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 30,
+              "unit": "mg/g"
+            }
+          }
+        ],
+        "id": "447ca74e-1837-401e-8bee-a530cf059986"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/447ca74e-1837-401e-8bee-a530cf059986"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:28d021e1-d306-4b5c-924b-5b4e9184fffd",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diagnostic and Glycemic Control Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "HbA1c"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 9.8,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 4,
+              "unit": "%"
+            },
+            "high": {
+              "value": 7,
+              "unit": "%"
+            }
+          }
+        ],
+        "id": "28d021e1-d306-4b5c-924b-5b4e9184fffd"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/28d021e1-d306-4b5c-924b-5b4e9184fffd"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:07e516e0-e93b-4f5f-95f9-6434196af8be",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diagnostic and Glycemic Control Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "1558-6",
+              "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Fasting Plasma Glucose (FPG)"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 125,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 70,
+              "unit": "mg/dL"
+            },
+            "high": {
+              "value": 100,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "07e516e0-e93b-4f5f-95f9-6434196af8be"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/07e516e0-e93b-4f5f-95f9-6434196af8be"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c656e800-b942-4900-89f6-a534031cc9ef",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18262-6",
+              "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "LDL Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 280,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "high": {
+              "value": 100,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "c656e800-b942-4900-89f6-a534031cc9ef"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/c656e800-b942-4900-89f6-a534031cc9ef"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f8214950-21ad-4dca-a0fb-7f16c4639798",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Laboratory Metabolic Panel"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2085-9",
+              "display": "Cholesterol in HDL [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "HDL Cholesterol"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 40,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 40,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "f8214950-21ad-4dca-a0fb-7f16c4639798"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/f8214950-21ad-4dca-a0fb-7f16c4639798"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f65ff765-8863-4b05-86f2-8132c018d66d",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/diabetes-panel",
+            "valueString": "Diabetes Complication Screening Markers"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2160-0",
+              "display": "Creatinine [Mass/volume] in Serum or Plasma"
+            }
+          ],
+          "text": "Serum Creatinine/eGFR"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 1.7,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        },
+        "referenceRange": [
+          {
+            "low": {
+              "value": 0.7,
+              "unit": "mg/dL"
+            },
+            "high": {
+              "value": 1.3,
+              "unit": "mg/dL"
+            }
+          }
+        ],
+        "id": "f65ff765-8863-4b05-86f2-8132c018d66d"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/f65ff765-8863-4b05-86f2-8132c018d66d"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:30b45eda-cadd-4bf3-9f57-80cee4be0cbe",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "High Priority"
+        },
+        "code": {
+          "text": "Type 2 Diabetes Mellitus"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 12/03/2023 | Status: Active - Under Treatment"
+          },
+          {
+            "text": "Current HbA1c: 7.8% (Target: <7.0%)"
+          }
+        ],
+        "id": "30b45eda-cadd-4bf3-9f57-80cee4be0cbe"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/30b45eda-cadd-4bf3-9f57-80cee4be0cbe"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:383f02b8-0b3d-4387-b380-4ff7b3ba3bda",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "High Priority"
+        },
+        "code": {
+          "text": "Essential Hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 08/01/2022 | Status: Active - Controlled"
+          },
+          {
+            "text": "Current BP: 138/86 mmHg (Target: <140/90 mmHg)"
+          }
+        ],
+        "id": "383f02b8-0b3d-4387-b380-4ff7b3ba3bda"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/383f02b8-0b3d-4387-b380-4ff7b3ba3bda"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f5700c2a-2739-48c2-91e6-be3851af519f",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Asthma"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "note": [
+          {
+            "text": "Diagnosed: 22/09/2021 | Status: Active - Well Controlled"
+          },
+          {
+            "text": "Last exacerbation: None in 12 months"
+          }
+        ],
+        "id": "f5700c2a-2739-48c2-91e6-be3851af519f"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/f5700c2a-2739-48c2-91e6-be3851af519f"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6a15a77f-add8-4abe-9aa7-10d0acb63e09",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Obesity (BMI 31.2)"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "note": [
+          {
+            "text": "Ongoing management | Status: Active - Weight Loss Program"
+          },
+          {
+            "text": "Progress: -2.3kg since 12/03/2026"
+          }
+        ],
+        "id": "6a15a77f-add8-4abe-9aa7-10d0acb63e09"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/6a15a77f-add8-4abe-9aa7-10d0acb63e09"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c5fdf139-5826-4c8a-bfd1-370dd2aac34f",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "text": "active"
+        },
+        "verificationStatus": {
+          "text": "confirmed"
+        },
+        "severity": {
+          "text": "Medium Priority"
+        },
+        "code": {
+          "text": "Coronary artery disease"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "note": [
+          {
+            "text": "History of unstable angina and stent placement"
+          },
+          {
+            "text": "Ongoing management"
+          }
+        ],
+        "id": "c5fdf139-5826-4c8a-bfd1-370dd2aac34f"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/c5fdf139-5826-4c8a-bfd1-370dd2aac34f"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:57aaaa16-1464-40e8-a177-0345f000ddba",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "basedOn": [
+          {
+            "display": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "text": "Endocrinologist",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "103696004",
+              "display": "Patient referral to specialist"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "authoredOn": "2026-04-15T16:48:53.221Z",
+        "requester": {
+          "display": "Dr. Sarah Mitchell"
+        },
+        "performer": [
+          {
+            "display": "Dr. Olivia Chen"
+          }
+        ],
+        "reasonCode": [
+          {
+            "text": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "note": [
+          {
+            "text": "Dear Dr. Jones,\nThis referral is being sent to you for patient Mrs. Alex Kirby. She is being treated for chronic conditions for which we are conducting additional preventative measures to ensure co-morbidity conditions are not caused as a result of her condition or recent gap in care. We have already ordered labs and are addressing other social impacts that may affect her condition. Please refer to her patient record to reference other actions that have been taken for her ongoing care.\nSincerely,\nDr. Smith"
+          }
+        ],
+        "id": "57aaaa16-1464-40e8-a177-0345f000ddba"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/57aaaa16-1464-40e8-a177-0345f000ddba"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6f3cc516-804c-4ef3-85c8-fe60a12c6088",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "basedOn": [
+          {
+            "display": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "text": "Labs",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "108252007",
+              "display": "Laboratory procedure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "authoredOn": "2026-04-15T16:48:53.221Z",
+        "requester": {
+          "display": "Dr. Sarah Mitchell"
+        },
+        "performer": [
+          {
+            "display": "Quest Diagnostic"
+          }
+        ],
+        "reasonCode": [
+          {
+            "text": "Care Plan - 75g Oral Glucose Tolerance Test (OGTT)"
+          }
+        ],
+        "note": [
+          {
+            "text": "Dear Dr. Jones,\nThis referral is being sent to you for patient Mrs. Alex Kirby. She is being treated for chronic conditions for which we are conducting additional preventative measures to ensure co-morbidity conditions are not caused as a result of her condition or recent gap in care. We have already ordered labs and are addressing other social impacts that may affect her condition. Please refer to her patient record to reference other actions that have been taken for her ongoing care.\nSincerely,\nDr. Smith"
+          }
+        ],
+        "id": "6f3cc516-804c-4ef3-85c8-fe60a12c6088"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/6f3cc516-804c-4ef3-85c8-fe60a12c6088"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3bd69940-9432-4ff1-9030-49f09e169417",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "001"
+          }
+        ],
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "001"
+            }
+          ],
+          "text": "A1C for diabetes"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "3bd69940-9432-4ff1-9030-49f09e169417"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/3bd69940-9432-4ff1-9030-49f09e169417"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4bf0bd93-efec-4c54-85af-c729e7a2a110",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "487"
+          }
+        ],
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "487"
+            }
+          ],
+          "text": "Screening for SDoH"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "4bf0bd93-efec-4c54-85af-c729e7a2a110"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/4bf0bd93-efec-4c54-85af-c729e7a2a110"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1cf461e3-bb03-44dc-a795-b7e48d9d84f7",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "134"
+          }
+        ],
+        "status": "ready",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "134"
+            }
+          ],
+          "text": "Mental/Behavioral Health (Clinical)"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "1cf461e3-bb03-44dc-a795-b7e48d9d84f7"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/1cf461e3-bb03-44dc-a795-b7e48d9d84f7"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:731b3806-f052-4a62-a46b-ab1fc60d0588",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "438"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "438"
+            }
+          ],
+          "text": "Statin Therapy for the Prevention and Treatment of Cardiovascular Disease"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "731b3806-f052-4a62-a46b-ab1fc60d0588"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/731b3806-f052-4a62-a46b-ab1fc60d0588"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8dfb0da3-ddf8-4d63-ae0d-414b05ffb7b2",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "236"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "236"
+            }
+          ],
+          "text": "Control of Hypertension"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "8dfb0da3-ddf8-4d63-ae0d-414b05ffb7b2"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/8dfb0da3-ddf8-4d63-ae0d-414b05ffb7b2"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b2dd7c68-3c2e-495b-988e-ae7425106cfb",
+      "resource": {
+        "resourceType": "Task",
+        "identifier": [
+          {
+            "system": "urn:cms-mips",
+            "value": "008"
+          }
+        ],
+        "status": "on-hold",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:cms-mips",
+              "code": "008"
+            }
+          ],
+          "text": "Preventive Care and Screening"
+        },
+        "for": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "b2dd7c68-3c2e-495b-988e-ae7425106cfb"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/b2dd7c68-3c2e-495b-988e-ae7425106cfb"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d831a6fb-9960-4fe7-b065-294c03545940",
+      "resource": {
+        "resourceType": "Flag",
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ],
+            "text": "Alert"
+          }
+        ],
+        "code": {
+          "text": "Patient seen in ER (08/2025)"
+        },
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "id": "d831a6fb-9960-4fe7-b065-294c03545940"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Flag/d831a6fb-9960-4fe7-b065-294c03545940"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d3fb7ec8-9dfe-4eb5-9037-7f05b329d6a8",
+      "resource": {
+        "resourceType": "MeasureReport",
+        "id": "d3fb7ec8-9dfe-4eb5-9037-7f05b329d6a8",
+        "status": "complete",
+        "type": "individual",
+        "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
+        "subject": {
+          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        },
+        "period": {
+          "start": "2026-01-01",
+          "end": "2026-09-30"
+        },
+        "group": [
+          {
+            "id": "g1",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC",
+                  "code": "HCC38",
+                  "display": "Diabetes with Glycemic, Unspecified, or No Complications"
+                }
+              ]
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-evidencestatus-cs",
+                      "code": "open-gap"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-suspectType",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-suspecttype-cs",
+                      "code": "suspected"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatusDate",
+                "valueDate": "2026-04-01"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MeasureReport/d3fb7ec8-9dfe-4eb5-9037-7f05b329d6a8"
+      }
+    }
+  ]
+}

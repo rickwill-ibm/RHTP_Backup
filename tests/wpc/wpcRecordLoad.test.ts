@@ -418,15 +418,24 @@ for (const backend of BACKENDS) {
 
       it('a coding gap CITES evidence via a neutral Evidence node — never mints a Condition', async () => {
         const res = L.results.get('dorothy-simmons')!;
-        // the V28 diabetes gap cites dorothy's real Condition + Encounter.
-        const gapKey = 'CodingGap/dorothy-simmons-codinggap-1:CMS-HCC-V28:g1:HCC38';
-        const edges = await L.graph.listEdges({ fromKey: gapKey });
+        // Resolve the V28 diabetes gap DYNAMICALLY by its clinical content
+        // (conditionCategory + modelVersion) rather than by a hardcoded node key, so
+        // this holds under either seed id scheme (traditional slug or Connect360 uuid).
+        const lb = await readMemberLensBundle(L.graph, res.memberId, NO_CONSENT);
+        const gap = lb.wholePerson.nodes.find(
+          (n) =>
+            n.kind === 'CodingGap' &&
+            String(n.properties.conditionCategory) === 'HCC38' &&
+            String(n.properties.modelVersion) === 'V28'
+        );
+        expect(gap).toBeDefined();
+        const edges = await L.graph.listEdges({ fromKey: gap!.key });
         const supported = edges.filter((e) => e.type === 'SUPPORTED_BY');
         expect(supported.length).toBe(2); // Condition + Encounter citations
         for (const e of supported) expect(e.to.kind).toBe('Evidence'); // never a clinical kind
-        expect(supported.some((e) => e.to.key === 'Condition/dorothy-simmons-condition-2')).toBe(
-          true
-        );
+        // one citation resolves to a Condition, one to an Encounter (by ref prefix).
+        expect(supported.some((e) => e.to.key.startsWith('Condition/'))).toBe(true);
+        expect(supported.some((e) => e.to.key.startsWith('Encounter/'))).toBe(true);
       });
 
       it('alex: the suspected gap projects but mints no Condition (firewall on the uncoded fixture)', async () => {

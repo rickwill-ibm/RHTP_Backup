@@ -1,0 +1,1945 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:010d4468-b556-41ab-9f3b-8a937d2b9dcb",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Winner Regional Medical Center",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cfba950e-dd56-472f-a6bc-5a6a5c251386",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "State Medicaid Agency",
+        "id": "cfba950e-dd56-472f-a6bc-5a6a5c251386"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/cfba950e-dd56-472f-a6bc-5a6a5c251386"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be",
+      "resource": {
+        "resourceType": "Patient",
+        "active": true,
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://tcoc.example.org/fhir/sid/mrn",
+            "value": "MRN-0087"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Wilson",
+            "given": [
+              "James"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1968-07-14",
+        "managingOrganization": {
+          "reference": "urn:uuid:010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+        },
+        "address": [
+          {
+            "use": "home",
+            "city": "Winner",
+            "state": "SD",
+            "country": "US"
+          }
+        ],
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "system": "urn:ietf:bcp:47",
+                  "code": "en"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ],
+        "id": "25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b",
+      "resource": {
+        "resourceType": "Practitioner",
+        "active": true,
+        "name": [
+          {
+            "family": "Okonkwo",
+            "given": [
+              "—"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ],
+        "id": "2d4edf9c-f714-48bd-abcb-f477ea5f9f4b",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1598765432"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:315bd0e0-043f-4626-b830-c99390536cc8",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "practitioner": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "organization": {
+          "reference": "urn:uuid:010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+                "code": "doctor",
+                "display": "Doctor"
+              }
+            ]
+          }
+        ],
+        "id": "315bd0e0-043f-4626-b830-c99390536cc8"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "PractitionerRole/315bd0e0-043f-4626-b830-c99390536cc8"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:56688899-3343-48a1-99f2-fea207634f04",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MC",
+              "display": "Medicaid"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:cfba950e-dd56-472f-a6bc-5a6a5c251386"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "56688899-3343-48a1-99f2-fea207634f04"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/56688899-3343-48a1-99f2-fea207634f04"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fc41e732-44e1-47fe-a75f-a8e11471e892",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "urn:uuid:010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+        },
+        "period": {
+          "start": "2026-04-15T09:00:00Z",
+          "end": "2026-04-15T09:40:00Z"
+        },
+        "id": "fc41e732-44e1-47fe-a75f-a8e11471e892",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-renderingProviderNpi",
+            "valueString": "1598765432"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-sourceDocument",
+            "valueString": "DocumentReference/james-wilson-visitdoc-1"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter/fc41e732-44e1-47fe-a75f-a8e11471e892"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7b68587d-d1a4-4842-8cce-0c8cfe5916a9",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I50.32",
+              "display": "Chronic diastolic (congestive) heart failure"
+            }
+          ],
+          "text": "Chronic diastolic (congestive) heart failure"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "onsetDateTime": "2022-01-01",
+        "id": "7b68587d-d1a4-4842-8cce-0c8cfe5916a9"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/7b68587d-d1a4-4842-8cce-0c8cfe5916a9"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a928980d-7145-41fa-9523-351bcaee715c",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.9",
+              "display": "Type 2 diabetes mellitus without complications"
+            }
+          ],
+          "text": "Type 2 diabetes mellitus without complications"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "onsetDateTime": "2015-04-01",
+        "id": "a928980d-7145-41fa-9523-351bcaee715c",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-meat",
+            "extension": [
+              {
+                "url": "monitored",
+                "valueBoolean": true
+              },
+              {
+                "url": "evaluated",
+                "valueBoolean": true
+              },
+              {
+                "url": "assessed",
+                "valueBoolean": true
+              },
+              {
+                "url": "treated",
+                "valueBoolean": true
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/a928980d-7145-41fa-9523-351bcaee715c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0485dd12-2078-4174-8d90-537dba4692fb",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            }
+          ],
+          "text": "Essential (primary) hypertension"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "onsetDateTime": "2013-08-01",
+        "id": "0485dd12-2078-4174-8d90-537dba4692fb"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/0485dd12-2078-4174-8d90-537dba4692fb"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:92df1675-d957-4213-a037-ecc1f6a156f5",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "F32.0",
+              "display": "Major depressive disorder, single episode, mild"
+            }
+          ],
+          "text": "Major depressive disorder, single episode, mild"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "onsetDateTime": "2024-02-01",
+        "id": "92df1675-d957-4213-a037-ecc1f6a156f5"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/92df1675-d957-4213-a037-ecc1f6a156f5"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fe27ddc2-df5b-4a2f-becc-bcbbc968165c",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "6809",
+              "display": "Metformin"
+            }
+          ],
+          "text": "Metformin hydrochloride 1000 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1000 mg twice daily"
+          }
+        ],
+        "id": "fe27ddc2-df5b-4a2f-becc-bcbbc968165c"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/fe27ddc2-df5b-4a2f-becc-bcbbc968165c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0db07089-66dd-4b8d-b330-da19c7dce460",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "20352",
+              "display": "Carvedilol"
+            }
+          ],
+          "text": "Carvedilol 12.5 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "dosageInstruction": [
+          {
+            "text": "12.5 mg twice daily"
+          }
+        ],
+        "id": "0db07089-66dd-4b8d-b330-da19c7dce460"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/0db07089-66dd-4b8d-b330-da19c7dce460"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5f64be08-6a27-42b6-9d78-55e5043594dc",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "29046",
+              "display": "Lisinopril"
+            }
+          ],
+          "text": "Lisinopril 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "dosageInstruction": [
+          {
+            "text": "10 mg once daily"
+          }
+        ],
+        "id": "5f64be08-6a27-42b6-9d78-55e5043594dc"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/5f64be08-6a27-42b6-9d78-55e5043594dc"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f3869ba7-895f-4e7e-86f5-23af24575f2e",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "4603",
+              "display": "Furosemide"
+            }
+          ],
+          "text": "Furosemide 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "dosageInstruction": [
+          {
+            "text": "20 mg once daily"
+          }
+        ],
+        "id": "f3869ba7-895f-4e7e-86f5-23af24575f2e"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/f3869ba7-895f-4e7e-86f5-23af24575f2e"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:62e771ad-d940-4d02-8ded-469d58f444a9",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "83367",
+              "display": "Atorvastatin"
+            }
+          ],
+          "text": "Atorvastatin 20 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "dosageInstruction": [
+          {
+            "text": "20 mg once nightly"
+          }
+        ],
+        "id": "62e771ad-d940-4d02-8ded-469d58f444a9"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/62e771ad-d940-4d02-8ded-469d58f444a9"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b0bb9dbf-de08-47dd-bacb-4c9910e059c3",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "108252007",
+                "display": "Laboratory procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c"
+            }
+          ],
+          "text": "Hemoglobin A1c"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-02-28",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "id": "b0bb9dbf-de08-47dd-bacb-4c9910e059c3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/b0bb9dbf-de08-47dd-bacb-4c9910e059c3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ddc1e1fa-e828-4696-ad0c-1fc1b2ab8e25",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "108252007",
+                "display": "Laboratory procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "30934-4",
+              "display": "B-type natriuretic peptide panel"
+            }
+          ],
+          "text": "B-type natriuretic peptide panel"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-03-21",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "id": "ddc1e1fa-e828-4696-ad0c-1fc1b2ab8e25"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/ddc1e1fa-e828-4696-ad0c-1fc1b2ab8e25"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8f293acf-94cf-4287-b64e-4de0de41b00a",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "108252007",
+                "display": "Laboratory procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "2022F",
+              "display": "Dilated retinal eye exam"
+            }
+          ],
+          "text": "Diabetic retinal exam"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2025-12-01",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "id": "8f293acf-94cf-4287-b64e-4de0de41b00a"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/8f293acf-94cf-4287-b64e-4de0de41b00a"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1c0e11ac-f681-40ac-822f-9370a6f4e23b",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "99242",
+              "display": "Office consultation"
+            }
+          ],
+          "text": "Cardiology consultation"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-04-01",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "id": "1c0e11ac-f681-40ac-822f-9370a6f4e23b"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/1c0e11ac-f681-40ac-822f-9370a6f4e23b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4a40b7da-a41e-47c5-94b1-e2f090cc4411",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "71802-3",
+              "display": "Housing status"
+            }
+          ],
+          "text": "Housing status"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Stable — owns home"
+        },
+        "id": "4a40b7da-a41e-47c5-94b1-e2f090cc4411"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/4a40b7da-a41e-47c5-94b1-e2f090cc4411"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3980988f-29e2-4f93-aec7-53f867f88d72",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "88122-7",
+              "display": "Food insecurity risk"
+            }
+          ],
+          "text": "Food insecurity risk"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "SNAP active"
+        },
+        "id": "3980988f-29e2-4f93-aec7-53f867f88d72"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/3980988f-29e2-4f93-aec7-53f867f88d72"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c6e621cf-1928-4190-b9e9-11b7a8e54924",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93030-5",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Limited — 35 miles to clinic"
+        },
+        "id": "c6e621cf-1928-4190-b9e9-11b7a8e54924"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/c6e621cf-1928-4190-b9e9-11b7a8e54924"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:32174dc4-8d5e-4e26-966f-45e1f97b6727",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76513-1",
+              "display": "Financial resource strain"
+            }
+          ],
+          "text": "Financial resource strain"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Rural, low income"
+        },
+        "id": "32174dc4-8d5e-4e26-966f-45e1f97b6727"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/32174dc4-8d5e-4e26-966f-45e1f97b6727"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1924738b-f935-46f7-991f-906e00a1eb32",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          },
+          {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/us/sdoh-clinicalcare/CodeSystem/SDOHCC-CodeSystemTemporaryCodes",
+                "code": "sdoh-category-unspecified",
+                "display": "SDOH Category Unspecified"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z59.82",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "onsetDateTime": "2026-03-01",
+        "id": "1924738b-f935-46f7-991f-906e00a1eb32"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/1924738b-f935-46f7-991f-906e00a1eb32"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7846e7ef-73ce-4a18-a66b-bd195f493134",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Winner Rural Transit Assistance",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "other",
+                "display": "Community-Based Organization"
+              }
+            ],
+            "text": "Community-Based Organization (CBO)"
+          }
+        ],
+        "id": "7846e7ef-73ce-4a18-a66b-bd195f493134"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/7846e7ef-73ce-4a18-a66b-bd195f493134"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:480b24f4-4076-408a-83fd-9e9adaf3a4a3",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Transportation to specialist visits",
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "T2003",
+              "display": "Non-emergency transportation; encounter/trip"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "authoredOn": "2026-03-01",
+        "requester": {
+          "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:7846e7ef-73ce-4a18-a66b-bd195f493134"
+          }
+        ],
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:1924738b-f935-46f7-991f-906e00a1eb32"
+          }
+        ],
+        "id": "480b24f4-4076-408a-83fd-9e9adaf3a4a3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/480b24f4-4076-408a-83fd-9e9adaf3a4a3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:e1f0f75b-83c8-4591-8391-5899abd92c1b",
+      "resource": {
+        "resourceType": "Task",
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill",
+              "display": "Fulfill the focal request"
+            }
+          ]
+        },
+        "description": "Closed-loop CBO referral: Transportation to specialist visits",
+        "focus": {
+          "reference": "urn:uuid:480b24f4-4076-408a-83fd-9e9adaf3a4a3"
+        },
+        "for": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "owner": {
+          "reference": "urn:uuid:7846e7ef-73ce-4a18-a66b-bd195f493134"
+        },
+        "authoredOn": "2026-03-01",
+        "businessStatus": {
+          "text": "Requested"
+        },
+        "id": "e1f0f75b-83c8-4591-8391-5899abd92c1b"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/e1f0f75b-83c8-4591-8391-5899abd92c1b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f420f7b7-9e76-4340-af45-e7b7652ee076",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 8,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "id": "f420f7b7-9e76-4340-af45-e7b7652ee076"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/f420f7b7-9e76-4340-af45-e7b7652ee076"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:36a0f3c4-8a68-40c2-a1fe-faf8fb979a4a",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C total score"
+            }
+          ],
+          "text": "AUDIT-C total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 3,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "id": "36a0f3c4-8a68-40c2-a1fe-faf8fb979a4a"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/36a0f3c4-8a68-40c2-a1fe-faf8fb979a4a"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:87951f17-7b56-4309-8869-52eca01cca49",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c"
+            }
+          ],
+          "text": "A1C recheck and control"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "id": "87951f17-7b56-4309-8869-52eca01cca49"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/87951f17-7b56-4309-8869-52eca01cca49"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:009bbb9d-1379-43df-80b2-5ed7a84cb186",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "30934-4",
+              "display": "Natriuretic peptide B"
+            }
+          ],
+          "text": "BNP panel for CHF monitoring"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "id": "009bbb9d-1379-43df-80b2-5ed7a84cb186"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/009bbb9d-1379-43df-80b2-5ed7a84cb186"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cec3d19f-caf5-4227-b46f-2db4e679f14f",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 follow-up"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "id": "cec3d19f-caf5-4227-b46f-2db4e679f14f"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/cec3d19f-caf5-4227-b46f-2db4e679f14f"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:884919af-1003-42fa-abc2-34c261bb7dcc",
+      "resource": {
+        "resourceType": "CareTeam",
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "participant": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "446050000",
+                    "display": "Primary care physician"
+                  }
+                ]
+              }
+            ],
+            "member": {
+              "reference": "urn:uuid:2d4edf9c-f714-48bd-abcb-f477ea5f9f4b"
+            }
+          }
+        ],
+        "managingOrganization": [
+          {
+            "reference": "urn:uuid:010d4468-b556-41ab-9f3b-8a937d2b9dcb"
+          }
+        ],
+        "id": "884919af-1003-42fa-abc2-34c261bb7dcc"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "CareTeam/884919af-1003-42fa-abc2-34c261bb7dcc"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:72871f45-045d-4615-9a13-405d64a4a5a6",
+      "resource": {
+        "resourceType": "CarePlan",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "careTeam": [
+          {
+            "reference": "urn:uuid:884919af-1003-42fa-abc2-34c261bb7dcc"
+          }
+        ],
+        "addresses": [
+          {
+            "reference": "urn:uuid:7b68587d-d1a4-4842-8cce-0c8cfe5916a9"
+          },
+          {
+            "reference": "urn:uuid:a928980d-7145-41fa-9523-351bcaee715c"
+          },
+          {
+            "reference": "urn:uuid:0485dd12-2078-4174-8d90-537dba4692fb"
+          },
+          {
+            "reference": "urn:uuid:92df1675-d957-4213-a037-ecc1f6a156f5"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "urn:uuid:87951f17-7b56-4309-8869-52eca01cca49"
+          },
+          {
+            "reference": "urn:uuid:009bbb9d-1379-43df-80b2-5ed7a84cb186"
+          },
+          {
+            "reference": "urn:uuid:cec3d19f-caf5-4227-b46f-2db4e679f14f"
+          }
+        ],
+        "id": "72871f45-045d-4615-9a13-405d64a4a5a6"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "CarePlan/72871f45-045d-4615-9a13-405d64a4a5a6"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9d6bbee5-1242-4dc6-8031-0bef2d038eb3",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 45
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "jw-1"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "A1C Recheck (Diabetes)"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "valueInteger": 45,
+        "note": [
+          {
+            "text": "Care gap open for 45 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "9d6bbee5-1242-4dc6-8031-0bef2d038eb3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/9d6bbee5-1242-4dc6-8031-0bef2d038eb3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b7150712-b08a-406a-812a-fdcdc90764c3",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 22
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "jw-2"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "BNP Lab Panel (CHF)"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "valueInteger": 22,
+        "note": [
+          {
+            "text": "Care gap open for 22 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "b7150712-b08a-406a-812a-fdcdc90764c3"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/b7150712-b08a-406a-812a-fdcdc90764c3"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0e8ffa82-aba1-4f7b-a4b2-9352235cde2e",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "BH"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 30
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "jw-5"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75626-2",
+                "display": "BH Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "PHQ-9 Follow-up"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "valueInteger": 30,
+        "note": [
+          {
+            "text": "Care gap open for 30 days. Domain: BH. Status: Open."
+          }
+        ],
+        "id": "0e8ffa82-aba1-4f7b-a4b2-9352235cde2e"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/0e8ffa82-aba1-4f7b-a4b2-9352235cde2e"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:83b0ae1f-b36f-44fc-b0f5-00d135b16bfc",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Social"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 45
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "jw-6"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75630-4",
+                "display": "Social Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Transportation — Specialist Visits"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "valueInteger": 45,
+        "note": [
+          {
+            "text": "Care gap open for 45 days. Domain: Social. Status: Open."
+          }
+        ],
+        "id": "83b0ae1f-b36f-44fc-b0f5-00d135b16bfc"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/83b0ae1f-b36f-44fc-b0f5-00d135b16bfc"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5c12dbeb-a826-42ab-96a4-2709720a595c",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "Diabetic A1C recheck is 45 days overdue. Bundle labs to reduce patient travel burden."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-james-1"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "warning",
+              "display": "warning"
+            }
+          ],
+          "text": "A1C overdue 45 days — diabetes management gap"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "id": "5c12dbeb-a826-42ab-96a4-2709720a595c"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Flag/5c12dbeb-a826-42ab-96a4-2709720a595c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b8e9d971-6972-4b30-946c-feb8538108ae",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "CHF monitoring BNP panel is 22 days overdue. Active CHF episode (89 days)."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-james-2"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "warning",
+              "display": "warning"
+            }
+          ],
+          "text": "BNP panel overdue 22 days — CHF monitoring gap"
+        },
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "id": "b8e9d971-6972-4b30-946c-feb8538108ae"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Flag/b8e9d971-6972-4b30-946c-feb8538108ae"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47c7e2ee-c675-44a6-8574-840caa129629",
+      "resource": {
+        "resourceType": "RiskAssessment",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/raf-score",
+            "valueDecimal": 2.8
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-suspects",
+            "valueInteger": 3
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-value",
+            "valueDecimal": 18600
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "prediction": [
+          {
+            "outcome": {
+              "text": "Emergency Room Visit"
+            },
+            "probabilityDecimal": 0.67,
+            "rationale": "Predicted ER risk 67% based on RAF score 2.8 and clinical profile."
+          }
+        ],
+        "id": "47c7e2ee-c675-44a6-8574-840caa129629"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "RiskAssessment/47c7e2ee-c675-44a6-8574-840caa129629"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c760ddbe-cc44-4745-aa18-5fdf132b1bf6",
+      "resource": {
+        "resourceType": "MeasureReport",
+        "id": "c760ddbe-cc44-4745-aa18-5fdf132b1bf6",
+        "status": "complete",
+        "type": "individual",
+        "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "period": {
+          "start": "2026-01-01",
+          "end": "2026-09-30"
+        },
+        "group": [
+          {
+            "id": "g1",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC",
+                  "code": "HCC226",
+                  "display": "Heart Failure"
+                }
+              ]
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-evidencestatus-cs",
+                      "code": "pending"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-suspectType",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-suspecttype-cs",
+                      "code": "historic"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-hierarchicalStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-hierarchicalstatus-cs",
+                      "code": "not-applicable"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatusDate",
+                "valueDate": "2026-04-01"
+              }
+            ]
+          }
+        ],
+        "evaluatedResource": [
+          {
+            "reference": "Condition/7b68587d-d1a4-4842-8cce-0c8cfe5916a9",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          },
+          {
+            "reference": "Encounter/fc41e732-44e1-47fe-a75f-a8e11471e892",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MeasureReport/c760ddbe-cc44-4745-aa18-5fdf132b1bf6"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9f1a6d32-bc09-4e22-9f4b-a9aff12a43e0",
+      "resource": {
+        "resourceType": "MeasureReport",
+        "id": "9f1a6d32-bc09-4e22-9f4b-a9aff12a43e0",
+        "status": "complete",
+        "type": "individual",
+        "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
+        "subject": {
+          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        },
+        "period": {
+          "start": "2026-01-01",
+          "end": "2026-09-30"
+        },
+        "group": [
+          {
+            "id": "g1",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC",
+                  "code": "HCC38",
+                  "display": "Diabetes with Glycemic, Unspecified, or No Complications"
+                }
+              ]
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-evidencestatus-cs",
+                      "code": "closed-gap"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-suspectType",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-suspecttype-cs",
+                      "code": "net-new"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-hierarchicalStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-hierarchicalstatus-cs",
+                      "code": "applied-not-superseded"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatusDate",
+                "valueDate": "2026-04-01"
+              }
+            ]
+          }
+        ],
+        "evaluatedResource": [
+          {
+            "reference": "Condition/a928980d-7145-41fa-9523-351bcaee715c",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          },
+          {
+            "reference": "Encounter/fc41e732-44e1-47fe-a75f-a8e11471e892",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MeasureReport/9f1a6d32-bc09-4e22-9f4b-a9aff12a43e0"
+      }
+    }
+  ]
+}

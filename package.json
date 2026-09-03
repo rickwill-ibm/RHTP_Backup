@@ -64,6 +64,8 @@
     "a11y": "playwright test e2e/a11y.spec.ts",
     "seed:maria": "node tools/seed/load-maria.mjs",
     "seed:patients": "node fhir/seed-patients.mjs",
+    "seed:connect360": "node tools/seed/gen-connect360.mjs",
+    "verify:connect360": "vitest run tests/seed/connect360.test.ts tests/seed/connect360IngestParity.test.ts",
     "backbone:up": "docker compose -f install/docker-compose.backbone.yml up -d",
     "backbone:down": "docker compose -f install/docker-compose.backbone.yml down",
     "backbone:logs": "docker compose -f install/docker-compose.backbone.yml logs -f",

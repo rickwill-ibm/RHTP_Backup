@@ -43,7 +43,21 @@ import { readMemberLensBundle } from '@/lib/wpc/projectedAggregator';
 import { NO_CONSENT } from '@/lib/graph/lens/types';
 
 const SOURCE = 'ehr-alex-kirby';
-const DIABETES_ID = 'alex-kirby-condition-1'; // the uncoded Type 2 Diabetes Condition
+// The uncoded Type 2 Diabetes Condition (no code.coding → quarantined). Resolved
+// dynamically from the bundle by its code.text, so the test is agnostic to the seed
+// id scheme (traditional slug ids here; Connect360 uses uuid ids in its own bundles).
+const DIABETES_ID: string = (() => {
+  const bundle = JSON.parse(readFileSync('fhir/seed/patients/alex-kirby.bundle.json', 'utf8'));
+  const cond = (bundle.entry ?? [])
+    .map((e: { resource?: Record<string, unknown> }) => e.resource)
+    .find(
+      (r?: Record<string, unknown>) =>
+        r?.resourceType === 'Condition' &&
+        /type 2 diabetes/i.test(String((r.code as { text?: string })?.text ?? ''))
+    ) as { id: string } | undefined;
+  if (!cond) throw new Error('alex uncoded diabetes Condition not found in seed bundle');
+  return cond.id;
+})();
 const fixedNow = () => 1_700_000_000_000;
 function seededRng(seed = 0x1234abcd): () => number {
   let a = seed >>> 0;

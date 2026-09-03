@@ -1,0 +1,1552 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Sioux Falls Community Health",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "id": "58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b745c1b8-ed3c-4458-b3cb-0c38f9b446e9",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "State Medicaid Agency",
+        "id": "b745c1b8-ed3c-4458-b3cb-0c38f9b446e9"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/b745c1b8-ed3c-4458-b3cb-0c38f9b446e9"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661",
+      "resource": {
+        "resourceType": "Patient",
+        "active": true,
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR",
+                  "display": "Medical record number"
+                }
+              ]
+            },
+            "system": "http://tcoc.example.org/fhir/sid/mrn",
+            "value": "MRN-0156"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Thompson",
+            "given": [
+              "Lisa"
+            ]
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1985-05-19",
+        "managingOrganization": {
+          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+        },
+        "address": [
+          {
+            "use": "home",
+            "city": "Sioux Falls",
+            "state": "SD",
+            "country": "US"
+          }
+        ],
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "system": "urn:ietf:bcp:47",
+                  "code": "en"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ],
+        "id": "c1ed7104-6abe-49ea-92c6-f4746af35661"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/c1ed7104-6abe-49ea-92c6-f4746af35661"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a",
+      "resource": {
+        "resourceType": "Practitioner",
+        "active": true,
+        "name": [
+          {
+            "family": "Torres",
+            "given": [
+              "—"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ],
+        "id": "17a71c5e-ed0d-4318-a7b3-8dee369e883a",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1710987654"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cdb28461-4aa2-4d88-897a-2ea249488d98",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "active": true,
+        "practitioner": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "organization": {
+          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+                "code": "doctor",
+                "display": "Doctor"
+              }
+            ]
+          }
+        ],
+        "id": "cdb28461-4aa2-4d88-897a-2ea249488d98"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "PractitionerRole/cdb28461-4aa2-4d88-897a-2ea249488d98"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dfb52cfb-2f7a-4307-9320-877f749c40f2",
+      "resource": {
+        "resourceType": "Coverage",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "MC",
+              "display": "Medicaid"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "payor": [
+          {
+            "reference": "urn:uuid:b745c1b8-ed3c-4458-b3cb-0c38f9b446e9"
+          }
+        ],
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+              "code": "self"
+            }
+          ]
+        },
+        "id": "dfb52cfb-2f7a-4307-9320-877f749c40f2"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/dfb52cfb-2f7a-4307-9320-877f749c40f2"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:06dde41f-e0b3-4c2b-ad87-1a51dbf078f1",
+      "resource": {
+        "resourceType": "Encounter",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+        },
+        "period": {
+          "start": "2026-04-15T09:00:00Z",
+          "end": "2026-04-15T09:40:00Z"
+        },
+        "id": "06dde41f-e0b3-4c2b-ad87-1a51dbf078f1",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-renderingProviderNpi",
+            "valueString": "1710987654"
+          },
+          {
+            "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-sourceDocument",
+            "valueString": "DocumentReference/lisa-thompson-visitdoc-1"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter/06dde41f-e0b3-4c2b-ad87-1a51dbf078f1"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:81f8b207-e45c-4064-aaf2-fa7779c68fa7",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "J45.50",
+              "display": "Severe persistent asthma, uncomplicated"
+            }
+          ],
+          "text": "Severe persistent asthma, uncomplicated"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "onsetDateTime": "2012-03-01",
+        "id": "81f8b207-e45c-4064-aaf2-fa7779c68fa7"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/81f8b207-e45c-4064-aaf2-fa7779c68fa7"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1c610260-a526-4295-9b80-b8c430615cab",
+      "resource": {
+        "resourceType": "Condition",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E66.9",
+              "display": "Obesity, unspecified"
+            }
+          ],
+          "text": "Obesity, unspecified"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "onsetDateTime": "2018-09-01",
+        "id": "1c610260-a526-4295-9b80-b8c430615cab"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Condition/1c610260-a526-4295-9b80-b8c430615cab"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7ff10c6a-a906-48f4-ad8d-22762b54c0be",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "41126",
+              "display": "Fluticasone"
+            }
+          ],
+          "text": "Fluticasone 250 mcg / salmeterol 50 mcg inhalation powder"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1 inhalation twice daily"
+          }
+        ],
+        "id": "7ff10c6a-a906-48f4-ad8d-22762b54c0be"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/7ff10c6a-a906-48f4-ad8d-22762b54c0be"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:dd0ced00-d081-425c-909d-4c3ef90a8d6c",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "435",
+              "display": "Albuterol"
+            }
+          ],
+          "text": "Albuterol 90 mcg/actuation inhaler"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1-2 puffs as needed"
+          }
+        ],
+        "id": "dd0ced00-d081-425c-909d-4c3ef90a8d6c"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/dd0ced00-d081-425c-909d-4c3ef90a8d6c"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:846647a3-da72-4693-9105-2a13418cc0a6",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "88249",
+              "display": "Montelukast"
+            }
+          ],
+          "text": "Montelukast 10 mg oral tablet"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-04-15",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "dosageInstruction": [
+          {
+            "text": "10 mg once daily"
+          }
+        ],
+        "id": "846647a3-da72-4693-9105-2a13418cc0a6"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/846647a3-da72-4693-9105-2a13418cc0a6"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6d5606af-9c20-4962-b134-9d9ca7da3f27",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI)"
+            }
+          ],
+          "text": "Body mass index (BMI)"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-03-28",
+        "valueQuantity": {
+          "value": 38,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H"
+              }
+            ]
+          }
+        ],
+        "id": "6d5606af-9c20-4962-b134-9d9ca7da3f27"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/6d5606af-9c20-4962-b134-9d9ca7da3f27"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:379685b4-a233-4831-8197-8d04ad4ea5ea",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "108252007",
+                "display": "Laboratory procedure"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "94010",
+              "display": "Spirometry"
+            }
+          ],
+          "text": "Spirometry"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-03-28",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "id": "379685b4-a233-4831-8197-8d04ad4ea5ea"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/379685b4-a233-4831-8197-8d04ad4ea5ea"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:c7914f6b-6481-4237-b863-0735ef212aa2",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "103696004",
+              "display": "Patient referral to specialist"
+            }
+          ],
+          "text": "Weight management program referral"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-02-20",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "id": "c7914f6b-6481-4237-b863-0735ef212aa2"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/c7914f6b-6481-4237-b863-0735ef212aa2"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d35e4e93-1401-49e5-bb88-e42666f89168",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "71802-3",
+              "display": "Housing status"
+            }
+          ],
+          "text": "Housing status"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Stable — rents apartment"
+        },
+        "id": "d35e4e93-1401-49e5-bb88-e42666f89168"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d35e4e93-1401-49e5-bb88-e42666f89168"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d2a82405-6f57-4bd9-ad43-acbe6245b4c4",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "88122-7",
+              "display": "Food insecurity risk"
+            }
+          ],
+          "text": "Food insecurity risk"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "SNAP active"
+        },
+        "id": "d2a82405-6f57-4bd9-ad43-acbe6245b4c4"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d2a82405-6f57-4bd9-ad43-acbe6245b4c4"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:062011be-9d9d-40d1-96ff-5e8525bb4908",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93030-5",
+              "display": "Transportation insecurity"
+            }
+          ],
+          "text": "Transportation insecurity"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Adequate — urban"
+        },
+        "id": "062011be-9d9d-40d1-96ff-5e8525bb4908"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/062011be-9d9d-40d1-96ff-5e8525bb4908"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:6f951748-d6af-4514-839c-3bedb7f4edbc",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76513-1",
+              "display": "Financial resource strain"
+            }
+          ],
+          "text": "Financial resource strain"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-01-08",
+        "valueCodeableConcept": {
+          "text": "Not flagged"
+        },
+        "id": "6f951748-d6af-4514-839c-3bedb7f4edbc"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/6f951748-d6af-4514-839c-3bedb7f4edbc"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682",
+      "resource": {
+        "resourceType": "Organization",
+        "active": true,
+        "name": "Sioux Falls SNAP-Ed Nutrition Program",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "other",
+                "display": "Community-Based Organization"
+              }
+            ],
+            "text": "Community-Based Organization (CBO)"
+          }
+        ],
+        "id": "4fb5967a-5de9-4838-8f82-23a33e5da682"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/4fb5967a-5de9-4838-8f82-23a33e5da682"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:27b74379-d20e-4772-8c82-cee420d20ab4",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Nutrition counseling (SNAP-Ed)",
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "306163007",
+              "display": "Referral to dietetics service"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "authoredOn": "2026-04-01",
+        "requester": {
+          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+        },
+        "performer": [
+          {
+            "reference": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682"
+          }
+        ],
+        "id": "27b74379-d20e-4772-8c82-cee420d20ab4"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/27b74379-d20e-4772-8c82-cee420d20ab4"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5f1449db-c2c2-4fc9-bb4a-a124516371de",
+      "resource": {
+        "resourceType": "Task",
+        "status": "in-progress",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill",
+              "display": "Fulfill the focal request"
+            }
+          ]
+        },
+        "description": "Closed-loop CBO referral: Nutrition counseling (SNAP-Ed)",
+        "focus": {
+          "reference": "urn:uuid:27b74379-d20e-4772-8c82-cee420d20ab4"
+        },
+        "for": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "owner": {
+          "reference": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682"
+        },
+        "authoredOn": "2026-04-01",
+        "businessStatus": {
+          "text": "Pending enrollment"
+        },
+        "id": "5f1449db-c2c2-4fc9-bb4a-a124516371de"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Task/5f1449db-c2c2-4fc9-bb4a-a124516371de"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:316667b0-d5c7-4171-86ea-615cc91678ce",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 6,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "id": "316667b0-d5c7-4171-86ea-615cc91678ce"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/316667b0-d5c7-4171-86ea-615cc91678ce"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:613a57b7-5292-4fa6-abb9-847909895b44",
+      "resource": {
+        "resourceType": "Observation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey",
+                "display": "Survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C total score"
+            }
+          ],
+          "text": "AUDIT-C total score"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 1,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "id": "613a57b7-5292-4fa6-abb9-847909895b44"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/613a57b7-5292-4fa6-abb9-847909895b44"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:981db8c3-8015-43a0-808e-55a0e8c3b932",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "734163000",
+              "display": "Care plan"
+            }
+          ],
+          "text": "Asthma action plan update"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "id": "981db8c3-8015-43a0-808e-55a0e8c3b932"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/981db8c3-8015-43a0-808e-55a0e8c3b932"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:ae774ca5-1fc0-4252-98cc-d10d9940a3ac",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index"
+            }
+          ],
+          "text": "BMI / weight management"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "id": "ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3a763e8d-795b-4f34-b47d-ad12a60f00fe",
+      "resource": {
+        "resourceType": "Goal",
+        "lifecycleStatus": "active",
+        "description": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "44249-1",
+              "display": "PHQ-9 total score"
+            }
+          ],
+          "text": "PHQ-9 annual screening"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "id": "3a763e8d-795b-4f34-b47d-ad12a60f00fe"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Goal/3a763e8d-795b-4f34-b47d-ad12a60f00fe"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e679417-ccfd-40ee-880c-6deab7319e22",
+      "resource": {
+        "resourceType": "CareTeam",
+        "status": "active",
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "participant": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "446050000",
+                    "display": "Primary care physician"
+                  }
+                ]
+              }
+            ],
+            "member": {
+              "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+            }
+          }
+        ],
+        "managingOrganization": [
+          {
+            "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+          }
+        ],
+        "id": "1e679417-ccfd-40ee-880c-6deab7319e22"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "CareTeam/1e679417-ccfd-40ee-880c-6deab7319e22"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:abb1b27d-d5c7-4738-896c-333b72bb131b",
+      "resource": {
+        "resourceType": "CarePlan",
+        "status": "active",
+        "intent": "plan",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "734163000",
+                "display": "Care plan"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "careTeam": [
+          {
+            "reference": "urn:uuid:1e679417-ccfd-40ee-880c-6deab7319e22"
+          }
+        ],
+        "addresses": [
+          {
+            "reference": "urn:uuid:81f8b207-e45c-4064-aaf2-fa7779c68fa7"
+          },
+          {
+            "reference": "urn:uuid:1c610260-a526-4295-9b80-b8c430615cab"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "urn:uuid:981db8c3-8015-43a0-808e-55a0e8c3b932"
+          },
+          {
+            "reference": "urn:uuid:ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
+          },
+          {
+            "reference": "urn:uuid:3a763e8d-795b-4f34-b47d-ad12a60f00fe"
+          }
+        ],
+        "id": "abb1b27d-d5c7-4738-896c-333b72bb131b"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "CarePlan/abb1b27d-d5c7-4738-896c-333b72bb131b"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:db65c9ca-3695-4682-88e9-777d0ddbda84",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 35
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "lt-1"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Asthma Action Plan Update"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "valueInteger": 35,
+        "note": [
+          {
+            "text": "Care gap open for 35 days. Domain: Clinical. Status: Open."
+          }
+        ],
+        "id": "db65c9ca-3695-4682-88e9-777d0ddbda84"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/db65c9ca-3695-4682-88e9-777d0ddbda84"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2e19afe1-4203-458e-8daf-06c9db2a5cf8",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Clinical"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "In Progress"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 60
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "lt-2"
+          }
+        ],
+        "status": "registered",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11503-0",
+                "display": "Clinical Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "BMI / Weight Management Referral"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "valueInteger": 60,
+        "note": [
+          {
+            "text": "Care gap open for 60 days. Domain: Clinical. Status: In Progress."
+          }
+        ],
+        "id": "2e19afe1-4203-458e-8daf-06c9db2a5cf8"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/2e19afe1-4203-458e-8daf-06c9db2a5cf8"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5172f2a6-a703-41bb-a3ae-c04f72e1df98",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "BH"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 18
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "lt-3"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75626-2",
+                "display": "BH Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "PHQ-9 Annual Screening"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "valueInteger": 18,
+        "note": [
+          {
+            "text": "Care gap open for 18 days. Domain: BH. Status: Open."
+          }
+        ],
+        "id": "5172f2a6-a703-41bb-a3ae-c04f72e1df98"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/5172f2a6-a703-41bb-a3ae-c04f72e1df98"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d60c1675-8fd1-4496-b4d8-6e7ee1355b05",
+      "resource": {
+        "resourceType": "Observation",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-domain",
+            "valueString": "Social"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-status",
+            "valueString": "Open"
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/care-gap-days-open",
+            "valueInteger": 45
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id",
+            "valueString": "lt-4"
+          }
+        ],
+        "status": "preliminary",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75630-4",
+                "display": "Social Care Gap"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Nutrition Counseling Enrollment"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "valueInteger": 45,
+        "note": [
+          {
+            "text": "Care gap open for 45 days. Domain: Social. Status: Open."
+          }
+        ],
+        "id": "d60c1675-8fd1-4496-b4d8-6e7ee1355b05"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/d60c1675-8fd1-4496-b4d8-6e7ee1355b05"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0e081f67-4bf6-4bdc-9323-7ace97ef4259",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "Annual asthma action plan review is 35 days overdue. Consider spirometry."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-lisa-1"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "info",
+              "display": "information"
+            }
+          ],
+          "text": "Asthma action plan update overdue 35 days"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "id": "0e081f67-4bf6-4bdc-9323-7ace97ef4259"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Flag/0e081f67-4bf6-4bdc-9323-7ace97ef4259"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:726d0840-20b8-443a-a121-877e58a637f1",
+      "resource": {
+        "resourceType": "Flag",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
+            "valueString": "BMI elevated. SNAP-Ed nutrition counseling eligible."
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
+            "valueString": "cds-lisa-2"
+          }
+        ],
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://tcoc.example.org/fhir/CodeSystem/cds-indicator",
+              "code": "info",
+              "display": "information"
+            }
+          ],
+          "text": "Weight management referral in progress — BMI elevated"
+        },
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "id": "726d0840-20b8-443a-a121-877e58a637f1"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Flag/726d0840-20b8-443a-a121-877e58a637f1"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:98d313b2-5df7-4868-b4dc-ebea87cd7fe0",
+      "resource": {
+        "resourceType": "RiskAssessment",
+        "extension": [
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/raf-score",
+            "valueDecimal": 1.4
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-suspects",
+            "valueInteger": 1
+          },
+          {
+            "url": "http://tcoc.example.org/fhir/StructureDefinition/hcc-value",
+            "valueDecimal": 5800
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "prediction": [
+          {
+            "outcome": {
+              "text": "Emergency Room Visit"
+            },
+            "probabilityDecimal": 0.31,
+            "rationale": "Predicted ER risk 31% based on RAF score 1.4 and clinical profile."
+          }
+        ],
+        "id": "98d313b2-5df7-4868-b4dc-ebea87cd7fe0"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "RiskAssessment/98d313b2-5df7-4868-b4dc-ebea87cd7fe0"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0f7baa85-24cb-4bf8-846e-e1fc296d57e0",
+      "resource": {
+        "resourceType": "MeasureReport",
+        "id": "0f7baa85-24cb-4bf8-846e-e1fc296d57e0",
+        "status": "complete",
+        "type": "individual",
+        "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
+        "subject": {
+          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+        },
+        "period": {
+          "start": "2026-01-01",
+          "end": "2026-09-30"
+        },
+        "group": [
+          {
+            "id": "g1",
+            "code": {
+              "coding": [
+                {
+                  "system": "https://www.cms.gov/Medicare/Health-Plans/MedicareAdvtgSpecRateStats/Risk-Adjustors/HCC",
+                  "code": "HCC277",
+                  "display": "Chronic Obstructive Pulmonary Disease"
+                }
+              ]
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-evidencestatus-cs",
+                      "code": "open-gap"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-suspectType",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-suspecttype-cs",
+                      "code": "suspected"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-hierarchicalStatus",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/us/davinci-ra/CodeSystem/ra-hierarchicalstatus-cs",
+                      "code": "applied-not-superseded"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-evidenceStatusDate",
+                "valueDate": "2026-04-01"
+              }
+            ]
+          }
+        ],
+        "evaluatedResource": [
+          {
+            "reference": "Condition/81f8b207-e45c-4064-aaf2-fa7779c68fa7",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          },
+          {
+            "reference": "Encounter/06dde41f-e0b3-4c2b-ad87-1a51dbf078f1",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/us/davinci-ra/StructureDefinition/ra-groupReference",
+                "valueString": "g1"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "MeasureReport/0f7baa85-24cb-4bf8-846e-e1fc296d57e0"
+      }
+    }
+  ]
+}

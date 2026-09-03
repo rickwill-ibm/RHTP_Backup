@@ -7,7 +7,7 @@ This file is capped at 150 lines so it always fits in context. Keep it that way.
 ## Commands
 
 ```bash
-npm run dev              # app on http://localhost:4029
+npm run dev              # app on http://localhost:4032
 npm run check:types      # tsc --noEmit               (must be 0)
 npm run check:sizes      # size gate + quality ratchet (must pass)
 npm run lint             # next lint                   (clean on changed files)

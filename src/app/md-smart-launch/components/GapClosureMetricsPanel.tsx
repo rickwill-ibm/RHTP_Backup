@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import { referralStore, type GainshareRecord, type QualityMetrics } from '@/lib/mockData';
 
@@ -13,19 +13,7 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics[]>([]);
   const [closedReferrals, setClosedReferrals] = useState<any[]>([]);
 
-  useEffect(() => {
-    // Initial load
-    loadMetrics();
-
-    // Subscribe to updates
-    const unsubscribe = referralStore.subscribe(() => {
-      loadMetrics();
-    });
-
-    return unsubscribe;
-  }, [patientId]);
-
-  const loadMetrics = () => {
+  const loadMetrics = useCallback(() => {
     // Get all gainshare records for this patient
     const allGainshare = referralStore.getGainshareRecords();
     const patientGainshare = allGainshare.filter(g => g.patientId === patientId);
@@ -41,7 +29,16 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
       r.patientId === patientId && r.status === 'completed'
     );
     setClosedReferrals(closed);
-  };
+  }, [patientId]);
+
+  useEffect(() => {
+    loadMetrics();
+    const unsubscribe = referralStore.subscribe(() => {
+      loadMetrics();
+    });
+
+    return unsubscribe;
+  }, [loadMetrics]);
 
   // Calculate totals
   const totalProviderGainshare = gainshareRecords.reduce((sum, r) => sum + r.providerShare, 0);

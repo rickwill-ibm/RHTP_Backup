@@ -1,10 +1,15 @@
 'use client';
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+/**
+ * MD SmartApp — Cerner PowerChart-style clinical visit workflow.
+ *
+ * Launched from Cerner via CDS Hooks → SMART on FHIR. Persistent patient
+ * banner + left chart Menu + Provider View workflow MPage. All clinical
+ * content is FHIR R4 (mock fixtures or live HAPI via the same client).
+ * VBC features (quality, CDI/HCC, compliance) retained under the Menu.
+ */
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
-
-
-import MdSmartSummaryScreen from './components/MdSmartSummaryScreen';
 import CdsCardRenderer from './components/CdsCardRenderer';
 import OrderEntryModule from './components/OrderEntryModule';
 import CareTeamAssignmentModule from './components/CareTeamAssignmentModule';
@@ -13,31 +18,39 @@ import AuditLogPanel, { AuditEvent, AuditEventType } from './components/AuditLog
 import CarePlanPanel from './components/CarePlanPanel';
 import ActiveReferralsPanel from './components/ActiveReferralsPanel';
 import ComplianceDashboard from './components/ComplianceDashboard';
+import GapClosureMetricsPanel from './components/GapClosureMetricsPanel';
+import SdohGapPanel from './components/SdohGapPanel';
+import MdPatientSummary from './components/MdPatientSummary';
+import FhirResourceViewer from './components/FhirResourceViewer';
 import SmartErrorBoundary, {
-  SmartInlineAlert,
   TokenExpiryBanner,
-  type SmartError,
 } from './components/SmartErrorBoundary';
+import PatientBanner from './components/cerner/PatientBanner';
+import CernerMenu, { type MenuKey } from './components/cerner/CernerMenu';
+import ProviderViewReview from './components/cerner/ProviderViewReview';
+import ProviderViewAct, { type DerivedGap } from './components/cerner/ProviderViewAct';
+import ProviderViewDocument from './components/cerner/ProviderViewDocument';
+import {
+  ResultsReviewPage,
+  MedicationListPage,
+  ProblemsPage,
+  AllergiesPage,
+  VitalsPage,
+  DocumentationPage,
+  HistoriesPage,
+  ImmunizationsPage,
+  CarePlanFhirPage,
+  CoveragePage,
+  ClaimsPage,
+} from './components/cerner/ChartPages';
+import PayerExchangePanel from './components/PayerExchangePanel';
 import type { SmartLaunchContext, CdsCard, MdOrder, CareTeamAssignment, FhirServiceRequest } from '@/lib/smartFhirTypes';
 import { mockCdsCards } from '@/lib/smartFhirMockData';
-import Icon from '@/components/ui/AppIcon';
-import AppLogo from '@/components/ui/AppLogo';
 import { useAppContext } from '@/lib/appContext';
-import { referralStore } from '@/lib/mockData';
-
-type ActiveTab = 'summary' | 'cds' | 'orders' | 'team' | 'careplan' | 'referrals' | 'return' | 'audit' | 'compliance';
-
-const TABS: Array<{ key: ActiveTab; label: string; icon: string }> = [
-  { key: 'summary', label: 'Patient Summary', icon: 'UserIcon' },
-  { key: 'cds', label: 'CDS Alerts', icon: 'BellAlertIcon' },
-  { key: 'orders', label: 'Order Entry', icon: 'ClipboardDocumentCheckIcon' },
-  { key: 'team', label: 'Care Team', icon: 'UserGroupIcon' },
-  { key: 'careplan', label: 'Care Plan', icon: 'ClipboardDocumentListIcon' },
-  { key: 'referrals', label: 'Active Referrals', icon: 'ArrowTopRightOnSquareIcon' },
-  { key: 'return', label: 'Return to Cerner', icon: 'ArrowRightOnRectangleIcon' },
-  { key: 'audit', label: 'Audit Log', icon: 'ShieldCheckIcon' },
-  { key: 'compliance', label: 'Compliance', icon: 'DocumentCheckIcon' },
-];
+import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
+import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import { DEMO_PATIENT_ID, DEMO_ENCOUNTER_ID } from '@/lib/fhir/store';
+import { invokePatientViewHook } from '@/lib/fhir/cdsHooks';
 
 let auditSeq = 0;
 function makeAuditId(): string {
@@ -45,32 +58,40 @@ function makeAuditId(): string {
   return `AUD-${Date.now().toString(36).toUpperCase()}-${String(auditSeq).padStart(3, '0')}`;
 }
 
+/** Resolve launch-context IDs to FHIR resource IDs (demo fixtures in mock mode). */
+function resolveIds(ctx: SmartLaunchContext, mock: boolean): { patientId: string; encounterId: string } {
+  if (mock) return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
+  return {
+    patientId: ctx.patientId.replace(/^patient\//, ''),
+    encounterId: ctx.encounterId,
+  };
+}
+
+interface ViewerTarget {
+  resourceType: string;
+  resourceId: string;
+  label: string;
+}
+
 export default function MdSmartLaunchPage() {
   const router = useRouter();
-  const { entryContext } = useAppContext();
+  const { useMockData, setUseMockData } = useAppContext();
+  useFhirModeSync();
+
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
+  const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
+  const [cdsPanelOpen, setCdsPanelOpen] = useState(false);
   const [completedOrders, setCompletedOrders] = useState<MdOrder[]>([]);
   const [confirmedAssignments, setConfirmedAssignments] = useState<CareTeamAssignment[]>([]);
   const [closedGapIds, setClosedGapIds] = useState<string[]>([]);
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
-
-  // ── Inline error state ────────────────────────────────────────────────────
-  const [inlineErrors, setInlineErrors] = useState<SmartError[]>([]);
-  const [fhirTimeoutError, setFhirTimeoutError] = useState<SmartError | null>(null);
-  const [orderValidationError, setOrderValidationError] = useState<SmartError | null>(null);
-  const [missingPatientDataError, setMissingPatientDataError] = useState<SmartError | null>(null);
+  const [sessionActions, setSessionActions] = useState<string[]>([]);
+  const [reviewed, setReviewed] = useState<Record<string, boolean>>({});
+  const [viewer, setViewer] = useState<ViewerTarget | null>(null);
 
   const launchContextRef = useRef<SmartLaunchContext | null>(null);
-
-  const dismissInlineError = useCallback((code: string) => {
-    setInlineErrors((prev) => prev.filter((e) => e.code !== code));
-    if (code === 'FHIR_TIMEOUT') setFhirTimeoutError(null);
-    if (code === 'ORDER_VALIDATION_FAILED') setOrderValidationError(null);
-    if (code === 'MISSING_PATIENT_DATA') setMissingPatientDataError(null);
-  }, []);
 
   // ── Audit helper ──────────────────────────────────────────────────────────
   const pushAudit = useCallback(
@@ -79,7 +100,7 @@ export default function MdSmartLaunchPage() {
       action: string,
       details: Record<string, string | number | boolean | undefined>,
       outcome: AuditEvent['outcome'] = 'success',
-      ctx?: SmartLaunchContext | null
+      ctx?: SmartLaunchContext | null,
     ) => {
       const context = ctx ?? launchContextRef.current;
       const event: AuditEvent = {
@@ -96,8 +117,12 @@ export default function MdSmartLaunchPage() {
       };
       setAuditEvents((prev) => [...prev, event]);
     },
-    []
+    [],
   );
+
+  const addSessionAction = useCallback((text: string) => {
+    setSessionActions((prev) => [...prev, text]);
+  }, []);
 
   // ── Launch ────────────────────────────────────────────────────────────────
   const handleLaunchReady = useCallback(
@@ -105,225 +130,191 @@ export default function MdSmartLaunchPage() {
       launchContextRef.current = ctx;
       setLaunchContext(ctx);
       setLaunchReady(true);
-
-      // Check for missing patient data after launch
-      if (!ctx.patientId || ctx.patientId === 'unknown') {
-        const err: SmartError = {
-          code: 'MISSING_PATIENT_DATA',
-          message: 'Patient ID was not returned in the FHIR launch context.',
-          detail: 'patientId is null or undefined in SmartLaunchContext',
-          timestamp: new Date().toISOString(),
-          retryable: true,
-        };
-        setMissingPatientDataError(err);
-        pushAudit('smart-launch', 'SMART launch completed with missing patient data', { patientId: ctx.patientId }, 'failure', ctx);
-        return;
-      }
-
       pushAudit(
         'smart-launch',
         'SMART on FHIR launch completed',
         {
-          launchToken: ctx.launchToken,
           fhirBaseUrl: ctx.fhirBaseUrl,
-          patientName: ctx.patientName,
-          encounterType: ctx.encounterType,
-          smartAppVersion: '1.0.0',
+          patientId: ctx.patientId,
+          encounterId: ctx.encounterId,
+          practitionerName: ctx.practitionerName,
+          smartAppVersion: '2.0.0-cerner',
         },
         'success',
-        ctx
+        ctx,
       );
     },
-    [pushAudit]
+    [pushAudit],
+  );
+
+  // ── FHIR AuditEvent for CDS interactions (live mode) ──────────────────────
+  const postCdsAuditEvent = useCallback(
+    (action: string, subtype: string, cardSummary: string, detail?: string) => {
+      if (getFhirMockMode()) return;
+      getFhirClient()
+        .create({
+          resourceType: 'AuditEvent',
+          type: { system: 'http://terminology.hl7.org/CodeSystem/audit-event-type', code: 'rest', display: 'RESTful Operation' },
+          subtype: [{ system: 'http://hl7.org/fhir/restful-interaction', code: subtype, display: subtype }],
+          action: 'E',
+          recorded: new Date().toISOString(),
+          outcome: '0',
+          agent: [{ who: { display: launchContext?.practitionerName ?? 'Unknown' }, requestor: true }],
+          source: { observer: { display: 'MD-SMART-CDS' } },
+          entity: [{ what: { display: cardSummary }, type: { code: '4', display: 'Other' }, detail: detail ? [{ type: 'cds-action', valueBase64Binary: btoa(detail) }] : [] }],
+        })
+        .catch((err) => console.warn('[AuditEvent] CDS audit POST failed:', err));
+    },
+    [launchContext],
   );
 
   // ── CDS interactions ──────────────────────────────────────────────────────
   const handleAcceptSuggestion = useCallback(
     (cardId: string, suggestionId: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c))
-      );
-      pushAudit('cds-suggestion-accepted', `CDS suggestion accepted: ${card?.summary ?? cardId}`, {
-        cardId,
-        suggestionId,
-        cardType: card?.cardType,
-        hookType: card?.hookType,
-        summary: card?.summary,
-      });
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c)));
+      pushAudit('cds-suggestion-accepted', `CDS suggestion accepted: ${card?.summary ?? cardId}`, { cardId, suggestionId, summary: card?.summary });
+      postCdsAuditEvent('accept', 'create', card?.summary ?? cardId, `suggestion:${suggestionId}`);
+      addSessionAction(`CDS suggestion accepted — ${card?.summary ?? cardId}`);
     },
-    [cdsCards, pushAudit]
+    [cdsCards, pushAudit, postCdsAuditEvent, addSessionAction],
   );
 
   const handleDismiss = useCallback(
     (cardId: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c))
-      );
-      pushAudit('cds-card-dismissed', `CDS card dismissed: ${card?.summary ?? cardId}`, {
-        cardId,
-        cardType: card?.cardType,
-        hookType: card?.hookType,
-        summary: card?.summary,
-      });
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c)));
+      pushAudit('cds-card-dismissed', `CDS card dismissed: ${card?.summary ?? cardId}`, { cardId, summary: card?.summary });
+      postCdsAuditEvent('dismiss', 'delete', card?.summary ?? cardId);
     },
-    [cdsCards, pushAudit]
+    [cdsCards, pushAudit, postCdsAuditEvent],
   );
 
   const handleSnooze = useCallback(
     (cardId: string) => {
       const until = new Date(Date.now() + 86400000).toISOString();
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true, snoozedUntil: until } : c))
-      );
-      pushAudit('cds-card-snoozed', `CDS card snoozed: ${card?.summary ?? cardId}`, {
-        cardId,
-        cardType: card?.cardType,
-        hookType: card?.hookType,
-        summary: card?.summary,
-        snoozedUntil: until,
-      });
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true, snoozedUntil: until } : c)));
+      pushAudit('cds-card-snoozed', `CDS card snoozed: ${card?.summary ?? cardId}`, { cardId, snoozedUntil: until });
+      postCdsAuditEvent('snooze', 'patch', card?.summary ?? cardId, `until:${until}`);
     },
-    [cdsCards, pushAudit]
+    [cdsCards, pushAudit, postCdsAuditEvent],
   );
 
   const handleAcknowledge = useCallback(
     (cardId: string, reason: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true, overrideReason: reason } : c))
-      );
-      pushAudit(
-        'cds-card-acknowledged',
-        `Critical CDS alert acknowledged with override: ${card?.summary ?? cardId}`,
-        {
-          cardId,
-          cardType: card?.cardType,
-          hookType: card?.hookType,
-          summary: card?.summary,
-          overrideReason: reason,
-        }
-      );
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true, overrideReason: reason } : c)));
+      pushAudit('cds-card-acknowledged', `Critical CDS alert acknowledged with override: ${card?.summary ?? cardId}`, { cardId, overrideReason: reason });
+      postCdsAuditEvent('acknowledge-override', 'update', card?.summary ?? cardId, `override-reason:${reason}`);
     },
-    [cdsCards, pushAudit]
+    [cdsCards, pushAudit, postCdsAuditEvent],
   );
 
-  const handleOpenSmartLink = useCallback(
-    (_cardId: string, _url: string) => {
-      // In production: open SMART app panel or navigate
+  // ── Chart review actions ──────────────────────────────────────────────────
+  const handleMarkReviewed = useCallback(
+    (what: string, resourceIds: string[]) => {
+      const key = what.toLowerCase().includes('problem')
+        ? 'problems'
+        : what.toLowerCase().includes('medication')
+          ? 'medications'
+          : 'results';
+      setReviewed((prev) => ({ ...prev, [key]: true }));
+      pushAudit('patient-chart-viewed', `${what} reviewed`, { resourceCount: resourceIds.length, resourceIds: resourceIds.join(', ') });
+      addSessionAction(`${what} reviewed (${resourceIds.length} resources)`);
     },
-    []
+    [pushAudit, addSessionAction],
   );
 
-  // ── Orders ────────────────────────────────────────────────────────────────
+  const handleCloseGap = useCallback(
+    (gap: DerivedGap) => {
+      setClosedGapIds((prev) => [...prev, gap.id]);
+      pushAudit('care-gap-closed', `Care gap addressed: ${gap.name}`, { gapId: gap.id, program: gap.program, measure: gap.measure, evidence: gap.evidence });
+      addSessionAction(`Care gap addressed — ${gap.name} (${gap.program} ${gap.measure})`);
+    },
+    [pushAudit, addSessionAction],
+  );
+
+  const handleWriteComplete = useCallback(
+    (kind: 'note' | 'order' | 'referral', display: string, resourceId: string) => {
+      const labels = { note: 'DocumentReference', order: 'ServiceRequest', referral: 'ServiceRequest (referral)' } as const;
+      pushAudit('order-signed', `${display} → FHIR ${labels[kind]} created`, { resourceId, fhirResourceType: labels[kind] });
+      addSessionAction(`${display} → ${labels[kind]}/${resourceId}`);
+    },
+    [pushAudit, addSessionAction],
+  );
+
+  // ── Legacy order module ───────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
     (orders: MdOrder[], _serviceRequests: FhirServiceRequest[]) => {
-      // Simulate order validation — flag stat orders without a note
-      const invalidOrders = orders.filter((o) => o.priority === 'stat' && !o.note);
-      if (invalidOrders.length > 0) {
-        const validationErr: SmartError = {
-          code: 'ORDER_VALIDATION_FAILED',
-          message: `${invalidOrders.length} STAT order${invalidOrders.length > 1 ? 's' : ''} missing required clinical indication note.`,
-          detail: `Order IDs: ${invalidOrders.map((o) => o.id).join(', ')}`,
-          timestamp: new Date().toISOString(),
-          retryable: true,
-        };
-        setOrderValidationError(validationErr);
-        pushAudit(
-          'order-signed',
-          `Order validation failed: ${invalidOrders.length} order(s) missing required fields`,
-          { orderCount: orders.length, invalidCount: invalidOrders.length },
-          'failure'
-        );
-        return;
-      }
-
-      setOrderValidationError(null);
       setCompletedOrders(orders);
-      pushAudit(
-        'order-signed',
-        `${orders.length} order${orders.length !== 1 ? 's' : ''} signed and submitted to Cerner`,
-        {
-          orderCount: orders.length,
-          orderIds: orders.map((o) => o.id).join(', '),
-          orderDisplays: orders.map((o) => o.display).join(' | '),
-          categories: [...new Set(orders.map((o) => o.category))].join(', '),
-          priorities: [...new Set(orders.map((o) => o.priority))].join(', '),
-          fhirResourceType: 'ServiceRequest',
-        }
-      );
-      setTimeout(() => setActiveTab('return'), 1500);
+      pushAudit('order-signed', `${orders.length} order(s) signed and submitted to Cerner`, {
+        orderCount: orders.length,
+        orderDisplays: orders.map((o) => o.display).join(' | '),
+      });
+      orders.forEach((o) => addSessionAction(`Order signed — ${o.display}`));
     },
-    [pushAudit]
+    [pushAudit, addSessionAction],
   );
 
-  // ── Team assignment ───────────────────────────────────────────────────────
   const handleAssignmentConfirmed = useCallback(
     (assignments: CareTeamAssignment[]) => {
       setConfirmedAssignments(assignments);
-      pushAudit(
-        'team-assignment-confirmed',
-        `Care team assignment confirmed: ${assignments.length} provider${assignments.length !== 1 ? 's' : ''} assigned`,
-        {
-          assignmentCount: assignments.length,
-          assignmentIds: assignments.map((a) => a.id).join(', '),
-          providerNames: assignments.map((a) => a.providerName).join(' | '),
-          specialties: assignments.map((a) => a.specialty).join(' | '),
-          networkTiers: assignments.map((a) => a.networkTier).join(' | '),
-          fhirResourceType: 'ServiceRequest',
-        }
-      );
-      // Navigate to Specialist Inbox instead of return
-      setTimeout(() => {
-        router.push('/specialist-inbox');
-      }, 1500);
+      pushAudit('team-assignment-confirmed', `Care team assignment confirmed: ${assignments.length} provider(s)`, {
+        assignmentCount: assignments.length,
+        providerNames: assignments.map((a) => a.providerName).join(' | '),
+      });
+      assignments.forEach((a) => addSessionAction(`Care team — ${a.providerName} (${a.specialty})`));
     },
-    [pushAudit, router]
+    [pushAudit, addSessionAction],
   );
 
-  // ── Cerner return ─────────────────────────────────────────────────────────
-  const handleReturnInitiated = useCallback((payload: any) => {
-    pushAudit(
-      'cerner-return-initiated',
-      'Return to Cerner initiated — encounter handoff complete',
-      {
+  const handleReturnInitiated = useCallback(
+    (payload: { patientId?: string }) => {
+      pushAudit('cerner-return-initiated', 'Return to Cerner initiated — encounter handoff complete', {
         completedOrderCount: completedOrders.length,
-        confirmedAssignmentCount: confirmedAssignments.length,
         closedGapCount: closedGapIds.length,
-        handoffTarget: 'Cerner PowerChart / UHG Controller',
+        sessionActionCount: sessionActions.length,
         returnPatientId: payload?.patientId,
-      }
-    );
-  }, [pushAudit, completedOrders, confirmedAssignments, closedGapIds]);
+      });
+    },
+    [pushAudit, completedOrders, closedGapIds, sessionActions],
+  );
 
-  // ── Token re-auth ─────────────────────────────────────────────────────────
   const handleReauth = useCallback(() => {
     pushAudit('smart-launch', 'Re-authentication initiated due to token expiry', {}, 'info');
-    // In production: trigger OAuth re-auth flow
     setLaunchReady(false);
     setLaunchContext(null);
   }, [pushAudit]);
 
-  const mariaWorkflowSummary = useMemo(() => {
-    const referrals = referralStore.getAllReferrals().filter((r) => r.patientId === launchContext?.patientId);
-    const hasLabcorp = referrals.some((r) => r.specialistType.toLowerCase().includes('labcorp'));
-    const hasUniteUs = referrals.some((r) => r.specialistType.toLowerCase().includes('unite us'));
-    const duplicateTherapyResolved = completedOrders.some((o) => o.category === 'medication') || cdsCards.some((c) => c.acknowledged);
-    return {
-      referrals,
-      hasLabcorp,
-      hasUniteUs,
-      duplicateTherapyResolved,
+  const openResource = useCallback((resourceType: string, resourceId: string, label: string) => {
+    setViewer({ resourceType, resourceId, label });
+  }, []);
+
+  // ── Live CDS Hooks invocation (patient-view) with demo-card fallback ──────
+  useEffect(() => {
+    if (!launchReady || !launchContext || useMockData) return;
+    let cancelled = false;
+    const ids = resolveIds(launchContext, false);
+    invokePatientViewHook(
+      ids.patientId,
+      ids.encounterId,
+      launchContext.practitionerId,
+      launchContext.fhirBaseUrl,
+    ).then((liveCards) => {
+      if (!cancelled && liveCards) {
+        setCdsCards(liveCards);
+        pushAudit('smart-launch', 'CDS Hooks patient-view invoked — live cards received', {
+          cardCount: liveCards.length,
+        });
+      }
+    });
+    return () => {
+      cancelled = true;
     };
-  }, [launchContext?.patientId, completedOrders, cdsCards]);
+  }, [launchReady, launchContext, useMockData, pushAudit]);
 
-  const activeCdsCount = cdsCards.filter((c) => !c.acknowledged).length;
-  const criticalCdsCount = cdsCards.filter((c) => !c.acknowledged && c.cardType === 'critical').length;
-  const activeReferralsCount = completedOrders.filter((o) => o.category === 'referral').length + confirmedAssignments.length + mariaWorkflowSummary.referrals.length;
-
-  // Show launch handler if not ready
+  // ── Launch gate ───────────────────────────────────────────────────────────
   if (!launchReady || !launchContext) {
     return (
       <SmartErrorBoundary errorCode="SMART_LAUNCH_FAILED" onReturnToCerner={() => (window.location.href = '/')}>
@@ -332,314 +323,261 @@ export default function MdSmartLaunchPage() {
     );
   }
 
-  // Token expiry: simulate 30-min session from launch timestamp
+  const { patientId, encounterId } = resolveIds(launchContext, useMockData);
   const tokenExpiry = launchContext.tokenExpiry ?? Date.now() + 30 * 60 * 1000;
+  const activeCdsCount = cdsCards.filter((c) => !c.acknowledged).length;
+
+  // Visit progress rail state
+  const steps = [
+    { label: 'Review', done: !!(reviewed.problems || reviewed.medications || reviewed.results) },
+    { label: 'Document', done: sessionActions.some((a) => a.includes('DocumentReference')) },
+    { label: 'Order', done: sessionActions.some((a) => a.includes('ServiceRequest')) || completedOrders.length > 0 },
+    { label: 'Sign', done: false },
+  ];
+
+  const pageProps = { patientId, onOpenResource: openResource };
 
   return (
     <SmartErrorBoundary errorCode="UNKNOWN_ERROR" onRetry={() => setLaunchReady(false)} onReturnToCerner={() => (window.location.href = '/')}>
-      <div className="flex h-screen overflow-hidden bg-carbon-gray-10">
-        {/* Slim sidebar — MD context */}
-        <aside className="w-14 bg-carbon-sidebar flex flex-col flex-shrink-0">
-          <div className="flex items-center justify-center py-4 border-b border-carbon-gray-80">
-            <AppLogo size={26} />
+      <div className="flex flex-col h-screen overflow-hidden bg-[#dfe4e8]">
+        <TokenExpiryBanner tokenExpiry={tokenExpiry} onReauth={handleReauth} />
+
+        {/* ── App bar ── */}
+        <header className="bg-[#1d3346] text-white px-3 h-9 flex items-center justify-between shrink-0 text-[12px]">
+          <div className="flex items-center gap-3">
+            <span className="font-bold tracking-wide">MD SmartApp</span>
+            <span className="text-white/60 hidden sm:inline">SMART on FHIR · launched from Cerner PowerChart</span>
           </div>
-          <nav className="flex-1 flex flex-col items-center py-4 gap-1">
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.key;
-              const hasBadge = tab.key === 'cds' && activeCdsCount > 0;
-              const isCritical = tab.key === 'cds' && criticalCdsCount > 0;
-              const hasAuditBadge = tab.key === 'audit' && auditEvents.length > 0;
-              const hasReferralBadge = tab.key === 'referrals' && activeReferralsCount > 0;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  title={tab.label}
-                  className={`relative w-10 h-10 flex items-center justify-center transition-colors ${
-                    isActive ? 'bg-[#6929c4] text-white' : 'text-carbon-gray-50 hover:text-white hover:bg-carbon-gray-80'
-                  }`}
-                >
-                  <Icon name={tab.icon as any} size={18} />
-                  {hasBadge && (
-                    <span className={`absolute top-1 right-1 w-2 h-2 rounded-full ${isCritical ? 'bg-[#da1e28]' : 'bg-[#f1c21b]'}`} />
-                  )}
-                  {hasAuditBadge && (
-                    <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#6929c4]" />
-                  )}
-                  {hasReferralBadge && (
-                    <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#24a148]" />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-          {/* Cerner badge */}
-          <div className="pb-4 flex flex-col items-center gap-2">
-            <div className="w-8 h-8 bg-[#6929c4]/20 border border-[#6929c4]/40 flex items-center justify-center" title="SMART on FHIR Active">
-              <Icon name="BoltIcon" size={14} className="text-[#a56eff]" />
-            </div>
-          </div>
-        </aside>
-
-        {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Token expiry banner — top of everything */}
-          <TokenExpiryBanner tokenExpiry={tokenExpiry} onReauth={handleReauth} />
-
-          {/* Top bar */}
-          <header className="bg-white border-b border-carbon-gray-20 px-5 h-14 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xs font-bold px-2 py-1 bg-[#f6f2ff] text-[#6929c4] border border-[#d4bbff]">
-                  ⚡ SMART on FHIR
-                </span>
-                <span className="text-2xs text-carbon-gray-50">Cerner PowerChart</span>
-              </div>
-              <div className="w-px h-4 bg-carbon-gray-20" />
-              <div>
-                <p className="text-sm font-semibold text-carbon-gray-100">
-                  {TABS.find((t) => t.key === activeTab)?.label}
-                </p>
-                <p className="text-2xs text-carbon-gray-50">
-                  {launchContext.practitionerName} · Enc: <span className="font-mono">{launchContext.encounterId}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Tab nav in header */}
-            <div className="flex items-center gap-0.5">
-              {TABS.map((tab) => {
-                const isActive = activeTab === tab.key;
-                const hasBadge = tab.key === 'cds' && activeCdsCount > 0;
-                const isCritical = tab.key === 'cds' && criticalCdsCount > 0;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
-                      isActive
-                        ? 'bg-[#6929c4] text-white'
-                        : 'text-carbon-gray-70 hover:bg-carbon-gray-10 hover:text-carbon-gray-100'
+          <div className="flex items-center gap-2">
+            {/* Visit progress rail */}
+            <div className="hidden md:flex items-center gap-1 mr-2">
+              {steps.map((s, i) => (
+                <React.Fragment key={s.label}>
+                  {i > 0 && <span className="text-white/40">→</span>}
+                  <span
+                    className={`px-1.5 rounded-sm leading-5 ${
+                      s.done ? 'bg-[#1e7e34] text-white' : 'bg-white/10 text-white/70'
                     }`}
                   >
-                    <Icon name={tab.icon as any} size={13} />
-                    <span className="hidden md:inline">{tab.label}</span>
-                    {hasBadge && (
-                      <span className={`text-2xs font-bold px-1 min-w-[16px] text-center ${isCritical ? 'bg-[#da1e28] text-white' : 'bg-[#f1c21b] text-[#b45309]'}`}>
-                        {activeCdsCount}
-                      </span>
-                    )}
-                    {tab.key === 'referrals' && activeReferralsCount > 0 && (
-                      <span className="text-2xs font-bold px-1 min-w-[16px] text-center bg-[#24a148] text-white">
-                        {activeReferralsCount}
-                      </span>
-                    )}
-                    {tab.key === 'audit' && auditEvents.length > 0 && (
-                      <span className="text-2xs font-bold px-1 min-w-[16px] text-center bg-[#6929c4]/20 text-[#6929c4]">
-                        {auditEvents.length}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+                    {s.done ? '✓ ' : ''}
+                    {s.label}
+                  </span>
+                </React.Fragment>
+              ))}
             </div>
-          </header>
+            <span className="text-white/80">{launchContext.practitionerName}</span>
+            <button
+              onClick={() => setUseMockData(!useMockData)}
+              title={useMockData ? 'Switch to live FHIR server' : 'Switch to mock FHIR fixtures'}
+              className={`px-2 leading-5 rounded-sm font-semibold border ${
+                useMockData
+                  ? 'bg-[#fff4e5] text-[#8a5300] border-[#e8a33d]'
+                  : 'bg-[#e6f4ea] text-[#1e7e34] border-[#1e7e34]'
+              }`}
+            >
+              {useMockData ? 'Mock FHIR' : 'Live FHIR'}
+            </button>
+            <button
+              onClick={() => router.push(`/patient-detail?id=${launchContext.patientId}`)}
+              className="px-2 leading-5 rounded-sm bg-white/10 border border-white/30 hover:bg-white/20"
+              title="Open RHTP Citizen Detail"
+            >
+              RHTP
+            </button>
+          </div>
+        </header>
 
-          {/* Content area */}
-          <main className="flex-1 overflow-y-auto p-5">
-            {launchContext.patientId === 'patient-001' && (
-              <div className="bg-[#f6f2ff] border border-[#d4bbff] px-4 py-3 mb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-[#6929c4]">Maria Reyes SMART Workflow</p>
-                    <p className="text-xs text-carbon-gray-70 mt-1">
-                      Duplicate therapy review, HbA1c routing to Labcorp, transportation routing to Unite Us, AI care plan generation, and gainshare return tracking are enabled for this Maria launch.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-2xs min-w-[260px]">
-                    <span className={`px-2 py-1 border ${mariaWorkflowSummary.duplicateTherapyResolved ? 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]' : 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>Duplicate Therapy</span>
-                    <span className={`px-2 py-1 border ${mariaWorkflowSummary.hasLabcorp ? 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]' : 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>Labcorp</span>
-                    <span className={`px-2 py-1 border ${mariaWorkflowSummary.hasUniteUs ? 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]' : 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>Unite Us</span>
-                    <span className={`px-2 py-1 border ${closedGapIds.length > 0 ? 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]' : 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>Gainshare Tracking</span>
-                  </div>
-                </div>
+        {/* ── Patient banner ── */}
+        <PatientBanner
+          patientId={patientId}
+          encounterId={encounterId}
+          finNumber={launchContext.encounterId}
+          onOpenResource={openResource}
+        />
+
+        {/* ── Menu + content ── */}
+        <div className="flex flex-1 min-h-0">
+          <CernerMenu
+            active={activeMenu}
+            onSelect={(k) => {
+              setActiveMenu(k);
+              pushAudit('patient-chart-viewed', `Chart section opened: ${k}`, { section: k });
+            }}
+            badges={{ 'provider-view': activeCdsCount }}
+          />
+
+          <main className="flex-1 overflow-y-auto p-3 min-w-0">
+            {activeMenu === 'provider-view' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
+                <ProviderViewReview
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  onOpenResource={openResource}
+                  onMarkReviewed={handleMarkReviewed}
+                  reviewed={reviewed}
+                />
+                <ProviderViewAct
+                  patientId={patientId}
+                  cdsCards={cdsCards.filter((c) => !c.acknowledged)}
+                  closedGapIds={closedGapIds}
+                  onOpenResource={openResource}
+                  onCloseGap={handleCloseGap}
+                  onOpenCdsCard={() => setCdsPanelOpen(true)}
+                />
+                <ProviderViewDocument
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  launchContext={launchContext}
+                  sessionActions={sessionActions}
+                  onWriteComplete={handleWriteComplete}
+                  onOpenResource={openResource}
+                  onSignAndReturn={() => setActiveMenu('return')}
+                />
               </div>
             )}
-            {/* CDS critical banner — always visible */}
-            {criticalCdsCount > 0 && activeTab !== 'cds' && (
-              <div
-                className="bg-[#da1e28] text-white px-4 py-2.5 mb-4 flex items-center gap-3 cursor-pointer hover:bg-[#b81922] transition-colors"
-                onClick={() => setActiveTab('cds')}
-              >
-                <Icon name="ShieldExclamationIcon" size={16} />
-                <span className="text-sm font-semibold">
-                  {criticalCdsCount} critical CDS alert{criticalCdsCount !== 1 ? 's' : ''} require acknowledgment before signing orders
-                </span>
-                <Icon name="ChevronRightIcon" size={14} className="ml-auto" />
+
+            {activeMenu === 'results' && <ResultsReviewPage {...pageProps} />}
+            {activeMenu === 'medications' && <MedicationListPage {...pageProps} />}
+            {activeMenu === 'problems' && <ProblemsPage {...pageProps} />}
+            {activeMenu === 'allergies' && <AllergiesPage {...pageProps} />}
+            {activeMenu === 'vitals' && <VitalsPage {...pageProps} />}
+            {activeMenu === 'documentation' && <DocumentationPage {...pageProps} />}
+            {activeMenu === 'histories' && <HistoriesPage {...pageProps} />}
+            {activeMenu === 'immunizations' && <ImmunizationsPage {...pageProps} />}
+
+            {activeMenu === 'orders' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
+                <OrderEntryModule
+                  patientId={launchContext.patientId}
+                  encounterId={launchContext.encounterId}
+                  practitionerId={launchContext.practitionerId}
+                  onOrderSigned={handleOrderSigned}
+                />
               </div>
             )}
 
-            {/* ── Inline error alerts ─────────────────────────────────────── */}
-            {missingPatientDataError && (
-              <SmartInlineAlert
-                error={missingPatientDataError}
-                onDismiss={() => dismissInlineError('MISSING_PATIENT_DATA')}
-                onRetry={() => { setLaunchReady(false); setLaunchContext(null); }}
-                className="mb-4"
-              />
-            )}
-
-            {fhirTimeoutError && (
-              <SmartInlineAlert
-                error={fhirTimeoutError}
-                onDismiss={() => dismissInlineError('FHIR_TIMEOUT')}
-                onRetry={() => dismissInlineError('FHIR_TIMEOUT')}
-                className="mb-4"
-              />
-            )}
-
-            {orderValidationError && activeTab === 'orders' && (
-              <SmartInlineAlert
-                error={orderValidationError}
-                onDismiss={() => dismissInlineError('ORDER_VALIDATION_FAILED')}
-                onRetry={() => dismissInlineError('ORDER_VALIDATION_FAILED')}
-                className="mb-4"
-              />
-            )}
-
-            {inlineErrors.map((err) => (
-              <SmartInlineAlert
-                key={err.code}
-                error={err}
-                onDismiss={() => dismissInlineError(err.code)}
-                className="mb-4"
-              />
-            ))}
-
-            {activeTab === 'summary' && (
-              <SmartErrorBoundary errorCode="MISSING_PATIENT_DATA" onRetry={() => setLaunchReady(false)}>
-                <div className="h-[calc(100vh-8rem)] -m-5">
-                  <MdSmartSummaryScreen
-                    launchContext={launchContext}
-                    cdsCards={cdsCards}
-                    onAuditEntry={(action, details) => pushAudit('smart-launch', action, details)}
-                    onOpenOrderEntry={() => setActiveTab('orders')}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'cds' && (
-              <SmartErrorBoundary errorCode="FHIR_TIMEOUT">
-                <div className="max-w-3xl">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <h2 className="text-sm font-semibold text-carbon-gray-100">CDS Hooks Alerts</h2>
-                      <p className="text-xs text-carbon-gray-50 mt-0.5">
-                        {activeCdsCount} active · {cdsCards.filter((c) => c.acknowledged).length} acknowledged
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-2xs text-carbon-gray-50">
-                      {(['patient-view', 'encounter-start', 'order-select', 'order-sign', 'care-gap-closure'] as const).map((hook) => {
-                        const count = cdsCards.filter((c) => c.hookType === hook && !c.acknowledged).length;
-                        return count > 0 ? (
-                          <span key={hook} className="px-2 py-0.5 bg-carbon-gray-10 border border-carbon-gray-20 font-mono">
-                            {hook}: {count}
-                          </span>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
-                  <CdsCardRenderer
-                    cards={cdsCards}
-                    onAcceptSuggestion={handleAcceptSuggestion}
-                    onDismiss={handleDismiss}
-                    onSnooze={handleSnooze}
-                    onAcknowledge={handleAcknowledge}
-                    onOpenSmartLink={handleOpenSmartLink}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'orders' && (
-              <SmartErrorBoundary errorCode="ORDER_VALIDATION_FAILED">
-                <div className="max-w-4xl">
-                  <OrderEntryModule
-                    patientId={launchContext.patientId}
-                    encounterId={launchContext.encounterId}
-                    practitionerId={launchContext.practitionerId}
-                    onOrderSigned={handleOrderSigned}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'team' && (
-              <SmartErrorBoundary errorCode="FHIR_TIMEOUT">
-                <div className="max-w-2xl">
-                  <CareTeamAssignmentModule
-                    patientId={launchContext.patientId}
-                    encounterId={launchContext.encounterId}
-                    onAssignmentConfirmed={handleAssignmentConfirmed}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'careplan' && (
-              <SmartErrorBoundary errorCode="MISSING_PATIENT_DATA">
-                <div className="max-w-4xl">
+            {activeMenu === 'careplan' && (
+              <div>
+                <CarePlanFhirPage {...pageProps} />
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                   <CarePlanPanel
                     launchContext={launchContext}
                     completedOrders={completedOrders}
                     confirmedAssignments={confirmedAssignments}
                   />
                 </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'referrals' && (
-              <SmartErrorBoundary errorCode="FHIR_TIMEOUT">
-                <div className="max-w-4xl">
-                  <ActiveReferralsPanel
-                    launchContext={launchContext}
-                    completedOrders={completedOrders}
-                    confirmedAssignments={confirmedAssignments}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'return' && (
-              <SmartErrorBoundary errorCode="SMART_LAUNCH_FAILED">
-                <div className="max-w-xl">
-                  <CernerReturnFlow
-                    launchContext={launchContext}
-                    completedOrders={completedOrders}
-                    confirmedAssignments={confirmedAssignments}
-                    closedGapIds={closedGapIds}
-                    onReturnInitiated={handleReturnInitiated}
-                  />
-                </div>
-              </SmartErrorBoundary>
-            )}
-
-            {activeTab === 'audit' && (
-              <div className="h-[calc(100vh-8rem)]">
-                <AuditLogPanel events={auditEvents} />
               </div>
             )}
 
-            {activeTab === 'compliance' && (
-              <SmartErrorBoundary errorCode="UNKNOWN_ERROR">
-                <div className="max-w-4xl">
+            {activeMenu === 'careteam' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-2xl">
+                <CareTeamAssignmentModule
+                  patientId={launchContext.patientId}
+                  encounterId={launchContext.encounterId}
+                  practitionerId={launchContext.practitionerId}
+                  onAssignmentConfirmed={handleAssignmentConfirmed}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'referrals' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
+                <ActiveReferralsPanel
+                  launchContext={launchContext}
+                  completedOrders={completedOrders}
+                  confirmedAssignments={confirmedAssignments}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'quality' && (
+              <div className="space-y-3">
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                  <GapClosureMetricsPanel
+                    patientId={launchContext.patientId}
+                    patientName={launchContext.patientName ?? 'Patient'}
+                  />
+                </div>
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                  <SdohGapPanel
+                    patientFhirId={patientId}
+                    practitionerFhirId={launchContext.practitionerId}
+                    practitionerDisplay={launchContext.practitionerName}
+                    onAuditEntry={(action, details) => pushAudit('patient-chart-viewed', action, details)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeMenu === 'cdi' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                <MdPatientSummary launchContext={launchContext} />
+              </div>
+            )}
+
+            {activeMenu === 'compliance' && (
+              <div className="space-y-3">
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
                   <ComplianceDashboard launchContext={launchContext} />
                 </div>
-              </SmartErrorBoundary>
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 h-[480px]">
+                  <AuditLogPanel events={auditEvents} />
+                </div>
+              </div>
+            )}
+
+            {activeMenu === 'coverage' && <CoveragePage {...pageProps} />}
+            {activeMenu === 'claims' && <ClaimsPage {...pageProps} />}
+            {activeMenu === 'payer-exchange' && (
+              <PayerExchangePanel patientId={patientId} />
+            )}
+
+            {activeMenu === 'return' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-xl">
+                <CernerReturnFlow
+                  launchContext={launchContext}
+                  completedOrders={completedOrders}
+                  confirmedAssignments={confirmedAssignments}
+                  closedGapIds={closedGapIds}
+                  onReturnInitiated={handleReturnInitiated}
+                />
+              </div>
             )}
           </main>
         </div>
+
+        {/* ── CDS full panel overlay ── */}
+        {cdsPanelOpen && (
+          <div className="fixed inset-0 z-40 flex items-start justify-center pt-14 px-4">
+            <button aria-label="Close CDS panel" className="absolute inset-0 bg-black/40" onClick={() => setCdsPanelOpen(false)} />
+            <div className="relative bg-[#f4f6f8] border border-[#b7c1ca] rounded-sm shadow-xl w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-[#2d4a63] text-white px-3 py-1.5 flex items-center justify-between sticky top-0 z-10">
+                <span className="text-[13px] font-bold">CDS Alerts — Clinical Decision Support</span>
+                <button className="text-white/80 hover:text-white text-[16px]" onClick={() => setCdsPanelOpen(false)}>✕</button>
+              </div>
+              <div className="p-3">
+                <CdsCardRenderer
+                  cards={cdsCards}
+                  onAcceptSuggestion={handleAcceptSuggestion}
+                  onDismiss={handleDismiss}
+                  onSnooze={handleSnooze}
+                  onAcknowledge={handleAcknowledge}
+                  onOpenSmartLink={() => undefined}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── FHIR resource drill-down ── */}
+        {viewer && (
+          <FhirResourceViewer
+            resourceType={viewer.resourceType}
+            resourceId={viewer.resourceId}
+            label={viewer.label}
+            onClose={() => setViewer(null)}
+          />
+        )}
       </div>
     </SmartErrorBoundary>
   );

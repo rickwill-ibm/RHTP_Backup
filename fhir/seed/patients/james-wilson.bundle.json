@@ -111,7 +111,7 @@
           {
             "family": "Okonkwo",
             "given": [
-              "\u2014"
+              "—"
             ],
             "prefix": [
               "Dr."
@@ -853,7 +853,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Stable \u2014 owns home"
+          "text": "Stable — owns home"
         },
         "id": "james-wilson-observation-1"
       },
@@ -933,7 +933,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Limited \u2014 35 miles to clinic"
+          "text": "Limited — 35 miles to clinic"
         },
         "id": "james-wilson-observation-3"
       },
@@ -1605,7 +1605,7 @@
           }
         ],
         "code": {
-          "text": "Transportation \u2014 Specialist Visits"
+          "text": "Transportation — Specialist Visits"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
@@ -1630,7 +1630,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "Diabetic A1C recheck is 45 days overdue. Bundle labs to reduce patient travel burden."
+            "valueString": "Diabetic A1C recheck is overdue. Bundle labs to reduce patient travel burden."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1657,12 +1657,15 @@
               "display": "warning"
             }
           ],
-          "text": "A1C overdue 45 days \u2014 diabetes management gap"
+          "text": "A1C — diabetes management gap"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
         },
-        "id": "james-wilson-flag-1"
+        "id": "james-wilson-flag-1",
+        "period": {
+          "start": "2026-07-20"
+        }
       },
       "request": {
         "method": "POST",
@@ -1676,7 +1679,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "CHF monitoring BNP panel is 22 days overdue. Active CHF episode (89 days)."
+            "valueString": "CHF monitoring BNP panel is overdue. Active CHF episode."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1703,12 +1706,15 @@
               "display": "warning"
             }
           ],
-          "text": "BNP panel overdue 22 days \u2014 CHF monitoring gap"
+          "text": "BNP panel — CHF monitoring gap"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
         },
-        "id": "james-wilson-flag-2"
+        "id": "james-wilson-flag-2",
+        "period": {
+          "start": "2026-08-12"
+        }
       },
       "request": {
         "method": "POST",

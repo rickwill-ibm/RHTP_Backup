@@ -282,19 +282,19 @@
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
           "value": 78,
-          "unit": "\u00b5mol/L"
+          "unit": "µmol/L"
         },
         "referenceRange": [
           {
             "low": {
               "value": 60,
-              "unit": "\u00b5mol/L"
+              "unit": "µmol/L"
             },
             "high": {
               "value": 110,
-              "unit": "\u00b5mol/L"
+              "unit": "µmol/L"
             },
-            "text": "60-110 \u00b5mol/L"
+            "text": "60-110 µmol/L"
           }
         ],
         "id": "alex-kirby-observation-3"
@@ -2034,12 +2034,15 @@
           }
         ],
         "code": {
-          "text": "Patient seen in ER (08/2025)"
+          "text": "Patient seen in ER"
         },
         "subject": {
           "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
         },
-        "id": "alex-kirby-flag-1"
+        "id": "alex-kirby-flag-1",
+        "period": {
+          "start": "2025-08-01"
+        }
       },
       "request": {
         "method": "POST",

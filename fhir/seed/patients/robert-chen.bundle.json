@@ -111,7 +111,7 @@
           {
             "family": "Castillo",
             "given": [
-              "\u2014"
+              "—"
             ],
             "prefix": [
               "Dr."
@@ -785,7 +785,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Stable \u2014 rents apartment"
+          "text": "Stable — rents apartment"
         },
         "id": "robert-chen-observation-3"
       },
@@ -865,7 +865,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Adequate \u2014 urban"
+          "text": "Adequate — urban"
         },
         "id": "robert-chen-observation-5"
       },
@@ -1564,12 +1564,15 @@
               "display": "warning"
             }
           ],
-          "text": "BP control check overdue 28 days \u2014 hypertension gap"
+          "text": "BP control check overdue — hypertension gap"
         },
         "subject": {
           "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
         },
-        "id": "robert-chen-flag-1"
+        "id": "robert-chen-flag-1",
+        "period": {
+          "start": "2026-08-06"
+        }
       },
       "request": {
         "method": "POST",
@@ -1610,12 +1613,15 @@
               "display": "warning"
             }
           ],
-          "text": "eGFR overdue 42 days \u2014 CKD monitoring gap"
+          "text": "eGFR overdue — CKD monitoring gap"
         },
         "subject": {
           "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
         },
-        "id": "robert-chen-flag-2"
+        "id": "robert-chen-flag-2",
+        "period": {
+          "start": "2026-07-23"
+        }
       },
       "request": {
         "method": "POST",

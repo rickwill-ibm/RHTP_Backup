@@ -3,6 +3,10 @@
  * Cerner PowerChart-style patient demographics banner.
  * Two rows, persistent at top. All content FHIR-fed:
  * Patient, Encounter, AllergyIntolerance, Flag, Coverage, Observation (wt/BMI).
+ *
+ * Flag gap-day computation: days are derived live from Flag.period.start so
+ * the banner always shows the current age of a gap — no hardcoded numbers
+ * in FHIR data.
  */
 import React from 'react';
 import {
@@ -19,8 +23,31 @@ import {
   ccText,
   fmtDate,
   quantityText,
+  type FhirFlag,
   type FhirObservation,
 } from '@/lib/fhir/types';
+
+/**
+ * Compute the number of whole days between a date string and today.
+ * Returns undefined when the date is missing or unparseable.
+ */
+function daysOpen(dateStr: string | undefined): number | undefined {
+  if (!dateStr) return undefined;
+  const ms = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(ms / 86_400_000);
+  return days >= 0 ? days : undefined;
+}
+
+/**
+ * Build the banner label for a single Flag.
+ * Appends " — X days" when Flag.period.start is present; otherwise renders
+ * code.text verbatim so flags without a time anchor still display cleanly.
+ */
+function flagLabel(flag: FhirFlag): string {
+  const base = ccText(flag.code);
+  const days = daysOpen(flag.period?.start);
+  return days !== undefined ? `${base} — ${days} days` : base;
+}
 
 interface PatientBannerProps {
   patientId: string;
@@ -46,12 +73,17 @@ export default function PatientBanner({
   const { data: coverages } = useCoverage(patientId);
   const { data: vitals } = useVitals(patientId);
 
-  const mrn = patient?.identifier?.find((i) => i.type?.text === 'MRN' || i.system?.includes('mrn'))?.value;
+  const mrn = patient?.identifier?.find(
+    (i) => i.type?.text === 'MRN' || i.system?.includes('mrn')
+  )?.value;
   const age = ageFromDob(patient?.birthDate);
-  const sex = patient?.gender ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1) : '—';
-  const attending = encounter?.participant?.find((p) =>
-    p.type?.some((t) => t.coding?.some((c) => c.code === 'ATND')),
-  )?.individual?.display ?? encounter?.participant?.[0]?.individual?.display;
+  const sex = patient?.gender
+    ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
+    : '—';
+  const attending =
+    encounter?.participant?.find((p) =>
+      p.type?.some((t) => t.coding?.some((c) => c.code === 'ATND'))
+    )?.individual?.display ?? encounter?.participant?.[0]?.individual?.display;
   const location = encounter?.location?.[0]?.location?.display;
   const weight = latestByLoinc(vitals, '29463-7');
   const bmi = latestByLoinc(vitals, '39156-5');
@@ -68,9 +100,7 @@ export default function PatientBanner({
 
   if (loading && !patient) {
     return (
-      <div className="w-full bg-[#2d4a63] text-white px-4 py-3 text-[13px]">
-        Loading patient…
-      </div>
+      <div className="w-full bg-[#2d4a63] text-white px-4 py-3 text-[13px]">Loading patient…</div>
     );
   }
 
@@ -80,7 +110,9 @@ export default function PatientBanner({
       <div className="bg-[#2d4a63] text-white px-4 py-1.5 flex items-center gap-x-5 flex-wrap text-[13px] leading-6">
         <button
           className="font-bold text-[15px] tracking-wide hover:underline"
-          onClick={() => onOpenResource?.('Patient', patientId, `Patient: ${bannerName(patient?.name)}`)}
+          onClick={() =>
+            onOpenResource?.('Patient', patientId, `Patient: ${bannerName(patient?.name)}`)
+          }
           title="Open Patient resource"
         >
           {bannerName(patient?.name)}
@@ -92,11 +124,7 @@ export default function PatientBanner({
         <span>MRN: {mrn ?? '—'}</span>
         <span>FIN: {finNumber ?? encounterId ?? '—'}</span>
         <span
-          className={
-            allergies.length > 0
-              ? 'font-bold text-[#ffb3b8]'
-              : 'text-[#cfe3cf]'
-          }
+          className={allergies.length > 0 ? 'font-bold text-[#ffb3b8]' : 'text-[#cfe3cf]'}
           title="From AllergyIntolerance"
         >
           Allergies: {allergyText}
@@ -105,10 +133,10 @@ export default function PatientBanner({
           <button
             key={f.id}
             className="bg-[#fff4e5] text-[#8a5300] border border-[#e8a33d] rounded px-1.5 py-0 text-[11px] font-semibold leading-5 hover:brightness-95"
-            onClick={() => f.id && onOpenResource?.('Flag', f.id, `Flag: ${ccText(f.code)}`)}
-            title={ccText(f.code)}
+            onClick={() => f.id && onOpenResource?.('Flag', f.id, `Flag: ${flagLabel(f)}`)}
+            title={flagLabel(f)}
           >
-            ⚑ {ccText(f.code).split('—')[0].trim()}
+            ⚑ {flagLabel(f).split('—')[0].trim()}
           </button>
         ))}
       </div>

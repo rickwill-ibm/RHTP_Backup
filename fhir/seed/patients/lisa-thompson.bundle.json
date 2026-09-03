@@ -111,7 +111,7 @@
           {
             "family": "Torres",
             "given": [
-              "\u2014"
+              "—"
             ],
             "prefix": [
               "Dr."
@@ -626,7 +626,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Stable \u2014 rents apartment"
+          "text": "Stable — rents apartment"
         },
         "id": "lisa-thompson-observation-2"
       },
@@ -706,7 +706,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Adequate \u2014 urban"
+          "text": "Adequate — urban"
         },
         "id": "lisa-thompson-observation-4"
       },
@@ -1331,7 +1331,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "Annual asthma action plan review is 35 days overdue. Consider spirometry."
+            "valueString": "Annual asthma action plan review is overdue. Consider spirometry."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1358,12 +1358,15 @@
               "display": "information"
             }
           ],
-          "text": "Asthma action plan update overdue 35 days"
+          "text": "Asthma action plan update overdue"
         },
         "subject": {
           "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
         },
-        "id": "lisa-thompson-flag-1"
+        "id": "lisa-thompson-flag-1",
+        "period": {
+          "start": "2026-07-30"
+        }
       },
       "request": {
         "method": "POST",
@@ -1404,7 +1407,7 @@
               "display": "information"
             }
           ],
-          "text": "Weight management referral in progress \u2014 BMI elevated"
+          "text": "Weight management referral in progress — BMI elevated"
         },
         "subject": {
           "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"

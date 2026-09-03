@@ -118,7 +118,7 @@
           {
             "family": "Whitfield",
             "given": [
-              "\u2014"
+              "—"
             ],
             "prefix": [
               "Dr."
@@ -1135,7 +1135,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Screened \u2014 no food insecurity"
+          "text": "Screened — no food insecurity"
         },
         "id": "dorothy-simmons-observation-6"
       },
@@ -1175,7 +1175,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Barrier \u2014 kept from care"
+          "text": "Barrier — kept from care"
         },
         "id": "dorothy-simmons-observation-7"
       },
@@ -1388,7 +1388,7 @@
         },
         "authoredOn": "2026-02-14",
         "businessStatus": {
-          "text": "In progress \u2014 referral #TU-48821"
+          "text": "In progress — referral #TU-48821"
         },
         "id": "dorothy-simmons-task-1"
       },
@@ -1595,7 +1595,7 @@
         },
         "authoredOn": "2026-03-15",
         "businessStatus": {
-          "text": "Referred \u2014 awaiting engagement"
+          "text": "Referred — awaiting engagement"
         },
         "id": "dorothy-simmons-task-2"
       },
@@ -2005,7 +2005,7 @@
           }
         ],
         "code": {
-          "text": "Transport Referral \u2014 Active"
+          "text": "Transport Referral — Active"
         },
         "subject": {
           "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
@@ -2030,7 +2030,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "Moderate depression. BH referral to Cascade Valley BH sent Mar 15 \u2014 not engaged."
+            "valueString": "Moderate depression. BH referral to Cascade Valley BH sent — not engaged."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -2057,12 +2057,15 @@
               "display": "error"
             }
           ],
-          "text": "PHQ-9 14 \u2014 BH referral open since Mar 15, not engaged"
+          "text": "PHQ-9 14 — BH referral open, not engaged"
         },
         "subject": {
           "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
         },
-        "id": "dorothy-simmons-flag-1"
+        "id": "dorothy-simmons-flag-1",
+        "period": {
+          "start": "2026-03-15"
+        }
       },
       "request": {
         "method": "POST",
@@ -2103,12 +2106,15 @@
               "display": "warning"
             }
           ],
-          "text": "COPD Exacerbation \u2014 spirometry overdue 42 days"
+          "text": "COPD Exacerbation — spirometry overdue"
         },
         "subject": {
           "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
         },
-        "id": "dorothy-simmons-flag-2"
+        "id": "dorothy-simmons-flag-2",
+        "period": {
+          "start": "2026-07-23"
+        }
       },
       "request": {
         "method": "POST",

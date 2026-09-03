@@ -95,7 +95,7 @@
             "preferred": true
           }
         ],
-        "id": "lisa-thompson"
+        "id": "patient-lisa-156"
       },
       "request": {
         "method": "POST",
@@ -111,7 +111,7 @@
           {
             "family": "Torres",
             "given": [
-              "—"
+              "\u2014"
             ],
             "prefix": [
               "Dr."
@@ -626,7 +626,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Stable — rents apartment"
+          "text": "Stable \u2014 rents apartment"
         },
         "id": "lisa-thompson-observation-2"
       },
@@ -706,7 +706,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Adequate — urban"
+          "text": "Adequate \u2014 urban"
         },
         "id": "lisa-thompson-observation-4"
       },
@@ -1404,7 +1404,7 @@
               "display": "information"
             }
           ],
-          "text": "Weight management referral in progress — BMI elevated"
+          "text": "Weight management referral in progress \u2014 BMI elevated"
         },
         "subject": {
           "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"

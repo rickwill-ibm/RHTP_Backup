@@ -95,7 +95,7 @@
             "preferred": true
           }
         ],
-        "id": "james-wilson"
+        "id": "patient-james-087"
       },
       "request": {
         "method": "POST",
@@ -111,7 +111,7 @@
           {
             "family": "Okonkwo",
             "given": [
-              "—"
+              "\u2014"
             ],
             "prefix": [
               "Dr."
@@ -853,7 +853,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Stable — owns home"
+          "text": "Stable \u2014 owns home"
         },
         "id": "james-wilson-observation-1"
       },
@@ -933,7 +933,7 @@
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
-          "text": "Limited — 35 miles to clinic"
+          "text": "Limited \u2014 35 miles to clinic"
         },
         "id": "james-wilson-observation-3"
       },
@@ -1605,7 +1605,7 @@
           }
         ],
         "code": {
-          "text": "Transportation — Specialist Visits"
+          "text": "Transportation \u2014 Specialist Visits"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
@@ -1657,7 +1657,7 @@
               "display": "warning"
             }
           ],
-          "text": "A1C overdue 45 days — diabetes management gap"
+          "text": "A1C overdue 45 days \u2014 diabetes management gap"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
@@ -1703,7 +1703,7 @@
               "display": "warning"
             }
           ],
-          "text": "BNP panel overdue 22 days — CHF monitoring gap"
+          "text": "BNP panel overdue 22 days \u2014 CHF monitoring gap"
         },
         "subject": {
           "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"

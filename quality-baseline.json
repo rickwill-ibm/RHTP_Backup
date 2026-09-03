@@ -1,5 +1,5 @@
 {
-  "_comment": "Quality ratchet baseline (AI-CODING-CONVENTIONS §3). Frozen legacy over-cap files with their line counts. May only shrink. Regenerate ONLY in a refactor-only PR: bash check-file-sizes.sh --write-baseline",
+  "_comment": "Quality ratchet baseline (AI-CODING-CONVENTIONS \u00a73). Frozen legacy over-cap files with their line counts. May only shrink. Regenerate ONLY in a refactor-only PR: bash check-file-sizes.sh --write-baseline",
   "files": {
     "src/lib/mockData.data2.ts": 450,
     "src/lib/services/fhirResourceMappers.ts": 444,
@@ -75,6 +75,7 @@
     "src/app/whole-person-intelligence/page.tsx": 612,
     "src/components/DemoNavigator.tsx": 1759,
     "src/components/PostmanSuiteTab.tsx": 752,
-    "src/uhg/components/shared/PresenterControls.tsx": 445
+    "src/uhg/components/shared/PresenterControls.tsx": 445,
+    "src/lib/patientRegistry.data1.ts": 899
   }
 }

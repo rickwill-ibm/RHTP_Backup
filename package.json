@@ -63,6 +63,7 @@
     "test:e2e": "playwright test",
     "a11y": "playwright test e2e/a11y.spec.ts",
     "seed:maria": "node tools/seed/load-maria.mjs",
+    "seed:patients": "node fhir/seed-patients.mjs",
     "backbone:up": "docker compose -f install/docker-compose.backbone.yml up -d",
     "backbone:down": "docker compose -f install/docker-compose.backbone.yml down",
     "backbone:logs": "docker compose -f install/docker-compose.backbone.yml logs -f",

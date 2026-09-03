@@ -3,17 +3,33 @@
 // FHIR ID mapping bridges EHR launch context to platform patient IDs
 
 export * from './patientRegistry.types';
-export { FHIR_ID_MAP, PLATFORM_TO_FHIR_ID_MAP } from './patientRegistry.data1';
 
-import { REGISTRY_PART1, FHIR_ID_MAP, PLATFORM_TO_FHIR_ID_MAP } from './patientRegistry.data1';
+import {
+  REGISTRY_PART1,
+  FHIR_ID_MAP as MAP1,
+  PLATFORM_TO_FHIR_ID_MAP as PMAP1,
+} from './patientRegistry.data1';
 import { REGISTRY_PART2 } from './patientRegistry.data2';
 import { REGISTRY_PART3 } from './patientRegistry.data3';
+import {
+  REGISTRY_PART4,
+  FHIR_ID_MAP_EXT,
+  PLATFORM_TO_FHIR_ID_MAP_EXT,
+} from './patientRegistry.data4';
 import type { RegistryPatient } from './patientRegistry.types';
+
+// Merged ID maps — data1 is the canonical baseline; data4 extends it.
+export const FHIR_ID_MAP: Record<string, string> = { ...MAP1, ...FHIR_ID_MAP_EXT };
+export const PLATFORM_TO_FHIR_ID_MAP: Record<string, string> = {
+  ...PMAP1,
+  ...PLATFORM_TO_FHIR_ID_MAP_EXT,
+};
 
 const PATIENT_REGISTRY: RegistryPatient[] = [
   ...REGISTRY_PART1,
   ...REGISTRY_PART2,
   ...REGISTRY_PART3,
+  ...REGISTRY_PART4,
 ];
 
 export function getPatientById(platformId: string): RegistryPatient | undefined {
@@ -38,7 +54,9 @@ export function resolveToCanonicalFhirPatientId(id: string): string | undefined 
   if (!id) return undefined;
   if (PLATFORM_TO_FHIR_ID_MAP[id]) return PLATFORM_TO_FHIR_ID_MAP[id];
   const platformId = resolveFhirToPlatformId(id);
-  return platformId ? PLATFORM_TO_FHIR_ID_MAP[platformId] ?? id.replace(/^patient\//, '') : id.replace(/^patient\//, '');
+  return platformId
+    ? (PLATFORM_TO_FHIR_ID_MAP[platformId] ?? id.replace(/^patient\//, ''))
+    : id.replace(/^patient\//, '');
 }
 
 export function getAllPatients(): RegistryPatient[] {

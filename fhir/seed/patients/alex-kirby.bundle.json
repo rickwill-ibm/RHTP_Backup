@@ -133,7 +133,7 @@
         "managingOrganization": {
           "reference": "urn:uuid:6e720e3e-6e00-4b05-8c30-a1cfde5432d2"
         },
-        "id": "alex-kirby"
+        "id": "patient-alex-kirby"
       },
       "request": {
         "method": "POST",
@@ -282,19 +282,19 @@
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
           "value": 78,
-          "unit": "µmol/L"
+          "unit": "\u00b5mol/L"
         },
         "referenceRange": [
           {
             "low": {
               "value": 60,
-              "unit": "µmol/L"
+              "unit": "\u00b5mol/L"
             },
             "high": {
               "value": 110,
-              "unit": "µmol/L"
+              "unit": "\u00b5mol/L"
             },
-            "text": "60-110 µmol/L"
+            "text": "60-110 \u00b5mol/L"
           }
         ],
         "id": "alex-kirby-observation-3"

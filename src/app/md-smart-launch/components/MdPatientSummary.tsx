@@ -1,145 +1,66 @@
 'use client';
 import React, { useState } from 'react';
-import { mockPatients, mockCareGaps, mockHCCSuspects } from '@/lib/mockData';
 import RiskBadge from '@/components/ui/RiskBadge';
 import Icon from '@/components/ui/AppIcon';
 import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
+import { ccText, codeOf, fmtDate, quantityText, interpCode } from '@/lib/fhir/types';
+import {
+  CHRONIC_CONDITIONS,
+  CDI_OPPORTUNITIES,
+  JOURNEY_PHASES,
+  ACUITY_DOT,
+  TREND_ICON,
+} from '../data/cdiData';
+import CdiEvidencePanel from './CdiEvidencePanel';
+import { useSummaryIdentity } from '../hooks/useSummaryIdentity';
 
 interface MdPatientSummaryProps {
+  /** Resolved FHIR patient ID (from resolveIds — correct for all patients). */
+  patientId: string;
   launchContext: SmartLaunchContext;
 }
 
-const CHRONIC_CONDITIONS = [
-  { code: 'T2DM', label: 'Type 2 Diabetes', icd: 'E11.65', hcc: 'HCC 18', acuity: 'critical', metric: 'A1C 9.2%', trend: 'worsening' },
-  { code: 'CKD', label: 'CKD Stage 3b', icd: 'N18.32', hcc: 'HCC 136', acuity: 'critical', metric: 'eGFR 42', trend: 'worsening' },
-  { code: 'HTN', label: 'Hypertension', icd: 'I10', hcc: 'HCC 85', acuity: 'high', metric: 'BP 158/96', trend: 'stable' },
-  { code: 'HF', label: 'Heart Failure (HFpEF)', icd: 'I50.30', hcc: 'HCC 85', acuity: 'high', metric: 'EF 55%', trend: 'stable' },
-];
+export default function MdPatientSummary({ patientId, launchContext }: MdPatientSummaryProps) {
+  const {
+    isMockPatient,
+    careGaps,
+    hccSuspects,
+    fhirMeds,
+    fhirLabs,
+    fhirVitals,
+    fhirProblems,
+    patientName,
+    patientDob,
+    patientGender,
+    patientMrn,
+    patientPayer,
+    patientInsId,
+    patientRafScore,
+    patientRafDelta,
+    patientErRisk,
+    patientOpenGaps,
+    patientHccSuspects,
+    patientHccValue,
+    patientRiskTier,
+    patientInitials,
+  } = useSummaryIdentity(patientId, launchContext);
 
-const ACUITY_DOT: Record<string, string> = {
-  critical: 'bg-[#da1e28]',
-  high: 'bg-[#f1c21b]',
-  moderate: 'bg-[#0043ce]',
-};
-
-const TREND_ICON: Record<string, { icon: string; color: string }> = {
-  worsening: { icon: 'ArrowTrendingDownIcon', color: 'text-[#da1e28]' },
-  stable: { icon: 'MinusIcon', color: 'text-[#b45309]' },
-  improving: { icon: 'ArrowTrendingUpIcon', color: 'text-[#24a148]' },
-};
-
-const JOURNEY_PHASES = [
-  { key: 'stable-management', label: 'Stable', color: 'bg-[#24a148]' },
-  { key: 'gap-in-care', label: 'Gap', color: 'bg-[#f1c21b]' },
-  { key: 'deteriorating', label: 'Deteriorating', color: 'bg-[#ff832b]' },
-  { key: 'high-risk-transition', label: 'High-Risk', color: 'bg-[#da1e28]' },
-  { key: 'post-acute-recovery', label: 'Post-Acute', color: 'bg-[#0043ce]' },
-];
-
-const CDI_OPPORTUNITIES = [
-  {
-    id: 'cdi-001',
-    condition: 'T2DM with CKD Stage 3',
-    icd: 'E11.65 + N18.32',
-    hcc: 'HCC 18 + HCC 136',
-    confidence: 91,
-    rafDelta: '+0.42',
-    revenueDelta: '$3,200',
-    evidenceSources: ['EMR', 'Claims', 'HIE'],
-    justification: 'Claims data and LPR confirm active T2DM with CKD Stage 3b. Last documented encounter 2025-11-14. A1C 9.2% and eGFR 42 support combined coding. Both conditions require separate HCC capture for accurate RAF.',
-    signals: [
-      { label: 'A1C', value: '9.2% (2026-02-10)', source: 'EMR', flagged: true },
-      { label: 'eGFR', value: '42 (2026-03-15)', source: 'EMR', flagged: true },
-      { label: 'Claims DX', value: 'E11.65 coded 2025-11-14', source: 'Claims', flagged: false },
-      { label: 'HIE Record', value: 'Nephrology note 2025-12-01', source: 'HIE', flagged: false },
-    ],
-    icd10Guidance: 'Use E11.65 (T2DM with hyperglycemia) + N18.32 (CKD Stage 3b). Do NOT use E11.65 alone — dual coding required for HCC 136 capture.',
-  },
-  {
-    id: 'cdi-002',
-    condition: 'Heart Failure — HFpEF',
-    icd: 'I50.30',
-    hcc: 'HCC 85',
-    confidence: 87,
-    rafDelta: '+0.28',
-    revenueDelta: '$2,100',
-    evidenceSources: ['EMR', 'Claims'],
-    justification: 'Echo confirms EF 55% consistent with HFpEF. BNP 210 pg/mL elevated. Prior year claims coded I50.9 (unspecified) — specificity upgrade to I50.30 required for HCC 85 capture.',
-    signals: [
-      { label: 'Echo EF', value: '55% (2026-01-15)', source: 'EMR', flagged: false },
-      { label: 'BNP', value: '210 pg/mL (2026-03-20)', source: 'EMR', flagged: true },
-      { label: 'Prior Claim', value: 'I50.9 coded 2025-09-10', source: 'Claims', flagged: false },
-    ],
-    icd10Guidance: 'Upgrade from I50.9 to I50.30 (HFpEF, unspecified). Confirm systolic function preserved on echo documentation.',
-  },
-  {
-    id: 'cdi-003',
-    condition: 'Atrial Fibrillation',
-    icd: 'I48.91',
-    hcc: 'HCC 96',
-    confidence: 79,
-    rafDelta: '+0.19',
-    revenueDelta: '$1,450',
-    evidenceSources: ['EMR', 'HIE'],
-    justification: 'ECG on 2026-01-20 confirms persistent AFib. Not coded in current encounter. HCC 96 requires annual recapture — last coded 2025-08-12.',
-    signals: [
-      { label: 'ECG', value: 'Persistent AFib (2026-01-20)', source: 'EMR', flagged: true },
-      { label: 'Last Coded', value: 'I48.91 — 2025-08-12', source: 'Claims', flagged: false },
-      { label: 'HIE Note', value: 'Cardiology — AFib confirmed', source: 'HIE', flagged: false },
-    ],
-    icd10Guidance: 'Use I48.91 (unspecified AFib). If paroxysmal confirmed, use I48.0. Annual recapture required — HCC 96 does not carry forward.',
-  },
-];
-
-const SOURCE_BADGE: Record<string, string> = {
-  EMR: 'bg-[#d0e2ff] text-[#0043ce]',
-  Claims: 'bg-[#fdf6dd] text-[#b45309]',
-  HIE: 'bg-[#defbe6] text-[#0e6027]',
-  LPR: 'bg-[#f6f2ff] text-[#6929c4]',
-};
-
-export default function MdPatientSummary({ launchContext }: MdPatientSummaryProps) {
-  const patient = mockPatients.find((p) => p.id === launchContext.patientId) || mockPatients[0];
-
-  // Filter care gaps to HEDIS and MIPS only (no STARS)
-  const careGaps = mockCareGaps
-    .filter((g) => g.patientId === patient.id && g.status === 'Open' && (g.program === 'HEDIS' || g.program === 'MIPS'))
-    .slice(0, 5);
-
-  const hccSuspects = mockHCCSuspects.filter((h) => h.patientId === patient.id).slice(0, 3);
-
-  // State
+  // ── State ──────────────────────────────────────────────────────────────────
   const [journeyExpanded, setJourneyExpanded] = useState(false);
   const [canViewFinancials, setCanViewFinancials] = useState(false);
   const [expandedCdi, setExpandedCdi] = useState<string | null>(null);
 
-  const MEDS = [
-    { name: 'Lisinopril 10mg', freq: 'QD', adherence: 78, flag: false },
-    { name: 'Metformin 500mg', freq: 'BID', adherence: 61, flag: true },
-    { name: 'Atorvastatin 400', freq: 'QHS', adherence: 84, flag: false },
-    { name: 'Furosemide 200', freq: 'QD', adherence: 72, flag: false },
-    { name: 'Potassium Chloride 200', freq: 'QD', adherence: 55, flag: true },
-  ];
-
-  const LABS = [
-    { name: 'A1C', value: '9.2%', date: '2026-02-10', flag: true },
-    { name: 'eGFR', value: '42', date: '2026-03-15', flag: true },
-    { name: 'K+', value: '5.1 mEq/L', date: '2026-04-01', flag: true },
-    { name: 'LDL', value: '118 mg/dL', date: '2026-02-10', flag: false },
-    { name: 'BNP', value: '210 pg/mL', date: '2026-03-20', flag: false },
-    { name: 'BP', value: '158/96', date: '2026-04-01', flag: true },
-  ];
-
   const currentPhaseIdx = JOURNEY_PHASES.findIndex((p) => p.key === 'high-risk-transition');
-
   const totalRafAtRisk = CDI_OPPORTUNITIES.reduce((s, c) => s + parseFloat(c.rafDelta), 0);
-  const totalRevenueAtRisk = CDI_OPPORTUNITIES.reduce((s, c) => s + parseInt(c.revenueDelta.replace(/[$,]/g, '')), 0);
+  const totalRevenueAtRisk = CDI_OPPORTUNITIES.reduce(
+    (s, c) => s + parseInt(c.revenueDelta.replace(/[$,]/g, '')),
+    0
+  );
 
   return (
     <div className="space-y-3">
       {/* ── 4-QUADRANT GRID ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3">
-
         {/* ╔══════════════════════════════╗
             ║  TOP LEFT — Patient Header   ║
             ╚══════════════════════════════╝ */}
@@ -147,26 +68,28 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
           {/* Identity row */}
           <div className="px-4 py-3 flex items-start gap-3 border-b border-carbon-gray-20">
             <div className="w-10 h-10 bg-carbon-gray-90 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm font-bold">
-                {patient.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-              </span>
+              <span className="text-white text-sm font-bold">{patientInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                <h2 className="text-sm font-semibold text-carbon-gray-100">{patient.name}</h2>
-                <RiskBadge tier={patient.riskTier} />
+                <h2 className="text-sm font-semibold text-carbon-gray-100">{patientName}</h2>
+                <RiskBadge tier={patientRiskTier} />
                 <span className="text-2xs font-semibold px-1.5 py-0.5 bg-[#f6f2ff] text-[#6929c4] border border-[#d4bbff]">
                   ⚡ Cerner
                 </span>
               </div>
               <div className="flex items-center gap-3 text-2xs text-carbon-gray-50 flex-wrap">
-                <span>DOB: {patient.dob}</span>
-                <span>Age: {patient.age}</span>
-                <span>{patient.gender}</span>
-                <span className="font-mono">{patient.mrn}</span>
-                <span>Enc: <span className="font-mono text-carbon-gray-70">{launchContext.encounterId}</span></span>
+                <span>DOB: {fmtDate(patientDob)}</span>
+                <span>{patientGender}</span>
+                <span className="font-mono">MRN: {patientMrn}</span>
+                <span>
+                  Enc:{' '}
+                  <span className="font-mono text-carbon-gray-70">{launchContext.encounterId}</span>
+                </span>
               </div>
-              <p className="text-2xs text-carbon-gray-50 mt-0.5">{patient.payer} · ID: <span className="font-mono">{patient.insuranceId}</span></p>
+              <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                {patientPayer} · ID: <span className="font-mono">{patientInsId}</span>
+              </p>
             </div>
           </div>
 
@@ -180,8 +103,12 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
             >
               <Icon name="ExclamationTriangleIcon" size={12} className="text-[#da1e28]" />
               <div className="text-left">
-                <p className="text-2xs font-bold text-[#da1e28] leading-tight whitespace-nowrap">High-Risk</p>
-                <p className="text-2xs text-[#da1e28] leading-tight whitespace-nowrap">Transition</p>
+                <p className="text-2xs font-bold text-[#da1e28] leading-tight whitespace-nowrap">
+                  High-Risk
+                </p>
+                <p className="text-2xs text-[#da1e28] leading-tight whitespace-nowrap">
+                  Transition
+                </p>
               </div>
               <Icon
                 name={journeyExpanded ? 'ChevronUpIcon' : 'ChevronDownIcon'}
@@ -192,30 +119,48 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
 
             {/* RAF Score */}
             <div className="px-3 py-2.5 border-r border-carbon-gray-20 text-center min-w-[70px]">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">RAF Score</p>
-              <p className="text-lg font-bold tabular-nums font-mono text-carbon-gray-100">{patient.rafScore.toFixed(2)}</p>
-              <p className="text-2xs text-[#24a148]">+{patient.rafScoreDelta.toFixed(2)} delta</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">
+                RAF Score
+              </p>
+              <p className="text-lg font-bold tabular-nums font-mono text-carbon-gray-100">
+                {patientRafScore.toFixed(2)}
+              </p>
+              <p className="text-2xs text-[#24a148]">+{patientRafDelta.toFixed(2)} delta</p>
             </div>
 
             {/* ER Risk */}
             <div className="px-3 py-2.5 border-r border-carbon-gray-20 text-center min-w-[65px]">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">ER Risk 30d</p>
-              <p className="text-lg font-bold tabular-nums font-mono text-[#da1e28]">{Math.round(patient.predictedErRisk * 100)}%</p>
-              <p className="text-2xs text-[#da1e28]">2 visits/60d</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">
+                ER Risk 30d
+              </p>
+              <p className="text-lg font-bold tabular-nums font-mono text-[#da1e28]">
+                {Math.round(patientErRisk * 100)}%
+              </p>
+              <p className="text-2xs text-[#da1e28]">{isMockPatient ? '2 visits/60d' : '—'}</p>
             </div>
 
             {/* Care Gaps */}
             <div className="px-3 py-2.5 border-r border-carbon-gray-20 text-center min-w-[65px]">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">Care Gaps</p>
-              <p className="text-lg font-bold tabular-nums font-mono text-[#0043ce]">{patient.openCareGaps}</p>
-              <p className="text-2xs text-[#da1e28]">2 overdue</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">
+                Care Gaps
+              </p>
+              <p className="text-lg font-bold tabular-nums font-mono text-[#0043ce]">
+                {patientOpenGaps}
+              </p>
+              <p className="text-2xs text-[#da1e28]">{isMockPatient ? '2 overdue' : '—'}</p>
             </div>
 
             {/* HCC Suspects */}
             <div className="px-3 py-2.5 text-center min-w-[65px]">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">HCC Suspects</p>
-              <p className="text-lg font-bold tabular-nums font-mono text-[#b45309]">{patient.openHCCSuspects}</p>
-              <p className="text-2xs text-[#b45309]">${(patient.hccSuspectValue / 1000).toFixed(1)}K risk</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-0.5">
+                HCC Suspects
+              </p>
+              <p className="text-lg font-bold tabular-nums font-mono text-[#b45309]">
+                {patientHccSuspects}
+              </p>
+              <p className="text-2xs text-[#b45309]">
+                {patientHccValue > 0 ? `$${(patientHccValue / 1000).toFixed(1)}K risk` : '—'}
+              </p>
             </div>
           </div>
 
@@ -229,14 +174,22 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                   const isPast = idx < currentPhaseIdx;
                   return (
                     <React.Fragment key={phase.key}>
-                      <div className={`flex flex-col items-center ${isActive ? 'opacity-100' : isPast ? 'opacity-50' : 'opacity-25'}`}>
-                        <div className={`w-2 h-2 rounded-full ${isActive ? phase.color : isPast ? 'bg-carbon-gray-40' : 'bg-carbon-gray-20'}`} />
-                        <span className={`text-2xs mt-1 whitespace-nowrap font-medium ${isActive ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}>
+                      <div
+                        className={`flex flex-col items-center ${isActive ? 'opacity-100' : isPast ? 'opacity-50' : 'opacity-25'}`}
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${isActive ? phase.color : isPast ? 'bg-carbon-gray-40' : 'bg-carbon-gray-20'}`}
+                        />
+                        <span
+                          className={`text-2xs mt-1 whitespace-nowrap font-medium ${isActive ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}
+                        >
                           {phase.label}
                         </span>
                       </div>
                       {idx < JOURNEY_PHASES.length - 1 && (
-                        <div className={`flex-1 h-px mx-1 ${idx < currentPhaseIdx ? 'bg-carbon-gray-40' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`flex-1 h-px mx-1 ${idx < currentPhaseIdx ? 'bg-carbon-gray-40' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -246,9 +199,12 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
               <div className="bg-[#fff1f1] border border-[#ffb3b8] px-3 py-2 mb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-[#da1e28] mb-0.5">High-Risk Transition · 47 days in phase</p>
+                    <p className="text-xs font-semibold text-[#da1e28] mb-0.5">
+                      High-Risk Transition · 47 days in phase
+                    </p>
                     <p className="text-2xs text-carbon-gray-70 leading-relaxed">
-                      Recent ER utilization, deteriorating chronic condition control, and multiple open care gaps indicate elevated near-term risk.
+                      Recent ER utilization, deteriorating chronic condition control, and multiple
+                      open care gaps indicate elevated near-term risk.
                     </p>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -258,7 +214,8 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                   </div>
                 </div>
                 <p className="text-2xs text-carbon-gray-70 mt-1.5 pt-1.5 border-t border-[#ffb3b8]">
-                  <span className="font-medium">Next milestone:</span> Post-acute follow-up due within 7 days
+                  <span className="font-medium">Next milestone:</span> Post-acute follow-up due
+                  within 7 days
                 </p>
               </div>
               {/* Signals compact */}
@@ -269,40 +226,94 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                   { label: 'BP Control', value: '158/96 (2026-04-01)', flagged: true },
                   { label: 'Med Adherence', value: '61% PDC', flagged: true },
                 ].map((sig, i) => (
-                  <div key={i} className={`flex items-center gap-1.5 px-2 py-1 border text-2xs ${sig.flagged ? 'bg-[#fff8f8] border-[#ffb3b8]' : 'bg-white border-carbon-gray-20'}`}>
-                    <div className={`w-1 h-1 rounded-full flex-shrink-0 ${sig.flagged ? 'bg-[#da1e28]' : 'bg-carbon-gray-40'}`} />
+                  <div
+                    key={i}
+                    className={`flex items-center gap-1.5 px-2 py-1 border text-2xs ${sig.flagged ? 'bg-[#fff8f8] border-[#ffb3b8]' : 'bg-white border-carbon-gray-20'}`}
+                  >
+                    <div
+                      className={`w-1 h-1 rounded-full flex-shrink-0 ${sig.flagged ? 'bg-[#da1e28]' : 'bg-carbon-gray-40'}`}
+                    />
                     <span className="text-carbon-gray-50 truncate">{sig.label}:</span>
-                    <span className={`font-medium truncate ${sig.flagged ? 'text-[#da1e28]' : 'text-carbon-gray-100'}`}>{sig.value}</span>
+                    <span
+                      className={`font-medium truncate ${sig.flagged ? 'text-[#da1e28]' : 'text-carbon-gray-100'}`}
+                    >
+                      {sig.value}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Compact 4 Chronic Conditions */}
+          {/* Chronic Conditions — FHIR problem list for real patients, authored list for Maria */}
           <div className="flex-1">
             <div className="px-4 py-2 border-b border-carbon-gray-20 flex items-center gap-2">
               <Icon name="HeartIcon" size={12} className="text-[#da1e28]" />
-              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">Chronic Conditions</span>
-              <span className="ml-auto text-2xs text-carbon-gray-50">4 active</span>
+              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">
+                Chronic Conditions
+              </span>
+              <span className="ml-auto text-2xs text-carbon-gray-50">
+                {isMockPatient ? CHRONIC_CONDITIONS.length : fhirProblems.data.length} active
+              </span>
             </div>
             <div className="divide-y divide-carbon-gray-10">
-              {CHRONIC_CONDITIONS.map((cond) => {
-                const tr = TREND_ICON[cond.trend];
-                return (
-                  <div key={cond.code} className="px-4 py-2 flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ACUITY_DOT[cond.acuity]}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <p className="text-xs font-medium text-carbon-gray-100 truncate">{cond.label}</p>
-                        <Icon name={tr.icon as any} size={10} className={tr.color} />
+              {isMockPatient ? (
+                // Maria: keep authored hardcoded conditions (demo narrative intact)
+                CHRONIC_CONDITIONS.map((cond) => {
+                  const tr = TREND_ICON[cond.trend];
+                  return (
+                    <div key={cond.code} className="px-4 py-2 flex items-center gap-2">
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${ACUITY_DOT[cond.acuity]}`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs font-medium text-carbon-gray-100 truncate">
+                            {cond.label}
+                          </p>
+                          <Icon name={tr.icon as any} size={10} className={tr.color} />
+                        </div>
+                        <p className="text-2xs text-carbon-gray-50">
+                          {cond.icd} · {cond.hcc}
+                        </p>
                       </div>
-                      <p className="text-2xs text-carbon-gray-50">{cond.icd} · {cond.hcc}</p>
+                      <span className="text-2xs font-mono text-carbon-gray-70 flex-shrink-0">
+                        {cond.metric}
+                      </span>
                     </div>
-                    <span className="text-2xs font-mono text-carbon-gray-70 flex-shrink-0">{cond.metric}</span>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : // Real patients: FHIR problem list
+              fhirProblems.loading ? (
+                <div className="px-4 py-3 text-2xs text-carbon-gray-50 italic">
+                  Loading conditions…
+                </div>
+              ) : fhirProblems.data.length === 0 ? (
+                <div className="px-4 py-3 text-2xs text-carbon-gray-50">
+                  No active conditions on record
+                </div>
+              ) : (
+                fhirProblems.data.map((p) => {
+                  const icd =
+                    codeOf(p.code, 'http://hl7.org/fhir/sid/icd-10-cm') ?? codeOf(p.code) ?? '';
+                  return (
+                    <div key={p.id} className="px-4 py-2 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-[#da1e28]" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-carbon-gray-100 truncate">
+                          {ccText(p.code)}
+                        </p>
+                        <p className="text-2xs text-carbon-gray-50">
+                          {icd} · Onset {fmtDate(p.onsetDateTime)}
+                        </p>
+                      </div>
+                      <span className="text-2xs font-mono text-carbon-gray-70 flex-shrink-0">
+                        {ccText(p.clinicalStatus)}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -311,7 +322,9 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
             <Icon name="BoltIcon" size={11} className="text-[#6929c4]" />
             <span className="text-2xs text-[#6929c4] font-semibold">SMART on FHIR · Cerner</span>
             <span className="text-2xs text-carbon-gray-50">{launchContext.practitionerName}</span>
-            <span className="text-2xs text-carbon-gray-50 ml-auto">NPI: {launchContext.practitionerNpi}</span>
+            <span className="text-2xs text-carbon-gray-50 ml-auto">
+              NPI: {launchContext.practitionerNpi}
+            </span>
           </div>
         </div>
 
@@ -323,10 +336,16 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
           <div className="px-4 py-2.5 border-b border-carbon-gray-20 flex items-center gap-2">
             <Icon name="ClipboardDocumentListIcon" size={14} className="text-[#0043ce]" />
             <span className="text-xs font-semibold text-carbon-gray-100">Open Care Gaps</span>
-            <span className="bg-[#da1e28] text-white text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center">{careGaps.length}</span>
+            <span className="bg-[#da1e28] text-white text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center">
+              {careGaps.length}
+            </span>
             <div className="ml-auto flex items-center gap-1.5">
-              <span className="text-2xs px-1.5 py-0.5 bg-[#d0e2ff] text-[#0043ce] font-semibold">HEDIS</span>
-              <span className="text-2xs px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] font-semibold">MIPS</span>
+              <span className="text-2xs px-1.5 py-0.5 bg-[#d0e2ff] text-[#0043ce] font-semibold">
+                HEDIS
+              </span>
+              <span className="text-2xs px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] font-semibold">
+                MIPS
+              </span>
               <span className="text-2xs text-carbon-gray-40 italic">STARS excluded</span>
             </div>
           </div>
@@ -335,21 +354,32 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
             <div className="divide-y divide-carbon-gray-10 flex-1">
               {careGaps.map((gap) => {
                 const isOverdue = gap.daysOpen > 90;
-                const programColor = gap.program === 'HEDIS' ?'bg-[#d0e2ff] text-[#0043ce]' :'bg-[#defbe6] text-[#0e6027]';
+                const programColor =
+                  gap.program === 'HEDIS'
+                    ? 'bg-[#d0e2ff] text-[#0043ce]'
+                    : 'bg-[#defbe6] text-[#0e6027]';
                 return (
                   <div key={gap.id} className={`px-4 py-3 ${isOverdue ? 'bg-[#fff8f8]' : ''}`}>
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className={`text-2xs font-semibold px-1.5 py-0.5 flex-shrink-0 ${programColor}`}>
+                          <span
+                            className={`text-2xs font-semibold px-1.5 py-0.5 flex-shrink-0 ${programColor}`}
+                          >
                             {gap.program}
                           </span>
-                          <p className="text-xs font-medium text-carbon-gray-100 truncate">{gap.measureName}</p>
+                          <p className="text-xs font-medium text-carbon-gray-100 truncate">
+                            {gap.measureName}
+                          </p>
                         </div>
-                        <p className="text-2xs text-carbon-gray-50">Due: {gap.dueDate} · {gap.closureRequirement}</p>
+                        <p className="text-2xs text-carbon-gray-50">
+                          Due: {gap.dueDate} · {gap.closureRequirement}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className={`text-2xs font-semibold px-2 py-0.5 ${isOverdue ? 'bg-[#ffe0e0] text-[#da1e28]' : 'bg-[#fdf6dd] text-[#b45309]'}`}>
+                        <span
+                          className={`text-2xs font-semibold px-2 py-0.5 ${isOverdue ? 'bg-[#ffe0e0] text-[#da1e28]' : 'bg-[#fdf6dd] text-[#b45309]'}`}
+                        >
                           {gap.daysOpen}d open
                         </span>
                         <button className="text-2xs px-2 py-0.5 bg-[#0043ce] text-white hover:bg-[#0035b3] transition-colors">
@@ -377,7 +407,9 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
           <div className="border-t border-carbon-gray-20 px-4 py-2 bg-[#f4f4f4] flex items-center gap-3">
             <Icon name="TrophyIcon" size={12} className="text-[#0e6027]" />
             <span className="text-2xs text-carbon-gray-70">MIPS Quality Score Impact</span>
-            <span className="ml-auto text-2xs font-mono font-semibold text-[#0043ce]">Est. +12 pts if closed</span>
+            <span className="ml-auto text-2xs font-mono font-semibold text-[#0043ce]">
+              Est. +12 pts if closed
+            </span>
           </div>
         </div>
 
@@ -385,64 +417,118 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
             ║  BOTTOM LEFT — Meds, Labs, CDI           ║
             ╚══════════════════════════════════════════╝ */}
         <div className="bg-white border border-carbon-gray-20 flex flex-col">
-
-          {/* Medications */}
+          {/* Medications — FHIR MedicationRequest */}
           <div className="border-b border-carbon-gray-20">
             <div className="px-4 py-2 border-b border-carbon-gray-20 flex items-center gap-2">
               <Icon name="PlusCircleIcon" size={12} className="text-[#0e6027]" />
-              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">Medications</span>
-              <span className="ml-auto text-2xs text-carbon-gray-50">{MEDS.length} active</span>
+              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">
+                Medications
+              </span>
+              <span className="ml-auto text-2xs text-carbon-gray-50">
+                {fhirMeds.data.length} active
+              </span>
             </div>
-            <div className="divide-y divide-carbon-gray-10">
-              {MEDS.map((med, idx) => (
-                <div key={`med-${idx}`} className={`px-4 py-2 ${med.flag ? 'bg-[#fff8f8]' : ''}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    {med.flag && <Icon name="ExclamationCircleIcon" size={11} className="text-[#da1e28] flex-shrink-0" />}
-                    <p className="text-xs font-medium text-carbon-gray-100 flex-1 truncate">{med.name}</p>
-                    <span className="text-2xs text-carbon-gray-50 flex-shrink-0">{med.freq}</span>
-                    <span className={`text-2xs font-mono font-semibold flex-shrink-0 ${med.adherence >= 80 ? 'text-[#24a148]' : med.adherence >= 65 ? 'text-[#b45309]' : 'text-[#da1e28]'}`}>
-                      {med.adherence}%
-                    </span>
+            {fhirMeds.loading ? (
+              <div className="px-4 py-2 text-2xs text-carbon-gray-50 italic">Loading…</div>
+            ) : fhirMeds.data.length === 0 ? (
+              <div className="px-4 py-2 text-2xs text-carbon-gray-50">No active medications</div>
+            ) : (
+              <div className="divide-y divide-carbon-gray-10">
+                {fhirMeds.data.map((m) => (
+                  <div key={m.id} className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-medium text-carbon-gray-100 flex-1 truncate">
+                        {ccText(m.medicationCodeableConcept)}
+                      </p>
+                      <span className="text-2xs text-carbon-gray-50 flex-shrink-0 truncate max-w-[120px]">
+                        {m.dosageInstruction?.[0]?.text ?? ''}
+                      </span>
+                    </div>
                   </div>
-                  <div className="h-1 bg-carbon-gray-20">
-                    <div
-                      className={`h-full transition-all ${med.adherence >= 80 ? 'bg-[#24a148]' : med.adherence >= 65 ? 'bg-[#f1c21b]' : 'bg-[#da1e28]'}`}
-                      style={{ width: `${med.adherence}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Recent Labs & Vitals */}
+          {/* Recent Labs & Vitals — FHIR Observation */}
           <div className="border-b border-carbon-gray-20">
             <div className="px-4 py-2 border-b border-carbon-gray-20 flex items-center gap-2">
               <Icon name="BeakerIcon" size={12} className="text-[#0043ce]" />
-              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">Recent Labs & Vitals</span>
+              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">
+                Recent Labs & Vitals
+              </span>
             </div>
-            <div className="grid grid-cols-3 divide-x divide-carbon-gray-10">
-              {LABS.map((lab, idx) => (
-                <div key={`lab-${idx}`} className={`px-3 py-2 ${lab.flag ? 'bg-[#fff8f8]' : ''}`}>
-                  <div className="flex items-center gap-1 mb-0.5">
-                    {lab.flag && <Icon name="ExclamationCircleIcon" size={10} className="text-[#da1e28]" />}
-                    <p className="text-2xs text-carbon-gray-50">{lab.name}</p>
-                  </div>
-                  <p className={`text-sm font-mono font-bold tabular-nums ${lab.flag ? 'text-[#da1e28]' : 'text-carbon-gray-100'}`}>
-                    {lab.value}
-                  </p>
-                  <p className="text-2xs text-carbon-gray-40">{lab.date}</p>
-                </div>
-              ))}
-            </div>
+            {fhirLabs.loading ? (
+              <div className="px-4 py-2 text-2xs text-carbon-gray-50 italic">Loading…</div>
+            ) : (
+              <div className="grid grid-cols-3 divide-x divide-carbon-gray-10">
+                {/* Latest 6 unique labs */}
+                {(() => {
+                  const seen = new Set<string>();
+                  const rows: typeof fhirLabs.data = [];
+                  for (const l of fhirLabs.data) {
+                    const key = codeOf(l.code) ?? ccText(l.code);
+                    if (!seen.has(key)) {
+                      seen.add(key);
+                      rows.push(l);
+                    }
+                    if (rows.length >= 6) break;
+                  }
+                  // Pad with vitals if < 6 labs
+                  if (rows.length < 6) {
+                    const vSeen = new Set(rows.map((r) => codeOf(r.code) ?? ccText(r.code)));
+                    for (const v of fhirVitals.data) {
+                      const key = codeOf(v.code) ?? ccText(v.code);
+                      if (!vSeen.has(key)) {
+                        vSeen.add(key);
+                        rows.push(v);
+                      }
+                      if (rows.length >= 6) break;
+                    }
+                  }
+                  return rows.map((obs) => {
+                    const flagged =
+                      interpCode(obs) === 'H' || interpCode(obs) === 'L' || interpCode(obs) === 'C';
+                    return (
+                      <div key={obs.id} className={`px-3 py-2 ${flagged ? 'bg-[#fff8f8]' : ''}`}>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          {flagged && (
+                            <Icon
+                              name="ExclamationCircleIcon"
+                              size={10}
+                              className="text-[#da1e28]"
+                            />
+                          )}
+                          <p className="text-2xs text-carbon-gray-50 truncate">
+                            {ccText(obs.code)}
+                          </p>
+                        </div>
+                        <p
+                          className={`text-sm font-mono font-bold tabular-nums ${flagged ? 'text-[#da1e28]' : 'text-carbon-gray-100'}`}
+                        >
+                          {quantityText(obs.valueQuantity)}
+                        </p>
+                        <p className="text-2xs text-carbon-gray-40">
+                          {fmtDate(obs.effectiveDateTime)}
+                        </p>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            )}
           </div>
 
           {/* CDI — Clinical Documentation Opportunities */}
           <div className="flex-1">
             <div className="px-4 py-2 border-b border-carbon-gray-20 flex items-center gap-2">
               <Icon name="DocumentMagnifyingGlassIcon" size={12} className="text-[#b45309]" />
-              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">Clinical Documentation Opportunities</span>
-              <span className="bg-[#b45309] text-white text-2xs font-bold px-1.5 py-0.5 ml-1">{CDI_OPPORTUNITIES.length}</span>
+              <span className="text-2xs font-semibold text-carbon-gray-100 uppercase tracking-wide">
+                Clinical Documentation Opportunities
+              </span>
+              <span className="bg-[#b45309] text-white text-2xs font-bold px-1.5 py-0.5 ml-1">
+                {CDI_OPPORTUNITIES.length}
+              </span>
               <span className="ml-auto text-2xs font-mono font-semibold text-[#b45309]">
                 ${(totalRevenueAtRisk / 1000).toFixed(1)}K at risk
               </span>
@@ -455,8 +541,12 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                     {/* CDI row */}
                     <div className="px-4 py-2.5 flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-carbon-gray-100 truncate">{cdi.condition}</p>
-                        <p className="text-2xs text-carbon-gray-50">{cdi.icd} · {cdi.hcc}</p>
+                        <p className="text-xs font-medium text-carbon-gray-100 truncate">
+                          {cdi.condition}
+                        </p>
+                        <p className="text-2xs text-carbon-gray-50">
+                          {cdi.icd} · {cdi.hcc}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {/* Confidence bar */}
@@ -467,10 +557,16 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                               style={{ width: `${cdi.confidence}%` }}
                             />
                           </div>
-                          <span className="text-2xs font-mono text-carbon-gray-70">{cdi.confidence}%</span>
+                          <span className="text-2xs font-mono text-carbon-gray-70">
+                            {cdi.confidence}%
+                          </span>
                         </div>
-                        <span className="text-2xs font-mono font-semibold text-[#0e6027]">{cdi.rafDelta} RAF</span>
-                        <span className="text-2xs font-mono font-semibold text-[#b45309]">{cdi.revenueDelta}</span>
+                        <span className="text-2xs font-mono font-semibold text-[#0e6027]">
+                          {cdi.rafDelta} RAF
+                        </span>
+                        <span className="text-2xs font-mono font-semibold text-[#b45309]">
+                          {cdi.revenueDelta}
+                        </span>
                         {/* DX Evidence button */}
                         <button
                           onClick={() => setExpandedCdi(isExpanded ? null : cdi.id)}
@@ -488,87 +584,7 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                     </div>
 
                     {/* DX Evidence accordion */}
-                    {isExpanded && (
-                      <div className="bg-[#fdf6dd] border-t border-[#f1c21b] px-4 py-3 space-y-3">
-                        {/* Evidence sources */}
-                        <div>
-                          <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1.5">Evidence Sources</p>
-                          <div className="flex flex-wrap gap-1.5 mb-2">
-                            {cdi.evidenceSources.map((src) => (
-                              <span key={src} className={`text-2xs font-semibold px-2 py-0.5 ${SOURCE_BADGE[src] || 'bg-carbon-gray-20 text-carbon-gray-70'}`}>
-                                {src}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="space-y-1">
-                            {cdi.signals.map((sig, i) => (
-                              <div key={i} className={`flex items-center gap-2 px-2 py-1 text-2xs border ${sig.flagged ? 'bg-[#fff8f8] border-[#ffb3b8]' : 'bg-white border-carbon-gray-20'}`}>
-                                <span className={`font-semibold px-1.5 py-0.5 text-2xs ${SOURCE_BADGE[sig.source] || 'bg-carbon-gray-20 text-carbon-gray-70'}`}>{sig.source}</span>
-                                <span className="text-carbon-gray-70">{sig.label}:</span>
-                                <span className={`font-medium ${sig.flagged ? 'text-[#da1e28]' : 'text-carbon-gray-100'}`}>{sig.value}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Clinical justification */}
-                        <div>
-                          <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1">Clinical Justification</p>
-                          <p className="text-2xs text-carbon-gray-70 leading-relaxed bg-white border border-carbon-gray-20 px-3 py-2">
-                            {cdi.justification}
-                          </p>
-                        </div>
-
-                        {/* Confidence breakdown */}
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1">Confidence</p>
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 h-2 bg-carbon-gray-20">
-                                <div
-                                  className={`h-full ${cdi.confidence >= 85 ? 'bg-[#24a148]' : cdi.confidence >= 70 ? 'bg-[#f1c21b]' : 'bg-[#da1e28]'}`}
-                                  style={{ width: `${cdi.confidence}%` }}
-                                />
-                              </div>
-                              <span className={`text-sm font-bold font-mono ${cdi.confidence >= 85 ? 'text-[#24a148]' : cdi.confidence >= 70 ? 'text-[#b45309]' : 'text-[#da1e28]'}`}>
-                                {cdi.confidence}%
-                              </span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1">RAF Delta</p>
-                            <p className="text-sm font-bold font-mono text-[#0e6027]">{cdi.rafDelta}</p>
-                          </div>
-                          <div>
-                            <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1">Revenue at Risk</p>
-                            <p className="text-sm font-bold font-mono text-[#b45309]">{cdi.revenueDelta}</p>
-                          </div>
-                        </div>
-
-                        {/* ICD-10 guidance */}
-                        <div>
-                          <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1">ICD-10 Specificity Guidance</p>
-                          <div className="bg-[#d0e2ff] border border-[#97c1ff] px-3 py-2 flex items-start gap-2">
-                            <Icon name="InformationCircleIcon" size={12} className="text-[#0043ce] flex-shrink-0 mt-0.5" />
-                            <p className="text-2xs text-[#0043ce] leading-relaxed">{cdi.icd10Guidance}</p>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 pt-1">
-                          <button className="text-xs font-semibold px-3 py-1.5 bg-[#0e6027] text-white hover:bg-[#0a4d1e] transition-colors flex items-center gap-1.5">
-                            <Icon name="CheckIcon" size={12} />
-                            Confirm & Document
-                          </button>
-                          <button className="text-xs font-semibold px-3 py-1.5 border border-carbon-gray-30 text-carbon-gray-70 hover:bg-carbon-gray-10 transition-colors">
-                            Defer
-                          </button>
-                          <span className="text-2xs text-carbon-gray-50 ml-auto">
-                            Submission deadline: Dec 31, 2026
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                    {isExpanded && <CdiEvidencePanel cdi={cdi} />}
                   </div>
                 );
               })}
@@ -597,7 +613,11 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                 }`}
                 role="switch"
                 aria-checked={canViewFinancials}
-                title={canViewFinancials ? 'Disable financial view' : 'Enable financial view (VBP authorized)'}
+                title={
+                  canViewFinancials
+                    ? 'Disable financial view'
+                    : 'Enable financial view (VBP authorized)'
+                }
               >
                 <span
                   className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
@@ -618,8 +638,13 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                   Toggle the switch above to enable VBP financial signals for authorized providers.
                 </p>
                 <div className="mt-3 pt-3 border-t border-[#97c1ff]">
-                  <p className="text-2xs text-carbon-gray-50 font-mono">can_view_financials = <span className="text-[#da1e28] font-semibold">false</span></p>
-                  <p className="text-2xs text-carbon-gray-50 mt-1">Cost, PMPM, and HCC revenue figures hidden per Provider Access rule.</p>
+                  <p className="text-2xs text-carbon-gray-50 font-mono">
+                    can_view_financials ={' '}
+                    <span className="text-[#da1e28] font-semibold">false</span>
+                  </p>
+                  <p className="text-2xs text-carbon-gray-50 mt-1">
+                    Cost, PMPM, and HCC revenue figures hidden per Provider Access rule.
+                  </p>
                 </div>
               </div>
             </div>
@@ -631,7 +656,9 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                 <div className="px-4 py-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon name="ExclamationTriangleIcon" size={11} className="text-[#b45309]" />
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">RAF Revenue at Risk</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      RAF Revenue at Risk
+                    </p>
                   </div>
                   <p className="text-xl font-bold font-mono text-[#b45309]">
                     ${(totalRevenueAtRisk / 1000).toFixed(1)}K
@@ -645,30 +672,42 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                 <div className="px-4 py-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon name="ArrowTrendingDownIcon" size={11} className="text-[#0e6027]" />
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Projected Savings</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      Projected Savings
+                    </p>
                   </div>
                   <p className="text-xl font-bold font-mono text-[#0e6027]">$4,200</p>
-                  <p className="text-2xs text-carbon-gray-50 mt-0.5">Est. gap closure — 5 HEDIS/MIPS measures</p>
+                  <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                    Est. gap closure — 5 HEDIS/MIPS measures
+                  </p>
                 </div>
 
                 {/* Prior Auth Cost Signals */}
                 <div className="px-4 py-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon name="DocumentCheckIcon" size={11} className="text-[#0043ce]" />
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Prior Auth Signals</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      Prior Auth Signals
+                    </p>
                   </div>
                   <p className="text-xl font-bold font-mono text-[#0043ce]">2 pending</p>
-                  <p className="text-2xs text-carbon-gray-50 mt-0.5">Nephrology referral · Renal ultrasound</p>
+                  <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                    Nephrology referral · Renal ultrasound
+                  </p>
                 </div>
 
                 {/* Network Cost Tier */}
                 <div className="px-4 py-3">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon name="BuildingOfficeIcon" size={11} className="text-[#6929c4]" />
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Network Cost Tier</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      Network Cost Tier
+                    </p>
                   </div>
                   <p className="text-xl font-bold font-mono text-[#6929c4]">Preferred</p>
-                  <p className="text-2xs text-carbon-gray-50 mt-0.5">Dr. Priya Mehta — Nephrology</p>
+                  <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                    Dr. Priya Mehta — Nephrology
+                  </p>
                 </div>
               </div>
 
@@ -677,18 +716,28 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
                 <div className="border-b border-carbon-gray-20">
                   <div className="px-4 py-2 bg-[#fdf6dd] flex items-center gap-2">
                     <Icon name="DocumentMagnifyingGlassIcon" size={11} className="text-[#b45309]" />
-                    <span className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">HCC Revenue Detail</span>
+                    <span className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">
+                      HCC Revenue Detail
+                    </span>
                   </div>
                   <div className="divide-y divide-carbon-gray-10">
                     {hccSuspects.map((hcc) => (
                       <div key={hcc.id} className="px-4 py-2 flex items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-carbon-gray-100 truncate">{hcc.hccDescription}</p>
-                          <p className="text-2xs text-carbon-gray-50">{hcc.icdCode} · {hcc.hccCode}</p>
+                          <p className="text-xs font-medium text-carbon-gray-100 truncate">
+                            {hcc.hccDescription}
+                          </p>
+                          <p className="text-2xs text-carbon-gray-50">
+                            {hcc.icdCode} · {hcc.hccCode}
+                          </p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-xs font-mono font-semibold text-[#b45309]">+${hcc.estimatedRevenueDelta.toLocaleString()}</p>
-                          <p className="text-2xs text-carbon-gray-50">{Math.round(hcc.suspectConfidence * 100)}% conf.</p>
+                          <p className="text-xs font-mono font-semibold text-[#b45309]">
+                            +${hcc.estimatedRevenueDelta.toLocaleString()}
+                          </p>
+                          <p className="text-2xs text-carbon-gray-50">
+                            {Math.round(hcc.suspectConfidence * 100)}% conf.
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -701,9 +750,15 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
           {/* VBP Disclaimer — ALWAYS VISIBLE */}
           <div className="border-t border-[#d4bbff] bg-[#f6f2ff] px-4 py-2.5">
             <div className="flex items-start gap-2">
-              <Icon name="ShieldCheckIcon" size={12} className="text-[#6929c4] flex-shrink-0 mt-0.5" />
+              <Icon
+                name="ShieldCheckIcon"
+                size={12}
+                className="text-[#6929c4] flex-shrink-0 mt-0.5"
+              />
               <p className="text-2xs text-[#6929c4] leading-relaxed">
-                Incentives shown per your 2026 VBP contract with Humana MA-PD. Subject to CMS AKS Value-Based Enterprise safe harbor and Stark VBE exception. Quality-based only — not tied to referral volume.
+                Incentives shown per your 2026 VBP contract with Humana MA-PD. Subject to CMS AKS
+                Value-Based Enterprise safe harbor and Stark VBE exception. Quality-based only — not
+                tied to referral volume.
               </p>
             </div>
           </div>
@@ -711,14 +766,19 @@ export default function MdPatientSummary({ launchContext }: MdPatientSummaryProp
           {/* CMS-0057-F Exclusion Footnote — ALWAYS VISIBLE */}
           <div className="border-t border-carbon-gray-20 bg-[#f4f4f4] px-4 py-2">
             <div className="flex items-start gap-1.5">
-              <Icon name="InformationCircleIcon" size={11} className="text-carbon-gray-50 flex-shrink-0 mt-0.5" />
+              <Icon
+                name="InformationCircleIcon"
+                size={11}
+                className="text-carbon-gray-50 flex-shrink-0 mt-0.5"
+              />
               <p className="text-2xs text-carbon-gray-50 leading-relaxed">
-                Provider remittances and patient cost-sharing excluded per CMS-0057-F Provider Access API rule. Financial signals limited to RAF scoring, prior auth, and Transparency in Coverage data.
+                Provider remittances and patient cost-sharing excluded per CMS-0057-F Provider
+                Access API rule. Financial signals limited to RAF scoring, prior auth, and
+                Transparency in Coverage data.
               </p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

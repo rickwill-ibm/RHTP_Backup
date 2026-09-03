@@ -9,8 +9,6 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDemoStore } from '@/uhg/store/demoStore';
-import { resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
 import CdsCardRenderer from './components/CdsCardRenderer';
 import OrderEntryModule from './components/OrderEntryModule';
@@ -53,11 +51,16 @@ import { useAppContext } from '@/lib/appContext';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
 import { useDataModeFromUrl } from '@/lib/hooks/useDataModeFromUrl';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
-import { DEMO_PATIENT_ID, DEMO_ENCOUNTER_ID, storeRead } from '@/lib/fhir/store';
 import { invokePatientViewHook } from '@/lib/fhir/cdsHooks';
+import { resolveIds } from './lib/resolveIds';
+import { useCdsFlagsEffect } from './hooks/useCdsFlagsEffect';
 import AppLayout from '@/components/AppLayout';
 
-import { makeAuditId, resolveIds } from './launch.helpers';
+let auditSeq = 0;
+function makeAuditId(): string {
+  auditSeq += 1;
+  return `AUD-${Date.now().toString(36).toUpperCase()}-${String(auditSeq).padStart(3, '0')}`;
+}
 
 interface ViewerTarget {
   resourceType: string;
@@ -76,16 +79,6 @@ export default function MdSmartLaunchPage() {
 
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
-  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
-  // Launch precedence: the SMART launch's ?patientId= is AUTHORITATIVE. Set the global active
-  // member to the launched patient so the shell and any member screen agree with the EHR
-  // context — the URL wins over whatever member was previously active (wrong-patient guard).
-  useEffect(() => {
-    if (!launchReady || !launchContext?.patientId) return;
-    const fhir = launchContext.patientId.replace(/^patient\//, '');
-    const platform = resolveFhirToPlatformId(fhir) ?? resolveFhirToPlatformId(`patient-${fhir}`);
-    if (platform) setActiveCitizen(platform);
-  }, [launchReady, launchContext, setActiveCitizen]);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
   const [cdsPanelOpen, setCdsPanelOpen] = useState(false);
@@ -361,6 +354,9 @@ export default function MdSmartLaunchPage() {
     setViewer({ resourceType, resourceId, label });
   }, []);
 
+  // ── Seed CDS cards from patient's FHIR flags (non-Maria patients) ─────────
+  useCdsFlagsEffect({ launchReady, launchContext, useMockData, setCdsCards });
+
   // ── Live CDS Hooks invocation (patient-view) with demo-card fallback ──────
   useEffect(() => {
     if (!launchReady || !launchContext || useMockData) return;
@@ -550,6 +546,7 @@ export default function MdSmartLaunchPage() {
                     <CarePlanFhirPage {...pageProps} />
                     <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                       <CarePlanPanel
+                        patientId={patientId}
                         launchContext={launchContext}
                         completedOrders={completedOrders}
                         confirmedAssignments={confirmedAssignments}
@@ -602,7 +599,7 @@ export default function MdSmartLaunchPage() {
 
                 {activeMenu === 'cdi' && (
                   <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                    <MdPatientSummary launchContext={launchContext} />
+                    <MdPatientSummary patientId={patientId} launchContext={launchContext} />
                   </div>
                 )}
 

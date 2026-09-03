@@ -31,7 +31,7 @@
     "src/app/md-smart-launch/components/MdPatientSummary.tsx": 725,
     "src/app/md-smart-launch/components/MdSmartSummaryScreen.tsx": 2504,
     "src/app/md-smart-launch/components/SdohGapPanel.tsx": 541,
-    "src/app/md-smart-launch/page.tsx": 595,
+    "src/app/md-smart-launch/page.tsx": 698,
     "src/app/panel-cohort-view/components/PatientPanelTable.tsx": 647,
     "src/app/panel-cohort-view/components/PatientRowActions.tsx": 1091,
     "src/app/patient-detail/components/ActionsTasksTab.tsx": 832,

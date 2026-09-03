@@ -15,7 +15,7 @@ import { getPatientSync } from '@/lib/services/patientService';
 // Map mockData patient IDs → registry platform IDs
 const MOCK_ID_TO_PLATFORM_ID: Record<string, string> = {
   'patient-maria': 'MARIA_SD_001',
-  'MARIA_SD_001': 'MARIA_SD_001',
+  MARIA_SD_001: 'MARIA_SD_001',
   'patient-001': 'PAT-0042',
   'PAT-0042': 'PAT-0042',
   'patient-0042': 'PAT-0042',
@@ -29,7 +29,7 @@ const MOCK_ID_TO_PLATFORM_ID: Record<string, string> = {
 
 function PatientDetailContent() {
   const searchParams = useSearchParams();
-  const { activePatientId, setActivePatientId } = useAppContext();
+  const { activePatientId, setActivePatientId, useMockData } = useAppContext();
 
   // URL param takes precedence; otherwise fall back to global activePatientId (default: MARIA_SD_001)
   const urlId = searchParams?.get('id') ?? '';
@@ -44,7 +44,7 @@ function PatientDetailContent() {
     if (resolvedId && resolvedId !== activePatientId) {
       setActivePatientId(resolvedId);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedId]);
 
   // Look up patient from registry — works for any patient, not just Maria
@@ -70,13 +70,15 @@ function PatientDetailContent() {
         ]}
         contextBanner={
           <div className="bg-[#d0e2ff] border-b border-[#97c1ff] px-6 py-2 flex items-center gap-6 flex-wrap">
-            <span className="text-xs font-semibold text-[#0043ce]">Contract Context: {contract}</span>
+            <span className="text-xs font-semibold text-[#0043ce]">
+              Contract Context: {contract}
+            </span>
             <span className="text-xs text-[#0043ce]">Attribution: Confirmed</span>
             <span className="text-xs text-[#0043ce]">RAF Score: {rafScore}</span>
             <span className="text-xs text-[#0043ce]">Risk: {riskLabel}</span>
             <span className="text-xs font-semibold text-[#da1e28]">{hccWarning}</span>
             <a
-              href={`/md-smart-launch?patientId=${PLATFORM_TO_FHIR_ID_MAP[resolvedId] ?? resolvedId}`}
+              href={`/md-smart-launch?patientId=${PLATFORM_TO_FHIR_ID_MAP[resolvedId] ?? resolvedId}&dataMode=${useMockData ? 'mock' : 'live'}`}
               className="ml-auto flex items-center gap-1.5 px-3 py-1 text-2xs font-semibold bg-[#6929c4] text-white hover:bg-[#491d8b] transition-colors"
               title="Open MD SMART on FHIR launch screen"
             >
@@ -105,7 +107,9 @@ function PatientDetailContent() {
 
 export default function PatientDetailPage() {
   return (
-    <React.Suspense fallback={<div className="p-8 text-center text-carbon-gray-50">Loading patient record…</div>}>
+    <React.Suspense
+      fallback={<div className="p-8 text-center text-carbon-gray-50">Loading patient record…</div>}
+    >
       <PatientDetailContent />
     </React.Suspense>
   );

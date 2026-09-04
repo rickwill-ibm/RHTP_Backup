@@ -4,7 +4,7 @@ import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
 import { useRouter } from 'next/navigation';
 import { ACTIVE_CRISES, CRISIS_CONTACTS, SOCIAL_PATIENTS } from '@/lib/socialMockData';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { getPatientSync } from '@/lib/services/patientService';
 
 const ACUITY_CONFIG = {
@@ -407,7 +407,7 @@ const PATHWAY_STAGES = [
 
 export default function CrisisPathwayPage() {
   const router = useRouter();
-  const { activePatientId } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const activePatient = getPatientSync(activePatientId);
   const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [selectedContact, setSelectedContact] = useState<(typeof CRISIS_CONTACTS)[0] | null>(null);

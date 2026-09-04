@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import PatientRowActions from './PatientRowActions';
 import { exportPanelCSV } from '@/lib/exportUtils';
 import { useAppContext } from '@/lib/appContext';
+import { useActiveCitizen } from '@/uhg/store/useActiveCitizen';
 import { getAllPatients } from '@/lib/patientRegistry';
 import type { RegistryPatient } from '@/lib/patientRegistry';
 import { getFhirClient } from '@/lib/services/fhirClient';
@@ -219,7 +220,8 @@ export default function PatientPanelTable({
   physicianName,
 }: PatientPanelTableProps & { physicianName?: string }) {
   const router = useRouter();
-  const { setActivePatientId, useMockData } = useAppContext();
+  const { useMockData } = useAppContext();
+  const { setActiveCitizen } = useActiveCitizen();
   const [page, setPage] = useState(1);
   const perPage = 10;
 
@@ -472,7 +474,7 @@ export default function PatientPanelTable({
                 key={patient.id}
                 className={`group hover:bg-[#edf5ff] transition-colors cursor-pointer ${selectedPatients.has(patient.id) ? 'bg-[#d0e2ff]/30' : ''}`}
                 onClick={() => {
-                  setActivePatientId(patient.id);
+                  setActiveCitizen(patient.id);
                   router.push(`/patient-detail?id=${patient.id}`);
                 }}
               >
@@ -489,7 +491,7 @@ export default function PatientPanelTable({
                     className="text-left hover:text-carbon-blue transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setActivePatientId(patient.id);
+                      setActiveCitizen(patient.id);
                       router.push(`/patient-detail?id=${patient.id}`);
                     }}
                   >
@@ -593,7 +595,7 @@ export default function PatientPanelTable({
                       title="Open patient detail"
                       className="p-1.5 text-carbon-gray-50 hover:text-carbon-blue hover:bg-[#d0e2ff] transition-colors opacity-0 group-hover:opacity-100"
                       onClick={() => {
-                        setActivePatientId(patient.id);
+                        setActiveCitizen(patient.id);
                         router.push(`/patient-detail?id=${patient.id}`);
                       }}
                     >

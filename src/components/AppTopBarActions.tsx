@@ -10,10 +10,27 @@ import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import { useAppContext } from '@/lib/appContext';
 import PatientSwitcherDropdown from '@/components/PatientSwitcherDropdown';
+import {
+  resolveScreenContext,
+  showsMemberSwitcher,
+  type ScreenFrame,
+} from '@/lib/context/screenFrames';
+
+// Non-member frames get a scope label instead of the member switcher, so the absence of a
+// patient control reads as intentional (this is a caseload / population / platform view).
+const SCOPE_LABEL: Partial<Record<ScreenFrame, string>> = {
+  caseload: 'Team caseload',
+  population: 'Population view',
+  enterprise: 'Enterprise view',
+  platform: 'Platform',
+  'member-facing': 'Member portal',
+};
 
 export default function AppTopBarActions({ roleColor }: { roleColor: string }): React.ReactElement {
   const { user, entryContext, useMockData, setUseMockData } = useAppContext();
   const pathname = usePathname();
+  const { frame } = resolveScreenContext(pathname);
+  const scopeLabel = SCOPE_LABEL[frame];
 
   return (
     <div className="flex items-center gap-2">
@@ -45,9 +62,18 @@ export default function AppTopBarActions({ roleColor }: { roleColor: string }): 
           {entryContext === 'cerner-launch' ? '⚡ Cerner' : 'Browse'}
         </span>
       </div>
-      {/* Patient switcher — hidden on payer-side authoring routes (the policy encoder /
-          reviewer), where there is no patient in context. */}
-      {!pathname.startsWith('/policy-engine') && <PatientSwitcherDropdown />}
+      {/* Top-bar scope control — the member switcher appears ONLY on member-subject frames
+          (member / household / SMART-launch). Every other frame is a caseload, population,
+          or platform view where a single patient is not the subject, so it shows a scope
+          label instead. Driven by the single screenFrames registry. */}
+      {showsMemberSwitcher(frame) ? (
+        <PatientSwitcherDropdown />
+      ) : scopeLabel ? (
+        <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold text-carbon-gray-70 bg-carbon-gray-10 border border-carbon-gray-20 rounded-sm">
+          <Icon name="Squares2X2Icon" size={13} className="text-carbon-gray-50" />
+          {scopeLabel}
+        </span>
+      ) : null}
       <div className="w-px h-6 bg-carbon-gray-20 mx-1" />
       <button className="p-2 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10 transition-colors relative">
         <Icon name="BellIcon" size={18} />

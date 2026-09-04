@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
 
-
 import MdSmartSummaryScreen from './components/MdSmartSummaryScreen';
 import CdsCardRenderer from './components/CdsCardRenderer';
 import OrderEntryModule from './components/OrderEntryModule';
@@ -18,14 +17,30 @@ import SmartErrorBoundary, {
   type SmartError,
 } from './components/SmartErrorBoundary';
 import RhtpPlatformHeader from './components/RhtpPlatformHeader';
-import type { SmartLaunchContext, CdsCard, MdOrder, CareTeamAssignment, FhirServiceRequest } from '@/lib/smartFhirTypes';
+import type {
+  SmartLaunchContext,
+  CdsCard,
+  MdOrder,
+  CareTeamAssignment,
+  FhirServiceRequest,
+} from '@/lib/smartFhirTypes';
 import { mockCdsCards } from '@/lib/smartFhirMockData';
 import Icon from '@/components/ui/AppIcon';
 import AppLogo from '@/components/ui/AppLogo';
 import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { resolveFhirToPlatformId, getPatientById } from '@/lib/patientRegistry';
 
-type ActiveTab = 'summary' | 'cds' | 'orders' | 'team' | 'careplan' | 'referrals' | 'return' | 'audit' | 'compliance';
+type ActiveTab =
+  | 'summary'
+  | 'cds'
+  | 'orders'
+  | 'team'
+  | 'careplan'
+  | 'referrals'
+  | 'return'
+  | 'audit'
+  | 'compliance';
 
 const TABS: Array<{ key: ActiveTab; label: string; icon: string }> = [
   { key: 'summary', label: 'Patient Summary', icon: 'UserIcon' },
@@ -46,7 +61,8 @@ function makeAuditId(): string {
 }
 
 export default function MdSmartLaunchPage() {
-  const { entryContext, setActivePatientId } = useAppContext();
+  const { entryContext } = useAppContext();
+  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('summary');
@@ -115,7 +131,13 @@ export default function MdSmartLaunchPage() {
           retryable: true,
         };
         setMissingPatientDataError(err);
-        pushAudit('smart-launch', 'SMART launch completed with missing patient data', { patientId: ctx.patientId }, 'failure', ctx);
+        pushAudit(
+          'smart-launch',
+          'SMART launch completed with missing patient data',
+          { patientId: ctx.patientId },
+          'failure',
+          ctx
+        );
         return;
       }
 
@@ -124,14 +146,19 @@ export default function MdSmartLaunchPage() {
       // and set the global active patient context
       const resolvedPlatformId = resolveFhirToPlatformId(ctx.patientId);
       if (resolvedPlatformId) {
-        setActivePatientId(resolvedPlatformId);
+        setActiveCitizen(resolvedPlatformId);
         // Load patient-specific CDS cards from registry
         const registryPatient = getPatientById(resolvedPlatformId);
         if (registryPatient?.cdsCards && registryPatient.cdsCards.length > 0) {
           const patientCdsCards: CdsCard[] = registryPatient.cdsCards.map((c) => ({
             id: c.id,
             hookType: 'patient-view' as const,
-            cardType: c.indicator === 'critical' ? 'critical' : c.indicator === 'warning' ? 'warning' : 'info',
+            cardType:
+              c.indicator === 'critical'
+                ? 'critical'
+                : c.indicator === 'warning'
+                  ? 'warning'
+                  : 'info',
             summary: c.summary,
             detail: c.detail,
             source: 'CDS Hooks / Patient Registry',
@@ -176,16 +203,14 @@ export default function MdSmartLaunchPage() {
         ctx
       );
     },
-    [pushAudit, setActivePatientId]
+    [pushAudit, setActiveCitizen]
   );
 
   // ── CDS interactions ──────────────────────────────────────────────────────
   const handleAcceptSuggestion = useCallback(
     (cardId: string, suggestionId: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c))
-      );
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c)));
       pushAudit('cds-suggestion-accepted', `CDS suggestion accepted: ${card?.summary ?? cardId}`, {
         cardId,
         suggestionId,
@@ -200,9 +225,7 @@ export default function MdSmartLaunchPage() {
   const handleDismiss = useCallback(
     (cardId: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
-      setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c))
-      );
+      setCdsCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true } : c)));
       pushAudit('cds-card-dismissed', `CDS card dismissed: ${card?.summary ?? cardId}`, {
         cardId,
         cardType: card?.cardType,
@@ -235,7 +258,9 @@ export default function MdSmartLaunchPage() {
     (cardId: string, reason: string) => {
       const card = cdsCards.find((c) => c.id === cardId);
       setCdsCards((prev) =>
-        prev.map((c) => (c.id === cardId ? { ...c, acknowledged: true, overrideReason: reason } : c))
+        prev.map((c) =>
+          c.id === cardId ? { ...c, acknowledged: true, overrideReason: reason } : c
+        )
       );
       pushAudit(
         'cds-card-acknowledged',
@@ -252,12 +277,9 @@ export default function MdSmartLaunchPage() {
     [cdsCards, pushAudit]
   );
 
-  const handleOpenSmartLink = useCallback(
-    (_cardId: string, _url: string) => {
-      // In production: open SMART app panel or navigate
-    },
-    []
-  );
+  const handleOpenSmartLink = useCallback((_cardId: string, _url: string) => {
+    // In production: open SMART app panel or navigate
+  }, []);
 
   // ── Orders ────────────────────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
@@ -345,13 +367,19 @@ export default function MdSmartLaunchPage() {
   }, [pushAudit]);
 
   const activeCdsCount = cdsCards.filter((c) => !c.acknowledged).length;
-  const criticalCdsCount = cdsCards.filter((c) => !c.acknowledged && c.cardType === 'critical').length;
-  const activeReferralsCount = completedOrders.filter((o) => o.category === 'referral').length + confirmedAssignments.length;
+  const criticalCdsCount = cdsCards.filter(
+    (c) => !c.acknowledged && c.cardType === 'critical'
+  ).length;
+  const activeReferralsCount =
+    completedOrders.filter((o) => o.category === 'referral').length + confirmedAssignments.length;
 
   // Show launch handler if not ready
   if (!launchReady || !launchContext) {
     return (
-      <SmartErrorBoundary errorCode="SMART_LAUNCH_FAILED" onReturnToCerner={() => (window.location.href = '/')}>
+      <SmartErrorBoundary
+        errorCode="SMART_LAUNCH_FAILED"
+        onReturnToCerner={() => (window.location.href = '/')}
+      >
         <SmartLaunchHandler onLaunchReady={handleLaunchReady} />
       </SmartErrorBoundary>
     );
@@ -361,7 +389,11 @@ export default function MdSmartLaunchPage() {
   const tokenExpiry = launchContext.tokenExpiry ?? Date.now() + 30 * 60 * 1000;
 
   return (
-    <SmartErrorBoundary errorCode="UNKNOWN_ERROR" onRetry={() => setLaunchReady(false)} onReturnToCerner={() => (window.location.href = '/')}>
+    <SmartErrorBoundary
+      errorCode="UNKNOWN_ERROR"
+      onRetry={() => setLaunchReady(false)}
+      onReturnToCerner={() => (window.location.href = '/')}
+    >
       <div className="flex h-screen overflow-hidden bg-carbon-gray-10">
         {/* Slim sidebar — MD context */}
         <aside className="w-14 bg-carbon-sidebar flex flex-col flex-shrink-0">
@@ -381,12 +413,16 @@ export default function MdSmartLaunchPage() {
                   onClick={() => setActiveTab(tab.key)}
                   title={tab.label}
                   className={`relative w-10 h-10 flex items-center justify-center transition-colors ${
-                    isActive ? 'bg-[#6929c4] text-white' : 'text-carbon-gray-50 hover:text-white hover:bg-carbon-gray-80'
+                    isActive
+                      ? 'bg-[#6929c4] text-white'
+                      : 'text-carbon-gray-50 hover:text-white hover:bg-carbon-gray-80'
                   }`}
                 >
                   <Icon name={tab.icon as any} size={18} />
                   {hasBadge && (
-                    <span className={`absolute top-1 right-1 w-2 h-2 rounded-full ${isCritical ? 'bg-[#da1e28]' : 'bg-[#f1c21b]'}`} />
+                    <span
+                      className={`absolute top-1 right-1 w-2 h-2 rounded-full ${isCritical ? 'bg-[#da1e28]' : 'bg-[#f1c21b]'}`}
+                    />
                   )}
                   {hasAuditBadge && (
                     <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#6929c4]" />
@@ -400,7 +436,10 @@ export default function MdSmartLaunchPage() {
           </nav>
           {/* Cerner badge */}
           <div className="pb-4 flex flex-col items-center gap-2">
-            <div className="w-8 h-8 bg-[#6929c4]/20 border border-[#6929c4]/40 flex items-center justify-center" title="SMART on FHIR Active">
+            <div
+              className="w-8 h-8 bg-[#6929c4]/20 border border-[#6929c4]/40 flex items-center justify-center"
+              title="SMART on FHIR Active"
+            >
               <Icon name="BoltIcon" size={14} className="text-[#a56eff]" />
             </div>
           </div>
@@ -429,7 +468,8 @@ export default function MdSmartLaunchPage() {
                   {TABS.find((t) => t.key === activeTab)?.label}
                 </p>
                 <p className="text-2xs text-carbon-gray-50">
-                  {launchContext.practitionerName} · Enc: <span className="font-mono">{launchContext.encounterId}</span>
+                  {launchContext.practitionerName} · Enc:{' '}
+                  <span className="font-mono">{launchContext.encounterId}</span>
                 </p>
               </div>
             </div>
@@ -453,7 +493,9 @@ export default function MdSmartLaunchPage() {
                     <Icon name={tab.icon as any} size={13} />
                     <span className="hidden md:inline">{tab.label}</span>
                     {hasBadge && (
-                      <span className={`text-2xs font-bold px-1 min-w-[16px] text-center ${isCritical ? 'bg-[#da1e28] text-white' : 'bg-[#f1c21b] text-[#b45309]'}`}>
+                      <span
+                        className={`text-2xs font-bold px-1 min-w-[16px] text-center ${isCritical ? 'bg-[#da1e28] text-white' : 'bg-[#f1c21b] text-[#b45309]'}`}
+                      >
                         {activeCdsCount}
                       </span>
                     )}
@@ -483,7 +525,8 @@ export default function MdSmartLaunchPage() {
               >
                 <Icon name="ShieldExclamationIcon" size={16} />
                 <span className="text-sm font-semibold">
-                  {criticalCdsCount} critical CDS alert{criticalCdsCount !== 1 ? 's' : ''} require acknowledgment before signing orders
+                  {criticalCdsCount} critical CDS alert{criticalCdsCount !== 1 ? 's' : ''} require
+                  acknowledgment before signing orders
                 </span>
                 <Icon name="ChevronRightIcon" size={14} className="ml-auto" />
               </div>
@@ -494,7 +537,10 @@ export default function MdSmartLaunchPage() {
               <SmartInlineAlert
                 error={missingPatientDataError}
                 onDismiss={() => dismissInlineError('MISSING_PATIENT_DATA')}
-                onRetry={() => { setLaunchReady(false); setLaunchContext(null); }}
+                onRetry={() => {
+                  setLaunchReady(false);
+                  setLaunchContext(null);
+                }}
                 className="mb-4"
               />
             )}
@@ -527,7 +573,10 @@ export default function MdSmartLaunchPage() {
             ))}
 
             {activeTab === 'summary' && (
-              <SmartErrorBoundary errorCode="MISSING_PATIENT_DATA" onRetry={() => setLaunchReady(false)}>
+              <SmartErrorBoundary
+                errorCode="MISSING_PATIENT_DATA"
+                onRetry={() => setLaunchReady(false)}
+              >
                 <div className="h-[calc(100vh-8rem)] -m-5">
                   <MdSmartSummaryScreen
                     launchContext={launchContext}
@@ -544,16 +593,32 @@ export default function MdSmartLaunchPage() {
                 <div className="max-w-3xl">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <h2 className="text-sm font-semibold text-carbon-gray-100">CDS Hooks Alerts</h2>
+                      <h2 className="text-sm font-semibold text-carbon-gray-100">
+                        CDS Hooks Alerts
+                      </h2>
                       <p className="text-xs text-carbon-gray-50 mt-0.5">
-                        {activeCdsCount} active · {cdsCards.filter((c) => c.acknowledged).length} acknowledged
+                        {activeCdsCount} active · {cdsCards.filter((c) => c.acknowledged).length}{' '}
+                        acknowledged
                       </p>
                     </div>
                     <div className="flex items-center gap-2 text-2xs text-carbon-gray-50">
-                      {(['patient-view', 'encounter-start', 'order-select', 'order-sign', 'care-gap-closure'] as const).map((hook) => {
-                        const count = cdsCards.filter((c) => c.hookType === hook && !c.acknowledged).length;
+                      {(
+                        [
+                          'patient-view',
+                          'encounter-start',
+                          'order-select',
+                          'order-sign',
+                          'care-gap-closure',
+                        ] as const
+                      ).map((hook) => {
+                        const count = cdsCards.filter(
+                          (c) => c.hookType === hook && !c.acknowledged
+                        ).length;
                         return count > 0 ? (
-                          <span key={hook} className="px-2 py-0.5 bg-carbon-gray-10 border border-carbon-gray-20 font-mono">
+                          <span
+                            key={hook}
+                            className="px-2 py-0.5 bg-carbon-gray-10 border border-carbon-gray-20 font-mono"
+                          >
                             {hook}: {count}
                           </span>
                         ) : null;

@@ -6,6 +6,7 @@ import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useAppContext, PHYSICIAN_PROFILES } from '@/lib/appContext';
 import type { PhysicianPersona } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 import { DEMO_USERS, navItems, groupOrder } from './AppLayout.nav';
@@ -21,6 +22,9 @@ interface AppLayoutProps {
   pageTitle?: string;
   breadcrumbs?: { label: string; href?: string }[];
   contextBanner?: React.ReactNode;
+  /** When true, children fill the remaining viewport height with no padding or scroll.
+   *  Use for full-bleed canvas/graph pages that manage their own internal scroll. */
+  fullBleed?: boolean;
 }
 
 export default function AppLayout({
@@ -28,6 +32,7 @@ export default function AppLayout({
   pageTitle,
   breadcrumbs,
   contextBanner,
+  fullBleed,
 }: AppLayoutProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -43,10 +48,30 @@ export default function AppLayout({
     physicianPersona,
     setPhysicianPersona,
     activePhysician,
-    activePatientId,
-    setActivePatientId,
   } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   useFhirModeSync(); // keeps fhirClient singleton in sync with the UI toggle
+
+  // P0 patient-stability: persist the selected member for the session so a reload
+  // or hard navigation no longer snaps back to the Maria default. Client-only
+  // (effects), so SSR still renders the default and there is no hydration mismatch.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('wpco.activeCitizen');
+      if (saved && saved !== useDemoStore.getState().activeCitizenId) {
+        useDemoStore.getState().setActiveCitizen(saved);
+      }
+    } catch {
+      /* sessionStorage unavailable */
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('wpco.activeCitizen', activePatientId);
+    } catch {
+      /* ignore */
+    }
+  }, [activePatientId]);
 
   // Ref for nav container to enable scrollIntoView
   const navRef = useRef<HTMLElement>(null);
@@ -145,9 +170,9 @@ export default function AppLayout({
           <AppLogo size={28} />
           {!collapsed && (
             <div>
-              <span className="font-semibold text-white text-sm tracking-tight">RHTP</span>
+              <span className="font-semibold text-white text-sm tracking-tight">WPCO</span>
               <p className="text-2xs text-carbon-gray-30 leading-none">
-                Rural Health Transformation
+                Whole Person Care Orchestration
               </p>
             </div>
           )}
@@ -374,11 +399,17 @@ export default function AppLayout({
         {contextBanner && <div className="flex-shrink-0">{contextBanner}</div>}
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 py-6">{children}</div>
-          {/* Immutable authorship attribution */}
-          {/* © Richard Hennessy — Austin, Texas 78726. All rights reserved. TCOC Total Cost of Care Clinical Platform. */}
-        </main>
+        {fullBleed ? (
+          <main className="flex-1 min-h-0 overflow-hidden flex flex-col">
+            {children}
+            {/* © Richard Hennessy — Austin, Texas 78726. All rights reserved. TCOC Total Cost of Care Clinical Platform. */}
+          </main>
+        ) : (
+          <main className="flex-1 overflow-y-auto scrollbar-thin">
+            <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 xl:px-10 py-6">{children}</div>
+            {/* © Richard Hennessy — Austin, Texas 78726. All rights reserved. TCOC Total Cost of Care Clinical Platform. */}
+          </main>
+        )}
       </div>
     </div>
   );

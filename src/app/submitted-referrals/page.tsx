@@ -6,6 +6,7 @@ import { mockReferrals } from '@/app/referral-tracking/components/ActiveReferral
 import type { ReferralRecord, ReferralStatus, ReferralUrgency } from '@/app/referral-tracking/page';
 import { generatePDFReport } from '@/lib/exportUtils';
 import { useAppContext } from '@/lib/appContext';
+import { useActiveCitizen } from '@/uhg/store/useActiveCitizen';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 import { getFhirMockMode, getFhirClient } from '@/lib/services/fhirClient';
 
@@ -15,8 +16,12 @@ function mapFhirToReferralRecord(sr: any, taskMap: Map<string, any>): ReferralRe
   const task = taskMap.get(sr.id) ?? null;
   const taskStatus: string = task?.status ?? 'requested';
   const statusMap: Record<string, ReferralRecord['status']> = {
-    requested: 'Pending', accepted: 'Assigned', 'in-progress': 'In Progress',
-    completed: 'Completed', rejected: 'Cancelled', cancelled: 'Cancelled',
+    requested: 'Pending',
+    accepted: 'Assigned',
+    'in-progress': 'In Progress',
+    completed: 'Completed',
+    rejected: 'Cancelled',
+    cancelled: 'Cancelled',
   };
   return {
     id: sr.id,
@@ -24,7 +29,11 @@ function mapFhirToReferralRecord(sr: any, taskMap: Map<string, any>): ReferralRe
     patientId: sr.subject?.reference?.split('/')[1] ?? '',
     referralDate: sr.authoredOn?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
     specialty: sr.code?.text ?? sr.code?.coding?.[0]?.display ?? 'Referral',
-    urgency: (sr.priority === 'stat' ? 'STAT' : sr.priority === 'urgent' ? 'Urgent' : 'Routine') as ReferralRecord['urgency'],
+    urgency: (sr.priority === 'stat'
+      ? 'STAT'
+      : sr.priority === 'urgent'
+        ? 'Urgent'
+        : 'Routine') as ReferralRecord['urgency'],
     status: statusMap[taskStatus] ?? 'Pending',
     assignedProvider: task?.owner?.display ?? null,
     providerId: task?.owner?.reference?.split('/')[1] ?? null,
@@ -38,7 +47,9 @@ function mapFhirToReferralRecord(sr: any, taskMap: Map<string, any>): ReferralRe
     outcome: taskStatus === 'completed' ? 'Seen' : 'Pending',
     coordinatorName: sr.requester?.display ?? 'RHTP Platform',
     notes: sr.note?.[0]?.text ?? '',
-    daysOpen: Math.floor((Date.now() - new Date(sr.authoredOn ?? Date.now()).getTime()) / 86_400_000),
+    daysOpen: Math.floor(
+      (Date.now() - new Date(sr.authoredOn ?? Date.now()).getTime()) / 86_400_000
+    ),
   };
 }
 
@@ -87,7 +98,11 @@ function StatusBadge({ status }: { status: ReferralStatus }) {
     Completed: 'bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]',
     Cancelled: 'bg-[#fff1f1] text-[#da1e28] border border-[#ffb3b8]',
   };
-  return <span className={`inline-flex items-center text-2xs font-semibold px-2 py-0.5 ${map[status]}`}>{status}</span>;
+  return (
+    <span className={`inline-flex items-center text-2xs font-semibold px-2 py-0.5 ${map[status]}`}>
+      {status}
+    </span>
+  );
 }
 
 function UrgencyBadge({ urgency }: { urgency: ReferralUrgency }) {
@@ -106,19 +121,30 @@ function UrgencyBadge({ urgency }: { urgency: ReferralUrgency }) {
 }
 
 function OutcomeBadge({ outcome }: { outcome: ReferralRecord['outcome'] }) {
-  if (!outcome || outcome === 'Pending') return <span className="text-xs text-carbon-gray-40">—</span>;
+  if (!outcome || outcome === 'Pending')
+    return <span className="text-xs text-carbon-gray-40">—</span>;
   const map: Record<string, string> = {
     Seen: 'bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]',
     'No-Show': 'bg-[#fff1f1] text-[#da1e28] border border-[#ffb3b8]',
     Cancelled: 'bg-carbon-gray-10 text-carbon-gray-70 border border-carbon-gray-30',
     Hospitalized: 'bg-[#fdf6dd] text-[#b45309] border border-[#f1c21b]',
   };
-  return <span className={`inline-flex items-center text-2xs font-semibold px-2 py-0.5 ${map[outcome] ?? ''}`}>{outcome}</span>;
+  return (
+    <span
+      className={`inline-flex items-center text-2xs font-semibold px-2 py-0.5 ${map[outcome] ?? ''}`}
+    >
+      {outcome}
+    </span>
+  );
 }
 
 function TierBadge({ tier }: { tier: ReferralRecord['providerTier'] }) {
   if (!tier) return <span className="text-xs text-carbon-gray-40">—</span>;
-  const map = { Preferred: 'text-[#0e6027]', 'In-Network': 'text-[#0043ce]', 'Out-of-Network': 'text-[#da1e28]' };
+  const map = {
+    Preferred: 'text-[#0e6027]',
+    'In-Network': 'text-[#0043ce]',
+    'Out-of-Network': 'text-[#da1e28]',
+  };
   return <span className={`text-xs font-medium ${map[tier]}`}>{tier}</span>;
 }
 
@@ -140,10 +166,17 @@ function ReferralStatusTimeline({ referral }: { referral: ReferralRecord }) {
           <div key={step.key} className="flex items-start flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1 min-w-0">
               {/* Circle */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2 transition-all
-                ${isCompleted ? 'bg-[#24a148] border-[#24a148] text-white' :
-                  isActive ? 'bg-[#0f62fe] border-[#0f62fe] text-white' :
-                  isCancelled && idx === 0 ? 'bg-[#da1e28] border-[#da1e28] text-white': 'bg-white border-carbon-gray-20 text-carbon-gray-30'}`}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 border-2 transition-all
+                ${
+                  isCompleted
+                    ? 'bg-[#24a148] border-[#24a148] text-white'
+                    : isActive
+                      ? 'bg-[#0f62fe] border-[#0f62fe] text-white'
+                      : isCancelled && idx === 0
+                        ? 'bg-[#da1e28] border-[#da1e28] text-white'
+                        : 'bg-white border-carbon-gray-20 text-carbon-gray-30'
+                }`}
               >
                 {isCompleted ? (
                   <Icon name="CheckIcon" size={13} />
@@ -152,14 +185,19 @@ function ReferralStatusTimeline({ referral }: { referral: ReferralRecord }) {
                 )}
               </div>
               {/* Label */}
-              <p className={`text-2xs font-semibold mt-1.5 text-center leading-tight
-                ${isCompleted ? 'text-[#24a148]' : isActive ? 'text-[#0f62fe]' : 'text-carbon-gray-40'}`}>
+              <p
+                className={`text-2xs font-semibold mt-1.5 text-center leading-tight
+                ${isCompleted ? 'text-[#24a148]' : isActive ? 'text-[#0f62fe]' : 'text-carbon-gray-40'}`}
+              >
                 {step.label}
               </p>
               {/* Date */}
               {stepDate ? (
                 <p className="text-2xs text-carbon-gray-40 mt-0.5 text-center leading-tight">
-                  {new Date(stepDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {new Date(stepDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </p>
               ) : (
                 <p className="text-2xs text-carbon-gray-30 mt-0.5 text-center">—</p>
@@ -167,7 +205,8 @@ function ReferralStatusTimeline({ referral }: { referral: ReferralRecord }) {
             </div>
             {/* Connector */}
             {idx < TIMELINE_STEPS.length - 1 && (
-              <div className={`h-0.5 flex-1 mt-4 mx-1 transition-all
+              <div
+                className={`h-0.5 flex-1 mt-4 mx-1 transition-all
                 ${isCompleted ? 'bg-[#24a148]' : isActive ? 'bg-[#d0e2ff]' : 'bg-carbon-gray-20'}`}
               />
             )}
@@ -180,8 +219,16 @@ function ReferralStatusTimeline({ referral }: { referral: ReferralRecord }) {
 
 // ─── Referral Detail Drawer ───────────────────────────────────────────────────
 
-function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord; onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState<'timeline' | 'provider' | 'appointment' | 'notes'>('timeline');
+function ReferralDetailDrawer({
+  referral,
+  onClose,
+}: {
+  referral: ReferralRecord;
+  onClose: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<'timeline' | 'provider' | 'appointment' | 'notes'>(
+    'timeline'
+  );
 
   const tabs: { key: typeof activeTab; label: string; icon: string }[] = [
     { key: 'timeline', label: 'Status Timeline', icon: 'ArrowPathIcon' },
@@ -197,14 +244,21 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
       : null,
     responseChannel: referral.submissionChannel ?? 'Pending',
     acceptanceStatus:
-      referral.status === 'Pending' ? 'Awaiting Response' :
-      referral.status === 'Cancelled'? 'Declined' : 'Accepted',
+      referral.status === 'Pending'
+        ? 'Awaiting Response'
+        : referral.status === 'Cancelled'
+          ? 'Declined'
+          : 'Accepted',
     providerNote:
       referral.status === 'Completed'
         ? `Patient seen on ${referral.closedDate}. Clinical summary forwarded to referring provider. Follow-up recommended in 90 days.`
-        : referral.status === 'In Progress' || referral.status === 'Assigned' ?'Referral accepted. Appointment scheduled. Patient instructions sent via patient portal.'
-        : referral.status === 'Awaiting EMR' ?'Awaiting EMR authorization before scheduling. Expected response within 48 hours.'
-        : referral.status === 'Cancelled' ?'Provider unavailable for this referral type. Please reassign to alternate provider.' :'No response received yet.',
+        : referral.status === 'In Progress' || referral.status === 'Assigned'
+          ? 'Referral accepted. Appointment scheduled. Patient instructions sent via patient portal.'
+          : referral.status === 'Awaiting EMR'
+            ? 'Awaiting EMR authorization before scheduling. Expected response within 48 hours.'
+            : referral.status === 'Cancelled'
+              ? 'Provider unavailable for this referral type. Please reassign to alternate provider.'
+              : 'No response received yet.',
     npi: referral.providerId ? `NPI-${referral.providerId.replace('prov-', '1234567')}` : null,
   };
 
@@ -214,12 +268,16 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
       <div className="px-5 py-4 border-b border-carbon-gray-20 flex items-start justify-between gap-3 bg-[#f4f4f4]">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-xs font-mono text-carbon-gray-50">{referral.id.toUpperCase()}</span>
+            <span className="text-xs font-mono text-carbon-gray-50">
+              {referral.id.toUpperCase()}
+            </span>
             <StatusBadge status={referral.status} />
             <UrgencyBadge urgency={referral.urgency} />
           </div>
           <p className="text-sm font-semibold text-carbon-gray-100">{referral.patientName}</p>
-          <p className="text-xs text-carbon-gray-50 mt-0.5">{referral.specialty} · {referral.icdCode} — {referral.icdDescription}</p>
+          <p className="text-xs text-carbon-gray-50 mt-0.5">
+            {referral.specialty} · {referral.icdCode} — {referral.icdDescription}
+          </p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
@@ -246,9 +304,11 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
             key={t.key}
             onClick={() => setActiveTab(t.key)}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors flex-1 justify-center
-              ${activeTab === t.key
-                ? 'border-[#0f62fe] text-[#0f62fe] bg-[#edf5ff]'
-                : 'border-transparent text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10'}`}
+              ${
+                activeTab === t.key
+                  ? 'border-[#0f62fe] text-[#0f62fe] bg-[#edf5ff]'
+                  : 'border-transparent text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10'
+              }`}
           >
             <Icon name={t.icon as any} size={12} />
             <span className="hidden sm:inline">{t.label}</span>
@@ -258,18 +318,21 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
-
         {/* ── Timeline Tab ── */}
         {activeTab === 'timeline' && (
           <div className="space-y-5">
             <div>
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-3">Referral Progress</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-3">
+                Referral Progress
+              </p>
               <ReferralStatusTimeline referral={referral} />
             </div>
 
             {/* Key dates grid */}
             <div className="bg-[#f4f4f4] p-4 space-y-3">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Key Dates</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                Key Dates
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Referral Initiated', value: referral.referralDate },
@@ -278,11 +341,19 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                   { label: 'Referral Closed', value: referral.closedDate },
                 ].map((d) => (
                   <div key={d.label}>
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">{d.label}</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      {d.label}
+                    </p>
                     <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
-                      {d.value
-                        ? new Date(d.value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                        : <span className="text-carbon-gray-30">—</span>}
+                      {d.value ? (
+                        new Date(d.value).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      ) : (
+                        <span className="text-carbon-gray-30">—</span>
+                      )}
                     </p>
                   </div>
                 ))}
@@ -291,7 +362,9 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
             {/* Submission details */}
             <div className="bg-[#f4f4f4] p-4 space-y-3">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Submission Details</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                Submission Details
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Submission Channel', value: referral.submissionChannel ?? '—' },
@@ -300,7 +373,9 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                   { label: 'Outcome', value: referral.outcome ?? 'Pending' },
                 ].map((d) => (
                   <div key={d.label}>
-                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">{d.label}</p>
+                    <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      {d.label}
+                    </p>
                     <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">{d.value}</p>
                   </div>
                 ))}
@@ -318,16 +393,25 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-[#0f62fe] flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-xs">
-                      {referral.assignedProvider.split(' ').filter(Boolean).slice(-2).map((w) => w[0]).join('')}
+                      {referral.assignedProvider
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(-2)
+                        .map((w) => w[0])
+                        .join('')}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-carbon-gray-100">{referral.assignedProvider}</p>
+                    <p className="text-sm font-semibold text-carbon-gray-100">
+                      {referral.assignedProvider}
+                    </p>
                     <p className="text-xs text-carbon-gray-50 mt-0.5">{referral.specialty}</p>
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <TierBadge tier={referral.providerTier} />
                       {providerResponse.npi && (
-                        <span className="text-2xs text-carbon-gray-40 font-mono">{providerResponse.npi}</span>
+                        <span className="text-2xs text-carbon-gray-40 font-mono">
+                          {providerResponse.npi}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -342,40 +426,70 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
             {/* Response status */}
             <div className="bg-[#f4f4f4] p-4 space-y-3">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Provider Response</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                Provider Response
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Acceptance Status</p>
-                  <p className={`text-sm font-semibold mt-0.5
-                    ${providerResponse.acceptanceStatus === 'Accepted' ? 'text-[#24a148]' :
-                      providerResponse.acceptanceStatus === 'Declined' ? 'text-[#da1e28]' :
-                      'text-[#b45309]'}`}>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Acceptance Status
+                  </p>
+                  <p
+                    className={`text-sm font-semibold mt-0.5
+                    ${
+                      providerResponse.acceptanceStatus === 'Accepted'
+                        ? 'text-[#24a148]'
+                        : providerResponse.acceptanceStatus === 'Declined'
+                          ? 'text-[#da1e28]'
+                          : 'text-[#b45309]'
+                    }`}
+                  >
                     {providerResponse.acceptanceStatus}
                   </p>
                 </div>
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Response Date</p>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Response Date
+                  </p>
                   <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
-                    {providerResponse.responseDate
-                      ? new Date(providerResponse.responseDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : <span className="text-carbon-gray-30">Awaiting</span>}
+                    {providerResponse.responseDate ? (
+                      new Date(providerResponse.responseDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    ) : (
+                      <span className="text-carbon-gray-30">Awaiting</span>
+                    )}
                   </p>
                 </div>
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Response Channel</p>
-                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">{providerResponse.responseChannel}</p>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Response Channel
+                  </p>
+                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
+                    {providerResponse.responseChannel}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Network Tier</p>
-                  <div className="mt-0.5"><TierBadge tier={referral.providerTier} /></div>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Network Tier
+                  </p>
+                  <div className="mt-0.5">
+                    <TierBadge tier={referral.providerTier} />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Provider note */}
             <div className="bg-[#f4f4f4] p-4">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">Provider Note</p>
-              <p className="text-sm text-carbon-gray-70 leading-relaxed">{providerResponse.providerNote}</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">
+                Provider Note
+              </p>
+              <p className="text-sm text-carbon-gray-70 leading-relaxed">
+                {providerResponse.providerNote}
+              </p>
             </div>
           </div>
         )}
@@ -392,9 +506,16 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                       <Icon name="CalendarDaysIcon" size={18} className="text-white" />
                     </div>
                     <div>
-                      <p className="text-xs text-[#0e6027] font-semibold uppercase tracking-wide">Appointment Scheduled</p>
+                      <p className="text-xs text-[#0e6027] font-semibold uppercase tracking-wide">
+                        Appointment Scheduled
+                      </p>
                       <p className="text-base font-bold text-[#0e6027] mt-0.5">
-                        {new Date(referral.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                        {new Date(referral.appointmentDate).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
                       </p>
                     </div>
                   </div>
@@ -402,20 +523,34 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
                 {/* Appointment details */}
                 <div className="bg-[#f4f4f4] p-4 space-y-3">
-                  <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Appointment Details</p>
+                  <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                    Appointment Details
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: 'Provider', value: referral.assignedProvider ?? '—' },
                       { label: 'Specialty', value: referral.specialty },
-                      { label: 'Appointment Date', value: new Date(referral.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
+                      {
+                        label: 'Appointment Date',
+                        value: new Date(referral.appointmentDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        }),
+                      },
                       { label: 'Appointment Time', value: '10:30 AM' },
                       { label: 'Visit Type', value: 'In-Person Consultation' },
                       { label: 'Location', value: 'Main Campus — Suite 400' },
-                      { label: 'Confirmation #', value: `APT-${referral.id.replace('ref-', '').padStart(5, '0')}` },
+                      {
+                        label: 'Confirmation #',
+                        value: `APT-${referral.id.replace('ref-', '').padStart(5, '0')}`,
+                      },
                       { label: 'Patient Notified', value: 'Yes — Portal + SMS' },
                     ].map((d) => (
                       <div key={d.label}>
-                        <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">{d.label}</p>
+                        <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                          {d.label}
+                        </p>
                         <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">{d.value}</p>
                       </div>
                     ))}
@@ -424,13 +559,19 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
                 {/* ICD / clinical context */}
                 <div className="bg-[#f4f4f4] p-4 space-y-2">
-                  <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Clinical Context</p>
+                  <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                    Clinical Context
+                  </p>
                   <div className="flex items-start gap-2">
-                    <span className="text-xs font-mono bg-carbon-gray-20 text-carbon-gray-70 px-2 py-0.5 flex-shrink-0">{referral.icdCode}</span>
+                    <span className="text-xs font-mono bg-carbon-gray-20 text-carbon-gray-70 px-2 py-0.5 flex-shrink-0">
+                      {referral.icdCode}
+                    </span>
                     <p className="text-sm text-carbon-gray-70">{referral.icdDescription}</p>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Urgency:</span>
+                    <span className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                      Urgency:
+                    </span>
                     <UrgencyBadge urgency={referral.urgency} />
                   </div>
                 </div>
@@ -441,10 +582,15 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                   <Icon name="CalendarDaysIcon" size={22} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#b45309]">Appointment Not Yet Scheduled</p>
+                  <p className="text-sm font-semibold text-[#b45309]">
+                    Appointment Not Yet Scheduled
+                  </p>
                   <p className="text-xs text-[#b45309] mt-1">
-                    {referral.status === 'Pending' ?'Awaiting provider assignment before scheduling.'
-                      : referral.status === 'Awaiting EMR' ?'EMR authorization required before appointment can be booked.' :'Provider will confirm appointment date upon acceptance.'}
+                    {referral.status === 'Pending'
+                      ? 'Awaiting provider assignment before scheduling.'
+                      : referral.status === 'Awaiting EMR'
+                        ? 'EMR authorization required before appointment can be booked.'
+                        : 'Provider will confirm appointment date upon acceptance.'}
                   </p>
                 </div>
               </div>
@@ -457,43 +603,67 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
           <div className="space-y-4">
             {/* Outcome summary */}
             <div className="bg-[#f4f4f4] p-4 space-y-3">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Referral Outcome</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                Referral Outcome
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Outcome</p>
-                  <div className="mt-1"><OutcomeBadge outcome={referral.outcome} /></div>
+                  <div className="mt-1">
+                    <OutcomeBadge outcome={referral.outcome} />
+                  </div>
                 </div>
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Closed Date</p>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Closed Date
+                  </p>
                   <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
-                    {referral.closedDate
-                      ? new Date(referral.closedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : <span className="text-carbon-gray-30">Open</span>}
+                    {referral.closedDate ? (
+                      new Date(referral.closedDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    ) : (
+                      <span className="text-carbon-gray-30">Open</span>
+                    )}
                   </p>
                 </div>
                 <div>
                   <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Days Open</p>
-                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">{referral.daysOpen} days</p>
+                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
+                    {referral.daysOpen} days
+                  </p>
                 </div>
                 <div>
-                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">Coordinator</p>
-                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">{referral.coordinatorName}</p>
+                  <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide">
+                    Coordinator
+                  </p>
+                  <p className="text-sm font-medium text-carbon-gray-100 mt-0.5">
+                    {referral.coordinatorName}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Clinical note */}
             <div className="bg-[#f4f4f4] p-4">
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">Clinical Note</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">
+                Clinical Note
+              </p>
               <p className="text-sm text-carbon-gray-70 leading-relaxed">
-                {referral.notes || <span className="text-carbon-gray-30 italic">No clinical notes recorded.</span>}
+                {referral.notes || (
+                  <span className="text-carbon-gray-30 italic">No clinical notes recorded.</span>
+                )}
               </p>
             </div>
 
             {/* Follow-up / next steps */}
             {referral.status === 'Completed' && referral.outcome === 'Seen' && (
               <div className="bg-[#edf5ff] border border-[#97c1ff] p-4">
-                <p className="text-xs font-semibold text-[#0043ce] uppercase tracking-wide mb-2">Follow-Up Actions</p>
+                <p className="text-xs font-semibold text-[#0043ce] uppercase tracking-wide mb-2">
+                  Follow-Up Actions
+                </p>
                 <ul className="space-y-1.5">
                   {[
                     'Specialist summary received and filed in EMR',
@@ -502,7 +672,11 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                     'Care gap closure status updated',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-[#0043ce]">
-                      <Icon name="CheckCircleIcon" size={13} className="flex-shrink-0 mt-0.5 text-[#24a148]" />
+                      <Icon
+                        name="CheckCircleIcon"
+                        size={13}
+                        className="flex-shrink-0 mt-0.5 text-[#24a148]"
+                      />
                       {item}
                     </li>
                   ))}
@@ -512,7 +686,9 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
 
             {referral.outcome === 'No-Show' && (
               <div className="bg-[#fff1f1] border border-[#ffb3b8] p-4">
-                <p className="text-xs font-semibold text-[#da1e28] uppercase tracking-wide mb-2">No-Show Actions Required</p>
+                <p className="text-xs font-semibold text-[#da1e28] uppercase tracking-wide mb-2">
+                  No-Show Actions Required
+                </p>
                 <ul className="space-y-1.5">
                   {[
                     'Patient outreach needed — reschedule appointment',
@@ -520,7 +696,11 @@ function ReferralDetailDrawer({ referral, onClose }: { referral: ReferralRecord;
                     'Assess barriers to care (transportation, cost, etc.)',
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2 text-xs text-[#da1e28]">
-                      <Icon name="ExclamationCircleIcon" size={13} className="flex-shrink-0 mt-0.5" />
+                      <Icon
+                        name="ExclamationCircleIcon"
+                        size={13}
+                        className="flex-shrink-0 mt-0.5"
+                      />
                       {item}
                     </li>
                   ))}
@@ -540,25 +720,67 @@ function SubmittedReferralsKPI() {
   const total = mockReferrals.length;
   const completed = mockReferrals.filter((r) => r.status === 'Completed').length;
   const pending = mockReferrals.filter((r) => r.status === 'Pending').length;
-  const inProgress = mockReferrals.filter((r) => r.status === 'In Progress' || r.status === 'Assigned').length;
+  const inProgress = mockReferrals.filter(
+    (r) => r.status === 'In Progress' || r.status === 'Assigned'
+  ).length;
   const stat = mockReferrals.filter((r) => r.urgency === 'STAT').length;
   const avgDays = (mockReferrals.reduce((s, r) => s + r.daysOpen, 0) / total).toFixed(1);
-  const seenRate = Math.round((mockReferrals.filter((r) => r.outcome === 'Seen').length / total) * 100);
+  const seenRate = Math.round(
+    (mockReferrals.filter((r) => r.outcome === 'Seen').length / total) * 100
+  );
 
   const kpis = [
-    { label: 'Total Submitted', value: String(total), sub: 'All referrals', color: 'text-carbon-gray-100' },
-    { label: 'Completed', value: String(completed), sub: `${Math.round((completed / total) * 100)}% completion rate`, color: 'text-[#24a148]' },
-    { label: 'In Progress', value: String(inProgress), sub: 'Assigned or active', color: 'text-[#b45309]' },
-    { label: 'Pending Assignment', value: String(pending), sub: 'Awaiting provider', color: 'text-[#da1e28]' },
-    { label: 'STAT Referrals', value: String(stat), sub: 'Highest urgency', color: 'text-[#da1e28]' },
-    { label: 'Avg Days Open', value: avgDays, sub: 'Across all referrals', color: 'text-carbon-gray-100' },
-    { label: 'Seen Rate', value: `${seenRate}%`, sub: 'Appointments kept', color: 'text-[#24a148]' },
+    {
+      label: 'Total Submitted',
+      value: String(total),
+      sub: 'All referrals',
+      color: 'text-carbon-gray-100',
+    },
+    {
+      label: 'Completed',
+      value: String(completed),
+      sub: `${Math.round((completed / total) * 100)}% completion rate`,
+      color: 'text-[#24a148]',
+    },
+    {
+      label: 'In Progress',
+      value: String(inProgress),
+      sub: 'Assigned or active',
+      color: 'text-[#b45309]',
+    },
+    {
+      label: 'Pending Assignment',
+      value: String(pending),
+      sub: 'Awaiting provider',
+      color: 'text-[#da1e28]',
+    },
+    {
+      label: 'STAT Referrals',
+      value: String(stat),
+      sub: 'Highest urgency',
+      color: 'text-[#da1e28]',
+    },
+    {
+      label: 'Avg Days Open',
+      value: avgDays,
+      sub: 'Across all referrals',
+      color: 'text-carbon-gray-100',
+    },
+    {
+      label: 'Seen Rate',
+      value: `${seenRate}%`,
+      sub: 'Appointments kept',
+      color: 'text-[#24a148]',
+    },
   ];
 
   return (
     <div className="bg-white border-b border-carbon-gray-20 px-6 py-3 flex items-stretch gap-0 overflow-x-auto">
       {kpis.map((k, i) => (
-        <div key={k.label} className={`flex flex-col justify-center px-5 min-w-[110px] flex-shrink-0 ${i > 0 ? 'border-l border-carbon-gray-20' : ''}`}>
+        <div
+          key={k.label}
+          className={`flex flex-col justify-center px-5 min-w-[110px] flex-shrink-0 ${i > 0 ? 'border-l border-carbon-gray-20' : ''}`}
+        >
           <p className={`text-xl font-bold tabular-nums ${k.color}`}>{k.value}</p>
           <p className="text-2xs font-semibold text-carbon-gray-70 mt-0.5">{k.label}</p>
           <p className="text-2xs text-carbon-gray-40 mt-0.5">{k.sub}</p>
@@ -592,18 +814,25 @@ function ReferralRow({
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-xs font-mono text-carbon-gray-40">{referral.id.toUpperCase()}</span>
+            <span className="text-xs font-mono text-carbon-gray-40">
+              {referral.id.toUpperCase()}
+            </span>
             <StatusBadge status={referral.status} />
             <UrgencyBadge urgency={referral.urgency} />
           </div>
           <p className="text-sm font-semibold text-carbon-gray-100">{referral.patientName}</p>
           <p className="text-xs text-carbon-gray-50 mt-0.5">
-            {referral.specialty} · <span className="font-mono">{referral.icdCode}</span> — {referral.icdDescription}
+            {referral.specialty} · <span className="font-mono">{referral.icdCode}</span> —{' '}
+            {referral.icdDescription}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
           <p className="text-xs text-carbon-gray-50">
-            {new Date(referral.referralDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            {new Date(referral.referralDate).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
           </p>
           <p className="text-2xs text-carbon-gray-40 mt-0.5">{referral.daysOpen}d open</p>
         </div>
@@ -621,7 +850,9 @@ function ReferralRow({
             <Icon name="UserIcon" size={11} />
             {referral.assignedProvider}
             {referral.providerTier && (
-              <span className="ml-1"><TierBadge tier={referral.providerTier} /></span>
+              <span className="ml-1">
+                <TierBadge tier={referral.providerTier} />
+              </span>
             )}
           </span>
         ) : (
@@ -633,7 +864,11 @@ function ReferralRow({
         {referral.appointmentDate && (
           <span className="flex items-center gap-1">
             <Icon name="CalendarDaysIcon" size={11} />
-            Appt: {new Date(referral.appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            Appt:{' '}
+            {new Date(referral.appointmentDate).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })}
           </span>
         )}
         {referral.outcome && referral.outcome !== 'Pending' && (
@@ -656,7 +891,11 @@ function ReferralRow({
 
 function formatDate(d: string | null | undefined): string {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function getTimelineStepLabel(status: ReferralStatus): string {
@@ -675,10 +914,14 @@ function getProviderAcceptanceStatus(status: ReferralStatus): string {
 }
 
 function getProviderNote(ref: ReferralRecord): string {
-  if (ref.status === 'Completed') return `Patient seen on ${formatDate(ref.closedDate)}. Clinical summary forwarded to referring provider. Follow-up recommended in 90 days.`;
-  if (ref.status === 'In Progress' || ref.status === 'Assigned') return 'Referral accepted. Appointment scheduled. Patient instructions sent via patient portal.';
-  if (ref.status === 'Awaiting EMR') return 'Awaiting EMR authorization before scheduling. Expected response within 48 hours.';
-  if (ref.status === 'Cancelled') return 'Provider unavailable for this referral type. Please reassign to alternate provider.';
+  if (ref.status === 'Completed')
+    return `Patient seen on ${formatDate(ref.closedDate)}. Clinical summary forwarded to referring provider. Follow-up recommended in 90 days.`;
+  if (ref.status === 'In Progress' || ref.status === 'Assigned')
+    return 'Referral accepted. Appointment scheduled. Patient instructions sent via patient portal.';
+  if (ref.status === 'Awaiting EMR')
+    return 'Awaiting EMR authorization before scheduling. Expected response within 48 hours.';
+  if (ref.status === 'Cancelled')
+    return 'Provider unavailable for this referral type. Please reassign to alternate provider.';
   return 'No response received yet.';
 }
 
@@ -762,16 +1005,47 @@ function exportAllReferralsPDF(referrals: ReferralRecord[], subtitle?: string) {
         title: 'Summary',
         rows: [
           { label: 'Total Referrals', value: String(referrals.length) },
-          { label: 'Completed', value: String(referrals.filter((r) => r.status === 'Completed').length) },
-          { label: 'In Progress', value: String(referrals.filter((r) => r.status === 'In Progress' || r.status === 'Assigned').length) },
-          { label: 'Pending Assignment', value: String(referrals.filter((r) => r.status === 'Pending').length) },
-          { label: 'STAT Referrals', value: String(referrals.filter((r) => r.urgency === 'STAT').length) },
-          { label: 'Seen Rate', value: `${Math.round((referrals.filter((r) => r.outcome === 'Seen').length / referrals.length) * 100)}%` },
-          { label: 'Avg Days Open', value: `${(referrals.reduce((s, r) => s + r.daysOpen, 0) / referrals.length).toFixed(1)} days` },
+          {
+            label: 'Completed',
+            value: String(referrals.filter((r) => r.status === 'Completed').length),
+          },
+          {
+            label: 'In Progress',
+            value: String(
+              referrals.filter((r) => r.status === 'In Progress' || r.status === 'Assigned').length
+            ),
+          },
+          {
+            label: 'Pending Assignment',
+            value: String(referrals.filter((r) => r.status === 'Pending').length),
+          },
+          {
+            label: 'STAT Referrals',
+            value: String(referrals.filter((r) => r.urgency === 'STAT').length),
+          },
+          {
+            label: 'Seen Rate',
+            value: `${Math.round((referrals.filter((r) => r.outcome === 'Seen').length / referrals.length) * 100)}%`,
+          },
+          {
+            label: 'Avg Days Open',
+            value: `${(referrals.reduce((s, r) => s + r.daysOpen, 0) / referrals.length).toFixed(1)} days`,
+          },
         ],
       },
     ],
-    tableHeaders: ['Referral ID', 'Patient', 'Specialty', 'Urgency', 'Status', 'Provider', 'Tier', 'Appt Date', 'Outcome', 'Days Open'],
+    tableHeaders: [
+      'Referral ID',
+      'Patient',
+      'Specialty',
+      'Urgency',
+      'Status',
+      'Provider',
+      'Tier',
+      'Appt Date',
+      'Outcome',
+      'Days Open',
+    ],
     tableRows: referrals.map((r) => [
       r.id.toUpperCase(),
       r.patientName,
@@ -790,7 +1064,8 @@ function exportAllReferralsPDF(referrals: ReferralRecord[], subtitle?: string) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SubmittedReferralsPage() {
-  const { activePatientId, useMockData } = useAppContext();
+  const { useMockData } = useAppContext();
+  const { activeCitizenId } = useActiveCitizen();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -804,36 +1079,69 @@ export default function SubmittedReferralsPage() {
   useEffect(() => {
     if (useMockData || getFhirMockMode() || loadedRef.current) return;
     loadedRef.current = true;
-    const fhirId = PLATFORM_TO_FHIR_ID_MAP[activePatientId] ?? activePatientId;
+    const fhirId = PLATFORM_TO_FHIR_ID_MAP[activeCitizenId] ?? activeCitizenId;
     if (!fhirId) return;
     Promise.all([
       getFhirClient().search('ServiceRequest', { patient: `Patient/${fhirId}`, _count: 50 }),
       getFhirClient().search('Task', { patient: `Patient/${fhirId}`, _count: 50 }),
-    ]).then(([srBundle, taskBundle]: [any, any]) => {
-      const srEntries = (srBundle?.entry ?? []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'ServiceRequest');
-      const taskEntries = (taskBundle?.entry ?? []).map((e: any) => e.resource).filter((r: any) => r?.resourceType === 'Task');
-      if (srEntries.length === 0) return;
-      const taskMap = new Map<string, any>();
-      taskEntries.forEach((t: any) => {
-        const srRef = t.focus?.reference?.split('/')[1];
-        if (srRef) taskMap.set(srRef, t);
+    ])
+      .then(([srBundle, taskBundle]: [any, any]) => {
+        const srEntries = (srBundle?.entry ?? [])
+          .map((e: any) => e.resource)
+          .filter((r: any) => r?.resourceType === 'ServiceRequest');
+        const taskEntries = (taskBundle?.entry ?? [])
+          .map((e: any) => e.resource)
+          .filter((r: any) => r?.resourceType === 'Task');
+        if (srEntries.length === 0) return;
+        const taskMap = new Map<string, any>();
+        taskEntries.forEach((t: any) => {
+          const srRef = t.focus?.reference?.split('/')[1];
+          if (srRef) taskMap.set(srRef, t);
+        });
+        const records = srEntries.map((sr: any) => mapFhirToReferralRecord(sr, taskMap));
+        setFhirReferrals(records);
+        setFhirSource(true);
+      })
+      .catch(() => {
+        /* non-fatal — fall back to mock */
       });
-      const records = srEntries.map((sr: any) => mapFhirToReferralRecord(sr, taskMap));
-      setFhirReferrals(records);
-      setFhirSource(true);
-    }).catch(() => { /* non-fatal — fall back to mock */ });
-  }, [activePatientId, useMockData]);
+  }, [activeCitizenId, useMockData]);
 
   const sourceReferrals = fhirReferrals ?? mockReferrals;
 
-  const statuses = ['All', 'Pending', 'Assigned', 'In Progress', 'Awaiting EMR', 'Completed', 'Cancelled'];
-  const specialties = ['All', 'Cardiology', 'Endocrinology', 'Nephrology', 'Ophthalmology', 'Pulmonology', 'Orthopedics', 'Gastroenterology', 'Geriatrics'];
+  const statuses = [
+    'All',
+    'Pending',
+    'Assigned',
+    'In Progress',
+    'Awaiting EMR',
+    'Completed',
+    'Cancelled',
+  ];
+  const specialties = [
+    'All',
+    'Cardiology',
+    'Endocrinology',
+    'Nephrology',
+    'Ophthalmology',
+    'Pulmonology',
+    'Orthopedics',
+    'Gastroenterology',
+    'Geriatrics',
+  ];
   const urgencies = ['All', 'Routine', 'Urgent', 'STAT'];
 
   const filtered = useMemo(() => {
     return sourceReferrals.filter((r) => {
       const q = search.toLowerCase();
-      if (q && !r.patientName.toLowerCase().includes(q) && !r.icdCode.toLowerCase().includes(q) && !(r.assignedProvider ?? '').toLowerCase().includes(q) && !r.specialty.toLowerCase().includes(q)) return false;
+      if (
+        q &&
+        !r.patientName.toLowerCase().includes(q) &&
+        !r.icdCode.toLowerCase().includes(q) &&
+        !(r.assignedProvider ?? '').toLowerCase().includes(q) &&
+        !r.specialty.toLowerCase().includes(q)
+      )
+        return false;
       if (statusFilter !== 'All' && r.status !== statusFilter) return false;
       if (specialtyFilter !== 'All' && r.specialty !== specialtyFilter) return false;
       if (urgencyFilter !== 'All' && r.urgency !== urgencyFilter) return false;
@@ -841,9 +1149,12 @@ export default function SubmittedReferralsPage() {
     });
   }, [sourceReferrals, search, statusFilter, specialtyFilter, urgencyFilter]);
 
-  const selectedReferral = selectedId ? sourceReferrals.find((r) => r.id === selectedId) ?? null : null;
+  const selectedReferral = selectedId
+    ? (sourceReferrals.find((r) => r.id === selectedId) ?? null)
+    : null;
 
-  const hasFilters = search || statusFilter !== 'All' || specialtyFilter !== 'All' || urgencyFilter !== 'All';
+  const hasFilters =
+    search || statusFilter !== 'All' || specialtyFilter !== 'All' || urgencyFilter !== 'All';
 
   return (
     <AppLayout
@@ -855,10 +1166,18 @@ export default function SubmittedReferralsPage() {
       ]}
       contextBanner={
         <div className="bg-[#d0e2ff] border-b border-[#97c1ff] px-6 py-2 flex items-center gap-6 flex-wrap">
-          <span className="text-xs font-semibold text-[#0043ce]">Contract: Medicare MSSP Track 3</span>
+          <span className="text-xs font-semibold text-[#0043ce]">
+            Contract: Medicare MSSP Track 3
+          </span>
           <span className="text-xs text-[#0043ce]">Total Submitted: {sourceReferrals.length}</span>
-          <span className="text-xs text-[#0043ce]">Completed: {sourceReferrals.filter((r) => r.status === 'Completed').length}</span>
-          {fhirSource && <span className="ml-1 text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">FHIR R4</span>}
+          <span className="text-xs text-[#0043ce]">
+            Completed: {sourceReferrals.filter((r) => r.status === 'Completed').length}
+          </span>
+          {fhirSource && (
+            <span className="ml-1 text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
+              FHIR R4
+            </span>
+          )}
           <span className="ml-auto text-xs text-carbon-gray-50">Data as of Apr 15, 2026</span>
         </div>
       }
@@ -868,7 +1187,11 @@ export default function SubmittedReferralsPage() {
       {/* Filter bar */}
       <div className="bg-white border-b border-carbon-gray-20 px-6 py-3 flex flex-wrap items-center gap-3">
         <div className="relative">
-          <Icon name="MagnifyingGlassIcon" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-40" />
+          <Icon
+            name="MagnifyingGlassIcon"
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-40"
+          />
           <input
             type="text"
             placeholder="Search patient, provider, ICD, specialty…"
@@ -882,33 +1205,51 @@ export default function SubmittedReferralsPage() {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="border border-carbon-gray-30 text-sm px-3 py-1.5 focus:outline-none focus:border-carbon-blue bg-white"
         >
-          {statuses.map((s) => <option key={s}>{s}</option>)}
+          {statuses.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
         </select>
         <select
           value={specialtyFilter}
           onChange={(e) => setSpecialtyFilter(e.target.value)}
           className="border border-carbon-gray-30 text-sm px-3 py-1.5 focus:outline-none focus:border-carbon-blue bg-white"
         >
-          {specialties.map((s) => <option key={s}>{s}</option>)}
+          {specialties.map((s) => (
+            <option key={s}>{s}</option>
+          ))}
         </select>
         <select
           value={urgencyFilter}
           onChange={(e) => setUrgencyFilter(e.target.value)}
           className="border border-carbon-gray-30 text-sm px-3 py-1.5 focus:outline-none focus:border-carbon-blue bg-white"
         >
-          {urgencies.map((u) => <option key={u}>{u}</option>)}
+          {urgencies.map((u) => (
+            <option key={u}>{u}</option>
+          ))}
         </select>
         {hasFilters && (
           <button
-            onClick={() => { setSearch(''); setStatusFilter('All'); setSpecialtyFilter('All'); setUrgencyFilter('All'); }}
+            onClick={() => {
+              setSearch('');
+              setStatusFilter('All');
+              setSpecialtyFilter('All');
+              setUrgencyFilter('All');
+            }}
             className="text-xs text-carbon-blue hover:underline"
           >
             Clear filters
           </button>
         )}
-        <span className="ml-auto text-xs text-carbon-gray-50">{filtered.length} referral{filtered.length !== 1 ? 's' : ''}</span>
+        <span className="ml-auto text-xs text-carbon-gray-50">
+          {filtered.length} referral{filtered.length !== 1 ? 's' : ''}
+        </span>
         <button
-          onClick={() => exportAllReferralsPDF(filtered, `${filtered.length} referral${filtered.length !== 1 ? 's' : ''}${statusFilter !== 'All' ? ` · ${statusFilter}` : ''}${specialtyFilter !== 'All' ? ` · ${specialtyFilter}` : ''}`)}
+          onClick={() =>
+            exportAllReferralsPDF(
+              filtered,
+              `${filtered.length} referral${filtered.length !== 1 ? 's' : ''}${statusFilter !== 'All' ? ` · ${statusFilter}` : ''}${specialtyFilter !== 'All' ? ` · ${specialtyFilter}` : ''}`
+            )
+          }
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#0f62fe] border border-[#0f62fe] hover:bg-[#edf5ff] transition-colors"
           title="Export current view as PDF"
         >
@@ -925,7 +1266,15 @@ export default function SubmittedReferralsPage() {
             <div className="flex flex-col items-center justify-center py-20 text-carbon-gray-40">
               <Icon name="DocumentMagnifyingGlassIcon" size={36} />
               <p className="mt-3 text-sm font-medium">No referrals match your filters</p>
-              <button onClick={() => { setSearch(''); setStatusFilter('All'); setSpecialtyFilter('All'); setUrgencyFilter('All'); }} className="mt-2 text-xs text-carbon-blue hover:underline">
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setStatusFilter('All');
+                  setSpecialtyFilter('All');
+                  setUrgencyFilter('All');
+                }}
+                className="mt-2 text-xs text-carbon-blue hover:underline"
+              >
                 Clear all filters
               </button>
             </div>
@@ -943,10 +1292,7 @@ export default function SubmittedReferralsPage() {
 
         {/* Detail drawer */}
         {selectedReferral && (
-          <ReferralDetailDrawer
-            referral={selectedReferral}
-            onClose={() => setSelectedId(null)}
-          />
+          <ReferralDetailDrawer referral={selectedReferral} onClose={() => setSelectedId(null)} />
         )}
       </div>
     </AppLayout>

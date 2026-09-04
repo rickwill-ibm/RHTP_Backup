@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { usePaStore } from '@/lib/pa/usePaStore';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { runCrdChecks } from '@/lib/pa/crdService';
 import { fhirGet } from '@/lib/client/bff';
 import { toast } from 'sonner';
@@ -27,7 +27,7 @@ const MARIA_PREFILL = [
 ];
 
 export default function OrderView() {
-  const { activePatientId } = useAppContext();
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const {
     patient,
     patientLoading,
@@ -47,7 +47,7 @@ export default function OrderView() {
   const [facility, setFacility] = useState('Pine Ridge FQHC — South Dakota');
   const [submitting, setSubmitting] = useState(false);
 
-  const isMaria = activePatientId === 'MARIA_SD_001';
+  const isMaria = activeCitizenId === 'MARIA_SD_001';
 
   const {
     register,
@@ -64,38 +64,38 @@ export default function OrderView() {
   // read for any patient not in the seeded set. Patient banner + membership come from context —
   // no hardcoded Maria/South Dakota profile.
   useEffect(() => {
-    const ctx = getPatientContext(activePatientId);
+    const ctx = getPatientContext(activeCitizenId);
     if (ctx) {
       setPatient(patientBannerFrom(ctx));
       if (isMaria) reset({ procedures: MARIA_PREFILL });
       return;
     }
-    if (!activePatientId) return;
+    if (!activeCitizenId) return;
     setPatientLoading(true);
     fhirGet<{
       resourceType: string;
       name?: { text?: string; family?: string; given?: string[] }[];
       birthDate?: string;
       identifier?: { value?: string }[];
-    }>(`Patient/${activePatientId}`)
+    }>(`Patient/${activeCitizenId}`)
       .then((r) => {
         if (r.ok && r.data) {
           const n = r.data.name?.[0];
           const name =
             n?.text ??
             [n?.given?.join(' '), n?.family].filter(Boolean).join(' ') ??
-            activePatientId;
+            activeCitizenId;
           setPatient({
             name,
             dob: r.data.birthDate ?? '',
-            memberId: r.data.identifier?.[0]?.value ?? activePatientId,
+            memberId: r.data.identifier?.[0]?.value ?? activeCitizenId,
           });
         } else {
           setPatientError('Could not load patient from FHIR.');
         }
       })
       .finally(() => setPatientLoading(false));
-  }, [activePatientId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeCitizenId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function onSubmit(values: ProcedureFields) {
     if (!patient) {
@@ -121,7 +121,7 @@ export default function OrderView() {
         procedures.map(async (proc) => ({
           cpt: proc.cpt,
           cptDesc: proc.cptDesc,
-          result: await runCrdChecks(activePatientId, proc.cpt, {
+          result: await runCrdChecks(activeCitizenId, proc.cpt, {
             serviceDate: new Date().toISOString().slice(0, 10),
             orderingProvider,
             // demo: the seeded ordering providers are verified in-network for the member's plan

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import AppLayout from '@/components/AppLayout';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { getPatientSync } from '@/lib/services/patientService';
 const DEVICE_FINGERPRINT = 'dv_SD_8821x';
 const PRE_AUTH_CONFIDENCE = '87%';
@@ -125,7 +125,11 @@ interface LogLine {
   phase?: number;
 }
 
-function buildLogLines(memberId: string, memberRoles: string[], completionMessage: string): LogLine[] {
+function buildLogLines(
+  memberId: string,
+  memberRoles: string[],
+  completionMessage: string
+): LogLine[] {
   const graphNodes = buildGraphNodes(memberId);
   return [
     // Phase 1
@@ -148,11 +152,31 @@ function buildLogLines(memberId: string, memberRoles: string[], completionMessag
     { text: `    Pharmacy Account: MARTIN_PHARM_MARIA`, type: 'indent' },
     // Phase 3
     { text: '── PHASE 3: SIX SOURCE STREAM INGESTION ──────────────────', type: 'phase', phase: 3 },
-    { text: `> [SD Medicaid MMIS]       X12 837 EDI  → FHIR ExplanationOfBenefit ✓`, type: 'lime', cardTrigger: 1 },
-    { text: `> [Bennett County EHR]     HL7 v2.x     → FHIR Patient + Condition ✓`, type: 'lime', cardTrigger: 2 },
-    { text: `> [SD CHIP Coverage]       X12 837 EDI  → FHIR Patient + Coverage ✓`, type: 'lime', cardTrigger: 3 },
-    { text: `> [Martin Pharmacy PMS]    NCPDP SCRIPT → FHIR MedicationDispense ✓`, type: 'lime', cardTrigger: 4 },
-    { text: `> [SD DSS Benefits]        EDI 834+CSV  → FHIR Coverage + Task ✓`, type: 'lime', cardTrigger: 5 },
+    {
+      text: `> [SD Medicaid MMIS]       X12 837 EDI  → FHIR ExplanationOfBenefit ✓`,
+      type: 'lime',
+      cardTrigger: 1,
+    },
+    {
+      text: `> [Bennett County EHR]     HL7 v2.x     → FHIR Patient + Condition ✓`,
+      type: 'lime',
+      cardTrigger: 2,
+    },
+    {
+      text: `> [SD CHIP Coverage]       X12 837 EDI  → FHIR Patient + Coverage ✓`,
+      type: 'lime',
+      cardTrigger: 3,
+    },
+    {
+      text: `> [Martin Pharmacy PMS]    NCPDP SCRIPT → FHIR MedicationDispense ✓`,
+      type: 'lime',
+      cardTrigger: 4,
+    },
+    {
+      text: `> [SD DSS Benefits]        EDI 834+CSV  → FHIR Coverage + Task ✓`,
+      type: 'lime',
+      cardTrigger: 5,
+    },
     { text: `> [SD BH Division]         REST API     → FHIR CarePlan ⚠ 42 CFR Pt 2`, type: 'red' },
     { text: `    > BH consent verified: ACTIVE`, type: 'indent' },
     { text: `    > SD BH Division stream: FHIR EpisodeOfCare ✓`, type: 'lime', cardTrigger: 6 },
@@ -162,7 +186,10 @@ function buildLogLines(memberId: string, memberRoles: string[], completionMessag
     { text: '── PHASE 4: IDENTITY PROMOTION ───────────────────────────', type: 'phase', phase: 4 },
     { text: `> Authentication event received`, type: 'default' },
     { text: `> ANONYMOUS → KNOWN promotion triggered`, type: 'amber' },
-    { text: `> Confidence score: ${PRE_AUTH_CONFIDENCE} → ${POST_AUTH_CONFIDENCE} [█████████░]`, type: 'amber' },
+    {
+      text: `> Confidence score: ${PRE_AUTH_CONFIDENCE} → ${POST_AUTH_CONFIDENCE} [█████████░]`,
+      type: 'amber',
+    },
     { text: `> Identity method: ${IDENTITY_METHOD}`, type: 'default' },
     { text: `> Golden ID locked: ${memberId}`, type: 'amber' },
     { text: `> Session promoted: anon_sess_SD_8821x → known_sess_${memberId}`, type: 'default' },
@@ -194,7 +221,7 @@ const FORMAT_BADGE: Record<string, { bg: string; text: string }> = {
 };
 
 export default function CdpAssemblyPage() {
-  const { activePatientId } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const patient = getPatientSync(activePatientId);
   const MEMBER_NAME = patient?.name ?? 'Maria Redhawk';
   const MEMBER_ID = patient?.platformId ?? 'MARIA_SD_001';
@@ -289,12 +316,18 @@ export default function CdpAssemblyPage() {
 
   const getLineColor = (type: LogLineType) => {
     switch (type) {
-      case 'amber': return '#F59E0B';
-      case 'lime': return '#84CC16';
-      case 'red': return '#EF4444';
-      case 'phase': return '#F59E0B';
-      case 'indent': return '#94a3b8';
-      default: return '#e2e8f0';
+      case 'amber':
+        return '#F59E0B';
+      case 'lime':
+        return '#84CC16';
+      case 'red':
+        return '#EF4444';
+      case 'phase':
+        return '#F59E0B';
+      case 'indent':
+        return '#94a3b8';
+      default:
+        return '#e2e8f0';
     }
   };
 
@@ -304,11 +337,16 @@ export default function CdpAssemblyPage() {
 
   const getCardStatusConfig = (status: CardStatus) => {
     switch (status) {
-      case 'PENDING': return { label: 'PENDING', color: '#64748b', bg: '#1e293b', dot: '#475569' };
-      case 'INGESTING': return { label: 'INGESTING...', color: '#60a5fa', bg: '#1e3a5f', dot: '#3b82f6' };
-      case 'NORMALISING': return { label: 'NORMALISING', color: '#fbbf24', bg: '#2a1f00', dot: '#f59e0b' };
-      case 'COMPLETE': return { label: 'COMPLETE ✓', color: '#84CC16', bg: '#1a2e0a', dot: '#84CC16' };
-      case 'CONSENT_CHECK': return { label: '⚠ CONSENT CHECK', color: '#f87171', bg: '#3b0a0a', dot: '#ef4444' };
+      case 'PENDING':
+        return { label: 'PENDING', color: '#64748b', bg: '#1e293b', dot: '#475569' };
+      case 'INGESTING':
+        return { label: 'INGESTING...', color: '#60a5fa', bg: '#1e3a5f', dot: '#3b82f6' };
+      case 'NORMALISING':
+        return { label: 'NORMALISING', color: '#fbbf24', bg: '#2a1f00', dot: '#f59e0b' };
+      case 'COMPLETE':
+        return { label: 'COMPLETE ✓', color: '#84CC16', bg: '#1a2e0a', dot: '#84CC16' };
+      case 'CONSENT_CHECK':
+        return { label: '⚠ CONSENT CHECK', color: '#f87171', bg: '#3b0a0a', dot: '#ef4444' };
     }
   };
 
@@ -340,16 +378,39 @@ export default function CdpAssemblyPage() {
         style={{ background: '#0a0f1e', border: '1px solid #1e293b' }}
       >
         <div>
-          <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#F59E0B', fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>
+          <p
+            style={{
+              fontFamily: 'JetBrains Mono, Fira Code, monospace',
+              color: '#F59E0B',
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: 1,
+            }}
+          >
             SD RHTP · MEMBER IDENTITY RESOLUTION
           </p>
-          <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#94a3b8', fontSize: 11 }}>
+          <p
+            style={{
+              fontFamily: 'JetBrains Mono, Fira Code, monospace',
+              color: '#94a3b8',
+              fontSize: 11,
+            }}
+          >
             {PROGRAM} · {STATE_AGENCY} · {MEMBER_LOCATION}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {currentPhase > 0 && (
-            <span style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', fontSize: 11, color: '#F59E0B', background: '#1a1200', border: '1px solid #F59E0B', padding: '2px 10px' }}>
+            <span
+              style={{
+                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                fontSize: 11,
+                color: '#F59E0B',
+                background: '#1a1200',
+                border: '1px solid #F59E0B',
+                padding: '2px 10px',
+              }}
+            >
               PHASE {currentPhase} / 5
             </span>
           )}
@@ -378,14 +439,60 @@ export default function CdpAssemblyPage() {
         {/* LEFT — Terminal Log */}
         <div
           className="flex-1"
-          style={{ background: '#0a0f1e', border: '1px solid #1e293b', display: 'flex', flexDirection: 'column', minWidth: 0 }}
+          style={{
+            background: '#0a0f1e',
+            border: '1px solid #1e293b',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+          }}
         >
           {/* Terminal title bar */}
-          <div style={{ background: '#0f172a', borderBottom: '1px solid #1e293b', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#84cc16', display: 'inline-block' }} />
-            <span style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#64748b', fontSize: 11, marginLeft: 8 }}>
+          <div
+            style={{
+              background: '#0f172a',
+              borderBottom: '1px solid #1e293b',
+              padding: '8px 14px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: '#ef4444',
+                display: 'inline-block',
+              }}
+            />
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: '#f59e0b',
+                display: 'inline-block',
+              }}
+            />
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: '#84cc16',
+                display: 'inline-block',
+              }}
+            />
+            <span
+              style={{
+                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                color: '#64748b',
+                fontSize: 11,
+                marginLeft: 8,
+              }}
+            >
               sd-rhtp-cdp-assembly — identity-resolution-log
             </span>
           </div>
@@ -429,7 +536,9 @@ export default function CdpAssemblyPage() {
         </div>
 
         {/* RIGHT — Source System Cards */}
-        <div style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+        <div
+          style={{ width: 340, display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}
+        >
           {SOURCE_SYSTEMS.map((src, idx) => {
             const status = cardStatuses[idx];
             const statusCfg = getCardStatusConfig(status);
@@ -446,40 +555,115 @@ export default function CdpAssemblyPage() {
                   transition: 'border-color 0.3s',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    marginBottom: 4,
+                  }}
+                >
                   <div>
-                    <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#f1f5f9', fontSize: 12, fontWeight: 700 }}>
+                    <p
+                      style={{
+                        fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                        color: '#f1f5f9',
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    >
                       {src.name}
                     </p>
-                    <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#64748b', fontSize: 10 }}>
+                    <p
+                      style={{
+                        fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                        color: '#64748b',
+                        fontSize: 10,
+                      }}
+                    >
                       {src.owner}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-                    <span style={{ background: fmtCfg.bg, color: fmtCfg.text, fontSize: 9, fontFamily: 'JetBrains Mono, Fira Code, monospace', padding: '1px 6px', fontWeight: 700 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      gap: 3,
+                    }}
+                  >
+                    <span
+                      style={{
+                        background: fmtCfg.bg,
+                        color: fmtCfg.text,
+                        fontSize: 9,
+                        fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                        padding: '1px 6px',
+                        fontWeight: 700,
+                      }}
+                    >
                       {src.format}
                     </span>
                     {src.isBH && (
-                      <span style={{ background: '#3b0a0a', color: '#f87171', fontSize: 9, fontFamily: 'JetBrains Mono, Fira Code, monospace', padding: '1px 6px', fontWeight: 700 }}>
+                      <span
+                        style={{
+                          background: '#3b0a0a',
+                          color: '#f87171',
+                          fontSize: 9,
+                          fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                          padding: '1px 6px',
+                          fontWeight: 700,
+                        }}
+                      >
                         42 CFR Pt 2
                       </span>
                     )}
                   </div>
                 </div>
 
-                <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#F59E0B', fontSize: 10, marginBottom: 6 }}>
+                <p
+                  style={{
+                    fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                    color: '#F59E0B',
+                    fontSize: 10,
+                    marginBottom: 6,
+                  }}
+                >
                   {src.fhir}
                 </p>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusCfg.dot, display: 'inline-block' }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: statusCfg.color, fontSize: 10, fontWeight: 700 }}>
+                    <span
+                      style={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        background: statusCfg.dot,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                        color: statusCfg.color,
+                        fontSize: 10,
+                        fontWeight: 700,
+                      }}
+                    >
                       {statusCfg.label}
                     </span>
                   </div>
                   {status === 'COMPLETE' && (
-                    <span style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#64748b', fontSize: 9 }}>
+                    <span
+                      style={{
+                        fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                        color: '#64748b',
+                        fontSize: 9,
+                      }}
+                    >
                       {src.records}
                     </span>
                   )}
@@ -497,19 +681,49 @@ export default function CdpAssemblyPage() {
               marginTop: 4,
             }}
           >
-            <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#F59E0B', fontSize: 10, fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>
+            <p
+              style={{
+                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                color: '#F59E0B',
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 1,
+                marginBottom: 8,
+              }}
+            >
               IDENTITY STITCHING
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 }}>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 }}
+            >
               {IDENTITY_SOURCES.map((src) => (
                 <div key={src.label} style={{ background: '#1e293b', padding: '4px 7px' }}>
-                  <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#64748b', fontSize: 9 }}>{src.label}</p>
-                  <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#e2e8f0', fontSize: 9, fontWeight: 700 }}>{src.value}</p>
+                  <p
+                    style={{
+                      fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                      color: '#64748b',
+                      fontSize: 9,
+                    }}
+                  >
+                    {src.label}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                      color: '#e2e8f0',
+                      fontSize: 9,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {src.value}
+                  </p>
                 </div>
               ))}
             </div>
             {/* Converging arrow */}
-            <div style={{ textAlign: 'center', color: '#F59E0B', fontSize: 14, marginBottom: 6 }}>↓ ↓ ↓ ↓</div>
+            <div style={{ textAlign: 'center', color: '#F59E0B', fontSize: 14, marginBottom: 6 }}>
+              ↓ ↓ ↓ ↓
+            </div>
             {/* Golden record */}
             <div
               style={{
@@ -520,14 +734,36 @@ export default function CdpAssemblyPage() {
                 textAlign: 'center',
               }}
             >
-              <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#F59E0B', fontSize: 11, fontWeight: 700 }}>
+              <p
+                style={{
+                  fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                  color: '#F59E0B',
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
                 {GOLDEN_RECORD_LABEL}
               </p>
-              <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#94a3b8', fontSize: 9, marginTop: 2 }}>
+              <p
+                style={{
+                  fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                  color: '#94a3b8',
+                  fontSize: 9,
+                  marginTop: 2,
+                }}
+              >
                 {PRE_AUTH_CONFIDENCE} → {POST_AUTH_CONFIDENCE} · {IDENTITY_METHOD}
               </p>
             </div>
-            <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#475569', fontSize: 9, marginTop: 6, textAlign: 'center' }}>
+            <p
+              style={{
+                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                color: '#475569',
+                fontSize: 9,
+                marginTop: 6,
+                textAlign: 'center',
+              }}
+            >
               {SURVIVORSHIP_RULES[0]}
             </p>
           </div>
@@ -549,7 +785,14 @@ export default function CdpAssemblyPage() {
             gap: 12,
           }}
         >
-          <p style={{ fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#F59E0B', fontSize: 12, fontWeight: 700 }}>
+          <p
+            style={{
+              fontFamily: 'JetBrains Mono, Fira Code, monospace',
+              color: '#F59E0B',
+              fontSize: 12,
+              fontWeight: 700,
+            }}
+          >
             {COMPLETION_MESSAGE}
           </p>
           <div style={{ display: 'flex', gap: 8 }}>

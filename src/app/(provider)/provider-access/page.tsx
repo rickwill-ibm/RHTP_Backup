@@ -12,7 +12,7 @@ import { canReadMemberData } from '@/lib/authz/guard';
 import { toConditionVM, type ConditionVM } from '@/lib/fhir/viewModels';
 import { flag } from '@/lib/flags/flags';
 import AppLayout from '@/components/AppLayout';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 
 interface Bundle {
   entry?: { resource?: Record<string, unknown> }[];
@@ -24,7 +24,7 @@ interface ConsentStatus {
 }
 
 export default function ProviderAccessPage(): React.ReactElement {
-  const { activePatientId } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const [memberId, setMemberId] = useState(activePatientId);
   const [matched, setMatched] = useState<string | null>(null);
   const [conditions, setConditions] = useState<ConditionVM[]>([]);
@@ -74,59 +74,59 @@ export default function ProviderAccessPage(): React.ReactElement {
 
   return (
     <AppLayout>
-    <main className="mx-auto max-w-3xl space-y-4 p-6">
-      <h1 className="text-xl font-semibold">Provider access</h1>
-      <p className="text-xs text-slate-500">
-        Authorization basis: {decision.reason} {decision.elevatedAudit ? '(elevated audit)' : ''}
-      </p>
-      <div className="flex gap-2">
-        <input
-          value={memberId}
-          onChange={(e) => setMemberId(e.target.value)}
-          placeholder="Member id (e.g. MARIA_SD_001)"
-          className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
-        />
-        <button
-          onClick={match}
-          disabled={!memberId}
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50"
-        >
-          $member-match
-        </button>
-      </div>
-      {msg ? <p className="text-sm text-slate-600">{msg}</p> : null}
-      {consent?.optedOut ? (
-        <section
-          aria-label="Provider Access opt-out"
-          className="rounded border border-amber-300 bg-amber-50 p-3 text-sm"
-        >
-          <p className="font-medium text-amber-900">
-            Member {consent.memberId} has opted out of Provider Access data sharing.
-          </p>
-          <p className="mt-1 text-xs text-amber-700">
-            Access is blocked (Authorization basis: {decision.reason}). The member — or an
-            authorized delegate — can revoke this opt-out via the consent API
-            (POST /api/consent/provider-access, action: &quot;revoke&quot;).
-          </p>
-        </section>
-      ) : null}
-      {matched ? (
-        <section>
-          <h2 className="mb-2 text-sm font-semibold text-slate-500">Conditions for {matched}</h2>
-          <div className="rounded border border-slate-200 p-3">
-            {conditions.length === 0 ? (
-              <p className="text-sm text-slate-400">No records.</p>
-            ) : (
-              conditions.map((c) => (
-                <div key={c.id} className="border-b py-1 text-sm last:border-0">
-                  {c.display} — {c.clinicalStatus}
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      ) : null}
-    </main>
+      <main className="mx-auto max-w-3xl space-y-4 p-6">
+        <h1 className="text-xl font-semibold">Provider access</h1>
+        <p className="text-xs text-slate-500">
+          Authorization basis: {decision.reason} {decision.elevatedAudit ? '(elevated audit)' : ''}
+        </p>
+        <div className="flex gap-2">
+          <input
+            value={memberId}
+            onChange={(e) => setMemberId(e.target.value)}
+            placeholder="Member id (e.g. MARIA_SD_001)"
+            className="flex-1 rounded border border-slate-300 px-2 py-1 text-sm"
+          />
+          <button
+            onClick={match}
+            disabled={!memberId}
+            className="rounded bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50"
+          >
+            $member-match
+          </button>
+        </div>
+        {msg ? <p className="text-sm text-slate-600">{msg}</p> : null}
+        {consent?.optedOut ? (
+          <section
+            aria-label="Provider Access opt-out"
+            className="rounded border border-amber-300 bg-amber-50 p-3 text-sm"
+          >
+            <p className="font-medium text-amber-900">
+              Member {consent.memberId} has opted out of Provider Access data sharing.
+            </p>
+            <p className="mt-1 text-xs text-amber-700">
+              Access is blocked (Authorization basis: {decision.reason}). The member — or an
+              authorized delegate — can revoke this opt-out via the consent API (POST
+              /api/consent/provider-access, action: &quot;revoke&quot;).
+            </p>
+          </section>
+        ) : null}
+        {matched ? (
+          <section>
+            <h2 className="mb-2 text-sm font-semibold text-slate-500">Conditions for {matched}</h2>
+            <div className="rounded border border-slate-200 p-3">
+              {conditions.length === 0 ? (
+                <p className="text-sm text-slate-400">No records.</p>
+              ) : (
+                conditions.map((c) => (
+                  <div key={c.id} className="border-b py-1 text-sm last:border-0">
+                    {c.display} — {c.clinicalStatus}
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        ) : null}
+      </main>
     </AppLayout>
   );
 }

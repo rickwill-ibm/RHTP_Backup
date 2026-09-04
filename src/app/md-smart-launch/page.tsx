@@ -9,6 +9,8 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDemoStore } from '@/uhg/store/demoStore';
+import { resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
 import CdsCardRenderer from './components/CdsCardRenderer';
 import OrderEntryModule from './components/OrderEntryModule';
@@ -102,6 +104,16 @@ export default function MdSmartLaunchPage() {
 
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
+  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
+  // Launch precedence: the SMART launch's ?patientId= is AUTHORITATIVE. Set the global active
+  // member to the launched patient so the shell and any member screen agree with the EHR
+  // context — the URL wins over whatever member was previously active (wrong-patient guard).
+  useEffect(() => {
+    if (!launchReady || !launchContext?.patientId) return;
+    const fhir = launchContext.patientId.replace(/^patient\//, '');
+    const platform = resolveFhirToPlatformId(fhir) ?? resolveFhirToPlatformId(`patient-${fhir}`);
+    if (platform) setActiveCitizen(platform);
+  }, [launchReady, launchContext, setActiveCitizen]);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
   const [cdsPanelOpen, setCdsPanelOpen] = useState(false);

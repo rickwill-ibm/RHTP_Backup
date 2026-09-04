@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { postJson } from '@/lib/client/bff';
 import type { MedicalNecessityVM } from '@/lib/goldenThread';
 import { MedicalNecessityPanel } from './MedicalNecessityPanel';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 
 interface RunResult {
   evidenceId: string;
@@ -32,7 +32,7 @@ const PROVIDERS = [
 ];
 
 export function FinancialClearanceRunner(): React.ReactElement {
-  const { activePatientId } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const [orderCode, setOrderCode] = useState('72148');
   const [providerNpi, setProviderNpi] = useState(PROVIDERS[0].npi);
   const [running, setRunning] = useState(false);
@@ -42,7 +42,11 @@ export function FinancialClearanceRunner(): React.ReactElement {
   async function run(): Promise<void> {
     setRunning(true);
     setError(null);
-    const r = await postJson<RunResult>('/api/financial-clearance', { orderCode, providerNpi, patientId: activePatientId });
+    const r = await postJson<RunResult>('/api/financial-clearance', {
+      orderCode,
+      providerNpi,
+      patientId: activePatientId,
+    });
     if (r.ok && r.data) setResult(r.data);
     else setError(r.error?.issue?.[0]?.diagnostics ?? 'Run failed');
     setRunning(false);

@@ -9,6 +9,7 @@ import PatientBreadcrumb from './components/PatientBreadcrumb';
 import LegendPanel from './components/LegendPanel';
 import WholePersonSummary from './components/WholePersonSummary';
 import { PatientContextProvider } from '@/lib/patientContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { useAppContext } from '@/lib/appContext';
 import { getPatientSync } from '@/lib/services/patientService';
 
@@ -29,7 +30,10 @@ const MOCK_ID_TO_PLATFORM_ID: Record<string, string> = {
 
 function PatientDetailContent() {
   const searchParams = useSearchParams();
-  const { activePatientId, setActivePatientId, useMockData } = useAppContext();
+  const { useMockData } = useAppContext();
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
+  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
+  const activePatientId = activeCitizenId;
 
   // URL param takes precedence; otherwise fall back to global activePatientId (default: MARIA_SD_001)
   const urlId = searchParams?.get('id') ?? '';
@@ -41,8 +45,8 @@ function PatientDetailContent() {
   // Keep AppContext.activePatientId in sync when navigated here via URL param.
   // This ensures care-team-inbox, specialist-inbox, etc. all show the same patient.
   useEffect(() => {
-    if (resolvedId && resolvedId !== activePatientId) {
-      setActivePatientId(resolvedId);
+    if (resolvedId && resolvedId !== activeCitizenId) {
+      setActiveCitizen(resolvedId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedId]);

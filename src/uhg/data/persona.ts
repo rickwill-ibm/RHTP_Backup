@@ -24,8 +24,23 @@ function topClinicalGap(p: RegistryPatient) {
   return g ? `${g.name.replace(/ \(.*\)/, '')} ${g.daysOpen}d` : 'No open gap';
 }
 
+// Fail-closed placeholder. An unknown or empty citizenId must NEVER resolve to
+// another member's record — the previous `|| DEFAULT_CITIZEN` fallback leaked
+// Maria Redhawk's identity/PII onto out-of-scope members. Screens gate real
+// member detail via MemberScopeNotice; this keeps the non-null contract safe.
+function placeholderPersona(citizenId?: string): UhgPersona {
+  return {
+    id: citizenId || 'UNKNOWN', name: 'Member', age: 0, gender: '', initials: '\u2014',
+    riskLabel: 'Scope pending', riskColor: '#64748b',
+    bhStatus: 'No BH screen', careGap: 'No open gap', episode: '\u2014',
+    clinicalAlert: null, sdoh: 'SDOH \u00b7 screening', population: '\u2014',
+    careManager: '\u2014', organization: '\u2014', location: '\u2014',
+  };
+}
+
 export function personaFor(citizenId?: string): UhgPersona {
-  const p = getPatientById(citizenId || DEFAULT_CITIZEN) || getPatientById(DEFAULT_CITIZEN)!;
+  const p = getPatientById(citizenId ?? '');
+  if (!p) return placeholderPersona(citizenId);
   const tier = p.riskTier || 'Moderate';
   const social = p.careGaps?.filter((c) => c.domain === 'Social').length || 0;
   return {

@@ -5,7 +5,7 @@ import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { getPatientById } from '@/lib/patientRegistry';
 
 // ─── ETG Constants ────────────────────────────────────────────────────────────
@@ -18,14 +18,59 @@ const ETG_COLORS = {
   Emergency: '#f1c21b',
 };
 
-const ETG_EPISODE_TYPES: Record<number, { label: string; description: string; start: string; finish: string; duration: string }> = {
-  0: { label: 'Type 0', description: 'Complete Episode', start: 'Clean', finish: 'Clean', duration: '—' },
-  1: { label: 'Type 1', description: 'Full Year — clean start, unknown finish', start: 'Clean', finish: 'Unknown', duration: 'Full Year' },
-  2: { label: 'Type 2', description: 'Full Year — unknown start, clean finish', start: 'Unknown', finish: 'Clean', duration: 'Full Year' },
-  3: { label: 'Type 3', description: 'Full Year — unknown start & finish', start: 'Unknown', finish: 'Unknown', duration: 'Full Year' },
-  4: { label: 'Type 4', description: 'Incomplete — clean start, <1 year', start: 'Clean', finish: 'Unknown', duration: 'Incomplete' },
-  5: { label: 'Type 5', description: 'Incomplete — clean finish, <1 year', start: 'Unknown', finish: 'Clean', duration: 'Incomplete' },
-  6: { label: 'Type 6', description: 'Incomplete — no clean start or finish', start: 'Unknown', finish: 'Unknown', duration: 'Incomplete' },
+const ETG_EPISODE_TYPES: Record<
+  number,
+  { label: string; description: string; start: string; finish: string; duration: string }
+> = {
+  0: {
+    label: 'Type 0',
+    description: 'Complete Episode',
+    start: 'Clean',
+    finish: 'Clean',
+    duration: '—',
+  },
+  1: {
+    label: 'Type 1',
+    description: 'Full Year — clean start, unknown finish',
+    start: 'Clean',
+    finish: 'Unknown',
+    duration: 'Full Year',
+  },
+  2: {
+    label: 'Type 2',
+    description: 'Full Year — unknown start, clean finish',
+    start: 'Unknown',
+    finish: 'Clean',
+    duration: 'Full Year',
+  },
+  3: {
+    label: 'Type 3',
+    description: 'Full Year — unknown start & finish',
+    start: 'Unknown',
+    finish: 'Unknown',
+    duration: 'Full Year',
+  },
+  4: {
+    label: 'Type 4',
+    description: 'Incomplete — clean start, <1 year',
+    start: 'Clean',
+    finish: 'Unknown',
+    duration: 'Incomplete',
+  },
+  5: {
+    label: 'Type 5',
+    description: 'Incomplete — clean finish, <1 year',
+    start: 'Unknown',
+    finish: 'Clean',
+    duration: 'Incomplete',
+  },
+  6: {
+    label: 'Type 6',
+    description: 'Incomplete — no clean start or finish',
+    start: 'Unknown',
+    finish: 'Unknown',
+    duration: 'Incomplete',
+  },
 };
 
 // ─── Mock Episode Data ────────────────────────────────────────────────────────
@@ -80,18 +125,33 @@ interface EpisodeDetailData {
   costByCareSetting: { setting: string; cost: number; pct: number; color: string }[];
   etgCostData: ETGCostData[];
   caseMixMetrics: CaseMixMetric[];
-  quality: { complications: boolean; readmission30d: boolean; satisfaction: number; carePlanAdherence: number };
+  quality: {
+    complications: boolean;
+    readmission30d: boolean;
+    satisfaction: number;
+    carePlanAdherence: number;
+  };
   clinicalEvents: ClinicalEvent[];
 }
 
 const EPISODE_DATA: Record<string, EpisodeDetailData> = {
   'ep-001': {
-    id: 'ep-001', type: 'CHF Exacerbation', status: 'Active',
-    patientName: 'Margaret Okonkwo', mrn: 'MRN-204817', age: 78, gender: 'F',
+    id: 'ep-001',
+    type: 'CHF Exacerbation',
+    status: 'Active',
+    patientName: 'Margaret Okonkwo',
+    mrn: 'MRN-204817',
+    age: 78,
+    gender: 'F',
     careManager: 'Linda Marsh',
-    totalCost: 32650, targetCost: 28000, variancePct: 16.6, varianceAmt: 4650,
-    duration: 90, utilizationScore: 72,
-    startDate: '2026-03-14', endDate: '2026-06-12',
+    totalCost: 32650,
+    targetCost: 28000,
+    variancePct: 16.6,
+    varianceAmt: 4650,
+    duration: 90,
+    utilizationScore: 72,
+    startDate: '2026-03-14',
+    endDate: '2026-06-12',
     etgTypeCode: 0,
     timeline: [
       { setting: 'Inpatient', date: 'Mar 14', color: '#0043ce', dotColor: '#0043ce' },
@@ -107,11 +167,41 @@ const EPISODE_DATA: Record<string, EpisodeDetailData> = {
       { setting: 'Outpatient', cost: 450, pct: 1.4, color: '#24a148' },
     ],
     etgCostData: [
-      { setting: 'Inpatient', actual: 18500, benchmark: 14200, peer: 15800, color: ETG_COLORS.Inpatient },
-      { setting: 'Outpatient', actual: 450, benchmark: 2100, peer: 1800, color: ETG_COLORS.Outpatient },
-      { setting: 'Ancillary', actual: 3100, benchmark: 3800, peer: 3500, color: ETG_COLORS.Ancillary },
-      { setting: 'Pharmacy', actual: 1800, benchmark: 2200, peer: 2000, color: ETG_COLORS.Pharmacy },
-      { setting: 'Emergency', actual: 2400, benchmark: 1000, peer: 1200, color: ETG_COLORS.Emergency },
+      {
+        setting: 'Inpatient',
+        actual: 18500,
+        benchmark: 14200,
+        peer: 15800,
+        color: ETG_COLORS.Inpatient,
+      },
+      {
+        setting: 'Outpatient',
+        actual: 450,
+        benchmark: 2100,
+        peer: 1800,
+        color: ETG_COLORS.Outpatient,
+      },
+      {
+        setting: 'Ancillary',
+        actual: 3100,
+        benchmark: 3800,
+        peer: 3500,
+        color: ETG_COLORS.Ancillary,
+      },
+      {
+        setting: 'Pharmacy',
+        actual: 1800,
+        benchmark: 2200,
+        peer: 2000,
+        color: ETG_COLORS.Pharmacy,
+      },
+      {
+        setting: 'Emergency',
+        actual: 2400,
+        benchmark: 1000,
+        peer: 1200,
+        color: ETG_COLORS.Emergency,
+      },
     ],
     caseMixMetrics: [
       { label: 'Episode Duration', actual: '90 days', benchmark: '75 days', flag: true },
@@ -121,24 +211,94 @@ const EPISODE_DATA: Record<string, EpisodeDetailData> = {
       { label: 'Allowed Amount', actual: '$32,650', benchmark: '$28,000', flag: true },
       { label: 'Paid Amount', actual: '$29,800', benchmark: '$26,500', flag: true },
     ],
-    quality: { complications: false, readmission30d: false, satisfaction: 4.5, carePlanAdherence: 85 },
+    quality: {
+      complications: false,
+      readmission30d: false,
+      satisfaction: 4.5,
+      carePlanAdherence: 85,
+    },
     clinicalEvents: [
-      { seq: 1, setting: 'ER', settingColor: '#da1e28', description: 'Emergency Department', diagnosis: 'CHF exacerbation, SOB, edema', provider: 'Dr. Emergency', facility: 'County Hospital ER', cost: 2400, date: 'Mar 14, 2026', claimType: 'Facility' },
-      { seq: 2, setting: 'Inpatient', settingColor: '#0043ce', description: 'Inpatient Admission', diagnosis: 'CHF exacerbation — IV diuresis, monitoring', provider: 'Dr. Sarah Okonkwo', facility: 'County Hospital', cost: 18500, date: 'Mar 14, 2026', claimType: 'Facility' },
-      { seq: 3, setting: 'SNF', settingColor: '#6929c4', description: 'Skilled Nursing Facility', diagnosis: 'Post-acute rehab — cardiac rehab protocol', provider: 'SNF Care Team', facility: 'Riverside SNF', cost: 8200, date: 'Mar 19, 2026', claimType: 'Facility' },
-      { seq: 4, setting: 'Home Health', settingColor: '#24a148', description: 'Home Health Agency', diagnosis: 'Wound care, medication management, PT/OT', provider: 'Home Health RN', facility: 'Rural Home Health', cost: 3100, date: 'Apr 2, 2026', claimType: 'Facility' },
-      { seq: 5, setting: 'Outpatient', settingColor: '#24a148', description: 'Follow-up Office Visit', diagnosis: 'CHF follow-up — stable, medication adjustment', provider: 'Dr. Sarah Okonkwo', facility: 'FQHC Clinic', cost: 450, date: 'May 14, 2026', claimType: 'Professional' },
+      {
+        seq: 1,
+        setting: 'ER',
+        settingColor: '#da1e28',
+        description: 'Emergency Department',
+        diagnosis: 'CHF exacerbation, SOB, edema',
+        provider: 'Dr. Emergency',
+        facility: 'County Hospital ER',
+        cost: 2400,
+        date: 'Mar 14, 2026',
+        claimType: 'Facility',
+      },
+      {
+        seq: 2,
+        setting: 'Inpatient',
+        settingColor: '#0043ce',
+        description: 'Inpatient Admission',
+        diagnosis: 'CHF exacerbation — IV diuresis, monitoring',
+        provider: 'Dr. Sarah Okonkwo',
+        facility: 'County Hospital',
+        cost: 18500,
+        date: 'Mar 14, 2026',
+        claimType: 'Facility',
+      },
+      {
+        seq: 3,
+        setting: 'SNF',
+        settingColor: '#6929c4',
+        description: 'Skilled Nursing Facility',
+        diagnosis: 'Post-acute rehab — cardiac rehab protocol',
+        provider: 'SNF Care Team',
+        facility: 'Riverside SNF',
+        cost: 8200,
+        date: 'Mar 19, 2026',
+        claimType: 'Facility',
+      },
+      {
+        seq: 4,
+        setting: 'Home Health',
+        settingColor: '#24a148',
+        description: 'Home Health Agency',
+        diagnosis: 'Wound care, medication management, PT/OT',
+        provider: 'Home Health RN',
+        facility: 'Rural Home Health',
+        cost: 3100,
+        date: 'Apr 2, 2026',
+        claimType: 'Facility',
+      },
+      {
+        seq: 5,
+        setting: 'Outpatient',
+        settingColor: '#24a148',
+        description: 'Follow-up Office Visit',
+        diagnosis: 'CHF follow-up — stable, medication adjustment',
+        provider: 'Dr. Sarah Okonkwo',
+        facility: 'FQHC Clinic',
+        cost: 450,
+        date: 'May 14, 2026',
+        claimType: 'Professional',
+      },
     ],
   },
 };
 
 const DEFAULT_EPISODE: EpisodeDetailData = {
-  id: 'ep-default', type: 'Episode of Care', status: 'Active',
-  patientName: 'Patient', mrn: 'MRN-000000', age: 70, gender: 'F',
+  id: 'ep-default',
+  type: 'Episode of Care',
+  status: 'Active',
+  patientName: 'Patient',
+  mrn: 'MRN-000000',
+  age: 70,
+  gender: 'F',
   careManager: 'Angela Torres',
-  totalCost: 22000, targetCost: 20000, variancePct: 10.0, varianceAmt: 2000,
-  duration: 60, utilizationScore: 75,
-  startDate: '2026-04-01', endDate: null,
+  totalCost: 22000,
+  targetCost: 20000,
+  variancePct: 10.0,
+  varianceAmt: 2000,
+  duration: 60,
+  utilizationScore: 75,
+  startDate: '2026-04-01',
+  endDate: null,
   etgTypeCode: 4,
   timeline: [
     { setting: 'Inpatient', date: 'Apr 1', color: '#0043ce', dotColor: '#0043ce' },
@@ -151,9 +311,27 @@ const DEFAULT_EPISODE: EpisodeDetailData = {
     { setting: 'Outpatient', cost: 3000, pct: 13.6, color: '#24a148' },
   ],
   etgCostData: [
-    { setting: 'Inpatient', actual: 14000, benchmark: 12000, peer: 13000, color: ETG_COLORS.Inpatient },
-    { setting: 'Outpatient', actual: 3000, benchmark: 2500, peer: 2800, color: ETG_COLORS.Outpatient },
-    { setting: 'Ancillary', actual: 5000, benchmark: 4200, peer: 4600, color: ETG_COLORS.Ancillary },
+    {
+      setting: 'Inpatient',
+      actual: 14000,
+      benchmark: 12000,
+      peer: 13000,
+      color: ETG_COLORS.Inpatient,
+    },
+    {
+      setting: 'Outpatient',
+      actual: 3000,
+      benchmark: 2500,
+      peer: 2800,
+      color: ETG_COLORS.Outpatient,
+    },
+    {
+      setting: 'Ancillary',
+      actual: 5000,
+      benchmark: 4200,
+      peer: 4600,
+      color: ETG_COLORS.Ancillary,
+    },
     { setting: 'Pharmacy', actual: 0, benchmark: 800, peer: 600, color: ETG_COLORS.Pharmacy },
     { setting: 'Emergency', actual: 0, benchmark: 500, peer: 400, color: ETG_COLORS.Emergency },
   ],
@@ -165,24 +343,78 @@ const DEFAULT_EPISODE: EpisodeDetailData = {
     { label: 'Allowed Amount', actual: '$22,000', benchmark: '$20,000', flag: true },
     { label: 'Paid Amount', actual: '$20,500', benchmark: '$19,000', flag: true },
   ],
-  quality: { complications: false, readmission30d: false, satisfaction: 4.2, carePlanAdherence: 80 },
+  quality: {
+    complications: false,
+    readmission30d: false,
+    satisfaction: 4.2,
+    carePlanAdherence: 80,
+  },
   clinicalEvents: [
-    { seq: 1, setting: 'Inpatient', settingColor: '#0043ce', description: 'Inpatient Admission', diagnosis: 'Acute care episode', provider: 'Attending Physician', facility: 'County Hospital', cost: 14000, date: 'Apr 1, 2026', claimType: 'Facility' },
-    { seq: 2, setting: 'Home Health', settingColor: '#24a148', description: 'Home Health', diagnosis: 'Post-acute care', provider: 'Home Health RN', facility: 'Rural Home Health', cost: 5000, date: 'Apr 10, 2026', claimType: 'Facility' },
-    { seq: 3, setting: 'Outpatient', settingColor: '#24a148', description: 'Follow-up Visit', diagnosis: 'Routine follow-up', provider: 'Primary Care', facility: 'FQHC Clinic', cost: 3000, date: 'May 1, 2026', claimType: 'Professional' },
+    {
+      seq: 1,
+      setting: 'Inpatient',
+      settingColor: '#0043ce',
+      description: 'Inpatient Admission',
+      diagnosis: 'Acute care episode',
+      provider: 'Attending Physician',
+      facility: 'County Hospital',
+      cost: 14000,
+      date: 'Apr 1, 2026',
+      claimType: 'Facility',
+    },
+    {
+      seq: 2,
+      setting: 'Home Health',
+      settingColor: '#24a148',
+      description: 'Home Health',
+      diagnosis: 'Post-acute care',
+      provider: 'Home Health RN',
+      facility: 'Rural Home Health',
+      cost: 5000,
+      date: 'Apr 10, 2026',
+      claimType: 'Facility',
+    },
+    {
+      seq: 3,
+      setting: 'Outpatient',
+      settingColor: '#24a148',
+      description: 'Follow-up Visit',
+      diagnosis: 'Routine follow-up',
+      provider: 'Primary Care',
+      facility: 'FQHC Clinic',
+      cost: 3000,
+      date: 'May 1, 2026',
+      claimType: 'Professional',
+    },
   ],
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function KPICard({ label, value, sub, icon, overTarget }: { label: string; value: string; sub: string; icon: string; overTarget?: boolean }) {
+function KPICard({
+  label,
+  value,
+  sub,
+  icon,
+  overTarget,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: string;
+  overTarget?: boolean;
+}) {
   return (
     <div className="bg-white border border-carbon-gray-20 px-5 py-4">
       <div className="flex items-start justify-between">
-        <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">{label}</p>
+        <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">
+          {label}
+        </p>
         <Icon name={icon as any} size={16} className="text-carbon-gray-30" />
       </div>
-      <p className={`text-3xl font-bold font-mono mt-2 ${overTarget === true ? 'text-[#da1e28]' : overTarget === false ? 'text-[#24a148]' : 'text-carbon-gray-100'}`}>
+      <p
+        className={`text-3xl font-bold font-mono mt-2 ${overTarget === true ? 'text-[#da1e28]' : overTarget === false ? 'text-[#24a148]' : 'text-carbon-gray-100'}`}
+      >
         {value}
       </p>
       <p className="text-2xs text-carbon-gray-50 mt-1">{sub}</p>
@@ -199,7 +431,10 @@ function ETGBarTooltip({ active, payload, label }: any) {
       {payload.map((entry: any) => (
         <div key={entry.name} className="flex items-center justify-between gap-3 mb-0.5">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: entry.fill || entry.color }} />
+            <div
+              className="w-2 h-2 rounded-sm"
+              style={{ backgroundColor: entry.fill || entry.color }}
+            />
             <span className="text-carbon-gray-30">{entry.name}</span>
           </div>
           <span className="font-mono font-semibold">${Number(entry.value).toLocaleString()}</span>
@@ -229,7 +464,9 @@ function ETGCostAnalysisTab({ ep }: { ep: EpisodeDetailData }) {
       <div className="bg-white border border-carbon-gray-20 px-5 py-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-2">ETG Episode Type Classification</p>
+            <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-2">
+              ETG Episode Type Classification
+            </p>
             <div className="flex items-center gap-3 flex-wrap">
               <span className="inline-flex items-center gap-1.5 bg-[#8a3ffc] text-white text-sm font-bold px-3 py-1.5 rounded-sm">
                 <Icon name="TagIcon" size={14} />
@@ -244,7 +481,8 @@ function ETGCostAnalysisTab({ ep }: { ep: EpisodeDetailData }) {
                   {etgInfo.duration !== '—' && (
                     <>
                       <span className="mx-2">·</span>
-                      Duration: <span className="font-medium text-carbon-gray-70">{etgInfo.duration}</span>
+                      Duration:{' '}
+                      <span className="font-medium text-carbon-gray-70">{etgInfo.duration}</span>
                     </>
                   )}
                 </p>
@@ -272,15 +510,28 @@ function ETGCostAnalysisTab({ ep }: { ep: EpisodeDetailData }) {
           {costDrivers.map((driver) => {
             const ratio = (driver.actual / driver.benchmark).toFixed(1);
             return (
-              <div key={driver.setting} className="bg-[#fff1f1] border border-[#ffb3b8] px-4 py-3 flex items-center gap-3">
-                <Icon name="ExclamationTriangleIcon" size={16} className="text-[#da1e28] flex-shrink-0" />
+              <div
+                key={driver.setting}
+                className="bg-[#fff1f1] border border-[#ffb3b8] px-4 py-3 flex items-center gap-3"
+              >
+                <Icon
+                  name="ExclamationTriangleIcon"
+                  size={16}
+                  className="text-[#da1e28] flex-shrink-0"
+                />
                 <div className="flex-1">
-                  <span className="text-sm font-semibold text-[#da1e28]">{driver.setting} cost {ratio}× ETG benchmark</span>
+                  <span className="text-sm font-semibold text-[#da1e28]">
+                    {driver.setting} cost {ratio}× ETG benchmark
+                  </span>
                   <span className="text-xs text-carbon-gray-70 ml-2">
-                    Actual: ${driver.actual.toLocaleString()} vs Benchmark: ${driver.benchmark.toLocaleString()} (+${(driver.actual - driver.benchmark).toLocaleString()})
+                    Actual: ${driver.actual.toLocaleString()} vs Benchmark: $
+                    {driver.benchmark.toLocaleString()} (+$
+                    {(driver.actual - driver.benchmark).toLocaleString()})
                   </span>
                 </div>
-                <span className="text-2xs font-semibold bg-[#da1e28] text-white px-2 py-0.5 rounded-sm">Cost Driver</span>
+                <span className="text-2xs font-semibold bg-[#da1e28] text-white px-2 py-0.5 rounded-sm">
+                  Cost Driver
+                </span>
               </div>
             );
           })}
@@ -289,11 +540,20 @@ function ETGCostAnalysisTab({ ep }: { ep: EpisodeDetailData }) {
 
       {/* Three-column stacked bar comparison */}
       <div className="bg-white border border-carbon-gray-20 px-5 py-5">
-        <h3 className="text-sm font-semibold text-carbon-gray-100 mb-1">Cost Comparison by Care Setting</h3>
-        <p className="text-2xs text-carbon-gray-50 mb-4">This episode vs ETG benchmark vs peer average — grouped by care setting</p>
+        <h3 className="text-sm font-semibold text-carbon-gray-100 mb-1">
+          Cost Comparison by Care Setting
+        </h3>
+        <p className="text-2xs text-carbon-gray-50 mb-4">
+          This episode vs ETG benchmark vs peer average — grouped by care setting
+        </p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }} barCategoryGap="25%" barGap={2}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+              barCategoryGap="25%"
+              barGap={2}
+            >
               <XAxis dataKey="setting" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
               <Tooltip content={<ETGBarTooltip />} />
@@ -310,19 +570,28 @@ function ETGCostAnalysisTab({ ep }: { ep: EpisodeDetailData }) {
       <div className="bg-white border border-carbon-gray-20">
         <div className="px-5 py-4 border-b border-carbon-gray-20">
           <h3 className="text-sm font-semibold text-carbon-gray-100">Case-Mix Metrics</h3>
-          <p className="text-2xs text-carbon-gray-50 mt-0.5">Episode characteristics vs ETG benchmark for this episode type</p>
+          <p className="text-2xs text-carbon-gray-50 mt-0.5">
+            Episode characteristics vs ETG benchmark for this episode type
+          </p>
         </div>
         <div className="grid grid-cols-3 divide-x divide-carbon-gray-20">
           {ep.caseMixMetrics.map((metric) => (
             <div key={metric.label} className="px-5 py-4">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-1">{metric.label}</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-1">
+                {metric.label}
+              </p>
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className={`text-lg font-bold font-mono ${metric.flag ? 'text-[#da1e28]' : 'text-[#24a148]'}`}>
+                <span
+                  className={`text-lg font-bold font-mono ${metric.flag ? 'text-[#da1e28]' : 'text-[#24a148]'}`}
+                >
                   {metric.actual}
                 </span>
                 {metric.flag && <Icon name="ArrowUpIcon" size={12} className="text-[#da1e28]" />}
               </div>
-              <p className="text-2xs text-carbon-gray-50 mt-0.5">Benchmark: <span className="font-medium text-carbon-gray-70">{metric.benchmark}</span></p>
+              <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                Benchmark:{' '}
+                <span className="font-medium text-carbon-gray-70">{metric.benchmark}</span>
+              </p>
             </div>
           ))}
         </div>
@@ -343,10 +612,15 @@ function EpisodeDetailContent() {
   const mrn = searchParams.get('mrn') || '';
   const episodeTypeParam = searchParams.get('episodeType') || '';
 
-  const { activePatientId } = useAppContext();
+  const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const activePatient = getPatientById(activePatientId);
 
-  const ep = EPISODE_DATA[episodeId] || { ...DEFAULT_EPISODE, patientName: patientNameParam || DEFAULT_EPISODE.patientName, mrn: mrn || DEFAULT_EPISODE.mrn, type: episodeTypeParam || DEFAULT_EPISODE.type };
+  const ep = EPISODE_DATA[episodeId] || {
+    ...DEFAULT_EPISODE,
+    patientName: patientNameParam || DEFAULT_EPISODE.patientName,
+    mrn: mrn || DEFAULT_EPISODE.mrn,
+    type: episodeTypeParam || DEFAULT_EPISODE.type,
+  };
 
   // Override patient identity fields from registry if available
   const displayName = activePatient?.name || ep.patientName;
@@ -366,7 +640,10 @@ function EpisodeDetailContent() {
     { label: 'RHTP Overview', href: '/contract-program-selection' },
     { label: 'Panel & Cohort', href: '/panel-cohort-view' },
     { label: displayName, href: '/patient-detail' },
-    { label: 'Episodes', href: `/patient-episode-summary?patientId=${activePatientId}&patientName=${encodeURIComponent(displayName)}&mrn=${displayMrn}` },
+    {
+      label: 'Episodes',
+      href: `/patient-episode-summary?patientId=${activePatientId}&patientName=${encodeURIComponent(displayName)}&mrn=${displayMrn}`,
+    },
     { label: ep.type },
   ];
 
@@ -376,10 +653,7 @@ function EpisodeDetailContent() {
   ];
 
   return (
-    <AppLayout
-      pageTitle="Episode Detail"
-      breadcrumbs={breadcrumbs}
-    >
+    <AppLayout pageTitle="Episode Detail" breadcrumbs={breadcrumbs}>
       {/* Episode Header */}
       <div className="bg-white border-b border-carbon-gray-20 px-6 py-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
@@ -429,10 +703,27 @@ function EpisodeDetailContent() {
       <div className="px-6 py-5 space-y-5">
         {/* Four KPI Cards */}
         <div className="grid grid-cols-4 gap-4">
-          <KPICard label="Total Cost" value={`$${ep.totalCost.toLocaleString()}`} sub={`Target: $${ep.targetCost.toLocaleString()}`} icon="CurrencyDollarIcon" overTarget={overTarget} />
-          <KPICard label="Cost Variance" value={`${overTarget ? '+' : ''}${ep.variancePct.toFixed(1)}%`} sub={`$${ep.varianceAmt.toLocaleString()} ${overTarget ? 'over' : 'under'}`} icon="ArrowTrendingUpIcon" overTarget={overTarget} />
+          <KPICard
+            label="Total Cost"
+            value={`$${ep.totalCost.toLocaleString()}`}
+            sub={`Target: $${ep.targetCost.toLocaleString()}`}
+            icon="CurrencyDollarIcon"
+            overTarget={overTarget}
+          />
+          <KPICard
+            label="Cost Variance"
+            value={`${overTarget ? '+' : ''}${ep.variancePct.toFixed(1)}%`}
+            sub={`$${ep.varianceAmt.toLocaleString()} ${overTarget ? 'over' : 'under'}`}
+            icon="ArrowTrendingUpIcon"
+            overTarget={overTarget}
+          />
           <KPICard label="Duration" value={`${ep.duration}`} sub="days" icon="ClockIcon" />
-          <KPICard label="Utilization Score" value={`${ep.utilizationScore}`} sub="out of 100" icon="ChartBarIcon" />
+          <KPICard
+            label="Utilization Score"
+            value={`${ep.utilizationScore}`}
+            sub="out of 100"
+            icon="ChartBarIcon"
+          />
         </div>
 
         {/* Tab bar */}
@@ -460,18 +751,52 @@ function EpisodeDetailContent() {
             <div className="bg-white border border-carbon-gray-20 px-6 py-5">
               <h3 className="text-sm font-semibold text-carbon-gray-100 mb-4">Episode Timeline</h3>
               <div className="flex items-center justify-between text-xs text-carbon-gray-50 mb-3">
-                <div><p className="text-2xs text-carbon-gray-50">Episode Start</p><p className="text-sm font-semibold text-carbon-gray-100">{new Date(ep.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</p></div>
-                <div className="text-center"><p className="text-2xs text-carbon-gray-50">Duration</p><p className="text-sm font-semibold text-carbon-gray-100">{ep.duration} days</p></div>
-                <div className="text-right"><p className="text-2xs text-carbon-gray-50">Episode End</p><p className="text-sm font-semibold text-carbon-gray-100">{ep.endDate ? new Date(ep.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : 'Ongoing'}</p></div>
+                <div>
+                  <p className="text-2xs text-carbon-gray-50">Episode Start</p>
+                  <p className="text-sm font-semibold text-carbon-gray-100">
+                    {new Date(ep.startDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      timeZone: 'UTC',
+                    })}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xs text-carbon-gray-50">Duration</p>
+                  <p className="text-sm font-semibold text-carbon-gray-100">{ep.duration} days</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xs text-carbon-gray-50">Episode End</p>
+                  <p className="text-sm font-semibold text-carbon-gray-100">
+                    {ep.endDate
+                      ? new Date(ep.endDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          timeZone: 'UTC',
+                        })
+                      : 'Ongoing'}
+                  </p>
+                </div>
               </div>
               {/* Timeline bar */}
               <div className="relative mt-2 mb-6">
                 <div className="h-1 bg-[#0043ce] w-full" />
                 <div className="flex justify-between mt-1">
                   {ep.timeline.map((t, i) => (
-                    <div key={t.setting} className="flex flex-col items-center" style={{ width: `${100 / ep.timeline.length}%` }}>
-                      <div className="w-3 h-3 rounded-full border-2 border-white -mt-2.5" style={{ backgroundColor: t.dotColor }} />
-                      <p className="text-2xs font-semibold text-carbon-gray-100 mt-1 whitespace-nowrap">{t.setting}</p>
+                    <div
+                      key={t.setting}
+                      className="flex flex-col items-center"
+                      style={{ width: `${100 / ep.timeline.length}%` }}
+                    >
+                      <div
+                        className="w-3 h-3 rounded-full border-2 border-white -mt-2.5"
+                        style={{ backgroundColor: t.dotColor }}
+                      />
+                      <p className="text-2xs font-semibold text-carbon-gray-100 mt-1 whitespace-nowrap">
+                        {t.setting}
+                      </p>
                       <p className="text-2xs text-carbon-gray-50">{t.date}</p>
                     </div>
                   ))}
@@ -482,7 +807,9 @@ function EpisodeDetailContent() {
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs font-semibold text-carbon-gray-70">Cost Accumulation</p>
-                  <p className="text-xs font-mono font-semibold text-carbon-gray-100">${ep.totalCost.toLocaleString()} / ${ep.targetCost.toLocaleString()}</p>
+                  <p className="text-xs font-mono font-semibold text-carbon-gray-100">
+                    ${ep.totalCost.toLocaleString()} / ${ep.targetCost.toLocaleString()}
+                  </p>
                 </div>
                 <div className="h-8 bg-carbon-gray-20 w-full relative overflow-hidden">
                   <div
@@ -494,24 +821,36 @@ function EpisodeDetailContent() {
                 </div>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-2xs text-carbon-gray-50">Variance from target:</p>
-                  <p className={`text-2xs font-semibold font-mono ${overTarget ? 'text-[#da1e28]' : 'text-[#24a148]'}`}>
-                    {overTarget ? '+' : ''}{ep.variancePct.toFixed(1)}% (${ep.varianceAmt.toLocaleString()})
+                  <p
+                    className={`text-2xs font-semibold font-mono ${overTarget ? 'text-[#da1e28]' : 'text-[#24a148]'}`}
+                  >
+                    {overTarget ? '+' : ''}
+                    {ep.variancePct.toFixed(1)}% (${ep.varianceAmt.toLocaleString()})
                   </p>
                 </div>
               </div>
 
               {/* Care Settings Legend */}
               <div className="mt-4 pt-4 border-t border-carbon-gray-20">
-                <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">CARE SETTINGS</p>
+                <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">
+                  CARE SETTINGS
+                </p>
                 <div className="grid grid-cols-4 gap-2">
                   {[
-                    { label: 'ER', color: '#da1e28' }, { label: 'Inpatient', color: '#0043ce' },
-                    { label: 'SNF', color: '#6929c4' }, { label: 'Home Health', color: '#24a148' },
-                    { label: 'Outpatient', color: '#24a148' }, { label: 'Procedure', color: '#6929c4' },
-                    { label: 'Lab', color: '#0043ce' }, { label: 'Medication', color: '#24a148' },
+                    { label: 'ER', color: '#da1e28' },
+                    { label: 'Inpatient', color: '#0043ce' },
+                    { label: 'SNF', color: '#6929c4' },
+                    { label: 'Home Health', color: '#24a148' },
+                    { label: 'Outpatient', color: '#24a148' },
+                    { label: 'Procedure', color: '#6929c4' },
+                    { label: 'Lab', color: '#0043ce' },
+                    { label: 'Medication', color: '#24a148' },
                   ].map((s) => (
                     <div key={s.label} className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
+                      <div
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: s.color }}
+                      />
                       <span className="text-2xs text-carbon-gray-70">{s.label}</span>
                     </div>
                   ))}
@@ -523,21 +862,33 @@ function EpisodeDetailContent() {
             <div className="grid grid-cols-2 gap-4">
               {/* Cost by Care Setting */}
               <div className="bg-white border border-carbon-gray-20 px-5 py-4">
-                <h3 className="text-sm font-semibold text-carbon-gray-100 mb-4">Cost by Care Setting</h3>
+                <h3 className="text-sm font-semibold text-carbon-gray-100 mb-4">
+                  Cost by Care Setting
+                </h3>
                 <div className="space-y-3">
                   {ep.costByCareSetting.map((cs) => (
                     <div key={cs.setting}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cs.color }} />
+                          <div
+                            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: cs.color }}
+                          />
                           <span className="text-sm text-carbon-gray-100">{cs.setting}</span>
                         </div>
-                        <span className="text-sm font-semibold font-mono text-carbon-gray-100">${cs.cost.toLocaleString()}</span>
+                        <span className="text-sm font-semibold font-mono text-carbon-gray-100">
+                          ${cs.cost.toLocaleString()}
+                        </span>
                       </div>
                       <div className="h-1.5 bg-carbon-gray-20 w-full">
-                        <div className="h-full" style={{ width: `${cs.pct}%`, backgroundColor: cs.color }} />
+                        <div
+                          className="h-full"
+                          style={{ width: `${cs.pct}%`, backgroundColor: cs.color }}
+                        />
                       </div>
-                      <p className="text-2xs text-carbon-gray-50 mt-0.5">{cs.pct.toFixed(1)}% of total</p>
+                      <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                        {cs.pct.toFixed(1)}% of total
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -549,32 +900,46 @@ function EpisodeDetailContent() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between bg-carbon-gray-10 px-4 py-3">
                     <span className="text-sm text-carbon-gray-100">Complications</span>
-                    <span className={`text-sm font-semibold ${ep.quality.complications ? 'text-[#da1e28]' : 'text-[#24a148]'}`}>
+                    <span
+                      className={`text-sm font-semibold ${ep.quality.complications ? 'text-[#da1e28]' : 'text-[#24a148]'}`}
+                    >
                       {ep.quality.complications ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between bg-carbon-gray-10 px-4 py-3">
                     <span className="text-sm text-carbon-gray-100">30-Day Readmission</span>
-                    <span className={`text-sm font-semibold ${ep.quality.readmission30d ? 'text-[#da1e28]' : 'text-[#24a148]'}`}>
+                    <span
+                      className={`text-sm font-semibold ${ep.quality.readmission30d ? 'text-[#da1e28]' : 'text-[#24a148]'}`}
+                    >
                       {ep.quality.readmission30d ? 'Yes' : 'No'}
                     </span>
                   </div>
                   <div className="px-4 py-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-carbon-gray-100">Patient Satisfaction</span>
-                      <span className="text-sm font-semibold text-carbon-gray-100">{ep.quality.satisfaction}/5.0</span>
+                      <span className="text-sm font-semibold text-carbon-gray-100">
+                        {ep.quality.satisfaction}/5.0
+                      </span>
                     </div>
                     <div className="h-2 bg-carbon-gray-20 w-full">
-                      <div className="h-full bg-[#0043ce]" style={{ width: `${(ep.quality.satisfaction / 5) * 100}%` }} />
+                      <div
+                        className="h-full bg-[#0043ce]"
+                        style={{ width: `${(ep.quality.satisfaction / 5) * 100}%` }}
+                      />
                     </div>
                   </div>
                   <div className="px-4 py-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm text-carbon-gray-100">Care Plan Adherence</span>
-                      <span className="text-sm font-semibold text-carbon-gray-100">{ep.quality.carePlanAdherence}%</span>
+                      <span className="text-sm font-semibold text-carbon-gray-100">
+                        {ep.quality.carePlanAdherence}%
+                      </span>
                     </div>
                     <div className="h-2 bg-carbon-gray-20 w-full">
-                      <div className="h-full bg-[#24a148]" style={{ width: `${ep.quality.carePlanAdherence}%` }} />
+                      <div
+                        className="h-full bg-[#24a148]"
+                        style={{ width: `${ep.quality.carePlanAdherence}%` }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -588,7 +953,10 @@ function EpisodeDetailContent() {
               </div>
               <div className="divide-y divide-carbon-gray-20">
                 {ep.clinicalEvents.map((evt) => (
-                  <div key={evt.seq} className="px-5 py-4 flex items-start gap-4 hover:bg-[#f4f4f4] transition-colors">
+                  <div
+                    key={evt.seq}
+                    className="px-5 py-4 flex items-start gap-4 hover:bg-[#f4f4f4] transition-colors"
+                  >
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold"
                       style={{ backgroundColor: evt.settingColor }}
@@ -601,10 +969,14 @@ function EpisodeDetailContent() {
                         <span className="text-2xs text-carbon-gray-50">— {evt.description}</span>
                       </div>
                       <p className="text-xs text-carbon-gray-70 mt-0.5">{evt.diagnosis}</p>
-                      <p className="text-2xs text-carbon-gray-50 mt-0.5">Provider: {evt.provider} · Facility: {evt.facility}</p>
+                      <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                        Provider: {evt.provider} · Facility: {evt.facility}
+                      </p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold font-mono text-carbon-gray-100">${evt.cost.toLocaleString()}</p>
+                      <p className="text-sm font-bold font-mono text-carbon-gray-100">
+                        ${evt.cost.toLocaleString()}
+                      </p>
                       <p className="text-2xs text-carbon-gray-50">{evt.date}</p>
                       <span className="text-2xs text-carbon-gray-50">{evt.claimType}</span>
                     </div>
@@ -618,22 +990,36 @@ function EpisodeDetailContent() {
               <div className="bg-white border border-[#a7f0ba]">
                 <div className="px-5 py-3 border-b border-[#a7f0ba] bg-[#defbe6] flex items-center gap-2">
                   <Icon name="ServerIcon" size={14} className="text-[#198038]" />
-                  <h3 className="text-sm font-semibold text-[#0e6027]">FHIR Encounters ({activePatient.recentEncounters.length})</h3>
-                  <span className="ml-auto text-2xs text-[#0e6027] font-mono">Live · HAPI FHIR R4</span>
+                  <h3 className="text-sm font-semibold text-[#0e6027]">
+                    FHIR Encounters ({activePatient.recentEncounters.length})
+                  </h3>
+                  <span className="ml-auto text-2xs text-[#0e6027] font-mono">
+                    Live · HAPI FHIR R4
+                  </span>
                 </div>
                 <div className="divide-y divide-carbon-gray-10">
                   {activePatient.recentEncounters.map((enc) => (
                     <div key={enc.id} className="px-5 py-3 flex items-start gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-semibold text-carbon-gray-100">{enc.type}</span>
-                          <span className="text-2xs px-1.5 py-0.5 bg-[#d0e2ff] text-[#0043ce]">{enc.setting}</span>
+                          <span className="text-xs font-semibold text-carbon-gray-100">
+                            {enc.type}
+                          </span>
+                          <span className="text-2xs px-1.5 py-0.5 bg-[#d0e2ff] text-[#0043ce]">
+                            {enc.setting}
+                          </span>
                           <span className="text-2xs font-mono text-carbon-gray-30">{enc.date}</span>
                         </div>
-                        {enc.provider && <p className="text-xs text-carbon-gray-50 mt-0.5">Provider: {enc.provider}</p>}
+                        {enc.provider && (
+                          <p className="text-xs text-carbon-gray-50 mt-0.5">
+                            Provider: {enc.provider}
+                          </p>
+                        )}
                         {enc.reason && <p className="text-xs text-carbon-gray-50">{enc.reason}</p>}
                       </div>
-                      <span className={`text-2xs font-semibold px-2 py-0.5 flex-shrink-0 ${enc.status === 'finished' ? 'bg-[#defbe6] text-[#0e6027]' : 'bg-[#fdf6dd] text-[#b45309]'}`}>
+                      <span
+                        className={`text-2xs font-semibold px-2 py-0.5 flex-shrink-0 ${enc.status === 'finished' ? 'bg-[#defbe6] text-[#0e6027]' : 'bg-[#fdf6dd] text-[#b45309]'}`}
+                      >
                         {enc.status}
                       </span>
                     </div>
@@ -653,7 +1039,13 @@ function EpisodeDetailContent() {
 
 export default function EpisodeDetailPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen text-carbon-gray-50 text-sm">Loading episode...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen text-carbon-gray-50 text-sm">
+          Loading episode...
+        </div>
+      }
+    >
       <EpisodeDetailContent />
     </Suspense>
   );

@@ -6,11 +6,11 @@
  * CMS-0057-F compliance. Six tabs — one per mandate provision plus
  * infrastructure cross-cuts and a Postman Suite configurator.
  * All requests go through the RHTP BFF layer (never directly to FHIR/APIM).
- * Pre-fills from activePatientId.
+ * Pre-fills from activeCitizenId.
  */
 import { useState, useCallback, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
-import { useAppContext } from '@/lib/appContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
 import { resolveToCanonicalFhirPatientId } from '@/lib/patientRegistry';
 import PostmanSuiteTab from '@/components/PostmanSuiteTab';
 
@@ -665,7 +665,7 @@ function EndpointCard({ ep, patientId }: { ep: Endpoint; patientId: string }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ApiExplorerPage(): React.ReactElement {
-  const { activePatientId } = useAppContext();
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const [activeTab, setActiveTab] = useState<TabId>('patient-access');
   const isPostmanTab = activeTab === 'postman-suite';
   const [sessionPatient, setSessionPatient] = useState<string | null>(null);
@@ -673,7 +673,7 @@ export default function ApiExplorerPage(): React.ReactElement {
   useEffect(() => {
     let cancelled = false;
     async function syncSession(): Promise<void> {
-      const patient = resolveToCanonicalFhirPatientId(activePatientId) ?? activePatientId;
+      const patient = resolveToCanonicalFhirPatientId(activeCitizenId) ?? activeCitizenId;
       await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -693,11 +693,11 @@ export default function ApiExplorerPage(): React.ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [activePatientId]);
+  }, [activeCitizenId]);
 
   // Rebuild endpoint definitions whenever the active patient changes —
   // labels, CPT codes, paths, and request bodies are all patient-specific.
-  const ENDPOINTS = buildEndpoints(activePatientId);
+  const ENDPOINTS = buildEndpoints(activeCitizenId);
   const endpoints = isPostmanTab
     ? []
     : (ENDPOINTS[activeTab as Exclude<TabId, 'postman-suite'>] ?? []);
@@ -717,10 +717,10 @@ export default function ApiExplorerPage(): React.ReactElement {
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <span className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wide">
-              Selected: <span className="text-gray-800">{activePatientId}</span>
+              Selected: <span className="text-gray-800">{activeCitizenId}</span>
             </span>
             <span
-              className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${sessionPatient === activePatientId ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}
+              className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${sessionPatient === activeCitizenId ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}
             >
               Session: <span className="text-gray-800">{sessionPatient ?? '—'}</span>
             </span>
@@ -730,10 +730,10 @@ export default function ApiExplorerPage(): React.ReactElement {
           </div>
         </div>
 
-        {sessionPatient && sessionPatient !== activePatientId && (
+        {sessionPatient && sessionPatient !== activeCitizenId && (
           <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             Explorer patient mismatch: selected patient is{' '}
-            <span className="font-mono font-bold">{activePatientId}</span> but current session is{' '}
+            <span className="font-mono font-bold">{activeCitizenId}</span> but current session is{' '}
             <span className="font-mono font-bold">{sessionPatient}</span>. Responses may reflect the
             session patient until context is resynced.
           </div>
@@ -771,7 +771,7 @@ export default function ApiExplorerPage(): React.ReactElement {
                   className={`ml-0.5 text-[10px] ${activeTab === t.id ? 'text-[#1669c1]' : 'text-gray-400'}`}
                 >
                   (
-                  {buildEndpoints(activePatientId)[t.id as Exclude<TabId, 'postman-suite'>]
+                  {buildEndpoints(activeCitizenId)[t.id as Exclude<TabId, 'postman-suite'>]
                     ?.length ?? 0}
                   )
                 </span>
@@ -811,9 +811,9 @@ export default function ApiExplorerPage(): React.ReactElement {
             <div className="space-y-3">
               {endpoints.map((ep) => (
                 <EndpointCard
-                  key={`${ep.id}-${activePatientId}`}
+                  key={`${ep.id}-${activeCitizenId}`}
                   ep={ep}
-                  patientId={activePatientId}
+                  patientId={activeCitizenId}
                 />
               ))}
             </div>

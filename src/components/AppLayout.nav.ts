@@ -33,7 +33,7 @@ export const navItems: NavItem[] = [
   // RHTP Program
   {
     key: 'nav-contracts',
-    label: 'RHTP Overview',
+    label: 'WPCO Overview',
     icon: 'BuildingOffice2Icon',
     href: '/contract-program-selection',
     group: 'RHTP Program',
@@ -188,14 +188,14 @@ export const navItems: NavItem[] = [
     label: 'CBO Directory',
     icon: 'BuildingStorefrontIcon',
     href: '/cbo-directory',
-    group: 'Whole Person Care',
+    group: 'RHTP Program',
   },
   {
     key: 'nav-episodic-management',
     label: 'Episodic Management Analytics',
     icon: 'ChartBarIcon',
     href: '/episodic-management-analytics',
-    group: 'Whole Person Care',
+    group: 'RHTP Program',
   },
   // Agentic Orchestrate
   {

@@ -4,14 +4,37 @@ import * as d3 from 'd3';
 import {
   graphNodes,
   graphEdges,
-  lensDefinitions,
   activeSignals,
   type GraphNode,
   type GraphEdge,
-  type LensType,
   type ActiveSignal,
 } from '@/lib/wholePersonGraphData';
 import { useGapClosureStore } from '@/lib/patientContext';
+import { useDemoStore } from '@/uhg/store/demoStore';
+import { personaFor } from '@/uhg/data/persona';
+import { useWholePersonGraph } from '@/lib/wpcGraph/useWholePersonGraph';
+import { buildLensCypher } from '@/lib/wpcGraph/generateCypher';
+import {
+  buildLensRegistry,
+  applyBehavioralLayout,
+  enrichSparseLens,
+  type LensDescriptor,
+} from '@/lib/wpcGraph/lensUtils';
+import { buildMemberSignals, memberBannerText } from '@/lib/wpcGraph/memberSignals';
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
+import { StoryFlowStrip } from '@/components/wpc/StoryFlowStrip';
+import { DarkLensBar } from '@/components/wpc/LensBar';
+import { SignalGraph } from '@/components/wpc/SignalGraph';
+import { type SimNode, renderFrame } from '@/lib/wpcGraph/graphRender';
+import {
+  scoreAttention,
+  attnNodeStyle,
+  scoreAttentionNG,
+  ngNodeStyle,
+  emphasizedChain,
+  prefersReducedMotion,
+  type AttentionTier,
+} from '@/lib/wpcGraph/attention';
 
 // ── Dark theme ────────────────────────────────────────────────────────────────
 const DARK = {
@@ -24,42 +47,35 @@ const DARK = {
   textDim: '#2d3748',
 };
 
-// ── Sofia lens — 7 nodes in clean radial ring ─────────────────────────────────
-const SOFIA_LENS_NODES = ['n01', 'n15', 'n06', 'n35', 'n13', 'n32', 'n26', 'n52'];
-
-// ── Agent Coalition lens nodes ────────────────────────────────────────────────
-const AGENT_LENS_NODES = ['n01', 'a01', 'a02', 'a03', 'n04', 'n07', 'n17', 'n18', 'n41', 'n38', 'n51', 'n25', 'n14'];
-
-// ── Refined lens node sets ────────────────────────────────────────────────────
-const LENS_NODE_SETS: Record<LensType, string[]> = {
-  all: graphNodes.map((n) => n.id),
-  clinical: [
-    'n01', 'n04', 'n05', 'n06', 'n07', 'n08', 'n09', 'n10',
-    'n14', 'n33', 'n11', 'n12', 'n13', 'n15', 'n16', 'n17', 'n18',
-  ],
-  behavioral: [
-    'n01', 'n05', 'n07', 'n08', 'n19', 'n23', 'n24', 'n25', 'n31', 'n38', 'n44', 'n49', 'n51',
-  ],
-  social: ['n01', 'n17', 'n18', 'n04', 'n20', 'n21', 'n22', 'n23', 'n47', 'n48', 'n30', 'n36', 'n41'],
-  eligibility: [
-    'n01', 'n41', 'n42', 'n43', 'n46', 'n45', 'n39', 'n40', 'n18', 'n04', 'n02',
-  ],
-  agents: AGENT_LENS_NODES,
-};
-
-type ExtendedLensType = LensType | 'sofia';
+type ExtendedLensType = string; // a lens id: a domain LensType, or a relationship id (dep:/car:)
 
 const NODE_TYPE_LABELS: Record<string, string> = {
-  Member: 'Member', Insurance: 'Insurance', CareGap: 'Care Gap',
-  Episode: 'Episode', Medication: 'Medication', Provider: 'Provider',
-  Dependent: 'Dependent', SDOHNode: 'SDOH', BHScreening: 'BH Screening',
-  Consent: 'Consent', ChannelHistory: 'Channel', WorkScheduleConstraint: 'Work Constraint',
-  HouseholdUnit: 'Household', CaregiverBurden: 'Caregiver Burden',
-  PharmacyTouchpoint: 'Pharmacy', CriticalAccessHospital: 'CAH Facility',
-  ChildDevelopment: 'Child Development', SeasonalBarrier: 'Seasonal Barrier',
-  EligibilityStatus: 'Eligibility', BenefitStatus: 'Benefit Status',
-  WICStatus: 'WIC', BHProgramStatus: 'BH Program', HousingStatus: 'Housing',
-  LIHEAPStatus: 'LIHEAP', ScreeningResult: 'Screening Result', Agent: 'Agent',
+  Member: 'Member',
+  Insurance: 'Insurance',
+  CareGap: 'Care Gap',
+  Episode: 'Episode',
+  Medication: 'Medication',
+  Provider: 'Provider',
+  Dependent: 'Dependent',
+  SDOHNode: 'SDOH',
+  BHScreening: 'BH Screening',
+  Consent: 'Consent',
+  ChannelHistory: 'Channel',
+  WorkScheduleConstraint: 'Work Constraint',
+  HouseholdUnit: 'Household',
+  CaregiverBurden: 'Caregiver Burden',
+  PharmacyTouchpoint: 'Pharmacy',
+  CriticalAccessHospital: 'CAH Facility',
+  ChildDevelopment: 'Child Development',
+  SeasonalBarrier: 'Seasonal Barrier',
+  EligibilityStatus: 'Eligibility',
+  BenefitStatus: 'Benefit Status',
+  WICStatus: 'WIC',
+  BHProgramStatus: 'BH Program',
+  HousingStatus: 'Housing',
+  LIHEAPStatus: 'LIHEAP',
+  ScreeningResult: 'Screening Result',
+  Agent: 'Agent',
 };
 
 // ── Edge Properties Tooltip Panel ─────────────────────────────────────────────
@@ -76,25 +92,48 @@ function EdgeTooltipPanel({ edge, x, y, sourceNode, targetNode, onClose }: EdgeT
   const ep = edge.edgeProps;
   const confidence = ep?.confidence ?? null;
   const confPct = confidence !== null ? Math.round(confidence * 100) : null;
-  const confColor = confPct !== null ? (confPct >= 90 ? '#4ade80' : confPct >= 70 ? '#f59e0b' : '#ef4444') : '#64748b';
+  const confColor =
+    confPct !== null
+      ? confPct >= 90
+        ? '#4ade80'
+        : confPct >= 70
+          ? '#f59e0b'
+          : '#ef4444'
+      : '#64748b';
 
   const rows: { key: string; val: string; highlight?: boolean }[] = [];
   if (ep?.since) rows.push({ key: 'since', val: ep.since });
-  if (ep?.status) rows.push({ key: 'status', val: String(ep.status), highlight: ep.status === 'OPEN' || ep.status === 'ACTIVE' });
+  if (ep?.status)
+    rows.push({
+      key: 'status',
+      val: String(ep.status),
+      highlight: ep.status === 'OPEN' || ep.status === 'ACTIVE',
+    });
   if (ep?.touchpoints) rows.push({ key: 'touchpoints', val: String(ep.touchpoints) });
   if (ep?.lastContact) rows.push({ key: 'last_contact', val: String(ep.lastContact) });
   if (ep?.lastAction) rows.push({ key: 'last_action', val: String(ep.lastAction) });
   if (ep?.actionType) rows.push({ key: 'action_type', val: String(ep.actionType) });
   if (ep?.dose) rows.push({ key: 'dose', val: String(ep.dose) });
   if (ep?.frequency) rows.push({ key: 'frequency', val: String(ep.frequency) });
-  if (ep?.adherence !== undefined) rows.push({ key: 'adherence', val: `${Math.round((ep.adherence as number) * 100)}%`, highlight: (ep.adherence as number) < 0.7 });
+  if (ep?.adherence !== undefined)
+    rows.push({
+      key: 'adherence',
+      val: `${Math.round((ep.adherence as number) * 100)}%`,
+      highlight: (ep.adherence as number) < 0.7,
+    });
   if (ep?.gapDays) rows.push({ key: 'gap_days', val: `${ep.gapDays}d` });
 
   // Clamp panel to viewport
   const panelW = 240;
   const panelH = 180;
-  const clampedX = Math.min(x, (typeof window !== 'undefined' ? window.innerWidth : 1200) - panelW - 16);
-  const clampedY = Math.min(y, (typeof window !== 'undefined' ? window.innerHeight : 800) - panelH - 16);
+  const clampedX = Math.min(
+    x,
+    (typeof window !== 'undefined' ? window.innerWidth : 1200) - panelW - 16
+  );
+  const clampedY = Math.min(
+    y,
+    (typeof window !== 'undefined' ? window.innerHeight : 800) - panelH - 16
+  );
 
   return (
     <div
@@ -109,30 +148,69 @@ function EdgeTooltipPanel({ edge, x, y, sourceNode, targetNode, onClose }: EdgeT
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${edge.color}44` }}>
+      <div
+        className="flex items-center justify-between px-3 py-2"
+        style={{ borderBottom: `1px solid ${edge.color}44` }}
+      >
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: edge.color, boxShadow: `0 0 6px ${edge.color}` }} />
-          <span className="text-xs font-mono font-bold truncate" style={{ color: edge.color }}>{edge.label}</span>
+          <div
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: edge.color, boxShadow: `0 0 6px ${edge.color}` }}
+          />
+          <span className="text-xs font-mono font-bold truncate" style={{ color: edge.color }}>
+            {edge.label}
+          </span>
         </div>
-        <button onClick={onClose} className="text-xs ml-2 flex-shrink-0" style={{ color: DARK.textMuted }}>✕</button>
+        <button
+          onClick={onClose}
+          className="text-xs ml-2 flex-shrink-0"
+          style={{ color: DARK.textMuted }}
+        >
+          ✕
+        </button>
       </div>
 
       {/* Source → Target */}
-      <div className="px-3 py-1.5 flex items-center gap-1.5" style={{ borderBottom: `1px solid ${DARK.border}` }}>
-        <span className="text-xs font-mono truncate" style={{ color: DARK.textMuted, maxWidth: 80 }}>{sourceNode?.label ?? edge.source}</span>
-        <span className="text-xs" style={{ color: DARK.textDim }}>→</span>
-        <span className="text-xs font-mono truncate" style={{ color: DARK.textMuted, maxWidth: 80 }}>{targetNode?.label ?? edge.target}</span>
+      <div
+        className="px-3 py-1.5 flex items-center gap-1.5"
+        style={{ borderBottom: `1px solid ${DARK.border}` }}
+      >
+        <span
+          className="text-xs font-mono truncate"
+          style={{ color: DARK.textMuted, maxWidth: 80 }}
+        >
+          {sourceNode?.label ?? edge.source}
+        </span>
+        <span className="text-xs" style={{ color: DARK.textDim }}>
+          →
+        </span>
+        <span
+          className="text-xs font-mono truncate"
+          style={{ color: DARK.textMuted, maxWidth: 80 }}
+        >
+          {targetNode?.label ?? edge.target}
+        </span>
       </div>
 
       {/* Confidence bar */}
       {confPct !== null && (
         <div className="px-3 py-1.5" style={{ borderBottom: `1px solid ${DARK.border}` }}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>confidence</span>
-            <span className="text-xs font-bold font-mono" style={{ color: confColor }}>{confPct}%</span>
+            <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>
+              confidence
+            </span>
+            <span className="text-xs font-bold font-mono" style={{ color: confColor }}>
+              {confPct}%
+            </span>
           </div>
           <div className="h-1 rounded-full overflow-hidden" style={{ background: DARK.border }}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${confPct}%`, background: `linear-gradient(90deg, ${confColor}88, ${confColor})` }} />
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${confPct}%`,
+                background: `linear-gradient(90deg, ${confColor}88, ${confColor})`,
+              }}
+            />
           </div>
         </div>
       )}
@@ -141,17 +219,29 @@ function EdgeTooltipPanel({ edge, x, y, sourceNode, targetNode, onClose }: EdgeT
       <div className="px-3 py-1.5 space-y-0.5 max-h-28 overflow-y-auto">
         {rows.map((r) => (
           <div key={r.key} className="flex items-center justify-between gap-2">
-            <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>{r.key}</span>
-            <span className="text-xs font-mono font-semibold" style={{ color: r.highlight ? '#f59e0b' : DARK.text }}>{r.val}</span>
+            <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>
+              {r.key}
+            </span>
+            <span
+              className="text-xs font-mono font-semibold"
+              style={{ color: r.highlight ? '#f59e0b' : DARK.text }}
+            >
+              {r.val}
+            </span>
           </div>
         ))}
         {rows.length === 0 && (
-          <span className="text-xs font-mono" style={{ color: DARK.textDim }}>No additional properties</span>
+          <span className="text-xs font-mono" style={{ color: DARK.textDim }}>
+            No additional properties
+          </span>
         )}
       </div>
 
       {/* Cypher snippet */}
-      <div className="px-3 py-1.5 rounded-b-xl" style={{ borderTop: `1px solid ${DARK.border}`, background: 'rgba(0,0,0,0.3)' }}>
+      <div
+        className="px-3 py-1.5 rounded-b-xl"
+        style={{ borderTop: `1px solid ${DARK.border}`, background: 'rgba(0,0,0,0.3)' }}
+      >
         <span className="text-xs font-mono" style={{ color: '#42be65', fontSize: '9px' }}>
           [{edge.type} &#123;confidence: {confPct ?? '?'}%&#125;]
         </span>
@@ -161,37 +251,109 @@ function EdgeTooltipPanel({ edge, x, y, sourceNode, targetNode, onClose }: EdgeT
 }
 
 // ── Cypher Modal ──────────────────────────────────────────────────────────────
-function CypherModal({ lens, onClose }: { lens: LensType; onClose: () => void }) {
-  const ld = lensDefinitions.find((l) => l.id === lens);
-  if (!ld) return null;
-  const nodeCount = LENS_NODE_SETS[lens]?.length ?? ld.nodeCount;
+function CypherModal({
+  descriptor,
+  onClose,
+  memberId,
+  memberName,
+  nodes,
+  edges,
+}: {
+  descriptor: LensDescriptor;
+  onClose: () => void;
+  memberId: string;
+  memberName: string;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}) {
+  const ld = descriptor;
+  const gen = buildLensCypher(
+    nodes,
+    edges,
+    { id: descriptor.id, label: descriptor.label, nodeIds: descriptor.nodeIds },
+    { memberId, memberName }
+  );
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
-      <div className="w-full max-w-lg rounded-xl overflow-hidden shadow-2xl" style={{ background: DARK.surface, border: `1px solid ${DARK.borderBright}` }}>
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${DARK.border}` }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.85)' }}
+    >
+      <div
+        className="w-full max-w-lg rounded-xl overflow-hidden shadow-2xl"
+        style={{ background: DARK.surface, border: `1px solid ${DARK.borderBright}` }}
+      >
+        <div
+          className="flex items-center justify-between px-4 py-3"
+          style={{ borderBottom: `1px solid ${DARK.border}` }}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: ld.color + '33', color: ld.color, border: `1px solid ${ld.color}66` }}>{ld.label}</span>
-            <span className="text-sm font-semibold" style={{ color: DARK.text }}>Cypher Query</span>
+            <span
+              className="text-xs font-bold px-2 py-0.5 rounded"
+              style={{
+                background: ld.color + '33',
+                color: ld.color,
+                border: `1px solid ${ld.color}66`,
+              }}
+            >
+              {ld.label}
+            </span>
+            <span className="text-sm font-semibold" style={{ color: DARK.text }}>
+              Cypher Query
+            </span>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white text-lg leading-none">✕</button>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-white text-lg leading-none"
+          >
+            ✕
+          </button>
         </div>
         <div className="p-4">
-          <p className="text-xs mb-3" style={{ color: DARK.textMuted }}>{ld.description}</p>
-          <pre className="text-xs p-4 overflow-x-auto leading-relaxed font-mono rounded" style={{ background: '#0a0f1a', color: '#42be65', border: `1px solid #1a3a1a` }}>{ld.cypher}</pre>
-          <div className="flex items-center gap-6 mt-3 pt-3" style={{ borderTop: `1px solid ${DARK.border}` }}>
+          <p className="text-xs mb-3" style={{ color: DARK.textMuted }}>
+            {gen.description}
+          </p>
+          <pre
+            className="text-xs p-4 overflow-x-auto leading-relaxed font-mono rounded"
+            style={{ background: '#0a0f1a', color: '#42be65', border: `1px solid #1a3a1a` }}
+          >
+            {gen.cypher}
+          </pre>
+          <div
+            className="flex items-center gap-6 mt-3 pt-3"
+            style={{ borderTop: `1px solid ${DARK.border}` }}
+          >
             <div className="text-center">
-              <p className="text-lg font-bold tabular-nums" style={{ color: ld.color }}>{nodeCount}</p>
-              <p className="text-xs" style={{ color: DARK.textMuted }}>Nodes</p>
+              <p className="text-lg font-bold tabular-nums" style={{ color: ld.color }}>
+                {gen.nodeCount}
+              </p>
+              <p className="text-xs" style={{ color: DARK.textMuted }}>
+                Nodes
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold tabular-nums" style={{ color: DARK.text }}>{ld.edgeCount}</p>
-              <p className="text-xs" style={{ color: DARK.textMuted }}>Edges</p>
+              <p className="text-lg font-bold tabular-nums" style={{ color: DARK.text }}>
+                {gen.edgeCount}
+              </p>
+              <p className="text-xs" style={{ color: DARK.textMuted }}>
+                Edges
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-sm font-bold" style={{ color: ld.color }}>MARIA_SD_001</p>
-              <p className="text-xs" style={{ color: DARK.textMuted }}>Anchor Node</p>
+              <p className="text-sm font-bold" style={{ color: ld.color }}>
+                {memberId}
+              </p>
+              <p className="text-xs" style={{ color: DARK.textMuted }}>
+                Anchor Node
+              </p>
             </div>
           </div>
+          <p
+            className="text-[10px] mt-3 pt-3 leading-snug"
+            style={{ color: DARK.textMuted, borderTop: `1px solid ${DARK.border}` }}
+          >
+            PROJECTION NOTE — minimum-necessary graph for care coordination under the member&apos;s
+            active benefit. PHI limited to the selected lens. Access is logged.
+          </p>
         </div>
       </div>
     </div>
@@ -203,137 +365,217 @@ interface RightPanelProps {
   node: GraphNode | null;
   edges: GraphEdge[];
   allNodes: GraphNode[];
+  registry: LensDescriptor[];
   onClose: () => void;
+  memberName: string;
+  memberId: string;
 }
 
-function RightPanel({ node, edges, allNodes, onClose }: RightPanelProps) {
+function RightPanel({
+  node,
+  edges,
+  allNodes,
+  registry,
+  onClose,
+  memberName,
+  memberId,
+}: RightPanelProps) {
   const [expandedThread, setExpandedThread] = useState<string | null>('clinical');
 
-  const threads = [
-    {
-      id: 'clinical', label: 'Clinical Thread', color: '#3b82f6',
-      items: [
-        { label: 'HbA1c Gap', sub: 'Open 38 days · HEDIS window 40d · BLOCKED', color: '#ef4444', urgent: true },
-        { label: 'Edinburgh PND Gap', sub: 'Open 427 days · Awaiting BH referral acceptance', color: '#ef4444', urgent: true },
-        { label: 'Pre-Diabetic Episode', sub: 'Active · A1C 6.2% ↑ trending', color: '#10b981' },
-        { label: 'Postpartum Health', sub: 'UNMANAGED · 427 days post-partum', color: '#f59e0b', urgent: true },
-        { label: 'Well-Child 24mo', sub: 'Sophia · 21 days overdue · Bundle with Maria visit', color: '#f97316', urgent: true },
-        { label: 'Bennett County Health', sub: 'PCP · CAH · Primary care site', color: '#0ea5e9' },
-        { label: 'Postpartum Support Group', sub: 'Referred · Not enrolled · 427d open', color: '#64748b' },
-      ],
-    },
-    {
-      id: 'sophia', label: 'Sofia · Dependent', color: '#ec4899',
-      items: [
-        { label: 'Relationship', sub: 'PARENT_OF · MBR-002 · Age 2', color: '#ec4899' },
-        { label: 'PCP', sub: 'Not assigned — referral needed', color: '#ef4444', urgent: true },
-        { label: '24-Month Visit', sub: 'Overdue — M-CHAT-R/F pending', color: '#f59e0b', urgent: true },
-        { label: 'Immunizations', sub: '3 series incomplete', color: '#f97316' },
-        { label: 'Lead / Hemoglobin', sub: 'Screening outstanding', color: '#f59e0b' },
-      ],
-    },
-    {
-      id: 'elena', label: 'Elena · Caregiver', color: '#8b5cf6',
-      items: [
-        { label: 'Consent Pending', sub: 'Elena must authorize independently', color: '#f59e0b', urgent: true },
-        { label: 'Cardiac/DM Episode', sub: 'A1C 8.1% · Caregiver managed', color: '#10b981' },
-        { label: 'Cardiology Follow-up', sub: 'Winner, SD · 47 miles', color: '#0ea5e9' },
-      ],
-    },
-    {
-      id: 'sdoh', label: 'SDOH · Whole Person', color: '#f97316',
-      items: [
-        { label: 'Transportation HIGH', sub: '47+ miles · No vehicle · No transit', color: '#ef4444', urgent: true },
-        { label: 'Childcare Barrier HIGH', sub: 'Blocks HbA1c appointment', color: '#ef4444', urgent: true },
-        { label: 'Caregiver Burden', sub: 'Zarit 48 · 18hrs/wk · No respite', color: '#f97316' },
-        { label: 'Food Insecurity', sub: 'SNAP active · WIC lapsed', color: '#f59e0b' },
-        { label: 'Digital Divide', sub: 'No broadband · SMS only 3pm–7pm', color: '#64748b' },
-      ],
-    },
-    {
-      id: 'obligations', label: 'Active Obligations', color: '#84cc16',
-      items: [
-        { label: 'Childcare Subsidy', sub: '$487/mo eligible · Not enrolled', color: '#f59e0b', urgent: true },
-        { label: 'WIC Re-enrollment', sub: '$320/mo · Sophia + Maria eligible', color: '#f59e0b' },
-        { label: 'SNAP Renewal', sub: 'T+47 days · Action required', color: '#ef4444' },
-        { label: 'LIHEAP Window', sub: 'Oct–Dec · Winter risk HIGH', color: '#f97316' },
-      ],
-    },
-  ];
+  // Threads derive from the lens registry — member-aware for ANY patient. One thread
+  // per populated domain + each relationship; items are the lens's own graph nodes.
+  const threads = React.useMemo(() => {
+    const nodeById = new Map(allNodes.map((n) => [n.id, n]));
+    const anchorId = allNodes.find((n) => n.type === 'Member')?.id;
+    return registry
+      .filter((l) => l.kind !== 'all' && l.count > 1)
+      .map((l) => ({
+        id: l.id,
+        label: l.legendLabel,
+        color: l.color,
+        items: l.nodeIds
+          .filter((id) => id !== anchorId)
+          .map((id) => nodeById.get(id))
+          .filter((n): n is GraphNode => Boolean(n))
+          .slice(0, 8)
+          .map((n) => ({
+            label: n.label,
+            sub: n.sublabel ?? '',
+            color: n.color,
+            urgent: Boolean(n.pulse || n.locked),
+          })),
+      }))
+      .filter((t) => t.items.length > 0);
+  }, [registry, allNodes]);
 
-  const connectedEdges = node ? edges.filter((e) => e.source === node.id || e.target === node.id) : [];
-  const connectedNodes = connectedEdges.map((e) => {
-    const otherId = e.source === node?.id ? e.target : e.source;
-    return { edge: e, node: allNodes.find((n) => n.id === otherId) };
-  }).filter((c) => c.node);
+  const connectedEdges = node
+    ? edges.filter((e) => e.source === node.id || e.target === node.id)
+    : [];
+  const connectedNodes = connectedEdges
+    .map((e) => {
+      const otherId = e.source === node?.id ? e.target : e.source;
+      return { edge: e, node: allNodes.find((n) => n.id === otherId) };
+    })
+    .filter((c) => c.node);
 
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: DARK.surface }}>
-      <div className="flex items-center justify-between px-3 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${DARK.border}` }}>
+      <div
+        className="flex items-center justify-between px-3 py-2 flex-shrink-0"
+        style={{ borderBottom: `1px solid ${DARK.border}` }}
+      >
         <div>
-          <p className="text-sm font-bold" style={{ color: DARK.text }}>Maria Redhawk</p>
-          <p className="text-xs" style={{ color: DARK.textMuted }}>Knowledge Graph Context</p>
+          <p className="text-sm font-bold" style={{ color: DARK.text }}>
+            {memberName}
+          </p>
+          <p className="text-xs" style={{ color: DARK.textMuted }}>
+            Knowledge Graph Context
+          </p>
         </div>
-        <span className="text-xs px-2 py-0.5 rounded font-bold" style={{ background: '#14532d', color: '#4ade80', border: '1px solid #166534' }}>KNOWN ●</span>
+        <span
+          className="text-xs px-2 py-0.5 rounded font-bold"
+          style={{ background: '#14532d', color: '#4ade80', border: '1px solid #166534' }}
+        >
+          KNOWN ●
+        </span>
       </div>
 
       <div className="px-3 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${DARK.border}` }}>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs" style={{ color: DARK.textMuted }}>Identity Confidence</span>
-          <span className="text-xs font-bold" style={{ color: '#4ade80' }}>97%</span>
+          <span className="text-xs" style={{ color: DARK.textMuted }}>
+            Identity Confidence
+          </span>
+          <span className="text-xs font-bold" style={{ color: '#4ade80' }}>
+            97%
+          </span>
         </div>
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: DARK.border }}>
-          <div className="h-full rounded-full" style={{ width: '97%', background: 'linear-gradient(90deg, #16a34a, #4ade80)' }} />
+          <div
+            className="h-full rounded-full"
+            style={{ width: '97%', background: 'linear-gradient(90deg, #16a34a, #4ade80)' }}
+          />
         </div>
         <div className="flex items-center justify-between mt-1">
-          <span className="text-xs" style={{ color: DARK.textDim }}>4 sources reconciled</span>
-          <span className="text-xs" style={{ color: '#4ade80' }}>Golden record committed</span>
+          <span className="text-xs" style={{ color: DARK.textDim }}>
+            4 sources reconciled
+          </span>
+          <span className="text-xs" style={{ color: '#4ade80' }}>
+            Golden record committed
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 px-3 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${DARK.border}` }}>
-        {[{ val: '21', label: 'Nodes' }, { val: '26', label: 'Edges' }, { val: '4', label: 'Threads' }].map((s) => (
+      <div
+        className="grid grid-cols-3 px-3 py-2 flex-shrink-0"
+        style={{ borderBottom: `1px solid ${DARK.border}` }}
+      >
+        {[
+          { val: String(allNodes.length), label: 'Nodes' },
+          { val: String(edges.length), label: 'Edges' },
+          { val: String(threads.length), label: 'Threads' },
+        ].map((s) => (
           <div key={s.label} className="text-center">
-            <p className="text-lg font-bold tabular-nums" style={{ color: DARK.text }}>{s.val}</p>
-            <p className="text-xs" style={{ color: DARK.textMuted }}>{s.label}</p>
+            <p className="text-lg font-bold tabular-nums" style={{ color: DARK.text }}>
+              {s.val}
+            </p>
+            <p className="text-xs" style={{ color: DARK.textMuted }}>
+              {s.label}
+            </p>
           </div>
         ))}
       </div>
 
       {node && (
-        <div className="px-3 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${DARK.border}`, borderLeft: `3px solid ${node.color}` }}>
+        <div
+          className="px-3 py-2 flex-shrink-0"
+          style={{
+            borderBottom: `1px solid ${DARK.border}`,
+            borderLeft: `3px solid ${node.color}`,
+          }}
+        >
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: node.color + '33', color: node.color }}>
+            <span
+              className="text-xs font-bold px-1.5 py-0.5 rounded"
+              style={{ background: node.color + '33', color: node.color }}
+            >
               {NODE_TYPE_LABELS[node.type] ?? node.type}
             </span>
-            <button onClick={onClose} className="text-xs" style={{ color: DARK.textMuted }}>✕</button>
+            <button onClick={onClose} className="text-xs" style={{ color: DARK.textMuted }}>
+              ✕
+            </button>
           </div>
-          <p className="text-sm font-bold" style={{ color: DARK.text }}>{node.label}</p>
-          {node.sublabel && <p className="text-xs" style={{ color: DARK.textMuted }}>{node.sublabel}</p>}
-          {node.locked && <p className="text-xs mt-1" style={{ color: '#f59e0b' }}>🔒 42 CFR Part 2 — BH consent gated</p>}
-          {node.consentPending && <p className="text-xs mt-1" style={{ color: '#f97316' }}>⚠ Consent pending</p>}
+          <p className="text-sm font-bold" style={{ color: DARK.text }}>
+            {node.label}
+          </p>
+          {node.sublabel && (
+            <p className="text-xs" style={{ color: DARK.textMuted }}>
+              {node.sublabel}
+            </p>
+          )}
+          {node.locked && (
+            <p className="text-xs mt-1" style={{ color: '#f59e0b' }}>
+              🔒 42 CFR Part 2 — BH consent gated
+            </p>
+          )}
+          {node.consentPending && (
+            <p className="text-xs mt-1" style={{ color: '#f97316' }}>
+              ⚠ Consent pending
+            </p>
+          )}
           {/* Property richness */}
           {node.propertyRichness !== undefined && (
             <div className="mt-2">
               <div className="flex items-center justify-between mb-0.5">
-                <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>property richness</span>
-                <span className="text-xs font-bold font-mono" style={{ color: node.propertyRichness >= 0.8 ? '#4ade80' : node.propertyRichness >= 0.5 ? '#f59e0b' : '#ef4444' }}>
+                <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>
+                  property richness
+                </span>
+                <span
+                  className="text-xs font-bold font-mono"
+                  style={{
+                    color:
+                      node.propertyRichness >= 0.8
+                        ? '#4ade80'
+                        : node.propertyRichness >= 0.5
+                          ? '#f59e0b'
+                          : '#ef4444',
+                  }}
+                >
                   {Math.round(node.propertyRichness * 100)}%
                 </span>
               </div>
               <div className="h-1 rounded-full overflow-hidden" style={{ background: DARK.border }}>
-                <div className="h-full rounded-full" style={{ width: `${node.propertyRichness * 100}%`, background: node.propertyRichness >= 0.8 ? '#4ade80' : node.propertyRichness >= 0.5 ? '#f59e0b' : '#ef4444' }} />
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${node.propertyRichness * 100}%`,
+                    background:
+                      node.propertyRichness >= 0.8
+                        ? '#4ade80'
+                        : node.propertyRichness >= 0.5
+                          ? '#f59e0b'
+                          : '#ef4444',
+                  }}
+                />
               </div>
             </div>
           )}
           {connectedNodes.length > 0 && (
             <div className="mt-2 space-y-1">
-              <p className="text-xs font-semibold" style={{ color: DARK.textMuted }}>Connections ({connectedNodes.length})</p>
+              <p className="text-xs font-semibold" style={{ color: DARK.textMuted }}>
+                Connections ({connectedNodes.length})
+              </p>
               {connectedNodes.slice(0, 4).map(({ edge, node: cn }, i) => (
                 <div key={i} className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cn!.color }} />
-                  <span className="text-xs truncate" style={{ color: DARK.text }}>{cn!.label}</span>
-                  <span className="text-xs flex-shrink-0" style={{ color: DARK.textDim }}>[{edge.label}]</span>
+                  <div
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: cn!.color }}
+                  />
+                  <span className="text-xs truncate" style={{ color: DARK.text }}>
+                    {cn!.label}
+                  </span>
+                  <span className="text-xs flex-shrink-0" style={{ color: DARK.textDim }}>
+                    [{edge.label}]
+                  </span>
                 </div>
               ))}
             </div>
@@ -350,18 +592,32 @@ function RightPanel({ node, edges, allNodes, onClose }: RightPanelProps) {
             >
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: thread.color }} />
-                <span className="text-xs font-semibold" style={{ color: thread.color }}>{thread.label}</span>
+                <span className="text-xs font-semibold" style={{ color: thread.color }}>
+                  {thread.label}
+                </span>
               </div>
-              <span className="text-xs" style={{ color: DARK.textMuted }}>{expandedThread === thread.id ? '▲' : '▼'}</span>
+              <span className="text-xs" style={{ color: DARK.textMuted }}>
+                {expandedThread === thread.id ? '▲' : '▼'}
+              </span>
             </button>
             {expandedThread === thread.id && (
               <div className="px-3 pb-2 space-y-1.5">
                 {thread.items.map((item, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: item.color }} />
+                    <div
+                      className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0"
+                      style={{ background: item.color }}
+                    />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium" style={{ color: item.urgent ? item.color : DARK.text }}>{item.label}</p>
-                      <p className="text-xs" style={{ color: DARK.textMuted }}>{item.sub}</p>
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: item.urgent ? item.color : DARK.text }}
+                      >
+                        {item.label}
+                      </p>
+                      <p className="text-xs" style={{ color: DARK.textMuted }}>
+                        {item.sub}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -372,24 +628,15 @@ function RightPanel({ node, edges, allNodes, onClose }: RightPanelProps) {
       </div>
 
       <div className="px-3 py-2 flex-shrink-0" style={{ borderTop: `1px solid ${DARK.border}` }}>
-        <p className="text-xs font-mono" style={{ color: '#4ade80' }}>● KNOWN · MARIA_SD_001 · 4 THREADS ACTIVE</p>
+        <p className="text-xs font-mono" style={{ color: '#4ade80' }}>
+          ● KNOWN · {memberId} · 4 THREADS ACTIVE
+        </p>
       </div>
     </div>
   );
 }
 
 // ── Canvas + SVG Hybrid Graph ─────────────────────────────────────────────────
-interface SimNode extends GraphNode {
-  r: number;
-  x: number;
-  y: number;
-  vx?: number;
-  vy?: number;
-  fx?: number | null;
-  fy?: number | null;
-  isCross?: boolean;
-}
-
 interface D3GraphProps {
   activeLens: ExtendedLensType;
   highlightNodeIds: string[];
@@ -411,21 +658,31 @@ function computeRadialPositions(
   width: number,
   height: number
 ): void {
+  // The member node is ALWAYS id 'n01' (builder invariant, line ~340). GOLDEN (Maria) is
+  // therefore detected by the member's stable sublabel (MARIA_SD_001), NOT the node id.
+  // Only Maria's layout must stay byte-identical; every other member gets the roomier layout.
+  const golden = nodes.find((n) => n.id === 'n01')?.sublabel === DEMO_MEMBER_ID;
   const nonMaria = nodes.filter((n) => n.id !== 'n01');
-  const maria = nodes.find((n) => n.id === 'n01');
-  if (maria) { maria.x = cx; maria.y = cy; maria.fx = cx; maria.fy = cy; }
+  const member = nodes.find((n) => n.id === 'n01');
+  if (member) {
+    member.x = cx;
+    member.y = cy;
+    member.fx = cx;
+    member.fy = cy;
+  }
 
   const maxR = Math.min(width, height) * 0.38;
   const innerR = Math.min(maxR * 0.62, 185);
   const outerR = Math.min(maxR, 270);
 
-  if (lens === 'sofia') {
+  if (lens.startsWith('dep:') || lens.startsWith('car:')) {
     const R = Math.min(maxR * 0.68, 210);
     nonMaria.forEach((n, i) => {
       const angle = (i / nonMaria.length) * Math.PI * 2 - Math.PI / 2;
       n.x = cx + R * Math.cos(angle);
       n.y = cy + R * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
     return;
   }
@@ -441,14 +698,22 @@ function computeRadialPositions(
       const angle = (i / agentNodes.length) * Math.PI * 2 - Math.PI / 2;
       n.x = cx + agentR * Math.cos(angle);
       n.y = cy + agentR * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
     otherNodes.forEach((n, i) => {
       const angle = (i / otherNodes.length) * Math.PI * 2 - Math.PI / 2;
       n.x = cx + outerAgentR * Math.cos(angle);
       n.y = cy + outerAgentR * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
+    return;
+  }
+
+  if (lens === 'behavioral') {
+    // Delegates to the extracted layout function in lensUtils.ts (ratchet compliance).
+    applyBehavioralLayout(nodes, cx, cy, maxR);
     return;
   }
 
@@ -459,22 +724,45 @@ function computeRadialPositions(
     const blockedIds = ['n04'];
     const resolverIds = ['n41'];
     const outerIds = nonMaria
-      .filter((n) => !blockerIds.includes(n.id) && !blockedIds.includes(n.id) && !resolverIds.includes(n.id))
+      .filter(
+        (n) =>
+          !blockerIds.includes(n.id) && !blockedIds.includes(n.id) && !resolverIds.includes(n.id)
+      )
       .map((n) => n.id);
 
     const nodeById = new Map(nodes.map((n) => [n.id, n]));
 
     const n17 = nodeById.get('n17');
-    if (n17) { n17.x = cx - scaledInner * 1.15; n17.y = cy - 25; n17.fx = n17.x; n17.fy = n17.y; }
+    if (n17) {
+      n17.x = cx - scaledInner * 1.15;
+      n17.y = cy - 25;
+      n17.fx = n17.x;
+      n17.fy = n17.y;
+    }
 
     const n18 = nodeById.get('n18');
-    if (n18) { n18.x = cx - scaledInner * 0.95; n18.y = cy + 75; n18.fx = n18.x; n18.fy = n18.y; }
+    if (n18) {
+      n18.x = cx - scaledInner * 0.95;
+      n18.y = cy + 75;
+      n18.fx = n18.x;
+      n18.fy = n18.y;
+    }
 
     const n04 = nodeById.get('n04');
-    if (n04) { n04.x = cx + scaledInner; n04.y = cy; n04.fx = n04.x; n04.fy = n04.y; }
+    if (n04) {
+      n04.x = cx + scaledInner;
+      n04.y = cy;
+      n04.fx = n04.x;
+      n04.fy = n04.y;
+    }
 
     const n41 = nodeById.get('n41');
-    if (n41) { n41.x = cx + scaledInner * 0.5; n41.y = cy + scaledInner * 0.65; n41.fx = n41.x; n41.fy = n41.y; }
+    if (n41) {
+      n41.x = cx + scaledInner * 0.5;
+      n41.y = cy + scaledInner * 0.65;
+      n41.fx = n41.x;
+      n41.fy = n41.y;
+    }
 
     const outerNodes = outerIds.map((id) => nodeById.get(id)).filter(Boolean) as SimNode[];
     outerNodes.forEach((n, i) => {
@@ -483,19 +771,43 @@ function computeRadialPositions(
       const angle = startAngle + (i / Math.max(outerNodes.length - 1, 1)) * (endAngle - startAngle);
       n.x = cx + scaledOuter * Math.cos(angle);
       n.y = cy + scaledOuter * Math.sin(angle) - 20;
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
     return;
   }
 
   const count = nonMaria.length;
-  if (count <= 8) {
-    const R = Math.min(maxR * 0.72, 220);
+  if (!golden && count > 0) {
+    // 5E fill: spread satellites on a wide ELLIPSE that uses the real canvas (minus the
+    // ~300px right panel), signal at 12 o'clock, then alternating right/left. Deterministic.
+    const Rx = Math.max(240, width / 2 - 210);
+    const Ry = Math.max(180, height / 2 - 130);
+    const tierRank = (t?: string) => (t === 'act' ? 0 : t === 'watch' ? 1 : 2);
+    const ordered = [...nonMaria].sort(
+      (a, b) =>
+        tierRank((a as SimNode).attn) - tierRank((b as SimNode).attn) || (a.id < b.id ? -1 : 1)
+    );
+    const n = ordered.length;
+    const spread = Math.min(Math.PI * 2 * (n / (n + 1)), Math.PI * (300 / 180)); // ≤300°
+    ordered.forEach((node, k) => {
+      // k=0 at top (−90°); then alternate +,−,+,− around the top
+      const side = k === 0 ? 0 : k % 2 === 1 ? 1 : -1;
+      const step = Math.ceil(k / 2) * (spread / Math.max(n - 1, 1));
+      const angle = -Math.PI / 2 + side * step;
+      node.x = cx + Rx * Math.cos(angle);
+      node.y = cy + Ry * Math.sin(angle);
+      node.fx = node.x;
+      node.fy = node.y;
+    });
+  } else if (count <= (golden ? 8 : 12)) {
+    const R = golden ? Math.min(maxR * 0.72, 220) : Math.min(maxR * 0.86, 258);
     nonMaria.forEach((n, i) => {
       const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
       n.x = cx + R * Math.cos(angle);
       n.y = cy + R * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
   } else {
     const innerCount = Math.ceil(count / 2);
@@ -505,294 +817,30 @@ function computeRadialPositions(
       const angle = (i / innerCount) * Math.PI * 2 - Math.PI / 2;
       n.x = cx + innerR * Math.cos(angle);
       n.y = cy + innerR * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
     nonMaria.slice(innerCount).forEach((n, i) => {
-      const angle = (i / outerCount) * Math.PI * 2 - Math.PI / 2 + (Math.PI / outerCount);
+      const angle = (i / outerCount) * Math.PI * 2 - Math.PI / 2 + Math.PI / outerCount;
       n.x = cx + outerR * Math.cos(angle);
       n.y = cy + outerR * Math.sin(angle);
-      n.fx = n.x; n.fy = n.y;
+      n.fx = n.x;
+      n.fy = n.y;
     });
   }
 }
 
-// ── Draw a sphere-quality node on Canvas 2D ───────────────────────────────────
-function drawSphereNode(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  r: number,
-  color: string,
-  isMaria: boolean,
-  isCross: boolean,
-  pulse: boolean,
-  flashActive: boolean,
-  consentPending: boolean,
-  opacity: number,
-  time: number,
-  highlighted: boolean,
-  chainActive: boolean,
-  chainProgress: number, // 0–1 for the traveling pulse
-  validUntilDays: number | undefined,
-  propertyRichness: number | undefined,
-  isAgent: boolean
-): void {
-  ctx.save();
-  ctx.globalAlpha = opacity;
-
-  // Outer bloom glow
-  const glowR = r + (isMaria ? 40 : 22);
-  const glowGrad = ctx.createRadialGradient(x, y, r * 0.5, x, y, glowR);
-  glowGrad.addColorStop(0, color + (isMaria ? 'aa' : '66'));
-  glowGrad.addColorStop(0.4, color + '33');
-  glowGrad.addColorStop(1, color + '00');
-  ctx.beginPath();
-  ctx.arc(x, y, glowR, 0, Math.PI * 2);
-  ctx.fillStyle = glowGrad;
-  ctx.fill();
-
-  if (isMaria) {
-    const glow2R = r + 65;
-    const glow2 = ctx.createRadialGradient(x, y, r, x, y, glow2R);
-    glow2.addColorStop(0, color + '44');
-    glow2.addColorStop(1, color + '00');
-    ctx.beginPath();
-    ctx.arc(x, y, glow2R, 0, Math.PI * 2);
-    ctx.fillStyle = glow2;
-    ctx.fill();
-  }
-
-  // Pulse ring animation
-  if (pulse && !isCross) {
-    const pulseScale = 1 + 0.18 * Math.sin(time * 0.003);
-    const pulseR = r * pulseScale + 8;
-    ctx.beginPath();
-    ctx.arc(x, y, pulseR, 0, Math.PI * 2);
-    ctx.strokeStyle = color + 'aa';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // Consent pending dashed ring
-  if (consentPending) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x, y, r + 5, 0, Math.PI * 2);
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([5, 3]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-
-  // ── Temporal validity arc ─────────────────────────────────────────────────
-  // Drawn just outside the node as a depleting arc (full = 90d, empty = 0d)
-  if (validUntilDays !== undefined) {
-    const maxDays = 90;
-    const fraction = Math.min(validUntilDays / maxDays, 1);
-    const arcR = r + 9;
-    const startAngle = -Math.PI / 2;
-    const endAngle = startAngle + fraction * Math.PI * 2;
-    const arcColor = validUntilDays <= 14 ? '#ef4444' : validUntilDays <= 30 ? '#f59e0b' : '#4ade80';
-
-    // Background track
-    ctx.beginPath();
-    ctx.arc(x, y, arcR, 0, Math.PI * 2);
-    ctx.strokeStyle = arcColor + '22';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Filled arc
-    ctx.beginPath();
-    ctx.arc(x, y, arcR, startAngle, endAngle);
-    ctx.strokeStyle = arcColor;
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.lineCap = 'butt';
-
-    // Pulsing tip dot
-    const tipX = x + arcR * Math.cos(endAngle);
-    const tipY = y + arcR * Math.sin(endAngle);
-    const tipPulse = 0.7 + 0.3 * Math.sin(time * 0.004);
-    ctx.beginPath();
-    ctx.arc(tipX, tipY, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = arcColor;
-    ctx.globalAlpha = opacity * tipPulse;
-    ctx.fill();
-    ctx.globalAlpha = opacity;
-  }
-
-  // ── Property richness indicator ───────────────────────────────────────────
-  // Small segmented arc on the inner border of the node
-  if (propertyRichness !== undefined && !isMaria) {
-    const segments = 8;
-    const filled = Math.round(propertyRichness * segments);
-    const segR = r - 3;
-    const richColor = propertyRichness >= 0.8 ? '#4ade80' : propertyRichness >= 0.5 ? '#f59e0b' : '#ef444488';
-    const gapAngle = 0.08;
-    const segAngle = (Math.PI * 2 - segments * gapAngle) / segments;
-
-    for (let i = 0; i < segments; i++) {
-      const startA = -Math.PI / 2 + i * (segAngle + gapAngle);
-      const endA = startA + segAngle;
-      ctx.beginPath();
-      ctx.arc(x, y, segR, startA, endA);
-      ctx.strokeStyle = i < filled ? richColor : richColor.replace('80', '20') + '33';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-  }
-
-  // Agent node — hexagonal outer ring
-  if (isAgent) {
-    const hexR = r + 6;
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2 - Math.PI / 6;
-      const hx = x + hexR * Math.cos(angle);
-      const hy = y + hexR * Math.sin(angle);
-      if (i === 0) ctx.moveTo(hx, hy);
-      else ctx.lineTo(hx, hy);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = color + 'cc';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // Main sphere
-  const highlightX = x - r * 0.3;
-  const highlightY = y - r * 0.3;
-  const sphereGrad = ctx.createRadialGradient(highlightX, highlightY, r * 0.05, x, y, r);
-
-  if (flashActive) {
-    sphereGrad.addColorStop(0, '#ffffff');
-    sphereGrad.addColorStop(0.3, color);
-    sphereGrad.addColorStop(1, '#000000cc');
-  } else {
-    sphereGrad.addColorStop(0, '#ffffffcc');
-    sphereGrad.addColorStop(0.12, color + 'ff');
-    sphereGrad.addColorStop(0.55, color + 'dd');
-    sphereGrad.addColorStop(1, '#000000ee');
-  }
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = sphereGrad;
-  ctx.globalAlpha = opacity * (isCross ? 0.65 : 1);
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.strokeStyle = isMaria ? color : color + 'cc';
-  ctx.lineWidth = isMaria ? 3 : (isCross ? 1.5 : 2);
-  ctx.globalAlpha = opacity * (isCross ? 0.5 : 0.9);
-  ctx.stroke();
-
-  // Signal highlight ring
-  if (highlighted) {
-    ctx.globalAlpha = 1;
-    const ringR = r + (validUntilDays !== undefined ? 14 : 7);
-    const ringGlow = ctx.createRadialGradient(x, y, ringR - 4, x, y, ringR + 8);
-    ringGlow.addColorStop(0, color + 'cc');
-    ringGlow.addColorStop(0.5, color + '66');
-    ringGlow.addColorStop(1, color + '00');
-    ctx.beginPath();
-    ctx.arc(x, y, ringR + 8, 0, Math.PI * 2);
-    ctx.fillStyle = ringGlow;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x, y, ringR, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x, y, ringR, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // Chain traversal pulse ring
-  if (chainActive && chainProgress > 0) {
-    ctx.globalAlpha = chainProgress * opacity;
-    const chainR = r + 12 + (1 - chainProgress) * 20;
-    ctx.beginPath();
-    ctx.arc(x, y, chainR, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x, y, chainR, 0, Math.PI * 2);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.globalAlpha = opacity;
-  }
-
-  ctx.restore();
-}
-
-// ── Standalone render helper ──────────────────────────────────────────────────
-function renderFrame(
-  canvas: HTMLCanvasElement,
-  timestamp: number,
-  dimensions: { width: number; height: number },
-  dpr: number,
-  transform: { k: number; x: number; y: number },
-  nodes: SimNode[],
-  highlightRef: React.MutableRefObject<string[]>,
-  flashRef: React.MutableRefObject<string[]>,
-  chainRef: React.MutableRefObject<{ nodeId: string; progress: number }[]>
-): void {
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const { width: w, height: h } = dimensions;
-  ctx.save();
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-  const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
-  bgGrad.addColorStop(0, '#0c0c1a');
-  bgGrad.addColorStop(1, '#030305');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = 'rgba(255,255,255,0.028)';
-  for (let gx = 0; gx < w; gx += 28) {
-    for (let gy = 0; gy < h; gy += 28) {
-      ctx.beginPath();
-      ctx.arc(gx, gy, 0.7, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-  const { k, x: tx, y: ty } = transform;
-  ctx.translate(tx, ty);
-  ctx.scale(k, k);
-  const hlSet = new Set(highlightRef.current);
-  const flashSet = new Set(flashRef.current);
-  const chainMap = new Map(chainRef.current.map((c) => [c.nodeId, c.progress]));
-
-  nodes.forEach((n) => {
-    const opacity = 1;
-    const highlighted = hlSet.size > 0 && hlSet.has(n.id);
-    const chainProgress = chainMap.get(n.id) ?? 0;
-    const chainActive = chainMap.has(n.id);
-    drawSphereNode(
-      ctx, n.x, n.y, n.r, n.color,
-      n.id === 'n01', n.isCross ?? false, n.pulse ?? false,
-      flashSet.has(n.id), n.consentPending ?? false,
-      opacity, timestamp, highlighted,
-      chainActive, chainProgress,
-      n.validUntilDays,
-      n.propertyRichness,
-      n.type === 'Agent'
-    );
-  });
-  ctx.restore();
-}
-
-function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover, flashNodeIds, chainTraversalIds, onEdgeClick, overrideNodes, overrideEdges }: D3GraphProps) {
+function CanvasSVGGraph({
+  activeLens,
+  highlightNodeIds,
+  onNodeClick,
+  onNodeHover,
+  flashNodeIds,
+  chainTraversalIds,
+  onEdgeClick,
+  overrideNodes,
+  overrideEdges,
+}: D3GraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -829,7 +877,10 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
 
         await new Promise<void>((resolve) => {
           const tick = (now: number) => {
-            if (cancelled) { resolve(); return; }
+            if (cancelled) {
+              resolve();
+              return;
+            }
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / PULSE_DURATION, 1);
             // Ease out
@@ -840,7 +891,17 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
             if (canvas && dimensions) {
               cancelAnimationFrame(animFrameRef.current);
               animFrameRef.current = requestAnimationFrame((ts) => {
-                renderFrame(canvas, ts, dimensions, dpr, transformRef.current, nodesRef.current, highlightRef, flashRef, chainRef);
+                renderFrame(
+                  canvas,
+                  ts,
+                  dimensions,
+                  dpr,
+                  transformRef.current,
+                  nodesRef.current,
+                  highlightRef,
+                  flashRef,
+                  chainRef
+                );
               });
             }
 
@@ -858,8 +919,11 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
     };
 
     animateChain();
-    return () => { cancelled = true; chainRef.current = []; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+      chainRef.current = [];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainTraversalIds]);
 
   // Keep highlight/flash refs in sync
@@ -871,7 +935,17 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
       const canvas = canvasRef.current;
       if (!canvas || !dimensions) return;
       animFrameRef.current = requestAnimationFrame((ts) => {
-        renderFrame(canvas, ts, dimensions, dpr, transformRef.current, nodesRef.current, highlightRef, flashRef, chainRef);
+        renderFrame(
+          canvas,
+          ts,
+          dimensions,
+          dpr,
+          transformRef.current,
+          nodesRef.current,
+          highlightRef,
+          flashRef,
+          chainRef
+        );
       });
     }
   }, [highlightNodeIds, flashNodeIds, dimensions, dpr, transform]);
@@ -904,30 +978,56 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
     const cx = width / 2;
     const cy = height / 2;
 
-    const lensKey: LensType = activeLens === 'sofia' ? 'social' : activeLens as LensType;
-    const lensNodeIds = activeLens === 'sofia' ? SOFIA_LENS_NODES : LENS_NODE_SETS[lensKey];
-    const lensNodeSet = new Set(lensNodeIds);
     const sourceNodes = overrideNodes ?? graphNodes;
+    const lensDesc = buildLensRegistry(sourceNodes, overrideEdges ?? graphEdges).find(
+      (l) => l.id === activeLens
+    );
+    const memberAnchor = sourceNodes.find((n) => n.type === 'Member')?.id;
+    const baseLensIds = lensDesc?.nodeIds ?? (memberAnchor ? [memberAnchor] : []);
+    const lensNodeIds =
+      sourceNodes.find((n) => n.id === 'n01')?.sublabel === DEMO_MEMBER_ID
+        ? baseLensIds
+        : enrichSparseLens(baseLensIds, sourceNodes, overrideEdges ?? graphEdges);
+    const lensNodeSet = new Set(lensNodeIds);
     const visibleNodes = sourceNodes.filter((n) => lensNodeSet.has(n.id));
 
-    const getRadius = (n: GraphNode): number => {
-      if (n.id === 'n01') return 75;
-      if (n.type === 'Agent') return 28;
-      const baseR = n.radius;
-      if (baseR >= 20) return 26;
-      if (baseR >= 16) return 22;
-      return 18;
-    };
+    const getRadius = (n: GraphNode): number =>
+      n.id === 'n01'
+        ? 75
+        : n.type === 'Agent'
+          ? 28
+          : n.radius >= 20
+            ? 26
+            : n.radius >= 16
+              ? 22
+              : 18;
+    const isGoldenGraph = sourceNodes.find((n) => n.id === 'n01')?.sublabel === DEMO_MEMBER_ID;
+    const attnMap = scoreAttention(visibleNodes, overrideEdges ?? graphEdges);
+    const ngMap = isGoldenGraph
+      ? null
+      : scoreAttentionNG(visibleNodes, overrideEdges ?? graphEdges);
 
-    const simNodes: SimNode[] = visibleNodes.map((n) => ({
-      ...n,
-      r: getRadius(n),
-      x: n.id === 'n01' ? cx : cx + (Math.random() - 0.5) * 200,
-      y: n.id === 'n01' ? cy : cy + (Math.random() - 0.5) * 200,
-      fx: n.id === 'n01' ? cx : null,
-      fy: n.id === 'n01' ? cy : null,
-      isCross: false,
-    }));
+    const simNodes: SimNode[] = visibleNodes.map((n) => {
+      const anchor = n.id === 'n01' || n.type === 'Agent';
+      const attn = attnMap.get(n.id) ?? 'context';
+      const ng = ngMap ? ngNodeStyle(ngMap.get(n.id) ?? 'context') : null;
+      const baseR = n.id === 'n01' ? (isGoldenGraph ? 75 : 46) : getRadius(n); // non-golden member recedes
+      return {
+        ...n,
+        attn,
+        signal: ng?.signal ?? false,
+        alpha: anchor ? 1 : ng ? ng.alpha : attnNodeStyle(attn).alpha,
+        r:
+          n.id === 'n01'
+            ? baseR
+            : baseR * (anchor ? 1 : ng ? ng.radiusMul : attnNodeStyle(attn).radiusMul),
+        x: n.id === 'n01' ? cx : cx + (Math.random() - 0.5) * 200,
+        y: n.id === 'n01' ? cy : cy + (Math.random() - 0.5) * 200,
+        fx: n.id === 'n01' ? cx : null,
+        fy: n.id === 'n01' ? cy : null,
+        isCross: false,
+      };
+    });
 
     nodesRef.current = simNodes;
 
@@ -945,13 +1045,27 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
         target: nodeById.get(e.target) ?? e.target,
       }));
 
-      const simulation = d3.forceSimulation(simNodes as any)
+      const simulation = d3
+        .forceSimulation(simNodes as any)
         .alphaDecay(0.035)
         .velocityDecay(0.55)
-        .force('link', d3.forceLink(simEdges).id((d: any) => d.id).distance(90).strength(0.5))
+        .force(
+          'link',
+          d3
+            .forceLink(simEdges)
+            .id((d: any) => d.id)
+            .distance(90)
+            .strength(0.5)
+        )
         .force('charge', d3.forceManyBody().strength(-180).distanceMax(300))
         .force('center', d3.forceCenter(cx, cy).strength(0.12))
-        .force('collision', d3.forceCollide().radius((d: any) => d.r + 14).strength(0.9))
+        .force(
+          'collision',
+          d3
+            .forceCollide()
+            .radius((d: any) => d.r + 14)
+            .strength(0.9)
+        )
         .force('x', d3.forceX(cx).strength(0.08))
         .force('y', d3.forceY(cy).strength(0.08));
 
@@ -964,7 +1078,17 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
         const canvas = canvasRef.current;
         if (!canvas) return;
         animFrameRef.current = requestAnimationFrame((ts) => {
-          renderFrame(canvas, ts, dimensions, dpr, transformRef.current, nodesRef.current, highlightRef, flashRef, chainRef);
+          renderFrame(
+            canvas,
+            ts,
+            dimensions,
+            dpr,
+            transformRef.current,
+            nodesRef.current,
+            highlightRef,
+            flashRef,
+            chainRef
+          );
           simulationDoneRef.current = true;
         });
       });
@@ -979,13 +1103,51 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
       const drawFrame = (timestamp: number) => {
         timeRef.current = timestamp;
         if (simulationDoneRef.current) return;
-        renderFrame(canvas, timestamp, dimensions, dpr, transformRef.current, nodesRef.current, highlightRef, flashRef, chainRef);
+        renderFrame(
+          canvas,
+          timestamp,
+          dimensions,
+          dpr,
+          transformRef.current,
+          nodesRef.current,
+          highlightRef,
+          flashRef,
+          chainRef
+        );
         animFrameRef.current = requestAnimationFrame(drawFrame);
       };
       animFrameRef.current = requestAnimationFrame(drawFrame);
+    } else if (!isGoldenGraph && !prefersReducedMotion()) {
+      // Non-golden lens views animate continuously so the signal pulse is visible
+      // (golden keeps its single-shot settle; reduced-motion falls through to static).
+      const loop = (timestamp: number) => {
+        renderFrame(
+          canvas,
+          timestamp,
+          dimensions,
+          dpr,
+          transformRef.current,
+          nodesRef.current,
+          highlightRef,
+          flashRef,
+          chainRef
+        );
+        animFrameRef.current = requestAnimationFrame(loop);
+      };
+      animFrameRef.current = requestAnimationFrame(loop);
     } else {
       animFrameRef.current = requestAnimationFrame((ts) => {
-        renderFrame(canvas, ts, dimensions, dpr, transformRef.current, nodesRef.current, highlightRef, flashRef, chainRef);
+        renderFrame(
+          canvas,
+          ts,
+          dimensions,
+          dpr,
+          transformRef.current,
+          nodesRef.current,
+          highlightRef,
+          flashRef,
+          chainRef
+        );
         simulationDoneRef.current = true;
       });
     }
@@ -994,8 +1156,10 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
       cancelAnimationFrame(animFrameRef.current);
       if (simulationRef.current) simulationRef.current.stop();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLens, dimensions]);
+    // patientKey changes whenever the node set changes identity (patient switch or closure toggle).
+    // Without it the simulation never re-runs when only overrideNodes changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLens, dimensions, (overrideNodes ?? []).map((n) => n.id + n.label).join('|')]);
 
   const [edgeTick, setEdgeTick] = useState(0);
 
@@ -1011,7 +1175,8 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
   useEffect(() => {
     if (!svgRef.current) return;
     const svg = d3.select<SVGSVGElement, unknown>(svgRef.current);
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 5])
       .on('zoom', (event) => {
         const t = { k: event.transform.k, x: event.transform.x, y: event.transform.y };
@@ -1021,108 +1186,150 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
         if (canvas && dimensions) {
           cancelAnimationFrame(animFrameRef.current);
           animFrameRef.current = requestAnimationFrame((ts) => {
-            renderFrame(canvas, ts, dimensions, dpr, t, nodesRef.current, highlightRef, flashRef, chainRef);
+            renderFrame(
+              canvas,
+              ts,
+              dimensions,
+              dpr,
+              t,
+              nodesRef.current,
+              highlightRef,
+              flashRef,
+              chainRef
+            );
           });
         }
       });
     svg.call(zoom);
-    return () => { svg.on('.zoom', null); };
+    return () => {
+      svg.on('.zoom', null);
+    };
   }, [dimensions, dpr]);
 
-  const getNodeAtPoint = useCallback((clientX: number, clientY: number): SimNode | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    const rawX = (clientX - rect.left);
-    const rawY = (clientY - rect.top);
-    const { k, x: tx, y: ty } = transform;
-    let gx = (rawX - tx) / k;
-    let gy = (rawY - ty) / k;
+  const getNodeAtPoint = useCallback(
+    (clientX: number, clientY: number): SimNode | null => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      const rawX = clientX - rect.left;
+      const rawY = clientY - rect.top;
+      const { k, x: tx, y: ty } = transform;
+      let gx = (rawX - tx) / k;
+      let gy = (rawY - ty) / k;
 
-    const nodes = nodesRef.current;
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      const n = nodes[i];
-      const dx = gx - n.x;
-      const dy = gy - n.y;
-      if (dx * dx + dy * dy <= (n.r + 8) * (n.r + 8)) return n;
-    }
-    return null;
-  }, [transform]);
+      const nodes = nodesRef.current;
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        const dx = gx - n.x;
+        const dy = gy - n.y;
+        if (dx * dx + dy * dy <= (n.r + 8) * (n.r + 8)) return n;
+      }
+      return null;
+    },
+    [transform]
+  );
 
   // ── Edge hit testing ──────────────────────────────────────────────────────
-  const getEdgeAtPoint = useCallback((clientX: number, clientY: number): { edge: GraphEdge; x: number; y: number } | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    const rawX = clientX - rect.left;
-    const rawY = clientY - rect.top;
-    const { k, x: tx, y: ty } = transform;
-    let gx = (rawX - tx) / k;
-    let gy = (rawY - ty) / k;
-
-    const nodePositions = new Map(nodesRef.current.map((n) => [n.id, { x: n.x, y: n.y, r: n.r }]));
-    const lensKey: LensType = activeLens === 'sofia' ? 'social' : activeLens as LensType;
-    const lensNodeIds = activeLens === 'sofia' ? SOFIA_LENS_NODES : LENS_NODE_SETS[lensKey];
-    const lensNodeSet = new Set(lensNodeIds);
-    const visibleEdges = graphEdges.filter(
-      (e) => lensNodeSet.has(e.source) && lensNodeSet.has(e.target)
-    );
-
-    const HIT_DIST = 8 / k; // 8px hit tolerance in graph space
-
-    for (const e of visibleEdges) {
-      const src = nodePositions.get(e.source);
-      const tgt = nodePositions.get(e.target);
-      if (!src || !tgt) continue;
-
-      const dx = tgt.x - src.x;
-      const dy = tgt.y - src.y;
-      const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      const x1 = src.x + (dx / len) * (src.r + 3);
-      const y1 = src.y + (dy / len) * (src.r + 3);
-      const x2 = tgt.x - (dx / len) * (tgt.r + 12);
-      const y2 = tgt.y - (dy / len) * (tgt.r + 12);
-
-      // Point-to-segment distance
-      const ex = x2 - x1, ey = y2 - y1;
-      const segLen = Math.sqrt(ex * ex + ey * ey) || 1;
-      const t = Math.max(0, Math.min(1, ((gx - x1) * ex + (gy - y1) * ey) / (segLen * segLen)));
-      const closestX = x1 + t * ex;
-      const closestY = y1 + t * ey;
-      const dist = Math.sqrt((gx - closestX) ** 2 + (gy - closestY) ** 2);
-
-      if (dist <= HIT_DIST) {
-        return { edge: e, x: clientX - rect.left + 12, y: clientY - rect.top - 20 };
-      }
-    }
-    return null;
-  }, [transform, activeLens]);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const n = getNodeAtPoint(e.clientX, e.clientY);
-    onNodeHover(n);
-  }, [getNodeAtPoint, onNodeHover]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    const n = getNodeAtPoint(e.clientX, e.clientY);
-    if (n) {
-      onNodeClick(n);
-      return;
-    }
-    // Check edge click
-    const edgeHit = getEdgeAtPoint(e.clientX, e.clientY);
-    if (edgeHit) {
+  const getEdgeAtPoint = useCallback(
+    (clientX: number, clientY: number): { edge: GraphEdge; x: number; y: number } | null => {
       const canvas = canvasRef.current;
-      const rect = canvas?.getBoundingClientRect();
-      onEdgeClick(edgeHit.edge, edgeHit.x + (rect?.left ?? 0), edgeHit.y + (rect?.top ?? 0));
-    }
-  }, [getNodeAtPoint, getEdgeAtPoint, onNodeClick, onEdgeClick]);
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      const rawX = clientX - rect.left;
+      const rawY = clientY - rect.top;
+      const { k, x: tx, y: ty } = transform;
+      let gx = (rawX - tx) / k;
+      let gy = (rawY - ty) / k;
 
-  const handleMouseLeave = useCallback(() => { onNodeHover(null); }, [onNodeHover]);
+      const nodePositions = new Map(
+        nodesRef.current.map((n) => [n.id, { x: n.x, y: n.y, r: n.r }])
+      );
+      const hitSourceNodes = overrideNodes ?? graphNodes;
+      const hitLensDesc = buildLensRegistry(hitSourceNodes, overrideEdges ?? graphEdges).find(
+        (l) => l.id === activeLens
+      );
+      const hitMemberAnchor = hitSourceNodes.find((n) => n.type === 'Member')?.id;
+      const lensNodeIds = hitLensDesc?.nodeIds ?? (hitMemberAnchor ? [hitMemberAnchor] : []);
+      const lensNodeSet = new Set(lensNodeIds);
+      const hitSourceEdges = overrideEdges ?? graphEdges;
+      const visibleEdges = hitSourceEdges.filter(
+        (e) => lensNodeSet.has(e.source) && lensNodeSet.has(e.target)
+      );
+
+      const HIT_DIST = 8 / k; // 8px hit tolerance in graph space
+
+      for (const e of visibleEdges) {
+        const src = nodePositions.get(e.source);
+        const tgt = nodePositions.get(e.target);
+        if (!src || !tgt) continue;
+
+        const dx = tgt.x - src.x;
+        const dy = tgt.y - src.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const x1 = src.x + (dx / len) * (src.r + 3);
+        const y1 = src.y + (dy / len) * (src.r + 3);
+        const x2 = tgt.x - (dx / len) * (tgt.r + 12);
+        const y2 = tgt.y - (dy / len) * (tgt.r + 12);
+
+        // Point-to-segment distance
+        const ex = x2 - x1,
+          ey = y2 - y1;
+        const segLen = Math.sqrt(ex * ex + ey * ey) || 1;
+        const t = Math.max(0, Math.min(1, ((gx - x1) * ex + (gy - y1) * ey) / (segLen * segLen)));
+        const closestX = x1 + t * ex;
+        const closestY = y1 + t * ey;
+        const dist = Math.sqrt((gx - closestX) ** 2 + (gy - closestY) ** 2);
+
+        if (dist <= HIT_DIST) {
+          return { edge: e, x: clientX - rect.left + 12, y: clientY - rect.top - 20 };
+        }
+      }
+      return null;
+    },
+    [transform, activeLens]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      const n = getNodeAtPoint(e.clientX, e.clientY);
+      onNodeHover(n);
+    },
+    [getNodeAtPoint, onNodeHover]
+  );
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      const n = getNodeAtPoint(e.clientX, e.clientY);
+      if (n) {
+        onNodeClick(n);
+        return;
+      }
+      // Check edge click
+      const edgeHit = getEdgeAtPoint(e.clientX, e.clientY);
+      if (edgeHit) {
+        const canvas = canvasRef.current;
+        const rect = canvas?.getBoundingClientRect();
+        onEdgeClick(edgeHit.edge, edgeHit.x + (rect?.left ?? 0), edgeHit.y + (rect?.top ?? 0));
+      }
+    },
+    [getNodeAtPoint, getEdgeAtPoint, onNodeClick, onEdgeClick]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    onNodeHover(null);
+  }, [onNodeHover]);
 
   // ── Render SVG edges ──────────────────────────────────────────────────────
-  const lensKey: LensType = activeLens === 'sofia' ? 'social' : activeLens as LensType;
-  const lensNodeIds = activeLens === 'sofia' ? SOFIA_LENS_NODES : LENS_NODE_SETS[lensKey];
+  const renderSourceNodes = overrideNodes ?? graphNodes;
+  const renderLensDesc = buildLensRegistry(renderSourceNodes, overrideEdges ?? graphEdges).find(
+    (l) => l.id === activeLens
+  );
+  const renderMemberAnchor = renderSourceNodes.find((n) => n.type === 'Member')?.id;
+  const baseLensIds = renderLensDesc?.nodeIds ?? (renderMemberAnchor ? [renderMemberAnchor] : []);
+  const lensNodeIds =
+    renderSourceNodes.find((n) => n.id === 'n01')?.sublabel === DEMO_MEMBER_ID
+      ? baseLensIds
+      : enrichSparseLens(baseLensIds, renderSourceNodes, overrideEdges ?? graphEdges);
   const lensNodeSet = new Set(lensNodeIds);
   const sourceEdges = overrideEdges ?? graphEdges;
   const visibleEdges = sourceEdges.filter(
@@ -1131,6 +1338,20 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
 
   const nodePositions = new Map(nodesRef.current.map((n) => [n.id, { x: n.x, y: n.y, r: n.r }]));
   const hlSet = new Set(highlightNodeIds);
+  // Phase 2: emphasize the causal BLOCKS chain for non-golden members; Maria keeps authored edges.
+  const isGoldenRender = renderSourceNodes.find((n) => n.id === 'n01')?.sublabel === DEMO_MEMBER_ID;
+  const onChain = isGoldenRender
+    ? null
+    : emphasizedChain(
+        nodesRef.current,
+        visibleEdges,
+        new Map(
+          nodesRef.current.map((n) => [
+            n.id,
+            (n.signal ? 'act' : (n.attn ?? 'context')) as AttentionTier,
+          ])
+        )
+      );
 
   const { k, x: tx, y: ty } = transform;
   const svgTransform = `translate(${tx},${ty}) scale(${k})`;
@@ -1138,235 +1359,442 @@ function CanvasSVGGraph({ activeLens, highlightNodeIds, onNodeClick, onNodeHover
   return (
     <div
       ref={containerRef}
-      style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', background: '#030305' }}
+      style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        background: '#030305',
+      }}
     >
       {dimensions && (
-      <>
-      <canvas
-        ref={canvasRef}
-        width={dimensions.width * dpr}
-        height={dimensions.height * dpr}
-        style={{
-          position: 'absolute', top: 0, left: 0,
-          width: dimensions.width, height: dimensions.height,
-          display: 'block',
-        }}
-        onMouseMove={handleMouseMove}
-        onClick={handleClick}
-        onMouseLeave={handleMouseLeave}
-      />
+        <>
+          <canvas
+            ref={canvasRef}
+            width={dimensions.width * dpr}
+            height={dimensions.height * dpr}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: dimensions.width,
+              height: dimensions.height,
+              display: 'block',
+            }}
+            onMouseMove={handleMouseMove}
+            onClick={handleClick}
+            onMouseLeave={handleMouseLeave}
+          />
 
-      <svg
-        ref={svgRef}
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-        width={dimensions.width}
-        height={dimensions.height}
-      >
-        <defs>
-          {[...new Set(visibleEdges.map((e) => e.color))].map((color) => {
-            const safeId = 'mk-' + color.replace('#', '');
-            return (
-              <marker key={safeId} id={safeId} viewBox="0 -4 8 8" refX={20} refY={0}
-                markerWidth={6} markerHeight={6} orient="auto">
-                <path d="M0,-4L8,0L0,4" fill={color} opacity={0.95} />
-              </marker>
-            );
-          })}
-          <style>{`
+          <svg
+            ref={svgRef}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+            }}
+            width={dimensions.width}
+            height={dimensions.height}
+          >
+            <defs>
+              {[...new Set(visibleEdges.map((e) => e.color))].map((color) => {
+                const safeId = 'mk-' + color.replace('#', '');
+                return (
+                  <marker
+                    key={safeId}
+                    id={safeId}
+                    viewBox="0 -4 8 8"
+                    refX={20}
+                    refY={0}
+                    markerWidth={6}
+                    markerHeight={6}
+                    orient="auto"
+                  >
+                    <path d="M0,-4L8,0L0,4" fill={color} opacity={0.95} />
+                  </marker>
+                );
+              })}
+              <style>{`
             @keyframes dashFlow { to { stroke-dashoffset: -32; } }
             .anim-edge { animation: dashFlow 1s linear infinite; }
             @keyframes dashFlowGreen { to { stroke-dashoffset: -32; } }
             .anim-edge-green { animation: dashFlowGreen 1.2s linear infinite; }
           `}</style>
-        </defs>
+            </defs>
 
-        <g transform={svgTransform}>
-          {/* Edges — opacity driven by confidence */}
-          {visibleEdges.map((e) => {
-            const src = nodePositions.get(e.source);
-            const tgt = nodePositions.get(e.target);
-            if (!src || !tgt) return null;
+            <g transform={svgTransform}>
+              {/* Edges — opacity driven by confidence */}
+              {visibleEdges.map((e) => {
+                const src = nodePositions.get(e.source);
+                const tgt = nodePositions.get(e.target);
+                if (!src || !tgt) return null;
 
-            // ── Edge opacity by confidence/strength ──────────────────────────
-            const confidence = e.edgeProps?.confidence;
-            const baseOpacity = e.animated ? 0.95 : 0.65;
-            const opacity = confidence !== undefined
-              ? Math.max(0.2, confidence * (e.animated ? 1.0 : 0.85))
-              : baseOpacity;
+                // ── Edge opacity by confidence/strength ──────────────────────────
+                const confidence = e.edgeProps?.confidence;
+                const baseOpacity = e.animated ? 0.95 : 0.65;
+                const opacity =
+                  confidence !== undefined
+                    ? Math.max(0.2, confidence * (e.animated ? 1.0 : 0.85))
+                    : baseOpacity;
 
-            const dx = tgt.x - src.x;
-            const dy = tgt.y - src.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const x1 = src.x + (dx / dist) * (src.r + 3);
-            const y1 = src.y + (dy / dist) * (src.r + 3);
-            const x2 = tgt.x - (dx / dist) * (tgt.r + 12);
-            const y2 = tgt.y - (dy / dist) * (tgt.r + 12);
+                const dx = tgt.x - src.x;
+                const dy = tgt.y - src.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                const x1 = src.x + (dx / dist) * (src.r + 3);
+                const y1 = src.y + (dy / dist) * (src.r + 3);
+                const x2 = tgt.x - (dx / dist) * (tgt.r + 12);
+                const y2 = tgt.y - (dy / dist) * (tgt.r + 12);
 
-            return (
-              <line
-                key={e.id}
-                x1={x1} y1={y1} x2={x2} y2={y2}
-                stroke={e.color}
-                strokeWidth={e.animated ? Math.max(e.strokeWidth + 1, 3) : Math.max(e.strokeWidth, 1.5)}
-                strokeDasharray={e.animated ? '10,6' : (e.dashed ? '6,4' : undefined)}
-                strokeOpacity={opacity}
-                markerEnd={`url(#mk-${e.color.replace('#', '')})`}
-                className={e.animated ? (e.color.includes('198') ? 'anim-edge-green' : 'anim-edge') : undefined}
-              />
-            );
-          })}
-
-          {/* Edge labels for animated/key edges */}
-          {visibleEdges.filter((e) => e.animated).map((e) => {
-            const src = nodePositions.get(e.source);
-            const tgt = nodePositions.get(e.target);
-            if (!src || !tgt) return null;
-            const mx = (src.x + tgt.x) / 2;
-            const my = (src.y + tgt.y) / 2 - 6;
-            return (
-              <text key={`lbl-${e.id}`} x={mx} y={my}
-                textAnchor="middle" fontSize={9} fontFamily="IBM Plex Mono, monospace"
-                fill={e.color} opacity={0.9} pointerEvents="none">
-                {e.label}
-              </text>
-            );
-          })}
-
-          {/* Node labels + sublabels + badges */}
-          {nodesRef.current.map((n) => {
-            const opacity = hlSet.size > 0 ? (hlSet.has(n.id) ? 1 : 1) : 1;
-            const isMaria = n.id === 'n01';
-            const isAgent = n.type === 'Agent';
-            const fontSize = isMaria ? 13 : (lensNodeIds.length <= 14 ? 10 : 9);
-            const subFontSize = lensNodeIds.length <= 14 ? 8 : 7;
-            // Offset label below temporal arc if present
-            const arcOffset = n.validUntilDays !== undefined ? 6 : 0;
-            const labelY = n.y + n.r + 15 + arcOffset;
-            const subY = n.y + n.r + 27 + arcOffset;
-
-            return (
-              <g key={`lbl-${n.id}`} opacity={opacity} pointerEvents="none">
-                {!isMaria && (
-                  <rect
-                    x={n.x - (n.label.length > 18 ? 16 : n.label.length * 3.2)}
-                    y={labelY - fontSize}
-                    width={(n.label.length > 18 ? 32 : n.label.length * 6.4)}
-                    height={fontSize + 3}
-                    rx={2}
-                    fill="rgba(3,3,8,0.72)"
+                return (
+                  <line
+                    key={e.id}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke={e.color}
+                    strokeWidth={
+                      onChain
+                        ? onChain.has(e.id)
+                          ? 3
+                          : 1.5
+                        : e.animated
+                          ? Math.max(e.strokeWidth + 1, 3)
+                          : Math.max(e.strokeWidth, 1.5)
+                    }
+                    strokeDasharray={
+                      onChain
+                        ? onChain.has(e.id)
+                          ? '10,6'
+                          : e.dashed
+                            ? '6,4'
+                            : undefined
+                        : e.animated
+                          ? '10,6'
+                          : e.dashed
+                            ? '6,4'
+                            : undefined
+                    }
+                    strokeOpacity={onChain ? (onChain.has(e.id) ? 1 : 0.28) : opacity}
+                    markerEnd={`url(#mk-${e.color.replace('#', '')})`}
+                    className={
+                      (onChain ? onChain.has(e.id) : e.animated)
+                        ? e.color.includes('198')
+                          ? 'anim-edge-green'
+                          : 'anim-edge'
+                        : undefined
+                    }
                   />
-                )}
-                <text x={n.x} y={labelY} textAnchor="middle"
-                  fontSize={fontSize} fontFamily="IBM Plex Mono, monospace"
-                  fontWeight={isMaria || isAgent ? 'bold' : '600'}
-                  fill={isMaria ? '#ffffff' : (isAgent ? '#e2e8f0' : (n.isCross ? '#cbd5e1' : '#f1f5f9'))}
-                  stroke="rgba(3,3,8,0.6)" strokeWidth={isMaria ? 0 : 2.5} paintOrder="stroke">
-                  {n.label.length > 18 ? n.label.slice(0, 16) + '…' : n.label}
-                </text>
-                {n.sublabel && (
-                  <text x={n.x} y={subY} textAnchor="middle"
-                    fontSize={subFontSize} fontFamily="IBM Plex Mono, monospace"
-                    fill="#94a3b8"
-                    stroke="rgba(3,3,8,0.7)" strokeWidth={2} paintOrder="stroke">
-                    {n.sublabel.length > 22 ? n.sublabel.slice(0, 20) + '…' : n.sublabel}
-                  </text>
-                )}
-                {/* Temporal validity countdown label */}
-                {n.validUntilDays !== undefined && (
-                  <text x={n.x} y={n.y - n.r - 14} textAnchor="middle"
-                    fontSize={7} fontFamily="IBM Plex Mono, monospace" fontWeight="bold"
-                    fill={n.validUntilDays <= 14 ? '#ef4444' : n.validUntilDays <= 30 ? '#f59e0b' : '#4ade80'}
-                    stroke="rgba(3,3,8,0.8)" strokeWidth={2} paintOrder="stroke">
-                    ⏱ {n.validUntilDays}d
-                  </text>
-                )}
-                {/* Agent role badge */}
-                {isAgent && (
-                  <>
-                    <rect x={n.x - 22} y={n.y - n.r - 17} width={44} height={13} rx={4}
-                      fill="#3b0764" stroke="#7c3aed" strokeWidth={1} />
-                    <text x={n.x} y={n.y - n.r - 7} textAnchor="middle"
-                      fontSize={7} fontWeight="bold" fill="#c4b5fd" fontFamily="IBM Plex Mono, monospace">
-                      AGENT
+                );
+              })}
+
+              {/* Edge labels for animated/key edges */}
+              {visibleEdges
+                .filter((e) => (onChain ? onChain.has(e.id) : e.animated))
+                .map((e) => {
+                  const src = nodePositions.get(e.source);
+                  const tgt = nodePositions.get(e.target);
+                  if (!src || !tgt) return null;
+                  const mx = (src.x + tgt.x) / 2;
+                  const my = (src.y + tgt.y) / 2 - 6;
+                  return (
+                    <text
+                      key={`lbl-${e.id}`}
+                      x={mx}
+                      y={my}
+                      textAnchor="middle"
+                      fontSize={9}
+                      fontFamily="IBM Plex Mono, monospace"
+                      fill={e.color}
+                      opacity={0.9}
+                      pointerEvents="none"
+                    >
+                      {e.label}
                     </text>
-                  </>
-                )}
-                {/* BLOCKER badge */}
-                {['n17', 'n18'].includes(n.id) && (
-                  <>
-                    <rect x={n.x - 26} y={n.y - n.r - 17} width={52} height={14} rx={4}
-                      fill="#7f1d1d" stroke="#ef4444" strokeWidth={1} />
-                    <text x={n.x} y={n.y - n.r - 7} textAnchor="middle"
-                      fontSize={8} fontWeight="bold" fill="#fca5a5" fontFamily="IBM Plex Mono, monospace">
-                      BLOCKER
+                  );
+                })}
+
+              {/* Node labels + sublabels + badges */}
+              {nodesRef.current.map((n) => {
+                if (
+                  n.id !== 'n01' &&
+                  n.type !== 'Agent' &&
+                  (isGoldenRender ? n.attn === 'context' : (n.alpha ?? 1) < 0.5)
+                )
+                  return null;
+                const opacity = hlSet.size > 0 ? (hlSet.has(n.id) ? 1 : 1) : 1;
+                const isMaria = n.id === 'n01';
+                const isAgent = n.type === 'Agent';
+                const fontSize = isMaria ? 13 : lensNodeIds.length <= 14 ? 10 : 9;
+                const subFontSize = lensNodeIds.length <= 14 ? 8 : 7;
+                // Offset label below temporal arc if present
+                const arcOffset = n.validUntilDays !== undefined ? 6 : 0;
+                const labelY = n.y + n.r + 15 + arcOffset;
+                const subY = n.y + n.r + 27 + arcOffset;
+                const maxLabel = lensNodeIds.length <= 14 ? 30 : 22;
+                const labelText =
+                  n.label.length > maxLabel ? n.label.slice(0, maxLabel - 1) + '…' : n.label;
+                const plateW = labelText.length * fontSize * 0.62 + 8;
+                const maxSub = lensNodeIds.length <= 14 ? 34 : 26;
+                const subText =
+                  n.sublabel && n.sublabel.length > maxSub
+                    ? n.sublabel.slice(0, maxSub - 1) + '…'
+                    : (n.sublabel ?? '');
+
+                return (
+                  <g key={`lbl-${n.id}`} opacity={opacity} pointerEvents="none">
+                    {!isMaria && (
+                      <rect
+                        x={n.x - plateW / 2}
+                        y={labelY - fontSize}
+                        width={plateW}
+                        height={fontSize + 3}
+                        rx={2}
+                        fill="rgba(3,3,8,0.82)"
+                      />
+                    )}
+                    <text
+                      x={n.x}
+                      y={labelY}
+                      textAnchor="middle"
+                      fontSize={fontSize}
+                      fontFamily="IBM Plex Mono, monospace"
+                      fontWeight={isMaria || isAgent ? 'bold' : '600'}
+                      fill={
+                        isMaria
+                          ? '#ffffff'
+                          : isAgent
+                            ? '#e2e8f0'
+                            : n.isCross
+                              ? '#cbd5e1'
+                              : '#f1f5f9'
+                      }
+                      stroke="rgba(3,3,8,0.6)"
+                      strokeWidth={isMaria ? 0 : 2.5}
+                      paintOrder="stroke"
+                    >
+                      {labelText}
                     </text>
-                  </>
-                )}
-                {/* BLOCKED badge */}
-                {n.id === 'n04' && (
-                  <>
-                    <rect x={n.x - 26} y={n.y - n.r - 17} width={52} height={14} rx={4}
-                      fill="#450a0a" stroke="#b91c1c" strokeWidth={1} />
-                    <text x={n.x} y={n.y - n.r - 7} textAnchor="middle"
-                      fontSize={8} fontWeight="bold" fill="#fca5a5" fontFamily="IBM Plex Mono, monospace">
-                      BLOCKED
-                    </text>
-                  </>
-                )}
-                {/* SAFETY ALERT badge */}
-                {['n31', 'n51'].includes(n.id) && (
-                  <>
-                    <rect x={n.x - 38} y={n.y + n.r + 2} width={76} height={13} rx={3}
-                      fill="#451a03" stroke="#f59e0b" strokeWidth={0.8} />
-                    <text x={n.x} y={n.y + n.r + 11} textAnchor="middle"
-                      fontSize={7} fontWeight="bold" fill="#fcd34d" fontFamily="IBM Plex Mono, monospace">
-                      △ SAFETY ALERT
-                    </text>
-                  </>
-                )}
-                {/* Lock icon for BH gated */}
-                {n.locked && (
-                  <text x={n.x} y={n.y + 5} textAnchor="middle" dominantBaseline="central"
-                    fontSize={Math.max(n.r * 0.4, 9)} fill="#f59e0b">
-                    🔒
-                  </text>
-                )}
-              </g>
-            );
-          })}
-        </g>
-      </svg>
-      </>
+                    {n.sublabel && (
+                      <text
+                        x={n.x}
+                        y={subY}
+                        textAnchor="middle"
+                        fontSize={subFontSize}
+                        fontFamily="IBM Plex Mono, monospace"
+                        fill="#94a3b8"
+                        stroke="rgba(3,3,8,0.7)"
+                        strokeWidth={2}
+                        paintOrder="stroke"
+                      >
+                        {subText}
+                      </text>
+                    )}
+                    {/* Temporal validity countdown label */}
+                    {n.validUntilDays !== undefined && (
+                      <text
+                        x={n.x}
+                        y={n.y - n.r - 14}
+                        textAnchor="middle"
+                        fontSize={7}
+                        fontFamily="IBM Plex Mono, monospace"
+                        fontWeight="bold"
+                        fill={
+                          n.validUntilDays <= 14
+                            ? '#ef4444'
+                            : n.validUntilDays <= 30
+                              ? '#f59e0b'
+                              : '#4ade80'
+                        }
+                        stroke="rgba(3,3,8,0.8)"
+                        strokeWidth={2}
+                        paintOrder="stroke"
+                      >
+                        ⏱ {n.validUntilDays}d
+                      </text>
+                    )}
+                    {/* Agent role badge */}
+                    {isAgent && (
+                      <>
+                        <rect
+                          x={n.x - 22}
+                          y={n.y - n.r - 17}
+                          width={44}
+                          height={13}
+                          rx={4}
+                          fill="#3b0764"
+                          stroke="#7c3aed"
+                          strokeWidth={1}
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y - n.r - 7}
+                          textAnchor="middle"
+                          fontSize={7}
+                          fontWeight="bold"
+                          fill="#c4b5fd"
+                          fontFamily="IBM Plex Mono, monospace"
+                        >
+                          AGENT
+                        </text>
+                      </>
+                    )}
+                    {/* BLOCKER badge */}
+                    {['n17', 'n18'].includes(n.id) && (
+                      <>
+                        <rect
+                          x={n.x - 26}
+                          y={n.y - n.r - 17}
+                          width={52}
+                          height={14}
+                          rx={4}
+                          fill="#7f1d1d"
+                          stroke="#ef4444"
+                          strokeWidth={1}
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y - n.r - 7}
+                          textAnchor="middle"
+                          fontSize={8}
+                          fontWeight="bold"
+                          fill="#fca5a5"
+                          fontFamily="IBM Plex Mono, monospace"
+                        >
+                          BLOCKER
+                        </text>
+                      </>
+                    )}
+                    {/* BLOCKED badge */}
+                    {n.id === 'n04' && (
+                      <>
+                        <rect
+                          x={n.x - 26}
+                          y={n.y - n.r - 17}
+                          width={52}
+                          height={14}
+                          rx={4}
+                          fill="#450a0a"
+                          stroke="#b91c1c"
+                          strokeWidth={1}
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y - n.r - 7}
+                          textAnchor="middle"
+                          fontSize={8}
+                          fontWeight="bold"
+                          fill="#fca5a5"
+                          fontFamily="IBM Plex Mono, monospace"
+                        >
+                          BLOCKED
+                        </text>
+                      </>
+                    )}
+                    {/* SAFETY ALERT badge */}
+                    {['n31', 'n51'].includes(n.id) && (
+                      <>
+                        <rect
+                          x={n.x - 38}
+                          y={n.y + n.r + 2}
+                          width={76}
+                          height={13}
+                          rx={3}
+                          fill="#451a03"
+                          stroke="#f59e0b"
+                          strokeWidth={0.8}
+                        />
+                        <text
+                          x={n.x}
+                          y={n.y + n.r + 11}
+                          textAnchor="middle"
+                          fontSize={7}
+                          fontWeight="bold"
+                          fill="#fcd34d"
+                          fontFamily="IBM Plex Mono, monospace"
+                        >
+                          △ SAFETY ALERT
+                        </text>
+                      </>
+                    )}
+                    {/* Lock icon for BH gated */}
+                    {n.locked && (
+                      <text
+                        x={n.x}
+                        y={n.y + 5}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fontSize={Math.max(n.r * 0.4, 9)}
+                        fill="#f59e0b"
+                      >
+                        🔒
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+        </>
       )}
     </div>
   );
 }
 
 // ── Patient Header Strip ──────────────────────────────────────────────────────
-function PatientHeaderStrip({ onSignalClick, activeSignalId }: { onSignalClick: (sig: ActiveSignal) => void; activeSignalId: string | null }) {
+function PatientHeaderStrip({
+  onSignalClick,
+  activeSignalId,
+  persona,
+}: {
+  onSignalClick: (sig: ActiveSignal) => void;
+  activeSignalId: string | null;
+  persona: ReturnType<typeof personaFor>;
+}) {
   const pills = [
-    { label: 'RISK MODERATE', color: '#f59e0b', bg: '#451a03' },
-    { label: 'AUTH ⚠ T-4 days', color: '#f59e0b', bg: '#451a03' },
-    { label: 'CARE GAP △ HbA1c 38d', color: '#f97316', bg: '#431407' },
-    { label: 'EPISODE Pre-Diabetic · Postpartum', color: '#10b981', bg: '#022c22' },
-    { label: '⚠ Edinburgh PND 427d', color: '#f59e0b', bg: '#451a03' },
-    { label: '◆ SDOH · 5 Barriers', color: '#f59e0b', bg: '#451a03' },
-    { label: '● RESOLVED', color: '#4ade80', bg: '#022c22' },
+    {
+      label: `RISK ${persona.riskLabel.split(' ')[0].toUpperCase()}`,
+      color: '#f59e0b',
+      bg: '#451a03',
+    },
+    { label: `EPISODE ${persona.episode}`, color: '#10b981', bg: '#022c22' },
+    { label: `CARE GAP ${persona.careGap}`, color: '#f97316', bg: '#431407' },
+    { label: `BH ${persona.bhStatus}`, color: '#f59e0b', bg: '#451a03' },
+    { label: `◆ ${persona.sdoh}`, color: '#f59e0b', bg: '#451a03' },
   ];
 
   return (
-    <div className="flex-shrink-0 px-3 py-1.5 flex items-center gap-2 overflow-x-auto" style={{ background: '#080812', borderBottom: `1px solid ${DARK.border}` }}>
+    <div
+      className="flex-shrink-0 px-3 py-1.5 flex items-center gap-2 overflow-x-auto"
+      style={{ background: '#080812', borderBottom: `1px solid ${DARK.border}` }}
+    >
       <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb' }}>MR</div>
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          style={{ background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb' }}
+        >
+          {persona.initials}
+        </div>
         <div>
-          <p className="text-xs font-bold leading-none" style={{ color: DARK.text }}>Maria Redhawk, 34</p>
-          <p className="text-xs leading-none mt-0.5" style={{ color: DARK.textMuted }}>MARIA_SD_001</p>
+          <p className="text-xs font-bold leading-none" style={{ color: DARK.text }}>
+            {persona.name}, {persona.age}
+          </p>
+          <p className="text-xs leading-none mt-0.5" style={{ color: DARK.textMuted }}>
+            {persona.id}
+          </p>
         </div>
       </div>
       <div className="w-px h-7 flex-shrink-0" style={{ background: DARK.border }} />
       <div className="flex items-center gap-1.5 overflow-x-auto">
         {pills.map((p, i) => (
-          <span key={i} className="text-xs px-2 py-0.5 rounded font-mono whitespace-nowrap flex-shrink-0 font-medium" style={{ background: p.bg, color: p.color, border: `1px solid ${p.color}44` }}>
+          <span
+            key={i}
+            className="text-xs px-2 py-0.5 rounded font-mono whitespace-nowrap flex-shrink-0 font-medium"
+            style={{ background: p.bg, color: p.color, border: `1px solid ${p.color}44` }}
+          >
             {p.label}
           </span>
         ))}
@@ -1376,46 +1804,92 @@ function PatientHeaderStrip({ onSignalClick, activeSignalId }: { onSignalClick: 
 }
 
 // ── Orchestration State Bar ───────────────────────────────────────────────────
-function OrchestrationBar() {
+// Shows orchestration stage pipeline + context badges only.
+// Patient identity is owned exclusively by PatientHeaderStrip below it.
+function OrchestrationBar({ persona }: { persona: ReturnType<typeof personaFor> }) {
   const stages = [
     { label: 'FOUNDATION', active: true },
     { label: 'ORCHESTRATION', active: false },
     { label: 'AUTONOMOUS', active: false },
   ];
+  // Extract the day count from "HbA1c Lab 38d" → "38d", or show the full careGap label
+  const gapLabel = persona.careGap ?? 'No open gap';
+  const dayMatch = gapLabel.match(/(\d+)d/);
+  const gapBadge = dayMatch ? `GAP ${dayMatch[1]}d` : 'GAP —';
 
   return (
-    <div className="flex items-center justify-between px-4 py-1.5 flex-shrink-0" style={{ background: '#06060f', borderBottom: `1px solid ${DARK.border}` }}>
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb' }}>MR</div>
-          <div>
-            <p className="text-xs font-bold leading-none" style={{ color: DARK.text }}>Maria Redhawk</p>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>MARIA_SD_001</span>
-              <span className="text-xs px-1 rounded font-bold" style={{ background: '#14532d', color: '#4ade80', fontSize: '9px' }}>CONSENT FULL</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 ml-2">
-          <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: '#1a1a2e', color: '#ef4444', border: '1px solid #7f1d1d', fontSize: '10px' }}>AUTH T-4</span>
-          <span className="text-xs px-1.5 py-0.5 rounded font-mono" style={{ background: '#1a1a2e', color: '#f59e0b', border: '1px solid #78350f', fontSize: '10px' }}>GAP 38d</span>
-        </div>
+    <div
+      className="flex items-center justify-between px-4 py-1.5 flex-shrink-0"
+      style={{ background: '#06060f', borderBottom: `1px solid ${DARK.border}` }}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className="text-xs px-1.5 py-0.5 rounded font-mono font-semibold"
+          style={{
+            background: '#14532d',
+            color: '#4ade80',
+            border: '1px solid #166534',
+            fontSize: '10px',
+          }}
+        >
+          CONSENT FULL
+        </span>
+        <span
+          className="text-xs px-1.5 py-0.5 rounded font-mono"
+          style={{
+            background: '#1a1a2e',
+            color: '#ef4444',
+            border: '1px solid #7f1d1d',
+            fontSize: '10px',
+          }}
+        >
+          AUTH T-4
+        </span>
+        <span
+          className="text-xs px-1.5 py-0.5 rounded font-mono"
+          style={{
+            background: '#1a1a2e',
+            color: '#f59e0b',
+            border: '1px solid #78350f',
+            fontSize: '10px',
+          }}
+        >
+          {gapBadge}
+        </span>
       </div>
       <div className="flex items-center gap-3">
-        <span className="text-xs font-mono px-2 py-0.5 rounded font-bold" style={{ background: '#0f1a2e', color: '#93c5fd', border: '1px solid #1d4ed8' }}>04/14</span>
         <div className="flex items-center gap-2">
           {stages.map((s, i) => (
             <React.Fragment key={s.label}>
-              {i > 0 && <div className="w-6 h-px" style={{ background: s.active ? '#3b82f6' : DARK.border }} />}
+              {i > 0 && (
+                <div
+                  className="w-6 h-px"
+                  style={{ background: s.active ? '#3b82f6' : DARK.border }}
+                />
+              )}
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full" style={{ background: s.active ? '#3b82f6' : DARK.textDim, boxShadow: s.active ? '0 0 8px #3b82f6' : 'none' }} />
-                <span className="text-xs font-mono font-semibold" style={{ color: s.active ? '#60a5fa' : DARK.textDim }}>{s.label}</span>
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    background: s.active ? '#3b82f6' : DARK.textDim,
+                    boxShadow: s.active ? '0 0 8px #3b82f6' : 'none',
+                  }}
+                />
+                <span
+                  className="text-xs font-mono font-semibold"
+                  style={{ color: s.active ? '#60a5fa' : DARK.textDim }}
+                >
+                  {s.label}
+                </span>
               </div>
             </React.Fragment>
           ))}
         </div>
-        <button className="text-xs font-bold px-3 py-1 rounded" style={{ background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb' }}>
-          UHG ORCHESTRATE
+        <button
+          className="text-xs font-bold px-3 py-1 rounded"
+          style={{ background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb' }}
+        >
+          WPCO ORCHESTRATE
         </button>
       </div>
     </div>
@@ -1423,58 +1897,132 @@ function OrchestrationBar() {
 }
 
 // ── Cypher Banner ─────────────────────────────────────────────────────────────
-function CypherBanner({ text, activeLens }: { text: string; activeLens: ExtendedLensType }) {
-  const lensMessages: Record<ExtendedLensType, string> = {
-    all: 'TRANSPORT BARRIER → BLOCKS HbA1c CARE GAP · Click node for Cypher query · Click edge for properties',
-    clinical: 'CLINICAL LENS · 17 nodes · BLOCKS chain: Transport/Childcare → HbA1c · Radial layout',
-    behavioral: 'BH LENS · 13 nodes · Edinburgh 11 → PostpartumRisk · Zarit 48 → CaregiverBurden · Radial layout',
-    social: 'SDOH LENS · 13 nodes · BLOCKS chain dominant axis · Transport/Childcare → HbA1c · Radial layout',
-    eligibility: 'ELIGIBILITY LENS · 11 nodes · Amber = ELIGIBLE_NOT_ENROLLED · WOULD_RESOLVE chain · Radial layout',
-    sofia: 'SOFIA LENS · 7 nodes · Pediatric thread · Well-Child gap · ENT flag · Proxy consent · Radial ring',
-    agents: 'AGENT COALITION · 3 agents · CHW · Care Manager · Zarit Dispatcher · Click edge for last-action properties',
+function CypherBanner({
+  text,
+  descriptor,
+  memberId,
+}: {
+  text: string;
+  descriptor: LensDescriptor;
+  memberId: string;
+}) {
+  // Member-agnostic banner: dynamic hero for 'all'; others from their descriptor; empty domain = clean clear-state.
+  const CLEAR: Record<string, string> = {
+    clinical: 'No active clinical items on record · no open care gaps',
+    social: 'No SDOH barriers on record · whole-person screen clear',
+    behavioral: 'No behavioral health flags on record',
+    eligibility: 'Coverage active · no outstanding obligations',
+    agents: 'No agent actions pending',
   };
+  const n = descriptor.count;
+  const unit = descriptor.cypherLens === 'social' ? 'barrier' : 'node';
+  const clear = CLEAR[descriptor.id] ?? 'No items in scope for this lens';
+  const role = descriptor.role ? `${descriptor.role} of member · ` : '';
+  const msg =
+    descriptor.id === 'all'
+      ? text
+      : n <= 1
+        ? `${descriptor.label.toUpperCase()} · 0 ${unit}s · ${clear}`
+        : `${descriptor.label.toUpperCase()} · ${n} ${unit}${n === 1 ? '' : 's'} · ${role}member-anchored projection`;
 
   return (
     <div className="absolute top-3 left-3 right-3 z-10 pointer-events-none">
-      <div className="flex items-start gap-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(5,5,15,0.92)', border: '1px solid #166534', backdropFilter: 'blur(4px)' }}>
-        <div className="w-2 h-2 rounded-full flex-shrink-0 mt-0.5" style={{ background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
-        <span className="text-xs font-mono" style={{ color: '#4ade80' }}>IDENTITY RESOLVED · MARIA_SD_001</span>
+      <div
+        className="flex items-start gap-3 px-3 py-2 rounded-lg"
+        style={{
+          background: 'rgba(5,5,15,0.92)',
+          border: '1px solid #166534',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <div
+          className="w-2 h-2 rounded-full flex-shrink-0 mt-0.5"
+          style={{ background: '#4ade80', boxShadow: '0 0 8px #4ade80' }}
+        />
+        <span className="text-xs font-mono" style={{ color: '#4ade80' }}>
+          IDENTITY RESOLVED · {memberId}
+        </span>
         <div className="w-px h-4 flex-shrink-0" style={{ background: '#166534' }} />
-        <span className="text-xs font-mono" style={{ color: '#ef4444' }}>{activeLens === 'all' ? text : lensMessages[activeLens]}</span>
+        <span className="text-xs font-mono" style={{ color: '#ef4444' }}>
+          {msg}
+        </span>
       </div>
     </div>
   );
 }
 
 // ── Bottom Thread Legend ──────────────────────────────────────────────────────
-function ThreadLegend({ onLensChange, activeLens }: { onLensChange: (l: ExtendedLensType) => void; activeLens: ExtendedLensType }) {
-  const threads = [
-    { id: 'clinical' as ExtendedLensType, label: 'Clinical', color: '#3b82f6' },
-    { id: 'sofia' as ExtendedLensType, label: 'Sofia · Dependent', color: '#ec4899' },
-    { id: 'behavioral' as ExtendedLensType, label: 'Elena · Caregiver', color: '#8b5cf6' },
-    { id: 'social' as ExtendedLensType, label: 'SDOH · Whole Person', color: '#f97316' },
-    { id: 'eligibility' as ExtendedLensType, label: 'Active Obligations', color: '#84cc16' },
-    { id: 'agents' as ExtendedLensType, label: 'Agent Coalition', color: '#7c3aed' },
-  ];
+function ThreadLegend({
+  onLensChange,
+  activeLens,
+  registry,
+}: {
+  onLensChange: (l: ExtendedLensType) => void;
+  activeLens: ExtendedLensType;
+  registry: LensDescriptor[];
+}) {
+  const domains = registry.filter((l) => l.kind === 'domain');
+  const rels = registry.filter((l) => l.kind === 'relationship');
+  const item = (t: LensDescriptor) => {
+    const empty = t.kind === 'domain' && t.count <= 1;
+    const dim = empty && activeLens !== t.id;
+    return (
+      <button
+        key={t.id}
+        onClick={() => {
+          if (!empty) onLensChange(t.id);
+        }}
+        disabled={empty}
+        className="flex items-center gap-1.5 whitespace-nowrap hover:opacity-80 transition-opacity"
+        style={{ cursor: empty ? 'default' : 'pointer' }}
+      >
+        <div
+          className="w-2 h-2 rounded-full"
+          style={{
+            background: t.color,
+            boxShadow: activeLens === t.id ? `0 0 8px ${t.color}` : 'none',
+            opacity: dim ? 0.4 : 1,
+          }}
+        />
+        <span
+          className="text-xs font-mono"
+          style={{ color: activeLens === t.id ? t.color : DARK.textMuted, opacity: dim ? 0.5 : 1 }}
+        >
+          {t.legendLabel}
+        </span>
+      </button>
+    );
+  };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 flex-shrink-0" style={{ background: '#06060f', borderTop: `1px solid ${DARK.border}` }}>
+    <div
+      className="flex items-center justify-between px-4 py-2 flex-shrink-0"
+      style={{ background: '#06060f', borderTop: `1px solid ${DARK.border}` }}
+    >
       <div className="flex items-center gap-1 mr-2 flex-shrink-0">
-        <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>THREADS:</span>
+        <span className="text-xs font-mono" style={{ color: DARK.textMuted }}>
+          THREADS:
+        </span>
       </div>
       <div className="flex items-center gap-4 overflow-x-auto flex-1">
-        {threads.map((t, i) => (
-          <button key={i} onClick={() => onLensChange(t.id)}
-            className="flex items-center gap-1.5 whitespace-nowrap hover:opacity-80 transition-opacity">
-            <div className="w-2 h-2 rounded-full" style={{ background: t.color, boxShadow: activeLens === t.id ? `0 0 8px ${t.color}` : 'none' }} />
-            <span className="text-xs font-mono" style={{ color: activeLens === t.id ? t.color : DARK.textMuted }}>{t.label}</span>
-          </button>
-        ))}
+        {domains.map(item)}
+        {rels.length > 0 && (
+          <div className="w-px h-4 flex-shrink-0" style={{ background: DARK.borderBright }} />
+        )}
+        {rels.map(item)}
       </div>
       <div className="flex-shrink-0 ml-4">
-        <div className="flex items-center gap-2 px-3 py-1 rounded" style={{ background: '#0d0d20', border: `1px solid #1a1a3a` }}>
-          <div className="w-2 h-2 rounded flex-shrink-0" style={{ background: '#3b82f6', boxShadow: '0 0 6px #3b82f6' }} />
-          <span className="text-xs font-mono font-bold" style={{ color: '#60a5fa' }}>PARALLEL ORCHESTRATIONS — 5 COALITIONS ACTIVE</span>
+        <div
+          className="flex items-center gap-2 px-3 py-1 rounded"
+          style={{ background: '#0d0d20', border: `1px solid #1a1a3a` }}
+        >
+          <div
+            className="w-2 h-2 rounded flex-shrink-0"
+            style={{ background: '#3b82f6', boxShadow: '0 0 6px #3b82f6' }}
+          />
+          <span className="text-xs font-mono font-bold" style={{ color: '#60a5fa' }}>
+            PARALLEL ORCHESTRATIONS — 5 COALITIONS ACTIVE
+          </span>
         </div>
       </div>
     </div>
@@ -1482,23 +2030,33 @@ function ThreadLegend({ onLensChange, activeLens }: { onLensChange: (l: Extended
 }
 
 // ── Signal Strip ──────────────────────────────────────────────────────────────
-function DarkSignalStrip({ signals, activeSignalId, onSignalClick }: { signals: ActiveSignal[]; activeSignalId: string | null; onSignalClick: (sig: ActiveSignal) => void }) {
-
-  const sigConfig: Record<string, {
-    icon: string;
-    iconColor: string;
-    accentColor: string;
-    bgIdle: string;
-    bgActive: string;
-    borderIdle: string;
-    borderActive: string;
-    textIdle: string;
-    textActive: string;
-    badgeStyle: 'chain' | 'act' | 'lapsed' | 'confirmed' | 'dual';
-    badgeBg: string;
-    badgeText: string;
-    shape: 'rounded' | 'pill' | 'square';
-  }> = {
+function DarkSignalStrip({
+  signals,
+  activeSignalId,
+  onSignalClick,
+}: {
+  signals: ActiveSignal[];
+  activeSignalId: string | null;
+  onSignalClick: (sig: ActiveSignal) => void;
+}) {
+  const sigConfig: Record<
+    string,
+    {
+      icon: string;
+      iconColor: string;
+      accentColor: string;
+      bgIdle: string;
+      bgActive: string;
+      borderIdle: string;
+      borderActive: string;
+      textIdle: string;
+      textActive: string;
+      badgeStyle: 'chain' | 'act' | 'lapsed' | 'confirmed' | 'dual';
+      badgeBg: string;
+      badgeText: string;
+      shape: 'rounded' | 'pill' | 'square';
+    }
+  > = {
     'sig-01': {
       icon: '⛓',
       iconColor: '#ef4444',
@@ -1576,7 +2134,7 @@ function DarkSignalStrip({ signals, activeSignalId, onSignalClick }: { signals: 
     },
   };
 
-  const actionBadge = (sig: ActiveSignal, cfg: typeof sigConfig[string], isActive: boolean) => {
+  const actionBadge = (sig: ActiveSignal, cfg: (typeof sigConfig)[string], isActive: boolean) => {
     const base = {
       display: 'inline-flex' as const,
       alignItems: 'center' as const,
@@ -1594,35 +2152,130 @@ function DarkSignalStrip({ signals, activeSignalId, onSignalClick }: { signals: 
     };
 
     if (cfg.badgeStyle === 'chain') return <span style={base}>⛓ VIEW CHAIN</span>;
-    if (cfg.badgeStyle === 'act') return <span style={{ ...base, background: isActive ? '#f59e0b55' : '#92400e', color: '#fcd34d', border: `1px solid ${isActive ? '#f59e0b' : '#b45309'}`, fontWeight: 800 }}>▶ ACT</span>;
-    if (cfg.badgeStyle === 'lapsed') return <span style={{ ...base, color: '#fdba74', textDecoration: 'none' }}>↺ RE-ENROLL</span>;
-    if (cfg.badgeStyle === 'confirmed') return <span style={{ ...base, color: '#86efac' }}>✓ VIEW</span>;
-    if (cfg.badgeStyle === 'dual') return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', marginLeft: '2px', flexShrink: 0 }}>
-        <span style={{ ...base, background: '#1e3a5f', color: '#93c5fd', border: '1px solid #2563eb', fontSize: '9px', padding: '1px 4px' }}>CONSENT ●</span>
-        <span style={{ ...base, background: '#0f172a', color: '#7dd3fc', border: '1px solid #1e40af', fontSize: '9px', padding: '1px 4px' }}>ZARIT ↗</span>
-      </span>
-    );
+    if (cfg.badgeStyle === 'act')
+      return (
+        <span
+          style={{
+            ...base,
+            background: isActive ? '#f59e0b55' : '#92400e',
+            color: '#fcd34d',
+            border: `1px solid ${isActive ? '#f59e0b' : '#b45309'}`,
+            fontWeight: 800,
+          }}
+        >
+          ▶ ACT
+        </span>
+      );
+    if (cfg.badgeStyle === 'lapsed')
+      return <span style={{ ...base, color: '#fdba74', textDecoration: 'none' }}>↺ RE-ENROLL</span>;
+    if (cfg.badgeStyle === 'confirmed')
+      return <span style={{ ...base, color: '#86efac' }}>✓ VIEW</span>;
+    if (cfg.badgeStyle === 'dual')
+      return (
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            marginLeft: '2px',
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              ...base,
+              background: '#1e3a5f',
+              color: '#93c5fd',
+              border: '1px solid #2563eb',
+              fontSize: '9px',
+              padding: '1px 4px',
+            }}
+          >
+            CONSENT ●
+          </span>
+          <span
+            style={{
+              ...base,
+              background: '#0f172a',
+              color: '#7dd3fc',
+              border: '1px solid #1e40af',
+              fontSize: '9px',
+              padding: '1px 4px',
+            }}
+          >
+            ZARIT ↗
+          </span>
+        </span>
+      );
     return <span style={base}>[{sig.action}]</span>;
   };
 
   const countdownBadge = (isActive: boolean) => (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '2px',
-      padding: '1px 5px', borderRadius: '3px', fontSize: '9px', fontWeight: 700,
-      background: isActive ? '#ef444433' : '#450a0a',
-      color: '#ef4444', border: '1px solid #7f1d1d', marginLeft: '2px', flexShrink: 0,
-    }}>⏱ 40d</span>
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '2px',
+        padding: '1px 5px',
+        borderRadius: '3px',
+        fontSize: '9px',
+        fontWeight: 700,
+        background: isActive ? '#ef444433' : '#450a0a',
+        color: '#ef4444',
+        border: '1px solid #7f1d1d',
+        marginLeft: '2px',
+        flexShrink: 0,
+      }}
+    >
+      ⏱ 40d
+    </span>
+  );
+
+  // Generic action pill for DERIVED (per-member) signals — shows the signal's own
+  // action verb (View Chain / Act / View) instead of the golden demo's fixed badges.
+  const genericBadge = (sig: ActiveSignal, cfg: (typeof sigConfig)[string], isActive: boolean) => (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: '1px 6px',
+        borderRadius: '999px',
+        fontSize: '9px',
+        fontWeight: 700,
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        background: isActive ? cfg.accentColor + '44' : cfg.badgeBg,
+        color: isActive ? cfg.textActive : cfg.badgeText,
+        flexShrink: 0,
+      }}
+    >
+      {sig.action}
+    </span>
   );
 
   return (
-    <div className="flex items-center gap-2 px-4 py-1.5 overflow-x-auto flex-shrink-0" style={{ background: '#050508', borderTop: `1px solid ${DARK.border}` }}>
-      <span className="text-xs font-mono font-semibold flex-shrink-0" style={{ color: DARK.textMuted }}>SIGNALS</span>
+    <div
+      className="flex items-center gap-2 px-4 py-1.5 overflow-x-auto flex-shrink-0"
+      style={{ background: '#050508', borderTop: `1px solid ${DARK.border}` }}
+    >
+      <span
+        className="text-xs font-mono font-semibold flex-shrink-0"
+        style={{ color: DARK.textMuted }}
+      >
+        SIGNALS
+      </span>
       {signals.map((sig) => {
-        const cfg = sigConfig[sig.id];
-        if (!cfg) return null;
+        const byUrgency: Record<string, (typeof sigConfig)[string]> = {
+          critical: sigConfig['sig-01'],
+          warning: sigConfig['sig-02'],
+          info: sigConfig['sig-05'],
+          success: sigConfig['sig-04'],
+        };
+        const cfg = sigConfig[sig.id] ?? byUrgency[sig.urgency] ?? sigConfig['sig-05'];
+        const derived = !sigConfig[sig.id];
         const isActive = activeSignalId === sig.id;
-        const borderRadius = cfg.shape === 'pill' ? '999px' : cfg.shape === 'square' ? '4px' : '6px';
+        const borderRadius =
+          cfg.shape === 'pill' ? '999px' : cfg.shape === 'square' ? '4px' : '6px';
 
         return (
           <button
@@ -1634,18 +2287,28 @@ function DarkSignalStrip({ signals, activeSignalId, onSignalClick }: { signals: 
               background: isActive ? cfg.bgActive : cfg.bgIdle,
               border: `1px solid ${isActive ? cfg.borderActive : cfg.borderIdle}`,
               color: isActive ? cfg.textActive : cfg.textIdle,
-              boxShadow: isActive ? `0 0 12px ${cfg.accentColor}55, inset 0 0 8px ${cfg.accentColor}11` : 'none',
+              boxShadow: isActive
+                ? `0 0 12px ${cfg.accentColor}55, inset 0 0 8px ${cfg.accentColor}11`
+                : 'none',
               borderRadius,
               outline: 'none',
               cursor: 'pointer',
             }}
           >
-            <span style={{ fontSize: '11px', lineHeight: 1, flexShrink: 0, color: isActive ? cfg.accentColor : cfg.iconColor }}>
+            <span
+              style={{
+                fontSize: '11px',
+                lineHeight: 1,
+                flexShrink: 0,
+                color: isActive ? cfg.accentColor : cfg.iconColor,
+              }}
+            >
               {cfg.icon}
             </span>
             <span style={{ fontWeight: isActive ? 700 : 500 }}>{sig.label}</span>
             {sig.id === 'sig-01' && countdownBadge(isActive)}
-            {sig.id !== 'sig-01' && actionBadge(sig, cfg, isActive)}
+            {sig.id !== 'sig-01' &&
+              (derived ? genericBadge(sig, cfg, isActive) : actionBadge(sig, cfg, isActive))}
             {sig.id === 'sig-01' && actionBadge(sig, cfg, isActive)}
           </button>
         );
@@ -1654,49 +2317,19 @@ function DarkSignalStrip({ signals, activeSignalId, onSignalClick }: { signals: 
   );
 }
 
-// ── Lens Bar ──────────────────────────────────────────────────────────────────
-function DarkLensBar({ activeLens, onLensChange, onShowCypher }: { activeLens: ExtendedLensType; onLensChange: (l: ExtendedLensType) => void; onShowCypher: () => void }) {
-  const lensNodeCounts: Record<ExtendedLensType, number> = {
-    all: 52,
-    clinical: LENS_NODE_SETS.clinical.length,
-    behavioral: LENS_NODE_SETS.behavioral.length,
-    social: LENS_NODE_SETS.social.length,
-    eligibility: LENS_NODE_SETS.eligibility.length,
-    sofia: SOFIA_LENS_NODES.length,
-    agents: AGENT_LENS_NODES.length,
-  };
-
-  const lensItems = [
-    ...lensDefinitions.map((ld) => ({ id: ld.id as ExtendedLensType, label: ld.label, color: ld.color })),
-    { id: 'sofia' as ExtendedLensType, label: 'Sofia', color: '#ec4899' },
-  ];
-
-  return (
-    <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto flex-shrink-0" style={{ background: '#080812', borderBottom: `1px solid ${DARK.border}` }}>
-      <span className="text-xs font-mono font-semibold flex-shrink-0" style={{ color: DARK.textMuted }}>LENS</span>
-      {lensItems.map((ld) => {
-        const isActive = activeLens === ld.id;
-        return (
-          <button key={ld.id} onClick={() => onLensChange(ld.id)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-mono font-semibold whitespace-nowrap flex-shrink-0 transition-all"
-            style={{ background: isActive ? ld.color + '25' : 'transparent', border: `1px solid ${isActive ? ld.color : DARK.border}`, color: isActive ? ld.color : DARK.textMuted, boxShadow: isActive ? `0 0 10px ${ld.color}44` : 'none' }}>
-            {ld.label}
-            <span className="opacity-60 text-xs ml-1">{lensNodeCounts[ld.id]}N</span>
-          </button>
-        );
-      })}
-      <div className="flex-1" />
-      <button onClick={onShowCypher}
-        className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-mono whitespace-nowrap flex-shrink-0"
-        style={{ background: '#0d0d20', border: `1px solid ${DARK.border}`, color: DARK.textMuted }}>
-        {'</>'}  VIEW CYPHER
-      </button>
-    </div>
-  );
-}
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function WholePersonCareSummaryPage() {
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
+  const persona = personaFor(activeCitizenId);
+  const isGolden = activeCitizenId === DEMO_MEMBER_ID; // golden demo keeps its authored signals/headline
+  const { nodes: activeNodes, edges: activeEdges } = useWholePersonGraph(activeCitizenId);
+
+  // Lens registry: universal domain lenses + relationship lenses derived from the member's edges. Pure — scales to any member.
+  const lensRegistry = React.useMemo(
+    () => buildLensRegistry(activeNodes, activeEdges),
+    [activeNodes, activeEdges]
+  );
+
   const [activeLens, setActiveLens] = useState<ExtendedLensType>('all');
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
@@ -1705,7 +2338,28 @@ export default function WholePersonCareSummaryPage() {
   const [showCypher, setShowCypher] = useState(false);
   const [flashNodeIds, setFlashNodeIds] = useState<string[]>([]);
   const [chainTraversalIds, setChainTraversalIds] = useState<string[]>([]);
-  const [selectedEdge, setSelectedEdge] = useState<{ edge: GraphEdge; x: number; y: number } | null>(null);
+  const [selectedEdge, setSelectedEdge] = useState<{
+    edge: GraphEdge;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false); // right panel is on-demand; graph is full-width at rest
+
+  // Reset interactive state when patient changes so stale lens/highlights don't carry over.
+  const prevCitizenRef = React.useRef(activeCitizenId);
+  useEffect(() => {
+    if (prevCitizenRef.current === activeCitizenId) return;
+    prevCitizenRef.current = activeCitizenId;
+    setActiveLens('all');
+    setSelectedNode(null);
+    setHoveredNode(null);
+    setActiveSignalId(null);
+    setHighlightNodeIds([]);
+    setChainTraversalIds([]);
+    setSelectedEdge(null);
+    setFlashNodeIds([]);
+    setGraphView('before');
+  }, [activeCitizenId]);
 
   // ── Gap Closure Store integration ─────────────────────────────────────────
   const { getGapClosure, isGapClosed, isGapClosing } = useGapClosureStore();
@@ -1713,51 +2367,50 @@ export default function WholePersonCareSummaryPage() {
   const gapClosed = isGapClosed('CG_MARIA_001');
   const gapClosing = isGapClosing('CG_MARIA_001');
 
-  // Before/After toggle state
   const [graphView, setGraphView] = useState<'before' | 'after'>('before');
-
-  // Auto-switch to 'after' when gap closes
   useEffect(() => {
-    if (gapClosed) {
-      setGraphView('after');
-    }
+    if (gapClosed) setGraphView('after');
   }, [gapClosed]);
 
-  // Compute dynamic node overrides based on closure state
   const getNodeOverrides = useCallback((): Record<string, Partial<GraphNode>> => {
     if (!gapClosed || graphView === 'before') return {};
-
     return {
-      'n04': {
-        color: '#84CC16', // lime green
-        pulse: false,
-        sublabel: 'CLOSED ✓',
-        validUntilDays: undefined,
-      },
+      n04: { color: '#84CC16', pulse: false, sublabel: 'CLOSED ✓', validUntilDays: undefined },
     };
   }, [gapClosed, graphView]);
 
-  // Compute dynamic edge overrides
   const getEdgeOverrides = useCallback((): Record<string, Partial<GraphEdge>> => {
     if (!gapClosed || graphView === 'before') return {};
-
     return {
-      'e19': { color: '#64748b', strokeWidth: 1, animated: false, label: 'WAS_BLOCKING' },
-      'e20': { color: '#64748b', strokeWidth: 1, animated: false, label: 'WAS_BLOCKING' },
+      e19: { color: '#64748b', strokeWidth: 1, animated: false, label: 'WAS_BLOCKING' },
+      e20: { color: '#64748b', strokeWidth: 1, animated: false, label: 'WAS_BLOCKING' },
     };
   }, [gapClosed, graphView]);
 
-  // Periodic flash for benefit gap nodes
+  // Flash benefit-gap nodes for the active patient (derived, not hardcoded to Maria IDs).
+  const flashTargetIds = React.useMemo(
+    () =>
+      activeNodes
+        .filter(
+          (n) =>
+            n.pulse &&
+            (n.type === 'BenefitStatus' || n.type === 'WICStatus' || n.type === 'LIHEAPStatus')
+        )
+        .map((n) => n.id),
+    [activeNodes]
+  );
   useEffect(() => {
+    if (flashTargetIds.length === 0) return;
     const interval = setInterval(() => {
-      setFlashNodeIds(['n41', 'n43', 'n46']);
+      setFlashNodeIds(flashTargetIds);
       setTimeout(() => setFlashNodeIds([]), 700);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [flashTargetIds]);
 
   const handleNodeClick = useCallback((node: GraphNode) => {
     setSelectedNode(node);
+    setDrawerOpen(true);
     setActiveSignalId(null);
     setHighlightNodeIds([]);
     setSelectedEdge(null);
@@ -1774,28 +2427,31 @@ export default function WholePersonCareSummaryPage() {
     setHighlightNodeIds([]);
   }, []);
 
-  const handleSignalClick = useCallback((sig: ActiveSignal) => {
-    if (activeSignalId === sig.id) {
-      setActiveSignalId(null);
-      setHighlightNodeIds([]);
-      setChainTraversalIds([]);
-    } else {
-      setActiveSignalId(sig.id);
-      setHighlightNodeIds(sig.relatedNodeIds);
-      setSelectedNode(null);
-      setSelectedEdge(null);
+  const handleSignalClick = useCallback(
+    (sig: ActiveSignal) => {
+      if (activeSignalId === sig.id) {
+        setActiveSignalId(null);
+        setHighlightNodeIds([]);
+        setChainTraversalIds([]);
+      } else {
+        setActiveSignalId(sig.id);
+        setHighlightNodeIds(sig.relatedNodeIds);
+        setSelectedNode(null);
+        setSelectedEdge(null);
 
-      if (sig.chainNodeIds && sig.chainNodeIds.length > 0) {
-        setChainTraversalIds(sig.chainNodeIds);
-        const totalDuration = sig.chainNodeIds.length * 600 + 200;
-        setTimeout(() => setChainTraversalIds([]), totalDuration);
-      }
+        if (sig.chainNodeIds && sig.chainNodeIds.length > 0) {
+          setChainTraversalIds(sig.chainNodeIds);
+          const totalDuration = sig.chainNodeIds.length * 600 + 200;
+          setTimeout(() => setChainTraversalIds([]), totalDuration);
+        }
 
-      if (sig.targetLens) {
-        setActiveLens(sig.targetLens as ExtendedLensType);
+        if (sig.targetLens) {
+          setActiveLens(sig.targetLens);
+        }
       }
-    }
-  }, [activeSignalId]);
+    },
+    [activeSignalId]
+  );
 
   const handleLensChange = useCallback((lens: ExtendedLensType) => {
     setActiveLens(lens);
@@ -1806,19 +2462,36 @@ export default function WholePersonCareSummaryPage() {
     setSelectedEdge(null);
   }, []);
 
+  const activeDescriptor = lensRegistry.find((l) => l.id === activeLens) ?? lensRegistry[0];
+  // Story is interpreted over the SAME node set the graph displays for this lens, so the
+  // headline finding always matches the graph's emphasis (never surfaces a gap the graph
+  // doesn't show). This is the single-source rule: story + graph read one lens-scoped set.
+  const lensNodeIdSet = new Set(activeDescriptor.nodeIds);
+  const storyNodes = activeNodes.filter((n) => lensNodeIdSet.has(n.id));
+  const storyNodeSet = new Set(storyNodes.map((n) => n.id));
+  const storyEdges = activeEdges.filter(
+    (e) => storyNodeSet.has(e.source) && storyNodeSet.has(e.target)
+  );
   const bannerText = hoveredNode
     ? `${hoveredNode.label.toUpperCase()} · Click node for Cypher query`
     : gapClosed
       ? 'HbA1c GAP CLOSED ✓ · HEDIS CDC MET · $8,100 ATTRIBUTED · Toggle Before/After'
-      : 'TRANSPORT BARRIER → BLOCKS HbA1c CARE GAP · Click node or edge for properties';
+      : isGolden
+        ? 'TRANSPORT BARRIER → BLOCKS HbA1c CARE GAP · Click node or edge for properties'
+        : memberBannerText(activeNodes, activeEdges, persona.name);
 
-  const cypherLens: LensType = (activeLens === 'sofia' ? 'social' : activeLens) as LensType;
+  const edgeSourceNode = selectedEdge
+    ? activeNodes.find((n) => n.id === selectedEdge.edge.source)
+    : undefined;
+  const edgeTargetNode = selectedEdge
+    ? activeNodes.find((n) => n.id === selectedEdge.edge.target)
+    : undefined;
 
-  const edgeSourceNode = selectedEdge ? graphNodes.find((n) => n.id === selectedEdge.edge.source) : undefined;
-  const edgeTargetNode = selectedEdge ? graphNodes.find((n) => n.id === selectedEdge.edge.target) : undefined;
-
-  // Build dynamic signals — replace sig-01 if gap is closed
-  const dynamicSignals = activeSignals.map((sig) => {
+  // Build dynamic signals — golden keeps authored signals; every other member's are
+  // derived from their own graph (open gap · blocker · benefit · BH). Then apply the
+  // gap-closed override (golden-only, keyed on sig-01).
+  const baseSignals = isGolden ? activeSignals : buildMemberSignals(activeNodes, activeEdges);
+  const dynamicSignals = baseSignals.map((sig) => {
     if (sig.id === 'sig-01' && gapClosed && graphView === 'after') {
       return {
         ...sig,
@@ -1833,23 +2506,42 @@ export default function WholePersonCareSummaryPage() {
 
   return (
     <>
-    <div
+      <div
         className="flex flex-col overflow-hidden"
         style={{ background: DARK.bg, height: '100%', maxHeight: '100%' }}
       >
-        <OrchestrationBar />
-        <PatientHeaderStrip onSignalClick={handleSignalClick} activeSignalId={activeSignalId} />
-        <DarkLensBar activeLens={activeLens} onLensChange={handleLensChange} onShowCypher={() => setShowCypher(true)} />
+        <PatientHeaderStrip
+          onSignalClick={handleSignalClick}
+          activeSignalId={activeSignalId}
+          persona={persona}
+        />
+        <DarkLensBar
+          activeLens={activeLens}
+          onLensChange={handleLensChange}
+          onShowCypher={() => setShowCypher(true)}
+          registry={lensRegistry}
+        />
+        <StoryFlowStrip nodes={storyNodes} edges={storyEdges} authored={isGolden} />
 
         {/* Before/After toggle — only shown when gap is closed */}
         {gapClosed && (
-          <div className="flex items-center gap-3 px-4 py-2 flex-shrink-0" style={{ background: '#050a05', borderBottom: '1px solid #166534' }}>
+          <div
+            className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
+            style={{ background: '#050a05', borderBottom: '1px solid #166534' }}
+          >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
-              <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>HbA1c GAP CLOSED ✓ · HEDIS CDC MET · $8,100 ATTRIBUTED</span>
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ background: '#4ade80', boxShadow: '0 0 8px #4ade80' }}
+              />
+              <span className="text-xs font-mono font-bold" style={{ color: '#4ade80' }}>
+                HbA1c GAP CLOSED ✓ · HEDIS CDC MET · $8,100 ATTRIBUTED
+              </span>
             </div>
             <div className="flex items-center gap-1 ml-auto">
-              <span className="text-xs font-mono" style={{ color: '#64748b' }}>Graph View:</span>
+              <span className="text-xs font-mono" style={{ color: '#64748b' }}>
+                Graph View:
+              </span>
               <button
                 onClick={() => setGraphView('before')}
                 className="px-3 py-1 text-xs font-mono font-bold transition-all"
@@ -1879,13 +2571,26 @@ export default function WholePersonCareSummaryPage() {
               <div className="flex items-center gap-3 ml-4">
                 {[
                   { label: 'A1C', value: `${hbA1cClosure.resultValue}%` },
-                  { label: 'HEDIS', value: hbA1cClosure.hedisCompliance === 'MET' ? 'MET ✓' : 'NOT MET' },
+                  {
+                    label: 'HEDIS',
+                    value: hbA1cClosure.hedisCompliance === 'MET' ? 'MET ✓' : 'NOT MET',
+                  },
                   { label: 'Gainshare', value: '$8,100' },
                   { label: 'Open Gaps', value: graphView === 'after' ? '8' : '9' },
                 ].map((item) => (
                   <div key={item.label} className="text-center">
-                    <p className="text-xs font-bold font-mono" style={{ color: '#4ade80' }}>{item.value}</p>
-                    <p style={{ fontSize: '9px', color: '#64748b', fontFamily: 'IBM Plex Mono, monospace' }}>{item.label}</p>
+                    <p className="text-xs font-bold font-mono" style={{ color: '#4ade80' }}>
+                      {item.value}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: '9px',
+                        color: '#64748b',
+                        fontFamily: 'IBM Plex Mono, monospace',
+                      }}
+                    >
+                      {item.label}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -1895,31 +2600,42 @@ export default function WholePersonCareSummaryPage() {
 
         {/* Closing indicator */}
         {gapClosing && !gapClosed && (
-          <div className="flex items-center gap-3 px-4 py-2 flex-shrink-0" style={{ background: '#0a0800', borderBottom: '1px solid #92400e' }}>
+          <div
+            className="flex items-center gap-3 px-4 py-2 flex-shrink-0"
+            style={{ background: '#0a0800', borderBottom: '1px solid #92400e' }}
+          >
             <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#f59e0b' }} />
-            <span className="text-xs font-mono font-bold" style={{ color: '#f59e0b' }}>HbA1c gap CLOSING... · Evidence pending</span>
+            <span className="text-xs font-mono font-bold" style={{ color: '#f59e0b' }}>
+              HbA1c gap CLOSING... · Evidence pending
+            </span>
           </div>
         )}
 
         <div className="flex min-h-0" style={{ flex: '1 1 0%', overflow: 'hidden' }}>
           {/* Graph canvas */}
           <div className="relative min-w-0" style={{ flex: '1 1 0%', overflow: 'hidden' }}>
-            <GapAwareCanvasSVGGraph
+            <SignalGraph
+              nodes={activeNodes}
+              edges={activeEdges}
               activeLens={activeLens}
-              highlightNodeIds={highlightNodeIds}
+              anchorId={activeCitizenId}
               onNodeClick={handleNodeClick}
-              onNodeHover={handleNodeHover}
-              flashNodeIds={flashNodeIds}
-              chainTraversalIds={chainTraversalIds}
               onEdgeClick={handleEdgeClick}
-              nodeOverrides={getNodeOverrides()}
-              edgeOverrides={getEdgeOverrides()}
-              gapClosed={gapClosed}
-              graphView={graphView}
-              hbA1cClosure={hbA1cClosure}
             />
-
-            <CypherBanner text={bannerText} activeLens={activeLens} />
+            <button
+              onClick={() => setDrawerOpen((v) => !v)}
+              className="absolute z-20 flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono"
+              style={{
+                top: 10,
+                right: 10,
+                background: 'rgba(13,13,32,0.92)',
+                border: `1px solid ${DARK.borderBright}`,
+                color: DARK.textMuted,
+                cursor: 'pointer',
+              }}
+            >
+              {drawerOpen ? 'Details \u203a' : '\u2039 Details'}
+            </button>
 
             {selectedEdge && (
               <EdgeTooltipPanel
@@ -1933,17 +2649,47 @@ export default function WholePersonCareSummaryPage() {
             )}
 
             {hoveredNode && !selectedNode && (
-              <div className="absolute bottom-16 left-4 pointer-events-none z-10 max-w-xs rounded-xl px-3 py-2 shadow-2xl"
-                style={{ background: 'rgba(10,10,20,0.95)', border: `1px solid ${hoveredNode.color}88`, backdropFilter: 'blur(8px)' }}>
+              <div
+                className="absolute bottom-16 left-4 pointer-events-none z-10 max-w-xs rounded-xl px-3 py-2 shadow-2xl"
+                style={{
+                  background: 'rgba(10,10,20,0.95)',
+                  border: `1px solid ${hoveredNode.color}88`,
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: hoveredNode.color, boxShadow: `0 0 8px ${hoveredNode.color}` }} />
-                  <span className="text-xs font-mono font-semibold" style={{ color: hoveredNode.color }}>{NODE_TYPE_LABELS[hoveredNode.type]}</span>
+                  <div
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{
+                      background: hoveredNode.color,
+                      boxShadow: `0 0 8px ${hoveredNode.color}`,
+                    }}
+                  />
+                  <span
+                    className="text-xs font-mono font-semibold"
+                    style={{ color: hoveredNode.color }}
+                  >
+                    {NODE_TYPE_LABELS[hoveredNode.type]}
+                  </span>
                 </div>
-                <p className="text-sm font-bold" style={{ color: DARK.text }}>{hoveredNode.label}</p>
-                {hoveredNode.sublabel && <p className="text-xs mt-0.5" style={{ color: DARK.textMuted }}>{hoveredNode.sublabel}</p>}
-                {hoveredNode.locked && <p className="text-xs mt-1" style={{ color: '#f59e0b' }}>🔒 42 CFR Part 2 gated</p>}
+                <p className="text-sm font-bold" style={{ color: DARK.text }}>
+                  {hoveredNode.label}
+                </p>
+                {hoveredNode.sublabel && (
+                  <p className="text-xs mt-0.5" style={{ color: DARK.textMuted }}>
+                    {hoveredNode.sublabel}
+                  </p>
+                )}
+                {hoveredNode.locked && (
+                  <p className="text-xs mt-1" style={{ color: '#f59e0b' }}>
+                    🔒 42 CFR Part 2 gated
+                  </p>
+                )}
                 {hoveredNode.validUntilDays !== undefined && (
-                  <p className="text-xs mt-1 font-mono font-bold" style={{ color: hoveredNode.validUntilDays <= 14 ? '#ef4444' : '#f59e0b' }}>
+                  <p
+                    className="text-xs mt-1 font-mono font-bold"
+                    style={{ color: hoveredNode.validUntilDays <= 14 ? '#ef4444' : '#f59e0b' }}
+                  >
                     ⏱ {hoveredNode.validUntilDays}d until expiry
                   </p>
                 )}
@@ -1952,27 +2698,51 @@ export default function WholePersonCareSummaryPage() {
                     ◈ {Math.round(hoveredNode.propertyRichness * 100)}% property richness
                   </p>
                 )}
-                <p className="text-xs mt-1.5 font-mono" style={{ color: DARK.textDim }}>Click to view details · Click edge for properties</p>
+                <p className="text-xs mt-1.5 font-mono" style={{ color: DARK.textDim }}>
+                  Click to view details · Click edge for properties
+                </p>
               </div>
             )}
           </div>
 
           {/* Right threaded panel */}
-          <div className="flex-shrink-0 flex flex-col overflow-hidden" style={{ width: '256px', borderLeft: `1px solid ${DARK.border}` }}>
+          <div
+            className="flex-shrink-0 flex flex-col overflow-hidden"
+            style={{
+              width: drawerOpen ? 300 : 0,
+              borderLeft: drawerOpen ? `1px solid ${DARK.border}` : 'none',
+              transition: 'width 220ms ease',
+            }}
+          >
             <RightPanel
               node={selectedNode}
-              edges={graphEdges}
-              allNodes={graphNodes}
+              edges={activeEdges}
+              allNodes={activeNodes}
+              registry={lensRegistry}
               onClose={() => setSelectedNode(null)}
+              memberName={persona.name}
+              memberId={persona.id}
             />
           </div>
         </div>
 
-        <DarkSignalStrip signals={dynamicSignals} activeSignalId={activeSignalId} onSignalClick={handleSignalClick} />
-        <ThreadLegend onLensChange={handleLensChange} activeLens={activeLens} />
+        <DarkSignalStrip
+          signals={dynamicSignals}
+          activeSignalId={activeSignalId}
+          onSignalClick={handleSignalClick}
+        />
       </div>
 
-      {showCypher && <CypherModal lens={cypherLens} onClose={() => setShowCypher(false)} />}
+      {showCypher && activeDescriptor && (
+        <CypherModal
+          descriptor={activeDescriptor}
+          onClose={() => setShowCypher(false)}
+          memberId={persona.id}
+          memberName={persona.name}
+          nodes={activeNodes}
+          edges={activeEdges}
+        />
+      )}
     </>
   );
 }
@@ -1984,6 +2754,8 @@ interface GapAwareCanvasSVGGraphProps extends D3GraphProps {
   gapClosed: boolean;
   graphView: 'before' | 'after';
   hbA1cClosure: ReturnType<ReturnType<typeof useGapClosureStore>['getGapClosure']>;
+  baseNodes: GraphNode[];
+  baseEdges: GraphEdge[];
 }
 
 function GapAwareCanvasSVGGraph({
@@ -1999,12 +2771,14 @@ function GapAwareCanvasSVGGraph({
   gapClosed,
   graphView,
   hbA1cClosure,
+  baseNodes,
+  baseEdges,
 }: GapAwareCanvasSVGGraphProps) {
   // Build modified nodes/edges for the after-closure view
   const effectiveNodes = React.useMemo(() => {
-    if (!gapClosed || graphView === 'before') return graphNodes;
+    if (!gapClosed || graphView === 'before') return baseNodes;
 
-    const modified = graphNodes.map((n) => {
+    const modified = baseNodes.map((n) => {
       const override = nodeOverrides[n.id];
       if (!override) return n;
       return { ...n, ...override };
@@ -2054,12 +2828,12 @@ function GapAwareCanvasSVGGraph({
     };
 
     return [...modified, evidenceNode, hedisNode];
-  }, [gapClosed, graphView, nodeOverrides, hbA1cClosure]);
+  }, [gapClosed, graphView, nodeOverrides, hbA1cClosure, baseNodes]);
 
   const effectiveEdges = React.useMemo(() => {
-    if (!gapClosed || graphView === 'before') return graphEdges;
+    if (!gapClosed || graphView === 'before') return baseEdges;
 
-    const modified = graphEdges.map((e) => {
+    const modified = baseEdges.map((e) => {
       const override = edgeOverrides[e.id];
       if (!override) return e;
       return { ...e, ...override };
@@ -2089,7 +2863,11 @@ function GapAwareCanvasSVGGraph({
         strokeWidth: 2,
         animated: true,
         lens: ['all', 'clinical'],
-        edgeProps: { since: hbA1cClosure?.dateOfService ?? '', status: 'ATTRIBUTED', confidence: 1.0 },
+        edgeProps: {
+          since: hbA1cClosure?.dateOfService ?? '',
+          status: 'ATTRIBUTED',
+          confidence: 1.0,
+        },
       },
       {
         id: 'e_performed_by',
@@ -2105,7 +2883,7 @@ function GapAwareCanvasSVGGraph({
     ];
 
     return [...modified, ...closureEdges];
-  }, [gapClosed, graphView, edgeOverrides, hbA1cClosure]);
+  }, [gapClosed, graphView, edgeOverrides, hbA1cClosure, baseEdges]);
 
   return (
     <CanvasSVGGraph

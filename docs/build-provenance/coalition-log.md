@@ -42,6 +42,67 @@ persona definitions in `docs/framework/personas.md` and the trigger rules in
 
 **Verification:** `tsc --noEmit` 0 · `check:sizes` PASS ratchet intact · no src/ files
 changed · `AGENTS.md` line count 138 (≤ 150 cap).
+## 2026-09-03 — Patient navigation fix: Agentic Orchestrate category (A1–A8 findings)
+
+**Context:** Two screens in the Agentic Orchestrate tab category — `whole-person-care-summary` (the
+knowledge-graph explorer) and `journey-aware-context` (the engagement channel timeline) — always
+rendered Maria Redhawk regardless of which patient was selected in the roster dropdown. Ten of the
+twelve uhg-orchestrate screens correctly read `demoStore.activeCitizenId`; only these two were
+hardwired. The fix converges both screens onto the same shared seam already proven by the ten
+working screens, preserving Maria's authored graph at 100% byte-identical fidelity and running fully
+mock-mode (no Neo4j/Postgres dependency).
+
+**Root cause (A1 + A2, both CRITICAL).** `whole-person-care-summary/page.tsx`: `CanvasSVGGraph`'s
+D3 simulation read module-level `graphNodes`/`graphEdges` constants directly (lines 913–943), so the
+canvas never switched even though `RightPanel` received the active patient's nodes. `GapAwareCanvasSVGGraph`
+also seeded `effectiveNodes`/`effectiveEdges` from `graphNodes`/`graphEdges`. `LENS_NODE_SETS` was a
+module-level constant keyed from `graphNodes.map()`, so lens filtering was always over Maria's 55 nodes.
+`journey-aware-context/page.tsx`: all JSX still referenced 20+ deleted constants (`MEMBER_NAME`,
+`CHANNELS`, `INTERACTIONS`, `ACTIVE_WINDOW_START_HOUR`, etc.) and seven fields were missing from the
+`JourneyContext` interface (`sessionFrequency`, `sessionFrequencySubtext`, `lastTouchpointDays`,
+`lastTouchpointChannel`, `lastTouchpointSubtext`, `activeWindowStat`, `activeWindowStatSubtext`),
+causing a compile failure.
+
+**Additional findings closed (A3–A8).** A3: dead SDOH fallback in `builder.ts` duplicated logic
+already in `resources.ts:citizenNeeds()` — removed. A5: `GapAwareCanvasSVGGraph` is Maria-only by
+design (HbA1c closure animation) — documented. A6: `DarkLensBar` node-count badges always showed
+Maria's counts — now receives `lensCounts` computed from `activeNodes`. A7: hardcoded
+`"Maria's Active Window"` string in the channel band legend — replaced with `ctx.activeWindowLabel`.
+A8: unknown-patient fallback used `MARIA_CHANNELS` — replaced with a generic default.
+
+**Architect + SWE.** New module `src/lib/wpcGraph/` (4 files — `types.ts`, `builder.ts`,
+`useWholePersonGraph.ts`, `journeyContext.ts`) implements the shared patient-context seam. Two
+additional files extracted to satisfy the size ratchet: `src/lib/wpcGraph/lensUtils.ts`
+(`MARIA_LENS_NODE_SETS`, `buildLensNodeSets`) and `src/lib/wpcGraph/mariaJourneyData.ts` (Maria's
+15-interaction authored constants). `page.tsx` edits are net-neutral (2123 → 2123 lines, exactly at
+baseline). `journeyContext.ts` stays at 373 / 400 lines.
+
+**Seam wiring.** Both pages now open with:
+```
+const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
+```
+matching the canonical pattern from `consumer-360`, `whole-person-care`, and the other ten screens.
+`journey-aware-context` drops the old `useAppContext → activePatientId` path entirely.
+
+**Maria fidelity gate.** `buildWholePersonGraph('MARIA_SD_001')` passes `deepEqual(result.nodes,
+GOLDEN_NODES)` and `deepEqual(result.edges, GOLDEN_EDGES)` — the authored 55-node/77-edge graph is
+returned verbatim without modification.
+
+**Adversarial + red-team.** Architect agent issued HOLD verdict (A1+A2 critical) before coding.
+SWE fixes applied with independent architect review of each finding. 105/105 tests pass
+(55 builder + 50 journeyContext).
+
+**Verification:** `npm run check:types` → 0 errors · `npm run check:sizes` → PASS, ratchet intact
+(75 frozen legacy files unchanged) · `npx vitest run tests/wpcGraph` → 105/105 · lint warnings
+limited to pre-existing prettier issues in unrelated files (confirmed by stash/pop baseline comparison).
+
+**Files changed:**
+- NEW: `src/lib/wpcGraph/types.ts`, `builder.ts`, `useWholePersonGraph.ts`, `journeyContext.ts`,
+  `lensUtils.ts`, `mariaJourneyData.ts`
+- NEW: `tests/wpcGraph/builder.test.ts`, `journeyContext.test.ts`
+- MODIFIED (net-neutral): `src/app/whole-person-care-summary/page.tsx` (2123 → 2123)
+- MODIFIED (net-reduce): `src/app/journey-aware-context/page.tsx` (594 → ~480)
+
 
 ## 2026-09-02 — WPC Da Vinci Risk Adjustment: the CODING GAP as a first-class projected dimension
 
@@ -1139,3 +1200,80 @@ computed-then-dropped, (P2) catalog accuracy. Feature-scale items (durable serve
 enforced-vs-disclosed + null-when-withheld, provenance) and `projectedAggregator.test.ts` (+ context
 surfaces careTeam/part2Restricted with provenance). Node gates green on device (sizes, testlink E13,
 wiring E14, page-boundaries, skill-mirror, provenance E11); tsc/lint/vitest to run natively on Windows.
+
+## 2026-09-03 — Two-state FHIR seed: Connect360 UUIDv4/PUT projection (traditional pipeline preserved)
+
+**Owner intent:** preserve the preexisting seed pipeline (human-readable slug ids, POST) exactly, and
+add a SEPARATE Connect360 implementation (UUIDv4 resource ids, PUT-as-create) as new files, because
+Connect360's FHIR server accepts only UUIDv4 ids and upserts by id. Checked-in Connect360 bundles +
+a drift guard so the two states cannot silently diverge. This REVERSES an earlier in-place overwrite
+of the committed bundles (which had replaced them with random-uuid/PUT); traditional is restored
+byte-exact from git HEAD (90b74f4) and the mutated generator reverted.
+
+**Coalition (framework employed on explicit owner request — full coalition + adversarial + tree-of-thought):**
+- *Architect* — ratified the two-state design; ran tree-of-thought on the id-scheme fork.
+- *FHIR interoperability SME* — PUT-as-create semantics, reference-form policy, UUIDv4 format contract.
+- *EMPI/KG integrity SME* — traced ingestBundle → adapters → evidence join and EMPI resolution.
+- *Software-architect / build-integration* — generator revert, gate wiring, size-gate exemption, collision scan.
+- *Adversarial red-team (R1–R5)* — a NO-GO design pass BEFORE code and a SHIP pass AFTER code.
+
+**Tree-of-thought — id-scheme fork (enumerate → score → prune):**
+- Option A: promote each entry's existing random fullUrl uuid to be resource.id (mint only for the
+  synthetic coding-gap fullUrl). Option B: deterministic UUIDv4-SHAPED id = sha1(namespace|slug) with
+  version nibble 4 + variant 10xx. **Chose B** — its ids derive from the stable business key (the slug),
+  so a PUT-upsert stays idempotent across regeneration and the drift guard is deterministic; Option A's
+  ids ride on volatile random bytes and would create duplicate resources on the upsert server. Confirmed
+  by an anti-Option-A regression test (re-minting every fullUrl leaves the connect360 ids unchanged).
+
+**Reference-form fork (orchestrator adjudication):** the EMPI/KG SME leaned "normalize all refs to
+relative Type/uuid"; I chose **PRESERVE-FORM, remap-id** (relational refs stay urn:uuid; logical
+evidence refs stay Type/uuid) — it is trivially ingest-equivalent to traditional (identical reference
+shapes) AND the most server-portable (relational refs resolve via the universal fullUrl mechanism;
+logical evidence refs resolve via the PUT request.url and are the form our own KG SUPPORTED_BY join
+requires). Only string values under a `reference` key that resolve in-bundle are rewritten; canonicals,
+identifier.systems, extension urls, and unresolved refs pass through untouched.
+
+**Adversarial BEFORE coding — conditional NO-GO, all findings folded into the build:**
+- BLOCKER #1: the Connect360 server contract (UUIDv4-only, PUT) was asserted, never verified. Mitigation:
+  preserve-form (universal resolution) + a structural conformance test + a 2-backend ingest-parity proof;
+  an independent HL7 validator round-trip was attempted but the FHIR package servers are outside the CI
+  network allowlist (403), so a live Connect360-sandbox round-trip is recorded as the deployment-time gate.
+- #2 parity test must assert the coding-gap join by id-INDEPENDENT clinical content + an aggregate >0 guard.
+- #3 scope reference rewriting to resolvable `reference` values; add a diff-scope assertion; ref-count parity.
+- #4–#7 (documented v4-shaping consequence; serializer pinned to JSON.stringify(_,2) no trailing newline;
+  drift guard = order-insensitive deep-equal; evidence node is Condition|Encounter, not only Condition).
+
+**Adversarial AFTER coding — SHIP.** uuidForKey correct over 200k keys (version 4 / variant 8–b / lowercase,
+always); byte-stable output matches committed bundles exactly; drift guard PROVED to fail on an injected
+hand-edit; referential integrity exact (0 dangling, 0 type drift, slug↔uuid bijection); non-vacuity confirmed
+(alex-kirby has 0 evidence refs → the aggregate totalSupportedBy>0 guard is load-bearing). One MINOR: a slug
+survives inside an `ra-sourceDocument` provenance `valueString` (not a resource id/reference; target not
+in-bundle in either state) — left verbatim per preserve-form, scope documented + proven byte-identical by
+the diff-scope test.
+
+**Verified finding that CORRECTED a coalition assumption (R5):** the EMPI/KG SME claimed both id schemes
+resolve to the SAME golden memberId (demographics-anchored). Ingest-parity testing DISPROVED this: for these
+seed patients `canonicalPersonKey` falls back to `rec:<sourceRecordId>` (the Patient resource.id), so the
+golden memberId is DERIVED FROM the resource.id and legitimately DIFFERS between schemes. Harmless — the two
+states never share a graph and Connect360 runs its own EMPI — and the clinical graph is identical (proven by
+domain-census, quarantine-census, and coding-gap-signature parity across neo4j-fake + pg-mem). The parity
+test asserts the correct (clinical, id-independent) invariant and documents the id-specificity.
+
+**Changes (all additive except the two reverts):**
+1. REVERT `fhir/seed/patients/*.bundle.json` (5) + `manifest.json` → git HEAD bytes (traditional slug/POST).
+2. REVERT `tools/seed/gen-patient-bundles.mjs` → HEAD (traditional slug/POST; keeps exported CODING_GAPS + main-guard).
+3. NEW `tools/seed/lib/connect360Transform.mjs` — pure deterministic transform (uuidForKey + transformBundle).
+4. NEW `tools/seed/gen-connect360.mjs` — main-guarded driver; writes ONLY into fhir/seed/patients/connect360/.
+5. NEW `fhir/seed/patients/connect360/` — 5 bundles + manifest.json + README.md (checked-in projection).
+6. NEW `tests/seed/connect360.test.ts` (conformance + drift guard + anti-Option-A + evidence mapping) and
+   `tests/seed/connect360IngestParity.test.ts` (2-backend clinical parity).
+7. `package.json` — `seed:connect360`, `verify:connect360`. Stale UUIDv4 comments in the two wpc tests
+   corrected to scheme-agnostic wording.
+
+**Drift guard placement:** a vitest test (auto-run by g_unit in push/pre-merge/ci), matching the existing
+codingGapDrift data-integrity pattern — no edit to the canonical gate. Connect360 bundles are size-gate-exempt
+(check-file-sizes.sh scans only src/tests/e2e and only .ts/.tsx/.js/.jsx; fhir/ + .json are never scanned).
+
+**Gate:** `bash scripts/ci-gates.sh push` → ALL GATES PASS (format, types, sizes+ratchet, lint, testlink E13,
+page-boundaries, skill-mirror, unit 2593 tests, wired-path E14, provenance E11, coalition). E16 `next build`
+unaffected (no src/app changes). Nothing committed by the agent — staged for the owner's own push.

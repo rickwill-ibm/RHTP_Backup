@@ -12,11 +12,11 @@ export type PhysicianPersona = 'rick' | 'jon';
 
 export interface PhysicianProfile {
   id: PhysicianPersona;
-  fhirId: string;          // FHIR Practitioner resource id
+  fhirId: string; // FHIR Practitioner resource id
   displayName: string;
   role: 'PCP' | 'Specialist';
   specialty: string;
-  color: string;           // accent color for UI distinction
+  color: string; // accent color for UI distinction
 }
 
 export const PHYSICIAN_PROFILES: Record<PhysicianPersona, PhysicianProfile> = {
@@ -111,18 +111,18 @@ interface AppContextValue {
   selectedPatientId: string | null;
   setSelectedPatientId: (id: string | null) => void;
 
-  // Active patient — persists across all patient-facing screens
-  // Default: DEMO_MEMBER_ID (configured demo patient, see config/demoDefaults)
-  activePatientId: string;
-  setActivePatientId: (id: string) => void;
-
   // Care Team domain: cohorts, assignments, audit (single source of truth)
   cohorts: Cohort[];
   addCohort: (cohort: Cohort) => void;
   activeCohortId: string | null;
   setActiveCohortId: (id: string | null) => void;
   assignments: Record<string, Assignment>;
-  reassignPatient: (patientId: string, toMemberId: string, reason: string, fromMemberId?: string) => void;
+  reassignPatient: (
+    patientId: string,
+    toMemberId: string,
+    reason: string,
+    fromMemberId?: string
+  ) => void;
   auditLog: AuditEntry[];
 
   // Referral tasks created from screening / resource navigation (closed loop to caseload)
@@ -167,17 +167,17 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const [entryContext, setEntryContext] = useState<EntryContext>('browse');
   const [selectedContractId, setSelectedContractId] = useState<string | null>('contract-001');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>('patient-001');
-  // The configured demo member is the default active patient for all patient-facing demo screens
-  const [activePatientId, setActivePatientId] = useState<string>(DEMO_MEMBER_ID);
-
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
   const [manualOverrides, setManualOverrides] = useState<Record<string, Assignment>>({});
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [referralTasks, setReferralTasks] = useState<ReferralTask[]>([]);
-  const addReferralTasks = useCallback((tasks: ReferralTask[]) => setReferralTasks(prev => [...tasks, ...prev]), []);
+  const addReferralTasks = useCallback(
+    (tasks: ReferralTask[]) => setReferralTasks((prev) => [...tasks, ...prev]),
+    []
+  );
   const [opsTasks, setOpsTasks] = useState<OpsTask[]>([]);
-  const addOpsTask = useCallback((task: OpsTask) => setOpsTasks(prev => [task, ...prev]), []);
+  const addOpsTask = useCallback((task: OpsTask) => setOpsTasks((prev) => [task, ...prev]), []);
 
   const addCohort = useCallback((cohort: Cohort) => {
     setCohorts((prev) => [...prev.filter((c) => c.measureKey !== cohort.measureKey), cohort]);
@@ -207,13 +207,20 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
           },
         };
       });
-      setAuditLog((prev) => [makeAuditEntry(patientId, toMemberId, reason, user.name, fromMemberId), ...prev]);
+      setAuditLog((prev) => [
+        makeAuditEntry(patientId, toMemberId, reason, user.name, fromMemberId),
+        ...prev,
+      ]);
     },
     [assignments, user.name]
   );
 
   const getActions = useCallback(
-    (screen: ScreenScope, tab?: PatientTab, patientState?: ActionContext['patientState']): ActionDefinition[] => {
+    (
+      screen: ScreenScope,
+      tab?: PatientTab,
+      patientState?: ActionContext['patientState']
+    ): ActionDefinition[] => {
       return getAvailableActions({
         role: user.role,
         entryContext,
@@ -242,8 +249,6 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         setSelectedContractId,
         selectedPatientId,
         setSelectedPatientId,
-        activePatientId,
-        setActivePatientId,
         cohorts,
         addCohort,
         activeCohortId,

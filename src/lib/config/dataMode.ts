@@ -40,6 +40,7 @@ export const DATA_MODE_SEAMS = Object.freeze([
   'consent', //     wired: provider-access opt-out consent store (lib/consent/providerAccessOptOut.ts)
   'graph', //       registered: whole-person graph (SEAM anchor in lib/careTeam/graph/resources.ts)
   'sde', //         registered: SD community-resource data (SEAM anchor in lib/sdResourceData.ts)
+  'episodes', //    registered: episodic analytics — authored bundle (mock/seeded) vs external ETG/grouper + measure feed (production, fail-closed); switched in lib/episodes/index.ts
   'signalDisposition', // wired: Signal Disposition Engine — authored disposition (mock) vs the real engine over the seeded batch (production); switched in lib/sde/index.ts
   'wpcRecord', //   wired: whole-person holistic context — authored engine (mock) vs projected-graph aggregator (production, fail-closed); switched in lib/wpc/holisticContext.ts
   'carePlan', //    registered: care plan source

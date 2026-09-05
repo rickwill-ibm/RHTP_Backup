@@ -3,7 +3,7 @@
 // are unchanged — this is a location move only, keeping the page under cap and
 // referral demo data in the referrals domain lib.
 
-import { mockReferrals } from '@/app/referral-tracking/components/ActiveReferralsTable';
+import { mockReferrals } from '@/lib/referrals/mockReferrals';
 import type { ReferralRecord } from '@/app/referral-tracking/page';
 import type { ReferralJourneyRecord, JourneyStatus } from '@/app/referral-journey-tracker/page';
 

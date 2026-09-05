@@ -35,12 +35,12 @@ describe('referralTaskToRecord', () => {
 });
 
 describe('liveManualReferrals', () => {
-  it('keeps only manual tasks and dedupes by id', () => {
+  it('keeps manual tasks, dedupes by id AND by intent, keeps distinct intents', () => {
     const tasks: ReferralTask[] = [
-      baseTask,
-      { ...baseTask, id: 'rt-1' }, // duplicate id
-      { ...baseTask, id: 'rt-2', source: 'screening' }, // non-manual
-      { ...baseTask, id: 'rt-3' },
+      baseTask, // rt-1
+      { ...baseTask, id: 'rt-1b' }, // same intent (patient+action+category) -> collapsed
+      { ...baseTask, id: 'rt-2', source: 'screening' }, // non-manual -> excluded
+      { ...baseTask, id: 'rt-3', patientId: 'MEM-200' }, // distinct intent -> kept
     ];
     const out = liveManualReferrals(tasks);
     expect(out.map((r) => r.id)).toEqual(['rt-1', 'rt-3']);

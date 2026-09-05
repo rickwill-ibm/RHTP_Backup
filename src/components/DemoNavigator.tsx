@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import { useDemoStore } from '@/uhg/store/demoStore';
-import { DEFAULT_CITIZEN } from '@/uhg/data/persona';
+import { beatApplies, resolveBeat, beatAttribution } from '@/uhg/data/demoNarrative';
+import {
+  getStoryChapters,
+  getStorySteps,
+  type ChapterCard,
+  type StoryStep,
+} from '@/uhg/data/storyNarrative';
 
 // ─── Demo Sequence Definition ─────────────────────────────────────────────────
 
@@ -507,406 +513,20 @@ const ALL_STEPS: (DemoStep & { personaId: string; personaColor: string })[] = DE
   (p) => p.steps.map((s) => ({ ...s, personaId: p.id, personaColor: p.color }))
 );
 
-// ─── Story Mode (15 steps · ~20–25 min curated narrative) ────────────────────
-// Each step references an existing route. stepNum is local to story mode (1–15).
-
-interface StoryStep extends DemoStep {
-  chapter: string;
-  chapterColor: string;
-  // Storytelling overlay extensions
-  narratorLines: string[]; // Reveal one at a time — the presenter's spoken voice
-  pausePrompt?: string; // Optional "pause and reflect" cue shown after all lines
-  chapterIntro?: string; // First step of a chapter gets a chapter-transition card
-  metric?: { label: string; value: string }; // Hero stat shown on the right side
-  persona?: string; // Who is "speaking" from — shown as attribution
-  mood?: 'neutral' | 'tense' | 'hopeful' | 'decisive'; // Visual accent
-}
-
-// ── Chapter intro cards — shown as a full-screen interstitial before the first step ──
-interface ChapterCard {
-  chapter: string;
-  color: string;
-  headline: string;
-  subline: string;
-  reflectionPrompt: string;
-}
-
-const CHAPTER_CARDS: ChapterCard[] = [
-  {
-    chapter: 'Ch.1 · The Problem',
-    color: '#0043ce',
-    headline: 'The system sees programs. Not people.',
-    subline:
-      'A State Medicaid Executive opens her dashboard. She has 47 counties, 128,000 members, and three separate systems that have never spoken to each other.',
-    reflectionPrompt:
-      'Before we go further — what does it cost when clinical, behavioral, and social data live in separate silos?',
-  },
-  {
-    chapter: 'Ch.2 · Meet Maria',
-    color: '#007d79',
-    headline: 'Her name is Maria Redhawk.',
-    subline:
-      "She lives in Pine Ridge — 90 miles from the nearest specialist. Her A1C is 9.2. She hasn't eaten a full meal in three days. Her doctor doesn't know either of those last two facts.",
-    reflectionPrompt:
-      'Maria is not an edge case. She is 38% of your attributed population. The question is whether your platform can see the whole person.',
-  },
-  {
-    chapter: 'Ch.3 · In the Community',
-    color: '#198038',
-    headline: "Care doesn't live in the clinic.",
-    subline:
-      "Marcus, the Community Health Worker, pulls up to Maria's home. On his phone: her visit checklist, her clinical context, and the PRAPARE screening questions — all pre-loaded.",
-    reflectionPrompt:
-      'The last mile of care is a home visit. Does your platform equip the person standing at the door?',
-  },
-  {
-    chapter: 'Ch.4 · The Closed Loop',
-    color: '#8a3ffc',
-    headline: 'What gets measured, gets closed.',
-    subline:
-      "Three gaps: A1C, behavioral health engagement, food security. All three closed. All three evidenced by FHIR provenance chains. All three traceable to the governor's dashboard.",
-    reflectionPrompt:
-      "Closing a gap is not the same as proving it was closed. Here's what proof looks like.",
-  },
-  {
-    chapter: 'Ch.5 · The Mandate',
-    color: '#0369a1',
-    headline: 'The auditor is also in the room.',
-    subline:
-      "Every CMS-0057-F compliance endpoint, live and callable. Because the state doesn't just need outcomes — it needs evidence the system earned them.",
-    reflectionPrompt:
-      "This is not a slideshow. Every number you've seen tonight is drawn from a live FHIR-compliant platform. The API is open right now.",
-  },
-];
-
-const STORY_STEPS: StoryStep[] = [
-  // ── Chapter 1: The Problem ──────────────────────────────────────────────────
-  {
-    stepNum: 1,
-    chapter: 'Ch.1 · The Problem',
-    chapterColor: '#0043ce',
-    route: '/contract-program-selection',
-    label: 'WPCO Overview',
-    storyBeat:
-      'Every program, every dollar — one view. This is what a State Medicaid Executive sees on day one.',
-    chapterIntro: 'Ch.1 · The Problem',
-    persona: 'State Medicaid Executive',
-    mood: 'neutral',
-    metric: { label: 'Attributed Lives', value: '128,400' },
-    narratorLines: [
-      "This is the view she's been waiting three years to see.",
-      'One screen. 47 counties. Three program types — Clinical, Behavioral Health, and Social. $4.2 million in shared savings, tracked in real time.',
-      'Before this platform, she had three reports, two spreadsheets, and a lot of faith.',
-      'Point to the program-type filter. Switch from "All" to "Clinical." Then to "BH." Then to "Social." Each switch redraws the KPI strip. Every domain has its own accountability — and all three live in the same hierarchy.',
-    ],
-    pausePrompt:
-      'Pause here. Ask the room: where else can you see clinical, behavioral, and social accountability side by side — at the state level — without opening a second system?',
-  },
-  {
-    stepNum: 2,
-    chapter: 'Ch.1 · The Problem',
-    chapterColor: '#0043ce',
-    route: '/region-view',
-    label: 'Region View',
-    storyBeat:
-      "Those red counties in the southwest corner — Pine Ridge, Rosebud. No specialists within 90 miles. That's where Maria lives.",
-    persona: 'State Medicaid Executive',
-    mood: 'tense',
-    metric: { label: 'BH Access Rate — NE South Dakota', value: '49%' },
-    narratorLines: [
-      'Now we drill down. Four regions, benchmarked side by side on three domains.',
-      "See that northeast quadrant — 49% BH access rate. That's not a rounding error. That's a population that can't get to a behavioral health provider.",
-      'And see Pine Ridge, Rosebud, in the southwest. Red on clinical gap closure. Red on social screening. No specialists within 90 miles.',
-      "This is where Maria lives. She's not a data point yet — but she's about to become one.",
-    ],
-    pausePrompt:
-      "Let the map sit for a moment. Those red counties represent real people who are already enrolled in this program — and the platform already knows they're underserved.",
-  },
-  // ── Chapter 2: Meet Maria ───────────────────────────────────────────────────
-  {
-    stepNum: 3,
-    chapter: 'Ch.2 · Meet Maria',
-    chapterColor: '#007d79',
-    route: '/panel-cohort-view',
-    label: 'Panel & Cohort',
-    storyBeat:
-      "Dr. Chen's panel — Maria flagged: BH risk, food gap, overdue A1C. The platform surfaces all three, not just the clinical one.",
-    chapterIntro: 'Ch.2 · Meet Maria',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Primary Care Physician — Dr. Chen',
-    mood: 'neutral',
-    metric: { label: 'Tier 1 High-Risk Patients', value: '94' },
-    narratorLines: [
-      "Dr. Chen opens his panel. 847 patients. He doesn't have time to review all of them — so the platform ranked them.",
-      'Maria Redhawk. Row three. Three flags: BH risk. Food insecurity. A1C overdue.',
-      "Old system: he'd see one of those. Maybe two, if he was lucky. The platform shows all three — because it knows that if you only treat the A1C and miss the food insecurity, the A1C comes back in six weeks.",
-      "Notice the three attribution columns. Clinical PCP: Dr. Chen. Assigned CHW: Marcus. BH Provider: none yet. That's the gap.",
-    ],
-    pausePrompt:
-      "Which of your patients have a CHW assigned but no BH provider? That's a coordination gap that costs you — and them — more than you think.",
-  },
-  {
-    stepNum: 4,
-    chapter: 'Ch.2 · Meet Maria',
-    chapterColor: '#007d79',
-    route: '/patient-detail',
-    label: 'Patient Detail — Whole Person Care Plan',
-    storyBeat:
-      "Every dimension of Maria's life — clinical, behavioral, social, caregiver burden — unified in one plan.",
-    activePatient: 'MARIA_SD_001',
-    persona: 'Primary Care Physician — Dr. Chen',
-    mood: 'hopeful',
-    metric: { label: 'Gain-Share Eligible Per Gap Closed', value: '$18,400' },
-    narratorLines: [
-      "Open Maria's record. Navigate to the Whole Person Care Plan tab.",
-      'Clinical goals: A1C below 8, hypertension controlled. BH goals: 12-week engagement initiated, follow-up after ED visit. Social goals: SNAP enrolled, housing application submitted.',
-      'Three domains. One plan. One responsible care team. Every goal has a status, a due date, and a name attached to it.',
-      "And at the bottom — the gain-share value per open gap. $18,400 is the total financial incentive available to Dr. Chen's panel if these gaps close this measurement year.",
-      'This is the financial alignment that makes whole-person care sustainable, not just aspirational.',
-    ],
-    pausePrompt:
-      'Pause here. What does it mean when a physician can see — in the same view — the clinical need, the social barrier, and the financial incentive to close both?',
-  },
-  {
-    stepNum: 5,
-    chapter: 'Ch.2 · Meet Maria',
-    chapterColor: '#007d79',
-    route: '/md-smart-launch',
-    label: 'MD Smart Launch',
-    storyBeat: 'The same data, inside Cerner — SMART on FHIR. Dr. Chen never leaves the EHR.',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Primary Care Physician — Dr. Chen',
-    mood: 'neutral',
-    metric: { label: 'EHR Integration', value: 'SMART on FHIR' },
-    narratorLines: [
-      'Now here\'s the question every physician asks: "Does this mean I have to log into another system?"',
-      'No. Open the MD Smart Launch screen. This is what Dr. Chen sees inside Cerner — same patient, same data, embedded.',
-      "SMART on FHIR. The platform doesn't ask him to change his workflow. It meets him where he already is.",
-      'The care plan, the risk flags, the CHW assignment, the social needs — all surfaced inside the EHR he already uses, every day.',
-    ],
-  },
-  {
-    stepNum: 6,
-    chapter: 'Ch.2 · Meet Maria',
-    chapterColor: '#007d79',
-    route: '/prior-auth',
-    label: 'Prior Authorization — CRD · DTR · PAS',
-    storyBeat:
-      'Lumbar MRI ordered. AI prepares the PA. Dr. Chen reviews and approves — the AI never submits on its own.',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Primary Care Physician — Dr. Chen',
-    mood: 'decisive',
-    metric: { label: 'PA Decision Time (AI-Assisted)', value: '< 90 sec' },
-    narratorLines: [
-      "Dr. Chen orders a lumbar MRI for Maria's back pain. Historically, that order would sit in a PA queue for 3 to 5 days.",
-      "Watch what happens. CRD fires instantly — coverage requirement detected. DTR launches — the AI interrogates Maria's record and pre-fills the clinical justification. PAS submits the prior authorization request.",
-      "Dr. Chen sees a review screen. He reads the AI's work. He approves — or he overrides.",
-      'Important: the AI never submits on its own. Human in the loop. Always.',
-      'Total elapsed time: under 90 seconds. From order to submitted PA.',
-    ],
-    pausePrompt:
-      'This is CMS-0057-F compliance in action. The AI works for the physician — not instead of the physician.',
-  },
-  // ── Chapter 3: In the Community ────────────────────────────────────────────
-  {
-    stepNum: 7,
-    chapter: 'Ch.3 · In the Community',
-    chapterColor: '#198038',
-    route: '/chw-workflow',
-    label: 'CHW Workflow',
-    storyBeat:
-      "Marcus arrives at Maria's home — visit scheduled, clinical questions loaded. This is the last mile of care.",
-    chapterIntro: 'Ch.3 · In the Community',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Community Health Worker — Marcus',
-    mood: 'hopeful',
-    metric: { label: 'Home Visits This Month', value: '18 Scheduled' },
-    narratorLines: [
-      "Dr. Chen's care plan has a home visit task. Marcus gets it on his phone.",
-      "He drives out to Pine Ridge. He pulls up Maria's record before he knocks on the door.",
-      'Six checklist items load automatically: home safety assessment, medication review, vitals, SDOH screening, care plan goals, referral confirmation.',
-      "The platform has told him exactly what to do — and exactly why he's there.",
-      'Click "Start Visit." Marcus is now documenting in real time, at the kitchen table, on a phone.',
-    ],
-    pausePrompt:
-      "The last mile of care is a CHW with a phone, standing at someone's door. Does your platform equip that moment — or stop at the clinic's edge?",
-  },
-  {
-    stepNum: 8,
-    chapter: 'Ch.3 · In the Community',
-    chapterColor: '#198038',
-    route: '/social-needs-screening',
-    label: 'Social Needs Screening',
-    storyBeat:
-      'PRAPARE completed at the kitchen table — housing instability and food insecurity confirmed and coded in FHIR.',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Community Health Worker — Marcus',
-    mood: 'tense',
-    metric: { label: 'Domains Flagged for Maria', value: '2 — Food + Housing' },
-    narratorLines: [
-      'Marcus opens the PRAPARE screening. Ten social domains. Maria answers quietly — yes to food insecurity, yes to unstable housing, no to transportation barriers.',
-      'As she answers, the platform codes each response in FHIR. This is not a paper form that gets scanned later.',
-      "When Marcus completes the screening, two social Tasks are auto-created and linked to her care plan. Her care manager gets a notification. The CHW's supervisor sees the screening completion rate tick up by one.",
-      'And somewhere, the Quality & Compliance analyst sees the PRAPARE measure numerator increase by one.',
-      'One conversation at a kitchen table. Four downstream systems updated. Zero manual data entry.',
-    ],
-    pausePrompt:
-      'How much does a missed SDOH screening cost? Ask the room. Then show them the funnel on the next screen.',
-  },
-  {
-    stepNum: 9,
-    chapter: 'Ch.3 · In the Community',
-    chapterColor: '#198038',
-    route: '/crisis-pathway',
-    label: 'Crisis Pathway',
-    storyBeat:
-      "Maria calls 988. The BH specialist sees her SDOH context instantly — CSU dispatched, not the ED. That's $4,200 saved, one visit.",
-    persona: 'BH & Crisis Specialist',
-    mood: 'tense',
-    metric: { label: 'ED Diversions — Last 30 Days', value: '8' },
-    narratorLines: [
-      "Two weeks after Marcus's visit, Maria calls 988.",
-      "The BH crisis specialist opens her record. Instantly — not after a search — she sees Maria's SDOH context: housing instability, food insecurity, prior self-harm history, no BH provider assigned.",
-      'That context changes the dispatch decision. Not the ED — the Community Stabilization Unit. CSU can address the mental health crisis without a $4,200 emergency room bill.',
-      "The specialist clicks Dispatch. A BH follow-up task is created automatically and lands in Angela's — the care manager's — worklist.",
-      "Maria didn't fall through the cracks. The platform caught her — and closed the loop back to the care team.",
-    ],
-    pausePrompt:
-      'Eight ED diversions in 30 days. Each one $4,000 to $6,000 saved. The SDOH context panel is not a nice-to-have. It is the dispatch decision.',
-  },
-  // ── Chapter 4: The Closed Loop ─────────────────────────────────────────────
-  {
-    stepNum: 10,
-    chapter: 'Ch.4 · The Closed Loop',
-    chapterColor: '#8a3ffc',
-    route: '/care-gap-closure-verification',
-    label: 'Care Gap Closure & Verification',
-    storyBeat:
-      'All 3 gaps closed — A1C, BH engagement, food security. Each one evidenced by a FHIR provenance chain.',
-    chapterIntro: 'Ch.4 · The Closed Loop',
-    activePatient: 'MARIA_SD_001',
-    persona: 'Quality / Compliance Analyst',
-    mood: 'decisive',
-    metric: { label: 'FHIR Validation Pass Rate', value: '98.7%' },
-    narratorLines: [
-      "Three months pass. Let's see what happened.",
-      "Maria's A1C: closed. Evidence: lab result, FHIR Observation resource, provenance chain intact.",
-      'BH engagement: closed. Evidence: 12-week enrollment, session attendance records, FUH measure numerator hit.',
-      'Food security: closed. Evidence: SNAP enrollment, $234/month benefit, PRAPARE re-screen showing need resolved.',
-      'Each closure is not a checkbox. It is a FHIR resource with a provenance trail — auditable, queryable, reportable.',
-      '98.7% of resources passed automated validation before submission. The 1.3% were flagged and corrected by the analyst.',
-    ],
-    pausePrompt:
-      'Closing a gap is not the same as proving it was closed. The auditor in the room needs evidence, not assertions. Here it is.',
-  },
-  {
-    stepNum: 11,
-    chapter: 'Ch.4 · The Closed Loop',
-    chapterColor: '#8a3ffc',
-    route: '/outcomes-linkage',
-    label: 'Outcomes Linkage',
-    storyBeat:
-      'Housing stability → ED visits down 18%. Food security → A1C from 9.2 to 7.1. This is the ROI the governor needs.',
-    persona: 'Quality / Compliance Analyst',
-    mood: 'hopeful',
-    metric: { label: "Maria's A1C", value: '9.2 → 7.1' },
-    narratorLines: [
-      'Now we make the argument the governor cares about.',
-      'Housing stability reduces ED visits by 34% across the population. Food security improves A1C by an average of 1.8 points.',
-      "Maria's A1C went from 9.2 to 7.1. That's not anecdote — that's a data point in a cohort of 2,400.",
-      "Every dollar invested in social program intervention generates $2.80 in avoided medical cost. That's the ROI number.",
-      'This screen is the closing argument for continued social program funding. Show it slowly.',
-    ],
-    pausePrompt:
-      'Pause here. This is the screen that changes the conversation from "social programs are nice to have" to "social programs are cost-effective medicine."',
-  },
-  {
-    stepNum: 12,
-    chapter: 'Ch.4 · The Closed Loop',
-    chapterColor: '#8a3ffc',
-    route: '/social-needs-dashboard',
-    label: 'Social Needs Dashboard',
-    storyBeat:
-      "2,400 members screened. 38% have overlapping housing and food gaps. Maria wasn't an edge case — she was the pattern.",
-    persona: 'State Medicaid Executive',
-    mood: 'decisive',
-    metric: { label: 'Members with Dual Social Needs', value: '38% of Panel' },
-    narratorLines: [
-      'The executive asks: "Is Maria an outlier, or is she the pattern?"',
-      'Open the Social Needs Dashboard. 2,400 members screened. 38% have overlapping housing and food gaps — the same combination Maria had.',
-      'The dual-need cohort has 2.3 times higher medical cost than single-need patients — and 3.1 times higher ROI from social intervention.',
-      'Maria was not an edge case. She was the pattern. The platform knew it before the physician did.',
-    ],
-  },
-  {
-    stepNum: 13,
-    chapter: 'Ch.4 · The Closed Loop',
-    chapterColor: '#8a3ffc',
-    route: '/executive-outcomes-dashboard',
-    label: 'Executive Dashboard',
-    storyBeat:
-      "From Maria's kitchen table to the governor's dashboard — one closed loop. 6,842 gaps closed, $1.1M reinvested.",
-    persona: 'State Medicaid Executive',
-    mood: 'hopeful',
-    metric: { label: 'Care Gaps Closed YTD', value: '6,842' },
-    narratorLines: [
-      "Back to the top. From Maria's kitchen table to the executive's screen.",
-      '6,842 care gaps closed. $1.1 million in shared savings reinvested into the program. Quality score up 8.3 points.',
-      'Each of those numbers has a Maria behind it. A CHW visit. A PRAPARE screening. A BH crisis diverted. A care plan completed.',
-      "The platform doesn't just track the numbers — it traces the story behind them.",
-    ],
-    pausePrompt:
-      "This is the closed loop. One patient. One kitchen table. One care team. One line item on the executive dashboard. That's what whole-person care looks like when it's measured end-to-end.",
-  },
-  // ── Chapter 5: The Mandate ─────────────────────────────────────────────────
-  {
-    stepNum: 14,
-    chapter: 'Ch.5 · The Mandate',
-    chapterColor: '#0369a1',
-    route: '/stars-hedis-mips',
-    label: 'Quality Gaps & Attribution',
-    storyBeat:
-      'HEDIS, BH, Social — all green because the gaps were actually closed. Attribution tells you which team did it.',
-    chapterIntro: 'Ch.5 · The Mandate',
-    persona: 'Quality / Compliance Analyst',
-    mood: 'decisive',
-    metric: { label: 'HEDIS Hybrid Rate (YoY)', value: '74.2% → 82.5%' },
-    narratorLines: [
-      "Here's the accountability screen.",
-      'Five tabs: STARS, HEDIS, MIPS, BH Quality, Social Programs. One framework.',
-      'Walk through each tab. STARS — the payer bonus journey. HEDIS — clinical measure documentation. BH Quality — FUH 67% vs 85% target. Social Programs — PRAPARE 61% vs 80% target.',
-      'The gaps are visible. The gaps have owners. The gaps have deadlines.',
-      'And attribution — which care team member closed which gap — is tracked at the individual level. This is how you reward the right behavior.',
-    ],
-  },
-  {
-    stepNum: 15,
-    chapter: 'Ch.5 · The Mandate',
-    chapterColor: '#0369a1',
-    route: '/api-explorer',
-    label: 'CMS-0057-F API Explorer',
-    storyBeat:
-      "Every compliance endpoint, live — 5 provisions, 14 endpoints. For the auditor in the room: here's the technical proof.",
-    persona: 'Technical Audience / CMS Auditor',
-    mood: 'decisive',
-    metric: { label: 'CMS-0057-F Endpoints', value: '14 Live' },
-    narratorLines: [
-      "One more screen. For the person in the back of the room who isn't impressed by dashboards.",
-      'This is the API explorer. Every CMS-0057-F compliance endpoint — live, callable, documented.',
-      'Member access. Provider directory. Prior authorization status. Payer-to-payer exchange. Formulary.',
-      'Five provisions. Fourteen endpoints. All of them returning real FHIR resources right now.',
-      "We built the platform. We also built the compliance proof. Because passing an audit isn't a nice-to-have — it's the contract.",
-    ],
-    pausePrompt:
-      "This is not a slideshow. Every number you've seen tonight is drawn from a live FHIR-compliant platform. Open an endpoint. The data is there.",
-  },
-];
+// ─── Story Mode definitions ──────────────────────────────────────────────────
+// `StoryStep`, `ChapterCard`, and the per-patient chapter/step content now live in
+// `@/uhg/data/storyNarrative` (getStoryChapters / getStorySteps). They are composed
+// per selected patient there; this component consumes those functions.
 
 // ─── Storytelling Overlay ─────────────────────────────────────────────────────
 
 function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
   const router = useRouter();
-  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
+  // Follow the operator's selection: the story narrative is COMPOSED for whoever the patient
+  // switcher currently owns. The overlay reads the active patient and never resets it.
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
+  const storySteps: StoryStep[] = getStorySteps(activeCitizenId);
+  const chapters: ChapterCard[] = getStoryChapters(activeCitizenId);
 
   // Phase: 'chapter-card' shows the interstitial; 'step' shows the step itself
   type Phase = 'chapter-card' | 'step';
@@ -916,12 +536,21 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
   const [showAllLines, setShowAllLines] = useState(false);
   const [pauseVisible, setPauseVisible] = useState(false);
 
-  const step = STORY_STEPS[stepIndex];
-  const totalSteps = STORY_STEPS.length;
-  const chapterCard = CHAPTER_CARDS.find((c) => c.chapter === step.chapter)!;
+  const totalSteps = storySteps.length;
+  // Clamp the index into range. If the operator switches patients mid-story and the newly
+  // composed narrative is shorter, the persisted stepIndex could otherwise point past the end.
+  const stepIdx = Math.min(Math.max(stepIndex, 0), Math.max(totalSteps - 1, 0));
+  const step = storySteps[stepIdx];
+  const chapterCard = chapters.find((c) => c.chapter === step.chapter)!;
 
   // Determine if this step is the first step of its chapter
-  const isChapterStart = stepIndex === 0 || STORY_STEPS[stepIndex - 1].chapter !== step.chapter;
+  const isChapterStart = stepIdx === 0 || storySteps[stepIdx - 1].chapter !== step.chapter;
+
+  // If the composed narrative shrank under the current index (patient switched mid-story),
+  // snap the persisted index back into range so state and the clamped render agree.
+  useEffect(() => {
+    if (stepIndex > totalSteps - 1) setStepIndex(totalSteps - 1);
+  }, [stepIndex, totalSteps]);
 
   // Lock body scroll while overlay is mounted
   useEffect(() => {
@@ -932,13 +561,12 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  // Navigate to the current step's route whenever we enter 'step' phase
+  // Navigate to the current step's route whenever we enter 'step' phase.
+  // Follow-selection: the patient switcher owns the active member, and the narrative already
+  // follows `activeCitizenId`, so the overlay no longer resets the member on each step — it
+  // only drives the route. This is what lets Story Mode present whoever the operator selected.
   useEffect(() => {
     if (phase === 'step') {
-      // Reset the active member on EVERY step — a step without an explicit
-      // activePatient must not inherit the previously-selected member (wrong-patient
-      // carry-over). Falls back to the canonical demo protagonist deterministically.
-      setActiveCitizen(step.activePatient ?? DEFAULT_CITIZEN);
       router.push(step.route);
     }
   }, [phase, stepIndex]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -997,9 +625,9 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
         const prevIdx = stepIndex - 1;
         setStepIndex(prevIdx);
         setPhase('step');
-        setLineIndex(STORY_STEPS[prevIdx].narratorLines.length - 1);
+        setLineIndex(storySteps[prevIdx].narratorLines.length - 1);
         setShowAllLines(true);
-        setPauseVisible(!!STORY_STEPS[prevIdx].pausePrompt);
+        setPauseVisible(!!storySteps[prevIdx].pausePrompt);
       }
       return;
     }
@@ -1024,9 +652,9 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
     } else {
       const prevIdx = stepIndex - 1;
       setStepIndex(prevIdx);
-      setLineIndex(STORY_STEPS[prevIdx].narratorLines.length - 1);
+      setLineIndex(storySteps[prevIdx].narratorLines.length - 1);
       setShowAllLines(true);
-      setPauseVisible(!!STORY_STEPS[prevIdx].pausePrompt);
+      setPauseVisible(!!storySteps[prevIdx].pausePrompt);
     }
   }
 
@@ -1036,7 +664,7 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
       return;
     }
     const nextIdx = stepIndex + 1;
-    const nextStep = STORY_STEPS[nextIdx];
+    const nextStep = storySteps[nextIdx];
     const isNextChapterStart = nextStep.chapter !== step.chapter;
     setStepIndex(nextIdx);
     setLineIndex(0);
@@ -1050,16 +678,16 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
   }
 
   function jumpToStep(idx: number) {
-    const target = STORY_STEPS[idx];
+    const target = storySteps[idx];
     setStepIndex(idx);
     setLineIndex(0);
     setShowAllLines(false);
     setPauseVisible(false);
-    const isStart = idx === 0 || STORY_STEPS[idx - 1].chapter !== target.chapter;
+    const isStart = idx === 0 || storySteps[idx - 1].chapter !== target.chapter;
     setPhase(isStart ? 'chapter-card' : 'step');
   }
 
-  const progressPct = Math.round((stepIndex / (totalSteps - 1)) * 100);
+  const progressPct = totalSteps > 1 ? Math.round((stepIdx / (totalSteps - 1)) * 100) : 100;
   const moodAccent: Record<string, string> = {
     tense: '#da1e28',
     hopeful: '#198038',
@@ -1131,18 +759,18 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
 
         {/* Step minimap */}
         <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-1 px-8">
-          {STORY_STEPS.map((s, i) => (
+          {storySteps.map((s, i) => (
             <button
               key={s.stepNum}
               onClick={() => jumpToStep(i)}
               title={s.label}
               className="transition-all"
               style={{
-                width: i === stepIndex ? 20 : 8,
+                width: i === stepIdx ? 20 : 8,
                 height: 4,
                 backgroundColor:
                   s.chapter === step.chapter
-                    ? i <= stepIndex
+                    ? i <= stepIdx
                       ? chapterCard.color
                       : `${chapterCard.color}40`
                     : 'rgba(255,255,255,0.12)',
@@ -1192,7 +820,7 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
 
         <div className="flex items-center gap-3">
           <span className="text-white/30 text-xs font-mono hidden sm:inline">
-            Step {stepIndex + 1} / {totalSteps}
+            Step {stepIdx + 1} / {totalSteps}
           </span>
           <span className="text-white/20 text-xs hidden md:inline">Space / → · Esc</span>
           <button
@@ -1291,13 +919,13 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded transition-all hover:opacity-90"
               style={{ backgroundColor: accent }}
             >
-              {stepIndex === totalSteps - 1 && showAllLines && (!step.pausePrompt || pauseVisible)
+              {stepIdx === totalSteps - 1 && showAllLines && (!step.pausePrompt || pauseVisible)
                 ? 'Finish Story'
                 : !showAllLines
                   ? `Narrator line ${lineIndex + 2} of ${step.narratorLines.length}`
                   : step.pausePrompt && !pauseVisible
                     ? 'Pause & Reflect'
-                    : `Next — ${stepIndex < totalSteps - 1 ? STORY_STEPS[stepIndex + 1].label : 'End'}`}
+                    : `Next — ${stepIdx < totalSteps - 1 ? storySteps[stepIdx + 1].label : 'End'}`}
               <Icon name="ChevronRightIcon" size={15} />
             </button>
           </div>
@@ -1346,11 +974,11 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
               Story Track
             </p>
             <div className="space-y-0.5">
-              {STORY_STEPS.map((s, i) => {
-                const isCurr = i === stepIndex;
-                const isPast = i < stepIndex;
+              {storySteps.map((s, i) => {
+                const isCurr = i === stepIdx;
+                const isPast = i < stepIdx;
                 const chColor = s.chapterColor;
-                const isChapterBreak = i === 0 || STORY_STEPS[i - 1].chapter !== s.chapter;
+                const isChapterBreak = i === 0 || storySteps[i - 1].chapter !== s.chapter;
                 return (
                   <React.Fragment key={s.stepNum}>
                     {isChapterBreak && (
@@ -1408,10 +1036,35 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
 
 type DemoMode = 'full' | 'story';
 
+// When the current pathname is a real step route whose beat was filtered OUT for the selected
+// patient (so it's absent from the composed list), resolve navigation to the nearest surviving
+// steps by ORIGINAL order. `prevIndex`/`nextIndex` are indices into the FILTERED list: the last
+// survivor before the dropped step, and the first survivor after it (either can be -1 at an edge).
+// Returns null when the pathname isn't a known step route at all. Only conditional (household)
+// beats are ever filtered out, and those routes are unique in the base list, so a first-match
+// lookup is unambiguous here.
+function nearestApplicableNeighbours(
+  baseSteps: { route: string }[],
+  pathname: string,
+  citizenId: string,
+  filteredCount: number
+): { prevIndex: number; nextIndex: number } | null {
+  const rawIdx = baseSteps.findIndex((s) => s.route === pathname);
+  if (rawIdx === -1) return null;
+  const survivorsBefore = baseSteps
+    .slice(0, rawIdx)
+    .filter((s) => beatApplies(s.route, citizenId)).length;
+  const prevIndex = survivorsBefore - 1;
+  const nextIndex = survivorsBefore < filteredCount ? survivorsBefore : -1;
+  return { prevIndex, nextIndex };
+}
+
 export default function DemoNavigator() {
   const pathname = usePathname();
   const router = useRouter();
-  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
+  // Follow the operator's selection: the Navigator READS the active patient (to compose the
+  // flow + captions) and no longer force-resets it on navigation. The patient switcher owns it.
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const [expanded, setExpanded] = useState(false);
   const [demoMode, setDemoMode] = useState<DemoMode>('full');
   const [storyTrackOpen, setStoryTrackOpen] = useState(false);
@@ -1421,9 +1074,23 @@ export default function DemoNavigator() {
   // (e.g. /crisis-pathway appears at steps 22 AND 23) resolve to the right step.
   const lastStepNumRef = useRef<number | null>(null);
 
-  // Active step list depends on mode
-  const activeSteps = demoMode === 'story' ? STORY_STEPS : ALL_STEPS;
+  // Story Mode steps are COMPOSED per selected patient (Maria's authored content for
+  // Maria/unknown, per-patient content otherwise). Sourced from the narrative module so the
+  // panel, counts and prev/next all follow whoever the patient switcher currently owns.
+  const storySteps = getStorySteps(activeCitizenId);
+
+  // Active step list depends on mode — and is COMPOSED for the selected patient: beats that
+  // don't apply (e.g. a Family/dependent beat for a member with no dependent) drop out entirely.
+  const activeSteps = (demoMode === 'story' ? storySteps : ALL_STEPS).filter((s) =>
+    beatApplies(s.route, activeCitizenId)
+  );
   const totalSteps = activeSteps.length;
+
+  // Mode-tab counts are the COMPOSED counts for the selected patient (a beat that doesn't apply
+  // drops out of the tally). Computed for both modes so each tab label stays honest regardless of
+  // which mode is currently active.
+  const fullStepCount = ALL_STEPS.filter((s) => beatApplies(s.route, activeCitizenId)).length;
+  const storyStepCount = storySteps.filter((s) => beatApplies(s.route, activeCitizenId)).length;
 
   // Disambiguated lookup: if multiple steps share a pathname, prefer the one
   // whose stepNum matches the last navigation; otherwise fall back to first match.
@@ -1438,7 +1105,24 @@ export default function DemoNavigator() {
     return preferred ?? matches[0];
   })();
 
+  // If the pathname maps to a beat filtered OUT for this patient, currentStepIndex is -1 even
+  // though the route is a real step. Resolve to the nearest surviving neighbours (by original
+  // order) so the label + prev/next never dead-end on a dropped beat.
+  const baseSteps = demoMode === 'story' ? storySteps : ALL_STEPS;
+  const neighbours =
+    currentStepIndex === -1
+      ? nearestApplicableNeighbours(baseSteps, pathname, activeCitizenId, totalSteps)
+      : null;
+  // Index (into the filtered list) of the step whose label represents "where we are" — prefer
+  // the preceding survivor, falling back to the following one at the very start of the flow.
+  const nearestIndex = neighbours
+    ? neighbours.prevIndex >= 0
+      ? neighbours.prevIndex
+      : neighbours.nextIndex
+    : -1;
+
   const currentStep = currentStepIndex >= 0 ? activeSteps[currentStepIndex] : null;
+  const displayStep = currentStep ?? (nearestIndex >= 0 ? activeSteps[nearestIndex] : null);
 
   // For full mode — find the persona for colour
   const currentPersonaFull =
@@ -1452,11 +1136,18 @@ export default function DemoNavigator() {
       ? ((currentStep as StoryStep | null)?.chapterColor ?? '#0043ce')
       : (currentPersonaFull?.color ?? '#0043ce');
 
-  const prevStep = currentStepIndex > 0 ? activeSteps[currentStepIndex - 1] : null;
+  const prevStep =
+    currentStepIndex > 0
+      ? activeSteps[currentStepIndex - 1]
+      : neighbours && neighbours.prevIndex >= 0
+        ? activeSteps[neighbours.prevIndex]
+        : null;
   const nextStep =
     currentStepIndex >= 0 && currentStepIndex < activeSteps.length - 1
       ? activeSteps[currentStepIndex + 1]
-      : null;
+      : neighbours && neighbours.nextIndex >= 0
+        ? activeSteps[neighbours.nextIndex]
+        : null;
 
   // Close on outside click
   useEffect(() => {
@@ -1476,22 +1167,29 @@ export default function DemoNavigator() {
     setDemoMode(mode);
   };
 
-  // Helper: navigate to a step, setting active patient if specified.
+  // Helper: navigate to a step. The active patient is NOT reset here — navigation follows the
+  // operator's current selection (per-patient screens + fail-closed guards handle the render).
   const navigateToStep = (step: DemoStep) => {
     lastStepNumRef.current = step.stepNum;
-    setActiveCitizen(step.activePatient ?? DEFAULT_CITIZEN);
     router.push(step.route);
     setExpanded(false);
   };
 
+  // Numbering is the position in the COMPOSED (patient-filtered) flow, so "N / M" stays honest
+  // when a beat drops out for the selected patient.
   const stepLabel = currentStep
-    ? `${currentStep.stepNum} / ${totalSteps} — ${currentStep.label}`
-    : 'Demo Navigator';
+    ? `${currentStepIndex + 1} / ${totalSteps} — ${currentStep.label}`
+    : displayStep && nearestIndex >= 0
+      ? `${nearestIndex + 1} / ${totalSteps} — ${displayStep.label}`
+      : 'Demo Navigator';
 
   // ── Story mode panel content ────────────────────────────────────────────────
   const StoryPanel = () => {
-    // Group steps by chapter
-    const chapters = STORY_STEPS.reduce<{ chapter: string; color: string; steps: StoryStep[] }[]>(
+    // Group the per-patient composed steps (getStorySteps(activeCitizenId), via `storySteps`)
+    // by chapter — same grouping as before, now sourced from the narrative module. Captions
+    // still render through resolveBeat below (no extra beatApplies filter here, matching the
+    // panel's prior behavior).
+    const chapters = storySteps.reduce<{ chapter: string; color: string; steps: StoryStep[] }[]>(
       (acc, step) => {
         const existing = acc.find((c) => c.chapter === step.chapter);
         if (existing) {
@@ -1549,10 +1247,12 @@ export default function DemoNavigator() {
                     >
                       {step.label}
                     </p>
-                    <p className="text-2xs text-carbon-gray-50 truncate">{step.storyBeat}</p>
-                    {step.activePatient === 'MARIA_SD_001' && (
+                    <p className="text-2xs text-carbon-gray-50 truncate">
+                      {resolveBeat(step.route, step.storyBeat, step.activePatient, activeCitizenId)}
+                    </p>
+                    {step.activePatient && beatAttribution(step.activePatient, activeCitizenId) && (
                       <p className="text-2xs font-semibold mt-0.5" style={{ color: '#007d79' }}>
-                        ↗ Maria Redhawk
+                        ↗ {beatAttribution(step.activePatient, activeCitizenId)}
                       </p>
                     )}
                   </div>
@@ -1601,53 +1301,63 @@ export default function DemoNavigator() {
                 <p className="text-xs font-medium text-carbon-gray-100 truncate">{persona.title}</p>
               </div>
             </div>
-            {/* Steps */}
-            {persona.steps.map((step) => {
-              const isCurrentStep =
-                step.route === pathname && step.stepNum === currentStep?.stepNum;
-              return (
-                <button
-                  key={step.stepNum}
-                  onClick={() => navigateToStep(step)}
-                  className={`w-full flex items-start gap-3 px-4 py-2 text-left transition-colors hover:bg-carbon-gray-10 ${
-                    isCurrentStep ? 'bg-carbon-gray-10' : ''
-                  }`}
-                >
-                  <div
-                    className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-2xs font-bold"
-                    style={{
-                      backgroundColor: isCurrentStep ? persona.color : 'transparent',
-                      color: isCurrentStep ? '#fff' : persona.color,
-                      border: `1.5px solid ${persona.color}`,
-                      borderRadius: 0,
-                    }}
+            {/* Steps — composed for the selected patient (inapplicable beats drop out) */}
+            {persona.steps
+              .filter((step) => beatApplies(step.route, activeCitizenId))
+              .map((step) => {
+                const isCurrentStep =
+                  step.route === pathname && step.stepNum === currentStep?.stepNum;
+                return (
+                  <button
+                    key={step.stepNum}
+                    onClick={() => navigateToStep(step)}
+                    className={`w-full flex items-start gap-3 px-4 py-2 text-left transition-colors hover:bg-carbon-gray-10 ${
+                      isCurrentStep ? 'bg-carbon-gray-10' : ''
+                    }`}
                   >
-                    {step.stepNum}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className={`text-xs font-medium ${isCurrentStep ? 'text-carbon-gray-100' : 'text-carbon-gray-70'}`}
+                    <div
+                      className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-2xs font-bold"
+                      style={{
+                        backgroundColor: isCurrentStep ? persona.color : 'transparent',
+                        color: isCurrentStep ? '#fff' : persona.color,
+                        border: `1.5px solid ${persona.color}`,
+                        borderRadius: 0,
+                      }}
                     >
-                      {step.label}
-                    </p>
-                    <p className="text-2xs text-carbon-gray-50 truncate">{step.storyBeat}</p>
-                    {step.activePatient === 'MARIA_SD_001' && (
-                      <p className="text-2xs font-semibold mt-0.5" style={{ color: '#007d79' }}>
-                        ↗ Maria Redhawk
+                      {step.stepNum}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-xs font-medium ${isCurrentStep ? 'text-carbon-gray-100' : 'text-carbon-gray-70'}`}
+                      >
+                        {step.label}
                       </p>
+                      <p className="text-2xs text-carbon-gray-50 truncate">
+                        {resolveBeat(
+                          step.route,
+                          step.storyBeat,
+                          step.activePatient,
+                          activeCitizenId
+                        )}
+                      </p>
+                      {step.activePatient &&
+                        beatAttribution(step.activePatient, activeCitizenId) && (
+                          <p className="text-2xs font-semibold mt-0.5" style={{ color: '#007d79' }}>
+                            ↗ {beatAttribution(step.activePatient, activeCitizenId)}
+                          </p>
+                        )}
+                    </div>
+                    {isCurrentStep && (
+                      <Icon
+                        name="ChevronRightIcon"
+                        size={12}
+                        className="flex-shrink-0 mt-1"
+                        style={{ color: persona.color } as React.CSSProperties}
+                      />
                     )}
-                  </div>
-                  {isCurrentStep && (
-                    <Icon
-                      name="ChevronRightIcon"
-                      size={12}
-                      className="flex-shrink-0 mt-1"
-                      style={{ color: persona.color } as React.CSSProperties}
-                    />
-                  )}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
           </div>
         );
       })}
@@ -1696,7 +1406,7 @@ export default function DemoNavigator() {
                 <span
                   className={`ml-1 text-2xs font-normal ${demoMode === 'full' ? 'text-white/70' : 'text-carbon-gray-50'}`}
                 >
-                  54 steps
+                  {fullStepCount} steps
                 </span>
               </button>
               <button
@@ -1711,7 +1421,7 @@ export default function DemoNavigator() {
                 <span
                   className={`ml-1 text-2xs font-normal ${demoMode === 'story' ? 'text-white/70' : 'text-carbon-gray-50'}`}
                 >
-                  15 steps
+                  {storyStepCount} steps
                 </span>
               </button>
             </div>
@@ -1799,7 +1509,11 @@ export default function DemoNavigator() {
           <div
             className="flex items-center justify-center px-2 text-2xs font-bold tracking-wide border-l border-white/20 flex-shrink-0"
             style={{ background: 'rgba(0,0,0,0.18)' }}
-            title={demoMode === 'story' ? 'Story Mode — 15 steps' : 'Full Sequence — 54 steps'}
+            title={
+              demoMode === 'story'
+                ? `Story Mode — ${storyStepCount} steps`
+                : `Full Sequence — ${fullStepCount} steps`
+            }
           >
             {demoMode === 'story' ? 'STORY' : 'FULL'}
           </div>

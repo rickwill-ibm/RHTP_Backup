@@ -2,8 +2,8 @@
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useDemoStore, SCREEN_ORDER, SCREEN_ROUTES, ORCHESTRATE_FLOW, orchestrateIndexFor } from '@/uhg/store/demoStore';
-import { getPatientById } from '@/lib/patientRegistry';
+import { useDemoStore, SCREEN_ORDER, SCREEN_ROUTES } from '@/uhg/store/demoStore';
+import { resolveOrchestrateTarget, nextApplicableScreenIndex as nextApplicableScreenIndexFor } from '@/uhg/data/orchestrateNav';
 import { downloadTalkTrackPDF } from '@/uhg/lib/generateTalkTrackPDF';
 
 interface PresenterControlsProps {
@@ -246,28 +246,27 @@ export default function PresenterControls({
     [router, store]
   );
 
-  // Up/Down navigation across the Agentic Orchestrate flow (routes under /uhg-orchestrate/*).
-  // Returns true if it handled navigation for the current orchestrate screen.
+  // Up/Down nav across the Agentic Orchestrate flow. Pure target resolution lives in
+  // orchestrateNav; here we only apply side effects. Returns true if it handled the screen.
   const navigateOrchestrate = useCallback(
     (dir: 1 | -1): boolean => {
-      // The caregiver screen is only relevant for members who are a proxy caregiver —
-      // skip it in the flow for everyone else so arrow nav never lands on it.
-      const reg = getPatientById(store.activeCitizenId);
-      const hasCaregiver = !!reg?.household?.caregiverFor?.length;
-      const flow = hasCaregiver
-        ? ORCHESTRATE_FLOW
-        : ORCHESTRATE_FLOW.filter((s) => !s.route.endsWith('/caregiver-elena'));
-      const idx = flow.findIndex((s) => pathname === s.route || pathname.endsWith(s.route));
-      if (idx === -1) return false; // not on an orchestrate screen — let legacy nav handle it
-      const target = idx + dir;
-      if (target < 0 || target >= flow.length) return true; // at an edge: handled (no-op)
-      if (navigatingRef.current) return true;
-      navigatingRef.current = true;
-      router.push(flow[target].route);
-      setTimeout(() => { navigatingRef.current = false; }, 400);
+      const res = resolveOrchestrateTarget(pathname, store.activeCitizenId, dir);
+      if (res.kind === 'not-orchestrate') return false; // let legacy SCREEN_ORDER nav handle it
+      if (res.kind === 'navigate' && !navigatingRef.current) {
+        navigatingRef.current = true;
+        router.push(res.route);
+        setTimeout(() => { navigatingRef.current = false; }, 400);
+      }
       return true;
     },
     [pathname, router, store.activeCitizenId]
+  );
+
+  // Linear ←→ stepper: nearest applicable SCREEN_ORDER index for the selected patient (see orchestrateNav).
+  const nextApplicableScreenIndex = useCallback(
+    (fromIndex: number, dir: 1 | -1): number =>
+      nextApplicableScreenIndexFor(fromIndex, dir, store.activeCitizenId),
+    [store.activeCitizenId]
   );
 
   const openAppendix = useCallback(() => {
@@ -320,8 +319,8 @@ export default function PresenterControls({
         // If a screen has local reveal steps pending, do not navigate
         if (store.navigationBlocked) return;
         if (navigateOrchestrate(1)) return;
-        const idx = SCREEN_ORDER.indexOf(store.currentScreen);
-        if (idx < SCREEN_ORDER.length - 1) navigate(idx + 1);
+        const target = nextApplicableScreenIndex(SCREEN_ORDER.indexOf(store.currentScreen), 1);
+        if (target !== -1) navigate(target);
         return;
       }
 
@@ -330,8 +329,8 @@ export default function PresenterControls({
         e.preventDefault();
         // Allow going back even when navigation is blocked (clears block via screen unmount)
         if (navigateOrchestrate(-1)) return;
-        const idx = SCREEN_ORDER.indexOf(store.currentScreen);
-        if (idx > 0) navigate(idx - 1);
+        const target = nextApplicableScreenIndex(SCREEN_ORDER.indexOf(store.currentScreen), -1);
+        if (target !== -1) navigate(target);
         return;
       }
 
@@ -340,8 +339,8 @@ export default function PresenterControls({
         e.preventDefault();
         if (store.navigationBlocked) return;
         if (navigateOrchestrate(1)) return;
-        const idx = SCREEN_ORDER.indexOf(store.currentScreen);
-        if (idx < SCREEN_ORDER.length - 1) navigate(idx + 1);
+        const target = nextApplicableScreenIndex(SCREEN_ORDER.indexOf(store.currentScreen), 1);
+        if (target !== -1) navigate(target);
         return;
       }
 
@@ -349,8 +348,8 @@ export default function PresenterControls({
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         if (navigateOrchestrate(-1)) return;
-        const idx = SCREEN_ORDER.indexOf(store.currentScreen);
-        if (idx > 0) navigate(idx - 1);
+        const target = nextApplicableScreenIndex(SCREEN_ORDER.indexOf(store.currentScreen), -1);
+        if (target !== -1) navigate(target);
         return;
       }
 
@@ -435,7 +434,7 @@ export default function PresenterControls({
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
       document.removeEventListener('keyup', handleKeyUp, { capture: true });
     };
-  }, [store, navigate, navigateOrchestrate, onMariaInject, onGovernanceIntercept, pathname, router, showAppendix, openAppendix, closeAppendix]);
+  }, [store, navigate, navigateOrchestrate, nextApplicableScreenIndex, onMariaInject, onGovernanceIntercept, pathname, router, showAppendix, openAppendix, closeAppendix]);
 
   return (
     <>

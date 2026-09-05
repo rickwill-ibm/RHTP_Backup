@@ -134,7 +134,7 @@ export default function ActiveReferralsTable({
   };
 
   const filtered = useMemo(() => {
-    let result = source.filter((r) => {
+    const result = source.filter((r) => {
       const q = filters.search.toLowerCase();
       if (
         q &&

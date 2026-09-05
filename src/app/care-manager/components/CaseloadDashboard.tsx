@@ -60,31 +60,6 @@ export default function CaseloadDashboard() {
 
   const activeCohort = cohorts.find((c) => c.id === activeCohortId) ?? cohorts[0];
 
-  if (cohorts.length === 0) {
-    return (
-      <div className="bg-white border border-carbon-gray-20 px-6 py-16 text-center">
-        <Icon name="UserGroupIcon" size={32} className="text-carbon-gray-30 mx-auto mb-3" />
-        <p className="text-sm font-semibold text-carbon-gray-100">No cohorts attributed yet</p>
-        <p className="text-xs text-carbon-gray-50 mt-1 mb-4">
-          Create a measure cohort to auto-assign patients across the care team.
-        </p>
-        <Link
-          href="/stars-hedis-mips"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0043ce] text-white text-xs font-semibold hover:bg-[#002d9c]"
-        >
-          <Icon name="SparklesIcon" size={12} />
-          Go to Quality &amp; Compliance
-        </Link>
-      </div>
-    );
-  }
-
-  const startEdit = (patientId: string, currentMember: string) => {
-    setEditing(patientId);
-    setDraftMember(currentMember);
-    setDraftReason('');
-  };
-
   const writeCareTeamToFhir = useCallback(async (patientId: string, newMemberId: string) => {
     if (getFhirMockMode()) return;
     const fhirPatientId = PLATFORM_TO_FHIR_ID_MAP[patientId];
@@ -189,6 +164,31 @@ export default function CaseloadDashboard() {
       console.warn('[CaseloadDashboard] FHIR CareTeam update failed (local state updated):', err);
     }
   }, []);
+
+  if (cohorts.length === 0) {
+    return (
+      <div className="bg-white border border-carbon-gray-20 px-6 py-16 text-center">
+        <Icon name="UserGroupIcon" size={32} className="text-carbon-gray-30 mx-auto mb-3" />
+        <p className="text-sm font-semibold text-carbon-gray-100">No cohorts attributed yet</p>
+        <p className="text-xs text-carbon-gray-50 mt-1 mb-4">
+          Create a measure cohort to auto-assign patients across the care team.
+        </p>
+        <Link
+          href="/stars-hedis-mips"
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0043ce] text-white text-xs font-semibold hover:bg-[#002d9c]"
+        >
+          <Icon name="SparklesIcon" size={12} />
+          Go to Quality &amp; Compliance
+        </Link>
+      </div>
+    );
+  }
+
+  const startEdit = (patientId: string, currentMember: string) => {
+    setEditing(patientId);
+    setDraftMember(currentMember);
+    setDraftReason('');
+  };
 
   const commitEdit = (patientId: string, fromMemberId: string) => {
     if (!draftMember || draftMember === fromMemberId) {

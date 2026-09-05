@@ -833,11 +833,12 @@ export default function ExecutiveOutcomesDashboardPage() {
                   </p>
                   <p className="text-xs text-carbon-gray-70 leading-relaxed">
                     Each patient intervention — a cardiology referral, an A1C lab order, a
-                    specialist consultation — closes a care gap that contributes to the network's
-                    HEDIS/STARS quality score. Higher quality scores unlock the gain-share pool. The
-                    RHTP platform tracks every intervention from referral creation through evidence
-                    submission to EDW reporting, creating a closed-loop quality improvement cycle
-                    that directly drives state Medicaid incentive payments.
+                    specialist consultation — closes a care gap that contributes to the
+                    network&apos;s HEDIS/STARS quality score. Higher quality scores unlock the
+                    gain-share pool. The RHTP platform tracks every intervention from referral
+                    creation through evidence submission to EDW reporting, creating a closed-loop
+                    quality improvement cycle that directly drives state Medicaid incentive
+                    payments.
                     {isFiltered && (
                       <>
                         {' '}

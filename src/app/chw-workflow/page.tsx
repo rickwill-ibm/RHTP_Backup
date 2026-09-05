@@ -176,7 +176,7 @@ function StartVisitModal({ visit, onClose }: { visit: VisitData; onClose: () => 
   function toggle(id: string) {
     setChecked((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      next[next.has(id) ? 'delete' : 'add'](id);
       return next;
     });
   }
@@ -384,8 +384,8 @@ function RescheduleModal({ visit, onClose }: { visit: VisitData; onClose: () => 
           </div>
           <p className="text-lg font-bold text-carbon-gray-100">Visit Rescheduled</p>
           <p className="text-sm text-carbon-gray-50 text-center">
-            <span className="font-semibold text-carbon-gray-100">{visit.patient}</span>'s visit has
-            been rescheduled to{' '}
+            <span className="font-semibold text-carbon-gray-100">{visit.patient}</span>&apos;s visit
+            has been rescheduled to{' '}
             <span className="font-semibold text-carbon-gray-100">
               {newDate} at {newTime}
             </span>

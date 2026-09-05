@@ -885,7 +885,7 @@ function ETGProviderAnalysisTab() {
               Referral Pattern Analysis
             </h3>
             <p className="text-2xs text-carbon-gray-50 mt-0.5">
-              Providers involved in {selectedProvider.name}'s episodes — referral concentration
+              Providers involved in {selectedProvider.name}&apos;s episodes — referral concentration
             </p>
           </div>
           <div className="divide-y divide-carbon-gray-20">

@@ -364,7 +364,7 @@ export default function PatientPanelTable({
   const toggleRow = useCallback(
     (id: string) => {
       const next = new Set(selectedPatients);
-      next.has(id) ? next.delete(id) : next.add(id);
+      next[next.has(id) ? 'delete' : 'add'](id);
       onSelectionChange(next);
     },
     [selectedPatients, onSelectionChange]

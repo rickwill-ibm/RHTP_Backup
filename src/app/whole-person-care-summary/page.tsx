@@ -1214,8 +1214,8 @@ function CanvasSVGGraph({
       const rawX = clientX - rect.left;
       const rawY = clientY - rect.top;
       const { k, x: tx, y: ty } = transform;
-      let gx = (rawX - tx) / k;
-      let gy = (rawY - ty) / k;
+      const gx = (rawX - tx) / k;
+      const gy = (rawY - ty) / k;
 
       const nodes = nodesRef.current;
       for (let i = nodes.length - 1; i >= 0; i--) {
@@ -1238,8 +1238,8 @@ function CanvasSVGGraph({
       const rawX = clientX - rect.left;
       const rawY = clientY - rect.top;
       const { k, x: tx, y: ty } = transform;
-      let gx = (rawX - tx) / k;
-      let gy = (rawY - ty) / k;
+      const gx = (rawX - tx) / k;
+      const gy = (rawY - ty) / k;
 
       const nodePositions = new Map(
         nodesRef.current.map((n) => [n.id, { x: n.x, y: n.y, r: n.r }])

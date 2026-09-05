@@ -13,7 +13,8 @@
 >
 > **v2 changelog:** strict typing + boundary validation (§5), error doctrine (§6),
 > determinism (§7), observability (§8), prompts-as-code + agent manifests (§10),
-> expanded agent-session discipline with grep anchors and a verification ladder (§13),
+> expanded agent-session discipline with pre-flight file-state + shift-left gates,
+> grep anchors and a verification ladder (§13),
 > quality ratchet replacing ad-hoc legacy policy (§3), public-surface import rule (§4),
 > updated DoD (§16) and tooling wiring (§18).
 
@@ -213,6 +214,41 @@ props — no fetching or schema logic in the browser; derived values are compute
 
 ## 13. Agent-Session Discipline (v1 §9, expanded — context is the scarce resource)
 
+### 13.0 Pre-flight — before the first edit (new)
+Three checks run *before* touching code, because the cheapest defect is the one you never
+write. Each was added from a real, expensive miss this framework recorded — a formatting
+landmine, a silent-dead wiring, and a session's worth of gate debt detonating at once.
+
+1. **File-state gate — know the FORMATTED size before you edit.** Run
+   `bash tools/preflight-files.sh <files>` on every file you intend to change. It prints, per
+   file, current lines, the PRETTIER-FORMATTED line count (`npx prettier <file> | wc -l`), the
+   cap, and the baseline, and flags `🔴 LANDMINE: formats to N > cap — EXTRACT first` when your
+   edit would breach the ratchet *on commit*. This is the design-time complement to §2's rule
+   that a file's size is its formatted size: a file that was committed hand-compacted under an
+   old `--no-verify` bypass can balloon 2–3× when prettier runs at commit and blow the cap after
+   you have already built on it. Earn the headroom first — move data to `*.json`, split by
+   responsibility (§2) — *then* edit. Skipping this is how "the gate said green, then blocked my
+   commit on size" happens.
+
+2. **VERIFY-LIVE — confirm the thing is actually wired before you wire to it.** Before adding a
+   consumer of a seam, context value, flag, or exported symbol, prove it is really consumed
+   *today*: `rg` the symbol, read the live call site, and — for a UI or state seam — confirm it
+   renders/updates in the running app, not merely that it type-checks. **"It compiles" is not
+   "it runs":** extracted code with a missing `export`, or state nothing reads, type-checks green
+   and fails silently at runtime (both happened this project). Verify the live path first; build
+   the second consumer against a first one you have seen work.
+
+3. **Shift-left the heavy gate — run it per chunk, not at push.** `pre-commit` runs only the
+   cheap rungs (prettier, size ratchet, E13); tsc, full lint, unit tests, and E14 run only at
+   `pre-push`. So heavy debt is **invisible until the first push**, where a whole session's worth
+   detonates at once and turns into whack-a-mole. Prevent it: run
+   `bash scripts/ci-gates.sh push` (or `npm run gate:push`) locally **after each logical chunk of
+   work**, not just at push — it is the same gate CI runs, so a type error or a lint regression
+   surfaces in minutes, attributable to the chunk that caused it, instead of stacking. Opt in to
+   `PRECOMMIT_FAST=1` (see the `pre-commit` header) to run the fast tier (adds tsc +
+   changed-file lint) on every commit; it is off by default because tsc is minutes on this repo,
+   so the per-chunk `gate:push` is the preferred discipline.
+
 ### 13.1 Session scope
 One domain folder, one seam, or one contract per session. Never mix refactoring with
 feature work in one change set — separate PRs, because both human and AI reviewers
@@ -245,7 +281,13 @@ npx tsc --noEmit                 # 1. seconds — types
 npm run lint -- <changed paths>  # 2. seconds — style + boundaries
 npx vitest run tests/<domain>    # 3. the domain you touched
 npm run check:all                # 4. full gate before handoff/commit
+npm run gate:push                # 5. after EACH logical chunk (§13.0.3), not just at push
 ```
+
+Rung 5 is the shift-left rule made concrete: `gate:push` is the same gate CI runs, so running
+it per chunk keeps a type/lint/test regression attributable to the chunk that caused it instead
+of surfacing as a pile at first push. Pre-flight (§13.0) plus rung 5 is what keeps the ladder
+from ever going red in bulk.
 
 ### 13.5 Stop conditions (new)
 An agent stops and reports — instead of guessing — when: a symbol it expected cannot
@@ -292,6 +334,7 @@ never cited as conformance.
 - [ ] Data externalized; single source of truth preserved
 - [ ] Tests: unit + property (engines) + contract (seams touched); domain suite green
 - [ ] `docs/traceability.md` row added; feature README updated; grep anchors current
+- [ ] Pre-flight (§13.0) ran: `preflight-files.sh` clean, seams VERIFY-LIVE'd, `gate:push` green per chunk
 - [ ] `npm run check:all` exits 0
 - [ ] Commit/PR states what changed, why, and which invariants/contracts were touched
 
@@ -339,6 +382,12 @@ Git hooks are versioned under `tools/hooks/` and auto-enabled via the `prepare` 
 prettier auto-format of staged code (so formatting can never fail the lint gate after the
 fact), the file-size ratchet, and E13 test-link — while `pre-push` runs the full
 `gate:push` so a red push is caught locally, not in CI (`git push --no-verify` bypasses).
+`PRECOMMIT_FAST=1 git commit …` opts the cheap hook up to the full fast tier (adds tsc +
+changed-file lint) for a shell that wants the heavy rungs on every commit; it is off by default
+because tsc is minutes on this repo. The design-time counterpart is `tools/preflight-files.sh`
+(§13.0): run it on the files you are about to edit to see each one's prettier-formatted size vs
+cap vs baseline *before* the edit, so a formatting landmine is caught at design time, not at the
+commit that trips the ratchet.
 
 Local ⊊ CI: a clean `gate:push` is a strong signal, not a guarantee — the
 Docker/testcontainers integration specs and CI-only security scans run only in CI, so

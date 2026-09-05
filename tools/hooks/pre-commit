@@ -6,6 +6,12 @@
 # unit tests, E11/E14 — run at pre-push (tools/hooks/pre-push -> scripts/ci-gates.sh push)
 # and via `npm run gate:push` / `gate:pre-merge`. Running tsc here would make every commit
 # take minutes on this repo, which is why the heavy checks live at push, not commit.
+#
+# SHIFT-LEFT (AI-CODING-CONVENTIONS §13.0.3): the RIGHT way to stop heavy debt piling up to
+# the first push is NOT to slow every commit down — it is to run `npm run gate:push` (the same
+# gate CI runs) after each logical chunk of work, so a type/lint/test regression surfaces in
+# minutes, attributable to the chunk that caused it. For a shell that still wants the heavy
+# rungs on every commit, set PRECOMMIT_FAST=1 (step 4 below) — off by default, on purpose.
 set -e
 cd "$(git rev-parse --show-toplevel)"
 
@@ -30,6 +36,16 @@ if [ -n "$STAGED" ]; then
   node docs/build-provenance/check-testlink.mjs src tests $STAGED --baseline docs/build-provenance/testlink-baseline.json
 else
   echo "  (no staged source files)"
+fi
+
+# 4) OPTIONAL — full FAST tier (adds tsc + changed-file lint on top of the cheap rungs).
+#    OFF by default (tsc is minutes on this repo; see header). Reuses the canonical gate rather
+#    than re-implementing its logic, so it can never drift from CI. Opt in per-shell:
+#      PRECOMMIT_FAST=1 git commit …
+#    Prefer the shift-left habit (npm run gate:push per chunk) over turning this on globally.
+if [ "${PRECOMMIT_FAST:-0}" = "1" ]; then
+  echo "[pre-commit] PRECOMMIT_FAST=1 → scripts/ci-gates.sh fast (tsc + lint + sizes + E13)"
+  bash scripts/ci-gates.sh fast
 fi
 
 echo "[pre-commit] OK — tsc + full lint + tests run at pre-push / npm run gate:push"

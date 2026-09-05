@@ -35,6 +35,14 @@ Use `Agent`/subagents; capture prompts verbatim per the provenance rule
 (`docs/build-provenance/` + `PROMPT_MASTER_LOG.csv`). Inject tree-of-thought at the design and
 red-team-hypothesis forks (enumerate → score → prune).
 
+**Who staffs steps 3 & 5.** The adversarial seats are not a single generic reviewer — they are the
+**derived domain-expert lens set** in `personas.md` (D1–D8 for this payer domain: FHIR, population
+health, care manager, policy, MD, nursing, MTM/pharmacy, UX) plus the standing R2–R5 and the v1.5
+lenses. Which seats are required for a given change is the **LENS-COVERAGE MAP**, derived as part of
+the Definition of Ready (see `personas.md` → "Orchestration"): every surface the change touches must
+have an owning lens, or that gap is filled before code. Testing seats (T1–T6) and the convention
+steward (C1) run alongside the build and after convergence per that same orchestration.
+
 ## 4. Definition of Done (artifact requirement — this is what the gate checks)
 
 A change that hit the trigger is **not done** until `docs/build-provenance/coalition-log.md` has an

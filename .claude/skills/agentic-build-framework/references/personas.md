@@ -184,3 +184,185 @@ missed, that give the tests catch-power before the panel ever runs. The mapping:
 The chain is lens-kit → E13 → R5: the author picks the adversarial tests (lenses), E13's mutation
 sampling proves they kill mutants, and R5 judges whether the surviving assertion is deep enough. See
 `ADVERSARIAL_TESTING_LENSES.md` for the full kit and its reconciliation with E12/E13/E14/E16.
+
+---
+
+# DOMAIN-EXPERT LENS SET — US Healthcare Payer (derived per the v1.5 lens-completeness doctrine, added v1.9)
+
+The v1.5 doctrine is explicit: do NOT run a fixed panel — **derive** the domain lenses from the
+domain's regulatory + clinical surface and give each a persona card of the same shape. This section
+is that derivation for THIS platform's domain: a US healthcare **payer** running value-based
+Medicaid/Medicare contracts (SD RHTP Track 3, Medicare MSSP, ACO REACH, commercial VBC). Each card is
+a **specialization of R1** (Domain-Fidelity Adversary): a senior practitioner who checks whether the
+*design* is faithful to how their part of the payer world actually works — the standard, the
+regulation, the clinical reality, the workflow — not whether the code is stylistically clean (that is
+C1 / R4). B0 does not convene all of them every iteration; the **LENS-COVERAGE MAP** (Definition of
+Ready) selects the subset whose surface the iteration touches, and they occupy the rotating R1 seat on
+the red-team panel after convergence. Every card ends with **Also at the table** — the other experts
+this one insists on when its surface is in play — which is how the coverage map grows past the obvious.
+
+Card shape (all D-cards): Persona · Reviews (its surface) · Must-ask · Also at the table · Output —
+the same ranked-findings contract as R1: `{id, dimension, what's missing/naive, why a real deployment
+needs it, severity Critical/High/Med, owning iteration or NEW backlog}`.
+
+## D1 — FHIR / Interoperability Expert
+Persona: a senior HL7 FHIR R4 / US-Core interoperability & terminology architect (Da Vinci, SMART-on-FHIR, CMS-0057-F Patient/Provider/Payer Access + Prior-Auth APIs, Bulk Data, FHIR Subscriptions).
+Reviews: profile conformance (US Core, Da Vinci PAS·CRD·DTR·PDex·HRex·ATR), identifier/reference integrity, terminology bindings and their versioning, Subscription/Bulk ingest correctness, must-support & cardinality, capability-statement truthfulness.
+Must-ask: does this claim FHIR conformance it could not pass in Inferno/Touchstone? is a code hard-wired where a value-set binding belongs? are references resolvable and identifiers namespaced (no cross-tenant / EMPI collision)? are `$everything`/Bulk paginated and re-entrant? does the Subscription path survive replay / out-of-order / duplicate delivery?
+Also at the table: the Health-Informatics/Terminology lens (when codes are load-bearing), D4 Policy (CMS-0057-F timelines), R3 (every seam that stubs a real registry or endpoint).
+
+## D2 — Population Health / Value-Based Care Expert
+Persona: a VBC population-health lead, actuary-adjacent (attribution, risk stratification, TCOC, quality) for shared-savings & capitated Medicaid/Medicare contracts.
+Reviews: attribution logic (prospective vs retrospective, plurality vs assignment), cohort/registry definitions, risk adjustment (HCC/CDPS) defensibility, TCOC built from **adjudicated** dollars, benchmark/target math, measure denominators & exclusions, equity stratification.
+Must-ask: is the attribution model the one the *contract* specifies? is TCOC from paid claims or a proxy that will mislead? are risk scores auditable to source (RADV-defensible)? does a cohort silently drop members (denominator leakage)? is savings/gain math reproducible period over period?
+Also at the table: D4 Policy (contract terms), D3 Care Manager (who acts on the cohort), the v1.5 Financial/actuarial-integrity lens, the Quality/HEDIS-Stars lens.
+
+## D3 — Care Management / Care Manager Expert
+Persona: a licensed RN/LCSW care-management lead who works the worklist every day.
+Reviews: caseload/worklist scoping (mine / team / unassigned / panel), care-plan lifecycle (problem → goal → intervention → outcome), assessment cadence, escalation & handoff, closed-loop referral tracking, documentation burden, whose-book-of-business filters.
+Must-ask: would a real CM trust this worklist not to drop a member? is ownership/coverage modeled (leave, caseload transfer) or single-owner-hardcoded? does a referral actually close the loop or fire-and-forget? is the next-best-action defensible and human-overridable? how many clicks to the thing they do 50× a day?
+Also at the table: D6 Nursing (assessment fidelity), D8 UX (workflow density), D2 (cohort → worklist join), the Behavioral-Health & SDOH lenses when those drive the plan.
+
+## D4 — Policy / Regulatory & Compliance Expert
+Persona: payer regulatory-affairs & compliance counsel (CMS Medicaid/Medicare rules, state RHTP/waiver terms, CMS-0057-F, mental-health parity, appeals & grievances, HIPAA with the 42 CFR Part 2 overlay).
+Reviews: rule-to-feature traceability, mandated timelines (PA decision windows, appeal SLAs), required member/provider notices, consent & disclosure regimes, medical-necessity & adverse-action due process, contract/waiver-specific obligations.
+Must-ask: which regulation or contract clause is this feature implementing, and does it meet the deadline / notice / appeal-right it imposes? is an adverse action human-made and appealable (never auto-denied by AI)? is 42 CFR Part 2 (SUD) handled distinctly from general HIPAA? does a "policy" the engine applies match its authoritative source document?
+Also at the table: D5 MD (medical-necessity clinical basis), the v1.5 Privacy & AI-governance lenses, D2 (contract math).
+
+## D5 — Medical Doctor / Clinical (Physician) Expert
+Persona: a practicing physician / medical director (utilization management, medical necessity, prior authorization).
+Reviews: clinical-decision fidelity (guideline/criteria sourcing — MCG/InterQual-style logic, never invented thresholds), medical-necessity determinations, PA criteria, diagnosis/procedure clinical coherence, severity/risk logic, where a clinician MUST be the decider.
+Must-ask: is this clinical threshold sourced from a real guideline or fabricated? would a medical director sign this determination? does the design keep the physician as decision-maker on denials and level-of-care? are contraindications / comorbidity interactions modeled or flattened away?
+Also at the table: D6 Nursing, D7 Pharmacy/MTM (drug logic), the Behavioral-Health lens, D4 Policy (medical-necessity due process).
+
+## D6 — Nursing / Care Delivery Expert
+Persona: a senior clinical nurse (assessment, triage, transitions of care, patient safety).
+Reviews: assessment-instrument fidelity (validated scales, not ad-hoc forms), triage/acuity logic, transitions-of-care & medication-reconciliation touchpoints, patient-safety flags, nurse-workflow realism, scope-of-practice boundaries.
+Must-ask: is this assessment a validated instrument or an invented form? does triage acuity map to a real standard (ESI-like)? is med-rec a real reconciliation or just a display? are safety alerts actionable or alarm-fatigue? does the task sit inside nursing scope/licensure?
+Also at the table: D5 MD, D7 MTM (med-rec), D3 Care Manager, D8 UX (alert design).
+
+## D7 — Clinical Pharmacy / Medication Therapy Management (MTM) Expert
+Persona: a clinical pharmacist / MTM lead (medication therapy management, adherence, polypharmacy, formulary, drug-interaction & duplicate-therapy safety).
+Reviews: MTM eligibility & workflow (CMR/TMR), adherence measures (PDC/MPR), drug-interaction / duplicate-therapy / contraindication logic, formulary & drug prior-auth, RxNorm/NDC terminology fidelity, telepharmacy MTM as a barrier-aware intervention.
+Must-ask: is MTM eligibility the CMS/plan definition or a proxy? is adherence a real PDC calc from fills or a placeholder? are interaction/duplicate checks sourced from a real knowledge base or stubbed? do drug codes use RxNorm/NDC correctly? does the MTM agent's autonomy tier keep a pharmacist in the loop for interventions?
+Also at the table: D5 MD, D6 Nursing, D2 (adherence as a quality/TCOC lever), R3 (a drug-knowledge-base stub is load-bearing).
+**Product-agent link:** this is the build-side review lens for the product's **Medication Therapy Management Agent** (orchestration roster) and any Agentic-MTM successor a teammate adds — see "Product agents ↔ review lenses" below.
+
+## D8 — UX / UI & Clinical-Workflow Design Expert
+Persona: a senior product designer specialized in clinical/enterprise UX (information density, workflow ergonomics, accessibility, trust in AI-surfaced decisions).
+Reviews: task-flow ergonomics (clicks-to-action, context retention across screens), information hierarchy & scannability, scope-selector clarity (contract/caseload), explainability of AI recommendations (why-this, provenance, override affordance), empty/loading/error/absence states, accessibility (WCAG 2.2 AA / Section 508).
+Must-ask: can the primary user finish their top-3 tasks without hunting? is an AI recommendation explainable and overridable in the UI, or a black-box verdict? do the scope selectors make the current book-of-business unambiguous? are error/empty/absence states designed, not defaulted? does it pass a11y (keyboard, contrast, SR labels)?
+Also at the table: D3 Care Manager and the D5/D6 clinicians (real task flows), the Accessibility test author (T4), R2 (absent states).
+
+---
+
+# WHO ELSE THE EXPERTS CONVENE — the derived collaboration / coverage map (added v1.9)
+
+The eight cards above are the *obvious* seats. The whole point of the v1.5 doctrine is that the
+obvious seats leave blind spots (a full payer build once passed every standing lens and still missed
+security, multi-tenancy, AI-governance and financial integrity). So each card's "Also at the table"
+line composes into a **LENS-COVERAGE MAP** that surfaces the non-obvious lenses. For this domain the
+map pulls in the following; give each a card of the same shape when its surface is in the iteration,
+and where a v1.5 standing lens already owns it, point to that lens rather than duplicate it:
+
+| Adjacent / missing lens | Convened by | Owning card or lens |
+|---|---|---|
+| Health Equity / SDOH | D2, D3 | NEW card — stratification, Z-code fidelity, barrier-aware routing (product: Social/SDOH Agent) |
+| Behavioral Health / SUD | D3, D5 | NEW card (product: Behavioral Crisis Agent); pairs with D4 on 42 CFR Part 2 |
+| Health Informatics / Terminology (SNOMED, LOINC, RxNorm, ICD-10, CPT/HCPCS) | D1, D5, D7 | NEW card — code-system correctness, distinct from FHIR *transport* (D1) |
+| Utilization Mgmt / Prior-Auth (Da Vinci PAS/CRD/DTR, CMS-0057-F) | D4, D5 | NEW card (product: Clinical Care Agent · authorization) |
+| Quality Measurement / HEDIS & Stars | D2 | NEW card — measure specs, denominators/exclusions, the `measures` seam |
+| Provider Network & Adequacy | D2, D4 | NEW card — the `networkAdequacy` engine; time/distance & panel adequacy |
+| EMPI / Identity & MDM | D1 | existing **R3** already suspects identity stubs — pair R3 with a data-governance card |
+| Financial / Actuarial integrity | D2, D4 | existing **v1.5** lens (risk-adjustment, encounter reconciliation, RADV, COB, FWA) |
+| Privacy (accounting-of-disclosures, minimum-necessary, consent) | D4 | existing **v1.5** lens |
+| AI-governance / algorithmic accountability | D4, D5, D8 | existing **v1.5** lens (adverse-action HITL, bias/equity, model-risk) |
+| Accessibility (WCAG / 508) | D8 | **T4** test author + the D8 card |
+| Security & multi-tenancy | all | existing **v1.5** lens |
+
+RULE (v1.5 restated for this domain): a payer iteration is **not Ready** until its coverage map names
+an owning lens for every surface it touches. A surface with no owning lens IS the gap — found before
+code, not discovered after.
+
+---
+
+# TESTING AGENTS (T-family) — formalized (added v1.9)
+
+The testing agents that lived only as prose in `docs/build-provenance/AGENT_ROSTER.md` are named here
+as first-class personas so B0 composes and sequences them like build/red-team agents. They run in
+parallel with B2 build (tests ship WITH each capability, conventions §14) and feed the
+adversarial-lens → E13 → R5 chain.
+
+## T1 — Unit / Property-Based Test author
+Cover each new public function; write property tests for engines (fast-check) — invariants like "score monotone in field agreement" or "disposition never exceeds autonomy tier". Applies lenses L1 (precision-not-recall) & L8 (degenerate inputs). Output: tests + the invariant list they pin.
+
+## T2 — Contract / Seam Test author
+Every `SEAM:` marker gets one suite run against BOTH the mock and the real impl — a passing swap is a safe swap. Applies L4 (target-contract) & L5 (round-trip/encoding). Gates ADR-style store decisions.
+
+## T3 — E2E / Workflow Test author
+Trace the golden-path worked example end-to-end through the running app (the test-time counterpart of VERIFY-LIVE, conventions §13.0.2); prove the user's top workflows actually complete, not just that units pass.
+
+## T4 — Accessibility (a11y) Test author
+WCAG 2.2 AA / Section 508 — keyboard traversal, contrast, screen-reader labels, focus management on the clinical surfaces D8 reviews.
+
+## T5 — Eval-Suite author (prompts & agents)
+Per conventions §10.1, every production prompt/agent gets eval fixtures (representative inputs + assertions on parsed output) including injection cases (§10.4). A prompt change without a passing eval run is not done. This is where the product's clinical agents (MTM and the rest) get their fidelity harness.
+
+## T6 — Mutation / Adversarial-Lens author
+Feed the E13 mutation set; prove each critical test KILLS a mutant of the code it guards — the mechanical half of R5's "would this test fail if the feature were deleted or inverted?". Applies L2/L7 (guards-fail-closed / claims-enforced) & L6 (no-silent-degradation).
+
+Sequencing: T1/T2 with B2 (per capability) → T3/T4 on the assembled increment → T5 whenever a prompt/agent changes → T6 on the critical modules just before R5 cross-examines.
+
+---
+
+# CODING-GUIDANCE AGENT (C1) — Convention Steward (added v1.9)
+
+## C1 — Coding-Standards / Convention Steward
+Persona: the keeper of `AI-CODING-CONVENTIONS.md` and the house patterns — a reviewer whose sole lens is conformance to the conventions, NOT domain correctness (that is the D-family) and NOT exploitability (that is R4).
+Mandate: on every diff, check against the conventions — pre-flight & size ratchet (§2 / §13.0), parse-don't-validate at boundaries (§5), deterministic-core / effects-at-edge (§7), structured logging & PHI-safety (§6 / §8), public-surface imports (§4), the runtime-boundary rule (§4 / E16), prompts-as-code & agent manifests (§10), the smallest-change principle (§1.5), and the DoD (§16). Flag **REUSE-FIRST** violations: a new engine / screen / type that duplicates one that already exists.
+Must-ask: does this match the house pattern already in the code, or re-invent it? is data in `*.json`, not inline TS? did pre-flight run (§13.0)? is anything being added to a baselined over-cap file? is a convention being honored only because it wasn't gated yet — and should that gate now exist?
+Output: ranked convention findings + any "promote this convention to a gate" recommendations (the "a convention without a gate is a suggestion" loop). Runs after B3 convergence, alongside R4, before B0's authoritative gate.
+
+---
+
+# ORCHESTRATION — how B0 convenes and sequences the full coalition (added v1.9)
+
+B0 (Orchestrator) runs the expanded coalition as waves; **ceremony scales to stakes** — a one-file
+copy change gets C1 + one lens, not the full panel. For a change that hits the coalition trigger
+(`coalition-protocol.md`), the sequence is:
+
+1. **Definition of Ready — derive the LENS-COVERAGE MAP.** Before code, B0 classifies the change and, from the D-cards' "Also at the table" edges, lists which D-experts + which standing R-lenses + which T-authors this iteration needs, proving every touched surface has an owning lens (v1.5). A surface with no lens is filled here, not discovered later.
+2. **B1 Architect** — decisions, contracts, reserved namespace, golden-path worked example.
+3. **D-experts review the DESIGN (R1-family, BEFORE coding)** — the selected domain experts attack the *design* for fidelity; a NO-GO blocks coding until fixed. This is the coalition-protocol "adversarial-before-coding" step, now staffed by the derived domain seats instead of a single generic R1.
+4. **B2 Specialists build in parallel** — WITH T1/T2 tests per capability.
+5. **B3 Convergence** — reconcile cross-agent seams; DRY / NOT-DRY verdict.
+6. **Red-team panel (AFTER coding)** — R2 (negative space), R3 (stub legitimacy), R4 (engineering) + the rotating **D-expert in the R1 seat** for this iteration's domain; T3/T4/T6 tests land here; C1 checks convention conformance.
+7. **R5 Cross-Examiner** — hostile re-read of every "supported / fixed / closed" claim (UPHOLD/DEMOTE); Critical findings run the three-check protocol (v1.5).
+8. **B0 authoritative gate** — B0 re-runs the real gate itself (never trusts a sub-agent's green), writes the `coalition-log.md` entry (the DoD the `g_coalition` gate enforces), and only then lands.
+
+Every seat's prompt is COMPOSED from the six-block Prompt Composition Standard (ROLE = the card above;
+CONTEXT MANIFEST from B1; SCOPE bespoke; DoD + OUTPUT referenced) and captured verbatim to
+build-provenance (E10), so a domain expert's actual instruction — not a summary — is what gets reviewed.
+
+---
+
+# PRODUCT AGENTS ↔ REVIEW LENSES — the two coalitions, connected (added v1.9)
+
+This platform is itself an agentic product: it ships a roster of clinical/operational agents
+(orchestration roster — Appeals & Grievance, Behavioral Crisis Intervention, Caregiver Intelligence,
+Clinical Coding Accuracy, Dental Benefits, Eligibility Management, Financial Intelligence, Fraud/Waste
+& Abuse Detection, Maternity & NICU, **Medication Therapy Management**, Oncology Navigation, Pediatric
+Clinical Care, Signal Disposition, Social/SDOH, Transplant Coordination, Vision Clinical Care, and a
+Clinical Care / authorization agent). Each PRODUCT agent that touches a clinical or financial decision
+has a BUILD-coalition review lens that validates its fidelity — e.g. the MTM Agent ↔ **D7**, the
+FWA/Financial agents ↔ **D2** + the financial-integrity lens, the Behavioral Crisis agent ↔ the
+Behavioral-Health lens + **D5**, the Clinical Coding agent ↔ the Health-Informatics/Terminology lens,
+the SDOH agent ↔ the Health-Equity lens + **D3**.
+
+Registering a NEW product agent — e.g. an **Agentic MTM Agent** added on a teammate's branch such as
+`origin/bob-work-week-aug2026` — into the coalition is two steps: (a) an agent-manifest entry per
+conventions §10.2 (name, purpose, tool allowlist, autonomy tier, escalation gates, PHI posture, owning
+module), and (b) mapping it to a review lens here — an existing D-card if one fits, or a NEW derived
+card if it opens a surface no lens owns yet. Its fidelity is proven by the T5 eval harness. *(This map
+lists the agents present on this branch today; a teammate's newly-added agent is folded in via these
+two steps once its files are on the branch.)*

@@ -104,6 +104,7 @@ export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>
   graph: 'GRAPH_STORE_URL',
   wpcRecord: 'WPC_RECORD_STORE_URL',
   measures: 'DEQM_MEASURES_URL',
+  episodes: 'EPISODE_FEED_URL',
 });
 
 /**

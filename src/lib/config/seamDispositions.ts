@@ -66,291 +66,306 @@ export interface SeamDispositionEntry {
  * The manifest — one entry per DATA_MODE_SEAMS id, populated from the CURRENT
  * real state of every seam (verified against the code, not the labels).
  */
-export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEntry>> = Object.freeze({
-  // ── fail-closed-stub: production throws a named *NotConfiguredError ──────────
-  identity: {
-    seamId: 'identity',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/identity/identitySource.ts → getIdentitySource()',
-    notConfiguredError: 'EmpiCandidateSourceNotConfiguredError',
-    note:
-      'U3 fix. The real EMPI match engine must score against a real candidate ' +
-      'source; production with no registered source throws rather than scoring ' +
-      'against the 3 demo records. mock/seeded → the in-memory demo registry.',
-  },
-  terminology: {
-    seamId: 'terminology',
-    disposition: 'fail-closed-stub',
-    productionResolverRef:
-      'lib/terminology/productionTerminologyService.ts (via selectTerminologyService)',
-    notConfiguredError: 'TerminologyServiceNotConfiguredError',
-    note:
-      'Stage-4 semantic gate. production terminology service throws on every ' +
-      'validateCode/translate/classify; the gate turns the throw into a ' +
-      'fail-closed quarantine (semantic-terminology-unavailable).',
-  },
-  profileValidation: {
-    seamId: 'profileValidation',
-    disposition: 'fail-closed-stub',
-    productionResolverRef:
-      'lib/pipeline/profileValidator.ts → productionProfileValidationService (via selectProfileValidator)',
-    notConfiguredError: 'ProfileValidatorNotConfiguredError',
-    note:
-      'U2 fix. The US Core $validate backend is not wired; the production service ' +
-      'throws and the gate quarantines every record (profile-validation-unavailable) ' +
-      'rather than admitting it unverified. mock/seeded → structural pre-flight.',
-  },
-  evidence: {
-    seamId: 'evidence',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/evidence/store/index.ts → getEvidenceStore()',
-    notConfiguredError: 'EvidenceStoreNotConfiguredError',
-    note:
-      'U4 fix. Callers route through getEvidenceStore(); production with no ' +
-      'registered pg-ledger factory throws (never a silent in-memory Map). The ' +
-      'composition root additionally throws EvidenceLedgerConnectionNotConfiguredError ' +
-      'when the factory runs without a connection string.',
-  },
-  consent: {
-    seamId: 'consent',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/consent/providerAccessOptOut.ts → getProviderAccessConsentStore()',
-    notConfiguredError: 'Error',
-    note:
-      'Provider-access opt-out store. production throws until a real consent ' +
-      'repository is wired; the SDE consent gate treats the throw as fail-closed ' +
-      'no-contact. NOTE: throws a plain Error (message-gated), not a named ' +
-      '*NotConfiguredError — recommended follow-up: name it for parity.',
-  },
-  signalDisposition: {
-    seamId: 'signalDisposition',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/sde/policy/policyStore.ts → getPolicyPack()',
-    notConfiguredError: 'SdePolicyStoreNotConfiguredError',
-    note:
-      'Signal Disposition Engine policy pack. The production DECISION path ' +
-      '(getPolicyPack, consumed by the engine) throws with no registered pack ' +
-      'loader. The demo projection (getSdeDemoDisposition) deliberately runs the ' +
-      'real engine on the default reference pack and is not a decision path.',
-  },
-  idempotencyStore: {
-    seamId: 'idempotencyStore',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/idempotency/index.ts → getIdempotencyStore()',
-    notConfiguredError: 'IdempotencyStoreNotConfiguredError',
-    note:
-      'NS-04 fix. Durable consumer-idempotency store (eventId -> processed marker, ' +
-      'per-consumer namespace) that replaces the SDE intake in-memory Set and guards ' +
-      'agent send-effects so an at-least-once outbox republish cannot double-produce ' +
-      'or double-send. Callers route through getIdempotencyStore(); production with no ' +
-      'registered pg-marker factory throws (never a silent in-memory Map presented as ' +
-      'durable dedupe). mock/seeded → the process-global in-memory store. pg logic is ' +
-      'verified via pg-mem; a Docker-guarded testcontainer spec exercises real-Postgres ' +
-      'PRIMARY KEY concurrency (FAKE_FIDELITY records the in-memory concurrency gap).',
-  },
-  deadLetterStore: {
-    seamId: 'deadLetterStore',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/deadLetter/index.ts → getDeadLetterStore()',
-    notConfiguredError: 'DeadLetterStoreNotConfiguredError',
-    note:
-      'NS-01 fix. Durable append-only store for the three record kinds the pipeline ' +
-      'used to build then DROP (quarantine, held-identity EMPI 60-90 band, ' +
-      'failed-outbox), so a held member can no longer silently disappear. Callers ' +
-      'route through getDeadLetterStore(); production with no registered pg-store ' +
-      'factory throws (never a silent in-memory Map presented as durable). ' +
-      'mock/seeded → the process-global in-memory append-only store (the demo stays ' +
-      'green). pg logic is verified via pg-mem; a Docker-guarded testcontainer spec ' +
-      'exercises real-Postgres append-only uniqueness + the immutability trigger ' +
-      '(FAKE_FIDELITY records the in-memory concurrency gap).',
-  },
-  goldCardRoster: {
-    seamId: 'goldCardRoster',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/dataSources/goldCardRoster.ts → getGoldCardRosterLoader().load()',
-    notConfiguredError: 'DataSourceNotConfiguredError',
-    note: 'Data-source seam. production loader throws until a real roster client is wired.',
-  },
-  denialRateFeed: {
-    seamId: 'denialRateFeed',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/dataSources/denialRateFeed.ts → getDenialRateFeedLoader().load()',
-    notConfiguredError: 'DataSourceNotConfiguredError',
-    note: 'Data-source seam. production loader throws until a real denial-rate feed is wired.',
-  },
-  providerDirectory: {
-    seamId: 'providerDirectory',
-    disposition: 'fail-closed-stub',
-    productionResolverRef:
-      'lib/dataSources/providerDirectory.ts → getProviderDirectoryLoader().load()',
-    notConfiguredError: 'DataSourceNotConfiguredError',
-    note: 'Data-source seam. production loader throws until a real provider directory is wired.',
-  },
-  // ── I8A wave C (F5 provider identity) — appended block ──────────────────────
-  providerIdentity: {
-    seamId: 'providerIdentity',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/identity/provider/directory.ts → getProviderDirectory()',
-    notConfiguredError: 'NppesNotConfiguredError',
-    note:
-      'F5 fix. NPI/NPPES provider resolution. The provider resolver anchors a ' +
-      'provider by its VALIDATED NPI (NPPES 80840-prefixed Luhn) and enriches from ' +
-      'the NPPES directory seam. mock/seeded → the in-repo seeded synthetic ' +
-      'directory (demo stays green); production with no live NPPES client wired ' +
-      'throws NppesNotConfiguredError (fail closed) rather than serving the seed as ' +
-      'production data. NPI validation is offline + deterministic; an invalid NPI ' +
-      'is rejected and never anchored (E9: no fabricated provider identity).',
-  },
-  // ── I8A wave A (F3 golden-record survivorship + cross-reference) — appended block ──
-  crossReference: {
-    seamId: 'crossReference',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/identity/crossReference/index.ts → getCrossReferenceStore()',
-    notConfiguredError: 'CrossReferenceStoreNotConfiguredError',
-    note:
-      'F3 fix. Member<->source-id cross-reference table that closes identity ' +
-      'fragmentation: a source id already linked resolves to the EXISTING member ' +
-      'instead of minting a new one per feed. Append-only + merge-aware (DP-7); ' +
-      'link/unlink/merge/unmerge emit memberId-partitioned C2 events so the graph ' +
-      'rekeys by REPLAY (never in-place). mock/seeded → the process-global in-memory ' +
-      'store (demo stays green); production with no registered pg-store factory ' +
-      'throws CrossReferenceStoreNotConfiguredError (fail closed, never a silent ' +
-      'in-memory Map presented as durable). pg logic is verified via pg-mem. E9: an ' +
-      'ambiguous source id (distinct unmerged members) resolves to HELD, never a ' +
-      'wrong member.',
-  },
+export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEntry>> =
+  Object.freeze({
+    // ── fail-closed-stub: production throws a named *NotConfiguredError ──────────
+    identity: {
+      seamId: 'identity',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/identity/identitySource.ts → getIdentitySource()',
+      notConfiguredError: 'EmpiCandidateSourceNotConfiguredError',
+      note:
+        'U3 fix. The real EMPI match engine must score against a real candidate ' +
+        'source; production with no registered source throws rather than scoring ' +
+        'against the 3 demo records. mock/seeded → the in-memory demo registry.',
+    },
+    terminology: {
+      seamId: 'terminology',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/terminology/productionTerminologyService.ts (via selectTerminologyService)',
+      notConfiguredError: 'TerminologyServiceNotConfiguredError',
+      note:
+        'Stage-4 semantic gate. production terminology service throws on every ' +
+        'validateCode/translate/classify; the gate turns the throw into a ' +
+        'fail-closed quarantine (semantic-terminology-unavailable).',
+    },
+    profileValidation: {
+      seamId: 'profileValidation',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/pipeline/profileValidator.ts → productionProfileValidationService (via selectProfileValidator)',
+      notConfiguredError: 'ProfileValidatorNotConfiguredError',
+      note:
+        'U2 fix. The US Core $validate backend is not wired; the production service ' +
+        'throws and the gate quarantines every record (profile-validation-unavailable) ' +
+        'rather than admitting it unverified. mock/seeded → structural pre-flight.',
+    },
+    evidence: {
+      seamId: 'evidence',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/evidence/store/index.ts → getEvidenceStore()',
+      notConfiguredError: 'EvidenceStoreNotConfiguredError',
+      note:
+        'U4 fix. Callers route through getEvidenceStore(); production with no ' +
+        'registered pg-ledger factory throws (never a silent in-memory Map). The ' +
+        'composition root additionally throws EvidenceLedgerConnectionNotConfiguredError ' +
+        'when the factory runs without a connection string.',
+    },
+    consent: {
+      seamId: 'consent',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/consent/providerAccessOptOut.ts → getProviderAccessConsentStore()',
+      notConfiguredError: 'Error',
+      note:
+        'Provider-access opt-out store. production throws until a real consent ' +
+        'repository is wired; the SDE consent gate treats the throw as fail-closed ' +
+        'no-contact. NOTE: throws a plain Error (message-gated), not a named ' +
+        '*NotConfiguredError — recommended follow-up: name it for parity.',
+    },
+    signalDisposition: {
+      seamId: 'signalDisposition',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/sde/policy/policyStore.ts → getPolicyPack()',
+      notConfiguredError: 'SdePolicyStoreNotConfiguredError',
+      note:
+        'Signal Disposition Engine policy pack. The production DECISION path ' +
+        '(getPolicyPack, consumed by the engine) throws with no registered pack ' +
+        'loader. The demo projection (getSdeDemoDisposition) deliberately runs the ' +
+        'real engine on the default reference pack and is not a decision path.',
+    },
+    idempotencyStore: {
+      seamId: 'idempotencyStore',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/idempotency/index.ts → getIdempotencyStore()',
+      notConfiguredError: 'IdempotencyStoreNotConfiguredError',
+      note:
+        'NS-04 fix. Durable consumer-idempotency store (eventId -> processed marker, ' +
+        'per-consumer namespace) that replaces the SDE intake in-memory Set and guards ' +
+        'agent send-effects so an at-least-once outbox republish cannot double-produce ' +
+        'or double-send. Callers route through getIdempotencyStore(); production with no ' +
+        'registered pg-marker factory throws (never a silent in-memory Map presented as ' +
+        'durable dedupe). mock/seeded → the process-global in-memory store. pg logic is ' +
+        'verified via pg-mem; a Docker-guarded testcontainer spec exercises real-Postgres ' +
+        'PRIMARY KEY concurrency (FAKE_FIDELITY records the in-memory concurrency gap).',
+    },
+    deadLetterStore: {
+      seamId: 'deadLetterStore',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/deadLetter/index.ts → getDeadLetterStore()',
+      notConfiguredError: 'DeadLetterStoreNotConfiguredError',
+      note:
+        'NS-01 fix. Durable append-only store for the three record kinds the pipeline ' +
+        'used to build then DROP (quarantine, held-identity EMPI 60-90 band, ' +
+        'failed-outbox), so a held member can no longer silently disappear. Callers ' +
+        'route through getDeadLetterStore(); production with no registered pg-store ' +
+        'factory throws (never a silent in-memory Map presented as durable). ' +
+        'mock/seeded → the process-global in-memory append-only store (the demo stays ' +
+        'green). pg logic is verified via pg-mem; a Docker-guarded testcontainer spec ' +
+        'exercises real-Postgres append-only uniqueness + the immutability trigger ' +
+        '(FAKE_FIDELITY records the in-memory concurrency gap).',
+    },
+    goldCardRoster: {
+      seamId: 'goldCardRoster',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/dataSources/goldCardRoster.ts → getGoldCardRosterLoader().load()',
+      notConfiguredError: 'DataSourceNotConfiguredError',
+      note: 'Data-source seam. production loader throws until a real roster client is wired.',
+    },
+    denialRateFeed: {
+      seamId: 'denialRateFeed',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/dataSources/denialRateFeed.ts → getDenialRateFeedLoader().load()',
+      notConfiguredError: 'DataSourceNotConfiguredError',
+      note: 'Data-source seam. production loader throws until a real denial-rate feed is wired.',
+    },
+    providerDirectory: {
+      seamId: 'providerDirectory',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/dataSources/providerDirectory.ts → getProviderDirectoryLoader().load()',
+      notConfiguredError: 'DataSourceNotConfiguredError',
+      note: 'Data-source seam. production loader throws until a real provider directory is wired.',
+    },
+    // ── I8A wave C (F5 provider identity) — appended block ──────────────────────
+    providerIdentity: {
+      seamId: 'providerIdentity',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/identity/provider/directory.ts → getProviderDirectory()',
+      notConfiguredError: 'NppesNotConfiguredError',
+      note:
+        'F5 fix. NPI/NPPES provider resolution. The provider resolver anchors a ' +
+        'provider by its VALIDATED NPI (NPPES 80840-prefixed Luhn) and enriches from ' +
+        'the NPPES directory seam. mock/seeded → the in-repo seeded synthetic ' +
+        'directory (demo stays green); production with no live NPPES client wired ' +
+        'throws NppesNotConfiguredError (fail closed) rather than serving the seed as ' +
+        'production data. NPI validation is offline + deterministic; an invalid NPI ' +
+        'is rejected and never anchored (E9: no fabricated provider identity).',
+    },
+    // ── I8A wave A (F3 golden-record survivorship + cross-reference) — appended block ──
+    crossReference: {
+      seamId: 'crossReference',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/identity/crossReference/index.ts → getCrossReferenceStore()',
+      notConfiguredError: 'CrossReferenceStoreNotConfiguredError',
+      note:
+        'F3 fix. Member<->source-id cross-reference table that closes identity ' +
+        'fragmentation: a source id already linked resolves to the EXISTING member ' +
+        'instead of minting a new one per feed. Append-only + merge-aware (DP-7); ' +
+        'link/unlink/merge/unmerge emit memberId-partitioned C2 events so the graph ' +
+        'rekeys by REPLAY (never in-place). mock/seeded → the process-global in-memory ' +
+        'store (demo stays green); production with no registered pg-store factory ' +
+        'throws CrossReferenceStoreNotConfiguredError (fail closed, never a silent ' +
+        'in-memory Map presented as durable). pg logic is verified via pg-mem. E9: an ' +
+        'ambiguous source id (distinct unmerged members) resolves to HELD, never a ' +
+        'wrong member.',
+    },
 
-  // ── I8A-iii Wave A (value-set governance lifecycle) — appended block ──────────
-  valueSetGovernanceStore: {
-    seamId: 'valueSetGovernanceStore',
-    disposition: 'fail-closed-stub',
-    productionResolverRef:
-      'lib/terminology/governance/store.ts → getValueSetGovernanceStore()',
-    notConfiguredError: 'ValueSetGovernanceStoreNotConfiguredError',
-    note:
-      'B2 fix. Value-set version-lifecycle governance (draft -> in-review -> ' +
-      'approved(active) / rejected -> retired/superseded) with ENFORCED maker-checker ' +
-      'approval and an immutable, PHI-free transition audit ledger. Callers route ' +
-      'through getValueSetGovernanceStore(); production with no registered pg-ledger ' +
-      'factory throws (never a silent in-memory Map presented as durable governance). ' +
-      'mock/seeded → the process-global in-memory append-only store (the demo stays ' +
-      'green). The lifecycle is guarded (an illegal transition throws) and one ' +
-      'version per value set is active at a time.',
-  },
+    // ── I8A-iii Wave A (value-set governance lifecycle) — appended block ──────────
+    valueSetGovernanceStore: {
+      seamId: 'valueSetGovernanceStore',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/terminology/governance/store.ts → getValueSetGovernanceStore()',
+      notConfiguredError: 'ValueSetGovernanceStoreNotConfiguredError',
+      note:
+        'B2 fix. Value-set version-lifecycle governance (draft -> in-review -> ' +
+        'approved(active) / rejected -> retired/superseded) with ENFORCED maker-checker ' +
+        'approval and an immutable, PHI-free transition audit ledger. Callers route ' +
+        'through getValueSetGovernanceStore(); production with no registered pg-ledger ' +
+        'factory throws (never a silent in-memory Map presented as durable governance). ' +
+        'mock/seeded → the process-global in-memory append-only store (the demo stays ' +
+        'green). The lifecycle is guarded (an illegal transition throws) and one ' +
+        'version per value set is active at a time.',
+    },
 
-  // ── real-impl: production runs the real path, no mock fallback ───────────────
-  fhirStore: {
-    seamId: 'fhirStore',
-    disposition: 'real-impl',
-    productionResolverRef: 'lib/services/fhirClient.ts → useMock()/getFhirMockMode()',
-    note:
-      'production issues real HTTP requests against NEXT_PUBLIC_FHIR_BASE_URL; ' +
-      'mock/seeded serve the in-memory fixture store. In production useMock() is ' +
-      'false — the fixture store is never the production read path.',
-  },
-  agentRuntime: {
-    seamId: 'agentRuntime',
-    disposition: 'real-impl',
-    productionResolverRef: 'lib/agents/demo/index.ts → getAgentDemoActions() (agentRuntimeMode)',
-    note:
-      'production runs the REAL agents/runtime and returns EMERGENT actions; ' +
-      'mock returns the authored demo actions. production never returns the ' +
-      'authored mock. (The durable-engine backend is a documented L1 fidelity ' +
-      'gap — FAKE_FIDELITY.md / finding R1 — orthogonal to this fail-closed gate.)',
-  },
-  agentManifests: {
-    seamId: 'agentManifests',
-    disposition: 'real-impl',
-    productionResolverRef: 'lib/agents/manifest/registry.ts → loadAgentManifests()',
-    note:
-      'The shipped manifest registry is validated reference data (policy-as-data, ' +
-      'finding A15), identical across modes; production honors a registered ' +
-      'store-backed loader when present. There is no mock variant to fall back to.',
-  },
+    // ── real-impl: production runs the real path, no mock fallback ───────────────
+    fhirStore: {
+      seamId: 'fhirStore',
+      disposition: 'real-impl',
+      productionResolverRef: 'lib/services/fhirClient.ts → useMock()/getFhirMockMode()',
+      note:
+        'production issues real HTTP requests against NEXT_PUBLIC_FHIR_BASE_URL; ' +
+        'mock/seeded serve the in-memory fixture store. In production useMock() is ' +
+        'false — the fixture store is never the production read path.',
+    },
+    agentRuntime: {
+      seamId: 'agentRuntime',
+      disposition: 'real-impl',
+      productionResolverRef: 'lib/agents/demo/index.ts → getAgentDemoActions() (agentRuntimeMode)',
+      note:
+        'production runs the REAL agents/runtime and returns EMERGENT actions; ' +
+        'mock returns the authored demo actions. production never returns the ' +
+        'authored mock. (The durable-engine backend is a documented L1 fidelity ' +
+        'gap — FAKE_FIDELITY.md / finding R1 — orthogonal to this fail-closed gate.)',
+    },
+    agentManifests: {
+      seamId: 'agentManifests',
+      disposition: 'real-impl',
+      productionResolverRef: 'lib/agents/manifest/registry.ts → loadAgentManifests()',
+      note:
+        'The shipped manifest registry is validated reference data (policy-as-data, ' +
+        'finding A15), identical across modes; production honors a registered ' +
+        'store-backed loader when present. There is no mock variant to fall back to.',
+    },
 
-  // ── mock-only: registered for ops visibility; NO production decision consumer ─
-  // (graph + wpcRecord were reclassified fail-closed-stub in I14/I17 when the
-  //  projection consumer + record-lifecycle wired real production consumers.)
-  graph: {
-    seamId: 'graph',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/graph/consumer/provider.ts → resolveProjectionStores()',
-    notConfiguredError: 'ProjectionStoresNotConfiguredError',
-    note:
-      'I14 (REC-01) wired the outbox->projector consumer: resolveProjectionStores() ' +
-      'consults getDataMode(\'graph\'). production requires a REGISTERED durable ' +
-      'outbox + graph-store factory, or throws ProjectionStoresNotConfiguredError ' +
-      '(never the in-memory fake presented as durable). mock/seeded → the in-memory ' +
-      'projection stores (demo/authored graph unchanged).',
-  },
-  sde: {
-    seamId: 'sde',
-    disposition: 'mock-only',
-    productionResolverRef: 'lib/sdResourceData.ts (SEAM anchor; getDataMode not called)',
-    note:
-      'Authored SD community-resource data, a demo/UI source only (finding A15). ' +
-      'No getDataMode(\'sde\') consumer. Distinct from signalDisposition, which is ' +
-      'the wired SDE decision seam.',
-  },
-  wpcRecord: {
-    seamId: 'wpcRecord',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/lifecycle/recordLifecycle.ts → getRecordLifecycleStore() (via /api/records)',
-    notConfiguredError: 'RecordLifecycleNotConfiguredError',
-    note:
-      'I17 (RP-01/CRUD-02) wired the record-correction/void route: it consults ' +
-      'getDataMode(\'wpcRecord\') and resolves getRecordLifecycleStore(durable). ' +
-      'production requires a REGISTERED durable lifecycle factory, or throws ' +
-      'RecordLifecycleNotConfiguredError (never a process-local Map as durable). ' +
-      'mock/seeded → the in-memory lifecycle store (demo unchanged).',
-  },
-  carePlan: {
-    seamId: 'carePlan',
-    disposition: 'mock-only',
-    productionResolverRef: 'registered in dataMode.ts; no consumer wired yet',
-    note:
-      'Care-plan source seam, registered ahead of its backend. No ' +
-      'getDataMode(\'carePlan\') consumer exists — inert until wired.',
-  },
-  adequacy: {
-    seamId: 'adequacy',
-    disposition: 'mock-only',
-    productionResolverRef: 'lib/networkAdequacy/network.ts (loads seed directly; getDataMode not called)',
-    note:
-      'Network-adequacy input seam. loadMockNetwork() serves the bundled seed; ' +
-      'non-mock callers pass their own AdequacyInput. No getDataMode(\'adequacy\') ' +
-      'consumer exists — inert until wired.',
-  },
+    // ── mock-only: registered for ops visibility; NO production decision consumer ─
+    // (graph + wpcRecord were reclassified fail-closed-stub in I14/I17 when the
+    //  projection consumer + record-lifecycle wired real production consumers.)
+    graph: {
+      seamId: 'graph',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/graph/consumer/provider.ts → resolveProjectionStores()',
+      notConfiguredError: 'ProjectionStoresNotConfiguredError',
+      note:
+        'I14 (REC-01) wired the outbox->projector consumer: resolveProjectionStores() ' +
+        "consults getDataMode('graph'). production requires a REGISTERED durable " +
+        'outbox + graph-store factory, or throws ProjectionStoresNotConfiguredError ' +
+        '(never the in-memory fake presented as durable). mock/seeded → the in-memory ' +
+        'projection stores (demo/authored graph unchanged).',
+    },
+    episodes: {
+      seamId: 'episodes',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/episodes/index.ts → setProductionEpisodeFeedLoader() / ingestEpisodeFeed()',
+      notConfiguredError: 'EpisodeFeedNotConfiguredError',
+      note:
+        'Episodic analytics: mock/seeded serve the authored bundle; production ingests an ' +
+        'external ETG/grouper + measure feed via the registered loader, fail-closed until wired ' +
+        '(EpisodeFeedNotConfiguredError); ingestEpisodeFeed throws EpisodeFeedMalformedError on a bad feed.',
+    },
+    sde: {
+      seamId: 'sde',
+      disposition: 'mock-only',
+      productionResolverRef: 'lib/sdResourceData.ts (SEAM anchor; getDataMode not called)',
+      note:
+        'Authored SD community-resource data, a demo/UI source only (finding A15). ' +
+        'No data-mode decision consumer for sde. Distinct from signalDisposition, which is ' +
+        'the wired SDE decision seam.',
+    },
+    wpcRecord: {
+      seamId: 'wpcRecord',
+      disposition: 'fail-closed-stub',
+      productionResolverRef:
+        'lib/lifecycle/recordLifecycle.ts → getRecordLifecycleStore() (via /api/records)',
+      notConfiguredError: 'RecordLifecycleNotConfiguredError',
+      note:
+        'I17 (RP-01/CRUD-02) wired the record-correction/void route: it consults ' +
+        "getDataMode('wpcRecord') and resolves getRecordLifecycleStore(durable). " +
+        'production requires a REGISTERED durable lifecycle factory, or throws ' +
+        'RecordLifecycleNotConfiguredError (never a process-local Map as durable). ' +
+        'mock/seeded → the in-memory lifecycle store (demo unchanged).',
+    },
+    carePlan: {
+      seamId: 'carePlan',
+      disposition: 'mock-only',
+      productionResolverRef: 'registered in dataMode.ts; no consumer wired yet',
+      note:
+        'Care-plan source seam, registered ahead of its backend. No ' +
+        'a data-mode decision consumer for carePlan is not wired yet — inert until then.',
+    },
+    adequacy: {
+      seamId: 'adequacy',
+      disposition: 'mock-only',
+      productionResolverRef:
+        'lib/networkAdequacy/network.ts (loads seed directly; getDataMode not called)',
+      note:
+        'Network-adequacy input seam. loadMockNetwork() serves the bundled seed; ' +
+        'non-mock callers pass their own AdequacyInput. No data-mode decision consumer for adequacy ' +
+        'consumer exists — inert until wired.',
+    },
 
-  // ── I13 HW-SEC: tenant/plan/LOB boundary (C-TEN) ─────────────────────────────
-  tenancy: {
-    seamId: 'tenancy',
-    disposition: 'real-impl',
-    productionResolverRef: 'lib/security/tenant/resolve.ts → resolveActorTenantScope()/resolveMemberTenant()',
-    note:
-      'Tenant/plan/LOB isolation. production derives the member tenant from the ' +
-      'record (payer/contract) and the actor scope from VERIFIED IdP claims on the ' +
-      'session, then assertTenantScope() denies cross-tenant/cross-LOB access — even ' +
-      'for an org-scoped reviewer. production NEVER returns the permissive demo scope ' +
-      '(no mock fallback); an absent claim fails CLOSED to an empty scope (deny). ' +
-      'mock/seeded → the single demo tenant so the frontend-only demo is unchanged.',
-  },
+    // ── I13 HW-SEC: tenant/plan/LOB boundary (C-TEN) ─────────────────────────────
+    tenancy: {
+      seamId: 'tenancy',
+      disposition: 'real-impl',
+      productionResolverRef:
+        'lib/security/tenant/resolve.ts → resolveActorTenantScope()/resolveMemberTenant()',
+      note:
+        'Tenant/plan/LOB isolation. production derives the member tenant from the ' +
+        'record (payer/contract) and the actor scope from VERIFIED IdP claims on the ' +
+        'session, then assertTenantScope() denies cross-tenant/cross-LOB access — even ' +
+        'for an org-scoped reviewer. production NEVER returns the permissive demo scope ' +
+        '(no mock fallback); an absent claim fails CLOSED to an empty scope (deny). ' +
+        'mock/seeded → the single demo tenant so the frontend-only demo is unchanged.',
+    },
 
-  // ── I19 HW4: external DEQM measures ingestion (C-MEAS) ────────────────────────
-  measures: {
-    seamId: 'measures',
-    disposition: 'fail-closed-stub',
-    productionResolverRef: 'lib/measures/index.ts → getCareGapView()',
-    notConfiguredError: 'MeasuresFeedNotConfiguredError',
-    note:
-      'External HEDIS/Stars/MIPS measures. The platform INGESTS a Da Vinci DEQM ' +
-      'MeasureReport feed; it does NOT compute measures (constraint #4). production ' +
-      'with no registered external feed loader throws MeasuresFeedNotConfiguredError ' +
-      '(never a fabricated gap list presented as the real feed). mock/seeded → the ' +
-      'authored demo gaps (HEDIS/Stars/MIPS), normalized read-only so the demo golden ' +
-      'is unchanged.',
-  },
-} as const);
+    // ── I19 HW4: external DEQM measures ingestion (C-MEAS) ────────────────────────
+    measures: {
+      seamId: 'measures',
+      disposition: 'fail-closed-stub',
+      productionResolverRef: 'lib/measures/index.ts → getCareGapView()',
+      notConfiguredError: 'MeasuresFeedNotConfiguredError',
+      note:
+        'External HEDIS/Stars/MIPS measures. The platform INGESTS a Da Vinci DEQM ' +
+        'MeasureReport feed; it does NOT compute measures (constraint #4). production ' +
+        'with no registered external feed loader throws MeasuresFeedNotConfiguredError ' +
+        '(never a fabricated gap list presented as the real feed). mock/seeded → the ' +
+        'authored demo gaps (HEDIS/Stars/MIPS), normalized read-only so the demo golden ' +
+        'is unchanged.',
+    },
+  } as const);
 
 /** Every seam id declared in the manifest. */
 export function dispositionSeamIds(): DataModeSeam[] {

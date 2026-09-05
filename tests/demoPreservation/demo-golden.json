@@ -290,7 +290,7 @@
     },
     {
       "panel": "config.dataModes",
-      "count": 24,
+      "count": 25,
       "ids": [
         "adequacy",
         "agentManifests",
@@ -300,6 +300,7 @@
         "crossReference",
         "deadLetterStore",
         "denialRateFeed",
+        "episodes",
         "evidence",
         "fhirStore",
         "goldCardRoster",
@@ -317,7 +318,7 @@
         "valueSetGovernanceStore",
         "wpcRecord"
       ],
-      "hash": "6694c5db"
+      "hash": "c1115dd9"
     }
   ]
 }

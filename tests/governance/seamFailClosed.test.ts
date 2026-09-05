@@ -111,6 +111,11 @@ import {
   MeasuresFeedNotConfiguredError,
 } from '@/lib/measures';
 import {
+  getEpisodeAnalyticsView,
+  setProductionEpisodeFeedLoader,
+  EpisodeFeedNotConfiguredError,
+} from '@/lib/episodes';
+import {
   resolveProjectionStores,
   ProjectionStoresNotConfiguredError,
   setProductionOutboxFactory,
@@ -206,6 +211,16 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     // mock returns the authored demo gaps (demo preserved).
     expect(getCareGapView().gaps.length).toBeGreaterThan(0);
     setProductionMeasuresFeedLoader(null);
+  },
+  episodes: () => {
+    setProductionEpisodeFeedLoader(null);
+    setSessionDataMode('episodes', 'production');
+    // production with no external episode feed loader fails loud (never a fabricated feed).
+    expect(() => getEpisodeAnalyticsView()).toThrow(EpisodeFeedNotConfiguredError);
+    setSessionDataMode('episodes', 'mock');
+    // mock returns the authored demo bundle (demo preserved).
+    expect(getEpisodeAnalyticsView().EPISODE_TYPES.length).toBeGreaterThan(0);
+    setProductionEpisodeFeedLoader(null);
   },
   graph: () => {
     setProductionOutboxFactory(null);

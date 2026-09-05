@@ -56,7 +56,10 @@ changed_src() {
 g_format()   { local f; f="$(changed_src | tr '\n' ' ')"; [ -z "$f" ] && { echo "(no changed source files)"; return 0; }; npx --no-install prettier --write --ignore-unknown $f && echo "formatted changed files with the repo .prettierrc"; }
 g_types()    { npm run --silent check:types; }
 g_sizes()    { npm run --silent check:sizes; }
-g_lint()     { local f; f="$(changed_src | sed 's/^/--file /')"; if [ -z "$f" ]; then echo "(no changed source files)"; return 0; fi; npx --no-install next lint $f; }
+# g_lint: lint the changed source files. Exclude src/uhg/ — .eslintignore intentionally
+# excludes that legacy demo/presentation layer, and `next lint --file <ignored>` treats an
+# ignored file as a failure. Aligning the lint set with .eslintignore keeps the gate honest.
+g_lint()     { local f; f="$(changed_src | grep -v '^src/uhg/' | sed 's/^/--file /')"; if [ -z "$f" ]; then echo "(no changed lintable source files)"; return 0; fi; npx --no-install next lint $f; }
 g_testlink() { local f; f="$(changed_src | tr '\n' ' ')"; node docs/build-provenance/check-testlink.mjs src tests $f --baseline docs/build-provenance/testlink-baseline.json; }
 g_unit()     { npx --no-install vitest run; }
 g_wiring()   { node docs/build-provenance/check-wiring.mjs src --baseline docs/build-provenance/wiring-baseline.json; }

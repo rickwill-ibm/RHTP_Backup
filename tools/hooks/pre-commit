@@ -25,6 +25,17 @@ if [ -n "$FILES" ]; then
   echo "$FILES" | xargs -r git add
 fi
 
+# 1.5) Size preflight (ADVISORY) — print the ratchet status of every staged source file
+#      BEFORE the gate below judges it, so an at-cap / baselined / landmine file is a named
+#      heads-up at commit time, not a surprise at push. Never fails the commit itself (the
+#      ratchet in step 2 is the real gate); run `npm run preflight` any time for the full set.
+PF_STAGED=$(git diff --cached --name-only --diff-filter=ACMR -- src \
+  | grep -E '\.(ts|tsx|js|jsx)$' || true)
+if [ -n "$PF_STAGED" ]; then
+  echo "[pre-commit] size preflight (advisory — see npm run preflight)"
+  bash tools/preflight-files.sh $PF_STAGED || true
+fi
+
 # 2) File-size + quality ratchet (fast).
 echo "[pre-commit] file sizes + quality ratchet"
 bash check-file-sizes.sh

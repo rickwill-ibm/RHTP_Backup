@@ -219,16 +219,24 @@ Three checks run *before* touching code, because the cheapest defect is the one 
 write. Each was added from a real, expensive miss this framework recorded — a formatting
 landmine, a silent-dead wiring, and a session's worth of gate debt detonating at once.
 
-1. **File-state gate — know the FORMATTED size before you edit.** Run
-   `bash tools/preflight-files.sh <files>` on every file you intend to change. It prints, per
-   file, current lines, the PRETTIER-FORMATTED line count (`npx prettier <file> | wc -l`), the
-   cap, and the baseline, and flags `🔴 LANDMINE: formats to N > cap — EXTRACT first` when your
-   edit would breach the ratchet *on commit*. This is the design-time complement to §2's rule
-   that a file's size is its formatted size: a file that was committed hand-compacted under an
-   old `--no-verify` bypass can balloon 2–3× when prettier runs at commit and blow the cap after
-   you have already built on it. Earn the headroom first — move data to `*.json`, split by
-   responsibility (§2) — *then* edit. Skipping this is how "the gate said green, then blocked my
-   commit on size" happens.
+1. **File-state gate — know the FORMATTED size before you edit, for the WHOLE change set at once.**
+   Run `npm run preflight` (= `bash tools/preflight-files.sh` with no args). In that AUTO mode it
+   scans every source file the current change set touches — the *same* union the size gate judges
+   (committed-vs-`$GATE_BASE` ∪ staged ∪ unstaged ∪ untracked) — so you see every at-risk file in
+   one table instead of fixing one and discovering the next (the classic whack-a-mole). Pass explicit
+   files (`bash tools/preflight-files.sh <files>`) to check a file *before* you start editing it.
+   Either way it prints, per file, current lines, the PRETTIER-FORMATTED line count
+   (`npx prettier <file> | wc -l` — the number the ratchet actually uses), the cap, and the baseline,
+   and flags `🔴 LANDMINE: formats to N > cap/baseline — EXTRACT first` when an edit would breach the
+   ratchet *on commit*, `⚠ baselined N — no net growth` for a frozen file, and `⚠ approaching cap`
+   within 15% of the limit. The `pre-commit` hook now also prints this table (advisory, never
+   failing) for the staged files, so the landmine list appears at commit time, not first at push.
+   This is the design-time complement to §2's rule that a file's size is its formatted size: a file
+   committed hand-compacted under an old `--no-verify` bypass can balloon 2–3× when prettier runs at
+   commit and blow the cap after you have already built on it; and prettier can tip a file one line
+   over its baseline, which the table shows before the gate does. Earn the headroom first — move data
+   to `*.json`, split by responsibility (§2) — *then* edit. Skipping this is how "the gate said green,
+   then blocked my commit on size" happens.
 
 2. **VERIFY-LIVE — confirm the thing is actually wired before you wire to it.** Before adding a
    consumer of a seam, context value, flag, or exported symbol, prove it is really consumed

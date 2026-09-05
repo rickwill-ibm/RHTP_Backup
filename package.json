@@ -72,6 +72,7 @@
     "install:integrated": "bash install/install.sh --no-dev",
     "check:types": "tsc --noEmit",
     "check:sizes": "bash check-file-sizes.sh",
+    "preflight": "bash tools/preflight-files.sh",
     "check:all": "npm run check:types && npm run check:sizes && npm run lint && vitest run",
     "check:testlink": "node docs/build-provenance/check-testlink.mjs src tests --baseline docs/build-provenance/testlink-baseline.json",
     "check:mutation": "node docs/build-provenance/check-mutation.mjs --config docs/build-provenance/mutation-targets.json",

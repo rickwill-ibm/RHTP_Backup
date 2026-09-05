@@ -11,7 +11,7 @@
  *
  * Proven on BOTH graph backends (pg-mem Postgres + the Neo4j fake).
  */
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'fs';
 import { createXrefIndex } from '@/lib/identity';
 import { createMemoryOutboxStore } from '@/lib/outbox';
@@ -164,7 +164,7 @@ for (const backend of BACKENDS) {
     let load: IngestBundleResult;
     let diabetesHold: DeadLetterRecord;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       w = wire(await backend.make());
       load = await ingestBundle(
         loadAlex(),

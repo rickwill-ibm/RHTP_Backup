@@ -16,7 +16,7 @@
  *      unknown-subject resource still resolves via the xref/EMPI seam (no throw);
  *   5. idempotency: streaming the SAME Observation twice yields exactly ONE node.
  */
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'fs';
 import { createXrefIndex } from '@/lib/identity';
 import { createMemoryDeadLetterStore } from '@/lib/deadLetter';
@@ -104,7 +104,7 @@ for (const backend of BACKENDS) {
     let membersAfterBatch: number;
     let streamResult: Awaited<ReturnType<typeof ingestStreamEvent>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       const graph = await backend.make();
       stores = sharedStores(graph);
       bundle = loadBundle('dorothy-simmons');
@@ -229,7 +229,7 @@ for (const backend of BACKENDS) {
     });
 
     it('every stream event emits one PHI-safe, balanced reconciliation record', () => {
-      // The admitted dorothy stream from beforeAll carries a first-class ABC record.
+      // The admitted dorothy stream from the setup hook carries a first-class ABC record.
       expect(streamResult.reconciliation).toBeTruthy();
       expect(streamResult.reconciliation.countIn).toBe(1);
       expect(streamResult.reconciliation.balanced).toBe(true);
@@ -239,7 +239,7 @@ for (const backend of BACKENDS) {
 
     // ── 5. idempotency: same Observation twice -> exactly ONE node ────────────
     it('streaming the SAME Observation twice yields exactly ONE Observation node', async () => {
-      // dorothy's obs-stream-1 was already streamed once in beforeAll; stream it AGAIN.
+      // dorothy's obs-stream-1 was already streamed once in the setup hook; stream it AGAIN.
       const again = await ingestStreamEvent(
         streamObservation(patientToken(bundle)),
         { sourceSystem: SOURCE, now: fixedNow, rng: seededRng(7) },

@@ -22,7 +22,7 @@
     "src/app/demo-deck/page.tsx": 1223,
     "src/app/demo-onboarding/page.tsx": 2055,
     "src/app/episode-detail/page.tsx": 1052,
-    "src/app/episodic-management-analytics/page.tsx": 2292,
+    "src/app/episodic-management-analytics/page.tsx": 1530,
     "src/app/executive-outcomes-dashboard/page.tsx": 925,
     "src/app/financial-dashboard/components/FinancialActionBar.tsx": 563,
     "src/app/journey-aware-context/page.tsx": 589,
@@ -52,7 +52,7 @@
     "src/app/provider-level/page.tsx": 599,
     "src/app/provider-selection/components/ProviderDirectoryTable.tsx": 716,
     "src/app/provider-selection/components/ReferralJourney.tsx": 655,
-    "src/app/referral-journey-tracker/page.tsx": 1325,
+    "src/app/referral-journey-tracker/page.tsx": 1182,
     "src/app/referral-tracking/page.tsx": 811,
     "src/app/settings/fhir-tester/page.tsx": 1788,
     "src/app/settings/page.tsx": 727,
@@ -80,6 +80,7 @@
     "src/components/DemoNavigator.tsx": 1823,
     "src/components/PostmanSuiteTab.tsx": 752,
     "src/components/wpc/SignalGraph.tsx": 553,
-    "src/uhg/components/shared/PresenterControls.tsx": 445
+    "src/uhg/components/shared/PresenterControls.tsx": 445,
+    "src/lib/episodes/mockEpisodes.ts": 637
   }
 }

@@ -113,3 +113,31 @@ Order (worst-first; formatted line counts):
 
 Method per file: identify cohesive blocks (data → JSON/module; sub-views → components; helpers →
 lib), extract, re-verify, lower the baseline. Never a big-bang; each is independently revertible.
+## Scheduled: referral origination persistence (sessionStorage and/or FHIR write) — across the board
+
+Context: Run-play / manual enrollments create in-memory `ReferralTask`s in `appContext`
+(`referralTasks`). As of this change they surface contextually in the existing closed-loop
+screens — `/referral-tracking` (Active Referrals) and `/referral-journey-tracker` (Submitted
+stage) — via the single-source adapter `src/lib/referrals/fromReferralTask.ts` (dedup by id +
+intent, merged live-wins ahead of authored demo rows; no new engine, no seed data).
+
+Known limitation (accepted for now): `appContext` state is in-memory. It survives in-app client
+navigation (top-level provider) but NOT a hard page reload — on reload the run-play referrals
+disappear and both screens revert to authored demo data. This matches how the store behaves
+everywhere else in the app; it is honest current behavior, not a regression.
+
+Scheduled work — make origination durable **across the board** (not just referrals):
+1. **sessionStorage hydration** for `appContext` origination collections (`referralTasks`,
+   `opsTasks`, and any peer session-scoped queues) — rehydrate on mount, persist on change, with
+   try/catch + graceful-absence (private window / cleared storage). Cheapest path to
+   reload-durability for a demo; per-browser, per-tab.
+2. **FHIR write-path** as the production-grade option: persist a Run-play referral as a
+   `ServiceRequest` (+ `Task`) through the existing `fhirClient`, so the journey/tracking screens
+   read it back on their live FHIR branch (which already exists in both screens). This is the
+   "closes the loop for real" path and aligns with the ingest-not-compute doctrine (platform
+   writes the referral resource; downstream systems drive acceptance/scheduling/outcome states).
+3. Decide scope: sessionStorage is a demo convenience; FHIR write is the real closed loop. Likely
+   BOTH — sessionStorage for offline/demo resilience, FHIR write for the production seam — but
+   sequence FHIR write first if the demo narrative needs cross-reload persistence to look real.
+Method: one seam, applied uniformly to the origination collections; verified (tsc + vitest +
+browser reload parity) per step; independently revertible.

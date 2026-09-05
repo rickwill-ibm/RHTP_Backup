@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
-import { mockReferrals } from '@/app/referral-tracking/components/ActiveReferralsTable';
 import type { ReferralRecord } from '@/app/referral-tracking/page';
 import {
   CARE_TEAM_INBOX_TASKS,
@@ -15,6 +14,8 @@ import type { TaskProgramType } from '@/lib/fhirCareTeamData';
 import { useAppContext } from '@/lib/appContext';
 import { useActiveCitizen } from '@/uhg/store/useActiveCitizen';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
+import { buildLiveJourneyReferrals, mergeReferralsById } from '@/lib/referrals/fromReferralTask';
+import { journeyReferrals, deriveJourneyStatus } from '@/lib/referrals/journeyReferralData';
 import { getFhirMockMode, getFhirClient } from '@/lib/services/fhirClient';
 
 // ─── FHIR ServiceRequest → ReferralRecord mapper ──────────────────────────────
@@ -62,9 +63,9 @@ function mapFhirToReferralRecord(sr: any, taskMap: Map<string, any>): ReferralRe
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type JourneyStatus = 'pending' | 'accepted' | 'scheduled' | 'completed' | 'cancelled';
+export type JourneyStatus = 'pending' | 'accepted' | 'scheduled' | 'completed' | 'cancelled';
 
-interface ReferralJourneyRecord extends ReferralRecord {
+export interface ReferralJourneyRecord extends ReferralRecord {
   journeyStatus: JourneyStatus;
   providerResponse: string | null;
   providerResponseDate: string | null;
@@ -75,154 +76,6 @@ interface ReferralJourneyRecord extends ReferralRecord {
   followUpRequired: boolean;
   followUpDate: string | null;
 }
-
-// ─── Enrich mock referrals with journey data ──────────────────────────────────
-
-function deriveJourneyStatus(r: ReferralRecord): JourneyStatus {
-  if (r.status === 'Cancelled') return 'cancelled';
-  if (r.outcome === 'Seen') return 'completed';
-  if (r.appointmentDate) return 'scheduled';
-  if (r.assignedProvider) return 'accepted';
-  return 'pending';
-}
-
-const JOURNEY_ENRICHMENT: Record<string, Partial<ReferralJourneyRecord>> = {
-  'ref-001': {
-    providerResponse: 'Accepted — Dr. Osei confirmed availability for urgent cardiac eval.',
-    providerResponseDate: '2026-04-12',
-    scheduledDate: '2026-04-18',
-    appointmentConfirmedDate: '2026-04-12',
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: true,
-    followUpDate: '2026-04-25',
-  },
-  'ref-002': {
-    providerResponse: 'Accepted — appointment slot confirmed for late April.',
-    providerResponseDate: '2026-04-10',
-    scheduledDate: '2026-04-22',
-    appointmentConfirmedDate: '2026-04-10',
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: false,
-    followUpDate: null,
-  },
-  'ref-003': {
-    providerResponse: null,
-    providerResponseDate: null,
-    scheduledDate: null,
-    appointmentConfirmedDate: null,
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: false,
-    followUpDate: null,
-  },
-  'ref-004': {
-    providerResponse: 'Accepted — routine hypertension follow-up confirmed.',
-    providerResponseDate: '2026-04-07',
-    scheduledDate: '2026-04-13',
-    appointmentConfirmedDate: '2026-04-07',
-    outcomeNotes: 'BP well-controlled. Medication adjusted. Follow-up in 3 months with PCP.',
-    outcomeDate: '2026-04-13',
-    followUpRequired: true,
-    followUpDate: '2026-07-13',
-  },
-  'ref-005': {
-    providerResponse: null,
-    providerResponseDate: null,
-    scheduledDate: null,
-    appointmentConfirmedDate: null,
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: false,
-    followUpDate: null,
-  },
-  'ref-006': {
-    providerResponse: 'Accepted — colonoscopy prep instructions sent to patient.',
-    providerResponseDate: '2026-04-11',
-    scheduledDate: '2026-04-25',
-    appointmentConfirmedDate: '2026-04-11',
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: false,
-    followUpDate: null,
-  },
-  'ref-007': {
-    providerResponse: 'Accepted — OCT imaging slot available.',
-    providerResponseDate: '2026-04-03',
-    scheduledDate: '2026-04-08',
-    appointmentConfirmedDate: '2026-04-03',
-    outcomeNotes: 'OCT completed. Mild drusen noted. Annual monitoring recommended.',
-    outcomeDate: '2026-04-08',
-    followUpRequired: true,
-    followUpDate: '2026-04-08',
-  },
-  'ref-008': {
-    providerResponse: 'Accepted STAT — Holter monitor ordered, appointment same-day.',
-    providerResponseDate: '2026-04-13',
-    scheduledDate: '2026-04-15',
-    appointmentConfirmedDate: '2026-04-13',
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: true,
-    followUpDate: '2026-04-22',
-  },
-  'ref-009': {
-    providerResponse: 'Accepted — X-ray review and PT referral discussed.',
-    providerResponseDate: '2026-04-09',
-    scheduledDate: '2026-04-14',
-    appointmentConfirmedDate: '2026-04-09',
-    outcomeNotes: 'X-ray reviewed. Moderate OA confirmed. PT referral placed. Surgery deferred.',
-    outcomeDate: '2026-04-14',
-    followUpRequired: true,
-    followUpDate: '2026-07-14',
-  },
-  'ref-010': {
-    providerResponse: 'Accepted — out-of-network auth obtained, urgent slot confirmed.',
-    providerResponseDate: '2026-04-05',
-    scheduledDate: '2026-04-10',
-    appointmentConfirmedDate: '2026-04-05',
-    outcomeNotes: 'Insulin regimen adjusted. CGM initiated. A1c recheck in 90 days.',
-    outcomeDate: '2026-04-10',
-    followUpRequired: true,
-    followUpDate: '2026-07-10',
-  },
-  'ref-011': {
-    providerResponse: null,
-    providerResponseDate: null,
-    scheduledDate: null,
-    appointmentConfirmedDate: null,
-    outcomeNotes: null,
-    outcomeDate: null,
-    followUpRequired: false,
-    followUpDate: null,
-  },
-  'ref-012': {
-    providerResponse: 'Accepted — stress test ordered, urgent cardiac slot confirmed.',
-    providerResponseDate: '2026-03-30',
-    scheduledDate: '2026-04-04',
-    appointmentConfirmedDate: '2026-03-30',
-    outcomeNotes: 'Stress test completed. Mild ischemia noted. Cath lab referral placed.',
-    outcomeDate: '2026-04-04',
-    followUpRequired: true,
-    followUpDate: '2026-04-18',
-  },
-};
-
-// Static journey enrichment applied to both mock and FHIR-sourced referrals
-const journeyReferrals: ReferralJourneyRecord[] = mockReferrals.map((r) => ({
-  ...r,
-  journeyStatus: deriveJourneyStatus(r),
-  providerResponse: null,
-  providerResponseDate: null,
-  scheduledDate: null,
-  appointmentConfirmedDate: null,
-  outcomeNotes: null,
-  outcomeDate: null,
-  followUpRequired: false,
-  followUpDate: null,
-  ...JOURNEY_ENRICHMENT[r.id],
-}));
 
 // ─── Status Timeline Steps ────────────────────────────────────────────────────
 
@@ -615,14 +468,14 @@ function ReferralDetailDrawer({
 
 // ─── KPI Strip ────────────────────────────────────────────────────────────────
 
-function JourneyKPIStrip() {
-  const total = journeyReferrals.length;
-  const pending = journeyReferrals.filter((r) => r.journeyStatus === 'pending').length;
-  const accepted = journeyReferrals.filter((r) => r.journeyStatus === 'accepted').length;
-  const scheduled = journeyReferrals.filter((r) => r.journeyStatus === 'scheduled').length;
-  const completed = journeyReferrals.filter((r) => r.journeyStatus === 'completed').length;
+function JourneyKPIStrip({ referrals }: { referrals: ReferralJourneyRecord[] }) {
+  const total = referrals.length;
+  const pending = referrals.filter((r) => r.journeyStatus === 'pending').length;
+  const accepted = referrals.filter((r) => r.journeyStatus === 'accepted').length;
+  const scheduled = referrals.filter((r) => r.journeyStatus === 'scheduled').length;
+  const completed = referrals.filter((r) => r.journeyStatus === 'completed').length;
   const completionRate = Math.round((completed / total) * 100);
-  const avgDays = (journeyReferrals.reduce((s, r) => s + r.daysOpen, 0) / total).toFixed(1);
+  const avgDays = (referrals.reduce((s, r) => s + r.daysOpen, 0) / total).toFixed(1);
 
   const kpis = [
     {
@@ -932,7 +785,7 @@ function MultiProgramAnalyticsPanel() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ReferralJourneyTrackerPage() {
-  const { useMockData } = useAppContext();
+  const { useMockData, referralTasks } = useAppContext();
   const { activeCitizenId } = useActiveCitizen();
   const [selectedReferral, setSelectedReferral] = useState<ReferralJourneyRecord | null>(null);
   const [filterStatus, setFilterStatus] = useState<JourneyStatus | 'all'>('all');
@@ -989,7 +842,10 @@ export default function ReferralJourneyTrackerPage() {
       });
   }, [activeCitizenId, useMockData]);
 
-  const sourceReferrals = fhirReferrals ?? journeyReferrals;
+  // Live Run-play / manual referrals — deduped + shaped in the referrals lib,
+  // merged (by id, live-wins) ahead of the authored journeys.
+  const liveJourney = useMemo(() => buildLiveJourneyReferrals(referralTasks), [referralTasks]);
+  const sourceReferrals = fhirReferrals ?? mergeReferralsById(liveJourney, journeyReferrals);
   const specialties = [
     'All',
     ...Array.from(new Set(sourceReferrals.map((r) => r.specialty))).sort(),
@@ -1033,13 +889,13 @@ export default function ReferralJourneyTrackerPage() {
             Contract: Medicare MSSP Track 3
           </span>
           <span className="text-xs text-[#0043ce]">
-            Tracking {journeyReferrals.length} referral journeys
+            Tracking {sourceReferrals.length} referral journeys
           </span>
           <span className="text-xs text-[#0043ce]">
             Completion Rate:{' '}
             {Math.round(
-              (journeyReferrals.filter((r) => r.journeyStatus === 'completed').length /
-                journeyReferrals.length) *
+              (sourceReferrals.filter((r) => r.journeyStatus === 'completed').length /
+                sourceReferrals.length) *
                 100
             )}
             %
@@ -1064,7 +920,7 @@ export default function ReferralJourneyTrackerPage() {
         </div>
       }
     >
-      <JourneyKPIStrip />
+      <JourneyKPIStrip referrals={sourceReferrals} />
 
       <div className="px-6 pb-4 space-y-4 pt-4">
         {/* View toggle */}

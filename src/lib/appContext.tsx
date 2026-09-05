@@ -4,7 +4,6 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { UserRole } from './mockData';
-import { DEMO_MEMBER_ID } from './config/demoDefaults';
 import * as clock from './clock'; // determinism seam (Cycle 1)
 
 // ─── Physician Personas ───────────────────────────────────────────────────────

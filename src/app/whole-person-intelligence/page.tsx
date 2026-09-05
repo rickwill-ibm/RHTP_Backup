@@ -310,7 +310,7 @@ const RELATIONSHIPS = [
   },
   {
     id: 'rel-5',
-    name: "Elena\'s CHW",
+    name: "Elena's CHW",
     type: 'Community Health Worker',
     age: null,
     consent: 'FULL SCOPE',

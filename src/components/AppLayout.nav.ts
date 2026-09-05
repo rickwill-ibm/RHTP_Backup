@@ -256,14 +256,14 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'uhg-family-thread',
-    label: 'Family Thread — Sofia',
+    label: 'Family Thread',
     icon: 'HomeIcon',
     href: '/uhg-orchestrate/family-sofia',
     group: 'Agentic_Orchestrate-Screens',
   },
   {
     key: 'uhg-caregiver',
-    label: 'Caregiver Intelligence — Elena',
+    label: 'Caregiver Intelligence',
     icon: 'UserIcon',
     href: '/uhg-orchestrate/caregiver-elena',
     group: 'Agentic_Orchestrate-Screens',

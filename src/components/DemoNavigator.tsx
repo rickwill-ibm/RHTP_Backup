@@ -397,7 +397,7 @@ const DEMO_PERSONAS: DemoPersona[] = [
       {
         stepNum: 42,
         route: '/uhg-orchestrate/family-sofia',
-        label: 'Family Thread — Sofia',
+        label: 'Family Thread',
         storyBeat:
           "Maria's dependent Sofia — pediatric gaps surfaced and orchestrated in the household loop",
         activePatient: 'MARIA_SD_001',
@@ -405,7 +405,7 @@ const DEMO_PERSONAS: DemoPersona[] = [
       {
         stepNum: 43,
         route: '/uhg-orchestrate/caregiver-elena',
-        label: 'Caregiver Intelligence — Elena',
+        label: 'Caregiver Intelligence',
         storyBeat: "Maria as caregiver — Elena's INR, polypharmacy, Martin Pharmacy refill sync",
         activePatient: 'MARIA_SD_001',
       },

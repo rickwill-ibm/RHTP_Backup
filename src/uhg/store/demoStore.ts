@@ -41,24 +41,26 @@ export const APPENDIX_ORDER: ScreenId[] = [
 export const SCREEN_ROUTES: Record<ScreenId, string> = {
   'burning-platform': '/burning-platform',
   'opening': '/',
-  'fragmentation': '/fragmentation-split-system-view',
-  'cdp-assembly': '/cdp-assembly-split',
+  // Orchestrate screens live under /uhg-orchestrate/* — point the linear stepper at the
+  // real pages (matches ORCHESTRATE_FLOW), not the bare routes that 404 / hit Backup stubs.
+  'fragmentation': '/uhg-orchestrate/fragmentation-split-system-view',
+  'cdp-assembly': '/uhg-orchestrate/cdp-assembly-split',
   'maria-subgraph': '/maria-subgraph-context',
   'knowledge-graph': '/knowledge-graph-population-and-maria-subgraph',
-  'consumer-360': '/consumer-360',
-  'whole-person-care': '/whole-person-care',
+  'consumer-360': '/uhg-orchestrate/consumer-360',
+  'whole-person-care': '/uhg-orchestrate/whole-person-care',
   'signal-classification-beat': '/signal-classification-beat',
-  'signal-disposition-engine': '/signal-disposition-engine',
+  'signal-disposition-engine': '/uhg-orchestrate/signal-disposition-engine',
   'maria-counterfactual': '/maria-counterfactual',
   'agent-marketplace-query': '/agent-marketplace-query',
-  'controller': '/controller-agentic-super-orchestration-centerpiece',
+  'controller': '/uhg-orchestrate/controller-agentic-super-orchestration-centerpiece',
   'financial-intelligence': '/financial-intelligence',
-  'family-sofia': '/family-sofia',
-  'caregiver-elena': '/caregiver-elena',
-  'agent-impact': '/agent-impact-dashboard',
-  'reporting-dashboard': '/reporting-dashboard',
-  'agent-library': '/agent-library',
-  'portfolio-scale': '/portfolio-scale',
+  'family-sofia': '/uhg-orchestrate/family-sofia',
+  'caregiver-elena': '/uhg-orchestrate/caregiver-elena',
+  'agent-impact': '/uhg-orchestrate/agent-impact-dashboard',
+  'reporting-dashboard': '/uhg-orchestrate/reporting-dashboard',
+  'agent-library': '/uhg-orchestrate/agent-library',
+  'portfolio-scale': '/uhg-orchestrate/portfolio-scale',
   'strategic-roadmap': '/strategic-roadmap',
   'leave-behind': '/leave-behind',
 };
@@ -77,8 +79,8 @@ export const ORCHESTRATE_FLOW: OrchestrateStep[] = [
   { route: '/uhg-orchestrate/signal-disposition-engine', label: 'Signal Disposition' },          // step 37
   { route: '/uhg-orchestrate/controller-agentic-super-orchestration-centerpiece', label: 'Agentic Super Orchestration' }, // step 38
   { route: '/uhg-orchestrate/agent-library', label: 'Agent Library' },                           // step 39
-  { route: '/uhg-orchestrate/family-sofia', label: 'Family · Sophia' },                          // step 40
-  { route: '/uhg-orchestrate/caregiver-elena', label: 'Caregiver · Elena' },                     // step 41
+  { route: '/uhg-orchestrate/family-sofia', label: 'Family Thread' },                          // step 40
+  { route: '/uhg-orchestrate/caregiver-elena', label: 'Caregiver Intelligence' },                     // step 41
   { route: '/uhg-orchestrate/portfolio-scale', label: 'Portfolio Scale' },                       // step 42
   { route: '/uhg-orchestrate/agent-impact-dashboard', label: 'Agent Impact' },                   // step 43
   { route: '/uhg-orchestrate/reporting-dashboard', label: 'Reporting Dashboard' },               // step 44
@@ -104,8 +106,8 @@ export const SCREEN_LABELS: Record<ScreenId, string> = {
   'agent-marketplace-query': 'Agent Marketplace',
   'controller': 'Controller',
   'financial-intelligence': 'Financial Intelligence',
-  'family-sofia': 'Family · Sophia',
-  'caregiver-elena': 'Caregiver · Elena',
+  'family-sofia': 'Family Thread',
+  'caregiver-elena': 'Caregiver Intelligence',
   'agent-impact': 'Agent Impact',
   'reporting-dashboard': 'Reporting Dashboard',
   'agent-library': 'Agent Library',

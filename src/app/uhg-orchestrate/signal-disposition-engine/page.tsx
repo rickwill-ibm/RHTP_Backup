@@ -870,7 +870,7 @@ function SignalDispositionEngineInner() {
                   >
                     <span style={{ fontSize: '12px', color: '#8d8d8d' }}>Outreach decision:</span>
                     <span style={{ fontSize: '12px', color: '#42be65', fontWeight: 600 }}>
-                      1 approved · 3 suppressed · 1 delayed — single coordinated touchpoint
+                      5 approved · 3 suppressed · 1 delayed — single coordinated touchpoint
                     </span>
                   </div>
                 </div>
@@ -1015,7 +1015,7 @@ function SignalDispositionEngineInner() {
                           marginTop: 3,
                         }}
                       >
-                        Routing to Orchestration Controller — 5 signals sequenced, 0 suppressed, 0
+                        Routing to Orchestration Controller — 5 signals sequenced, 3 suppressed, 1
                         delayed · SDOH barriers modify intervention type · Med review prescriber
                         alerts dispatched
                       </span>

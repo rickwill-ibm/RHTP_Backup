@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
-# Pre-push - run the canonical gate at the 'push' tier (Framework v1.6 §1).
+# Pre-push - run the canonical gate at the 'pre-merge' tier (Framework v1.6 §1).
 # Enable once per clone:  git config core.hooksPath tools/hooks
-# Mutation (minutes) is CI-only; everything else runs here so a red push is
-# caught locally, not in CI. Emergency bypass:  git push --no-verify
+#
+# pre-merge = the 'push' tier PLUS the shuffled-order unit run (test isolation).
+# It runs here — not just in CI — because the shuffle run is the ONE gate the
+# per-chunk `gate:push` habit does not cover, so an order-coupled test (shared
+# `beforeAll` state a sibling mutates) would otherwise stay invisible until CI's
+# `ci` tier picks a shuffle seed that trips it. Catching it at push, attributable
+# to the change that introduced it, is the whole point. See
+# ADVERSARIAL_TESTING_LENSES.md → "Test-suite isolation (the shuffle gate)".
+#
+# Mutation (minutes) + next build stay CI-only. Emergency bypass: git push --no-verify.
+# To skip only the extra shuffle run for a quick push, PREPUSH_TIER=push git push.
 set -e
 cd "$(git rev-parse --show-toplevel)"
-exec bash scripts/ci-gates.sh push
+exec bash scripts/ci-gates.sh "${PREPUSH_TIER:-pre-merge}"

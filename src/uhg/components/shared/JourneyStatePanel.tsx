@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useDemoStore } from '@/uhg/store/demoStore';
-import { getPatientById } from '@/lib/patientRegistry';
+import { getPatientById, placeholderMember } from '@/lib/patientRegistry';
 import { journeyForPatient } from '@/uhg/data/journeys';
 
 interface JourneyStatePanelProps {
@@ -15,7 +15,7 @@ interface JourneyStatePanelProps {
 export default function JourneyStatePanel({ collapsed: initialCollapsed = false }: JourneyStatePanelProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
-  const reg = getPatientById(activeCitizenId) || getPatientById('MARIA_SD_001')!;
+  const reg = getPatientById(activeCitizenId) ?? placeholderMember(activeCitizenId);
 
   const firstName = reg.name.split(' ')[0];
   const org = reg.organization.replace(/ \(.*\)/, '');

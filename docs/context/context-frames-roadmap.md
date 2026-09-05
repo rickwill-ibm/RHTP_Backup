@@ -66,3 +66,50 @@ non-member frames. Next: working selectors —
 `resolveScreenContext` fails safe (switcher hidden) and warns in dev for any route missing from the
 registry. Keep the registry in sync as routes are added; consider a CI check that every
 `app/**/page.tsx` route has a registry entry.
+
+
+## P1 executed (this session)
+
+- Fail-open sweep: 13 screen sites converted to fail-closed. Pattern A (9 sites) now
+  `getPatientById(activeCitizenId) ?? placeholderMember(activeCitizenId)` (new neutral helper
+  in patientRegistry.ts, mirrors placeholderPersona — no Maria PII on unknown members).
+  Pattern B (whole-person-intelligence, cdp-assembly, signal-disposition-engine) identity
+  fallbacks neutralized. Server route (financial-clearance) fails closed on no session member.
+- PatientSwitcherDropdown `?? patients[0]` -> `?? null` (render already guarded; shows 'Select Patient').
+- MariaStatusStrip demoted to a READ-ONLY band (removed its member `<select>`; shell switcher owns switching).
+- Launch precedence added to care-plan-monitor/[patientId] (URL patientId -> global active member).
+- Maria de-hardcoding ratchet: 99 -> 80 (baseline re-locked to 80).
+- Browser swap test PASS: unknown member -> neutral 'Member' placeholder (no Maria leak);
+  valid member (Dorothy) -> correct member; golden (Maria) -> renders, no errors.
+  Frame-clear verified: population frame hides the switcher and shows the 'Population view' scope label.
+
+### Deferred from P1 (documented)
+- (reviewer)/evidence/[id]: launch precedence NOT applied. The viewer fetches a record by id and
+  shows that record (no Maria fail-open, so no safety risk). Syncing the global active member to the
+  evidence subject needs record-subject parsing + FHIR-id resolution; deferred to avoid a fragile edit.
+
+## Scheduled: incremental size-ratchet refactor (worst-first)
+
+Prior --no-verify commits let several page components grow far past the 400-line cap AND
+skip prettier (long compressed lines). This session reconciled the size baselines to the
+current *formatted* sizes so the gate is re-armed (no file may grow further; P2/P4 held to it)
+and verified commits work again. The existing bloat is now tracked debt, to be ratcheted DOWN
+incrementally — one file per change, each verified (tsc + vitest + browser + demo parity), with
+its baseline lowered as it shrinks. The ratchet's 'may only shrink' rule is designed for exactly
+this.
+
+Order (worst-first; formatted line counts):
+1. **wholePersonGraphData.ts (2212)** — FIRST + cleanest: it's authored graph DATA in a .ts file.
+   Move the data to `data/*.json` (exempt) / `src/lib/**/data` modules. ~1400-line, behavior-safe win.
+2. controller-agentic-super-orchestration-centerpiece (4036) — extract panels/sections to components.
+3. whole-person-care-summary (2901), episodic-management-analytics (2292), care-manager (2200),
+   social-needs-screening (2003), care-team-inbox (1941), consumer-360 (1928), DemoNavigator (1823).
+4. Remaining 1000-1700-line pages (chw-workflow, cbo-directory, referral-journey-tracker,
+   care-gap-closure-verification, submitted-referrals, agent-impact-dashboard, caregiver-elena,
+   signal-disposition-engine, whole-person-care, episode-detail, program-eligibility).
+5. Sub-1000 stragglers (specialist-inbox, whole-person-intelligence, cdp-assembly, referral-tracking,
+   CaseloadDashboard, payer-to-payer, SignalGraph, patient-episode-summary, care-plan-monitor,
+   access, AppLayout).
+
+Method per file: identify cohesive blocks (data → JSON/module; sub-views → components; helpers →
+lib), extract, re-verify, lower the baseline. Never a big-bang; each is independently revertible.

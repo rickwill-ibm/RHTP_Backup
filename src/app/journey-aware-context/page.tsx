@@ -5,30 +5,7 @@ import Icon from '@/components/ui/AppIcon';
 import { useDemoStore } from '@/uhg/store/demoStore';
 import { buildJourneyContext } from '@/lib/wpcGraph/journeyContext';
 
-// Outcome / type configs (presentation-only — kept as module-level constants)
-type OutcomeType =
-  'engaged' | 'ignored' | 'suppressed' | 'converted' | 'no_answer' | 'consent_check';
-type InteractionType =
-  'outreach' | 'response' | 'escalation' | 'session' | 'inbound' | 'outbound' | 'visit';
-
-const OUTCOME_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  engaged: { color: '#84CC16', bg: '#84CC1633', label: 'Engaged' },
-  converted: { color: '#a78bfa', bg: '#a78bfa33', label: 'Converted' },
-  ignored: { color: '#94a3b8', bg: '#94a3b833', label: 'Ignored' },
-  suppressed: { color: '#EF4444', bg: '#EF444433', label: 'Suppressed' },
-  no_answer: { color: '#F59E0B', bg: '#F59E0B33', label: 'No Answer' },
-  consent_check: { color: '#F59E0B', bg: '#F59E0B33', label: 'Consent Check' },
-};
-
-const TYPE_CONFIG: Record<string, { label: string }> = {
-  outreach: { label: 'Outreach' },
-  response: { label: 'Response' },
-  escalation: { label: 'Escalation' },
-  session: { label: 'Session' },
-  inbound: { label: 'Inbound' },
-  outbound: { label: 'Outbound' },
-  visit: { label: 'Visit' },
-};
+import { OUTCOME_CONFIG, TYPE_CONFIG } from './journey-aware-context.config';
 
 // Time axis: 24-hour day (0–23)
 const HOUR_LABELS = ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p', '11p'];

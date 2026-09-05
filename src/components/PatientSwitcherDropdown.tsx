@@ -28,7 +28,7 @@ export default function PatientSwitcherDropdown() {
   const panelRef = useRef<HTMLDivElement>(null);
 
   const patients = getAllRegistryPatients();
-  const active = patients.find((p) => p.platformId === activeCitizenId) ?? patients[0];
+  const active = patients.find((p) => p.platformId === activeCitizenId) ?? null;
 
   // Position panel using fixed coords derived from button rect
   function openPanel() {

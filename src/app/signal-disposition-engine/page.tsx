@@ -697,15 +697,15 @@ function DispositionCard({ route, signal }: { route: DispositionRoute; signal: S
 export default function SignalDispositionEnginePage() {
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const patient = getPatientSync(activeCitizenId);
-  const MEMBER_NAME = patient?.name ?? 'Maria Redhawk';
-  const MEMBER_ID = patient?.platformId ?? 'MARIA_SD_001';
-  const MEMBER_RISK = `${patient?.riskTier?.toUpperCase() ?? 'HIGH'} ${patient?.rafScore?.toFixed(1) ?? '7.8'}`;
+  const MEMBER_NAME = patient?.name ?? 'Member';
+  const MEMBER_ID = patient?.platformId ?? activeCitizenId;
+  const MEMBER_RISK = `${patient?.riskTier?.toUpperCase() ?? '—'} ${patient?.rafScore?.toFixed(1) ?? '—'}`;
   const MEMBER_AUTH = 'AUTH T-4 days';
   const MEMBER_CARE_GAP = patient?.careGaps?.[0]?.name
     ? `${patient.careGaps[0].name.split(' ')[0]} Gap ${patient.careGaps[0].daysOpen}d`
-    : 'HbA1c Gap 45d';
-  const MEMBER_EPISODE = patient?.episodeType ?? 'Pre-Diabetic · Postpartum';
-  const MEMBER_SDOH = patient ? `${patient.openCareGaps} Barriers` : '7 Barriers';
+    : '—';
+  const MEMBER_EPISODE = patient?.episodeType ?? '—';
+  const MEMBER_SDOH = patient ? `${patient.openCareGaps} Barriers` : '—';
   const SIGNALS = buildSignals(MEMBER_ID);
 
   const [activeSignalId, setActiveSignalId] = useState('sig-1');

@@ -10,6 +10,9 @@ export default defineConfig({
     // (npm run test:integration), NOT in the default unit run or the PR gate.
     exclude: [...configDefaults.exclude, 'tests/integration/**'],
     globals: true,
+    // pg-mem schema setup + multi-slug ingest in some suite hooks can exceed the 10s
+    // default on slower machines; give hooks headroom so timing variance can't flake the gate.
+    hookTimeout: 30000,
   },
   resolve: {
     alias: {

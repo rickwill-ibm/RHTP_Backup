@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f",
+      "fullUrl": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b",
       "resource": {
         "resourceType": "Patient",
         "identifier": [
@@ -133,11 +133,11 @@
         "managingOrganization": {
           "reference": "urn:uuid:41787f1e-03e3-446b-90cb-2c4ae71409e3"
         },
-        "id": "98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        "id": "6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+        "url": "Patient/6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
       }
     },
     {
@@ -155,7 +155,7 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "payor": [
           {
@@ -195,7 +195,7 @@
           "text": "Total Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -236,7 +236,7 @@
           "text": "Triglycerides"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -277,7 +277,7 @@
           "text": "Creatinine"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -322,7 +322,7 @@
           "text": "TSH"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-10",
         "valueQuantity": {
@@ -367,7 +367,7 @@
           "text": "Social Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueQuantity": {
@@ -399,7 +399,7 @@
           "text": "Food Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "High",
@@ -428,7 +428,7 @@
           "text": "Housing Stability Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "High",
@@ -457,7 +457,7 @@
           "text": "Lifestyle: Smoking Status"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Ex-smoker (Quit 15 years ago)",
@@ -486,7 +486,7 @@
           "text": "Lifestyle: History"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "20 pack-years (1976-2011)",
@@ -515,7 +515,7 @@
           "text": "Lifestyle: Alcohol Consumption"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Moderate - 6 units per week",
@@ -544,7 +544,7 @@
           "text": "Lifestyle: Typical"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Usually wine with evening meals",
@@ -573,7 +573,7 @@
           "text": "Lifestyle: Exercise"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Light to moderate activity",
@@ -602,7 +602,7 @@
           "text": "Lifestyle: Routine"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Walking 30 minutes, 4-5 days/week",
@@ -631,7 +631,7 @@
           "text": "Lifestyle: Diet"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Following diabetic diet plan",
@@ -660,7 +660,7 @@
           "text": "Lifestyle: Note"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Reduced carbohydrate intake since diagnosis",
@@ -689,7 +689,7 @@
           "text": "Living Situation: Marital Status"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Married",
@@ -718,7 +718,7 @@
           "text": "Living Situation: Living Arrangements"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Lives with husband in own home",
@@ -747,7 +747,7 @@
           "text": "Living Situation: Home"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "2-story house, stairs manageable",
@@ -776,7 +776,7 @@
           "text": "Living Situation: Support Network"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Good family support",
@@ -805,7 +805,7 @@
           "text": "Living Situation: Family"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Husband, 2 adult children nearby",
@@ -834,7 +834,7 @@
           "text": "Living Situation: Occupation"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Retired Primary School Teacher",
@@ -863,7 +863,7 @@
           "text": "Living Situation: Retired"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "June 2021",
@@ -907,7 +907,7 @@
           "text": "BMI"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -968,7 +968,7 @@
           "text": "Blood Pressure"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "referenceRange": [
@@ -1060,7 +1060,7 @@
           "text": "Waist/Height Ratio"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1121,7 +1121,7 @@
           "text": "Triglycerides"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1178,7 +1178,7 @@
           "text": "Liver Function Test (ALT/AST, U/L)"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1239,7 +1239,7 @@
           "text": "Urine Albumin/Creatine Ratio (UACR)"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1296,7 +1296,7 @@
           "text": "HbA1c"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1357,7 +1357,7 @@
           "text": "Fasting Plasma Glucose (FPG)"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1418,7 +1418,7 @@
           "text": "LDL Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1475,7 +1475,7 @@
           "text": "HDL Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1532,7 +1532,7 @@
           "text": "Serum Creatinine/eGFR"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1577,7 +1577,7 @@
           "text": "Type 2 Diabetes Mellitus"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "note": [
           {
@@ -1611,7 +1611,7 @@
           "text": "Essential Hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "note": [
           {
@@ -1645,7 +1645,7 @@
           "text": "Asthma"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "note": [
           {
@@ -1679,7 +1679,7 @@
           "text": "Obesity (BMI 31.2)"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "note": [
           {
@@ -1713,7 +1713,7 @@
           "text": "Coronary artery disease"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "note": [
           {
@@ -1752,7 +1752,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "authoredOn": "2026-04-15T16:48:53.221Z",
         "requester": {
@@ -1802,7 +1802,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "authoredOn": "2026-04-15T16:48:53.221Z",
         "requester": {
@@ -1852,7 +1852,7 @@
           "text": "A1C for diabetes"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "3bd69940-9432-4ff1-9030-49f09e169417"
       },
@@ -1883,7 +1883,7 @@
           "text": "Screening for SDoH"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "4bf0bd93-efec-4c54-85af-c729e7a2a110"
       },
@@ -1914,7 +1914,7 @@
           "text": "Mental/Behavioral Health (Clinical)"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "1cf461e3-bb03-44dc-a795-b7e48d9d84f7"
       },
@@ -1945,7 +1945,7 @@
           "text": "Statin Therapy for the Prevention and Treatment of Cardiovascular Disease"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "731b3806-f052-4a62-a46b-ab1fc60d0588"
       },
@@ -1976,7 +1976,7 @@
           "text": "Control of Hypertension"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "8dfb0da3-ddf8-4d63-ae0d-414b05ffb7b2"
       },
@@ -2007,7 +2007,7 @@
           "text": "Preventive Care and Screening"
         },
         "for": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "id": "b2dd7c68-3c2e-495b-988e-ae7425106cfb"
       },
@@ -2034,12 +2034,15 @@
           }
         ],
         "code": {
-          "text": "Patient seen in ER (08/2025)"
+          "text": "Patient seen in ER"
         },
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
-        "id": "d831a6fb-9960-4fe7-b065-294c03545940"
+        "id": "d831a6fb-9960-4fe7-b065-294c03545940",
+        "period": {
+          "start": "2025-08-01"
+        }
       },
       "request": {
         "method": "PUT",
@@ -2055,7 +2058,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:98d6267e-f2a8-4360-a88f-a59b1b6c6a8f"
+          "reference": "urn:uuid:6a5fdc1a-d700-4d69-9ddd-3569543bda5b"
         },
         "period": {
           "start": "2026-01-01",

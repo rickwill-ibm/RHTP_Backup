@@ -415,11 +415,11 @@ function ConsentBadge({ status }: { status: string }) {
 export default function WholePersonIntelligencePage() {
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const patient = getPatientSync(activeCitizenId);
-  const MEMBER_NAME = patient?.name ?? 'Maria Redhawk';
-  const MEMBER_ID = patient?.platformId ?? 'MARIA_SD_001';
-  const MEMBER_AGE_SEX = patient ? `${patient.age}y ${patient.gender}` : '34y F';
-  const MEMBER_LOCATION = patient?.location ?? 'Martin, SD 57551 · Bennett County';
-  const MEMBER_PROGRAM = patient?.contract ?? 'Medicaid RHTP Track 3';
+  const MEMBER_NAME = patient?.name ?? 'Member';
+  const MEMBER_ID = patient?.platformId ?? activeCitizenId;
+  const MEMBER_AGE_SEX = patient ? `${patient.age}y ${patient.gender}` : '—';
+  const MEMBER_LOCATION = patient?.location ?? '—';
+  const MEMBER_PROGRAM = patient?.contract ?? '—';
 
   const [expandedSdoh, setExpandedSdoh] = useState<string | null>(null);
 

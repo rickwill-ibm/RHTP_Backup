@@ -5,9 +5,9 @@
  * demo. These tests build synthetic members entirely from data (no Maria/Sofia/Elena
  * literals) and assert the registry derives the right lenses:
  *   - domain lenses always present; an empty domain degrades to the member anchor;
- *   - relationship lenses are DERIVED from PARENT_OF / CAREGIVER_FOR edges, labeled by
- *     whatever name is on the node, and ABSENT when the member has none;
- *   - 0 / 1 / many relationships all render correctly (dependents before caregivers).
+ *   - relationship lenses are DERIVED from PARENT_OF / CAREGIVER_FOR edges; for non-golden
+ *     members they MERGE into one consent-filtered "Household · N" lens whose legend names
+ *     each derived role (dependents before caregivers); ABSENT when the member has none.
  * A final block guards the golden demo (Maria) so it stays pixel-identical.
  *
  * @vitest-environment node
@@ -81,18 +81,22 @@ describe('buildLensRegistry — relationship lenses are DERIVED and member-agnos
     expect(rels(reg)).toHaveLength(0);
   });
 
-  it('a member with ONE dependent gets one dep: lens labeled by that person', () => {
+  // Non-golden members: per-person relationship lenses MERGE into one consent-filtered
+  // 'Household · N' lens (buildLensRegistry Phase-4). The derived per-person roles stay
+  // visible in the merged lens's legendLabel, and the union of each person's node closure
+  // forms the household nodeIds. (Maria/golden keeps per-person lenses — see the golden block.)
+  it('a member with ONE relationship gets a single household lens whose legend names the derived role', () => {
     const nodes = [member(), node('c1', 'Dependent', 'Amara Vega', ['all', 'social'])];
     const reg = buildLensRegistry(nodes, [edge('m1', 'c1', 'PARENT_OF')]);
     const r = rels(reg);
     expect(r).toHaveLength(1);
-    expect(r[0].id).toBe('dep:c1');
-    expect(r[0].label).toBe('Amara · Dependent');
-    expect(r[0].role).toBe('Dependent');
+    expect(r[0].id).toBe('household');
+    expect(r[0].label).toBe('Household · 1');
+    expect(r[0].legendLabel).toContain('Amara · Dependent'); // derived role preserved in the legend
     expect(r[0].nodeIds).toEqual(expect.arrayContaining(['m1', 'c1']));
   });
 
-  it('a member with MANY relationships gets one lens each, dependents before caregivers, named from data', () => {
+  it('a member with MANY relationships gets ONE household lens; the legend lists each derived role, dependents before caregivers', () => {
     const nodes = [
       member(),
       node('c1', 'Dependent', 'Amara Vega', ['all', 'social']),
@@ -105,19 +109,19 @@ describe('buildLensRegistry — relationship lenses are DERIVED and member-agnos
       edge('m1', 'p1', 'CAREGIVER_FOR'),
     ];
     const r = rels(buildLensRegistry(nodes, edges));
-    expect(r.map((l) => l.label)).toEqual([
-      'Amara · Dependent',
-      'Diego · Dependent',
-      'Rosa · Caregiver',
-    ]);
-    expect(r.map((l) => l.id)).toEqual(['dep:c1', 'dep:c2', 'car:p1']);
-    // distinct colors within a family (lightness ramp), and dependent≠caregiver hue
-    expect(new Set(r.map((l) => l.color)).size).toBe(3);
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('household');
+    expect(r[0].label).toBe('Household · 3');
+    // derived per-person roles preserved in the legend, dependents before caregivers
+    expect(r[0].legendLabel).toBe(
+      'Household · Amara · Dependent · Diego · Dependent · Rosa · Caregiver'
+    );
+    expect(r[0].nodeIds).toEqual(expect.arrayContaining(['m1', 'c1', 'c2', 'p1']));
     // NOTHING references Sofia/Elena — labels are pure data
     expect(JSON.stringify(r)).not.toMatch(/sofia|elena/i);
   });
 
-  it("INFORMAL_CAREGIVER_FOR also yields a Caregiver lens, and its closure pulls the person's neighborhood", () => {
+  it("INFORMAL_CAREGIVER_FOR is derived as a Caregiver and folded into the household lens, whose closure pulls the person's neighborhood", () => {
     const nodes = [
       member(),
       node('e1', 'Member', 'Sam Cruz', ['all', 'clinical']),
@@ -126,8 +130,9 @@ describe('buildLensRegistry — relationship lenses are DERIVED and member-agnos
     const edges = [edge('m1', 'e1', 'INFORMAL_CAREGIVER_FOR'), edge('e1', 'rx', 'PRESCRIBED')];
     const r = rels(buildLensRegistry(nodes, edges));
     expect(r).toHaveLength(1);
-    expect(r[0].role).toBe('Caregiver');
-    expect(r[0].nodeIds).toEqual(expect.arrayContaining(['m1', 'e1', 'rx'])); // one-hop closure
+    expect(r[0].id).toBe('household');
+    expect(r[0].legendLabel).toContain('Caregiver'); // informal-caregiver edge derived as a Caregiver
+    expect(r[0].nodeIds).toEqual(expect.arrayContaining(['m1', 'e1', 'rx'])); // one-hop closure preserved
   });
 });
 

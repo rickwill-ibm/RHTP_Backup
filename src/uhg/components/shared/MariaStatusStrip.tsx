@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useDemoStore } from '@/uhg/store/demoStore';
-import { personaFor, citizenRoster } from '@/uhg/data/persona';
+import { personaFor } from '@/uhg/data/persona';
 
 export type MariaStatusState = 'fragmented' | 'resolving' | 'known' | 'active' | 'resolved';
 
@@ -37,8 +37,6 @@ export default function MariaStatusStrip({
   showSdoh = true,
 }: MariaStatusStripProps) {
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
-  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
-  const roster = citizenRoster();
   const p = personaFor(activeCitizenId);
   if (!visible) return null;
 
@@ -55,16 +53,6 @@ export default function MariaStatusStrip({
         <div className="rounded-full flex items-center justify-center flex-shrink-0" style={{ width: 22, height: 22, background: 'rgba(250,77,86,0.2)', border: '1.5px solid rgba(250,77,86,0.5)', fontSize: '9px', color: 'white', fontWeight: 700 }}>{p.initials}</div>
         <span className="font-semibold text-white" style={{ fontSize: '13px', whiteSpace: 'nowrap' }}>{p.name}, {p.age}</span>
         <span className="font-mono" style={{ fontSize: '11px', color: '#8d8d8d' }}>{p.id}</span>
-        <select
-          value={activeCitizenId}
-          onChange={(e) => setActiveCitizen(e.target.value)}
-          title="Select citizen"
-          style={{ fontSize: '10px', background: '#262626', color: '#c6c6c6', border: '1px solid rgba(120,169,255,0.4)', borderRadius: 3, padding: '1px 4px', marginLeft: 4, cursor: 'pointer', outline: 'none' }}
-        >
-          {roster.map((c) => (
-            <option key={c.id} value={c.id} style={{ background: '#262626', color: '#f4f4f4' }}>{c.name}</option>
-          ))}
-        </select>
       </div>
       <div className="flex items-center gap-2 px-4 h-full flex-shrink-0" style={cell}>
         <span style={lbl}>RISK</span>

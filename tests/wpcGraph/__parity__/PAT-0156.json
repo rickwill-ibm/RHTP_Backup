@@ -1,0 +1,64 @@
+{
+  "id": "PAT-0156",
+  "isEmpty": false,
+  "panels": [
+    {
+      "panel": "graph.nodes",
+      "count": 8,
+      "ids": [
+        "n01",
+        "n02",
+        "n03",
+        "n04",
+        "n05",
+        "n06",
+        "n07",
+        "n08"
+      ],
+      "hash": "df60a879"
+    },
+    {
+      "panel": "graph.edges",
+      "count": 7,
+      "ids": [
+        "e01",
+        "e02",
+        "e03",
+        "e04",
+        "e05",
+        "e06",
+        "e07"
+      ],
+      "hash": "f9f69067"
+    },
+    {
+      "panel": "graph.lenses",
+      "count": 7,
+      "ids": [
+        "agents",
+        "all",
+        "behavioral",
+        "clinical",
+        "eligibility",
+        "household",
+        "social"
+      ],
+      "hash": "678582bb"
+    },
+    {
+      "panel": "graph.story",
+      "count": 5,
+      "ids": [],
+      "hash": "6a16c17a"
+    },
+    {
+      "panel": "graph.signals",
+      "count": 2,
+      "ids": [
+        "ms-bh",
+        "ms-gap"
+      ],
+      "hash": "632363dc"
+    }
+  ]
+}

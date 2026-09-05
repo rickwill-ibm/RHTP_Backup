@@ -171,7 +171,14 @@ const firstName = (label: string): string => {
   return t.split(/\s+/)[0] || t;
 };
 
-const DOMAIN_ORDER = ['all', 'clinical', 'behavioral', 'social', 'eligibility', 'agents'];
+const DOMAIN_ORDER: LensType[] = [
+  'all',
+  'clinical',
+  'behavioral',
+  'social',
+  'eligibility',
+  'agents',
+];
 
 /**
  * Build the full ordered lens registry for a patient's graph.
@@ -189,8 +196,7 @@ export function buildLensRegistry(nodes: GraphNode[], edges: GraphEdge[]): LensD
   const domainMeta = new Map(lensDefinitions.map((ld) => [ld.id, ld]));
   const domains: LensDescriptor[] = DOMAIN_ORDER.filter((id) => domainMeta.has(id)).map((id) => {
     const ld = domainMeta.get(id)!;
-    const lt = id as LensType;
-    const nodeIds = sets[lt] ?? memberOnly;
+    const nodeIds = sets[id] ?? memberOnly;
     return {
       id,
       label: ld.label,
@@ -199,7 +205,7 @@ export function buildLensRegistry(nodes: GraphNode[], edges: GraphEdge[]): LensD
       kind: (id === 'all' ? 'all' : 'domain') as LensKind,
       nodeIds,
       count: nodeIds.length,
-      cypherLens: lt,
+      cypherLens: id,
     };
   });
 

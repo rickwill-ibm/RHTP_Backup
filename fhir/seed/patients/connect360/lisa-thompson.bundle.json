@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661",
+      "fullUrl": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -95,11 +95,11 @@
             "preferred": true
           }
         ],
-        "id": "c1ed7104-6abe-49ea-92c6-f4746af35661"
+        "id": "64b13566-9345-48b2-8da8-4011d9547721"
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/c1ed7104-6abe-49ea-92c6-f4746af35661"
+        "url": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
       }
     },
     {
@@ -175,7 +175,7 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "payor": [
           {
@@ -219,7 +219,7 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "participant": [
           {
@@ -294,7 +294,7 @@
           "text": "Severe persistent asthma, uncomplicated"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "onsetDateTime": "2012-03-01",
         "id": "81f8b207-e45c-4064-aaf2-fa7779c68fa7"
@@ -346,7 +346,7 @@
           "text": "Obesity, unspecified"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "onsetDateTime": "2018-09-01",
         "id": "1c610260-a526-4295-9b80-b8c430615cab"
@@ -373,7 +373,7 @@
           "text": "Fluticasone 250 mcg / salmeterol 50 mcg inhalation powder"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -408,7 +408,7 @@
           "text": "Albuterol 90 mcg/actuation inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -443,7 +443,7 @@
           "text": "Montelukast 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -487,7 +487,7 @@
           "text": "Body mass index (BMI)"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-28",
         "valueQuantity": {
@@ -541,7 +541,7 @@
           "text": "Spirometry"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-03-28",
         "requester": {
@@ -582,7 +582,7 @@
           "text": "Weight management program referral"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-02-20",
         "requester": {
@@ -622,7 +622,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -662,7 +662,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -702,7 +702,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -742,7 +742,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -808,7 +808,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-01",
         "requester": {
@@ -846,7 +846,7 @@
           "reference": "urn:uuid:27b74379-d20e-4772-8c82-cee420d20ab4"
         },
         "for": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "owner": {
           "reference": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682"
@@ -889,7 +889,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -932,7 +932,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -964,7 +964,7 @@
           "text": "Asthma action plan update"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "981db8c3-8015-43a0-808e-55a0e8c3b932"
       },
@@ -989,7 +989,7 @@
           "text": "BMI / weight management"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
       },
@@ -1014,7 +1014,7 @@
           "text": "PHQ-9 annual screening"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "3a763e8d-795b-4f34-b47d-ad12a60f00fe"
       },
@@ -1029,7 +1029,7 @@
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "participant": [
           {
@@ -1079,7 +1079,7 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "careTeam": [
           {
@@ -1150,7 +1150,7 @@
           "text": "Asthma Action Plan Update"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 35,
         "note": [
@@ -1203,7 +1203,7 @@
           "text": "BMI / Weight Management Referral"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 60,
         "note": [
@@ -1256,7 +1256,7 @@
           "text": "PHQ-9 Annual Screening"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 18,
         "note": [
@@ -1309,7 +1309,7 @@
           "text": "Nutrition Counseling Enrollment"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 45,
         "note": [
@@ -1331,7 +1331,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "Annual asthma action plan review is 35 days overdue. Consider spirometry."
+            "valueString": "Annual asthma action plan review is overdue. Consider spirometry."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1358,12 +1358,15 @@
               "display": "information"
             }
           ],
-          "text": "Asthma action plan update overdue 35 days"
+          "text": "Asthma action plan update overdue"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
-        "id": "0e081f67-4bf6-4bdc-9323-7ace97ef4259"
+        "id": "0e081f67-4bf6-4bdc-9323-7ace97ef4259",
+        "period": {
+          "start": "2026-07-30"
+        }
       },
       "request": {
         "method": "PUT",
@@ -1407,7 +1410,7 @@
           "text": "Weight management referral in progress — BMI elevated"
         },
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "726d0840-20b8-443a-a121-877e58a637f1"
       },
@@ -1436,7 +1439,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "prediction": [
           {
@@ -1463,7 +1466,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:c1ed7104-6abe-49ea-92c6-f4746af35661"
+          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
         },
         "period": {
           "start": "2026-01-01",

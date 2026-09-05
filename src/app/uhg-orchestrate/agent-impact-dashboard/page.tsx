@@ -5,8 +5,11 @@ import ScreenLayout from '@/uhg/components/shared/ScreenLayout';
 import PresenterControls from '@/uhg/components/shared/PresenterControls';
 import MariaStatusStrip from '@/uhg/components/shared/MariaStatusStrip';
 import { useDemoStore } from '@/uhg/store/demoStore';
-import { getPatientById } from '@/lib/patientRegistry';
-import { dispatchAgentsForPatient, type CoalitionAgent } from '@/app/uhg-orchestrate/agent-library/coalition';
+import { getPatientById, placeholderMember } from '@/lib/patientRegistry';
+import {
+  dispatchAgentsForPatient,
+  type CoalitionAgent,
+} from '@/app/uhg-orchestrate/agent-library/coalition';
 import OrchestrationFlowModal from '@/uhg/components/shared/OrchestrationFlowModal';
 
 // ─── Timeline milestones ──────────────────────────────────────────────────────
@@ -24,47 +27,165 @@ interface Milestone {
 }
 
 interface ImpactTokens {
-  isMaria: boolean; name: string; firstName: string; lastName: string;
-  org: string; topGapName: string; contract: string; careManager: string;
-  depName: string; hasDep: boolean; cgFirst: string; cgMed: string; hasCg: boolean; hhId: string;
+  isMaria: boolean;
+  name: string;
+  firstName: string;
+  lastName: string;
+  org: string;
+  topGapName: string;
+  contract: string;
+  careManager: string;
+  depName: string;
+  hasDep: boolean;
+  cgFirst: string;
+  cgMed: string;
+  hasCg: boolean;
+  hhId: string;
 }
 
 // Each dispatchable domain agent contributes one timeline milestone, so the intervention
 // timeline reflects the member's actual coalition (which varies per patient) rather than a
 // fixed step list. Detail strings bind to the member's context tokens.
-interface AgentStepTpl { label: string; agent: string; color: string; detail: (t: ImpactTokens) => string; kpi: string; kpiColor: string }
+interface AgentStepTpl {
+  label: string;
+  agent: string;
+  color: string;
+  detail: (t: ImpactTokens) => string;
+  kpi: string;
+  kpiColor: string;
+}
 const AGENT_STEP: Record<string, AgentStepTpl> = {
-  'agent-care':      { label: 'Auth Evidence Assembled',    agent: 'Clinical Care Agent + Eligibility Agent', color: '#0C55B8', detail: (t) => `Clinical evidence package complete — ${t.topGapName} order — ${t.contract} coverage policy`, kpi: 'Auth cycle: 8.2d → 0.3d  ↓ 96%', kpiColor: '#42be65' },
-  'agent-util':      { label: 'Eligibility Gap Resolved',   agent: 'Eligibility Agent',                       color: '#f59e0b', detail: (t) => `${t.org} renewal initiated — episode continuity preserved`, kpi: 'Active episode protected', kpiColor: '#f59e0b' },
-  'agent-financial': { label: 'Financial Exposure Modeled', agent: 'Financial Intelligence Agent',            color: '#10b981', detail: () => 'OOP liability calculated — specialist referral initiated — cost summary sent to member portal', kpi: 'Financial surprise risk eliminated', kpiColor: '#10b981' },
-  'agent-provider':  { label: 'SDOH Barriers Mapped',       agent: 'Social / SDOH Agent',                     color: '#8b5cf6', detail: () => 'Transport + financial barriers mapped — SDOH-modified intervention routed — standard outreach failure averted', kpi: 'Barrier-aware intervention substituted', kpiColor: '#8b5cf6' },
-  'agent-caregiver': { label: 'Caregiver Thread Activated', agent: 'Caregiver Intelligence Agent',            color: '#c084fc', detail: (t) => `${t.cgFirst} proxy consent scope validated — ${t.cgMed} interaction flagged — PCP visit bundled T+7d`, kpi: 'Caregiver loop closed — medication risk surfaced', kpiColor: '#c084fc' },
-  'agent-appeals':   { label: 'Appeal Held for Review',     agent: 'Behavioral Health Agent + Governance',    color: '#f1c21b', detail: (t) => `${t.contract} APPEAL.AUTO.THRESHOLD.001 — clinical necessity requires human sign-off — ${t.careManager} notified`, kpi: 'Compliance window honored ✓', kpiColor: '#f1c21b' },
+  'agent-care': {
+    label: 'Auth Evidence Assembled',
+    agent: 'Clinical Care Agent + Eligibility Agent',
+    color: '#0C55B8',
+    detail: (t) =>
+      `Clinical evidence package complete — ${t.topGapName} order — ${t.contract} coverage policy`,
+    kpi: 'Auth cycle: 8.2d → 0.3d  ↓ 96%',
+    kpiColor: '#42be65',
+  },
+  'agent-util': {
+    label: 'Eligibility Gap Resolved',
+    agent: 'Eligibility Agent',
+    color: '#f59e0b',
+    detail: (t) => `${t.org} renewal initiated — episode continuity preserved`,
+    kpi: 'Active episode protected',
+    kpiColor: '#f59e0b',
+  },
+  'agent-financial': {
+    label: 'Financial Exposure Modeled',
+    agent: 'Financial Intelligence Agent',
+    color: '#10b981',
+    detail: () =>
+      'OOP liability calculated — specialist referral initiated — cost summary sent to member portal',
+    kpi: 'Financial surprise risk eliminated',
+    kpiColor: '#10b981',
+  },
+  'agent-provider': {
+    label: 'SDOH Barriers Mapped',
+    agent: 'Social / SDOH Agent',
+    color: '#8b5cf6',
+    detail: () =>
+      'Transport + financial barriers mapped — SDOH-modified intervention routed — standard outreach failure averted',
+    kpi: 'Barrier-aware intervention substituted',
+    kpiColor: '#8b5cf6',
+  },
+  'agent-caregiver': {
+    label: 'Caregiver Thread Activated',
+    agent: 'Caregiver Intelligence Agent',
+    color: '#c084fc',
+    detail: (t) =>
+      `${t.cgFirst} proxy consent scope validated — ${t.cgMed} interaction flagged — PCP visit bundled T+7d`,
+    kpi: 'Caregiver loop closed — medication risk surfaced',
+    kpiColor: '#c084fc',
+  },
+  'agent-appeals': {
+    label: 'Appeal Held for Review',
+    agent: 'Behavioral Health Agent + Governance',
+    color: '#f1c21b',
+    detail: (t) =>
+      `${t.contract} APPEAL.AUTO.THRESHOLD.001 — clinical necessity requires human sign-off — ${t.careManager} notified`,
+    kpi: 'Compliance window honored ✓',
+    kpiColor: '#f1c21b',
+  },
 };
 
 function buildMilestones(t: ImpactTokens, coalition: CoalitionAgent[]): Milestone[] {
   if (t.isMaria) return MARIA_MILESTONES;
-  interface Step { label: string; agent: string; color: string; detail: string; kpi: string; kpiColor: string }
+  interface Step {
+    label: string;
+    agent: string;
+    color: string;
+    detail: string;
+    kpi: string;
+    kpiColor: string;
+  }
   const steps: Step[] = [
-    { label: 'Orchestration Activated', agent: 'Controller', color: '#FF6310', detail: `${coalition.length} agents dispatched concurrently — AUTH + CARE_GAP signals in 30s window`, kpi: `${coalition.length} agents dispatched concurrently`, kpiColor: '#FF6310' },
-    { label: 'Signal Disposition Scored', agent: 'Signal Disposition Agent', color: '#06b6d4', detail: 'Active signals triaged — priority scored — escalation threshold crossed', kpi: 'Triage latency: 18min manual → 3min automated  ↓ 83%', kpiColor: '#06b6d4' },
+    {
+      label: 'Orchestration Activated',
+      agent: 'Controller',
+      color: '#FF6310',
+      detail: `${coalition.length} agents dispatched concurrently — AUTH + CARE_GAP signals in 30s window`,
+      kpi: `${coalition.length} agents dispatched concurrently`,
+      kpiColor: '#FF6310',
+    },
+    {
+      label: 'Signal Disposition Scored',
+      agent: 'Signal Disposition Agent',
+      color: '#06b6d4',
+      detail: 'Active signals triaged — priority scored — escalation threshold crossed',
+      kpi: 'Triage latency: 18min manual → 3min automated  ↓ 83%',
+      kpiColor: '#06b6d4',
+    },
     ...coalition.map((a): Step => {
       const tpl = AGENT_STEP[a.id];
       return tpl
-        ? { label: tpl.label, agent: tpl.agent, color: tpl.color, detail: tpl.detail(t), kpi: tpl.kpi, kpiColor: tpl.kpiColor }
-        : { label: `${a.name} Dispatched`, agent: a.name, color: a.color, detail: `${a.name} engaged for this member`, kpi: 'Agent action complete', kpiColor: a.color };
+        ? {
+            label: tpl.label,
+            agent: tpl.agent,
+            color: tpl.color,
+            detail: tpl.detail(t),
+            kpi: tpl.kpi,
+            kpiColor: tpl.kpiColor,
+          }
+        : {
+            label: `${a.name} Dispatched`,
+            agent: a.name,
+            color: a.color,
+            detail: `${a.name} engaged for this member`,
+            kpi: 'Agent action complete',
+            kpiColor: a.color,
+          };
     }),
-    { label: 'Scenario Resolved', agent: 'All Agents', color: '#42be65', detail: 'All conditions addressed — governance honored — outreach scheduled — monitoring active', kpi: 'Readmission risk: Elevated → Protocol active', kpiColor: '#42be65' },
+    {
+      label: 'Scenario Resolved',
+      agent: 'All Agents',
+      color: '#42be65',
+      detail:
+        'All conditions addressed — governance honored — outreach scheduled — monitoring active',
+      kpi: 'Readmission risk: Elevated → Protocol active',
+      kpiColor: '#42be65',
+    },
   ];
   const resolutionMin = 18 + coalition.length * 6; // total orchestration window scales with coalition size
   const N = steps.length;
   return steps.map((s, i) => {
     const tm = Math.round((i * resolutionMin) / (N - 1));
-    return { id: `ms-${i}`, time: i === 0 ? 'T+0' : `T+${tm}m`, timeMin: tm, label: s.label, agent: s.agent, agentColor: s.color, detail: s.detail, kpiImpact: s.kpi, kpiColor: s.kpiColor };
+    return {
+      id: `ms-${i}`,
+      time: i === 0 ? 'T+0' : `T+${tm}m`,
+      timeMin: tm,
+      label: s.label,
+      agent: s.agent,
+      agentColor: s.color,
+      detail: s.detail,
+      kpiImpact: s.kpi,
+      kpiColor: s.kpiColor,
+    };
   });
 }
 
-const MARIA_MILESTONES: Milestone[] = [] = [
+const MARIA_MILESTONES: Milestone[] = ([] = [
   {
     id: 'ms-0',
     time: 'T+0',
@@ -83,7 +204,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Signal Disposition Scored',
     agent: 'Signal Disposition Agent',
     agentColor: '#06b6d4',
-    detail: 'AUTH_EXPIRY + CARE_GAP_OPEN + BEHAVIORAL_RISK triaged — priority score 94/100 — escalation threshold crossed',
+    detail:
+      'AUTH_EXPIRY + CARE_GAP_OPEN + BEHAVIORAL_RISK triaged — priority score 94/100 — escalation threshold crossed',
     kpiImpact: 'Triage latency: 18min manual → 3min automated  ↓ 83%',
     kpiColor: '#06b6d4',
   },
@@ -105,7 +227,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Financial Exposure Modeled',
     agent: 'Financial Intelligence Agent',
     agentColor: '#10b981',
-    detail: 'OOP liability $340–$480 calculated — referral Dr. Sarah Kim initiated — cost summary sent to member portal',
+    detail:
+      'OOP liability $340–$480 calculated — referral Dr. Sarah Kim initiated — cost summary sent to member portal',
     kpiImpact: 'Financial surprise risk eliminated — member notified in 15m',
     kpiColor: '#10b981',
   },
@@ -116,7 +239,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Caregiver Thread Activated',
     agent: 'Caregiver Intelligence Agent',
     agentColor: '#c084fc',
-    detail: 'Elena proxy consent scope validated — A1C monitoring order initiated — Lisinopril interaction flagged — PCP visit bundled T+7d',
+    detail:
+      'Elena proxy consent scope validated — A1C monitoring order initiated — Lisinopril interaction flagged — PCP visit bundled T+7d',
     kpiImpact: 'Medication risk surfaced — caregiver loop closed in 19m',
     kpiColor: '#c084fc',
   },
@@ -127,7 +251,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Eligibility Gap Resolved',
     agent: 'Provider Agent',
     agentColor: '#8b5cf6',
-    detail: 'Bennett County Health renewal initiated — Bennett County Health — episode continuity preserved',
+    detail:
+      'Bennett County Health renewal initiated — Bennett County Health — episode continuity preserved',
     kpiImpact: '12 active episodes protected',
     kpiColor: '#8b5cf6',
   },
@@ -138,7 +263,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Appeal Held for Review',
     agent: 'Behavioral Health Agent + Governance',
     agentColor: '#f1c21b',
-    detail: 'SD Medicaid.APPEAL.AUTO.THRESHOLD.001 — clinical necessity requires human sign-off — Dr. K. Patel notified',
+    detail:
+      'SD Medicaid.APPEAL.AUTO.THRESHOLD.001 — clinical necessity requires human sign-off — Dr. K. Patel notified',
     kpiImpact: 'Compliance window: 68h remaining ✓',
     kpiColor: '#f1c21b',
   },
@@ -149,7 +275,8 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Scenario Resolved',
     agent: 'All Agents',
     agentColor: '#42be65',
-    detail: 'All 4 conditions addressed — governance honored — outreach scheduled — monitoring active',
+    detail:
+      'All 4 conditions addressed — governance honored — outreach scheduled — monitoring active',
     kpiImpact: 'Readmission risk: Elevated → Protocol active',
     kpiColor: '#42be65',
   },
@@ -160,11 +287,12 @@ const MARIA_MILESTONES: Milestone[] = [] = [
     label: 'Med review Duplicate Therapy Flagged',
     agent: 'Med review Agent + Governance',
     agentColor: '#fa4d56',
-    detail: 'Lisinopril + Metformin duplicate therapy identified — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched to Bennett County Health + Bennett County Health — Med review enrolled partial',
+    detail:
+      'Lisinopril + Metformin duplicate therapy identified — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched to Bennett County Health + Bennett County Health — Med review enrolled partial',
     kpiImpact: 'Patient safety risk surfaced — prescribers notified in 44m',
     kpiColor: '#fa4d56',
   },
-];;
+]);
 
 // ─── Thread Status Rows ───────────────────────────────────────────────────────
 
@@ -182,30 +310,136 @@ interface ThreadRow {
 function buildThreadRows(t: ImpactTokens): ThreadRow[] {
   if (t.isMaria) return MARIA_THREAD_ROWS;
   const R: ThreadRow[] = [
-    { id: 'th-signal', label: 'Signal Disposition', status: 'SCORED', statusColor: '#06b6d4', detail: 'AUTH_EXPIRY + CARE_GAP + BEHAVIORAL triaged — priority 94/100 — escalation triggered at T+3m', agent: 'Signal Disposition Agent', agentColor: '#06b6d4', icon: '◎' },
-    { id: 'th-auth', label: 'Authorization', status: 'PENDING', statusColor: '#f59e0b', detail: `Clinical evidence assembled — ${t.topGapName} order — awaiting payer review`, agent: 'Clinical Care Agent + Eligibility Agent', agentColor: '#0C55B8', icon: '◐' },
-    { id: 'th-cred', label: 'Eligibility', status: 'RENEWAL', statusColor: '#8b5cf6', detail: `${t.org} renewal initiated — 21d window`, agent: 'Social / SDOH Agent', agentColor: '#8b5cf6', icon: '↻' },
-    { id: 'th-appeal', label: 'Appeal', status: 'IN REVIEW', statusColor: '#f1c21b', detail: `Governance intercept — clinical necessity — ${t.careManager} notified — 68h remaining`, agent: 'Behavioral Health Agent + Governance', agentColor: '#f1c21b', icon: '⚑' },
-    { id: 'th-readmit', label: 'Readmission', status: 'MONITORING', statusColor: '#78a9ff', detail: '30-day monitoring window open — risk protocol active — discharge follow-up scheduled', agent: 'Clinical Care Agent', agentColor: '#0C55B8', icon: '◉' },
-    { id: 'th-financial', label: 'Financial Intelligence', status: 'COMPLETE', statusColor: '#10b981', detail: 'OOP summary $340–$480 generated — specialist referral initiated — cost summary sent to portal at T+15m', agent: 'Financial Intelligence Agent', agentColor: '#10b981', icon: '✓' },
+    {
+      id: 'th-signal',
+      label: 'Signal Disposition',
+      status: 'SCORED',
+      statusColor: '#06b6d4',
+      detail:
+        'AUTH_EXPIRY + CARE_GAP + BEHAVIORAL triaged — priority 94/100 — escalation triggered at T+3m',
+      agent: 'Signal Disposition Agent',
+      agentColor: '#06b6d4',
+      icon: '◎',
+    },
+    {
+      id: 'th-auth',
+      label: 'Authorization',
+      status: 'PENDING',
+      statusColor: '#f59e0b',
+      detail: `Clinical evidence assembled — ${t.topGapName} order — awaiting payer review`,
+      agent: 'Clinical Care Agent + Eligibility Agent',
+      agentColor: '#0C55B8',
+      icon: '◐',
+    },
+    {
+      id: 'th-cred',
+      label: 'Eligibility',
+      status: 'RENEWAL',
+      statusColor: '#8b5cf6',
+      detail: `${t.org} renewal initiated — 21d window`,
+      agent: 'Social / SDOH Agent',
+      agentColor: '#8b5cf6',
+      icon: '↻',
+    },
+    {
+      id: 'th-appeal',
+      label: 'Appeal',
+      status: 'IN REVIEW',
+      statusColor: '#f1c21b',
+      detail: `Governance intercept — clinical necessity — ${t.careManager} notified — 68h remaining`,
+      agent: 'Behavioral Health Agent + Governance',
+      agentColor: '#f1c21b',
+      icon: '⚑',
+    },
+    {
+      id: 'th-readmit',
+      label: 'Readmission',
+      status: 'MONITORING',
+      statusColor: '#78a9ff',
+      detail:
+        '30-day monitoring window open — risk protocol active — discharge follow-up scheduled',
+      agent: 'Clinical Care Agent',
+      agentColor: '#0C55B8',
+      icon: '◉',
+    },
+    {
+      id: 'th-financial',
+      label: 'Financial Intelligence',
+      status: 'COMPLETE',
+      statusColor: '#10b981',
+      detail:
+        'OOP summary $340–$480 generated — specialist referral initiated — cost summary sent to portal at T+15m',
+      agent: 'Financial Intelligence Agent',
+      agentColor: '#10b981',
+      icon: '✓',
+    },
   ];
-  if (t.hasDep) R.push({ id: 'th-family', label: `Family · ${t.depName}`, status: 'ACTIVE', statusColor: '#fa4d56', detail: `Pediatrician referral ${t.org} + screenings scheduled — combined outreach sent`, agent: 'Family Thread Agent', agentColor: '#fa4d56', icon: '◉' });
+  if (t.hasDep)
+    R.push({
+      id: 'th-family',
+      label: `Family · ${t.depName}`,
+      status: 'ACTIVE',
+      statusColor: '#fa4d56',
+      detail: `Pediatrician referral ${t.org} + screenings scheduled — combined outreach sent`,
+      agent: 'Family Thread Agent',
+      agentColor: '#fa4d56',
+      icon: '◉',
+    });
   if (t.hasCg) {
-    R.push({ id: 'th-elena', label: `Caregiver · ${t.cgFirst}`, status: 'ACTIVE', statusColor: '#c084fc', detail: `Monitoring order initiated — ${t.cgMed} interaction flagged — medication review bundled into PCP visit T+7d`, agent: 'Caregiver Intelligence Agent', agentColor: '#c084fc', icon: '◉' });
-    R.push({ id: 'th-consent', label: 'Proxy Consent', status: 'VERIFIED', statusColor: '#42be65', detail: `Scope validated before every ${t.cgFirst} action — CAREGIVER_FOR boundary enforced — audit logged`, agent: 'Governance · Consent Engine', agentColor: '#42be65', icon: '✓' });
-    R.push({ id: 'th-mtm', label: 'Med review — Duplicate Therapy', status: 'ACTIVE', statusColor: '#fa4d56', detail: 'Duplicate therapy — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched — Med review enrolled partial — consent expansion queued', agent: 'Med review Agent + Governance', agentColor: '#fa4d56', icon: '⚠' });
+    R.push({
+      id: 'th-elena',
+      label: `Caregiver · ${t.cgFirst}`,
+      status: 'ACTIVE',
+      statusColor: '#c084fc',
+      detail: `Monitoring order initiated — ${t.cgMed} interaction flagged — medication review bundled into PCP visit T+7d`,
+      agent: 'Caregiver Intelligence Agent',
+      agentColor: '#c084fc',
+      icon: '◉',
+    });
+    R.push({
+      id: 'th-consent',
+      label: 'Proxy Consent',
+      status: 'VERIFIED',
+      statusColor: '#42be65',
+      detail: `Scope validated before every ${t.cgFirst} action — CAREGIVER_FOR boundary enforced — audit logged`,
+      agent: 'Governance · Consent Engine',
+      agentColor: '#42be65',
+      icon: '✓',
+    });
+    R.push({
+      id: 'th-mtm',
+      label: 'Med review — Duplicate Therapy',
+      status: 'ACTIVE',
+      statusColor: '#fa4d56',
+      detail:
+        'Duplicate therapy — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched — Med review enrolled partial — consent expansion queued',
+      agent: 'Med review Agent + Governance',
+      agentColor: '#fa4d56',
+      icon: '⚠',
+    });
   }
-  if (t.hasDep || t.hasCg) R.push({ id: 'th-household', label: `Household · ${t.hhId}`, status: 'COORDINATED', statusColor: '#ff7eb6', detail: `Combined outreach — ${t.careManager} assigned — covers full household${t.hasCg ? ` · ${t.cgFirst} reminder via separate channel` : ''}`, agent: 'Household Coordination', agentColor: '#ff7eb6', icon: '⌂' });
+  if (t.hasDep || t.hasCg)
+    R.push({
+      id: 'th-household',
+      label: `Household · ${t.hhId}`,
+      status: 'COORDINATED',
+      statusColor: '#ff7eb6',
+      detail: `Combined outreach — ${t.careManager} assigned — covers full household${t.hasCg ? ` · ${t.cgFirst} reminder via separate channel` : ''}`,
+      agent: 'Household Coordination',
+      agentColor: '#ff7eb6',
+      icon: '⌂',
+    });
   return R;
 }
 
-const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
+const MARIA_THREAD_ROWS: ThreadRow[] = ([] = [
   {
     id: 'th-signal',
     label: 'Signal Disposition',
     status: 'SCORED',
     statusColor: '#06b6d4',
-    detail: 'AUTH_EXPIRY + CARE_GAP + BEHAVIORAL triaged — priority 94/100 — escalation triggered at T+3m',
+    detail:
+      'AUTH_EXPIRY + CARE_GAP + BEHAVIORAL triaged — priority 94/100 — escalation triggered at T+3m',
     agent: 'Signal Disposition Agent',
     agentColor: '#06b6d4',
     icon: '◎',
@@ -255,7 +489,8 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Financial Intelligence',
     status: 'COMPLETE',
     statusColor: '#10b981',
-    detail: 'OOP summary $340–$480 generated — referral Dr. Sarah Kim initiated — cost summary sent to portal at T+15m',
+    detail:
+      'OOP summary $340–$480 generated — referral Dr. Sarah Kim initiated — cost summary sent to portal at T+15m',
     agent: 'Financial Intelligence Agent',
     agentColor: '#10b981',
     icon: '✓',
@@ -265,7 +500,8 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Family · Sophia',
     status: 'ACTIVE',
     statusColor: '#fa4d56',
-    detail: 'Pediatrician referral Bennett County Health + 4 screenings scheduled — combined outreach sent',
+    detail:
+      'Pediatrician referral Bennett County Health + 4 screenings scheduled — combined outreach sent',
     agent: 'Family Thread Agent',
     agentColor: '#fa4d56',
     icon: '◉',
@@ -275,7 +511,8 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Caregiver · Elena',
     status: 'ACTIVE',
     statusColor: '#c084fc',
-    detail: 'A1C monitoring order initiated — Lisinopril interaction flagged — medication review bundled into PCP visit T+7d',
+    detail:
+      'A1C monitoring order initiated — Lisinopril interaction flagged — medication review bundled into PCP visit T+7d',
     agent: 'Caregiver Intelligence Agent',
     agentColor: '#c084fc',
     icon: '◉',
@@ -285,7 +522,8 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Proxy Consent',
     status: 'VERIFIED',
     statusColor: '#42be65',
-    detail: 'Scope validated before every Elena action — CAREGIVER_FOR boundary enforced — audit logged',
+    detail:
+      'Scope validated before every Elena action — CAREGIVER_FOR boundary enforced — audit logged',
     agent: 'Governance · Consent Engine',
     agentColor: '#42be65',
     icon: '✓',
@@ -295,7 +533,8 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Household · REDHAWK_HH-001',
     status: 'COORDINATED',
     statusColor: '#ff7eb6',
-    detail: 'Combined outreach: 1 message — Maria postpartum + Sophia pediatric · Household load: 1/3 weekly cap · Elena A1C reminder via separate channel · Sarah Johnson assigned — covers full household · Sophia well-visit bundled Q4 SD Medicaid quality',
+    detail:
+      'Combined outreach: 1 message — Maria postpartum + Sophia pediatric · Household load: 1/3 weekly cap · Elena A1C reminder via separate channel · Sarah Johnson assigned — covers full household · Sophia well-visit bundled Q4 SD Medicaid quality',
     agent: 'Household Coordination',
     agentColor: '#ff7eb6',
     icon: '⌂',
@@ -305,12 +544,13 @@ const MARIA_THREAD_ROWS: ThreadRow[] = [] = [
     label: 'Med review — Duplicate Therapy',
     status: 'ACTIVE',
     statusColor: '#fa4d56',
-    detail: 'Lisinopril (Bennett County Health · CVS) + Metformin (Bennett County Health · Walgreens) — same molecule — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched — Med review enrolled partial — consent expansion queued',
+    detail:
+      'Lisinopril (Bennett County Health · CVS) + Metformin (Bennett County Health · Walgreens) — same molecule — CONSENT.DOMAIN.BOUNDARY.002 intercept — prescriber alerts dispatched — Med review enrolled partial — consent expansion queued',
     agent: 'Med review Agent + Governance',
     agentColor: '#fa4d56',
     icon: '⚠',
   },
-];;
+]);
 
 // ─── Channel attribution per thread ──────────────────────────────────────────
 
@@ -324,32 +564,62 @@ function buildThreadChannels(t: ImpactTokens): Record<string, ChannelBadge[]> {
   if (t.isMaria) return MARIA_THREAD_CHANNELS;
   return {
     'th-signal': [{ channel: 'SYSTEM', color: '#06b6d4' }],
-    'th-auth': [{ channel: 'PORTAL', color: '#42be65', note: `${t.firstName} via portal` }, { channel: 'EHR', color: '#0C55B8', note: `${t.org} via EHR` }],
+    'th-auth': [
+      { channel: 'PORTAL', color: '#42be65', note: `${t.firstName} via portal` },
+      { channel: 'EHR', color: '#0C55B8', note: `${t.org} via EHR` },
+    ],
     'th-cred': [{ channel: 'EHR', color: '#0C55B8', note: 'Provider notification' }],
     'th-appeal': [{ channel: 'CARE MGR', color: '#f1c21b', note: `${t.careManager} notified` }],
     'th-readmit': [{ channel: 'PORTAL', color: '#42be65', note: `${t.firstName} monitoring` }],
     'th-financial': [{ channel: 'PORTAL', color: '#42be65', note: 'Cost summary sent' }],
-    'th-family': [{ channel: 'PORTAL', color: '#42be65', note: `${t.firstName}${t.depName ? ' + ' + t.depName : ''} combined` }],
-    'th-elena': [{ channel: 'PHONE', color: '#f59e0b', note: `${t.cgFirst} via phone` }, { channel: 'PORTAL', color: '#42be65', note: `${t.firstName} via portal` }],
+    'th-family': [
+      {
+        channel: 'PORTAL',
+        color: '#42be65',
+        note: `${t.firstName}${t.depName ? ' + ' + t.depName : ''} combined`,
+      },
+    ],
+    'th-elena': [
+      { channel: 'PHONE', color: '#f59e0b', note: `${t.cgFirst} via phone` },
+      { channel: 'PORTAL', color: '#42be65', note: `${t.firstName} via portal` },
+    ],
     'th-consent': [{ channel: 'PORTAL', color: '#42be65', note: 'Consent verified' }],
-    'th-household': [{ channel: 'PORTAL', color: '#42be65', note: t.firstName }, { channel: 'PHONE', color: '#f59e0b', note: `${t.cgFirst} — no overlap` }],
-    'th-mtm': [{ channel: 'EHR', color: '#0C55B8', note: 'Prescriber alerts' }, { channel: 'PORTAL', color: '#42be65', note: `${t.firstName} notified` }],
+    'th-household': [
+      { channel: 'PORTAL', color: '#42be65', note: t.firstName },
+      { channel: 'PHONE', color: '#f59e0b', note: `${t.cgFirst} — no overlap` },
+    ],
+    'th-mtm': [
+      { channel: 'EHR', color: '#0C55B8', note: 'Prescriber alerts' },
+      { channel: 'PORTAL', color: '#42be65', note: `${t.firstName} notified` },
+    ],
   };
 }
 
 const MARIA_THREAD_CHANNELS: Record<string, ChannelBadge[]> = {
-  'th-signal':    [{ channel: 'SYSTEM', color: '#06b6d4' }],
-  'th-auth':      [{ channel: 'PORTAL', color: '#42be65', note: 'Maria via portal' }, { channel: 'EHR', color: '#0C55B8', note: 'Bennett County Health via EHR' }],
-  'th-cred':      [{ channel: 'EHR', color: '#0C55B8', note: 'Provider notification' }],
-  'th-appeal':    [{ channel: 'CARE MGR', color: '#f1c21b', note: 'Dr. K. Patel notified' }],
-  'th-readmit':   [{ channel: 'PORTAL', color: '#42be65', note: 'Maria monitoring' }],
+  'th-signal': [{ channel: 'SYSTEM', color: '#06b6d4' }],
+  'th-auth': [
+    { channel: 'PORTAL', color: '#42be65', note: 'Maria via portal' },
+    { channel: 'EHR', color: '#0C55B8', note: 'Bennett County Health via EHR' },
+  ],
+  'th-cred': [{ channel: 'EHR', color: '#0C55B8', note: 'Provider notification' }],
+  'th-appeal': [{ channel: 'CARE MGR', color: '#f1c21b', note: 'Dr. K. Patel notified' }],
+  'th-readmit': [{ channel: 'PORTAL', color: '#42be65', note: 'Maria monitoring' }],
   'th-financial': [{ channel: 'PORTAL', color: '#42be65', note: 'Cost summary sent' }],
-  'th-family':    [{ channel: 'PORTAL', color: '#42be65', note: 'Maria + Sophia combined' }],
-  'th-elena':     [{ channel: 'PHONE', color: '#f59e0b', note: 'Elena via phone' }, { channel: 'PORTAL', color: '#42be65', note: 'Maria via portal' }],
-  'th-consent':   [{ channel: 'PORTAL', color: '#42be65', note: 'Consent verified' }],
-  'th-household': [{ channel: 'PORTAL', color: '#42be65', note: 'Maria' }, { channel: 'PHONE', color: '#f59e0b', note: 'Elena — no overlap' }],
-  'th-mtm':       [{ channel: 'EHR', color: '#0C55B8', note: 'Prescriber alerts' }, { channel: 'PORTAL', color: '#42be65', note: 'Maria notified' }],
-};;
+  'th-family': [{ channel: 'PORTAL', color: '#42be65', note: 'Maria + Sophia combined' }],
+  'th-elena': [
+    { channel: 'PHONE', color: '#f59e0b', note: 'Elena via phone' },
+    { channel: 'PORTAL', color: '#42be65', note: 'Maria via portal' },
+  ],
+  'th-consent': [{ channel: 'PORTAL', color: '#42be65', note: 'Consent verified' }],
+  'th-household': [
+    { channel: 'PORTAL', color: '#42be65', note: 'Maria' },
+    { channel: 'PHONE', color: '#f59e0b', note: 'Elena — no overlap' },
+  ],
+  'th-mtm': [
+    { channel: 'EHR', color: '#0C55B8', note: 'Prescriber alerts' },
+    { channel: 'PORTAL', color: '#42be65', note: 'Maria notified' },
+  ],
+};
 
 // ─── KPI cards ────────────────────────────────────────────────────────────────
 
@@ -364,49 +634,57 @@ interface KpiCard {
   color: string;
 }
 
-interface KpiSignals { gapDays: number; readmitPct: number; elevated: boolean; }
-function buildKpiCards(t: ImpactTokens, sig: KpiSignals): KpiCard[] { return [
-  {
-    id: 'kpi-auth',
-    label: 'Auth Cycle Time',
-    before: '8.2 days',
-    after: '0.3 days',
-    delta: '↓ 96%',
-    deltaColor: '#42be65',
-    subtext: 'Clinical evidence assembled autonomously',
-    color: '#0C55B8',
-  },
-  {
-    id: 'kpi-gap',
-    label: 'Care Gap Days',
-    before: t.isMaria ? '45 days open' : `${sig.gapDays} days open`,
-    after: 'Active tracking',
-    delta: '↓ Closure initiated',
-    deltaColor: '#42be65',
-    subtext: t.isMaria ? 'HbA1c order placed — outreach scheduled' : `${t.topGapName} — outreach scheduled`,
-    color: '#42be65',
-  },
-  {
-    id: 'kpi-readmit',
-    label: 'Readmission Risk',
-    before: t.isMaria || sig.elevated ? 'Elevated — unmonitored' : 'Moderate — unmonitored',
-    after: 'Protocol active',
-    delta: t.isMaria ? '↓ 48% projected' : `↓ ${sig.readmitPct}% projected`,
-    deltaColor: '#42be65',
-    subtext: '30-day monitoring window open',
-    color: '#f59e0b',
-  },
-  {
-    id: 'kpi-appeal',
-    label: 'Appeal Compliance',
-    before: '72h window — untracked',
-    after: '68h remaining',
-    delta: '✓ On track',
-    deltaColor: '#42be65',
-    subtext: 'Reviewer notified — draft pre-assembled',
-    color: '#8b5cf6',
-  },
-]; }
+interface KpiSignals {
+  gapDays: number;
+  readmitPct: number;
+  elevated: boolean;
+}
+function buildKpiCards(t: ImpactTokens, sig: KpiSignals): KpiCard[] {
+  return [
+    {
+      id: 'kpi-auth',
+      label: 'Auth Cycle Time',
+      before: '8.2 days',
+      after: '0.3 days',
+      delta: '↓ 96%',
+      deltaColor: '#42be65',
+      subtext: 'Clinical evidence assembled autonomously',
+      color: '#0C55B8',
+    },
+    {
+      id: 'kpi-gap',
+      label: 'Care Gap Days',
+      before: t.isMaria ? '45 days open' : `${sig.gapDays} days open`,
+      after: 'Active tracking',
+      delta: '↓ Closure initiated',
+      deltaColor: '#42be65',
+      subtext: t.isMaria
+        ? 'HbA1c order placed — outreach scheduled'
+        : `${t.topGapName} — outreach scheduled`,
+      color: '#42be65',
+    },
+    {
+      id: 'kpi-readmit',
+      label: 'Readmission Risk',
+      before: t.isMaria || sig.elevated ? 'Elevated — unmonitored' : 'Moderate — unmonitored',
+      after: 'Protocol active',
+      delta: t.isMaria ? '↓ 48% projected' : `↓ ${sig.readmitPct}% projected`,
+      deltaColor: '#42be65',
+      subtext: '30-day monitoring window open',
+      color: '#f59e0b',
+    },
+    {
+      id: 'kpi-appeal',
+      label: 'Appeal Compliance',
+      before: '72h window — untracked',
+      after: '68h remaining',
+      delta: '✓ On track',
+      deltaColor: '#42be65',
+      subtext: 'Reviewer notified — draft pre-assembled',
+      color: '#8b5cf6',
+    },
+  ];
+}
 
 // ─── Simulation tiers ─────────────────────────────────────────────────────────
 
@@ -426,9 +704,12 @@ interface SimData {
 //   • Complex / high-acuity managed pool ≈ 15% ≈ 18,700 members → ~18.7k orchestrations/mo.
 //   • Throughput ~847/day, ~5,929/week, ~25,410/month of complex multi-condition resolutions.
 //   • 30-day readmissions prevented ≈ 23/mo; TCOC impact ≈ −$2.1M/mo (~8% on the complex segment).
-const SIM_BASE: Record<SimTier, { label: string; scenarios: number; authDays: number; readmissions: number; tcocK: number }> = {
-  today: { label: 'Today',      scenarios: 847,   authDays: 224,  readmissions: 1,  tcocK: 68 },
-  week:  { label: 'This Week',  scenarios: 5929,  authDays: 1568, readmissions: 6,  tcocK: 476 },
+const SIM_BASE: Record<
+  SimTier,
+  { label: string; scenarios: number; authDays: number; readmissions: number; tcocK: number }
+> = {
+  today: { label: 'Today', scenarios: 847, authDays: 224, readmissions: 1, tcocK: 68 },
+  week: { label: 'This Week', scenarios: 5929, authDays: 1568, readmissions: 6, tcocK: 476 },
   month: { label: 'This Month', scenarios: 25410, authDays: 6942, readmissions: 23, tcocK: 2100 },
 };
 const __fmtN = (n: number) => Math.round(n).toLocaleString('en-US');
@@ -449,12 +730,37 @@ function buildSimData(acuity: number): Record<SimTier, SimData> {
   return out;
 }
 
-function buildRoiBenchmarks(readmitPct: number, monthTcoc: string, todayScenarios: string, isMaria: boolean) {
+function buildRoiBenchmarks(
+  readmitPct: number,
+  monthTcoc: string,
+  todayScenarios: string,
+  isMaria: boolean
+) {
   return [
-    { id: 'b1', metric: 'Auth cycle −96%', source: 'AHIP 2024 Prior Auth Benchmark: avg 8.2d manual → 0.3d automated', color: '#42be65' },
-    { id: 'b2', metric: `Readmission −${isMaria ? 48 : readmitPct}%`, source: 'SD Medicaid HRRP: coordinated post-discharge protocols reduce 30-day readmit 40–55%', color: '#f59e0b' },
-    { id: 'b3', metric: `TCOC ${isMaria ? '−$2.1M' : monthTcoc}/mo`, source: `124,847-citizen plan · $47K avg episode · ${isMaria ? '847' : todayScenarios} daily scenarios · AHIP benchmark`, color: '#fa4d56' },
-    { id: 'b4', metric: 'Care gap +71%', source: 'NCQA SD Medicaid quality 2024: automated outreach improves closure rates 65–78%', color: '#78a9ff' },
+    {
+      id: 'b1',
+      metric: 'Auth cycle −96%',
+      source: 'AHIP 2024 Prior Auth Benchmark: avg 8.2d manual → 0.3d automated',
+      color: '#42be65',
+    },
+    {
+      id: 'b2',
+      metric: `Readmission −${isMaria ? 48 : readmitPct}%`,
+      source: 'SD Medicaid HRRP: coordinated post-discharge protocols reduce 30-day readmit 40–55%',
+      color: '#f59e0b',
+    },
+    {
+      id: 'b3',
+      metric: `TCOC ${isMaria ? '−$2.1M' : monthTcoc}/mo`,
+      source: `124,847-citizen plan · $47K avg episode · ${isMaria ? '847' : todayScenarios} daily scenarios · AHIP benchmark`,
+      color: '#fa4d56',
+    },
+    {
+      id: 'b4',
+      metric: 'Care gap +71%',
+      source: 'NCQA SD Medicaid quality 2024: automated outreach improves closure rates 65–78%',
+      color: '#78a9ff',
+    },
   ];
 }
 
@@ -463,20 +769,28 @@ function buildRoiBenchmarks(readmitPct: number, monthTcoc: string, todayScenario
 function AgentImpactDashboardInner() {
   const setScreen = useDemoStore((s) => s.setScreen);
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
-  const __reg = getPatientById(activeCitizenId) || getPatientById('MARIA_SD_001')!;
+  const __reg = getPatientById(activeCitizenId) ?? placeholderMember(activeCitizenId);
   const __nameParts = __reg.name.split(' ');
   const __lastName = __nameParts.slice(1).join(' ') || __nameParts[0];
-  const __tg = (__reg.careGaps || []).find((g) => g.domain === 'Clinical' && g.status !== 'Closed') || __reg.careGaps?.[0];
+  const __tg =
+    (__reg.careGaps || []).find((g) => g.domain === 'Clinical' && g.status !== 'Closed') ||
+    __reg.careGaps?.[0];
   const __dep = __reg.household?.dependents?.[0];
   const __cg = __reg.household?.caregiverFor?.[0];
   const __tok: ImpactTokens = {
     isMaria: __reg.platformId === 'MARIA_SD_001',
-    name: __reg.name, firstName: __nameParts[0], lastName: __lastName,
+    name: __reg.name,
+    firstName: __nameParts[0],
+    lastName: __lastName,
     org: __reg.organization.replace(/ \(.*\)/, ''),
     topGapName: __tg ? __tg.name.replace(/ \(.*\)/, '') : 'Care gap',
-    contract: __reg.contract, careManager: __reg.careManager,
-    depName: __dep ? __dep.name.split(' ')[0] : '', hasDep: !!__dep,
-    cgFirst: __cg ? __cg.name.split(' ')[0] : '', cgMed: __cg?.meds?.[0]?.name || 'medication', hasCg: !!__cg,
+    contract: __reg.contract,
+    careManager: __reg.careManager,
+    depName: __dep ? __dep.name.split(' ')[0] : '',
+    hasDep: !!__dep,
+    cgFirst: __cg ? __cg.name.split(' ')[0] : '',
+    cgMed: __cg?.meds?.[0]?.name || 'medication',
+    hasCg: !!__cg,
     hhId: `${__lastName.replace(/\s+/g, '').toUpperCase()}_HH-001`,
   };
   const __coalition = dispatchAgentsForPatient(__reg);
@@ -487,11 +801,20 @@ function AgentImpactDashboardInner() {
   const __gapDays = __tg?.daysOpen ?? 45;
   const __readmitPct = Math.round(40 + ((__reg.erRiskPct ?? 42) / 100) * 15);
   const __elevated = /crit|high/i.test(__reg.riskTier || '');
-  const KPI_CARDS = buildKpiCards(__tok, { gapDays: __gapDays, readmitPct: __readmitPct, elevated: __elevated });
+  const KPI_CARDS = buildKpiCards(__tok, {
+    gapDays: __gapDays,
+    readmitPct: __readmitPct,
+    elevated: __elevated,
+  });
   // Population value simulation scales with member acuity (RAF vs Maria baseline 2.18).
   const __acuity = (__reg.rafScore ?? 2.18) / 2.18;
   const SIM_DATA = buildSimData(__acuity);
-  const ROI_BENCHMARKS = buildRoiBenchmarks(__readmitPct, SIM_DATA.month.tcocImpact, SIM_DATA.today.scenarios, __tok.isMaria);
+  const ROI_BENCHMARKS = buildRoiBenchmarks(
+    __readmitPct,
+    SIM_DATA.month.tcocImpact,
+    SIM_DATA.today.scenarios,
+    __tok.isMaria
+  );
   const __coalitionCount = __coalition.length;
   // Coordinated = dispatched domain coalition + 3 always-on infra agents (orchestrator, governance, audit).
   // Maria stays byte-identical to the authored walkthrough (8 coordinated / 9 in the flow modal).
@@ -532,10 +855,13 @@ function AgentImpactDashboardInner() {
 
     // Reveal milestones sequentially
     MILESTONES.forEach((ms, i) => {
-      const t = setTimeout(() => {
-        setVisibleMilestones((prev) => [...prev, ms.id]);
-        setActiveMilestone(ms.id);
-      }, 400 + i * 500);
+      const t = setTimeout(
+        () => {
+          setVisibleMilestones((prev) => [...prev, ms.id]);
+          setActiveMilestone(ms.id);
+        },
+        400 + i * 500
+      );
       timerRefs.current.push(t);
     });
 
@@ -617,10 +943,19 @@ function AgentImpactDashboardInner() {
           <div className="flex items-center gap-4">
             <div
               className="rounded px-3 py-1.5 flex items-center gap-2"
-              style={{ background: 'rgba(66,190,101,0.15)', border: '1px solid rgba(66,190,101,0.4)' }}
+              style={{
+                background: 'rgba(66,190,101,0.15)',
+                border: '1px solid rgba(66,190,101,0.4)',
+              }}
             >
-              <div className="rounded-full" style={{ width: 7, height: 7, background: '#42be65' }} />
-              <span className="font-mono font-semibold" style={{ fontSize: '11px', color: '#42be65', letterSpacing: '0.1em' }}>
+              <div
+                className="rounded-full"
+                style={{ width: 7, height: 7, background: '#42be65' }}
+              />
+              <span
+                className="font-mono font-semibold"
+                style={{ fontSize: '11px', color: '#42be65', letterSpacing: '0.1em' }}
+              >
                 RESOLVED — 47 MIN
               </span>
             </div>
@@ -631,16 +966,21 @@ function AgentImpactDashboardInner() {
           <div className="flex items-center gap-6">
             {[
               { label: 'Agents Coordinated', value: __agentsCoord, color: '#78a9ff' },
-                            { label: 'Threads Active', value: String(THREAD_ROWS.length), color: '#fa4d56' },
+              { label: 'Threads Active', value: String(THREAD_ROWS.length), color: '#fa4d56' },
               { label: 'Decisions Logged', value: '74', color: '#8b5cf6' },
               { label: 'Governance Honored', value: '9/9', color: '#42be65' },
               { label: 'Human Interventions', value: '1', color: '#f1c21b' },
             ].map((s) => (
               <div key={s.label} className="flex flex-col items-end gap-0.5">
-                <span className="font-mono font-bold" style={{ fontSize: '18px', color: s.color, lineHeight: 1 }}>
+                <span
+                  className="font-mono font-bold"
+                  style={{ fontSize: '18px', color: s.color, lineHeight: 1 }}
+                >
                   {s.value}
                 </span>
-                <span style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.06em' }}>{s.label}</span>
+                <span style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.06em' }}>
+                  {s.label}
+                </span>
               </div>
             ))}
           </div>
@@ -652,21 +992,36 @@ function AgentImpactDashboardInner() {
             {/* Left: Timeline */}
             <div
               className="flex flex-col overflow-hidden"
-              style={{ width: '40%', borderRight: '1px solid rgba(57,57,57,0.5)', background: '#1c1c1c' }}
+              style={{
+                width: '40%',
+                borderRight: '1px solid rgba(57,57,57,0.5)',
+                background: '#1c1c1c',
+              }}
             >
-              <div className="flex-shrink-0 px-5 py-3" style={{ borderBottom: '1px solid rgba(57,57,57,0.5)' }}>
+              <div
+                className="flex-shrink-0 px-5 py-3"
+                style={{ borderBottom: '1px solid rgba(57,57,57,0.5)' }}
+              >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono uppercase tracking-wider" style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}>
+                  <span
+                    className="font-mono uppercase tracking-wider"
+                    style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}
+                  >
                     INTERVENTION TIMELINE — {__tok.name.toUpperCase()}
                   </span>
-                  <span className="font-mono" style={{ fontSize: '11px', color: '#8d8d8d' }}>T+0 → T+{MILESTONES[MILESTONES.length - 1].timeMin}min</span>
+                  <span className="font-mono" style={{ fontSize: '11px', color: '#8d8d8d' }}>
+                    T+0 → T+{MILESTONES[MILESTONES.length - 1].timeMin}min
+                  </span>
                 </div>
               </div>
 
               {/* Timeline track */}
               <div className="flex-shrink-0 px-5 pt-4 pb-2">
                 <div className="relative" style={{ height: 6 }}>
-                  <div className="absolute inset-0 rounded-full" style={{ background: 'rgba(57,57,57,0.6)' }} />
+                  <div
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: 'rgba(57,57,57,0.6)' }}
+                  />
                   <div
                     className="absolute left-0 top-0 bottom-0 rounded-full"
                     style={{
@@ -688,7 +1043,8 @@ function AgentImpactDashboardInner() {
                           height: activeMilestone === ms.id ? 14 : 10,
                           marginLeft: activeMilestone === ms.id ? -7 : -5,
                           background: isVisible ? ms.agentColor : '#393939',
-                          boxShadow: activeMilestone === ms.id ? `0 0 12px ${ms.agentColor}` : 'none',
+                          boxShadow:
+                            activeMilestone === ms.id ? `0 0 12px ${ms.agentColor}` : 'none',
                           border: `2px solid ${isVisible ? ms.agentColor : '#393939'}`,
                           transition: 'all 0.3s ease',
                           zIndex: 2,
@@ -732,7 +1088,11 @@ function AgentImpactDashboardInner() {
                       key={ms.id}
                       className="rounded p-3 cursor-pointer"
                       style={{
-                        background: isActive ? `${ms.agentColor}12` : isVisible ? 'rgba(38,38,38,0.8)' : 'rgba(28,28,28,0.5)',
+                        background: isActive
+                          ? `${ms.agentColor}12`
+                          : isVisible
+                            ? 'rgba(38,38,38,0.8)'
+                            : 'rgba(28,28,28,0.5)',
                         border: `1px solid ${isActive ? ms.agentColor + '55' : isVisible ? 'rgba(57,57,57,0.6)' : 'rgba(57,57,57,0.3)'}`,
                         opacity: isVisible ? 1 : 0.3,
                         transform: isVisible ? 'translateX(0)' : 'translateX(-8px)',
@@ -743,23 +1103,57 @@ function AgentImpactDashboardInner() {
                       <div className="flex items-start gap-3">
                         <div
                           className="rounded-full flex-shrink-0"
-                          style={{ width: 8, height: 8, background: isVisible ? ms.agentColor : '#393939', marginTop: 5 }}
+                          style={{
+                            width: 8,
+                            height: 8,
+                            background: isVisible ? ms.agentColor : '#393939',
+                            marginTop: 5,
+                          }}
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <span className="font-semibold text-white" style={{ fontSize: '13px' }}>{ms.label}</span>
-                            <span className="font-mono flex-shrink-0" style={{ fontSize: '10px', color: ms.agentColor, letterSpacing: '0.06em' }}>{ms.time}</span>
+                            <span className="font-semibold text-white" style={{ fontSize: '13px' }}>
+                              {ms.label}
+                            </span>
+                            <span
+                              className="font-mono flex-shrink-0"
+                              style={{
+                                fontSize: '10px',
+                                color: ms.agentColor,
+                                letterSpacing: '0.06em',
+                              }}
+                            >
+                              {ms.time}
+                            </span>
                           </div>
-                          <span style={{ fontSize: '11px', color: ms.agentColor, letterSpacing: '0.04em' }}>{ms.agent}</span>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: ms.agentColor,
+                              letterSpacing: '0.04em',
+                            }}
+                          >
+                            {ms.agent}
+                          </span>
                           {isActive && (
                             <div className="mt-2 flex flex-col gap-1.5">
-                              <p style={{ fontSize: '12px', color: '#8d8d8d', lineHeight: 1.5 }}>{ms.detail}</p>
+                              <p style={{ fontSize: '12px', color: '#8d8d8d', lineHeight: 1.5 }}>
+                                {ms.detail}
+                              </p>
                               <div
                                 className="rounded px-2 py-1 flex items-center gap-2"
-                                style={{ background: `${ms.kpiColor}12`, border: `1px solid ${ms.kpiColor}35` }}
+                                style={{
+                                  background: `${ms.kpiColor}12`,
+                                  border: `1px solid ${ms.kpiColor}35`,
+                                }}
                               >
-                                <div className="rounded-full flex-shrink-0" style={{ width: 5, height: 5, background: ms.kpiColor }} />
-                                <span style={{ fontSize: '12px', color: ms.kpiColor }}>{ms.kpiImpact}</span>
+                                <div
+                                  className="rounded-full flex-shrink-0"
+                                  style={{ width: 5, height: 5, background: ms.kpiColor }}
+                                />
+                                <span style={{ fontSize: '12px', color: ms.kpiColor }}>
+                                  {ms.kpiImpact}
+                                </span>
                               </div>
                             </div>
                           )}
@@ -773,8 +1167,14 @@ function AgentImpactDashboardInner() {
 
             {/* Right: 8 Thread Statuses */}
             <div className="flex-1 flex flex-col overflow-hidden" style={{ background: '#161616' }}>
-              <div className="flex-shrink-0 px-5 py-3" style={{ borderBottom: '1px solid rgba(57,57,57,0.5)' }}>
-                <span className="font-mono uppercase tracking-wider" style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}>
+              <div
+                className="flex-shrink-0 px-5 py-3"
+                style={{ borderBottom: '1px solid rgba(57,57,57,0.5)' }}
+              >
+                <span
+                  className="font-mono uppercase tracking-wider"
+                  style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}
+                >
                   THREAD STATUS — {THREAD_ROWS.length} ACTIVE
                 </span>
               </div>
@@ -793,18 +1193,40 @@ function AgentImpactDashboardInner() {
                   >
                     <div
                       className="rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ width: 24, height: 24, background: `${thread.statusColor}15`, border: `1px solid ${thread.statusColor}40` }}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        background: `${thread.statusColor}15`,
+                        border: `1px solid ${thread.statusColor}40`,
+                      }}
                     >
-                      <span style={{ fontSize: '11px', color: thread.statusColor }}>{thread.icon}</span>
+                      <span style={{ fontSize: '11px', color: thread.statusColor }}>
+                        {thread.icon}
+                      </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className="font-semibold" style={{ fontSize: '13px', color: '#f4f4f4' }}>{thread.label}</span>
+                        <span
+                          className="font-semibold"
+                          style={{ fontSize: '13px', color: '#f4f4f4' }}
+                        >
+                          {thread.label}
+                        </span>
                         <div
                           className="rounded px-1.5 py-0.5"
-                          style={{ background: `${thread.statusColor}15`, border: `1px solid ${thread.statusColor}40` }}
+                          style={{
+                            background: `${thread.statusColor}15`,
+                            border: `1px solid ${thread.statusColor}40`,
+                          }}
                         >
-                          <span className="font-mono" style={{ fontSize: '9px', color: thread.statusColor, letterSpacing: '0.08em' }}>
+                          <span
+                            className="font-mono"
+                            style={{
+                              fontSize: '9px',
+                              color: thread.statusColor,
+                              letterSpacing: '0.08em',
+                            }}
+                          >
                             {thread.status}
                           </span>
                         </div>
@@ -813,23 +1235,50 @@ function AgentImpactDashboardInner() {
                           <div
                             key={ci}
                             className="rounded px-1.5 py-0.5 flex items-center gap-1"
-                            style={{ background: `${ch.color}12`, border: `1px solid ${ch.color}35` }}
+                            style={{
+                              background: `${ch.color}12`,
+                              border: `1px solid ${ch.color}35`,
+                            }}
                             title={ch.note}
                           >
-                            <div className="rounded-full" style={{ width: 4, height: 4, background: ch.color, flexShrink: 0 }} />
-                            <span className="font-mono" style={{ fontSize: '8px', color: ch.color, letterSpacing: '0.06em' }}>{ch.channel}</span>
+                            <div
+                              className="rounded-full"
+                              style={{ width: 4, height: 4, background: ch.color, flexShrink: 0 }}
+                            />
+                            <span
+                              className="font-mono"
+                              style={{ fontSize: '8px', color: ch.color, letterSpacing: '0.06em' }}
+                            >
+                              {ch.channel}
+                            </span>
                           </div>
                         ))}
                       </div>
-                      <span style={{ fontSize: '11px', color: '#6f6f6f', lineHeight: 1.3 }}>{thread.detail}</span>
+                      <span style={{ fontSize: '11px', color: '#6f6f6f', lineHeight: 1.3 }}>
+                        {thread.detail}
+                      </span>
                       {/* Household cross-channel coordination note */}
                       {thread.id === 'th-household' && (
                         <div className="mt-1 flex items-center gap-1.5">
-                          <span style={{ fontSize: '9px', color: '#ff7eb6', fontStyle: 'italic' }}>{__tok.firstName} via PORTAL · {__tok.cgFirst || __tok.depName || 'caregiver'} via PHONE — coordinated, no overlap</span>
+                          <span style={{ fontSize: '9px', color: '#ff7eb6', fontStyle: 'italic' }}>
+                            {__tok.firstName} via PORTAL ·{' '}
+                            {__tok.cgFirst || __tok.depName || 'caregiver'} via PHONE — coordinated,
+                            no overlap
+                          </span>
                         </div>
                       )}
                     </div>
-                    <span style={{ fontSize: '10px', color: thread.agentColor, flexShrink: 0, textAlign: 'right', maxWidth: 140 }}>{thread.agent}</span>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        color: thread.agentColor,
+                        flexShrink: 0,
+                        textAlign: 'right',
+                        maxWidth: 140,
+                      }}
+                    >
+                      {thread.agent}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -840,7 +1289,10 @@ function AgentImpactDashboardInner() {
                 style={{ borderTop: '1px solid rgba(57,57,57,0.4)' }}
               >
                 <span style={{ fontSize: '11px', color: '#4b5563' }}>↓</span>
-                <span className="font-mono" style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.1em' }}>
+                <span
+                  className="font-mono"
+                  style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.1em' }}
+                >
                   PRESS ↓ TO SEE KPI IMPACT &amp; VALUE SIMULATION
                 </span>
                 <span style={{ fontSize: '11px', color: '#4b5563' }}>↓</span>
@@ -855,7 +1307,10 @@ function AgentImpactDashboardInner() {
             {/* KPI Impact Cards */}
             <div className="flex-shrink-0">
               <div className="flex items-center gap-2 mb-3">
-                <span className="font-mono uppercase tracking-wider" style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}>
+                <span
+                  className="font-mono uppercase tracking-wider"
+                  style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}
+                >
                   KPI IMPACT — THIS SCENARIO
                 </span>
               </div>
@@ -873,17 +1328,38 @@ function AgentImpactDashboardInner() {
                     }}
                   >
                     <div className="flex items-center justify-between">
-                      <span style={{ fontSize: '11px', color: '#8d8d8d', letterSpacing: '0.04em' }}>{kpi.label}</span>
-                      <span className="font-mono font-bold" style={{ fontSize: '14px', color: kpi.deltaColor }}>
+                      <span style={{ fontSize: '11px', color: '#8d8d8d', letterSpacing: '0.04em' }}>
+                        {kpi.label}
+                      </span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '14px', color: kpi.deltaColor }}
+                      >
                         {kpi.delta}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono" style={{ fontSize: '12px', color: '#6b7280', textDecoration: 'line-through' }}>{kpi.before}</span>
+                      <span
+                        className="font-mono"
+                        style={{
+                          fontSize: '12px',
+                          color: '#6b7280',
+                          textDecoration: 'line-through',
+                        }}
+                      >
+                        {kpi.before}
+                      </span>
                       <span style={{ fontSize: '12px', color: '#4b5563' }}>→</span>
-                      <span className="font-mono font-semibold" style={{ fontSize: '13px', color: kpi.deltaColor }}>{kpi.after}</span>
+                      <span
+                        className="font-mono font-semibold"
+                        style={{ fontSize: '13px', color: kpi.deltaColor }}
+                      >
+                        {kpi.after}
+                      </span>
                     </div>
-                    <span style={{ fontSize: '10px', color: '#6f6f6f', lineHeight: 1.4 }}>{kpi.subtext}</span>
+                    <span style={{ fontSize: '10px', color: '#6f6f6f', lineHeight: 1.4 }}>
+                      {kpi.subtext}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -893,18 +1369,29 @@ function AgentImpactDashboardInner() {
             <div className="flex-1 flex flex-col min-h-0">
               <div className="flex items-center justify-between mb-3 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono uppercase tracking-wider" style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}>
+                  <span
+                    className="font-mono uppercase tracking-wider"
+                    style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.12em' }}
+                  >
                     CUMULATIVE VALUE SIMULATION — POPULATION
                   </span>
                   <div
                     className="rounded px-2 py-0.5"
-                    style={{ background: 'rgba(120,169,255,0.12)', border: '1px solid rgba(120,169,255,0.3)' }}
+                    style={{
+                      background: 'rgba(120,169,255,0.12)',
+                      border: '1px solid rgba(120,169,255,0.3)',
+                    }}
                   >
-                    <span className="font-mono" style={{ fontSize: '9px', color: '#78a9ff' }}>PROJECTED</span>
+                    <span className="font-mono" style={{ fontSize: '9px', color: '#78a9ff' }}>
+                      PROJECTED
+                    </span>
                   </div>
                 </div>
                 {/* Tier switcher */}
-                <div className="flex rounded overflow-hidden" style={{ border: '1px solid rgba(57,57,57,0.7)' }}>
+                <div
+                  className="flex rounded overflow-hidden"
+                  style={{ border: '1px solid rgba(57,57,57,0.7)' }}
+                >
                   {(['today', 'week', 'month'] as SimTier[]).map((tier) => (
                     <button
                       key={tier}
@@ -941,7 +1428,12 @@ function AgentImpactDashboardInner() {
                     id: 'sim-scenarios',
                     label: `Scenarios like ${__tok.firstName}'s`,
                     value: currentSim.scenarios,
-                    unit: simTier === 'today' ? 'today' : simTier === 'week' ? 'this week' : 'this month',
+                    unit:
+                      simTier === 'today'
+                        ? 'today'
+                        : simTier === 'week'
+                          ? 'this week'
+                          : 'this month',
                     color: '#78a9ff',
                     subtext: 'Complex multi-condition members resolved autonomously',
                   },
@@ -957,14 +1449,19 @@ function AgentImpactDashboardInner() {
                     id: 'sim-readmit',
                     label: 'Readmissions Prevented',
                     value: currentSim.readmissions,
-                    unit: simTier === 'today' ? 'today' : simTier === 'week' ? 'this week' : 'this month',
+                    unit:
+                      simTier === 'today'
+                        ? 'today'
+                        : simTier === 'week'
+                          ? 'this week'
+                          : 'this month',
                     color: '#f59e0b',
                     subtext: 'SD Medicaid HRRP: coordinated protocols reduce 30-day readmit 40–55%',
                   },
                   {
-                   id: 'sim-tcoc',
-                   label: 'TCOC Impact',
-                   value: currentSim.tcocImpact,
+                    id: 'sim-tcoc',
+                    label: 'TCOC Impact',
+                    value: currentSim.tcocImpact,
                     unit: simTier === 'month' ? 'projected this quarter' : 'projected',
                     color: '#fa4d56',
                     subtext: '124,847-member plan · $47K avg episode · AHIP benchmark',
@@ -979,13 +1476,20 @@ function AgentImpactDashboardInner() {
                     <div className="flex items-baseline gap-2">
                       <span
                         className="font-mono font-bold"
-                        style={{ fontSize: '28px', color: item.color, lineHeight: 1, letterSpacing: '-0.02em' }}
+                        style={{
+                          fontSize: '28px',
+                          color: item.color,
+                          lineHeight: 1,
+                          letterSpacing: '-0.02em',
+                        }}
                       >
                         {item.value}
                       </span>
                       <span style={{ fontSize: '11px', color: '#6f6f6f' }}>{item.unit}</span>
                     </div>
-                    <span style={{ fontSize: '10px', color: '#4b5563', lineHeight: 1.4 }}>{item.subtext}</span>
+                    <span style={{ fontSize: '10px', color: '#4b5563', lineHeight: 1.4 }}>
+                      {item.subtext}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1002,15 +1506,30 @@ function AgentImpactDashboardInner() {
                   }}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#4b5563', letterSpacing: '0.1em' }}>ROI SOURCES</span>
+                    <span
+                      className="font-mono uppercase"
+                      style={{ fontSize: '9px', color: '#4b5563', letterSpacing: '0.1em' }}
+                    >
+                      ROI SOURCES
+                    </span>
                   </div>
                   <div className="grid gap-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
                     {ROI_BENCHMARKS.map((b) => (
                       <div key={b.id} className="flex items-start gap-2">
-                        <div className="rounded-full flex-shrink-0 mt-1" style={{ width: 5, height: 5, background: b.color }} />
+                        <div
+                          className="rounded-full flex-shrink-0 mt-1"
+                          style={{ width: 5, height: 5, background: b.color }}
+                        />
                         <div className="flex items-start gap-1.5 flex-1 min-w-0">
-                          <span className="font-mono flex-shrink-0" style={{ fontSize: '10px', color: b.color, letterSpacing: '0.04em' }}>{b.metric}</span>
-                          <span style={{ fontSize: '10px', color: '#4b5563', lineHeight: 1.4 }}>— {b.source}</span>
+                          <span
+                            className="font-mono flex-shrink-0"
+                            style={{ fontSize: '10px', color: b.color, letterSpacing: '0.04em' }}
+                          >
+                            {b.metric}
+                          </span>
+                          <span style={{ fontSize: '10px', color: '#4b5563', lineHeight: 1.4 }}>
+                            — {b.source}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -1030,13 +1549,18 @@ function AgentImpactDashboardInner() {
                       cursor: 'pointer',
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(120,169,255,0.15)';
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(120,169,255,0.6)';
-                      (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(120,169,255,0.15)';
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        'rgba(120,169,255,0.15)';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor =
+                        'rgba(120,169,255,0.6)';
+                      (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                        '0 0 20px rgba(120,169,255,0.15)';
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = 'rgba(120,169,255,0.08)';
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(120,169,255,0.35)';
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        'rgba(120,169,255,0.08)';
+                      (e.currentTarget as HTMLButtonElement).style.borderColor =
+                        'rgba(120,169,255,0.35)';
                       (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
                     }}
                   >
@@ -1048,21 +1572,38 @@ function AgentImpactDashboardInner() {
                           style={{
                             width: 6,
                             height: 6,
-                            background: ['#78a9ff', '#0C55B8', '#42be65', '#10b981', '#c084fc', '#8b5cf6', '#f1c21b'][i],
+                            background: [
+                              '#78a9ff',
+                              '#0C55B8',
+                              '#42be65',
+                              '#10b981',
+                              '#c084fc',
+                              '#8b5cf6',
+                              '#f1c21b',
+                            ][i],
                             opacity: 0.8,
                           }}
                         />
                       ))}
                     </div>
-                    <span className="font-mono font-semibold" style={{ fontSize: '12px', color: '#78a9ff', letterSpacing: '0.1em' }}>
+                    <span
+                      className="font-mono font-semibold"
+                      style={{ fontSize: '12px', color: '#78a9ff', letterSpacing: '0.1em' }}
+                    >
                       VIEW AGENT ORCHESTRATION FLOW
                     </span>
                     <span style={{ fontSize: '14px', color: '#78a9ff' }}>→</span>
                     <div
                       className="rounded px-2 py-0.5"
-                      style={{ background: 'rgba(120,169,255,0.12)', border: '1px solid rgba(120,169,255,0.3)' }}
+                      style={{
+                        background: 'rgba(120,169,255,0.12)',
+                        border: '1px solid rgba(120,169,255,0.3)',
+                      }}
                     >
-                      <span className="font-mono" style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.08em' }}>
+                      <span
+                        className="font-mono"
+                        style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.08em' }}
+                      >
                         {__flowAgents} AGENTS · 3 LANES · JSON PAYLOADS
                       </span>
                     </div>
@@ -1077,7 +1618,10 @@ function AgentImpactDashboardInner() {
               style={{ borderTop: '1px solid rgba(57,57,57,0.4)' }}
             >
               <span style={{ fontSize: '11px', color: '#4b5563' }}>↑</span>
-              <span className="font-mono" style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.1em' }}>
+              <span
+                className="font-mono"
+                style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.1em' }}
+              >
                 ↑ TIMELINE &nbsp;·&nbsp; ↓ ADVANCE
               </span>
               <span style={{ fontSize: '11px', color: '#4b5563' }}>↓</span>
@@ -1091,17 +1635,31 @@ function AgentImpactDashboardInner() {
           style={{ color: '#6f6f6f', fontSize: '12px' }}
         >
           <div className="flex gap-1.5">
-            <div className="rounded-full" style={{ width: 6, height: 6, background: beat === 1 ? '#78a9ff' : '#393939', transition: 'background 0.3s' }} />
-            <div className="rounded-full" style={{ width: 6, height: 6, background: beat === 2 ? '#78a9ff' : '#393939', transition: 'background 0.3s' }} />
+            <div
+              className="rounded-full"
+              style={{
+                width: 6,
+                height: 6,
+                background: beat === 1 ? '#78a9ff' : '#393939',
+                transition: 'background 0.3s',
+              }}
+            />
+            <div
+              className="rounded-full"
+              style={{
+                width: 6,
+                height: 6,
+                background: beat === 2 ? '#78a9ff' : '#393939',
+                transition: 'background 0.3s',
+              }}
+            />
           </div>
           <span>16 / 19</span>
         </div>
       </div>
 
       {/* Orchestration Flow Modal */}
-      {orchModalOpen && (
-        <OrchestrationFlowModal onClose={() => setOrchModalOpen(false)} />
-      )}
+      {orchModalOpen && <OrchestrationFlowModal onClose={() => setOrchModalOpen(false)} />}
     </ScreenLayout>
   );
 }

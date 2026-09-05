@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be",
+      "fullUrl": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -95,11 +95,11 @@
             "preferred": true
           }
         ],
-        "id": "25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        "id": "9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
       },
       "request": {
         "method": "PUT",
-        "url": "Patient/25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+        "url": "Patient/9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
       }
     },
     {
@@ -175,7 +175,7 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "payor": [
           {
@@ -219,7 +219,7 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "participant": [
           {
@@ -294,7 +294,7 @@
           "text": "Chronic diastolic (congestive) heart failure"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "onsetDateTime": "2022-01-01",
         "id": "7b68587d-d1a4-4842-8cce-0c8cfe5916a9"
@@ -346,7 +346,7 @@
           "text": "Type 2 diabetes mellitus without complications"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "onsetDateTime": "2015-04-01",
         "id": "a928980d-7145-41fa-9523-351bcaee715c",
@@ -421,7 +421,7 @@
           "text": "Essential (primary) hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "onsetDateTime": "2013-08-01",
         "id": "0485dd12-2078-4174-8d90-537dba4692fb"
@@ -473,7 +473,7 @@
           "text": "Major depressive disorder, single episode, mild"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "onsetDateTime": "2024-02-01",
         "id": "92df1675-d957-4213-a037-ecc1f6a156f5"
@@ -500,7 +500,7 @@
           "text": "Metformin hydrochloride 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -535,7 +535,7 @@
           "text": "Carvedilol 12.5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -570,7 +570,7 @@
           "text": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -605,7 +605,7 @@
           "text": "Furosemide 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -640,7 +640,7 @@
           "text": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-15",
         "requester": {
@@ -686,7 +686,7 @@
           "text": "Hemoglobin A1c"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-02-28",
         "requester": {
@@ -727,7 +727,7 @@
           "text": "B-type natriuretic peptide panel"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-03-21",
         "requester": {
@@ -768,7 +768,7 @@
           "text": "Diabetic retinal exam"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2025-12-01",
         "requester": {
@@ -809,7 +809,7 @@
           "text": "Cardiology consultation"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-04-01",
         "requester": {
@@ -849,7 +849,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -889,7 +889,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -929,7 +929,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -969,7 +969,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1033,7 +1033,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "onsetDateTime": "2026-03-01",
         "id": "1924738b-f935-46f7-991f-906e00a1eb32"
@@ -1096,7 +1096,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "authoredOn": "2026-03-01",
         "requester": {
@@ -1139,7 +1139,7 @@
           "reference": "urn:uuid:480b24f4-4076-408a-83fd-9e9adaf3a4a3"
         },
         "for": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "owner": {
           "reference": "urn:uuid:7846e7ef-73ce-4a18-a66b-bd195f493134"
@@ -1182,7 +1182,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1225,7 +1225,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1257,7 +1257,7 @@
           "text": "A1C recheck and control"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "id": "87951f17-7b56-4309-8869-52eca01cca49"
       },
@@ -1282,7 +1282,7 @@
           "text": "BNP panel for CHF monitoring"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "id": "009bbb9d-1379-43df-80b2-5ed7a84cb186"
       },
@@ -1307,7 +1307,7 @@
           "text": "PHQ-9 follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "id": "cec3d19f-caf5-4227-b46f-2db4e679f14f"
       },
@@ -1322,7 +1322,7 @@
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "participant": [
           {
@@ -1372,7 +1372,7 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "careTeam": [
           {
@@ -1449,7 +1449,7 @@
           "text": "A1C Recheck (Diabetes)"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "valueInteger": 45,
         "note": [
@@ -1502,7 +1502,7 @@
           "text": "BNP Lab Panel (CHF)"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "valueInteger": 22,
         "note": [
@@ -1555,7 +1555,7 @@
           "text": "PHQ-9 Follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "valueInteger": 30,
         "note": [
@@ -1608,7 +1608,7 @@
           "text": "Transportation — Specialist Visits"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "valueInteger": 45,
         "note": [
@@ -1630,7 +1630,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "Diabetic A1C recheck is 45 days overdue. Bundle labs to reduce patient travel burden."
+            "valueString": "Diabetic A1C recheck is overdue. Bundle labs to reduce patient travel burden."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1657,12 +1657,15 @@
               "display": "warning"
             }
           ],
-          "text": "A1C overdue 45 days — diabetes management gap"
+          "text": "A1C — diabetes management gap"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
-        "id": "5c12dbeb-a826-42ab-96a4-2709720a595c"
+        "id": "5c12dbeb-a826-42ab-96a4-2709720a595c",
+        "period": {
+          "start": "2026-07-20"
+        }
       },
       "request": {
         "method": "PUT",
@@ -1676,7 +1679,7 @@
         "extension": [
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/cds-detail",
-            "valueString": "CHF monitoring BNP panel is 22 days overdue. Active CHF episode (89 days)."
+            "valueString": "CHF monitoring BNP panel is overdue. Active CHF episode."
           },
           {
             "url": "http://tcoc.example.org/fhir/StructureDefinition/tcoc-cds-id",
@@ -1703,12 +1706,15 @@
               "display": "warning"
             }
           ],
-          "text": "BNP panel overdue 22 days — CHF monitoring gap"
+          "text": "BNP panel — CHF monitoring gap"
         },
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
-        "id": "b8e9d971-6972-4b30-946c-feb8538108ae"
+        "id": "b8e9d971-6972-4b30-946c-feb8538108ae",
+        "period": {
+          "start": "2026-08-12"
+        }
       },
       "request": {
         "method": "PUT",
@@ -1735,7 +1741,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "prediction": [
           {
@@ -1762,7 +1768,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "period": {
           "start": "2026-01-01",
@@ -1856,7 +1862,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:25fd625c-ae56-49df-b35f-a3a23bc9c4be"
+          "reference": "urn:uuid:9c075c8e-9ed6-44ec-a059-80a5d5aaac68"
         },
         "period": {
           "start": "2026-01-01",

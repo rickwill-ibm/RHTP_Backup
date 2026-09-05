@@ -94,7 +94,8 @@ async function renderScenario(
             {estimate.planPays}.
           </p>
           <p className="text-xs text-slate-500">
-            Payment-readiness score: {estimate.propensityToPay.band} — {estimate.propensityToPay.note}
+            Payment-readiness score: {estimate.propensityToPay.band} —{' '}
+            {estimate.propensityToPay.note}
           </p>
         </div>
         <div className="rounded border border-slate-200 p-3 text-sm">
@@ -122,7 +123,16 @@ export default async function FinancialClearancePage(): Promise<React.ReactEleme
     );
   }
   const sessionPatient = await getSessionPatient().catch(() => null);
-  const memberId = sessionPatient ?? 'MARIA_SD_001';
+  if (!sessionPatient) {
+    return (
+      <main className="mx-auto max-w-3xl p-6">
+        <p className="text-sm text-slate-600">
+          No member in session - financial clearance requires an authenticated member context.
+        </p>
+      </main>
+    );
+  }
+  const memberId = sessionPatient;
   const scenarios = await Promise.all(SCENARIOS.map((s) => renderScenario(s, memberId)));
 
   return (
@@ -131,7 +141,8 @@ export default async function FinancialClearancePage(): Promise<React.ReactEleme
         <h1 className="text-2xl font-semibold">Golden Thread — Financial Clearance</h1>
         <p className="mt-1 text-sm text-slate-600">
           SMART-launched: Eligibility → Medical Necessity → Prior Auth → Patient Estimation, unified
-          by a persisted Evidence Record. Gold carding, submission-readiness scoring, and work-queue routing.
+          by a persisted Evidence Record. Gold carding, submission-readiness scoring, and work-queue
+          routing.
         </p>
         <p className="mt-1 text-xs text-slate-400">
           {sessionPatient
@@ -153,8 +164,8 @@ export default async function FinancialClearancePage(): Promise<React.ReactEleme
       ))}
       <p className="text-xs italic text-slate-500">
         Runs the production `runFinancialClearance` orchestrator (same path as
-        `/api/financial-clearance`). Submission-readiness scores and estimates are decision-support only; the payer
-        ClaimResponse is authoritative.
+        `/api/financial-clearance`). Submission-readiness scores and estimates are decision-support
+        only; the payer ClaimResponse is authoritative.
       </p>
     </main>
   );

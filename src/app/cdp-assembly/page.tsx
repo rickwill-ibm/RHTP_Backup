@@ -223,9 +223,9 @@ const FORMAT_BADGE: Record<string, { bg: string; text: string }> = {
 export default function CdpAssemblyPage() {
   const activePatientId = useDemoStore((s) => s.activeCitizenId);
   const patient = getPatientSync(activePatientId);
-  const MEMBER_NAME = patient?.name ?? 'Maria Redhawk';
-  const MEMBER_ID = patient?.platformId ?? 'MARIA_SD_001';
-  const MEMBER_LOCATION = patient?.location ?? 'Martin, SD 57551 · Bennett County';
+  const MEMBER_NAME = patient?.name ?? 'Member';
+  const MEMBER_ID = patient?.platformId ?? activePatientId;
+  const MEMBER_LOCATION = patient?.location ?? '—';
   const MEMBER_ROLES = ['PATIENT', 'PARENT', 'CAREGIVER', 'WORKER'];
   const GOLDEN_RECORD_LABEL = `${MEMBER_ID} · Golden Record Assembled`;
   const COMPLETION_MESSAGE = `✓ Knowledge Graph complete — ${MEMBER_NAME} is now known · 52 nodes · 67 edges`;

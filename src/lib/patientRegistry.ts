@@ -71,3 +71,65 @@ export function getVisiblePatients(useMock: boolean): RegistryPatient[] {
 }
 
 export default PATIENT_REGISTRY;
+
+/**
+ * Fail-closed neutral member. An unknown/out-of-scope citizenId must NEVER resolve
+ * to another member's record - the previous `|| getPatientById('MARIA_SD_001')!`
+ * fallback leaked Maria Redhawk's identity/PII onto other members. Screens that need
+ * a non-null RegistryPatient contract use this so no real member's data is shown.
+ * Mirrors placeholderPersona in uhg/data/persona.ts; values are neutral, not Maria's.
+ */
+export function placeholderMember(citizenId?: string): RegistryPatient {
+  return {
+    platformId: citizenId || 'UNKNOWN',
+    fhirId: '',
+    ehrMrn: '',
+    name: 'Member',
+    age: 0,
+    gender: '',
+    dob: '',
+    location: '—',
+    phone: '',
+    pcp: '—',
+    careManager: '—',
+    careManagerInitials: '—',
+    organization: '—',
+    contract: '—',
+    attribution: '—',
+    rafScore: 0,
+    riskTier: 'Low',
+    riskLabel: 'Scope pending',
+    erRiskPct: 0,
+    hccSuspects: 0,
+    hccValue: 0,
+    openCareGaps: 0,
+    episodeType: '—',
+    episodeStatus: 'Stable',
+    episodeDaysActive: 0,
+    pmpm: 0,
+    pmpmTarget: 0,
+    lastContact: '—',
+    bhScreeningLabel: '—',
+    bhScore: null,
+    bhScoreLabel: '—',
+    auditC: 0,
+    bhRisk: 'Low',
+    bhReferralStatus: '—',
+    bhProvider: '—',
+    burdenScore: '—',
+    patientGoal: '—',
+    transportStatus: '—',
+    foodSecurity: '—',
+    housingStatus: '—',
+    language: '—',
+    ruralDistance: '—',
+    disparityFlag: '—',
+    cohortFlag: '—',
+    snapStatus: '—',
+    digitalAccess: '—',
+    careGaps: [],
+    pathwaySteps: [],
+    aiCopilot: '—',
+    cdsCards: [],
+  };
+}

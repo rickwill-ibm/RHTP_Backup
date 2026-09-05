@@ -5,7 +5,6 @@ import ScreenLayout from '@/uhg/components/shared/ScreenLayout';
 import PresenterControls from '@/uhg/components/shared/PresenterControls';
 import MariaStatusStrip from '@/uhg/components/shared/MariaStatusStrip';
 import { useDemoStore } from '@/uhg/store/demoStore';
-import { personaFor } from '@/uhg/data/persona';
 import { contextFor } from '@/uhg/data/citizenContext';
 import { getPatientById, placeholderMember } from '@/lib/patientRegistry';
 
@@ -404,7 +403,6 @@ const LEVEL_CONFIG: Record<SdohDomain['level'], { color: string; bg: string; bor
 export default function WholePersonCareScreen() {
   const setScreen = useDemoStore((s) => s.setScreen);
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
-  const __persona = personaFor(activeCitizenId);
   const __ctx = contextFor(activeCitizenId);
   const __reg = getPatientById(activeCitizenId) ?? placeholderMember(activeCitizenId);
   const __topGapEntry =
@@ -506,7 +504,7 @@ export default function WholePersonCareScreen() {
                 margin: 0,
               }}
             >
-              Whole Person Care Intelligence — {__persona.name}
+              Whole Person Care Intelligence
             </h1>
           </div>
           <div className="flex items-center gap-3">

@@ -8,7 +8,8 @@
  */
 import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
-import { useAppContext } from '@/lib/appContext';
+import { useAppContext, type CaseloadScope } from '@/lib/appContext';
+import { CONTRACTS } from '@/lib/contracts';
 import PatientSwitcherDropdown from '@/components/PatientSwitcherDropdown';
 import {
   resolveScreenContext,
@@ -27,7 +28,16 @@ const SCOPE_LABEL: Partial<Record<ScreenFrame, string>> = {
 };
 
 export default function AppTopBarActions({ roleColor }: { roleColor: string }): React.ReactElement {
-  const { user, entryContext, useMockData, setUseMockData } = useAppContext();
+  const {
+    user,
+    entryContext,
+    useMockData,
+    setUseMockData,
+    selectedContractId,
+    setSelectedContractId,
+    caseloadScope,
+    setCaseloadScope,
+  } = useAppContext();
   const pathname = usePathname();
   const { frame } = resolveScreenContext(pathname);
   const scopeLabel = SCOPE_LABEL[frame];
@@ -68,6 +78,37 @@ export default function AppTopBarActions({ roleColor }: { roleColor: string }): 
           label instead. Driven by the single screenFrames registry. */}
       {showsMemberSwitcher(frame) ? (
         <PatientSwitcherDropdown />
+      ) : frame === 'population' ? (
+        <label className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-2xs font-semibold text-carbon-gray-70 bg-carbon-gray-10 border border-carbon-gray-20 rounded-sm">
+          <Icon name="Squares2X2Icon" size={13} className="text-carbon-gray-50" />
+          <select
+            aria-label="Contract scope"
+            value={selectedContractId ?? ''}
+            onChange={(e) => setSelectedContractId(e.target.value || null)}
+            className="bg-transparent text-2xs font-semibold text-carbon-gray-70 focus:outline-none cursor-pointer"
+          >
+            {CONTRACTS.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : frame === 'caseload' ? (
+        <label className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-2xs font-semibold text-carbon-gray-70 bg-carbon-gray-10 border border-carbon-gray-20 rounded-sm">
+          <Icon name="UserGroupIcon" size={13} className="text-carbon-gray-50" />
+          <select
+            aria-label="Caseload scope"
+            value={caseloadScope}
+            onChange={(e) => setCaseloadScope(e.target.value as CaseloadScope)}
+            className="bg-transparent text-2xs font-semibold text-carbon-gray-70 focus:outline-none cursor-pointer"
+          >
+            <option value="mine">My caseload</option>
+            <option value="team">My team</option>
+            <option value="unassigned">Unassigned</option>
+            <option value="all">All (supervisor)</option>
+          </select>
+        </label>
       ) : scopeLabel ? (
         <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold text-carbon-gray-70 bg-carbon-gray-10 border border-carbon-gray-20 rounded-sm">
           <Icon name="Squares2X2Icon" size={13} className="text-carbon-gray-50" />

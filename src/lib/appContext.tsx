@@ -107,6 +107,10 @@ interface AppContextValue {
   selectedContractId: string | null;
   setSelectedContractId: (id: string | null) => void;
 
+  // Caseload scope for the whose-book selector (persisted per session)
+  caseloadScope: CaseloadScope;
+  setCaseloadScope: (s: CaseloadScope) => void;
+
   // Selected patient
   selectedPatientId: string | null;
   setSelectedPatientId: (id: string | null) => void;
@@ -154,6 +158,9 @@ const USER_TO_MEMBER: Record<string, string> = {
   'user-003': 'chw-angela-torres',
 };
 
+// ─── Caseload scope (whose-book selector) ───────────────────────────────────
+export type CaseloadScope = 'mine' | 'team' | 'unassigned' | 'all';
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 const AppContext = createContext<AppContextValue | null>(null);
 
@@ -166,6 +173,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   );
   const [entryContext, setEntryContext] = useState<EntryContext>('browse');
   const [selectedContractId, setSelectedContractId] = useState<string | null>('contract-001');
+  const [caseloadScope, setCaseloadScope] = useState<CaseloadScope>('all');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>('patient-001');
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [activeCohortId, setActiveCohortId] = useState<string | null>(null);
@@ -178,6 +186,32 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   );
   const [opsTasks, setOpsTasks] = useState<OpsTask[]>([]);
   const addOpsTask = useCallback((task: OpsTask) => setOpsTasks((prev) => [task, ...prev]), []);
+
+  // Persist scope selectors across reload (mirrors the active-member pattern).
+  React.useEffect(() => {
+    try {
+      const sc = sessionStorage.getItem('wpco.caseloadScope');
+      if (sc) setCaseloadScope(sc as CaseloadScope);
+      const ct = sessionStorage.getItem('wpco.selectedContractId');
+      if (ct) setSelectedContractId(ct);
+    } catch {
+      /* sessionStorage unavailable — fall back to defaults */
+    }
+  }, []);
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('wpco.caseloadScope', caseloadScope);
+    } catch {
+      /* ignore */
+    }
+  }, [caseloadScope]);
+  React.useEffect(() => {
+    try {
+      if (selectedContractId) sessionStorage.setItem('wpco.selectedContractId', selectedContractId);
+    } catch {
+      /* ignore */
+    }
+  }, [selectedContractId]);
 
   const addCohort = useCallback((cohort: Cohort) => {
     setCohorts((prev) => [...prev.filter((c) => c.measureKey !== cohort.measureKey), cohort]);
@@ -247,6 +281,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         setEntryContext,
         selectedContractId,
         setSelectedContractId,
+        caseloadScope,
+        setCaseloadScope,
         selectedPatientId,
         setSelectedPatientId,
         cohorts,

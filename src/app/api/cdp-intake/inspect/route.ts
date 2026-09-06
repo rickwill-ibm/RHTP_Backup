@@ -15,6 +15,12 @@ export const dynamic = 'force-dynamic';
 const SAMPLE_DIR = join(process.cwd(), 'src', 'lib', 'cdp-intake', 'sample-sources');
 
 export async function GET(_req: NextRequest): Promise<NextResponse> {
+  if (process.env.CDP_INTAKE_LIVE !== '1') {
+    return NextResponse.json(
+      { ok: false, error: 'cdp-intake disabled (set CDP_INTAKE_LIVE=1)' },
+      { status: 404 }
+    );
+  }
   try {
     const { receipt, plan } = planIntake(SAMPLE_DIR, { receivedAt: new Date().toISOString() });
     return NextResponse.json({ ok: true, receipt, plan });

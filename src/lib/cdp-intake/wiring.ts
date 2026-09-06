@@ -10,14 +10,16 @@
 
 import { getSharedProjectionStores } from '@/lib/runtime/projectionRuntime';
 import { ingestBundleJson, type IngestStores } from '@/lib/runtime/ingestBundle';
-import { createXrefIndex } from '@/lib/identity';
+import { defaultCrossReferenceStore } from '@/lib/identity';
 import type { IntakeDispatch, SourceLoadOutcome, IntakeRunResult } from './types';
 import { runIntake } from './coordinator';
 
 /**
- * A live dispatch bound to the shared projection stores + ONE xref for this run, so
- * every source in the folder consolidates identity through the same cross-reference
- * (cross-source stitching) and projects into the same graph the WPC record + KG read.
+ * A live dispatch bound to the shared projection stores AND the process-shared
+ * cross-reference seam (defaultCrossReferenceStore().index), so identity persists
+ * across runs and consolidates across sources / the batch↔stream seam — the same
+ * xref every reader and the stream door use. (Production swaps the durable xref
+ * behind the same seam.) Projects into the same graph the WPC record + KG read.
  */
 export function makeLiveDispatch(): IntakeDispatch {
   const proj = getSharedProjectionStores();
@@ -25,7 +27,7 @@ export function makeLiveDispatch(): IntakeDispatch {
     outbox: proj.outbox,
     graph: proj.graph,
     checkpoint: proj.checkpoint,
-    xref: createXrefIndex(),
+    xref: defaultCrossReferenceStore().index,
   };
   return {
     async ingestFhir(payload: string, sourceSystem: string) {

@@ -18,6 +18,15 @@ export const dynamic = 'force-dynamic';
 const DEMO_DIR = join(process.cwd(), 'src', 'lib', 'cdp-intake', 'sample-sources');
 
 export async function POST(_req: NextRequest): Promise<NextResponse> {
+  // Flag-gated: the mutating run is OFF by default, so this is never an open,
+  // always-live ingestion endpoint. Enable per-environment for the demo.
+  // (Production hardening: front with the ops auth + audit seam, as /api/ops/* do.)
+  if (process.env.CDP_INTAKE_LIVE !== '1') {
+    return NextResponse.json(
+      { ok: false, error: 'cdp-intake live run disabled (set CDP_INTAKE_LIVE=1)' },
+      { status: 404 }
+    );
+  }
   try {
     const result = await runPopulationLoad(DEMO_DIR);
     return NextResponse.json({

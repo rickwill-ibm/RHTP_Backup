@@ -297,6 +297,30 @@ export default function MdSmartLaunchPage() {
     [pushAudit, addSessionAction]
   );
 
+  // ── Point-of-care clinical writes ─────────────────────────────────────────
+  const handleClinicalWrite = useCallback(
+    (
+      kind: 'condition-added' | 'allergy-added' | 'medication-added',
+      display: string,
+      resourceId: string
+    ) => {
+      const fhirTypes = {
+        'condition-added': 'Condition',
+        'allergy-added': 'AllergyIntolerance',
+        'medication-added': 'MedicationRequest',
+      } as const;
+      pushAudit(kind, `${display} added to patient record`, {
+        resourceId,
+        fhirResourceType: fhirTypes[kind],
+        dateOfService: new Date().toISOString().slice(0, 10),
+        attendingPhysician: launchContext?.practitionerName ?? 'Unknown',
+        attendingId: launchContext?.practitionerId ?? 'unknown',
+      });
+      addSessionAction(`${display} → ${fhirTypes[kind]}/${resourceId}`);
+    },
+    [pushAudit, addSessionAction, launchContext]
+  );
+
   // ── Legacy order module ───────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
     (orders: MdOrder[], _serviceRequests: FhirServiceRequest[]) => {
@@ -497,8 +521,10 @@ export default function MdSmartLaunchPage() {
                     <ProviderViewReview
                       patientId={patientId}
                       encounterId={encounterId}
+                      launchContext={launchContext}
                       onOpenResource={openResource}
                       onMarkReviewed={handleMarkReviewed}
+                      onClinicalWrite={handleClinicalWrite}
                       reviewed={reviewed}
                     />
                     <ProviderViewAct
@@ -522,9 +548,29 @@ export default function MdSmartLaunchPage() {
                 )}
 
                 {activeMenu === 'results' && <ResultsReviewPage {...pageProps} />}
-                {activeMenu === 'medications' && <MedicationListPage {...pageProps} />}
-                {activeMenu === 'problems' && <ProblemsPage {...pageProps} />}
-                {activeMenu === 'allergies' && <AllergiesPage {...pageProps} />}
+                {activeMenu === 'medications' && (
+                  <MedicationListPage
+                    {...pageProps}
+                    launchContext={launchContext}
+                    encounterId={encounterId}
+                    onClinicalWrite={handleClinicalWrite}
+                  />
+                )}
+                {activeMenu === 'problems' && (
+                  <ProblemsPage
+                    {...pageProps}
+                    launchContext={launchContext}
+                    encounterId={encounterId}
+                    onClinicalWrite={handleClinicalWrite}
+                  />
+                )}
+                {activeMenu === 'allergies' && (
+                  <AllergiesPage
+                    {...pageProps}
+                    launchContext={launchContext}
+                    onClinicalWrite={handleClinicalWrite}
+                  />
+                )}
                 {activeMenu === 'vitals' && <VitalsPage {...pageProps} />}
                 {activeMenu === 'documentation' && <DocumentationPage {...pageProps} />}
                 {activeMenu === 'histories' && <HistoriesPage {...pageProps} />}

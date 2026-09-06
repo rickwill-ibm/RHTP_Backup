@@ -12,16 +12,15 @@
 
 import type { RegistryPatient } from '../patientRegistry';
 import { getDataMode, setSessionDataMode } from '../config/dataMode';
-import {
-  storeRead,
-  storeSearch,
-  storeCreate,
-  storeUpdate,
-  storeDelete,
-} from '../fhir/store';
+import { storeRead, storeSearch, storeCreate, storeUpdate, storeDelete } from '../fhir/store';
 
-const FHIR_BASE =
-  process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
+// Server-side FHIR base (never exposed to the browser — used only from Node.js
+// server routes via fhirServer.ts). Browser-side code goes through the BFF.
+const FHIR_BASE_SERVER = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
+
+// Browser-side writes always go through the BFF at /api/fhir/...
+// This keeps the FHIR server URL and any token out of the browser.
+const FHIR_BASE_CLIENT = typeof window !== 'undefined' ? '/api/fhir' : FHIR_BASE_SERVER;
 
 const TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_FHIR_TIMEOUT ?? 30_000);
 
@@ -47,7 +46,8 @@ export function getFhirMockMode(): boolean {
 // ─── Low-level fetch wrapper ──────────────────────────────────────────────────
 
 async function fhirFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${FHIR_BASE}/${path.replace(/^\//, '')}`;
+  const base = typeof window !== 'undefined' ? FHIR_BASE_CLIENT : FHIR_BASE_SERVER;
+  const url = `${base}/${path.replace(/^\//, '')}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -76,7 +76,7 @@ export class FhirClient {
   private baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? FHIR_BASE;
+    this.baseUrl = baseUrl ?? FHIR_BASE_SERVER;
   }
 
   /** Read a single resource by type and id */
@@ -84,7 +84,7 @@ export class FhirClient {
     if (useMock()) {
       // Serve from the fixture store (same bundles that seed HAPI);
       // fall back to the legacy stub shape if the fixture is absent.
-      return (storeRead<T>(resourceType, id) ?? ({ resourceType, id } as T));
+      return storeRead<T>(resourceType, id) ?? ({ resourceType, id } as T);
     }
     return fhirFetch<T>(`${resourceType}/${id}`);
   }
@@ -115,13 +115,13 @@ export class FhirClient {
   /** Search for resources */
   async search<T = unknown>(
     resourceType: string,
-    params: Record<string, string | number | boolean>,
+    params: Record<string, string | number | boolean>
   ): Promise<T> {
     if (useMock()) {
       return storeSearch<T>(resourceType, params);
     }
     const qs = new URLSearchParams(
-      Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
+      Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)]))
     ).toString();
     return fhirFetch<T>(`${resourceType}?${qs}`);
   }
@@ -147,35 +147,46 @@ export class FhirClient {
     if (useMock()) return undefined;
 
     try {
-      const { mapFhirPatientToRegistryPatient, bundleEntries } = await import('./fhirResourceMappers');
+      const { mapFhirPatientToRegistryPatient, bundleEntries } =
+        await import('./fhirResourceMappers');
 
-      const [patient, obsBundle, flagBundle, riskBundle, condBundle, medBundle, careTeam, encounterBundle, goalBundle] = await Promise.all([
+      const [
+        patient,
+        obsBundle,
+        flagBundle,
+        riskBundle,
+        condBundle,
+        medBundle,
+        careTeam,
+        encounterBundle,
+        goalBundle,
+      ] = await Promise.all([
         fhirFetch<{ resourceType: string; id: string }>(`Patient/${fhirPatientId}`).catch(
-          () => undefined,
+          () => undefined
         ),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `Observation?subject=Patient/${fhirPatientId}&_count=200`,
+          `Observation?subject=Patient/${fhirPatientId}&_count=200`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `Flag?subject=Patient/${fhirPatientId}&_count=100`,
+          `Flag?subject=Patient/${fhirPatientId}&_count=100`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `RiskAssessment?subject=Patient/${fhirPatientId}&_count=5`,
+          `RiskAssessment?subject=Patient/${fhirPatientId}&_count=5`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `Condition?patient=${fhirPatientId}&_count=50`,
+          `Condition?patient=${fhirPatientId}&_count=50`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `MedicationRequest?patient=${fhirPatientId}&status=active&_count=50`,
+          `MedicationRequest?patient=${fhirPatientId}&status=active&_count=50`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
-        fhirFetch<{ resourceType: string; id: string }>(
-          `CareTeam/${fhirPatientId}-careteam`,
-        ).catch(() => undefined),
+        fhirFetch<{ resourceType: string; id: string }>(`CareTeam/${fhirPatientId}-careteam`).catch(
+          () => undefined
+        ),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `Encounter?patient=${fhirPatientId}&_count=20&_sort=-date`,
+          `Encounter?patient=${fhirPatientId}&_count=20&_sort=-date`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
         fhirFetch<{ resourceType: string; entry?: unknown[] }>(
-          `Goal?patient=${fhirPatientId}&_count=50`,
+          `Goal?patient=${fhirPatientId}&_count=50`
         ).catch(() => ({ resourceType: 'Bundle', entry: [] })),
       ]);
 
@@ -208,7 +219,7 @@ export class FhirClient {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fhirCareTeam as any,
         encounters,
-        goals,
+        goals
       );
     } catch (err) {
       console.error(`[FhirClient] getRegistryPatient(${fhirPatientId}) failed:`, err);
@@ -224,9 +235,10 @@ export class FhirClient {
     if (useMock()) return [];
 
     try {
-      const bundle = await fhirFetch<{ resourceType: string; entry?: { resource?: { id?: string } }[] }>(
-        'Patient?_count=100',
-      );
+      const bundle = await fhirFetch<{
+        resourceType: string;
+        entry?: { resource?: { id?: string } }[];
+      }>('Patient?_count=100');
       const ids = (bundle.entry ?? [])
         .map((e) => e.resource?.id)
         .filter((id): id is string => !!id);

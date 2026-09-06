@@ -7,6 +7,8 @@ import ReferralModal, { type ReferralFormData } from './ReferralModal';
 import { initiateReferral } from '@/lib/services/referralService';
 import { getFhirMockMode } from '@/lib/services/fhirClient';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
+import UpcomingPreventiveNeeds, { UPCOMING_PREVENTIVE_NEEDS } from './UpcomingPreventiveNeeds';
+import ReferralCardList, { type ReferralPanelItem } from './ReferralCardList';
 
 interface ActiveReferralsPanelProps {
   launchContext: SmartLaunchContext;
@@ -14,76 +16,25 @@ interface ActiveReferralsPanelProps {
   confirmedAssignments: CareTeamAssignment[];
 }
 
-interface ReferralPanelItem {
-  id: string;
-  specialty: string;
-  reason: string;
-  orderedBy: string;
-  orderedDate: string;
-  status: 'Pending' | 'Submitted' | 'Scheduled' | 'In Progress' | 'Completed';
-  priority: 'stat' | 'urgent' | 'routine';
-  providerName: string;
-  dueDate: string;
-  source: string;
-  networkTier?: string;
-  qualityScore?: number;
-  waitDays?: number;
-}
-
-// Referrals from order catalog that were signed
 function getReferralOrders(orders: MdOrder[]): MdOrder[] {
   return orders.filter((o) => o.category === 'referral');
 }
 
-const STATUS_STYLE: Record<string, string> = {
-  'Pending': 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
-  'Submitted': 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
-  'Scheduled': 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]',
-  'In Progress': 'bg-[#f6f2ff] text-[#6929c4] border-[#d4bbff]',
-  'Completed': 'bg-[#defbe6] text-[#24a148] border-[#a7f0ba]',
-};
-
-const PRIORITY_STYLE: Record<string, string> = {
-  stat: 'bg-[#fff1f1] text-[#da1e28] border-[#ffb3b8]',
-  urgent: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
-  routine: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20',
-};
-
-const UPCOMING_PREVENTIVE_NEEDS = [
-  {
-    id: 'upcoming-001',
-    title: 'Annual Wellness Visit',
-    detail: 'Coming due for scheduling; not currently counted as an open Maria care gap.',
-    owner: 'Primary Care',
-    dueDate: '2026-10-15',
-  },
-  {
-    id: 'upcoming-002',
-    title: 'Diabetic Eye Exam',
-    detail: 'Coming due for scheduling; not currently counted as an open Maria care gap.',
-    owner: 'Ophthalmology',
-    dueDate: '2026-09-30',
-  },
-  {
-    id: 'upcoming-003',
-    title: 'COPD Follow-up',
-    detail: 'Monitor and schedule if clinically indicated; not currently counted as an open Maria care gap.',
-    owner: 'Primary Care',
-    dueDate: '2026-11-01',
-  },
-];
-
-export default function ActiveReferralsPanel({ launchContext, completedOrders, confirmedAssignments }: ActiveReferralsPanelProps) {
+export default function ActiveReferralsPanel({
+  launchContext,
+  completedOrders,
+  confirmedAssignments,
+}: ActiveReferralsPanelProps) {
   const referralOrders = getReferralOrders(completedOrders);
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [referralSubmitting, setReferralSubmitting] = useState(false);
   const [lastReferralConfirmId, setLastReferralConfirmId] = useState<string | null>(null);
 
-  // Build this-visit referrals from signed orders + confirmed assignments
   const thisVisitReferrals: ReferralPanelItem[] = referralOrders.map((order) => {
-    const matchedAssignment = confirmedAssignments.find((a) =>
-      order.display.toLowerCase().includes(a.specialty.toLowerCase()) ||
-      a.specialty.toLowerCase().includes(order.display.toLowerCase().split(' ')[0])
+    const matchedAssignment = confirmedAssignments.find(
+      (a) =>
+        order.display.toLowerCase().includes(a.specialty.toLowerCase()) ||
+        a.specialty.toLowerCase().includes(order.display.toLowerCase().split(' ')[0])
     );
     return {
       id: order.id,
@@ -102,12 +53,15 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
     };
   });
 
-  // Also add confirmed assignments that don't have a matching order
   const assignmentOnlyReferrals: ReferralPanelItem[] = confirmedAssignments
-    .filter((a) => !referralOrders.some((o) =>
-      o.display.toLowerCase().includes(a.specialty.toLowerCase()) ||
-      a.specialty.toLowerCase().includes(o.display.toLowerCase().split(' ')[0])
-    ))
+    .filter(
+      (a) =>
+        !referralOrders.some(
+          (o) =>
+            o.display.toLowerCase().includes(a.specialty.toLowerCase()) ||
+            a.specialty.toLowerCase().includes(o.display.toLowerCase().split(' ')[0])
+        )
+    )
     .map((a) => ({
       id: a.id,
       specialty: `${a.specialty} Referral`,
@@ -142,30 +96,34 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
               ? 'In Progress'
               : 'Submitted',
       priority: ref.urgency === 'asap' ? 'urgent' : ref.urgency,
-      providerName: ref.specialistType === 'Unite Us' ? 'Unite Us Community Network' : ref.specialistType,
+      providerName:
+        ref.specialistType === 'Unite Us' ? 'Unite Us Community Network' : ref.specialistType,
       dueDate: '',
       source: 'Maria Workflow',
     }));
 
-  const existingVisitReferrals: ReferralPanelItem[] = [...thisVisitReferrals, ...assignmentOnlyReferrals];
+  const existingVisitReferrals: ReferralPanelItem[] = [
+    ...thisVisitReferrals,
+    ...assignmentOnlyReferrals,
+  ];
 
   const dedupedStoreReferrals: ReferralPanelItem[] = storeReferrals.filter(
     (ref) =>
       !existingVisitReferrals.some(
-        (visitRef: ReferralPanelItem) =>
-          visitRef.specialty === ref.specialty && visitRef.reason === ref.reason
+        (visitRef) => visitRef.specialty === ref.specialty && visitRef.reason === ref.reason
       )
   );
 
   const allThisVisit: ReferralPanelItem[] = [...dedupedStoreReferrals, ...existingVisitReferrals];
   const totalActive = allThisVisit.length;
 
-  // Build care gaps list for the referral modal from mock data (filtered to this patient)
-  const patientPlatformId = Object.entries(PLATFORM_TO_FHIR_ID_MAP).find(
-    ([, fhirId]) => fhirId === launchContext.patientId || launchContext.patientId.endsWith(fhirId)
-  )?.[0] ?? launchContext.patientId;
+  const patientPlatformId =
+    Object.entries(PLATFORM_TO_FHIR_ID_MAP).find(
+      ([, fhirId]) => fhirId === launchContext.patientId || launchContext.patientId.endsWith(fhirId)
+    )?.[0] ?? launchContext.patientId;
+
   const referralCareGaps = (mockCareGaps ?? [])
-    .filter((g) => g.patientId === 'patient-001' || g.patientId === patientPlatformId)
+    .filter((g) => g.patientId === patientPlatformId)
     .filter((g) => g.status === 'Open' || g.status === 'In Progress')
     .map((g) => ({
       id: g.id,
@@ -177,7 +135,6 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
       daysOpen: g.daysOpen ?? 0,
     }));
 
-  // Handle referral form submission — write to FHIR in live mode
   const handleReferralSubmit = async (data: ReferralFormData) => {
     setReferralSubmitting(true);
     const fhirPatientId = PLATFORM_TO_FHIR_ID_MAP[patientPlatformId] ?? launchContext.patientId;
@@ -188,7 +145,7 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
         const result = await initiateReferral({
           patientId: fhirPatientId,
           requesterId: launchContext.practitionerId ?? 'practitioner-rick',
-          performerId: 'practitioner-jon', // specialist / Dr. Jon Noyes
+          performerId: 'practitioner-jon',
           serviceCode: '3457005',
           serviceDisplay: `${data.specialistType} Referral — ${data.careGapName}`,
           careGapId: data.careGapId,
@@ -196,14 +153,15 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
           notes: data.clinicalNotes,
           gainshareEligible: true,
         });
-        console.info(`[ActiveReferrals] Referral initiated — SR: ${result.serviceRequest?.id}, Task: ${result.task?.id}`);
+        console.info(
+          `[ActiveReferrals] Referral initiated — SR: ${result.serviceRequest?.id}, Task: ${result.task?.id}`
+        );
         setLastReferralConfirmId(result.task?.id ?? confirmId);
       } catch (err) {
         console.warn('[ActiveReferrals] initiateReferral failed — logged locally only:', err);
         setLastReferralConfirmId(confirmId);
       }
     } else {
-      // Mock mode: local confirm only
       setLastReferralConfirmId(confirmId);
     }
 
@@ -222,7 +180,8 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
               Active Referrals
             </h2>
             <p className="text-xs text-carbon-gray-50 mt-0.5">
-              {launchContext.patientId} · Enc: <span className="font-mono">{launchContext.encounterId}</span>
+              {launchContext.patientId} · Enc:{' '}
+              <span className="font-mono">{launchContext.encounterId}</span>
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs">
@@ -247,11 +206,29 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
         {/* KPI strip */}
         <div className="mt-4 grid grid-cols-3 gap-3">
           {[
-            { label: 'Active Workflow Referrals', value: allThisVisit.length, color: 'text-[#6929c4]', sub: 'Maria launch + this visit' },
-            { label: 'Upcoming Needs', value: UPCOMING_PREVENTIVE_NEEDS.length, color: 'text-[#b45309]', sub: 'Schedule next' },
-            { label: 'Total Active', value: totalActive, color: 'text-carbon-gray-100', sub: 'Current routed items' },
+            {
+              label: 'Active Workflow Referrals',
+              value: allThisVisit.length,
+              color: 'text-[#6929c4]',
+              sub: 'Maria launch + this visit',
+            },
+            {
+              label: 'Upcoming Needs',
+              value: UPCOMING_PREVENTIVE_NEEDS.length,
+              color: 'text-[#b45309]',
+              sub: 'Schedule next',
+            },
+            {
+              label: 'Total Active',
+              value: totalActive,
+              color: 'text-carbon-gray-100',
+              sub: 'Current routed items',
+            },
           ].map((item) => (
-            <div key={item.label} className="bg-carbon-gray-10 px-3 py-2.5 border border-carbon-gray-20">
+            <div
+              key={item.label}
+              className="bg-carbon-gray-10 px-3 py-2.5 border border-carbon-gray-20"
+            >
               <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
               <p className="text-xs font-medium text-carbon-gray-70 mt-0.5">{item.label}</p>
               <p className="text-2xs text-carbon-gray-50">{item.sub}</p>
@@ -260,101 +237,11 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
         </div>
       </div>
 
-      {/* This Visit Referrals */}
-      {allThisVisit.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">This Visit</span>
-            <span className="px-1.5 py-0.5 text-2xs font-bold bg-[#6929c4] text-white">{allThisVisit.length}</span>
-          </div>
-          <div className="space-y-2">
-            {allThisVisit.map((ref: ReferralPanelItem) => (
-              <div key={ref.id} className="bg-white border border-[#d4bbff] px-5 py-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 bg-[#f6f2ff] border border-[#d4bbff] flex items-center justify-center flex-shrink-0">
-                      <Icon name="ArrowTopRightOnSquareIcon" size={14} className="text-[#6929c4]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-semibold text-carbon-gray-100">{ref.specialty}</span>
-                        <span className={`text-2xs font-medium px-1.5 py-0.5 border ${STATUS_STYLE[ref.status] || 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>
-                          {ref.status}
-                        </span>
-                        <span className={`text-2xs font-medium px-1.5 py-0.5 border ${PRIORITY_STYLE[ref.priority] || 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20'}`}>
-                          {ref.priority.toUpperCase()}
-                        </span>
-                        <span className="text-2xs px-1.5 py-0.5 bg-[#f6f2ff] text-[#6929c4] border border-[#d4bbff]">
-                          ⚡ This Visit
-                        </span>
-                      </div>
-                      <p className="text-xs text-carbon-gray-50 mb-1.5">{ref.reason}</p>
-                      <div className="flex items-center gap-4 text-xs text-carbon-gray-50 flex-wrap">
-                        <span>Provider: <span className="font-medium text-carbon-gray-70">{ref.providerName}</span></span>
-                        {ref.networkTier && (
-                          <span>Network: <span className="font-medium text-carbon-gray-70">{ref.networkTier}</span></span>
-                        )}
-                        {ref.qualityScore && (
-                          <span>Quality: <span className="font-medium text-[#24a148]">{ref.qualityScore}/100</span></span>
-                        )}
-                        {ref.waitDays && (
-                          <span>Wait: <span className="font-medium text-carbon-gray-70">{ref.waitDays}d</span></span>
-                        )}
-                        <span>Ordered by: {ref.orderedBy}</span>
-                        <span>Date: {ref.orderedDate}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Icon name="CheckCircleIcon" size={16} className="text-[#24a148] flex-shrink-0 mt-0.5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* No this-visit referrals */}
-      {allThisVisit.length === 0 && (
-        <div className="bg-carbon-gray-10 border border-carbon-gray-20 px-5 py-4 flex items-center gap-3 text-xs text-carbon-gray-50">
-          <Icon name="InformationCircleIcon" size={16} />
-          <span>No referrals signed during this visit yet. Sign orders or confirm care team assignments to see them here.</span>
-        </div>
-      )}
+      {/* Referral card list (extracted to ReferralCardList) */}
+      <ReferralCardList items={allThisVisit} />
 
       {/* Upcoming preventive / scheduling needs */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Upcoming / Schedule Next</span>
-          <span className="px-1.5 py-0.5 text-2xs font-bold bg-carbon-gray-70 text-white">{UPCOMING_PREVENTIVE_NEEDS.length}</span>
-        </div>
-        <div className="space-y-2">
-          {UPCOMING_PREVENTIVE_NEEDS.map((item) => (
-            <div key={item.id} className="bg-white border border-carbon-gray-20 px-5 py-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 bg-carbon-gray-10 border border-carbon-gray-20 flex items-center justify-center flex-shrink-0">
-                    <Icon name="CalendarDaysIcon" size={14} className="text-carbon-gray-50" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-sm font-semibold text-carbon-gray-100">{item.title}</span>
-                      <span className="text-2xs font-medium px-1.5 py-0.5 border bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20">
-                        COMING DUE
-                      </span>
-                    </div>
-                    <p className="text-xs text-carbon-gray-50 mb-1.5">{item.detail}</p>
-                    <div className="flex items-center gap-4 text-xs text-carbon-gray-50 flex-wrap">
-                      <span>Owner: <span className="font-medium text-carbon-gray-70">{item.owner}</span></span>
-                      <span>Due: <span className="font-medium text-[#b45309]">{item.dueDate}</span></span>
-                    </div>
-                  </div>
-                </div>
-                <Icon name="ClockIcon" size={16} className="text-[#b45309] flex-shrink-0 mt-0.5" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <UpcomingPreventiveNeeds />
 
       {/* Last referral confirmation */}
       {lastReferralConfirmId && (
@@ -362,8 +249,13 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
           <Icon name="CheckCircleIcon" size={14} className="text-[#0e6027]" />
           <span className="text-[#0e6027] font-semibold">Referral submitted</span>
           <span className="font-mono text-[#0e6027]/70">{lastReferralConfirmId}</span>
-          <span className="text-[#0e6027]/70">— FHIR ServiceRequest + Task written · Specialist Inbox notified</span>
-          <button onClick={() => setLastReferralConfirmId(null)} className="ml-auto text-[#0e6027]/50 hover:text-[#0e6027]">
+          <span className="text-[#0e6027]/70">
+            — FHIR ServiceRequest + Task written · Specialist Inbox notified
+          </span>
+          <button
+            onClick={() => setLastReferralConfirmId(null)}
+            className="ml-auto text-[#0e6027]/50 hover:text-[#0e6027]"
+          >
             <Icon name="XMarkIcon" size={12} />
           </button>
         </div>
@@ -373,7 +265,10 @@ export default function ActiveReferralsPanel({ launchContext, completedOrders, c
       <div className="bg-carbon-gray-10 border border-carbon-gray-20 px-4 py-3 flex items-start gap-2 text-xs text-carbon-gray-50">
         <Icon name="BoltIcon" size={13} className="text-[#6929c4] mt-0.5 flex-shrink-0" />
         <span>
-          Referrals from this visit are written to Cerner as FHIR <span className="font-mono">ServiceRequest</span> resources and will appear in PowerChart on return. Pre-existing referrals are sourced from FHIR R4 at <span className="font-mono text-2xs">{launchContext.fhirBaseUrl}</span>.
+          Referrals from this visit are written to Cerner as FHIR{' '}
+          <span className="font-mono">ServiceRequest</span> resources and will appear in PowerChart
+          on return. Pre-existing referrals are sourced from FHIR R4 at{' '}
+          <span className="font-mono text-2xs">{launchContext.fhirBaseUrl}</span>.
         </span>
       </div>
 

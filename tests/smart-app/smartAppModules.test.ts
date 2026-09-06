@@ -17,9 +17,9 @@ import { resolveIds } from '@/app/md-smart-launch/lib/resolveIds';
 // ─────────────────────────────────────────────────────────────────────────────
 describe('flagsToCdsCards', () => {
   const makeFlag = (id: string, text: string) => ({
-    resourceType: 'Flag',
+    resourceType: 'Flag' as const,
     id,
-    status: 'active',
+    status: 'active' as const,
     code: { text },
     subject: { reference: 'Patient/p-1' },
   });
@@ -61,8 +61,15 @@ describe('resolveIds', () => {
     patientId,
     encounterId,
     practitionerId: 'dr-1',
+    practitionerName: 'Dr. Test',
+    practitionerNpi: '1234567890',
     fhirBaseUrl: 'http://localhost:8080/fhir',
     smartVersion: '2' as const,
+    accessToken: 'test-token',
+    tokenExpiry: 9999999999,
+    scope: 'openid',
+    launchTimestamp: new Date().toISOString(),
+    cernerOrgId: 'org-test',
   });
 
   it('returns demo IDs for maria alias', () => {

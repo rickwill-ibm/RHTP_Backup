@@ -1,156 +1,26 @@
 'use client';
+/**
+ * AuditLogPanel — HIPAA-compliant session audit log viewer.
+ * Type definitions, event config and filter groups are in auditLogTypes.ts.
+ */
 import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
+import {
+  type AuditEventType,
+  type FilterType,
+  EVENT_CONFIG,
+  OUTCOME_CONFIG,
+  FILTER_GROUPS,
+  isCdsEvent,
+  isOrderEvent,
+  formatTimestamp,
+} from './auditLogTypes';
 
-export type AuditEventType =
-  | 'smart-launch' |'cds-card-viewed' |'cds-card-dismissed' |'cds-card-snoozed' |'cds-card-acknowledged' |'cds-suggestion-accepted' |'order-added' |'order-removed' |'order-signed' |'team-assignment-confirmed' |'cerner-return-initiated' |'patient-chart-viewed' |'care-gap-closed';
-
-export interface AuditEvent {
-  id: string;
-  eventType: AuditEventType;
-  timestamp: string;
-  userId: string;
-  userName: string;
-  patientId: string;
-  encounterId: string;
-  action: string;
-  details: Record<string, string | number | boolean | undefined>;
-  outcome: 'success' | 'failure' | 'info';
-}
-
-const EVENT_CONFIG: Record<AuditEventType, { label: string; icon: string; color: string; bg: string; border: string }> = {
-  'smart-launch': {
-    label: 'SMART Launch',
-    icon: 'BoltIcon',
-    color: 'text-[#6929c4]',
-    bg: 'bg-[#f6f2ff]',
-    border: 'border-[#d4bbff]',
-  },
-  'cds-card-viewed': {
-    label: 'CDS Card Viewed',
-    icon: 'EyeIcon',
-    color: 'text-[#0043ce]',
-    bg: 'bg-[#edf5ff]',
-    border: 'border-[#97c1ff]',
-  },
-  'cds-card-dismissed': {
-    label: 'CDS Card Dismissed',
-    icon: 'XMarkIcon',
-    color: 'text-carbon-gray-70',
-    bg: 'bg-carbon-gray-10',
-    border: 'border-carbon-gray-20',
-  },
-  'cds-card-snoozed': {
-    label: 'CDS Card Snoozed',
-    icon: 'ClockIcon',
-    color: 'text-[#b45309]',
-    bg: 'bg-[#fdf6dd]',
-    border: 'border-[#f1c21b]',
-  },
-  'cds-card-acknowledged': {
-    label: 'CDS Critical Acknowledged',
-    icon: 'ShieldExclamationIcon',
-    color: 'text-[#da1e28]',
-    bg: 'bg-[#fff1f1]',
-    border: 'border-[#ffb3b8]',
-  },
-  'cds-suggestion-accepted': {
-    label: 'CDS Suggestion Accepted',
-    icon: 'CheckCircleIcon',
-    color: 'text-[#0e6027]',
-    bg: 'bg-[#defbe6]',
-    border: 'border-[#a7f0ba]',
-  },
-  'order-added': {
-    label: 'Order Added',
-    icon: 'PlusCircleIcon',
-    color: 'text-[#0043ce]',
-    bg: 'bg-[#edf5ff]',
-    border: 'border-[#97c1ff]',
-  },
-  'order-removed': {
-    label: 'Order Removed',
-    icon: 'TrashIcon',
-    color: 'text-carbon-gray-70',
-    bg: 'bg-carbon-gray-10',
-    border: 'border-carbon-gray-20',
-  },
-  'order-signed': {
-    label: 'Orders Signed',
-    icon: 'ClipboardDocumentCheckIcon',
-    color: 'text-[#0e6027]',
-    bg: 'bg-[#defbe6]',
-    border: 'border-[#a7f0ba]',
-  },
-  'team-assignment-confirmed': {
-    label: 'Team Assignment Confirmed',
-    icon: 'UserGroupIcon',
-    color: 'text-[#6929c4]',
-    bg: 'bg-[#f6f2ff]',
-    border: 'border-[#d4bbff]',
-  },
-  'cerner-return-initiated': {
-    label: 'Return to Cerner',
-    icon: 'ArrowRightOnRectangleIcon',
-    color: 'text-[#0e6027]',
-    bg: 'bg-[#defbe6]',
-    border: 'border-[#a7f0ba]',
-  },
-  'patient-chart-viewed': {
-    label: 'Chart Reviewed',
-    icon: 'EyeIcon',
-    color: 'text-[#0043ce]',
-    bg: 'bg-[#edf5ff]',
-    border: 'border-[#97c1ff]',
-  },
-  'care-gap-closed': {
-    label: 'Care Gap Addressed',
-    icon: 'CheckCircleIcon',
-    color: 'text-[#0e6027]',
-    bg: 'bg-[#defbe6]',
-    border: 'border-[#a7f0ba]',
-  },
-};
-
-const OUTCOME_CONFIG = {
-  success: { label: 'Success', color: 'text-[#0e6027]', bg: 'bg-[#defbe6]' },
-  failure: { label: 'Failure', color: 'text-[#da1e28]', bg: 'bg-[#fff1f1]' },
-  info: { label: 'Info', color: 'text-[#0043ce]', bg: 'bg-[#edf5ff]' },
-};
-
-type FilterType = 'all' | AuditEventType;
-
-const FILTER_GROUPS: Array<{ label: string; value: FilterType }> = [
-  { label: 'All Events', value: 'all' },
-  { label: 'SMART Launch', value: 'smart-launch' },
-  { label: 'CDS Interactions', value: 'cds-card-acknowledged' },
-  { label: 'Orders', value: 'order-signed' },
-  { label: 'Team', value: 'team-assignment-confirmed' },
-];
+export type { AuditEventType } from './auditLogTypes';
+export type { AuditEvent } from './auditLogTypes';
 
 interface AuditLogPanelProps {
-  events: AuditEvent[];
-}
-
-function formatTimestamp(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
-}
-
-function isCdsEvent(type: AuditEventType): boolean {
-  return type.startsWith('cds-');
-}
-
-function isOrderEvent(type: AuditEventType): boolean {
-  return type.startsWith('order-');
+  events: import('./auditLogTypes').AuditEvent[];
 }
 
 export default function AuditLogPanel({ events }: AuditLogPanelProps) {
@@ -192,14 +62,18 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
           <Icon name="ClipboardDocumentListIcon" size={16} className="text-[#6929c4]" />
           <div>
             <p className="text-sm font-semibold text-carbon-gray-100">HIPAA Audit Log</p>
-            <p className="text-2xs text-carbon-gray-50">{events.length} event{events.length !== 1 ? 's' : ''} captured this session</p>
+            <p className="text-2xs text-carbon-gray-50">
+              {events.length} event{events.length !== 1 ? 's' : ''} captured this session
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-2xs font-bold px-2 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
             HIPAA COMPLIANT
           </span>
-          <span className="text-2xs text-carbon-gray-50 font-mono">Session: {events[0]?.encounterId ?? '—'}</span>
+          <span className="text-2xs text-carbon-gray-50 font-mono">
+            Session: {events[0]?.encounterId ?? '—'}
+          </span>
         </div>
       </div>
 
@@ -245,7 +119,9 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
               const cfg = EVENT_CONFIG[event.eventType];
               const outcomeCfg = OUTCOME_CONFIG[event.outcome];
               const isExpanded = expandedId === event.id;
-              const detailEntries = Object.entries(event.details).filter(([, v]) => v !== undefined && v !== '');
+              const detailEntries = Object.entries(event.details).filter(
+                ([, v]) => v !== undefined && v !== ''
+              );
 
               return (
                 <div key={event.id} className="hover:bg-carbon-gray-10 transition-colors">
@@ -253,19 +129,25 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                     className="w-full text-left px-5 py-3 flex items-start gap-3"
                     onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   >
-                    {/* Event type icon */}
-                    <div className={`w-7 h-7 flex-shrink-0 flex items-center justify-center border ${cfg.bg} ${cfg.border} mt-0.5`}>
-                      <Icon name={cfg.icon as any} size={13} className={cfg.color} />
+                    <div
+                      className={`w-7 h-7 flex-shrink-0 flex items-center justify-center border ${cfg.bg} ${cfg.border} mt-0.5`}
+                    >
+                      <Icon name={cfg.icon as never} size={13} className={cfg.color} />
                     </div>
 
-                    {/* Main content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-carbon-gray-100">{event.action}</span>
-                        <span className={`text-2xs font-medium px-1.5 py-0.5 ${outcomeCfg.bg} ${outcomeCfg.color}`}>
+                        <span className="text-xs font-semibold text-carbon-gray-100">
+                          {event.action}
+                        </span>
+                        <span
+                          className={`text-2xs font-medium px-1.5 py-0.5 ${outcomeCfg.bg} ${outcomeCfg.color}`}
+                        >
                           {outcomeCfg.label}
                         </span>
-                        <span className={`text-2xs px-1.5 py-0.5 ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 ${cfg.bg} ${cfg.color} border ${cfg.border}`}
+                        >
                           {cfg.label}
                         </span>
                       </div>
@@ -284,7 +166,6 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                       </div>
                     </div>
 
-                    {/* Expand chevron */}
                     <Icon
                       name={isExpanded ? 'ChevronUpIcon' : 'ChevronDownIcon'}
                       size={12}
@@ -292,7 +173,6 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                     />
                   </button>
 
-                  {/* Expanded detail */}
                   {isExpanded && detailEntries.length > 0 && (
                     <div className="px-5 pb-3 ml-10">
                       <div className="bg-carbon-gray-10 border border-carbon-gray-20 px-3 py-2.5">
@@ -314,16 +194,28 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                         <div className="mt-2 pt-2 border-t border-carbon-gray-20">
                           <div className="flex items-center gap-4">
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">Patient ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.patientId}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                Patient ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.patientId}
+                              </span>
                             </div>
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">User ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.userId}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                User ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.userId}
+                              </span>
                             </div>
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">Event ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.id}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                Event ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.id}
+                              </span>
                             </div>
                           </div>
                         </div>

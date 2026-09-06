@@ -1,0 +1,19 @@
+{
+  "_note": "Representative multi-source demo drop for the CDP Assembly intake. Synthetic data only. sourceSystem is authoritative — it drives identity scoping and cannot be inferred from a filename.",
+  "sources": [
+    {
+      "file": "eligibility.834.txt",
+      "sourceSystem": "SD_MEDICAID_MMIS",
+      "format": "x12-834",
+      "adapter": "eligibility834",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "member.fhir.json",
+      "sourceSystem": "BENNETT_COUNTY_EHR",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    }
+  ]
+}

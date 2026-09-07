@@ -1,4 +1,3 @@
-import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * In-memory FHIR store — backs the FhirClient's mock mode.
  *
@@ -15,23 +14,10 @@ import * as clock from '@/lib/clock'; // deterministic time/rng seam (test sette
  */
 import type { FhirBundle, FhirResource } from './types';
 import mariaBundle from '../../../fhir/seed/maria-redhawk.bundle.json';
-import dorothyBundle from '../../../fhir/seed/patients/dorothy-simmons.bundle.json';
-import jamesBundle from '../../../fhir/seed/patients/james-wilson.bundle.json';
-import alexBundle from '../../../fhir/seed/patients/alex-kirby.bundle.json';
-import lisaBundle from '../../../fhir/seed/patients/lisa-thompson.bundle.json';
-import robertBundle from '../../../fhir/seed/patients/robert-chen.bundle.json';
 
 type AnyResource = FhirResource & Record<string, unknown>;
 
-// All whole-person patients — mock mode renders any patient that HAPI serves.
-const SEED_BUNDLES: FhirBundle[] = [
-  mariaBundle as unknown as FhirBundle,
-  dorothyBundle as unknown as FhirBundle,
-  jamesBundle as unknown as FhirBundle,
-  alexBundle as unknown as FhirBundle,
-  lisaBundle as unknown as FhirBundle,
-  robertBundle as unknown as FhirBundle,
-];
+const SEED_BUNDLES: FhirBundle[] = [mariaBundle as unknown as FhirBundle];
 
 // resourceType -> id -> resource
 let db: Map<string, Map<string, AnyResource>> | null = null;
@@ -166,8 +152,12 @@ export function storeCreate<T = unknown>(resource: Record<string, unknown>): T {
   const d = load();
   const rt = String(resource.resourceType ?? 'Basic');
   createSeq += 1;
-  const id = (resource.id as string) ?? `local-${rt.toLowerCase()}-${clock.now()}-${createSeq}`;
-  const stored = { ...resource, id, meta: { lastUpdated: clock.nowIso() } } as AnyResource;
+  const id = (resource.id as string) ?? `local-${rt.toLowerCase()}-${Date.now()}-${createSeq}`;
+  const stored = {
+    ...resource,
+    id,
+    meta: { lastUpdated: new Date().toISOString() },
+  } as AnyResource;
   if (!d.has(rt)) d.set(rt, new Map());
   d.get(rt)!.set(id, stored);
   return stored as unknown as T;
@@ -176,7 +166,7 @@ export function storeCreate<T = unknown>(resource: Record<string, unknown>): T {
 export function storeUpdate<T = unknown>(resource: Record<string, unknown> & { id: string }): T {
   const d = load();
   const rt = String(resource.resourceType ?? 'Basic');
-  const stored = { ...resource, meta: { lastUpdated: clock.nowIso() } } as AnyResource;
+  const stored = { ...resource, meta: { lastUpdated: new Date().toISOString() } } as AnyResource;
   if (!d.has(rt)) d.set(rt, new Map());
   d.get(rt)!.set(resource.id, stored);
   return stored as unknown as T;

@@ -22,6 +22,10 @@ export type MenuKey =
   | 'quality'
   | 'cdi'
   | 'compliance'
+  // CMS-0057-F provisions
+  | 'coverage'
+  | 'claims'
+  | 'payer-exchange'
   | 'return';
 
 export interface MenuItem {
@@ -48,6 +52,10 @@ export const MENU_ITEMS: MenuItem[] = [
   { key: 'quality', label: 'Quality & Care Gaps', section: 'Value-Based Care' },
   { key: 'cdi', label: 'CDI / HCC Opportunities', section: 'Value-Based Care' },
   { key: 'compliance', label: 'Compliance & Audit', section: 'Value-Based Care' },
+  // CMS-0057-F provisions
+  { key: 'coverage', label: 'Coverage & Benefits', section: 'CMS-0057-F' },
+  { key: 'claims', label: 'Claims & EOBs', section: 'CMS-0057-F' },
+  { key: 'payer-exchange', label: 'Payer Data Exchange', section: 'CMS-0057-F' },
   { key: 'return', label: 'Return to Cerner', section: 'Exit' },
 ];
 
@@ -76,7 +84,9 @@ export default function CernerMenu({
     >
       <div className="flex items-center justify-between px-2 py-1.5 border-b border-[#b7c1ca] bg-[#e3e8ec]">
         {!collapsed && (
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5b6770]">Menu</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5b6770]">
+            Menu
+          </span>
         )}
         <button
           className="text-[#5b6770] text-[12px] hover:text-[#1a1a1a]"

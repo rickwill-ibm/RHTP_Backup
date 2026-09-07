@@ -1,46 +1,12 @@
-version: "3.8"
-
-# ─── HAPI FHIR R4 Server (local development) ──────────────────────────────────
-#
-# Usage:
-#   docker compose -f fhir/docker-compose.yml up -d
-#
-# FHIR base URL after startup: http://localhost:8080/fhir
-# HAPI web UI:                 http://localhost:8080/
-#
-# After the server is healthy, run the migration script:
-#   node fhir/migrate-patients.mjs
-# ─────────────────────────────────────────────────────────────────────────────
-
 services:
-  hapi-fhir:
+  fhir:
     image: hapiproject/hapi:latest
-    container_name: tcoc-hapi-fhir
+    container_name: mdsmartapp-hapi
     ports:
       - "8080:8080"
     environment:
-      hapi.fhir.default_encoding: JSON
       hapi.fhir.fhir_version: R4
-      # In-memory H2 database — suitable for local dev / demo.
-      # Replace with a Postgres datasource for production.
-      spring.datasource.url: jdbc:h2:mem:hapi;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-      spring.datasource.driverClassName: org.h2.Driver
-      spring.datasource.username: sa
-      spring.datasource.password: ""
-      spring.jpa.hibernate.ddl-auto: update
-      # Allow unauthenticated writes (dev only)
-      hapi.fhir.allow_external_references: "true"
-      hapi.fhir.allow_multiple_delete: "true"
+      hapi.fhir.server_address: http://localhost:8080/fhir
       hapi.fhir.cors.allowed_origin: "*"
-    healthcheck:
-      test: ["CMD", "curl", "-fs", "http://localhost:8080/fhir/metadata"]
-      interval: 20s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
-    volumes:
-      # Optional: persist H2 data across restarts
-      - hapi-data:/data/hapi
-
-volumes:
-  hapi-data:
+      hapi.fhir.allow_multiple_delete: "true"
+    restart: unless-stopped

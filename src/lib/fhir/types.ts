@@ -1,4 +1,3 @@
-import * as clock from '@/lib/clock'; // deterministic time/rng seam (test setters: setClock/setRng)
 /**
  * Minimal FHIR R4 typings for the resources this app renders.
  * Intentionally partial — only the fields the UI consumes.
@@ -44,14 +43,6 @@ export interface FhirExtension {
   valueDecimal?: number;
   valueString?: string;
   valueBoolean?: boolean;
-  valueCanonical?: string; // e.g. cqf-library → Library canonical
-  valueExpression?: FhirExpression; // e.g. SDC initialExpression
-}
-
-/** A typed expression (e.g. CQL) used by SDC population extensions. */
-export interface FhirExpression {
-  language: string; // e.g. 'text/cql'
-  expression: string;
 }
 
 export interface FhirHumanName {
@@ -66,7 +57,7 @@ export interface FhirHumanName {
 export interface FhirResource {
   resourceType: string;
   id?: string;
-  meta?: { lastUpdated?: string; versionId?: string; profile?: string[] };
+  meta?: { lastUpdated?: string; versionId?: string };
   extension?: FhirExtension[];
 }
 
@@ -76,30 +67,6 @@ export interface FhirBundle<T extends FhirResource = FhirResource> extends FhirR
   total?: number;
   entry?: Array<{ fullUrl?: string; resource?: T; request?: { method?: string; url?: string } }>;
 }
-
-/* ---- DTR package resource types (Questionnaire / ValueSet / Library) ---- */
-// Split into `dtrPackageTypes.ts` for the file-size cap; re-exported so importers are unchanged.
-export type {
-  FhirPublicationStatus,
-  FhirQuestionnaireEnableWhen,
-  FhirQuestionnaireAnswerOption,
-  FhirQuestionnaireItemType,
-  FhirQuestionnaireItem,
-  FhirQuestionnaire,
-  FhirValueSetConcept,
-  FhirValueSet,
-  FhirLibrary,
-} from './dtrPackageTypes';
-
-/* ---- Da Vinci PAS resource types (Claim / Organization) ---- */
-// Split into `pasTypes.ts` for the file-size cap; re-exported so importers are unchanged.
-export type {
-  FhirClaim,
-  FhirClaimItem,
-  FhirClaimInsurance,
-  FhirClaimSupportingInfo,
-  FhirOrganization,
-} from './pasTypes';
 
 export interface FhirPatient extends FhirResource {
   resourceType: 'Patient';
@@ -296,6 +263,83 @@ export interface FhirProcedure extends FhirResource {
   performedDateTime?: string;
 }
 
+// ── CMS-0057-F resource types ─────────────────────────────────────────────────
+
+/** ExplanationOfBenefit — primary CMS Patient Access resource (claims data). */
+export interface FhirExplanationOfBenefit extends FhirResource {
+  resourceType: 'ExplanationOfBenefit';
+  status?: string;
+  type?: FhirCodeableConcept;
+  use?: string;
+  patient?: FhirReference;
+  billablePeriod?: FhirPeriod;
+  created?: string;
+  insurer?: FhirReference;
+  provider?: FhirReference;
+  outcome?: string;
+  diagnosis?: Array<{ sequence?: number; diagnosisCodeableConcept?: FhirCodeableConcept }>;
+  item?: Array<{
+    sequence?: number;
+    productOrService?: FhirCodeableConcept;
+    servicedDate?: string;
+    adjudication?: Array<{ category?: FhirCodeableConcept; amount?: FhirMoney }>;
+  }>;
+  total?: Array<{ category?: FhirCodeableConcept; amount?: FhirMoney }>;
+  payment?: { amount?: FhirMoney };
+}
+
+export interface FhirMoney {
+  value?: number;
+  currency?: string;
+}
+
+/** ClaimResponse — payer decision on a submitted Claim or prior-auth request. */
+export interface FhirClaimResponse extends FhirResource {
+  resourceType: 'ClaimResponse';
+  status?: string;
+  type?: FhirCodeableConcept;
+  use?: string;
+  patient?: FhirReference;
+  created?: string;
+  insurer?: FhirReference;
+  request?: FhirReference;
+  outcome?: 'queued' | 'complete' | 'error' | 'partial';
+  disposition?: string;
+  item?: Array<{
+    itemSequence?: number;
+    adjudication?: Array<{
+      category?: FhirCodeableConcept;
+      reason?: FhirCodeableConcept;
+      amount?: FhirMoney;
+    }>;
+  }>;
+  error?: Array<{ code?: FhirCodeableConcept }>;
+}
+
+/** Claim — used for DaVinci PAS ($submit). Minimal shape for UI display. */
+export interface FhirClaim extends FhirResource {
+  resourceType: 'Claim';
+  status?: string;
+  type?: FhirCodeableConcept;
+  use?: string;
+  patient?: FhirReference;
+  created?: string;
+  insurer?: FhirReference;
+  provider?: FhirReference;
+  priority?: FhirCodeableConcept;
+  supportingInfo?: Array<{
+    sequence?: number;
+    category?: FhirCodeableConcept;
+    valueReference?: FhirReference;
+  }>;
+  item?: Array<{
+    sequence?: number;
+    productOrService?: FhirCodeableConcept;
+    quantity?: FhirQuantity;
+    unitPrice?: FhirMoney;
+  }>;
+}
+
 export interface FhirPractitioner extends FhirResource {
   resourceType: 'Practitioner';
   identifier?: Array<{ system?: string; value?: string }>;
@@ -333,7 +377,7 @@ export function bannerName(names?: FhirHumanName[]): string {
 export function ageFromDob(dob?: string): number | undefined {
   if (!dob) return undefined;
   const d = new Date(dob);
-  const now = clock.nowDate();
+  const now = new Date();
   let age = now.getFullYear() - d.getFullYear();
   const m = now.getMonth() - d.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;

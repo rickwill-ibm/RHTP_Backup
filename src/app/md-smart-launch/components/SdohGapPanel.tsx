@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import type { FhirBundle, FhirCondition, FhirExtension } from '@/lib/fhir/types';
 import { toast } from 'sonner';
 
 // ─── Gravity Project domain config ───────────────────────────────────────────
@@ -95,10 +96,15 @@ interface Props {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practitionerDisplay, onAuditEntry }: Props) {
+export default function SdohGapPanel({
+  patientFhirId,
+  practitionerFhirId,
+  practitionerDisplay,
+  onAuditEntry,
+}: Props) {
   const [gaps, setGaps] = useState<ActiveSdohGap[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState<string | null>(null);    // conditionId being sent
+  const [sending, setSending] = useState<string | null>(null); // conditionId being sent
   const [simulating, setSimulating] = useState<string | null>(null); // conditionId being simulated
 
   // ── Load active SDOH Conditions from FHIR ──────────────────────────────────
@@ -106,31 +112,31 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
     if (getFhirMockMode() || !patientFhirId) return;
     setLoading(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const bundle: any = await getFhirClient().search('Condition', {
+      const bundle = await getFhirClient().search<FhirBundle<FhirCondition>>('Condition', {
         subject: `Patient/${patientFhirId}`,
-        'category': 'problem-list-item',
+        category: 'problem-list-item',
         'clinical-status': 'active',
-        '_count': '50',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+        _count: '50',
+      });
 
       const found: ActiveSdohGap[] = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const entry of (bundle?.entry ?? [])) {
+      for (const entry of bundle.entry ?? []) {
         const cond = entry?.resource;
         if (!cond || cond.resourceType !== 'Condition') continue;
         // Match by ICD-10 Z-code
         const condCode: string = cond.code?.coding?.[0]?.code ?? '';
-        const domain = SDOH_DOMAINS.find(d => d.zCode === condCode);
+        const domain = SDOH_DOMAINS.find((d) => d.zCode === condCode);
         if (!domain) continue;
         // Check if already sent (look for our extension)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sdohStatus = cond.extension?.find((e: any) => e.url?.includes('sdoh-status'))?.valueString ?? 'open';
+        const sdohStatus =
+          (cond.extension as FhirExtension[] | undefined)?.find((e) =>
+            e.url?.includes('sdoh-status')
+          )?.valueString ?? 'open';
         found.push({
-          conditionId: cond.id,
+          conditionId: cond.id ?? '',
           domain,
-          onsetDate: cond.onsetDateTime?.slice(0, 10) ?? cond.meta?.lastUpdated?.slice(0, 10) ?? '—',
+          onsetDate:
+            cond.onsetDateTime?.slice(0, 10) ?? cond.meta?.lastUpdated?.slice(0, 10) ?? '—',
           status: sdohStatus === 'sent' ? 'sent' : sdohStatus === 'resolved' ? 'resolved' : 'open',
         });
       }
@@ -142,7 +148,9 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
     }
   }, [patientFhirId]);
 
-  useEffect(() => { loadGaps(); }, [loadGaps]);
+  useEffect(() => {
+    loadGaps();
+  }, [loadGaps]);
 
   // ── Step 2: Send to Unite Us — POST ServiceRequest + Task ──────────────────
   const sendToUniteUs = async (gap: ActiveSdohGap) => {
@@ -152,38 +160,72 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       const now = new Date().toISOString();
 
       // POST ServiceRequest
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const srResult: any = await client.create({
+      const srResult = await client.create<{ id?: string }>({
         resourceType: 'ServiceRequest',
         status: 'active',
         intent: 'referral',
         priority: 'routine',
-        category: [{ coding: [{ system: 'http://snomed.info/sct', code: '306206005', display: 'Referral to service' }] }],
+        category: [
+          {
+            coding: [
+              {
+                system: 'http://snomed.info/sct',
+                code: '306206005',
+                display: 'Referral to service',
+              },
+            ],
+          },
+        ],
         code: {
-          coding: [{ system: 'http://snomed.info/sct', code: gap.domain.serviceRequestSnomed, display: gap.domain.serviceRequestDisplay }],
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: gap.domain.serviceRequestSnomed,
+              display: gap.domain.serviceRequestDisplay,
+            },
+          ],
           text: gap.domain.serviceRequestDisplay,
         },
         subject: { reference: `Patient/${patientFhirId}` },
-        requester: { reference: `Practitioner/${practitionerFhirId}`, display: practitionerDisplay },
+        requester: {
+          reference: `Practitioner/${practitionerFhirId}`,
+          display: practitionerDisplay,
+        },
         performer: [{ display: gap.domain.cboName }],
-        reasonCode: [{ coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: gap.domain.zCode, display: gap.domain.zDisplay }] }],
+        reasonCode: [
+          {
+            coding: [
+              {
+                system: 'http://hl7.org/fhir/sid/icd-10-cm',
+                code: gap.domain.zCode,
+                display: gap.domain.zDisplay,
+              },
+            ],
+          },
+        ],
         reasonReference: [{ reference: `Condition/${gap.conditionId}` }],
         authoredOn: now,
-        note: [{ text: `SDOH referral — ${gap.domain.label}. Sent to Unite Us / ${gap.domain.cboName} by ${practitionerDisplay} on ${now.slice(0, 10)}.` }],
-        extension: [{
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
-          valueString: gap.domain.id,
-        }, {
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
-          valueString: 'Unite Us',
-        }],
+        note: [
+          {
+            text: `SDOH referral — ${gap.domain.label}. Sent to Unite Us / ${gap.domain.cboName} by ${practitionerDisplay} on ${now.slice(0, 10)}.`,
+          },
+        ],
+        extension: [
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
+            valueString: gap.domain.id,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
+            valueString: 'Unite Us',
+          },
+        ],
       } as Record<string, unknown>);
 
       const srId: string = srResult?.id ?? `sr-${gap.domain.id}-${Date.now()}`;
 
       // POST Task
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const taskResult: any = await client.create({
+      const taskResult = await client.create<{ id?: string }>({
         resourceType: 'Task',
         status: 'requested',
         intent: 'order',
@@ -191,18 +233,28 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
         description: `${gap.domain.label} referral — ${gap.domain.cboName}`,
         focus: { reference: `ServiceRequest/${srId}` },
         for: { reference: `Patient/${patientFhirId}` },
-        requester: { reference: `Practitioner/${practitionerFhirId}`, display: practitionerDisplay },
+        requester: {
+          reference: `Practitioner/${practitionerFhirId}`,
+          display: practitionerDisplay,
+        },
         owner: { display: 'Unite Us CRN' },
         authoredOn: now,
         lastModified: now,
-        note: [{ text: `Task sent to Unite Us for ${gap.domain.label} intervention. CBO: ${gap.domain.cboName}.` }],
-        extension: [{
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
-          valueString: gap.domain.id,
-        }, {
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
-          valueString: 'Unite Us',
-        }],
+        note: [
+          {
+            text: `Task sent to Unite Us for ${gap.domain.label} intervention. CBO: ${gap.domain.cboName}.`,
+          },
+        ],
+        extension: [
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
+            valueString: gap.domain.id,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
+            valueString: 'Unite Us',
+          },
+        ],
       } as Record<string, unknown>);
 
       const taskId: string = taskResult?.id ?? `task-${gap.domain.id}-${Date.now()}`;
@@ -211,24 +263,68 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       await client.update({
         resourceType: 'Condition',
         id: gap.conditionId,
-        clinicalStatus: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'active' }] },
-        verificationStatus: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status', code: 'confirmed' }] },
-        category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-category', code: 'problem-list-item' }] }],
-        code: { coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: gap.domain.zCode, display: gap.domain.zDisplay }], text: gap.domain.zDisplay },
+        clinicalStatus: {
+          coding: [
+            { system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'active' },
+          ],
+        },
+        verificationStatus: {
+          coding: [
+            {
+              system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status',
+              code: 'confirmed',
+            },
+          ],
+        },
+        category: [
+          {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/condition-category',
+                code: 'problem-list-item',
+              },
+            ],
+          },
+        ],
+        code: {
+          coding: [
+            {
+              system: 'http://hl7.org/fhir/sid/icd-10-cm',
+              code: gap.domain.zCode,
+              display: gap.domain.zDisplay,
+            },
+          ],
+          text: gap.domain.zDisplay,
+        },
         subject: { reference: `Patient/${patientFhirId}` },
         onsetDateTime: gap.onsetDate,
         extension: [
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain', valueString: gap.domain.id },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-status', valueString: 'sent' },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-service-request', valueString: srId },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-task', valueString: taskId },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
+            valueString: gap.domain.id,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-status',
+            valueString: 'sent',
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-service-request',
+            valueString: srId,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-task',
+            valueString: taskId,
+          },
         ],
       });
 
-      setGaps(prev => prev.map(g => g.conditionId === gap.conditionId
-        ? { ...g, status: 'sent', serviceRequestId: srId, taskId }
-        : g
-      ));
+      setGaps((prev) =>
+        prev.map((g) =>
+          g.conditionId === gap.conditionId
+            ? { ...g, status: 'sent', serviceRequestId: srId, taskId }
+            : g
+        )
+      );
 
       onAuditEntry?.('SDOH referral sent to Unite Us', {
         domain: gap.domain.label,
@@ -257,36 +353,55 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       const now = new Date().toISOString();
 
       // 1. POST Procedure — proof of service delivery (SNOMED intervention code)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const procResult: any = await client.create({
+      const procResult = await client.create<{ id?: string }>({
         resourceType: 'Procedure',
         status: 'completed',
         code: {
-          coding: [{
-            system: 'http://snomed.info/sct',
-            code: gap.domain.procedureSnomed,
-            display: gap.domain.procedureDisplay,
-          }],
+          coding: [
+            {
+              system: 'http://snomed.info/sct',
+              code: gap.domain.procedureSnomed,
+              display: gap.domain.procedureDisplay,
+            },
+          ],
           text: gap.domain.procedureDisplay,
         },
         subject: { reference: `Patient/${patientFhirId}` },
         performedDateTime: now,
         performer: [{ actor: { display: gap.domain.cboName } }],
-        reasonCode: [{ coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: gap.domain.zCode, display: gap.domain.zDisplay }] }],
-        ...(gap.serviceRequestId ? { basedOn: [{ reference: `ServiceRequest/${gap.serviceRequestId}` }] } : {}),
-        note: [{
-          text: `Service delivered. ${gap.domain.label} intervention completed by ${gap.domain.cboName}. Unite Us ref: ${uniteUsRef}. Simulated callback on ${now.slice(0, 10)}.`,
-        }],
-        extension: [{
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-ref',
-          valueString: uniteUsRef,
-        }, {
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
-          valueString: gap.domain.id,
-        }, {
-          url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
-          valueString: 'Unite Us (simulated)',
-        }],
+        reasonCode: [
+          {
+            coding: [
+              {
+                system: 'http://hl7.org/fhir/sid/icd-10-cm',
+                code: gap.domain.zCode,
+                display: gap.domain.zDisplay,
+              },
+            ],
+          },
+        ],
+        ...(gap.serviceRequestId
+          ? { basedOn: [{ reference: `ServiceRequest/${gap.serviceRequestId}` }] }
+          : {}),
+        note: [
+          {
+            text: `Service delivered. ${gap.domain.label} intervention completed by ${gap.domain.cboName}. Unite Us ref: ${uniteUsRef}. Simulated callback on ${now.slice(0, 10)}.`,
+          },
+        ],
+        extension: [
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-ref',
+            valueString: uniteUsRef,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
+            valueString: gap.domain.id,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/crn-platform',
+            valueString: 'Unite Us (simulated)',
+          },
+        ],
       } as Record<string, unknown>);
 
       const procId: string = procResult?.id ?? `proc-${gap.domain.id}-${Date.now()}`;
@@ -299,13 +414,17 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
           status: 'completed',
           intent: 'order',
           lastModified: now,
-          output: [{
-            type: { text: 'Procedure Evidence' },
-            valueReference: { reference: `Procedure/${procId}` },
-          }],
-          note: [{
-            text: `Task completed by ${gap.domain.cboName} via Unite Us. Unite Us ref: ${uniteUsRef}. Procedure: ${procId}.`,
-          }],
+          output: [
+            {
+              type: { text: 'Procedure Evidence' },
+              valueReference: { reference: `Procedure/${procId}` },
+            },
+          ],
+          note: [
+            {
+              text: `Task completed by ${gap.domain.cboName} via Unite Us. Unite Us ref: ${uniteUsRef}. Procedure: ${procId}.`,
+            },
+          ],
         });
       }
 
@@ -317,12 +436,26 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
           status: 'completed',
           intent: 'referral',
           priority: 'routine',
-          code: { coding: [{ system: 'http://snomed.info/sct', code: gap.domain.serviceRequestSnomed, display: gap.domain.serviceRequestDisplay }], text: gap.domain.serviceRequestDisplay },
+          code: {
+            coding: [
+              {
+                system: 'http://snomed.info/sct',
+                code: gap.domain.serviceRequestSnomed,
+                display: gap.domain.serviceRequestDisplay,
+              },
+            ],
+            text: gap.domain.serviceRequestDisplay,
+          },
           subject: { reference: `Patient/${patientFhirId}` },
-          requester: { reference: `Practitioner/${practitionerFhirId}`, display: practitionerDisplay },
+          requester: {
+            reference: `Practitioner/${practitionerFhirId}`,
+            display: practitionerDisplay,
+          },
           performer: [{ display: gap.domain.cboName }],
           authoredOn: gap.onsetDate,
-          note: [{ text: `Completed by Unite Us callback. Procedure: ${procId}. Ref: ${uniteUsRef}.` }],
+          note: [
+            { text: `Completed by Unite Us callback. Procedure: ${procId}. Ref: ${uniteUsRef}.` },
+          ],
         });
       }
 
@@ -331,19 +464,62 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
         resourceType: 'Condition',
         id: gap.conditionId,
         clinicalStatus: {
-          coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'resolved', display: 'Resolved' }],
+          coding: [
+            {
+              system: 'http://terminology.hl7.org/CodeSystem/condition-clinical',
+              code: 'resolved',
+              display: 'Resolved',
+            },
+          ],
         },
-        verificationStatus: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status', code: 'confirmed' }] },
-        category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-category', code: 'problem-list-item' }] }],
-        code: { coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: gap.domain.zCode, display: gap.domain.zDisplay }], text: gap.domain.zDisplay },
+        verificationStatus: {
+          coding: [
+            {
+              system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status',
+              code: 'confirmed',
+            },
+          ],
+        },
+        category: [
+          {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/condition-category',
+                code: 'problem-list-item',
+              },
+            ],
+          },
+        ],
+        code: {
+          coding: [
+            {
+              system: 'http://hl7.org/fhir/sid/icd-10-cm',
+              code: gap.domain.zCode,
+              display: gap.domain.zDisplay,
+            },
+          ],
+          text: gap.domain.zDisplay,
+        },
         subject: { reference: `Patient/${patientFhirId}` },
         onsetDateTime: gap.onsetDate,
         abatementDateTime: now,
         extension: [
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain', valueString: gap.domain.id },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-status', valueString: 'resolved' },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-ref', valueString: uniteUsRef },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/procedure-evidence', valueString: procId },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-domain',
+            valueString: gap.domain.id,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/sdoh-status',
+            valueString: 'resolved',
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/unite-us-ref',
+            valueString: uniteUsRef,
+          },
+          {
+            url: 'http://tcoc.example.org/fhir/StructureDefinition/procedure-evidence',
+            valueString: procId,
+          },
         ],
       });
 
@@ -357,26 +533,61 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
         date: now,
         reporter: { display: 'TCOC Platform — DEQM Auto-Generated' },
         period: { start: gap.onsetDate, end: now.slice(0, 10) },
-        group: [{
-          code: { coding: [{ code: gap.domain.hedisNumerator }] },
-          population: [
-            { code: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/measure-population', code: 'initial-population' }] }, count: 1 },
-            { code: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/measure-population', code: 'denominator' }] }, count: 1 },
-            { code: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/measure-population', code: 'numerator' }] }, count: 1 },
-          ],
-          measureScore: { value: 1 },
-        }],
+        group: [
+          {
+            code: { coding: [{ code: gap.domain.hedisNumerator }] },
+            population: [
+              {
+                code: {
+                  coding: [
+                    {
+                      system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                      code: 'initial-population',
+                    },
+                  ],
+                },
+                count: 1,
+              },
+              {
+                code: {
+                  coding: [
+                    {
+                      system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                      code: 'denominator',
+                    },
+                  ],
+                },
+                count: 1,
+              },
+              {
+                code: {
+                  coding: [
+                    {
+                      system: 'http://terminology.hl7.org/CodeSystem/measure-population',
+                      code: 'numerator',
+                    },
+                  ],
+                },
+                count: 1,
+              },
+            ],
+            measureScore: { value: 1 },
+          },
+        ],
         evaluatedResource: [
           { reference: `Condition/${gap.conditionId}` },
           { reference: `Procedure/${procId}` },
-          ...(gap.serviceRequestId ? [{ reference: `ServiceRequest/${gap.serviceRequestId}` }] : []),
+          ...(gap.serviceRequestId
+            ? [{ reference: `ServiceRequest/${gap.serviceRequestId}` }]
+            : []),
         ],
       } as Record<string, unknown>);
 
-      setGaps(prev => prev.map(g => g.conditionId === gap.conditionId
-        ? { ...g, status: 'resolved', procedureId: procId }
-        : g
-      ));
+      setGaps((prev) =>
+        prev.map((g) =>
+          g.conditionId === gap.conditionId ? { ...g, status: 'resolved', procedureId: procId } : g
+        )
+      );
 
       onAuditEntry?.('SDOH gap closed via Unite Us simulation', {
         domain: gap.domain.label,
@@ -414,10 +625,18 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       <div className="px-5 py-3 border-b border-carbon-gray-20 bg-[#f6f2ff] flex items-center gap-3">
         <Icon name="ShieldCheckIcon" size={16} className="text-[#6929c4]" />
         <div className="flex-1">
-          <p className="text-sm font-semibold text-[#6929c4]">SDOH Gap Closure — Gravity Project / Unite Us</p>
-          <p className="text-2xs text-carbon-gray-50">Active Z-code Conditions from FHIR problem list · Food · Housing · Transportation</p>
+          <p className="text-sm font-semibold text-[#6929c4]">
+            SDOH Gap Closure — Gravity Project / Unite Us
+          </p>
+          <p className="text-2xs text-carbon-gray-50">
+            Active Z-code Conditions from FHIR problem list · Food · Housing · Transportation
+          </p>
         </div>
-        <button onClick={loadGaps} disabled={loading} className="text-2xs text-[#6929c4] hover:underline disabled:opacity-40">
+        <button
+          onClick={loadGaps}
+          disabled={loading}
+          className="text-2xs text-[#6929c4] hover:underline disabled:opacity-40"
+        >
           {loading ? 'Loading…' : '↻ Refresh'}
         </button>
       </div>
@@ -425,17 +644,24 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       {/* Body */}
       <div className="divide-y divide-carbon-gray-10">
         {loading && (
-          <div className="px-5 py-6 text-xs text-carbon-gray-50 text-center animate-pulse">Reading SDOH Conditions from FHIR…</div>
+          <div className="px-5 py-6 text-xs text-carbon-gray-50 text-center animate-pulse">
+            Reading SDOH Conditions from FHIR…
+          </div>
         )}
 
         {!loading && gaps.length === 0 && (
           <div className="px-5 py-6 text-center space-y-2">
-            <p className="text-xs text-carbon-gray-50">No active SDOH Z-code Conditions found for this patient.</p>
-            <p className="text-2xs text-carbon-gray-30">Submit a PRAPARE screening on Screen 18 to generate Food / Housing / Transportation Z-codes.</p>
+            <p className="text-xs text-carbon-gray-50">
+              No active SDOH Z-code Conditions found for this patient.
+            </p>
+            <p className="text-2xs text-carbon-gray-30">
+              Submit a PRAPARE screening on Screen 18 to generate Food / Housing / Transportation
+              Z-codes.
+            </p>
           </div>
         )}
 
-        {gaps.map(gap => {
+        {gaps.map((gap) => {
           const isSending = sending === gap.conditionId;
           const isSimulating = simulating === gap.conditionId;
 
@@ -447,12 +673,17 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
                   <span className="text-lg">{gap.domain.emoji}</span>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-sm font-semibold ${gap.domain.color}`}>{gap.domain.label}</span>
-                      <span className="font-mono text-2xs bg-white/70 px-1.5 py-0.5 border border-carbon-gray-20 text-carbon-gray-70">{gap.domain.zCode}</span>
+                      <span className={`text-sm font-semibold ${gap.domain.color}`}>
+                        {gap.domain.label}
+                      </span>
+                      <span className="font-mono text-2xs bg-white/70 px-1.5 py-0.5 border border-carbon-gray-20 text-carbon-gray-70">
+                        {gap.domain.zCode}
+                      </span>
                       <span className="text-2xs text-carbon-gray-50">Onset {gap.onsetDate}</span>
                     </div>
                     <p className="text-2xs text-carbon-gray-50 mt-0.5">
-                      LOINC <span className="font-mono">{gap.domain.loincCode}</span> · HEDIS {gap.domain.hedisNumerator}
+                      LOINC <span className="font-mono">{gap.domain.loincCode}</span> · HEDIS{' '}
+                      {gap.domain.hedisNumerator}
                     </p>
                   </div>
                 </div>
@@ -475,15 +706,24 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
 
               {/* CBO + SNOMED info */}
               <div className="mt-2 flex items-center gap-3 text-2xs text-carbon-gray-50 flex-wrap">
-                <span>CBO: <span className="font-medium text-carbon-gray-70">{gap.domain.cboName}</span></span>
-                <span>Intervention: <span className="font-mono">{gap.domain.serviceRequestSnomed}</span> {gap.domain.serviceRequestDisplay}</span>
+                <span>
+                  CBO: <span className="font-medium text-carbon-gray-70">{gap.domain.cboName}</span>
+                </span>
+                <span>
+                  Intervention: <span className="font-mono">{gap.domain.serviceRequestSnomed}</span>{' '}
+                  {gap.domain.serviceRequestDisplay}
+                </span>
               </div>
 
               {/* Resolved evidence */}
               {gap.status === 'resolved' && gap.procedureId && (
                 <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-[#defbe6] border border-[#a7f0ba] text-xs text-[#0e6027]">
                   <Icon name="CheckCircleIcon" size={13} />
-                  <span>Procedure <span className="font-mono">{gap.procedureId}</span> · SNOMED <span className="font-mono">{gap.domain.procedureSnomed}</span> · MeasureReport posted · Z-code resolved</span>
+                  <span>
+                    Procedure <span className="font-mono">{gap.procedureId}</span> · SNOMED{' '}
+                    <span className="font-mono">{gap.domain.procedureSnomed}</span> · MeasureReport
+                    posted · Z-code resolved
+                  </span>
                 </div>
               )}
 
@@ -515,10 +755,14 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
                   )}
 
                   {gap.serviceRequestId && (
-                    <span className="text-2xs font-mono text-carbon-gray-50">SR/{gap.serviceRequestId}</span>
+                    <span className="text-2xs font-mono text-carbon-gray-50">
+                      SR/{gap.serviceRequestId}
+                    </span>
                   )}
                   {gap.taskId && (
-                    <span className="text-2xs font-mono text-carbon-gray-50">Task/{gap.taskId}</span>
+                    <span className="text-2xs font-mono text-carbon-gray-50">
+                      Task/{gap.taskId}
+                    </span>
                   )}
                 </div>
               )}
@@ -530,9 +774,18 @@ export default function SdohGapPanel({ patientFhirId, practitionerFhirId, practi
       {/* Footer */}
       {gaps.length > 0 && (
         <div className="px-5 py-2.5 border-t border-carbon-gray-20 bg-carbon-gray-10 flex items-center gap-4 text-2xs text-carbon-gray-50 flex-wrap">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#da1e28] inline-block" /> Open: {gaps.filter(g => g.status === 'open').length}</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#f1c21b] inline-block" /> Sent: {gaps.filter(g => g.status === 'sent').length}</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#24a148] inline-block" /> Resolved: {gaps.filter(g => g.status === 'resolved').length}</span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#da1e28] inline-block" /> Open:{' '}
+            {gaps.filter((g) => g.status === 'open').length}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#f1c21b] inline-block" /> Sent:{' '}
+            {gaps.filter((g) => g.status === 'sent').length}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[#24a148] inline-block" /> Resolved:{' '}
+            {gaps.filter((g) => g.status === 'resolved').length}
+          </span>
           <span className="ml-auto">Gravity Project · Da Vinci DEQM · HEDIS SNS-E</span>
         </div>
       )}

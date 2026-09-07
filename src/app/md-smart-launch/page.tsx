@@ -38,7 +38,10 @@ import {
   HistoriesPage,
   ImmunizationsPage,
   CarePlanFhirPage,
+  CoveragePage,
+  ClaimsPage,
 } from './components/cerner/ChartPages';
+import PayerExchangePanel from './components/PayerExchangePanel';
 import type {
   SmartLaunchContext,
   CdsCard,
@@ -49,17 +52,26 @@ import type {
 import { mockCdsCards } from '@/lib/smartFhirMockData';
 import { useAppContext } from '@/lib/appContext';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
-import { useDataModeFromUrl } from '@/lib/hooks/useDataModeFromUrl';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import { DEMO_PATIENT_ID, DEMO_ENCOUNTER_ID } from '@/lib/fhir/store';
 import { invokePatientViewHook } from '@/lib/fhir/cdsHooks';
-import { resolveIds } from './lib/resolveIds';
-import { useCdsFlagsEffect } from './hooks/useCdsFlagsEffect';
-import AppLayout from '@/components/AppLayout';
 
 let auditSeq = 0;
 function makeAuditId(): string {
   auditSeq += 1;
   return `AUD-${Date.now().toString(36).toUpperCase()}-${String(auditSeq).padStart(3, '0')}`;
+}
+
+/** Resolve launch-context IDs to FHIR resource IDs (demo fixtures in mock mode). */
+function resolveIds(
+  ctx: SmartLaunchContext,
+  mock: boolean
+): { patientId: string; encounterId: string } {
+  if (mock) return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
+  return {
+    patientId: ctx.patientId.replace(/^patient\//, ''),
+    encounterId: ctx.encounterId,
+  };
 }
 
 interface ViewerTarget {
@@ -71,10 +83,6 @@ interface ViewerTarget {
 export default function MdSmartLaunchPage() {
   const router = useRouter();
   const { useMockData, setUseMockData } = useAppContext();
-
-  // Inherit data mode from RHTP platform (?dataMode=mock|live) before the
-  // launch sequence fires. Must run before useFhirModeSync().
-  useDataModeFromUrl();
   useFhirModeSync();
 
   const [launchReady, setLaunchReady] = useState(false);
@@ -297,30 +305,6 @@ export default function MdSmartLaunchPage() {
     [pushAudit, addSessionAction]
   );
 
-  // ── Point-of-care clinical writes ─────────────────────────────────────────
-  const handleClinicalWrite = useCallback(
-    (
-      kind: 'condition-added' | 'allergy-added' | 'medication-added',
-      display: string,
-      resourceId: string
-    ) => {
-      const fhirTypes = {
-        'condition-added': 'Condition',
-        'allergy-added': 'AllergyIntolerance',
-        'medication-added': 'MedicationRequest',
-      } as const;
-      pushAudit(kind, `${display} added to patient record`, {
-        resourceId,
-        fhirResourceType: fhirTypes[kind],
-        dateOfService: new Date().toISOString().slice(0, 10),
-        attendingPhysician: launchContext?.practitionerName ?? 'Unknown',
-        attendingId: launchContext?.practitionerId ?? 'unknown',
-      });
-      addSessionAction(`${display} → ${fhirTypes[kind]}/${resourceId}`);
-    },
-    [pushAudit, addSessionAction, launchContext]
-  );
-
   // ── Legacy order module ───────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
     (orders: MdOrder[], _serviceRequests: FhirServiceRequest[]) => {
@@ -378,9 +362,6 @@ export default function MdSmartLaunchPage() {
     setViewer({ resourceType, resourceId, label });
   }, []);
 
-  // ── Seed CDS cards from patient's FHIR flags (non-Maria patients) ─────────
-  useCdsFlagsEffect({ launchReady, launchContext, useMockData, setCdsCards });
-
   // ── Live CDS Hooks invocation (patient-view) with demo-card fallback ──────
   useEffect(() => {
     if (!launchReady || !launchContext || useMockData) return;
@@ -404,17 +385,15 @@ export default function MdSmartLaunchPage() {
     };
   }, [launchReady, launchContext, useMockData, pushAudit]);
 
-  // ── Launch gate (inside RHTP chrome so the platform menu stays visible) ───
+  // ── Launch gate ───────────────────────────────────────────────────────────
   if (!launchReady || !launchContext) {
     return (
-      <AppLayout pageTitle="MD Smart Launch">
-        <SmartErrorBoundary
-          errorCode="SMART_LAUNCH_FAILED"
-          onReturnToCerner={() => (window.location.href = '/')}
-        >
-          <SmartLaunchHandler onLaunchReady={handleLaunchReady} />
-        </SmartErrorBoundary>
-      </AppLayout>
+      <SmartErrorBoundary
+        errorCode="SMART_LAUNCH_FAILED"
+        onReturnToCerner={() => (window.location.href = '/')}
+      >
+        <SmartLaunchHandler onLaunchReady={handleLaunchReady} />
+      </SmartErrorBoundary>
     );
   }
 
@@ -436,290 +415,264 @@ export default function MdSmartLaunchPage() {
   const pageProps = { patientId, onOpenResource: openResource };
 
   return (
-    <AppLayout pageTitle="MD Smart Launch">
-      <SmartErrorBoundary
-        errorCode="UNKNOWN_ERROR"
-        onRetry={() => setLaunchReady(false)}
-        onReturnToCerner={() => (window.location.href = '/')}
-      >
-        {/* Full-bleed inside AppLayout's padded content area */}
-        <div className="-mx-6 lg:-mx-8 xl:-mx-10 -my-6">
-          <div className="flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden bg-[#dfe4e8]">
-            <TokenExpiryBanner tokenExpiry={tokenExpiry} onReauth={handleReauth} />
+    <SmartErrorBoundary
+      errorCode="UNKNOWN_ERROR"
+      onRetry={() => setLaunchReady(false)}
+      onReturnToCerner={() => (window.location.href = '/')}
+    >
+      <div className="flex flex-col h-screen overflow-hidden bg-[#dfe4e8]">
+        <TokenExpiryBanner tokenExpiry={tokenExpiry} onReauth={handleReauth} />
 
-            {/* ── App bar ── */}
-            <header className="bg-[#1d3346] text-white px-3 h-9 flex items-center justify-between shrink-0 text-[12px]">
-              <div className="flex items-center gap-3">
-                <span className="font-bold tracking-wide">MD SmartApp</span>
-                <span className="text-white/60 hidden sm:inline">
-                  SMART on FHIR · launched from Cerner PowerChart
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Visit progress rail */}
-                <div className="hidden md:flex items-center gap-1 mr-2">
-                  {steps.map((s, i) => (
-                    <React.Fragment key={s.label}>
-                      {i > 0 && <span className="text-white/40">→</span>}
-                      <span
-                        className={`px-1.5 rounded-sm leading-5 ${
-                          s.done ? 'bg-[#1e7e34] text-white' : 'bg-white/10 text-white/70'
-                        }`}
-                      >
-                        {s.done ? '✓ ' : ''}
-                        {s.label}
-                      </span>
-                    </React.Fragment>
-                  ))}
-                </div>
-                <span className="text-white/80">{launchContext.practitionerName}</span>
-                <button
-                  onClick={() => setUseMockData(!useMockData)}
-                  title={
-                    useMockData ? 'Switch to live FHIR server' : 'Switch to mock FHIR fixtures'
-                  }
-                  className={`px-2 leading-5 rounded-sm font-semibold border ${
-                    useMockData
-                      ? 'bg-[#fff4e5] text-[#8a5300] border-[#e8a33d]'
-                      : 'bg-[#e6f4ea] text-[#1e7e34] border-[#1e7e34]'
-                  }`}
-                >
-                  {useMockData ? 'Mock FHIR' : 'Live FHIR'}
-                </button>
-                <button
-                  onClick={() => router.push(`/patient-detail?id=${launchContext.patientId}`)}
-                  className="px-2 leading-5 rounded-sm bg-white/10 border border-white/30 hover:bg-white/20"
-                  title="Open RHTP Citizen Detail"
-                >
-                  RHTP
-                </button>
-              </div>
-            </header>
-
-            {/* ── Patient banner ── */}
-            <PatientBanner
-              patientId={patientId}
-              encounterId={encounterId}
-              finNumber={launchContext.encounterId}
-              onOpenResource={openResource}
-            />
-
-            {/* ── Menu + content ── */}
-            <div className="flex flex-1 min-h-0">
-              <CernerMenu
-                active={activeMenu}
-                onSelect={(k) => {
-                  setActiveMenu(k);
-                  pushAudit('patient-chart-viewed', `Chart section opened: ${k}`, { section: k });
-                }}
-                badges={{ 'provider-view': activeCdsCount }}
-              />
-
-              <main className="flex-1 overflow-y-auto p-3 min-w-0">
-                {activeMenu === 'provider-view' && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
-                    <ProviderViewReview
-                      patientId={patientId}
-                      encounterId={encounterId}
-                      launchContext={launchContext}
-                      onOpenResource={openResource}
-                      onMarkReviewed={handleMarkReviewed}
-                      onClinicalWrite={handleClinicalWrite}
-                      reviewed={reviewed}
-                    />
-                    <ProviderViewAct
-                      patientId={patientId}
-                      cdsCards={cdsCards.filter((c) => !c.acknowledged)}
-                      closedGapIds={closedGapIds}
-                      onOpenResource={openResource}
-                      onCloseGap={handleCloseGap}
-                      onOpenCdsCard={() => setCdsPanelOpen(true)}
-                    />
-                    <ProviderViewDocument
-                      patientId={patientId}
-                      encounterId={encounterId}
-                      launchContext={launchContext}
-                      sessionActions={sessionActions}
-                      onWriteComplete={handleWriteComplete}
-                      onOpenResource={openResource}
-                      onSignAndReturn={() => setActiveMenu('return')}
-                    />
-                  </div>
-                )}
-
-                {activeMenu === 'results' && <ResultsReviewPage {...pageProps} />}
-                {activeMenu === 'medications' && (
-                  <MedicationListPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    encounterId={encounterId}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
-                {activeMenu === 'problems' && (
-                  <ProblemsPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    encounterId={encounterId}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
-                {activeMenu === 'allergies' && (
-                  <AllergiesPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
-                {activeMenu === 'vitals' && <VitalsPage {...pageProps} />}
-                {activeMenu === 'documentation' && <DocumentationPage {...pageProps} />}
-                {activeMenu === 'histories' && <HistoriesPage {...pageProps} />}
-                {activeMenu === 'immunizations' && <ImmunizationsPage {...pageProps} />}
-
-                {activeMenu === 'orders' && (
-                  <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
-                    <OrderEntryModule
-                      patientId={launchContext.patientId}
-                      encounterId={launchContext.encounterId}
-                      practitionerId={launchContext.practitionerId}
-                      onOrderSigned={handleOrderSigned}
-                    />
-                  </div>
-                )}
-
-                {activeMenu === 'careplan' && (
-                  <div>
-                    <CarePlanFhirPage {...pageProps} />
-                    <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
-                      <CarePlanPanel
-                        patientId={patientId}
-                        launchContext={launchContext}
-                        completedOrders={completedOrders}
-                        confirmedAssignments={confirmedAssignments}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {activeMenu === 'careteam' && (
-                  <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-2xl">
-                    <CareTeamAssignmentModule
-                      patientId={launchContext.patientId}
-                      encounterId={launchContext.encounterId}
-                      practitionerId={launchContext.practitionerId}
-                      onAssignmentConfirmed={handleAssignmentConfirmed}
-                    />
-                  </div>
-                )}
-
-                {activeMenu === 'referrals' && (
-                  <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
-                    <ActiveReferralsPanel
-                      launchContext={launchContext}
-                      completedOrders={completedOrders}
-                      confirmedAssignments={confirmedAssignments}
-                    />
-                  </div>
-                )}
-
-                {activeMenu === 'quality' && (
-                  <div className="space-y-3">
-                    <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                      <GapClosureMetricsPanel
-                        patientId={launchContext.patientId}
-                        patientName={launchContext.patientName ?? 'Patient'}
-                      />
-                    </div>
-                    <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                      <SdohGapPanel
-                        patientFhirId={patientId}
-                        practitionerFhirId={launchContext.practitionerId}
-                        practitionerDisplay={launchContext.practitionerName}
-                        onAuditEntry={(action, details) =>
-                          pushAudit('patient-chart-viewed', action, details)
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {activeMenu === 'cdi' && (
-                  <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                    <MdPatientSummary patientId={patientId} launchContext={launchContext} />
-                  </div>
-                )}
-
-                {activeMenu === 'compliance' && (
-                  <div className="space-y-3">
-                    <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                      <ComplianceDashboard launchContext={launchContext} />
-                    </div>
-                    <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 h-[480px]">
-                      <AuditLogPanel events={auditEvents} />
-                    </div>
-                  </div>
-                )}
-
-                {activeMenu === 'return' && (
-                  <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-xl">
-                    <CernerReturnFlow
-                      launchContext={launchContext}
-                      completedOrders={completedOrders}
-                      confirmedAssignments={confirmedAssignments}
-                      closedGapIds={closedGapIds}
-                      onReturnInitiated={handleReturnInitiated}
-                    />
-                  </div>
-                )}
-              </main>
-            </div>
-
-            {/* ── CDS full panel overlay ── */}
-            {cdsPanelOpen && (
-              <div className="fixed inset-0 z-40 flex items-start justify-center pt-14 px-4">
-                <button
-                  aria-label="Close CDS panel"
-                  className="absolute inset-0 bg-black/40"
-                  onClick={() => setCdsPanelOpen(false)}
-                />
-                <div className="relative bg-[#f4f6f8] border border-[#b7c1ca] rounded-sm shadow-xl w-full max-w-3xl max-h-[80vh] overflow-y-auto">
-                  <div className="bg-[#2d4a63] text-white px-3 py-1.5 flex items-center justify-between sticky top-0 z-10">
-                    <span className="text-[13px] font-bold">
-                      CDS Alerts — Clinical Decision Support
-                    </span>
-                    <button
-                      className="text-white/80 hover:text-white text-[16px]"
-                      onClick={() => setCdsPanelOpen(false)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  <div className="p-3">
-                    <CdsCardRenderer
-                      cards={cdsCards}
-                      onAcceptSuggestion={handleAcceptSuggestion}
-                      onDismiss={handleDismiss}
-                      onSnooze={handleSnooze}
-                      onAcknowledge={handleAcknowledge}
-                      onOpenSmartLink={() => undefined}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── FHIR resource drill-down ── */}
-            {viewer && (
-              <FhirResourceViewer
-                resourceType={viewer.resourceType}
-                resourceId={viewer.resourceId}
-                label={viewer.label}
-                onClose={() => setViewer(null)}
-              />
-            )}
+        {/* ── App bar ── */}
+        <header className="bg-[#1d3346] text-white px-3 h-9 flex items-center justify-between shrink-0 text-[12px]">
+          <div className="flex items-center gap-3">
+            <span className="font-bold tracking-wide">MD SmartApp</span>
+            <span className="text-white/60 hidden sm:inline">
+              SMART on FHIR · launched from Cerner PowerChart
+            </span>
           </div>
+          <div className="flex items-center gap-2">
+            {/* Visit progress rail */}
+            <div className="hidden md:flex items-center gap-1 mr-2">
+              {steps.map((s, i) => (
+                <React.Fragment key={s.label}>
+                  {i > 0 && <span className="text-white/40">→</span>}
+                  <span
+                    className={`px-1.5 rounded-sm leading-5 ${
+                      s.done ? 'bg-[#1e7e34] text-white' : 'bg-white/10 text-white/70'
+                    }`}
+                  >
+                    {s.done ? '✓ ' : ''}
+                    {s.label}
+                  </span>
+                </React.Fragment>
+              ))}
+            </div>
+            <span className="text-white/80">{launchContext.practitionerName}</span>
+            <button
+              onClick={() => setUseMockData(!useMockData)}
+              title={useMockData ? 'Switch to live FHIR server' : 'Switch to mock FHIR fixtures'}
+              className={`px-2 leading-5 rounded-sm font-semibold border ${
+                useMockData
+                  ? 'bg-[#fff4e5] text-[#8a5300] border-[#e8a33d]'
+                  : 'bg-[#e6f4ea] text-[#1e7e34] border-[#1e7e34]'
+              }`}
+            >
+              {useMockData ? 'Mock FHIR' : 'Live FHIR'}
+            </button>
+            <button
+              onClick={() => router.push(`/patient-detail?id=${launchContext.patientId}`)}
+              className="px-2 leading-5 rounded-sm bg-white/10 border border-white/30 hover:bg-white/20"
+              title="Open RHTP Citizen Detail"
+            >
+              RHTP
+            </button>
+          </div>
+        </header>
+
+        {/* ── Patient banner ── */}
+        <PatientBanner
+          patientId={patientId}
+          encounterId={encounterId}
+          finNumber={launchContext.encounterId}
+          onOpenResource={openResource}
+        />
+
+        {/* ── Menu + content ── */}
+        <div className="flex flex-1 min-h-0">
+          <CernerMenu
+            active={activeMenu}
+            onSelect={(k) => {
+              setActiveMenu(k);
+              pushAudit('patient-chart-viewed', `Chart section opened: ${k}`, { section: k });
+            }}
+            badges={{ 'provider-view': activeCdsCount }}
+          />
+
+          <main className="flex-1 overflow-y-auto p-3 min-w-0">
+            {activeMenu === 'provider-view' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
+                <ProviderViewReview
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  onOpenResource={openResource}
+                  onMarkReviewed={handleMarkReviewed}
+                  reviewed={reviewed}
+                />
+                <ProviderViewAct
+                  patientId={patientId}
+                  cdsCards={cdsCards.filter((c) => !c.acknowledged)}
+                  closedGapIds={closedGapIds}
+                  onOpenResource={openResource}
+                  onCloseGap={handleCloseGap}
+                  onOpenCdsCard={() => setCdsPanelOpen(true)}
+                />
+                <ProviderViewDocument
+                  patientId={patientId}
+                  encounterId={encounterId}
+                  launchContext={launchContext}
+                  sessionActions={sessionActions}
+                  onWriteComplete={handleWriteComplete}
+                  onOpenResource={openResource}
+                  onSignAndReturn={() => setActiveMenu('return')}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'results' && <ResultsReviewPage {...pageProps} />}
+            {activeMenu === 'medications' && <MedicationListPage {...pageProps} />}
+            {activeMenu === 'problems' && <ProblemsPage {...pageProps} />}
+            {activeMenu === 'allergies' && <AllergiesPage {...pageProps} />}
+            {activeMenu === 'vitals' && <VitalsPage {...pageProps} />}
+            {activeMenu === 'documentation' && <DocumentationPage {...pageProps} />}
+            {activeMenu === 'histories' && <HistoriesPage {...pageProps} />}
+            {activeMenu === 'immunizations' && <ImmunizationsPage {...pageProps} />}
+
+            {activeMenu === 'orders' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
+                <OrderEntryModule
+                  patientId={launchContext.patientId}
+                  encounterId={launchContext.encounterId}
+                  practitionerId={launchContext.practitionerId}
+                  onOrderSigned={handleOrderSigned}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'careplan' && (
+              <div>
+                <CarePlanFhirPage {...pageProps} />
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
+                  <CarePlanPanel
+                    launchContext={launchContext}
+                    completedOrders={completedOrders}
+                    confirmedAssignments={confirmedAssignments}
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeMenu === 'careteam' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-2xl">
+                <CareTeamAssignmentModule
+                  patientId={launchContext.patientId}
+                  encounterId={launchContext.encounterId}
+                  practitionerId={launchContext.practitionerId}
+                  onAssignmentConfirmed={handleAssignmentConfirmed}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'referrals' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-4xl">
+                <ActiveReferralsPanel
+                  launchContext={launchContext}
+                  completedOrders={completedOrders}
+                  confirmedAssignments={confirmedAssignments}
+                />
+              </div>
+            )}
+
+            {activeMenu === 'quality' && (
+              <div className="space-y-3">
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                  <GapClosureMetricsPanel
+                    patientId={launchContext.patientId}
+                    patientName={launchContext.patientName ?? 'Patient'}
+                  />
+                </div>
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                  <SdohGapPanel
+                    patientFhirId={patientId}
+                    practitionerFhirId={launchContext.practitionerId}
+                    practitionerDisplay={launchContext.practitionerName}
+                    onAuditEntry={(action, details) =>
+                      pushAudit('patient-chart-viewed', action, details)
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeMenu === 'cdi' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                <MdPatientSummary launchContext={launchContext} />
+              </div>
+            )}
+
+            {activeMenu === 'compliance' && (
+              <div className="space-y-3">
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
+                  <ComplianceDashboard launchContext={launchContext} />
+                </div>
+                <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 h-[480px]">
+                  <AuditLogPanel events={auditEvents} />
+                </div>
+              </div>
+            )}
+
+            {activeMenu === 'coverage' && <CoveragePage {...pageProps} />}
+            {activeMenu === 'claims' && <ClaimsPage {...pageProps} />}
+            {activeMenu === 'payer-exchange' && <PayerExchangePanel patientId={patientId} />}
+
+            {activeMenu === 'return' && (
+              <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 max-w-xl">
+                <CernerReturnFlow
+                  launchContext={launchContext}
+                  completedOrders={completedOrders}
+                  confirmedAssignments={confirmedAssignments}
+                  closedGapIds={closedGapIds}
+                  onReturnInitiated={handleReturnInitiated}
+                />
+              </div>
+            )}
+          </main>
         </div>
-      </SmartErrorBoundary>
-    </AppLayout>
+
+        {/* ── CDS full panel overlay ── */}
+        {cdsPanelOpen && (
+          <div className="fixed inset-0 z-40 flex items-start justify-center pt-14 px-4">
+            <button
+              aria-label="Close CDS panel"
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setCdsPanelOpen(false)}
+            />
+            <div className="relative bg-[#f4f6f8] border border-[#b7c1ca] rounded-sm shadow-xl w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-[#2d4a63] text-white px-3 py-1.5 flex items-center justify-between sticky top-0 z-10">
+                <span className="text-[13px] font-bold">
+                  CDS Alerts — Clinical Decision Support
+                </span>
+                <button
+                  className="text-white/80 hover:text-white text-[16px]"
+                  onClick={() => setCdsPanelOpen(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="p-3">
+                <CdsCardRenderer
+                  cards={cdsCards}
+                  onAcceptSuggestion={handleAcceptSuggestion}
+                  onDismiss={handleDismiss}
+                  onSnooze={handleSnooze}
+                  onAcknowledge={handleAcknowledge}
+                  onOpenSmartLink={() => undefined}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── FHIR resource drill-down ── */}
+        {viewer && (
+          <FhirResourceViewer
+            resourceType={viewer.resourceType}
+            resourceId={viewer.resourceId}
+            label={viewer.label}
+            onClose={() => setViewer(null)}
+          />
+        )}
+      </div>
+    </SmartErrorBoundary>
   );
 }

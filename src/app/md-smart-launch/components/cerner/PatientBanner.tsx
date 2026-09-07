@@ -3,12 +3,9 @@
  * Cerner PowerChart-style patient demographics banner.
  * Two rows, persistent at top. All content FHIR-fed:
  * Patient, Encounter, AllergyIntolerance, Flag, Coverage, Observation (wt/BMI).
- *
- * Flag gap-day computation: days are derived live from Flag.period.start so
- * the banner always shows the current age of a gap — no hardcoded numbers
- * in FHIR data.
+ * Row 2 also shows $member-match status (Provider Access — CMS-0057-F).
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   useAllergies,
   useCoverage,
@@ -17,37 +14,15 @@ import {
   usePatient,
   useVitals,
 } from '@/lib/fhir/hooks';
+import { getFhirClient } from '@/lib/services/fhirClient';
 import {
   ageFromDob,
   bannerName,
   ccText,
   fmtDate,
   quantityText,
-  type FhirFlag,
   type FhirObservation,
 } from '@/lib/fhir/types';
-
-/**
- * Compute the number of whole days between a date string and today.
- * Returns undefined when the date is missing or unparseable.
- */
-function daysOpen(dateStr: string | undefined): number | undefined {
-  if (!dateStr) return undefined;
-  const ms = Date.now() - new Date(dateStr).getTime();
-  const days = Math.floor(ms / 86_400_000);
-  return days >= 0 ? days : undefined;
-}
-
-/**
- * Build the banner label for a single Flag.
- * Appends " — X days" when Flag.period.start is present; otherwise renders
- * code.text verbatim so flags without a time anchor still display cleanly.
- */
-function flagLabel(flag: FhirFlag): string {
-  const base = ccText(flag.code);
-  const days = daysOpen(flag.period?.start);
-  return days !== undefined ? `${base} — ${days} days` : base;
-}
 
 interface PatientBannerProps {
   patientId: string;
@@ -72,6 +47,44 @@ export default function PatientBanner({
   const { data: flags } = useFlags(patientId);
   const { data: coverages } = useCoverage(patientId);
   const { data: vitals } = useVitals(patientId);
+
+  // ── CMS-0057-F Provider Access: $member-match status ─────────────────────
+  const [memberMatchRef, setMemberMatchRef] = useState<string | null>(null);
+  const [memberMatchPending, setMemberMatchPending] = useState(false);
+  useEffect(() => {
+    if (!patientId || !coverages.length) return;
+    let cancelled = false;
+    setMemberMatchPending(true);
+    getFhirClient()
+      .memberMatch({
+        memberPatient: { resourceType: 'Patient', id: patientId },
+        coverageToMatch: {
+          id: coverages[0].id,
+          resourceType: 'Coverage',
+          beneficiary: { reference: `Patient/${patientId}` },
+          payor: coverages[0].payor,
+        },
+        consentToAccess: {
+          resourceType: 'Consent',
+          status: 'active',
+          patient: { reference: `Patient/${patientId}` },
+          policy: [{ uri: 'http://hl7.org/fhir/us/davinci-hrex/StructureDefinition/hrex-consent' }],
+          provision: { type: 'permit' },
+        },
+      })
+      .then((ref) => {
+        if (!cancelled) setMemberMatchRef(ref);
+      })
+      .catch(() => {
+        if (!cancelled) setMemberMatchRef(null);
+      })
+      .finally(() => {
+        if (!cancelled) setMemberMatchPending(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [patientId, coverages]);
 
   const mrn = patient?.identifier?.find(
     (i) => i.type?.text === 'MRN' || i.system?.includes('mrn')
@@ -133,10 +146,10 @@ export default function PatientBanner({
           <button
             key={f.id}
             className="bg-[#fff4e5] text-[#8a5300] border border-[#e8a33d] rounded px-1.5 py-0 text-[11px] font-semibold leading-5 hover:brightness-95"
-            onClick={() => f.id && onOpenResource?.('Flag', f.id, `Flag: ${flagLabel(f)}`)}
-            title={flagLabel(f)}
+            onClick={() => f.id && onOpenResource?.('Flag', f.id, `Flag: ${ccText(f.code)}`)}
+            title={ccText(f.code)}
           >
-            ⚑ {flagLabel(f).split('—')[0].trim()}
+            ⚑ {ccText(f.code).split('—')[0].trim()}
           </button>
         ))}
       </div>
@@ -152,6 +165,24 @@ export default function PatientBanner({
         <span>Wt: {weight?.valueQuantity ? quantityText(weight.valueQuantity) : '—'}</span>
         <span>BMI: {bmi?.valueQuantity?.value ?? '—'}</span>
         <span>Visit: {encounter?.period?.start ? fmtDate(encounter.period.start) : '—'}</span>
+        {/* CMS-0057-F Provider Access: $member-match chip */}
+        {memberMatchPending && <span className="text-white/60 text-[11px]">Member match…</span>}
+        {!memberMatchPending && memberMatchRef && (
+          <span
+            className="bg-[#1e7e34]/80 text-white text-[11px] px-1.5 rounded-sm border border-white/20"
+            title={`$member-match: ${memberMatchRef}`}
+          >
+            Payer Match ✓
+          </span>
+        )}
+        {!memberMatchPending && !memberMatchRef && coverages.length > 0 && (
+          <span
+            className="bg-white/10 text-white/70 text-[11px] px-1.5 rounded-sm border border-white/20"
+            title="$member-match not confirmed"
+          >
+            Match —
+          </span>
+        )}
       </div>
     </div>
   );

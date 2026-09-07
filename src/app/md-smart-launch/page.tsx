@@ -305,6 +305,26 @@ export default function MdSmartLaunchPage() {
     [pushAudit, addSessionAction]
   );
 
+  const handleClinicalWrite = useCallback(
+    (
+      kind: 'condition-added' | 'allergy-added' | 'medication-added',
+      display: string,
+      resourceId: string
+    ) => {
+      const labels = {
+        'condition-added': 'Condition',
+        'allergy-added': 'AllergyIntolerance',
+        'medication-added': 'MedicationRequest',
+      } as const;
+      pushAudit('order-signed', `${display} → FHIR ${labels[kind]} created`, {
+        resourceId,
+        fhirResourceType: labels[kind],
+      });
+      addSessionAction(`${display} → ${labels[kind]}/${resourceId}`);
+    },
+    [pushAudit, addSessionAction]
+  );
+
   // ── Legacy order module ───────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
     (orders: MdOrder[], _serviceRequests: FhirServiceRequest[]) => {
@@ -412,7 +432,13 @@ export default function MdSmartLaunchPage() {
     { label: 'Sign', done: false },
   ];
 
-  const pageProps = { patientId, onOpenResource: openResource };
+  const pageProps = {
+    patientId,
+    onOpenResource: openResource,
+    launchContext,
+    encounterId,
+    onClinicalWrite: handleClinicalWrite,
+  };
 
   return (
     <SmartErrorBoundary
@@ -495,8 +521,10 @@ export default function MdSmartLaunchPage() {
                 <ProviderViewReview
                   patientId={patientId}
                   encounterId={encounterId}
+                  launchContext={launchContext}
                   onOpenResource={openResource}
                   onMarkReviewed={handleMarkReviewed}
+                  onClinicalWrite={handleClinicalWrite}
                   reviewed={reviewed}
                 />
                 <ProviderViewAct
@@ -544,6 +572,7 @@ export default function MdSmartLaunchPage() {
                 <CarePlanFhirPage {...pageProps} />
                 <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                   <CarePlanPanel
+                    patientId={patientId}
                     launchContext={launchContext}
                     completedOrders={completedOrders}
                     confirmedAssignments={confirmedAssignments}
@@ -596,7 +625,7 @@ export default function MdSmartLaunchPage() {
 
             {activeMenu === 'cdi' && (
               <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                <MdPatientSummary launchContext={launchContext} />
+                <MdPatientSummary patientId={patientId} launchContext={launchContext} />
               </div>
             )}
 

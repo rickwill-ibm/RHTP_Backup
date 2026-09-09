@@ -67,8 +67,8 @@ echo ""
 
 # Start auto-sync in a new terminal tab
 echo "[1/3] Starting auto-sync with GitHub..."
-osascript -e "tell application \"Terminal\" to do script \"cd '$PROJECT_DIR' && bash auto-sync-github.sh\"" 2>/dev/null \
-  || (bash auto-sync-github.sh &)
+osascript -e "tell application \"Terminal\" to do script \"cd '$PROJECT_DIR' && bash scripts/legacy/auto-sync-github.sh\"" 2>/dev/null \
+  || (bash scripts/legacy/auto-sync-github.sh &)
 sleep 2
 echo "    Auto-sync running (push/pull every 5 seconds)"
 echo ""

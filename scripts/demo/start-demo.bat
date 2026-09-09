@@ -11,7 +11,7 @@ REM  No FHIR server, no Docker, no API keys required.
 REM  Runs entirely on mock / seed data.
 REM ============================================================
 
-set "PROJECT_DIR=%~dp0"
+set "PROJECT_DIR=%~dp0..\.."
 REM Strip trailing backslash
 if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
 

@@ -1,2 +1,0 @@
-
-===== types (tsc --noEmit) =====

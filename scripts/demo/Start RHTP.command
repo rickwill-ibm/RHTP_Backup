@@ -1,6 +1,6 @@
 #!/bin/bash
 # One-click launcher — starts the RHTP platform (with the Cerner MD SmartApp).
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/../.."
 echo "════════════════════════════════════════════"
 echo "  RHTP — Total Cost of Care Clinical Platform"
 echo "════════════════════════════════════════════"

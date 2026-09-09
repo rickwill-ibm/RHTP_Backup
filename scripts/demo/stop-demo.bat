@@ -13,7 +13,7 @@ REM
 REM  Safe to run even if services are not running.
 REM ============================================================
 
-set "PROJECT_DIR=%~dp0"
+set "PROJECT_DIR=%~dp0..\.."
 if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
 
 title RHTP Stop

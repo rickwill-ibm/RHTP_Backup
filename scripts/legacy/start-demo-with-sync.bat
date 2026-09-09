@@ -48,7 +48,7 @@ REM Write helper bats to TEMP (avoids spaces-in-path issues)
 set "HELPER1=%TEMP%\tcoc_autosync.bat"
 echo @echo off > "%HELPER1%"
 echo cd /d "%PROJECT_DIR%" >> "%HELPER1%"
-echo call "%PROJECT_DIR%\auto-sync-github.bat" >> "%HELPER1%"
+echo call "%PROJECT_DIR%\scripts\legacy\auto-sync-github.bat" >> "%HELPER1%"
 
 set "HELPER2=%TEMP%\tcoc_devserver.bat"
 echo @echo off > "%HELPER2%"

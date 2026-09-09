@@ -2,7 +2,7 @@
 # Restores RHTP's canonical patient data on the HAPI FHIR server
 # (fixes records overwritten by the MD SmartApp seed), then re-applies
 # the SmartApp's clinical demo resources non-destructively.
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/../.."
 echo "════════════════════════════════════════════════"
 echo "  RHTP — FHIR Data Restore"
 echo "════════════════════════════════════════════════"

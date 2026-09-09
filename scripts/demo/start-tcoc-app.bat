@@ -6,7 +6,7 @@ echo Starting TCOC Application...
 echo.
 
 REM Change to the project directory
-cd /d "%~dp0"
+cd /d "%~dp0..\.."
 
 REM Check if node_modules exists
 if not exist "node_modules" (

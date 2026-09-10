@@ -15,42 +15,20 @@ import {
   type DomainCount,
   type SourceRollup,
 } from './useLivePopulationLoad';
+import {
+  MONO,
+  PANEL,
+  CARD,
+  BORDER,
+  AMBER,
+  LIME,
+  MUTED,
+  TEXT,
+  n,
+  humanizeDomain,
+} from './LivePopulationLoad.format';
 
-const MONO = 'JetBrains Mono, Fira Code, monospace';
-const PANEL = '#0a0f1e';
-const CARD = '#0f172a';
-const BORDER = '#1e293b';
-const AMBER = '#F59E0B';
-const LIME = '#84CC16';
-const MUTED = '#64748b';
-const TEXT = '#e2e8f0';
-
-const n = (v: number): string => v.toLocaleString('en-US');
-
-// WPC-domain keys are lowercase-kebab; preserve payer acronyms rather than title-casing
-// them into "Sdoh" / "Bh". Everything else gets a plain humanised label.
-const DOMAIN_LABELS: Record<string, string> = {
-  sdoh: 'SDOH',
-  'behavioral-health': 'Behavioral Health',
-  'labs-vitals': 'Labs & Vitals',
-  'pa-lifecycle': 'PA Lifecycle',
-  'claims-financial': 'Claims & Financial',
-  'care-team': 'Care Team',
-  'goals-tasks': 'Goals & Tasks',
-  'caregiver-household': 'Caregiver & Household',
-  'diagnostic-reports': 'Diagnostic Reports',
-  'family-history': 'Family History',
-  'risk-assessment': 'Risk Assessment',
-};
-function humanizeDomain(d: string): string {
-  if (DOMAIN_LABELS[d]) return DOMAIN_LABELS[d];
-  return d
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-function Metric({
+export function Metric({
   label,
   value,
   accent,
@@ -88,7 +66,7 @@ function Metric({
   );
 }
 
-function DomainBars({ domains }: { domains: DomainCount[] }) {
+export function DomainBars({ domains }: { domains: DomainCount[] }) {
   if (domains.length === 0) {
     return (
       <p style={{ fontFamily: MONO, color: MUTED, fontSize: 11, fontStyle: 'italic' }}>
@@ -155,7 +133,7 @@ function DomainBars({ domains }: { domains: DomainCount[] }) {
   );
 }
 
-function SourceRows({ sources }: { sources: SourceRollup[] }) {
+export function SourceRows({ sources }: { sources: SourceRollup[] }) {
   if (sources.length === 0) {
     return (
       <p style={{ fontFamily: MONO, color: MUTED, fontSize: 11, fontStyle: 'italic' }}>
@@ -196,7 +174,7 @@ function SourceRows({ sources }: { sources: SourceRollup[] }) {
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+export function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <p
       style={{

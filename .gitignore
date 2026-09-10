@@ -80,3 +80,22 @@ _to_delete/
 
 # Never commit real env — only .env.example
 .env
+
+# Portable demo build outputs (generated)
+dist-portable/
+
+# Ship/staging bundles (scratch — incomplete app copies, must not be type-checked or committed)
+_ship/
+
+# ── Never committed: deliverables & build artifacts (policy — see AGENTS.md) ──
+# Whitepapers, sales decks, and packaging/build outputs are deliverables, not source.
+/whitepaper/
+/packaging/
+/*.pptx
+/*.docx
+/.next-portable/
+/WPCO-Demo-Portable-Fast/
+# scratch / backups
+/devlog.txt
+*.bak-hotfix
+**/_to_delete_samples/

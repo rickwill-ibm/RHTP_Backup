@@ -1,0 +1,575 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RHTP Capability Decomposition &amp; Build Estimate</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2328;
+    background: #ffffff;
+  }
+  .wrapper { max-width: 760px; margin: 0 auto; padding: 32px 24px 48px; }
+
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 28px; }
+
+  h2 { font-size: 16px; font-weight: 700; margin: 32px 0 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { font-size: 14px; font-weight: 600; margin: 18px 0 4px; color: #3b82d4; }
+
+  p { margin-bottom: 8px; }
+
+  .callout {
+    background: #f7f8fa;
+    border-left: 3px solid #3b82d4;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #1f2328;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  th {
+    background: #f7f8fa;
+    text-align: left;
+    padding: 7px 10px;
+    font-weight: 600;
+    border: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+  td {
+    padding: 6px 10px;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  .badge {
+    display: inline-block;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .done   { background: #dcfce7; color: #15803d; }
+  .done-s { background: #dcfce7; color: #15803d; }
+  .partial{ background: #fef9c3; color: #92400e; }
+  .stub   { background: #fee2e2; color: #991b1b; }
+  .planned{ background: #eff6ff; color: #1d4ed8; }
+
+  .sz-s { background: #eff6ff; color: #1d4ed8; }
+  .sz-m { background: #fef9c3; color: #92400e; }
+  .sz-l { background: #fee2e2; color: #991b1b; }
+  .sz-xl{ background: #f3e8ff; color: #6b21a8; }
+
+  .cluster-num {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1f2328;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .cluster-header {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .totals-table td:last-child { font-weight: 700; }
+  .totals-table tr.grand td { background: #f7f8fa; font-weight: 700; font-size: 13.5px; }
+
+  .note { font-size: 12px; color: #57606a; margin-top: 4px; }
+
+  ul { padding-left: 20px; margin-bottom: 8px; }
+  li { margin-bottom: 3px; }
+
+  .footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 12px;
+    color: #57606a;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <h1>RHTP — Capability Decomposition &amp; Build Estimate</h1>
+  <div class="subtitle">Grounded in domain libraries, API contracts, and tested engine code. Screens, demos, and personas excluded per estimation rules.</div>
+
+  <div class="callout">
+    <strong>Estimation basis:</strong> Every cluster below is derived from <code>src/lib/&lt;domain&gt;</code> module boundaries, BFF API route namespaces (<code>src/app/api/</code>), test suites (<code>tests/&lt;domain&gt;/</code>), and the authoritative roadmap in <code>docs/BUILD_LESSONS_AND_ROADMAP.md</code>. Current codebase maturity: Iterations 0–4 complete; ~850 tests green; record coverage 7/20 domains; live-infra CI-pending (no Docker in build sandbox). Multiple screens sharing one business capability are counted once.
+  </div>
+
+  
+  <h2>1. Capability Cluster Decomposition</h2>
+
+  
+  <div class="cluster-header"><span class="cluster-num">1</span>CMS-0057-F Access APIs (four regulatory provisions)</div>
+  <p class="note">Patient Access · Provider Access · Payer-to-Payer · Prior Authorization — the four CMS final-rule API obligations. One business capability, four API surfaces.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Patient Access — FHIR mediated via BFF, SMART token, view models</td><td>lib/server/smartSession · fhir/viewModels · api/fhir</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Provider Access — $member-match + treatment-relationship authz</td><td>lib/server/memberMatch · lib/authz/guard · api/records</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Payer-to-Payer — async bulk $export + idempotent deduplication</td><td>lib/workflow/bulkJob · api/bulk</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>PA transparency — 72h/7d SLA, denial reasons surfaced</td><td>lib/workflow/paMachine · goldenThread/workQueue</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Live backbone cutover (HAPI FHIR + CRD/DTR/PAS endpoints)</td><td>lib/backbone · conformance-plan.md</td><td><span class="badge planned">CI-PENDING</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">2</span>Policy Engine — Coverage Determination</div>
+  <p class="note">Source-agnostic ingestion, normalization, and evaluation of any payer/state-agency medical policy. 17-policy seed corpus (Aetna Cardiac + UHC PA lists).</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>NormalizedPolicy model + ICD-10 criteria evaluator</td><td>lib/policy/policyEngine · criteria</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Ingestion adapter registry (Aetna CPB + UHC + generic)</td><td>lib/policy/ingest</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Gold-carding exemption (NPI × code × payer)</td><td>lib/policy/goldCarding · goldCardSource</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Propensity-to-deny model (decision-support, explainable)</td><td>lib/policy/propensity · denialRates</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>CQL executable criteria (replaces keyword ICD-10 screen)</td><td>lib/policy/criteria (extension point)</td><td><span class="badge partial">PARTIAL — criteria typed, CQL not yet executed</span></td></tr>
+      <tr><td>Real-time payer policy feed adapters (new payers / state Medicaid)</td><td>lib/policy/ingest registry</td><td><span class="badge planned">PLANNED — I8 / I10</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">3</span>Golden Thread — Financial Clearance Workflow</div>
+  <p class="note">Four-stage orchestration: Eligibility → Medical Necessity → Prior Authorization → Patient Estimation (No Surprises Act GFE). Evidence Record is append-only, Da Vinci CDR-aligned.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Thread orchestrator + financial clearance state machine</td><td>lib/goldenThread/threadOrchestrator · financialClearanceMachine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Eligibility determination (coverage + PA-required)</td><td>lib/goldenThread/eligibility</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Medical necessity (Policy Engine bridge + gold card + propensity)</td><td>lib/goldenThread/medicalNecessity · policyEngineBridge</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>DTR questionnaire generation (deterministic + AI-flag-gated seam)</td><td>lib/goldenThread/dtr · lib/dtr/questionnaireResponse</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Patient cost estimation (GFE / No Surprises Act)</td><td>lib/goldenThread/patientEstimation</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Evidence Record + append-only store</td><td>lib/evidence</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Work-queue routing with SLA timers + breach detection</td><td>lib/goldenThread/workQueue</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Live CRD/DTR/PAS end-to-end (real Da Vinci backbone)</td><td>lib/backbone / api/cds · api/dtr · api/pas</td><td><span class="badge planned">CI-PENDING (I10)</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">4</span>Signal Disposition Engine (SDE)</div>
+  <p class="note">Stream-lane agent: consumes typed member signals (C2 events), applies policy-driven fold, emits a single coordinated outreach touchpoint. Every decision is explainable and auditable.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Signal taxonomy (C2 event → signal kind, priority, channel, TTL)</td><td>lib/sde/taxonomy · intake</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Disposition engine (act / bundle / suppress / delay — pure fold)</td><td>lib/sde/engine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Policy pack (freq caps, quiet hours, bundling cadence — data, not code)</td><td>lib/sde/policy</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Consent gate (42 CFR Part 2 + member opt-out, fail-closed)</td><td>lib/sde/consentGate</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Touchpoint composer + delay bundler</td><td>lib/sde/touchpoint</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Explainability view-model (care-team-facing "why")</td><td>lib/sde/engine/explain</td><td><span class="badge done">DONE</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">5</span>Governed Agent Runtime + AI Workflow Governance</div>
+  <p class="note">Temporal-class workflow engine with HITL/HOTL/autonomous autonomy tiers, per-member ordering, escalation-as-data, and a hard-coded "no authoritative state without human approval" invariant.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>WorkflowEngine interface + in-memory fake (tested, fake-fidelity documented)</td><td>lib/agentRuntime/engine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>proposeAndWait HITL primitive + work-queue integration</td><td>lib/agentRuntime/engine · inbox</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Autonomy tier (HITL / HOTL / autonomous) — config, not code</td><td>lib/agentRuntime · agents/governance/decisionGate</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Escalation-as-data (SLA timers, care-team hierarchy hop)</td><td>lib/agentRuntime/escalation · data/escalation-policies.json</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Agent manifest registry + least-privilege tool allowlist</td><td>lib/agents/manifest</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Outreach agent (SDE-approved touchpoint → contact action)</td><td>lib/agents/outreach</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Referral-coordination agent</td><td>lib/agents/referral</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>PA-documentation agent</td><td>lib/agents/pa</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Decision provenance + fairness audit</td><td>lib/agents/governance/decisionProvenance · fairness</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Real Temporal engine swap (seam only, no code change)</td><td>SEAM: workflow-engine</td><td><span class="badge planned">I9</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">6</span>Care Plan Generation + Holistic Context</div>
+  <p class="note">Deterministic whole-person care plan: goals, interventions, citations, SDOH disposition, FHIR output. Clinical SME review pending (GB-3). Root cause + tiered intervention sub-engines.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Comprehensive care plan builder (goals, interventions, citations)</td><td>lib/carePlan/builder · templates · citations</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Holistic care plan (root-cause → tiered interventions)</td><td>lib/carePlan/holistic · services/holisticContextEngine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>SDOH disposition (addressed / deferred — never silently dropped)</td><td>lib/carePlan/builder (P4 invariant)</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>FHIR CarePlan / Goal structural mappers</td><td>lib/carePlan/fhirMappers</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Validator (P1/P3/P4 invariants)</td><td>lib/carePlan/validator</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Contraindication model + drug-interaction criteria (real, not keyword)</td><td>Planned I8</td><td><span class="badge planned">I8</span></td></tr>
+      <tr><td>Clinical SME sign-off + honesty ledger (GB-3)</td><td>External dependency</td><td><span class="badge stub">PENDING SME</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">7</span>Member-Event / Knowledge Graph (Dual-Backend)</div>
+  <p class="note">Postgres + Neo4j co-equal projection of the C2 event stream. Rebuild-from-replay, merge/unmerge, five lens queries (whole-person, care-gap, SDOH-barrier, care-team, Part 2). Currently 7 of 20 record domains projected.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Projector engine + neutral mutation instruction set</td><td>lib/graph/projector · types</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Postgres adapter (relational upserts, pg-mem unit + Docker CI)</td><td>lib/graph/adapters/postgres</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Neo4j adapter (Cypher, injection guard, Docker CI)</td><td>lib/graph/adapters/neo4j</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Five lens queries (co-equal, Part 2 enforced)</td><td>lib/graph/lens</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Rebuild-from-replay + identity merge/unmerge rekey</td><td>lib/graph/replay</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Record domains: coverage, encounter, SDOH, care team, meds, labs, allergies (7 of 20)</td><td>lib/graph/mapping</td><td><span class="badge done">DONE — 7/20</span></td></tr>
+      <tr><td>Record domains: goals/tasks, referrals, immunizations (I5)</td><td>Planned I5</td><td><span class="badge planned">I5</span></td></tr>
+      <tr><td>Record domains: BH/SUD (42 CFR Part 2), claims/financial, PA lifecycle, assessments, docs (I6)</td><td>Planned I6</td><td><span class="badge planned">I6</span></td></tr>
+      <tr><td>Remaining 3 domains (feed-gated, I6+ exit)</td><td>GB-6 external dependency</td><td><span class="badge stub">FEED-GATED</span></td></tr>
+      <tr><td>Whole-Person Intelligence view (wpcGraph + LensBar)</td><td>lib/wpcGraph · components/wpc</td><td><span class="badge done">DONE (graph seam)</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">8</span>Multi-Feed Ingestion Pipeline (5-Stage)</div>
+  <p class="note">Land → Stage+Validate → Transform+Enrich → Conform+Load → Project+Propagate. Batch and stream lanes from one implementation; segmentation-at-transform; reconciliation gate.</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>5-stage pipeline engine + anti-divergence batch/stream packaging</td><td>lib/pipeline/pipeline · stages · transform</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Adapter framework + golden template</td><td>lib/pipeline/adapters/_TEMPLATE.md</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Core adapters: X12 834 (coverage), ADT HL7v2 (encounter), SDOH CSV, FHIR meds</td><td>lib/pipeline/adapters</td><td><span class="badge done">DONE — 4 adapters</span></td></tr>
+      <tr><td>Segmentation-at-transform (42 CFR Part 2 labels at stage 3)</td><td>lib/pipeline/segmentation</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>PHI-safe quarantine lane + reconciliation gate</td><td>lib/pipeline/profileValidator · conformAndLoad</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Adapters for I5 domains (goals, referrals, immunizations)</td><td>Planned I5</td><td><span class="badge planned">I5</span></td></tr>
+      <tr><td>Adapters for I6 sensitive/financial domains</td><td>Planned I6</td><td><span class="badge planned">I6</span></td></tr>
+      <tr><td>Real Kafka broker adapter (stream lane, seam already built)</td><td>SEAM: event-backbone → I9</td><td><span class="badge planned">I9</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">9</span>Identity Resolution (EMPI)</div>
+  <p class="note">Deterministic + probabilistic member matching, survivorship, possible-match HELD semantics. External EMPI via PIX/PDQ/PIXm/PDQm stubbed (I8A).</p>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Deterministic rules + probabilistic scoring (Levenshtein, field-weight)</td><td>lib/identity/matchEngine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>EMPI resolver + survivorship (DP-7)</td><td>lib/identity/empiResolver · survivorship</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Cross-reference store</td><td>lib/identity/crossReference</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Provider identity resolution</td><td>lib/identity/provider</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>External EMPI: PIX/PDQ HL7v2 adapters</td><td>lib/identity/external — stub wired I4</td><td><span class="badge stub">STUB → I8A</span></td></tr>
+      <tr><td>External EMPI: PIXm/PDQm FHIR adapters</td><td>lib/identity/external — stub wired I4</td><td><span class="badge stub">STUB → I8A</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">10</span>42 CFR Part 2 Consent + Data Segmentation</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Consent resolver (fail-closed on error, directive provider seam)</td><td>lib/consent/consentResolver</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Part 2 consent evaluation + provider-access opt-out</td><td>lib/consent/part2Consent · providerAccessOptOut</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Segmentation labels applied at pipeline stage 3 (envelope inspection)</td><td>lib/pipeline/segmentation</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Break-glass + re-disclosure scrubbing (UC-64 / UC-17 compliance suite)</td><td>Planned I6</td><td><span class="badge planned">I6</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">11</span>Risk Adjustment &amp; HCC Coding</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>HCC risk-adjustment factor (RAF) engine + hierarchy crosswalk</td><td>lib/finance/riskAdjustment/raf · hccCrosswalk</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>ICD-10 rollup, MEAT criteria, coding gap bridge</td><td>lib/finance/riskAdjustment/meat · codingGapBridge</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Coding gap report + submission pipeline</td><td>lib/finance/riskAdjustment/codingGapReportOut · submission</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>RxHCC, HHS-HCC, CDPS real classifiers (replacing stub crosswalk)</td><td>Planned I8A pillar-3</td><td><span class="badge planned">I8A</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">12</span>Network Adequacy Engine</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Haversine distance + adequacy standard evaluation per county/specialty/LOB</td><td>lib/networkAdequacy/adequacyEngine</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Gap detection, severity classification, augmentation recommendations</td><td>lib/networkAdequacy/adequacyEngine · network</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Network adequacy NLP assistant</td><td>lib/networkAdequacy/assistant</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Geospatial heatmap + one-click compliance report</td><td>Planned I7</td><td><span class="badge planned">I7</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">13</span>HEDIS / Quality Measures (Care-Gap Closure)</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>DEQM MeasureReport ingest + care-gap view model</td><td>lib/measures</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Care-gap closure verification + gap closure service</td><td>lib/services/gapClosureService</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Care-team attribution for gap ownership</td><td>lib/careTeam/attribution · cohorts</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Production DEQM feed loader (seam wired, loader not configured)</td><td>lib/measures — seam only</td><td><span class="badge stub">STUB → live feed I10</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">14</span>Terminology Services &amp; Value-Set Governance</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Terminology service seam + seed allowlist (RxNorm/LOINC/SNOMED/ICD/CPT/HCC)</td><td>lib/terminology</td><td><span class="badge done">DONE (seeded)</span></td></tr>
+      <tr><td>Stage-4 semantic validation gate (wired into pipeline conformAndLoad)</td><td>lib/terminology/semanticValidator · pipeline/stages</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Value-set registry + 6 classification families (26 assets)</td><td>lib/terminology/registry · governance</td><td><span class="badge done">DONE (seeded)</span></td></tr>
+      <tr><td>Real terminology server integration ($validate-code / $expand / $translate)</td><td>lib/terminology/productionTerminologyService</td><td><span class="badge stub">STUB → I8A</span></td></tr>
+      <tr><td>Value-set governance console (lifecycle, approval gates, version replay)</td><td>Planned I8A pillar-4</td><td><span class="badge planned">I8A — XL</span></td></tr>
+      <tr><td>Behavioral / social classification families (DSM-5, Gravity SDOH, PRAPARE)</td><td>Planned I8A pillar-3</td><td><span class="badge planned">I8A</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">15</span>Care Team Management &amp; Population Operations</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Care team assignment, attribution, cohort management</td><td>lib/careTeam/assignments · attribution · cohorts</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Triage queue (ADT/task/transition signals, domain-tiered)</td><td>lib/careTeam/triage</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Visit planning + population panel management</td><td>lib/careTeam/visitPlan · population</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Graph-based keystone / program-action resources</td><td>lib/careTeam/graph</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Goals/tasks domain — real projected data (I5)</td><td>Planned I5</td><td><span class="badge planned">I5</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">16</span>Referral Management &amp; Social Services Integration</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Referral service (create, update, FHIR ServiceRequest mapping)</td><td>lib/services/referralService · referralService.fhir</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>CBO directory + SDOH resource data</td><td>lib/sdResourceData</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Social needs screening + SDOH data pipeline</td><td>lib/socialMockData · pipeline/cboSdohAdapter</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Referral-coordination agent (stall detection, auto-follow-up proposal)</td><td>lib/agents/referral</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Referral domain projected into knowledge graph (I5)</td><td>Planned I5</td><td><span class="badge planned">I5</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">17</span>Authorization, Security &amp; Compliance Platform</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>BFF security model (browser holds no tokens, server SMART session)</td><td>lib/server/smartSession · correlation · audit</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>RBAC guard + approval authority (session-principal role model)</td><td>lib/authz/guard · approvalAuthority · principal</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>PHI-safe audit ledger (append-only, references+codes only)</td><td>lib/server/audit · auditLedger</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Tenant isolation + egress security</td><td>lib/security/tenant · egress</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Record lifecycle (legal hold, right-to-delete, purge)</td><td>lib/lifecycle</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Feature-flag gating</td><td>lib/flags</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Security review / pen-test surface (GB-7)</td><td>Planned I10</td><td><span class="badge planned">I10</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">18</span>Platform Infrastructure (Outbox, Idempotency, Substrate)</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Transactional outbox (intent-commit → FHIR-apply → sequence → publish, exactly-once)</td><td>lib/outbox</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Idempotency store (Postgres + memory, unique key deduplication)</td><td>lib/idempotency</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Circuit breaker + scheduler (reliability)</td><td>lib/reliability</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Dead-letter queue + dead-letter processing</td><td>lib/deadLetter</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Job registry + projection/ingest jobs + ops runtime</td><td>lib/jobs</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Substrate bootstrap + migration runner</td><td>lib/substrate</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Real Kafka broker adapter + Temporal worker pool (swap behind seams)</td><td>SEAM: event-backbone / workflow-engine → I9</td><td><span class="badge planned">I9</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">19</span>CMS-0057-F Conformance Testing &amp; Certification</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>FHIR CapabilityStatement generator</td><td>lib/certification/capabilityStatement</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>CMS-0057-F readiness matrix + rollup</td><td>lib/certification/matrix · readinessRollup</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Postman collection + environment generation (BFF routes)</td><td>api/postman-collection · postman-environment</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Newman SSE runner (api/postman-run)</td><td>api/postman-run</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Inferno / Da Vinci CRD/DTR/PAS / US Core conformance runs (live backbone)</td><td>External infra + test calendar</td><td><span class="badge planned">I10 — GATED</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <div class="cluster-header"><span class="cluster-num">20</span>Deployment Configurator &amp; Execution Substrate</div>
+  <table>
+    <thead><tr><th>Sub-capability</th><th>Primary code</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Deploy preflight + config schema validation</td><td>lib/deploy</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Runtime config (no-restart read/write)</td><td>lib/runtimeConfig</td><td><span class="badge done">DONE</span></td></tr>
+      <tr><td>Terraform modules (AWS + Azure) + deploy.config.yaml IaC</td><td>Planned I9</td><td><span class="badge planned">I9</span></td></tr>
+      <tr><td>Portability conformance (no proprietary control-plane leak)</td><td>Planned I9</td><td><span class="badge planned">I9</span></td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>2. Build Effort Estimate by Capability Cluster</h2>
+  <p class="note">Effort units: <strong>iteration-unit</strong> ≈ 3 parallel build-agent waves + convergence + gate (~600K–1M tokens, ~65–85 min wall clock). Actuals from Iterations 0–4 used as calibration. XL items (I8A) are 3 back-to-back iteration-units.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Capability Cluster</th>
+        <th>Iter</th>
+        <th>Size</th>
+        <th>Tokens est.</th>
+        <th>Wall clock</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>CMS-0057-F Access APIs (live backbone cutover)</td><td>I10</td><td><span class="badge sz-m">M</span></td><td>~300K</td><td>~35 min</td></tr>
+      <tr><td>2</td><td>Policy Engine (CQL executable criteria + new payers)</td><td>I8</td><td><span class="badge sz-m">M</span></td><td>~250K</td><td>~30 min</td></tr>
+      <tr><td>3</td><td>Golden Thread (live CRD/DTR/PAS backbone)</td><td>I10</td><td><span class="badge sz-m">M</span></td><td>~250K (gated)</td><td>~30 min</td></tr>
+      <tr><td>4</td><td>Signal Disposition Engine</td><td>DONE</td><td><span class="badge sz-s">S</span></td><td>—</td><td>—</td></tr>
+      <tr><td>5</td><td>Agent Runtime (real Temporal swap)</td><td>I9</td><td><span class="badge sz-l">L</span></td><td>~300K</td><td>~35 min</td></tr>
+      <tr><td>6</td><td>Care Plan (contraindications + clinical criteria + SME)</td><td>I8</td><td><span class="badge sz-l">L</span></td><td>~850K</td><td>~75 min</td></tr>
+      <tr><td>7a</td><td>Knowledge Graph — I5 domains (goals, referrals, immunizations)</td><td>I5</td><td><span class="badge sz-m">M</span></td><td>~700K</td><td>~65 min</td></tr>
+      <tr><td>7b</td><td>Knowledge Graph — I6 sensitive/financial domains</td><td>I6</td><td><span class="badge sz-l">L</span></td><td>~900K</td><td>~80 min</td></tr>
+      <tr><td>8a</td><td>Pipeline — I5/I6 domain adapters</td><td>I5+I6</td><td><span class="badge sz-m">M</span></td><td>folded into I5/I6</td><td>—</td></tr>
+      <tr><td>8b</td><td>Pipeline — real Kafka stream lane</td><td>I9</td><td><span class="badge sz-l">L</span></td><td>folded into I9</td><td>—</td></tr>
+      <tr><td>9</td><td>Identity (PIX/PDQ/PIXm/PDQm real adapters)</td><td>I8A-i</td><td><span class="badge sz-l">L</span></td><td>~900K</td><td>~80 min</td></tr>
+      <tr><td>10</td><td>Consent / 42 CFR Part 2 (break-glass, re-disclosure)</td><td>I6</td><td><span class="badge sz-l">L</span></td><td>folded into I6</td><td>—</td></tr>
+      <tr><td>11</td><td>Risk Adjustment (real HCC/RxHCC/HHS-HCC classifiers)</td><td>I8A-iii</td><td><span class="badge sz-m">M</span></td><td>folded into I8A</td><td>—</td></tr>
+      <tr><td>12</td><td>Network Adequacy (geospatial report, I7)</td><td>I7</td><td><span class="badge sz-m">M</span></td><td>~700K</td><td>~65 min</td></tr>
+      <tr><td>13</td><td>Quality Measures (live DEQM feed)</td><td>I10</td><td><span class="badge sz-s">S</span></td><td>~100K</td><td>~15 min</td></tr>
+      <tr><td>14</td><td>Terminology + Value-Set Governance (I8A)</td><td>I8A-ii/iv</td><td><span class="badge sz-xl">XL</span></td><td>~2.5M</td><td>~3 sessions</td></tr>
+      <tr><td>15</td><td>Care Team / Population (I5 graph data)</td><td>I5</td><td><span class="badge sz-m">M</span></td><td>folded into I5</td><td>—</td></tr>
+      <tr><td>16</td><td>Referral / Social Services (I5 graph projection)</td><td>I5</td><td><span class="badge sz-s">S</span></td><td>folded into I5</td><td>—</td></tr>
+      <tr><td>17</td><td>Security (pen-test, GB-7)</td><td>I10</td><td><span class="badge sz-l">L</span></td><td>~300K + ext</td><td>ext. calendar</td></tr>
+      <tr><td>18</td><td>Platform Infra (Kafka + Temporal wiring)</td><td>I9</td><td><span class="badge sz-l">L</span></td><td>~900K</td><td>~85 min</td></tr>
+      <tr><td>19</td><td>CMS Conformance / Certification (Inferno runs)</td><td>I10</td><td><span class="badge sz-l">L</span></td><td>~700K + ext</td><td>ext. calendar</td></tr>
+      <tr><td>20</td><td>Deployment / IaC (Terraform + portability)</td><td>I9</td><td><span class="badge sz-l">L</span></td><td>folded into I9</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>3. Remaining Build Summary (Iterations 5–10)</h2>
+
+  <table class="totals-table">
+    <thead>
+      <tr><th>Iteration</th><th>Primary Capability Clusters</th><th>Size</th><th>Token Est.</th><th>Wall Clock</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>I5</strong></td>
+        <td>Knowledge Graph domains 8–11 (goals/tasks, referrals, immunizations, care-team projected); pipeline adapters; care team graph data</td>
+        <td><span class="badge sz-m">M</span></td><td>~700K</td><td>~65 min</td>
+      </tr>
+      <tr>
+        <td><strong>I6</strong></td>
+        <td>Knowledge Graph domains 12–17 (BH/SUD 42 CFR Part 2, claims, PA lifecycle, assessments, docs); Part 2 compliance suite; break-glass</td>
+        <td><span class="badge sz-l">L</span></td><td>~900K</td><td>~80 min</td>
+      </tr>
+      <tr>
+        <td><strong>I7</strong></td>
+        <td>Network Adequacy dashboards → shared view-models; geospatial heatmap; one-click compliance report; provider model (gaps↔referrals↔PA)</td>
+        <td><span class="badge sz-m">M</span></td><td>~700K</td><td>~65 min</td>
+      </tr>
+      <tr>
+        <td><strong>I8A-i</strong></td>
+        <td>External identity: PIX/PDQ HL7v2 + PIXm/PDQm FHIR adapters; internal-vs-external survivorship; mixed-source conformance suite</td>
+        <td><span class="badge sz-l">L</span></td><td>~900K</td><td>~80 min</td>
+      </tr>
+      <tr>
+        <td><strong>I8A-ii/iii</strong></td>
+        <td>Real terminology server ($validate-code/$expand/$translate); HCC/RxHCC/HHS-HCC/CDPS/behavioral/social classifiers; VSAC/Gravity feed importers</td>
+        <td><span class="badge sz-l">L</span></td><td>~900K</td><td>~80 min</td>
+      </tr>
+      <tr>
+        <td><strong>I8A-iv</strong></td>
+        <td>Value-set governance console: lifecycle state machine, approval gates, immutable history, specialist UI, version replay</td>
+        <td><span class="badge sz-xl">XL</span></td><td>~900K</td><td>~85 min</td>
+      </tr>
+      <tr>
+        <td><strong>I8</strong></td>
+        <td>Care plan: contraindication model, real drug-interaction criteria, clinical fixture oracle re-run; SME sign-off packet (GB-3)</td>
+        <td><span class="badge sz-l">L</span></td><td>~850K</td><td>~75 min</td>
+      </tr>
+      <tr>
+        <td><strong>I9</strong></td>
+        <td>Execution substrate: Kafka-API broker, Temporal worker pool, Terraform (AWS+Azure), graph-tier + FHIR-store IaC; portability conformance</td>
+        <td><span class="badge sz-l">L</span></td><td>~900K</td><td>~85 min</td>
+      </tr>
+      <tr>
+        <td><strong>I10</strong></td>
+        <td>Certification: GB-7 pen-test + PHI audit; Inferno Da Vinci + US Core + CARIN + X12 conformance runs; load gates (k6 1K/5K/10K); live backbone cutover</td>
+        <td><span class="badge sz-l">L</span></td><td>~700K + ext</td><td>Ext. calendar</td>
+      </tr>
+      <tr class="grand">
+        <td><strong>TOTAL remaining</strong></td>
+        <td>10 iteration-units across 6 capability domains</td>
+        <td>—</td>
+        <td><strong>~7–9M tokens</strong></td>
+        <td><strong>~10–12 sessions</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>4. Staffing Requirements (External Dependencies)</h2>
+
+  <p>The following roles cannot be substituted by build-sandbox sessions. They are genuine external-dependency gates on the critical path.</p>
+
+  <table>
+    <thead><tr><th>Role</th><th>Gate</th><th>Iteration</th><th>Duration estimate</th></tr></thead>
+    <tbody>
+      <tr><td>Clinical SME (physician / pharmacist)</td><td>GB-3: care-plan content sign-off; drug-interaction / guideline criteria review</td><td>I8</td><td>2–4 weeks review + feedback cycle</td></tr>
+      <tr><td>Terminology / coding specialist</td><td>I8A: value-set governance console; VSAC/Gravity feed access; behavioral + social classification families</td><td>I8A</td><td>Ongoing; value-set governance is a permanent operational role</td></tr>
+      <tr><td>Healthcare IT / EMPI administrator</td><td>I8A-i: PIX/PDQ connectathon-style test harness against reference MPI; assigning-authority OID configuration</td><td>I8A-i</td><td>2–3 weeks for integration + conformance</td></tr>
+      <tr><td>FHIR terminology server (HAPI / Ontoserver / VSAC)</td><td>I8A-ii: replace seed stub with live $validate-code / $expand / $translate</td><td>I8A-ii</td><td>Infrastructure procurement; 1–2 weeks onboarding</td></tr>
+      <tr><td>Cloud infrastructure / DevOps engineer</td><td>I9: Terraform IaC apply (AWS + Azure); Kafka managed service; Temporal cloud or self-hosted</td><td>I9</td><td>4–6 weeks; cloud accounts + VPC / IAM provisioning</td></tr>
+      <tr><td>Live HAPI FHIR backbone (Da Vinci test environment)</td><td>I10: CRD/DTR/PAS end-to-end; Inferno conformance runs; Newman contract tests against live</td><td>I10</td><td>Environment stand-up: 2–4 weeks; test calendar varies</td></tr>
+      <tr><td>Security / pen-test team</td><td>I10 (GB-7): authz bypass, PHI/PII leak, IDOR review; mTLS/signature verification</td><td>I10</td><td>2–3 weeks engagement; independent of build sessions</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h2>5. Maturity Ceiling — Honest Assessment</h2>
+
+  <div class="callout">
+    The build sandbox has no Docker. Every component whose correctness depends on real Postgres multi-writer semantics, real Neo4j Cypher execution, real Temporal worker behavior, or real Kafka partition ordering is <em>green on fakes but unproven on live infra</em>. This is a known, documented ceiling recorded in <code>docs/BUILD_LESSONS_AND_ROADMAP.md (L1/L5)</code> and the individual <code>FAKE_FIDELITY.md</code> files. The second progress counter — "components live-proven on real infra" — is currently 0. This does not mean the code is wrong; it means the proof is deferred to CI with Docker (all testcontainer specs already authored and waiting).
+  </div>
+
+  <table>
+    <thead><tr><th>Dimension</th><th>Current state</th><th>What closes it</th></tr></thead>
+    <tbody>
+      <tr><td>Test coverage</td><td>~850 tests green; all against fakes / in-memory</td><td>Docker in CI; testcontainer suites already authored</td></tr>
+      <tr><td>Record coverage</td><td>7 of 20 domain types projected into knowledge graph</td><td>Iterations 5–6 close to 17/20; 3 remaining feed-gated (GB-6)</td></tr>
+      <tr><td>Live infra proof</td><td>0 components proven against real Postgres / Neo4j / Temporal / Kafka</td><td>Iteration 9 IaC + CI Docker gate</td></tr>
+      <tr><td>Conformance</td><td>Structural / offline only (Inferno / Da Vinci not run)</td><td>Iteration 10 live backbone</td></tr>
+      <tr><td>Clinical content</td><td>Care plan citations flagged smeReviewed: false; keyword-based ICD criteria</td><td>Iteration 8 + GB-3 SME sign-off</td></tr>
+      <tr><td>Terminology accuracy</td><td>Seed allowlist covering demo data only</td><td>Iteration 8A real terminology server</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. Critical Path (Recommended Sequencing)</h2>
+  <ul>
+    <li><strong>Next (I5):</strong> Care-team + workflow record domains — highest-throughput progress available; continues proven domain-template pattern.</li>
+    <li><strong>I6:</strong> Sensitive/financial domains — Part 2 compliance risk; must precede any behavioral-health operational use.</li>
+    <li><strong>I7:</strong> Network adequacy view-model consolidation (independent; can interleave with I5/I6).</li>
+    <li><strong>I8A:</strong> Terminology + external identity + value-set governance — XL; run as three back-to-back sub-iterations; most valuable after I6 lands behavioral/social domains.</li>
+    <li><strong>I8:</strong> Care plan depth + clinical criteria — gated on clinical SME calendar (GB-3).</li>
+    <li><strong>I9:</strong> Real execution substrate (Kafka, Temporal, IaC) — gated on cloud accounts; all prior testcontainer specs become runnable.</li>
+    <li><strong>I10:</strong> Certification pass — last; cannot honestly run earlier (live backbone, pen-test, conformance calendar all required).</li>
+  </ul>
+
+  <p class="note" style="margin-top:12px">No estimate in this document is derived from counting screens, navigating demo flows, or extrapolating from UI personas. Every number traces to a domain library, API route, test suite count, or the iteration actuals recorded in <code>docs/BUILD_LESSONS_AND_ROADMAP.md</code>.</p>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

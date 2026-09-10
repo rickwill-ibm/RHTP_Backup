@@ -6,133 +6,6 @@ a landing that touches a core-logic path with no new entry here FAILS the gate.
 
 Newest first. One entry per qualifying change.
 
-
-## 2026-09-04 (addendum) — MTM Agent v2: drug-allergy checker, class table, FHIR DetectedIssue, duplicate-therapy fix
-
-**Scope:** Bug-fix + capability additions to `src/lib/agents/mtm/` domain. Full coalition re-triggered:
-new capabilities (drug-allergy check, FHIR DetectedIssue write), new files in `src/lib/**`, >40 lines changed.
-
-**Root causes addressed:**
-1. **Drug-allergy check absent** — no checker, no `PatientAllergy` type, no allergy input to engine.
-2. **Duplicate therapy silently skipped** — `atcLevel4` was never populated by BFF (RxNorm `/drugs` has no ATC). The checker correctly checked the field but it was always `undefined`.
-3. **No FHIR DetectedIssue output** — findings lived in UI state only; no Da Vinci MTM artifact written to FHIR store.
-
-**New files:**
-- `src/lib/agents/mtm/allergyChecker.ts` — class-level drug-allergy contraindication check
-- `src/lib/agents/mtm/allergyMapper.ts` — FHIR AllergyIntolerance[] → PatientAllergy[] boundary mapper
-- `src/lib/agents/mtm/drugClassTable.ts` — deterministic RxCUI/name → {atcLevel4, allergyClasses} resolver
-- `src/lib/agents/mtm/fhirDetectedIssue.ts` — pure builder: MtmFinding[] → FhirDetectedIssue[] (Da Vinci ActCode DUPTHPY / DRG-ALLRG / DDI / DACT)
-- `src/lib/agents/mtm/data/drug-class-table.json` — 45+ drug entries with ATC + allergyClasses (statins, penicillins, ACEi, ARBs, NSAIDs, quinolones, etc.)
-- `src/app/api/mtm/detected-issues/route.ts` — BFF POST route: writes DetectedIssue[] to FHIR store post-acknowledgement
-- `tests/smart-app/mtm-allergy.test.ts` — 29 new tests (allergy checker, class table, DetectedIssue builder, engine integration)
-
-**Modified files:**
-- `types.ts` — added PatientAllergy, FhirDetectedIssue, allergyClasses to DrugLookupResult, 'drug-allergy' to MtmFindingType, allergies[] to MtmCheckInput
-- `mtmEngine.evaluate()` — wires allergyChecker; uses drugClassTable to augment newDrug + currentMeds when atcLevel4 missing (fixes silent skip)
-- `src/app/api/mtm/drug-lookup/route.ts` — now calls lookupDrugClass() (table-first) + resolveAtcClass() (RxClass API fallback) to populate atcLevel4 + allergyClasses on every DrugLookupResult
-- `AddMedicationForm.tsx` — allergies prop added; DetectedIssue write to /api/mtm/detected-issues after FHIR MedicationRequest save
-- `ProviderViewReview.tsx` + `ChartPages.tsx` — pass currentMedications + allergies (via mapAllergiesToMtm) to AddMedicationForm
-
-**B1 Spine decisions:**
-- Class table is the authoritative offline source; RxClass API is a fallback only — deterministic-first invariant upheld
-- Drug-allergy match is class-level (not exact name): documented "Penicillin" allergy catches Amoxicillin, Ampicillin, etc.
-- Severity derivation: high-criticality + severe reaction = contraindicated (hardBlock); partial = major; otherwise moderate
-- DetectedIssue write is best-effort (failure does not block MedicationRequest save) — no PHI in error path
-- FHIR ActCode coding: DUPTHPY / DRG-ALLRG / DDI / DACT / COMPLIANCE per HL7 v3-ActCode CodeSystem
-
-**R1 (Domain Fidelity):**
-- FHIR R4 DetectedIssue conforms to Da Vinci MTM pattern (status:final, code.coding ActCode, implicated[] refs, mitigation[].action)
-- AllergyIntolerance criticality 'high' maps to FHIR criticality standard value set
-- Drug-allergy class matching consistent with published cross-reactivity literature (β-lactam ring for penicillin/cephalosporin)
-
-**R5 (Cross-Examiner):**
-- Claim "Amoxicillin + Penicillin allergy → contraindicated hardBlock" — UPHELD: test `fires contraindicated for Amoxicillin + high-criticality severe Penicillin allergy` passes
-- Claim "Rosuvastatin + Atorvastatin → duplicate-therapy" — UPHELD: test `detects Rosuvastatin as duplicate when Atorvastatin is on med list` passes; both resolve to C10AA via class table
-- Claim "0 tsc errors" — UPHELD: `npx tsc --noEmit` exits 0
-- Claim "2599/2599 tests passing" — UPHELD: `npx vitest run` output confirmed
-
-**Verification:** `tsc --noEmit` 0 · `vitest run` 2599/2599 · 29 new tests · no `any` · no `NEXT_PUBLIC_*` keys
-
-
-
-## 2026-09-04 — MTM Agent: drug lookup, NDC, interaction screening, Beers Criteria
-
-**Scope:** New domain `src/lib/agents/mtm/` (11 files) + 3 new BFF routes `src/app/api/mtm/` +
-upgraded `AddMedicationForm.tsx` + new `MtmSafetyPanel.tsx` + 33 new tests.  
-Coalition trigger: new `src/lib/**` domain module + new capability + >40 changed lines. **Full coalition required.**
-
-**Change summary:**
-
-New domain module `src/lib/agents/mtm/`:
-- `types.ts` — all domain types (DrugLookupResult, MtmFinding, MtmCheckInput, CurrentMedication, …)
-- `schema.ts` — plain-TS boundary parse functions for RxNorm, FDA NDC, RxNav Interaction APIs (no external library)
-- `mtmEngine.ts` — pure `evaluate()` orchestrator (deterministic, injectable clock)
-- `drugLookup.ts` — client-side BFF callers (searchDrugs, fetchNdcForRxcui)
-- `duplicateTherapyChecker.ts` — CMS Part D MTM duplicate therapy rule (ATC Level-4)
-- `refillTooSoonChecker.ts` — CMS Part D MTM refill-too-soon rule (80% threshold)
-- `interactionChecker.ts` — RxNav interaction normaliser + severity mapper
-- `beersCriteriaChecker.ts` — AGS 2023 Beers Criteria PIM check (age ≥65)
-- `manifest.ts` — agent manifest (HITL_ADVISORY autonomy tier, tool allowlist, invariants)
-- `data/beers-criteria.json` — 10-entry Beers Criteria table
-- `README.md` — domain README (data flow, invariants, file map, BFF routes)
-- `index.ts` — public surface re-exports only
-
-New BFF routes (`src/app/api/mtm/`):
-- `drug-lookup/route.ts` — POST {term} → DrugLookupResult[] via NLM RxNorm REST API (free, no key)
-- `ndc/route.ts` — POST {rxcui} → NDC list via FDA openFDA Drug NDC API (free, no key)
-- `interactions/route.ts` — POST {rxcuis[]} → DrugInteraction[] via RxNav Interaction API (free, no key)
-
-UI upgrades:
-- `AddMedicationForm.tsx` — debounced typeahead, brand→generic panel, NDC auto-fill, MTM Safety Panel
-- `MtmSafetyPanel.tsx` (NEW) — coloured finding chips, per-finding acknowledgement checkboxes, hard-block on contraindicated
-
-**B1 Spine decisions:**
-- No external validation library (zod not in project) → plain TypeScript boundary parse functions in `schema.ts`
-- `DrugInteraction.severity` excludes `'info'` (no informational interaction) — separate `InteractionSeverity` type
-- `normaliseSeverity()` maps RxNav's inconsistent severity strings to domain union (conservative: unknown → moderate)
-- Fail-open on interaction checks (network error → empty findings, not blocked prescription)
-- Hard block ONLY on severity === 'contraindicated' — all other findings are physician-acknowledged advisory
-
-**R1 (Domain Fidelity):**
-- CMS Part D MTM duplicate-therapy rule: ATC Level-4 (5-char prefix) — consistent with CMS program guidance
-- Refill-too-soon threshold: 80% of days supply — matches standard Part D coverage gap rule
-- Beers Criteria: AGS 2023 top-10 high-risk drugs included; age gate ≥65 years
-- RxNorm API brand→generic resolution: uses `tty=SCD+GPCK` (generic clinical drug + generic pack) per NLM spec
-- NDC stored as FHIR `identifier` with system `http://hl7.org/fhir/sid/ndc` — conformant with FHIR R4
-
-**R2 (Negative-Space):**
-- Typeahead min-length 2 chars (prevents degenerate API calls)
-- Debounce 300ms (prevents request storm)
-- NDC fetch is best-effort (fails silently — NDC is optional on the MedicationRequest)
-- MTM screening fail-open: if interaction API is unreachable, findings are empty (not blocked)
-- Beers check gated on `patientAgeYears !== undefined` — absent age does not produce false positives
-
-**R3 (Stub Legitimacy):**
-- Beers Criteria table: 10 entries (representative, not exhaustive) — ACCEPTABLE for initial release;
-  full 2023 table can be added by extending `data/beers-criteria.json` with no code change
-- ATC Level-4 data on `DrugLookupResult.atcLevel4`: sourced from RxNorm API in the BFF — ACCEPTABLE;
-  RxNorm does not expose ATC natively; BFF may need RxClass API augmentation in follow-on iteration
-- Cost tier data (`costTier`): field present in type, not populated by BFF (RxNorm has no cost data) — ACCEPTABLE stub;
-  field is typed as optional; UI renders badge only when present
-
-**R4 (Engineering):**
-- No `any` types in any new file (`tsc --noEmit` exits 0)
-- No API keys in `NEXT_PUBLIC_*` — all external calls are server-side BFF routes
-- No PHI in BFF route logs (routes log errors only, never medication names or patient IDs)
-- `fetch` calls use `next: { revalidate }` for edge caching — drug names stable (3600s), interactions shorter (300s)
-
-**R5 (Cross-Examiner):**
-- Claim "33/33 tests passing" — UPHELD: `npx vitest run tests/smart-app/mtm.test.ts` output confirmed 33 tests
-- Claim "tsc 0 errors" — UPHELD: `npx tsc --noEmit` exits 0 confirmed
-- Claim "no new ratchet violations" — UPHELD: `check:sizes` shows AddMedicationForm.tsx at 393/400 (approaching, not over)
-- Claim "BFF-only invariant" — UPHELD: `drugLookup.ts` calls `/api/mtm/*` only; no direct external calls from client
-- Claim "HITL_ADVISORY invariant" — UPHELD: `hardBlock` only set when `severity === 'contraindicated'`;
-  all others require physician acknowledgement checkbox — physician remains the decider
-
-**Verification:** `tsc --noEmit` 0 · `check:sizes` PASS on all new files · `vitest run` 2570/2570 passing ·
-MTM domain 33/33 · no `any` · no `NEXT_PUBLIC_*` keys · all BFF routes server-only
-
-
 ## 2026-09-03 — Coalition deployment: AGENTS.md roster + SESSION-START-PROMPT.md
 
 **Scope:** docs-only change — no `src/lib/**` domain logic touched. Coalition trigger
@@ -1404,3 +1277,79 @@ codingGapDrift data-integrity pattern — no edit to the canonical gate. Connect
 **Gate:** `bash scripts/ci-gates.sh push` → ALL GATES PASS (format, types, sizes+ratchet, lint, testlink E13,
 page-boundaries, skill-mirror, unit 2593 tests, wired-path E14, provenance E11, coalition). E16 `next build`
 unaffected (no src/app changes). Nothing committed by the agent — staged for the owner's own push.
+
+## 2026-09-08 — Panel & Cohort: registry-only patient source
+**Scope:** `src/app/panel-cohort-view/components/PatientPanelTable.tsx`
+**Trigger:** shipped demo screen, data-source logic change.
+**Design:** the panel merged registry (`getAllPatients`) + legacy `mockPatients`, injecting a duplicate "Maria Reyes" (distinct from golden-demo Maria Redhawk) + other non-registry names. Fix: drop the `mockFallback` merge → registry is the single source (matches the top-bar switcher).
+**Adversarial-before:** verified story/DemoNavigator does not hardcode the legacy patients (only routes to `/panel-cohort-view`); the attributed count is derived (`filteredPatients.length`). Safe.
+**Build:** removed `mockPatients` import + `mockFallback`/`registryIds`; `basePatients = registryAsMockPatients`.
+**Adversarial-after (browser verified):** panel now shows the 5 registry members incl. Maria Redhawk (MARIA_SD_001), no Maria Reyes / legacy filler. FINDING: `CohortKPIStrip.tsx` still computes tiles from legacy `mockPatients`, so the KPI strip now disagrees with the 5-member panel — routed to owner decision (align to cohort vs wire real population stats). Not yet resolved.
+
+**Resolution:** owner elected to leave the KPI tiles as-is for the demo (panel fix ships alone); KPI-strip source inconsistency deferred to the roadmap (P2/P3). Panel change: DONE + browser-verified (5 registry members incl. Maria Redhawk).
+
+## 2026-09-08 — Story Mode: insert Program Networks + Care Team; panel follows active member
+**Scope:** `src/uhg/data/storyNarrative.maria.json`, `src/uhg/data/storyNarrative.genSteps.ts`, `src/app/panel-cohort-view/components/PatientPanelTable.tsx`
+**Trigger:** demo-narrative logic + shipped screen.
+**Design:** owner chose Region → Program Networks → Care Team Members → Panel & Cohort (15→17 steps), and the panel step must follow/scroll to the active member (default Maria, nothing hardcoded).
+**Adversarial-before:** identified the load-bearing risk — `genSteps.ts` hard-indexes `MARIA_STEPS[0..14]`, so inserting steps into the JSON would shift every non-Maria override. Plan: re-index descending + localize the 2 new steps' names via `f.first`/`f.possFirst`.
+**Build:** (1) JSON: inserted Program Networks (`/provider-level`) + Care Team Members (`/physician-view`) after Region, renumbered to 17, simplified Prior-Auth pill label to "Prior Authorization". (2) genSteps: shifted `MARIA_STEPS[i≥2]→i+2` (verified spread sequence 0..16 consecutive), inserted 2 name-localized steps, updated header/verbatim comments. (3) Panel: `useActiveCitizen().activeCitizenId` drives a highlight ring + `scrollIntoView` + page-jump, keyed on activeCitizenId so manual paging isn't fought; additive only.
+**Adversarial-after (browser-verified):** panel highlights Maria by default and follows to Dorothy when selected (scrolled into view), zero console/render errors; story JSON = 17 steps in the requested order; `tsc` 0 errors in changed files. Maria's story returns JSON verbatim (demo path); non-Maria composed stories re-indexed and name-localized.
+
+## 2026-09-08 — SLED: a third demo mode alongside Full Sequence and Story Mode
+**Scope:** `src/components/DemoNavigator.tsx` (single file, additive)
+**Trigger:** new capability + >40 changed lines in one module (coalition-protocol §2). Note `g_coalition` does NOT fire — `CORE_RE` covers only `src/lib/(policy|identity|consent|goldenThread|networkAdequacy)/` — so this entry is protocol-driven, not gate-driven.
+**Design:** owner specified a 17-screen ordered track titled SLED. First cut modelled it as an 11th `DemoPersona` (P11, stepNum 55–71) inside `DEMO_PERSONAS`; owner corrected mid-build — SLED must sit at the same level as Full Sequence and Story Mode. Re-cut as a third `DemoMode`: `type DemoMode = 'full' | 'story' | 'sled'`, backed by a module-level `SLED_STEPS` with its OWN numbering space (1..17), never merged into `ALL_STEPS`.
+**Adversarial-before:** confirmed `beatApplies` filters the two household beats (`family-sofia`, `caregiver-elena`) on the SELECTED citizen, and that `MARIA_SD_001` carries both `household.dependents` and `household.caregiverFor`, so both survive for the scripted lead. Confirmed file-size headroom against the 1823 baseline before writing.
+**Adversarial-after (full review of the persona-based first cut):** 9 findings. Three were resolved *by the owner's re-cut to a peer mode*, which is why the correction mattered architecturally and not only conceptually:
+ - **Flat-list route collision (was HIGH).** As a persona, all 17 routes joined `ALL_STEPS`, where 11 of them already belonged to earlier personas; first-match resolution meant a refresh or deep link on any of those routes reported the OLD persona and colour, and ▶ walked the presenter out of the track. RESOLVED — `SLED_STEPS` is a separate base list selected by mode, so matching never crosses tracks.
+ - **`nearestApplicableNeighbours` uniqueness invariant (was HIGH).** The comment at the top of that helper asserts conditional-beat routes are unique in the base list; a persona-based SLED made `family-sofia`/`caregiver-elena` non-unique, so selecting a member without dependents (e.g. PAT-0042) mis-resolved into the P9 track. RESOLVED by the same separation; the invariant holds again.
+ - **Baked `N ·` label prefixes desynced** when a household beat dropped, leaving a visible hole in the numbering. FIXED — labels carry no number; `SledPanel` derives the position from the COMPOSED list at render, so a dropped beat renumbers cleanly.
+ - **Fail-closed caption contract (`demoNarrative.ts` header) violated.** The Journey-Aware beat read "Where she is in her journey — postpartum day 34"; `contextualizeText` is a denylist and matches neither the pronoun nor "postpartum day N", so selecting a male member would have asserted it under his name. FIXED — every SLED beat rewritten subject-neutral; verified by test 13 in the static verifier (`no gendered/lead-specific clinical assertion`).
+ - **Beat text truncated to one line** in the existing panels. FIXED in `SledPanel` (`line-clamp-2` + `title` tooltip); the pre-existing panels are untouched.
+**Build:** `SLED_COLOR`/`SLED_STEPS` consts; `stepsForMode` replaces the two-way ternary feeding `activeSteps` and `baseSteps`; `sledStepCount`; `pillColor`; three-way mode toggle; three-way panel switch; pill badge/title; new `SledPanel`. `DEMO_PERSONAS` is byte-for-byte unchanged (10 personas, stepNums 1..54).
+**Verification:** `tsc --noEmit` → 0 errors in `src/` (pre-existing `_ship/**` errors untouched). Prettier applied. Static verifier: 14/14 PASS — personas unchanged, SLED 1..17, all 17 routes resolve to a real `page.tsx`, no cross-track merge, three-way mode wiring, duplicate `/patient-detail` (steps 5 and 14) carries distinct stepNums, adversarial fixes present, 1774/1823 lines (49 headroom).
+**KNOWN-OPEN (not introduced here, reported to owner):**
+ 1. `PresenterControls` arrow keys drive `ORCHESTRATE_FLOW`, whose order contradicts SLED on the 8 shared `/uhg-orchestrate/*` screens. Pre-existing for any reordered track (the watsonx persona has it too). Drive SLED from the pill, not the arrows.
+ 2. `activePatient` is caption metadata — `navigateToStep` does NOT call `setActiveCitizen`. As with every existing persona, the presenter must select Maria before running the track.
+ 3. Duplicate `/patient-detail` resolves to step 5 (not 14) after a hard refresh, because `lastStepNumRef` is a `useRef` that resets on remount. Contained to SLED; fix would be `?step=` in the URL.
+ 4. `vitest` cannot run on this machine (`@rolldown/binding-wasm32-wasi` missing for Linux), so `npm run check:all` is UNVERIFIED above the type/format tier. Owner to run `npm run gate:push` on Windows.
+ 5. Pre-existing: persona colour `#007d79` is used twice (P3 physician, P10 watsonx). SLED's `#8e6a00` is unique. Left alone.
+
+---
+## 2026-09-08 · Graph attention scorer — surface causal-context signals
+**Change:** `src/lib/wpcGraph/attention.ts` (`rawScore` + `scoreAttention` param + `scoreAttentionNG` guard), `src/components/wpc/SignalGraph.tsx` (scoped watch cap + dynamic legend), `src/app/whole-person-care-summary/page.tsx` (golden graph cap).
+**Problem:** Childcare Subsidy / SD Winter Barrier / Early Shift rendered as unlabelled context dots — `rawScore` only scored `CareGap`/`SDOHNode`; other node types hit the `return 20` floor. (Childcare Subsidy scored 46 via `pulse` but lost the 5-slot watch budget.)
+**Design (coalition):** teach `rawScore` `BenefitStatus`/`SeasonalBarrier`/`WorkScheduleConstraint`, narrow-gated so only causally load-bearing instances leave context (unenrolled benefit that `wouldResolve` a barrier; work schedule with `scheduleConflictRisk:HIGH` — also de-dups the twin job node; seasonal impact = road-closure/access-loss). `pulse` is a floor, not a ceiling.
+**Adversarial review (2 lenses, BEFORE build):**
+- Correctness/blast-radius: caught (a) global `WATCH_CAP` bump would hit real members → parameterized `scoreAttention(…, watchCap=5)`, raised to 8 ONLY on the golden graph; (b) NG path could let a benefit/schedule node become a real member's single 'signal' → added clinical-max clamp in `scoreAttentionNG`; (c) enrolled/non-causal benefits (TANF) must stay context; (d) tighten to exact status strings.
+- Golden-parity/UX: confirmed golden fingerprint reads `graph.activeSignals` from authored data (not tier output) → guard cannot trip; flagged clutter/dedup → scoring narrowed so ONLY the 3 named nodes surface (not TANF/School District Job).
+**Verify (AFTER build):** `tsc --noEmit` 0 errors. Browser (Maria): Childcare Subsidy + SD Winter + Early Shift now labelled, all 8 incumbents retained, act tier unchanged (Edinburgh PND still headline), legend "Watch (8 max)", TANF + School District Job stayed context. Browser (Dorothy, non-golden): renders clean, legend "Watch (5 max)" (cap NOT bumped), headline is a real care gap (Spirometry) — no admin-node hijack.
+**Residual/offered:** School District Job is a data-level near-duplicate of Early Shift (scored to context, not shown); RESOLVER/ROOT-CAUSE/COMPOUNDER edge-verb polish offered as follow-up.
+
+---
+## 2026-09-09 · Signal scoring engine — GENERALIZED (structural salience from causal edges)
+**Supersedes** the 2026-09-08 render-side type-branch hotfix (reverted: SignalGraph.tsx + whole-person-care-summary.page.tsx restored from backup; cap param & golden-8 removed).
+**Change:** `src/lib/wpcGraph/attention.ts` rewritten. Salience now derives from GRAPH STRUCTURE, not node type.
+- `rawScore` no longer has BenefitStatus/SeasonalBarrier/WorkScheduleConstraint branches — non-clinical nodes start at 20 (context).
+- New `causalSupporters()` BFS: walks CAUSAL edges backward from emphasized (act/watch/signal) nodes, promotes upstream feeders (resolver/driver/compounder) to a label. Type- & member-agnostic.
+- CAUSAL set = BLOCKS, COMPOUNDS, DRIVES, DELAYS, DEPRIORITIZES, EXACERBATES, WOULD_RESOLVE, WOULD_REDUCE, WOULD_ADDRESS. DROPPED GATED_BY + EXPOSES_GAP (reversed direction / point at member — would promote wrong end).
+- Promotion runs INSIDE scoreAttention AND scoreAttentionNG, so every caller (SignalGraph, summary, memberGraphView) inherits it — no caller audit needed.
+- NG: removed the type-aware CONTEXT_TYPES clamp (obsolete once type scores gone); context dim-floor now demotes only NON-supporters so the chain is never dimmed.
+- Global `MAX_SUPPORTERS=8` safety valve (not a per-member N); deterministic supporter ranking (top-tier target, decisive edge, hop, intrinsic, id). `emphasizedChain` extended to the full causal set. Legend "(5 max)" → "· causal chain".
+**Adversarial review BEFORE build (2 lenses):** correctness lens caught GATED_BY reversal, NG floor-vs-promotion ordering, member-anchor guard, null source, blast radius → all fixed. density/parity lens caught the N=3 budget would evict the named COMPOUNDS nodes and reverse-engineer to Maria → rejected the tight budget in favor of the general safety valve (per user's explicit "generalize, not just Maria").
+**Verify AFTER build:** `tsc --noEmit` 0 errors. Browser, rendered SVG labels read via JS:
+- Maria (golden): promoted set EXACTLY {Early Shift, SD Winter, Childcare Subsidy, WIC Lapsed, Postpartum Support, Housing Waitlist} = the full causal chain from her edges. Martin Pharmacy (EXPOSES_GAP→member), TANF (non-causal), School District Job (no causal edge), GATED_BY consent nodes all correctly NOT promoted. Edinburgh PND still the headline.
+- Dorothy (PAT-0042): clinical gaps only, Spirometry signal, zero spurious promotions (graceful degradation — she has no causal-chain benefit nodes).
+- Robert (PAT-0103): BP Control Check signal, SNAP/WIC benefit gap labels subordinate, no hijack.
+**Residual/offered:** Maria now shows ~14 findings + 3 person = dense; `MAX_SUPPORTERS` (or a per-emphasized-node cap) is the global density knob if the demo wants it tighter — a global lever, not per-patient. Optional follow-up: render-time golden assertion on label count/promoted-set (fingerprint only guards authored data); two-class edge tint (helps/hurts).
+
+## 2026-09-10 · cdp-assembly Live Population Load — file-size split + E13 test coverage
+**Change:** Cleared two NEW gate violations on the increment-2a cdp-assembly / cdp-intake work the convention-clean way (split + real tests), not by baselining new debt.
+- `LivePopulationLoad.tsx` **414 → 226**: extracted presentational parts (style tokens, `humanizeDomain`, count formatter, and the `Metric`/`DomainBars`/`SourceRows`/`SectionTitle` subcomponents) into new `LivePopulationLoad.view.tsx` (204). Default export + signature unchanged → `cdp-assembly/page.tsx` import unaffected.
+- Exported the pure aggregators `aggregateDomains`/`aggregateSources` from `useLivePopulationLoad.ts` for direct unit testing.
+- New tests: `tests/cdpIntake/seededIdentitySource.test.ts` (pool + medicaidId anchors, payer-scoped), `tests/cdpIntake/useLivePopulationLoad.test.ts` (domain sum/sort, source rollup, unattributed), `tests/app/livePopulationLoad.test.tsx` (render-free via `react-dom/server`, hook mocked — view formatting + container idle/done). Links container, view, hook, seed for E13.
+- Refreshed `testlink-baseline.json` **252 → 232** (pure shrink; dropped now-tested modules).
+- Adjacent hygiene: excluded `_ship` in `tsconfig.json` + `.gitignore` (a stray incomplete bundle copy was polluting `tsc` with 33 phantom import errors).
+**Adversarial-before (design):** enumerated the container's residual imports (MONO/PANEL/BORDER/AMBER/MUTED/TEXT/n + the 4 subcomponents); confirmed no `LIME`/`CARD` leak and the default-export name preserved; confirmed the new view module earns E13 linkage via the `humanizeDomain` test; sized both files < 400.
+**Adversarial-after / verify:** E13 guard **PASS** (no new untested; the 4 modules linked, none in baseline). Sizes: container 226, view 204 (< 400 cap). Pure logic (aggregators, `humanizeDomain`, count formatter, seed medicaidId ordering) verified independently in node — **10/10** assertions pass. **Limitation:** full `tsc --noEmit` and `vitest` could not complete in the bridge sandbox (tsc pathologically slow on this VM; vitest missing the `@rolldown` native binding) — types were reasoned per-file and the changes are localized; authoritative confirmation is the repo gate in the normal dev environment.

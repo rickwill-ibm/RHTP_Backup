@@ -56,7 +56,7 @@ export interface LiveLoadState {
 }
 
 /** Sum admitted-per-domain across every source into one population roll-up, high→low. */
-function aggregateDomains(outcomes: SourceOutcome[]): DomainCount[] {
+export function aggregateDomains(outcomes: SourceOutcome[]): DomainCount[] {
   const acc: Record<string, number> = {};
   for (const o of outcomes) {
     for (const [domain, n] of Object.entries(o.byDomain)) {
@@ -70,7 +70,7 @@ function aggregateDomains(outcomes: SourceOutcome[]): DomainCount[] {
 
 /** Collapse per-file outcomes into one row per SOURCE SYSTEM — no member ids surfaced,
  * so the list is bounded by source count, not by population size. */
-function aggregateSources(outcomes: SourceOutcome[]): SourceRollup[] {
+export function aggregateSources(outcomes: SourceOutcome[]): SourceRollup[] {
   const acc = new Map<string, SourceRollup>();
   for (const o of outcomes) {
     const key = o.sourceSystem || '(unattributed)';

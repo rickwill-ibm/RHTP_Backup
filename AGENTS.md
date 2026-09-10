@@ -136,3 +136,14 @@ Full detail: `docs/framework/enforcement-kit.md`. The `g_coalition` gate in
 entry. E11/E13/E14 are wired in `.github/workflows/convention-gates.yml`.
 Framework: `docs/framework/` — `personas.md` · `coalition-protocol.md` ·
 `enforcement-kit.md` · `operating-model.md` · `SKILL.md`.
+
+## Repository hygiene — never commit
+
+These are DELIVERABLES / OUTPUTS, not source, and must NEVER be committed or pushed
+(enforced in .gitignore):
+- Whitepapers and drafts (`whitepaper/`, root `*.docx` plans)
+- Sales / briefing decks (`*.pptx`, deck `*.docx`)
+- Packaging & portable-build artifacts (`packaging/`, `.next-portable/`, `WPCO-Demo-Portable-Fast/`)
+- Scratch & backups (`devlog.txt`, `*.bak-hotfix`, `_to_delete_samples/`)
+
+Deliverables are shared out-of-band, never added to git.

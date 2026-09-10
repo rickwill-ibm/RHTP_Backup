@@ -64,15 +64,13 @@
           {
             "use": "official",
             "family": "Simmons",
-            "given": [
-              "Dorothy"
-            ]
+            "given": ["Dorothy"]
           }
         ],
         "gender": "female",
         "birthDate": "1951-03-14",
         "managingOrganization": {
-          "reference": "urn:uuid:d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
+          "reference": "Organization/d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
         },
         "telecom": [
           {
@@ -117,12 +115,8 @@
         "name": [
           {
             "family": "Whitfield",
-            "given": [
-              "—"
-            ],
-            "prefix": [
-              "Dr."
-            ]
+            "given": ["—"],
+            "prefix": ["Dr."]
           }
         ],
         "id": "9b265d92-e44a-4fe2-aec2-946777b3be7a",
@@ -144,10 +138,10 @@
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "organization": {
-          "reference": "urn:uuid:d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
+          "reference": "Organization/d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
         },
         "code": [
           {
@@ -182,11 +176,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "payor": [
           {
-            "reference": "urn:uuid:9d08ebc6-8938-4f1e-b9a4-a92f138bb295"
+            "reference": "Organization/9d08ebc6-8938-4f1e-b9a4-a92f138bb295"
           }
         ],
         "relationship": {
@@ -226,17 +220,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+              "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
+          "reference": "Organization/d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -301,7 +295,7 @@
           "text": "Chronic diastolic (congestive) heart failure"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2019-03-01",
         "id": "e821c618-e6ba-4dcf-a031-2203a9462745"
@@ -353,7 +347,7 @@
           "text": "Type 2 diabetes mellitus with hyperglycemia"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2014-07-01",
         "id": "b24f9b56-a6ed-4db7-870a-e0e93a1f14e7",
@@ -428,7 +422,7 @@
           "text": "COPD with (acute) exacerbation"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2021-11-01",
         "id": "2d394300-aa5d-4989-b455-9465856f3e4c"
@@ -480,7 +474,7 @@
           "text": "Essential (primary) hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2012-03-01",
         "id": "413208fe-04c2-44e9-931d-5d4dbe694e9c"
@@ -532,7 +526,7 @@
           "text": "Morbid (severe) obesity due to excess calories"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2016-05-01",
         "id": "624a768b-c4c6-4541-93ea-84cf6458fc92"
@@ -584,7 +578,7 @@
           "text": "Chronic kidney disease, stage 3 (moderate)"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2022-09-01",
         "id": "9fad61bd-463d-4f84-aebf-e9d6f0842ac7"
@@ -636,7 +630,7 @@
           "text": "Major depressive disorder, single episode, moderate"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2023-02-01",
         "id": "79d07641-54fd-47d3-886b-33854bf18e1b"
@@ -663,11 +657,11 @@
           "text": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -698,11 +692,11 @@
           "text": "Metformin hydrochloride 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -733,11 +727,11 @@
           "text": "Warfarin sodium 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -768,11 +762,11 @@
           "text": "Tiotropium bromide 18 mcg inhalation powder"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -803,11 +797,11 @@
           "text": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -838,11 +832,11 @@
           "text": "Atorvastatin 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "dosageInstruction": [
           {
@@ -882,7 +876,7 @@
           "text": "Hemoglobin A1c"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -934,7 +928,7 @@
           "text": "Natriuretic peptide B (BNP)"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-28",
         "valueQuantity": {
@@ -986,7 +980,7 @@
           "text": "eGFR"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1038,7 +1032,7 @@
           "text": "Left ventricular ejection fraction"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-12",
         "valueQuantity": {
@@ -1091,7 +1085,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1131,7 +1125,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1171,7 +1165,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1211,7 +1205,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1275,7 +1269,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "onsetDateTime": "2026-02-14",
         "id": "927aa90f-454a-4b24-9449-464e72a68087"
@@ -1338,20 +1332,20 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-02-14",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "performer": [
           {
-            "reference": "urn:uuid:355fcde7-0199-4ed2-bce2-4e53b1084021"
+            "reference": "Organization/355fcde7-0199-4ed2-bce2-4e53b1084021"
           }
         ],
         "reasonReference": [
           {
-            "reference": "urn:uuid:927aa90f-454a-4b24-9449-464e72a68087"
+            "reference": "Condition/927aa90f-454a-4b24-9449-464e72a68087"
           }
         ],
         "id": "161d2407-b571-4183-8fc4-363a0ade4081"
@@ -1378,13 +1372,13 @@
         },
         "description": "Closed-loop CBO referral: Non-emergency medical transportation",
         "focus": {
-          "reference": "urn:uuid:161d2407-b571-4183-8fc4-363a0ade4081"
+          "reference": "ServiceRequest/161d2407-b571-4183-8fc4-363a0ade4081"
         },
         "for": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "owner": {
-          "reference": "urn:uuid:355fcde7-0199-4ed2-bce2-4e53b1084021"
+          "reference": "Organization/355fcde7-0199-4ed2-bce2-4e53b1084021"
         },
         "authoredOn": "2026-02-14",
         "businessStatus": {
@@ -1424,7 +1418,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1477,7 +1471,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1546,15 +1540,15 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "authoredOn": "2026-03-15",
         "requester": {
-          "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+          "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
         },
         "performer": [
           {
-            "reference": "urn:uuid:4a4c7505-6af3-4ca1-b2ea-5eb1a76e4131"
+            "reference": "Organization/4a4c7505-6af3-4ca1-b2ea-5eb1a76e4131"
           }
         ],
         "reasonCode": [
@@ -1585,13 +1579,13 @@
         },
         "description": "Closed-loop behavioral-health referral",
         "focus": {
-          "reference": "urn:uuid:d67f5ba2-155a-423f-a288-aa796f682ddb"
+          "reference": "ServiceRequest/d67f5ba2-155a-423f-a288-aa796f682ddb"
         },
         "for": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "owner": {
-          "reference": "urn:uuid:4a4c7505-6af3-4ca1-b2ea-5eb1a76e4131"
+          "reference": "Organization/4a4c7505-6af3-4ca1-b2ea-5eb1a76e4131"
         },
         "authoredOn": "2026-03-15",
         "businessStatus": {
@@ -1620,7 +1614,7 @@
           "text": "A1C < 8.0% by Q3 2026"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "18b3b0e3-a5e9-4de4-9e45-62c55b391e86"
       },
@@ -1645,7 +1639,7 @@
           "text": "Blood pressure < 130/80 by Q2 2026"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "be84ca50-7224-400c-900f-8fa30acb3dfa"
       },
@@ -1670,7 +1664,7 @@
           "text": "Spirometry completed by May 2026"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "47a9e9f4-2020-4988-a6c5-d6e39c511f40"
       },
@@ -1695,7 +1689,7 @@
           "text": "PHQ-9 score < 10 by Q3 2026"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "76563f82-f209-46cc-a8ac-3e4b991c823a"
       },
@@ -1710,7 +1704,7 @@
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "participant": [
           {
@@ -1726,13 +1720,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:9b265d92-e44a-4fe2-aec2-946777b3be7a"
+              "reference": "Practitioner/9b265d92-e44a-4fe2-aec2-946777b3be7a"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
+            "reference": "Organization/d023ba1e-c0e5-4de0-9ec4-4901954b9d39"
           }
         ],
         "id": "31d225e7-9e8e-4d3e-a7be-2418ae7eee75"
@@ -1760,48 +1754,48 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:31d225e7-9e8e-4d3e-a7be-2418ae7eee75"
+            "reference": "CareTeam/31d225e7-9e8e-4d3e-a7be-2418ae7eee75"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:e821c618-e6ba-4dcf-a031-2203a9462745"
+            "reference": "Condition/e821c618-e6ba-4dcf-a031-2203a9462745"
           },
           {
-            "reference": "urn:uuid:b24f9b56-a6ed-4db7-870a-e0e93a1f14e7"
+            "reference": "Condition/b24f9b56-a6ed-4db7-870a-e0e93a1f14e7"
           },
           {
-            "reference": "urn:uuid:2d394300-aa5d-4989-b455-9465856f3e4c"
+            "reference": "Condition/2d394300-aa5d-4989-b455-9465856f3e4c"
           },
           {
-            "reference": "urn:uuid:413208fe-04c2-44e9-931d-5d4dbe694e9c"
+            "reference": "Condition/413208fe-04c2-44e9-931d-5d4dbe694e9c"
           },
           {
-            "reference": "urn:uuid:624a768b-c4c6-4541-93ea-84cf6458fc92"
+            "reference": "Condition/624a768b-c4c6-4541-93ea-84cf6458fc92"
           },
           {
-            "reference": "urn:uuid:9fad61bd-463d-4f84-aebf-e9d6f0842ac7"
+            "reference": "Condition/9fad61bd-463d-4f84-aebf-e9d6f0842ac7"
           },
           {
-            "reference": "urn:uuid:79d07641-54fd-47d3-886b-33854bf18e1b"
+            "reference": "Condition/79d07641-54fd-47d3-886b-33854bf18e1b"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:18b3b0e3-a5e9-4de4-9e45-62c55b391e86"
+            "reference": "Goal/18b3b0e3-a5e9-4de4-9e45-62c55b391e86"
           },
           {
-            "reference": "urn:uuid:be84ca50-7224-400c-900f-8fa30acb3dfa"
+            "reference": "Goal/be84ca50-7224-400c-900f-8fa30acb3dfa"
           },
           {
-            "reference": "urn:uuid:47a9e9f4-2020-4988-a6c5-d6e39c511f40"
+            "reference": "Goal/47a9e9f4-2020-4988-a6c5-d6e39c511f40"
           },
           {
-            "reference": "urn:uuid:76563f82-f209-46cc-a8ac-3e4b991c823a"
+            "reference": "Goal/76563f82-f209-46cc-a8ac-3e4b991c823a"
           }
         ],
         "id": "6ecd8a23-b01f-4399-81d1-26393c0c21ed"
@@ -1849,7 +1843,7 @@
           "text": "Spirometry (COPD)"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "valueInteger": 42,
         "note": [
@@ -1902,7 +1896,7 @@
           "text": "A1C Recheck"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "valueInteger": 61,
         "note": [
@@ -1955,7 +1949,7 @@
           "text": "PHQ-9 Follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "valueInteger": 21,
         "note": [
@@ -2008,7 +2002,7 @@
           "text": "Transport Referral — Active"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "valueInteger": 18,
         "note": [
@@ -2060,7 +2054,7 @@
           "text": "PHQ-9 14 — BH referral open, not engaged"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "0ec3deaa-1ebc-43b1-9215-d6e470cc8767",
         "period": {
@@ -2109,7 +2103,7 @@
           "text": "COPD Exacerbation — spirometry overdue"
         },
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "id": "8ade46f7-696e-40fb-a489-0d07f57cf4d5",
         "period": {
@@ -2141,7 +2135,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "prediction": [
           {
@@ -2168,7 +2162,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "period": {
           "start": "2026-01-01",
@@ -2262,7 +2256,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|24",
         "subject": {
-          "reference": "urn:uuid:5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
+          "reference": "Patient/5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb"
         },
         "period": {
           "start": "2026-01-01",

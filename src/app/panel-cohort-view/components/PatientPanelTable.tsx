@@ -279,7 +279,10 @@ export default function PatientPanelTable({
     activeAlerts: rp.cdsCards?.filter((c) => c.indicator === 'critical').length ?? 0,
   }));
 
-  // Registry is the single source of truth — no mockPatients merge.
+  // Registry is the single source of truth (matches the top-bar patient switcher).
+  // The legacy mock-data filler was removed: it injected demo patients absent from the
+  // registry (e.g. a duplicate 'Maria Reyes' distinct from the golden-demo Maria Redhawk),
+  // so the panel disagreed with every other screen about who the members are.
   const basePatients = registryAsMockPatients;
 
   const filteredPatients = useMemo(() => {
@@ -408,6 +411,21 @@ export default function PatientPanelTable({
 
   const totalPages = Math.ceil(filteredPatients.length / perPage);
   const paged = filteredPatients.slice((page - 1) * perPage, page * perPage);
+
+  // Follow the active/selected patient (Maria by default): jump to their page and scroll
+  // their row into view. Additive only — no data change; keyed on activeCitizenId so manual
+  // pagination is never fought.
+  useEffect(() => {
+    if (!activeCitizenId) return;
+    const idx = filteredPatients.findIndex((pt) => pt.id === activeCitizenId);
+    if (idx < 0) return;
+    const targetPage = Math.floor(idx / perPage) + 1;
+    setPage((prev) => (prev !== targetPage ? targetPage : prev));
+  }, [activeCitizenId, filteredPatients]);
+
+  useEffect(() => {
+    activeRowRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [activeCitizenId, page]);
 
   return (
     <div className="bg-white border border-carbon-gray-20 overflow-x-auto scrollbar-thin">

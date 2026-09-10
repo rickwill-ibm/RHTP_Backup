@@ -10,9 +10,10 @@
 // imports the engine at runtime — only these shapes, type-only.
 
 import type { IngestBundleResult } from '@/lib/runtime/ingestBundle';
-import type { QuarantineRecord } from '@/lib/pipeline';
+import type { ArrivalMode, QuarantineRecord } from '@/lib/pipeline';
 
-export type ArrivalMode = 'batch' | 'stream' | 'micro-batch';
+// ArrivalMode is the pipeline's canonical union — re-exported, never duplicated here.
+export type { ArrivalMode };
 
 /** One line of an index.json manifest — the authoritative source→adapter mapping. */
 export interface IntakeManifestEntry {

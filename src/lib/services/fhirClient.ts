@@ -1,33 +1,40 @@
 /**
  * FHIR R4 HTTP Client
  *
- * A thin, fetch-based FHIR R4 client.  When NEXT_PUBLIC_USE_MOCK_DATA=true
- * every method short-circuits to return empty / stub data so the app works
- * without a live FHIR server.
- *
- * When NEXT_PUBLIC_USE_MOCK_DATA=false the client issues real HTTP requests
- * against NEXT_PUBLIC_FHIR_BASE_URL (default http://localhost:8090/fhir).
+ * A thin, fetch-based FHIR R4 client. The 'fhirStore' seam of the data-mode
+ * registry (lib/config/dataMode.ts) decides its behavior: in 'mock'/'seeded'
+ * mode every method serves the in-memory fixture store so the app works
+ * without a live FHIR server; in 'production' mode the client issues real
+ * HTTP requests against NEXT_PUBLIC_FHIR_BASE_URL (default
+ * http://localhost:8080/fhir). Legacy NEXT_PUBLIC_USE_MOCK_DATA still works
+ * via the registry's compat layer.
  */
 
 import type { RegistryPatient } from '../patientRegistry';
+import { getDataMode, setSessionDataMode } from '../config/dataMode';
 import { storeRead, storeSearch, storeCreate, storeUpdate, storeDelete } from '../fhir/store';
 
-const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8090/fhir';
+const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
 
 const TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_FHIR_TIMEOUT ?? 30_000);
 
-// Runtime-overridable mock flag.
-// Starts from env var but can be toggled at runtime via setFhirMockMode().
-let _useMock = (process.env.NEXT_PUBLIC_USE_MOCK_DATA ?? 'true').toLowerCase() === 'true';
+// SEAM: fhirStore — mode-registry switch point (lib/config/dataMode.ts).
+// 'mock' / 'seeded' serve the in-memory fixture store; 'production' issues real
+// HTTP requests. Config: DATA_MODE_FHIR_STORE / DATA_MODE (legacy
+// NEXT_PUBLIC_USE_MOCK_DATA still honored below them); the UI FHIR/Mock toggle
+// layers on top as a session override via setFhirMockMode().
+function isMockMode(): boolean {
+  return getDataMode('fhirStore') !== 'production';
+}
 
 /** Toggle mock mode at runtime — called by the FHIR/Mock toggle in the UI. */
 export function setFhirMockMode(mock: boolean): void {
-  _useMock = mock;
+  setSessionDataMode('fhirStore', mock ? 'mock' : 'production');
 }
 
 /** Read current mock mode — useful for components that need to check. */
 export function getFhirMockMode(): boolean {
-  return _useMock;
+  return isMockMode();
 }
 
 // ─── Low-level fetch wrapper ──────────────────────────────────────────────────
@@ -67,8 +74,7 @@ export class FhirClient {
 
   /** Read a single resource by type and id */
   async read<T = unknown>(resourceType: string, id: string): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] read ${resourceType}/${id}`);
+    if (isMockMode()) {
       // Serve from the fixture store (same bundles that seed HAPI);
       // fall back to the legacy stub shape if the fixture is absent.
       return storeRead<T>(resourceType, id) ?? ({ resourceType, id } as T);
@@ -78,8 +84,7 @@ export class FhirClient {
 
   /** Create a resource (server assigns id) */
   async create<T = unknown>(resource: Record<string, unknown>): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] create ${resource.resourceType}`);
+    if (isMockMode()) {
       // Persist to the in-memory fixture store so demo write-back flows work.
       return storeCreate<T>(resource);
     }
@@ -91,8 +96,7 @@ export class FhirClient {
 
   /** Update (PUT) a resource — id must be set on the resource */
   async update<T = unknown>(resource: Record<string, unknown> & { id: string }): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] update ${resource.resourceType}/${resource.id}`);
+    if (isMockMode()) {
       return storeUpdate<T>(resource);
     }
     return fhirFetch<T>(`${resource.resourceType}/${resource.id}`, {
@@ -106,8 +110,7 @@ export class FhirClient {
     resourceType: string,
     params: Record<string, string | number | boolean>
   ): Promise<T> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] search ${resourceType}`, params);
+    if (isMockMode()) {
       return storeSearch<T>(resourceType, params);
     }
     const qs = new URLSearchParams(
@@ -118,8 +121,7 @@ export class FhirClient {
 
   /** Delete a resource */
   async delete(resourceType: string, id: string): Promise<void> {
-    if (_useMock) {
-      console.debug(`[FhirClient][mock] delete ${resourceType}/${id}`);
+    if (isMockMode()) {
       storeDelete(resourceType, id);
       return;
     }
@@ -129,50 +131,13 @@ export class FhirClient {
   // ── High-level patient helpers ──────────────────────────────────────────────
 
   /**
-   * DaVinci HRex $member-match
-   * POST /Patient/$member-match — identifies a payer member from a provider-supplied
-   * demographic + coverage record.  Used for Provider Access and Payer-to-Payer.
-   *
-   * Returns the matched FHIR Patient reference (e.g. "Patient/123") or null.
-   */
-  async memberMatch(params: {
-    memberPatient: Record<string, unknown>;
-    coverageToMatch: Record<string, unknown>;
-    consentToAccess: Record<string, unknown>;
-  }): Promise<string | null> {
-    if (_useMock) {
-      const id = (params.memberPatient.id as string | undefined) ?? 'demo-matched-001';
-      return `Patient/${id}`;
-    }
-    const body = {
-      resourceType: 'Parameters',
-      parameter: [
-        { name: 'MemberPatient', resource: params.memberPatient },
-        { name: 'CoverageToMatch', resource: params.coverageToMatch },
-        { name: 'Consent', resource: params.consentToAccess },
-      ],
-    };
-    try {
-      const result = await fhirFetch<{
-        parameter?: Array<{ name: string; valueReference?: { reference: string } }>;
-      }>('Patient/$member-match', { method: 'POST', body: JSON.stringify(body) });
-      return (
-        result.parameter?.find((p) => p.name === 'MemberIdentifier')?.valueReference?.reference ??
-        null
-      );
-    } catch {
-      return null;
-    }
-  }
-
-  /**
    * Fetch a patient from HAPI FHIR by FHIR id and inflate it into a
    * RegistryPatient including related Observations, Flags, and RiskAssessment.
    *
    * Returns undefined if not found.
    */
   async getRegistryPatient(fhirPatientId: string): Promise<RegistryPatient | undefined> {
-    if (_useMock) return undefined;
+    if (isMockMode()) return undefined;
 
     try {
       const { mapFhirPatientToRegistryPatient, bundleEntries } =
@@ -220,25 +185,34 @@ export class FhirClient {
 
       if (!patient || patient.resourceType !== 'Patient') return undefined;
 
-      const observations = bundleEntries(obsBundle as never, 'Observation');
-      const flags = bundleEntries(flagBundle as never, 'Flag');
-      const risks = bundleEntries(riskBundle as never, 'RiskAssessment');
-      const conditions = bundleEntries(condBundle as never, 'Condition');
-      const medications = bundleEntries(medBundle as never, 'MedicationRequest');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const observations = bundleEntries(obsBundle as any, 'Observation') as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const flags = bundleEntries(flagBundle as any, 'Flag') as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const risks = bundleEntries(riskBundle as any, 'RiskAssessment') as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const conditions = bundleEntries(condBundle as any, 'Condition') as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const medications = bundleEntries(medBundle as any, 'MedicationRequest') as any[];
       const fhirCareTeam = careTeam?.resourceType === 'CareTeam' ? careTeam : undefined;
-      const encounters = bundleEntries(encounterBundle as never, 'Encounter');
-      const goals = bundleEntries(goalBundle as never, 'Goal');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const encounters = bundleEntries(encounterBundle as any, 'Encounter') as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const goals = bundleEntries(goalBundle as any, 'Goal') as any[];
 
       return mapFhirPatientToRegistryPatient(
-        patient as never,
-        observations as never,
-        flags as never,
-        risks[0] as never,
-        conditions as never,
-        medications as never,
-        fhirCareTeam as never,
-        encounters as never,
-        goals as never
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        patient as any,
+        observations,
+        flags,
+        risks[0],
+        conditions,
+        medications,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fhirCareTeam as any,
+        encounters,
+        goals
       );
     } catch (err) {
       console.error(`[FhirClient] getRegistryPatient(${fhirPatientId}) failed:`, err);
@@ -251,7 +225,7 @@ export class FhirClient {
    * Falls back to empty array on error.
    */
   async getAllRegistryPatients(): Promise<RegistryPatient[]> {
-    if (_useMock) return [];
+    if (isMockMode()) return [];
 
     try {
       const bundle = await fhirFetch<{

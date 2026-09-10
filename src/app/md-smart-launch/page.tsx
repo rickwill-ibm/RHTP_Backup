@@ -533,10 +533,8 @@ export default function MdSmartLaunchPage() {
                     <ProviderViewReview
                       patientId={patientId}
                       encounterId={encounterId}
-                      launchContext={launchContext}
                       onOpenResource={openResource}
                       onMarkReviewed={handleMarkReviewed}
-                      onClinicalWrite={handleClinicalWrite}
                       reviewed={reviewed}
                     />
                     <ProviderViewAct
@@ -584,7 +582,6 @@ export default function MdSmartLaunchPage() {
                     <CarePlanFhirPage {...pageProps} />
                     <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                       <CarePlanPanel
-                        patientId={patientId}
                         launchContext={launchContext}
                         completedOrders={completedOrders}
                         confirmedAssignments={confirmedAssignments}
@@ -637,7 +634,7 @@ export default function MdSmartLaunchPage() {
 
                 {activeMenu === 'cdi' && (
                   <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                    <MdPatientSummary patientId={patientId} launchContext={launchContext} />
+                    <MdPatientSummary launchContext={launchContext} />
                   </div>
                 )}
 

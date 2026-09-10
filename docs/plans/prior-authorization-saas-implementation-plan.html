@@ -1,0 +1,617 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Prior Authorization SaaS — Implementation Plan</title>
+<style>
+:root{
+  --bg:#ffffff; --surface:#f7f8fa; --border:#e5e7eb;
+  --text:#1f2328; --muted:#57606a; --accent:#3b82d4;
+  --purple:#7c5cd8; --green:#1e7e34; --green-bg:#e6f4ea;
+  --amber:#b06a00; --amber-bg:#fdf3e2;
+  --red:#c0392b; --red-bg:#fdecea;
+  --teal:#0e7c7b; --teal-bg:#e4f5f4;
+  --radius:8px; --shadow:0 1px 3px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.65;color:var(--text);background:var(--bg);}
+a{color:var(--accent);}
+h1{font-size:22px;font-weight:700;margin-bottom:4px;}
+h2{font-size:17px;font-weight:700;margin:28px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent);}
+h3{font-size:14px;font-weight:700;margin:16px 0 6px;}
+h4{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px;}
+p{margin-bottom:10px;color:var(--muted);}
+strong{color:var(--text);}
+.page{max-width:860px;margin:0 auto;padding:40px 28px 60px;}
+.header-block{border-left:5px solid var(--accent);padding:18px 20px;background:var(--surface);border-radius:var(--radius);margin-bottom:32px;}
+.header-block .meta{font-size:12px;color:var(--muted);margin-top:4px;}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+.badge-blue{background:#dbeafe;color:#1d4ed8;}
+.badge-green{background:var(--green-bg);color:var(--green);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);}
+.badge-red{background:var(--red-bg);color:var(--red);}
+.badge-purple{background:#ede9fe;color:#6d28d9;}
+.badge-teal{background:var(--teal-bg);color:var(--teal);}
+.badge-gray{background:#f1f5f9;color:#475569;}
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px;}
+th{text-align:left;background:var(--surface);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--muted);}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafbfd;}
+.col-id{width:70px;font-family:"SFMono-Regular",Menlo,monospace;font-size:12px;font-weight:700;color:var(--accent);}
+.col-phase{width:90px;}
+.col-cost{text-align:right;white-space:nowrap;}
+.col-days{text-align:right;white-space:nowrap;}
+.subtotal td{font-weight:700;background:var(--surface);border-top:2px solid var(--border);}
+.grand-total td{font-weight:700;background:#dbeafe;color:#1d4ed8;font-size:14px;}
+/* PHASE CARDS */
+.phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.phase-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.phase-card h3{margin-top:0;font-size:13px;}
+.phase-card .phase-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;}
+.phase-card .weeks{font-size:22px;font-weight:700;color:var(--accent);}
+.phase-card .weeks span{font-size:13px;font-weight:400;color:var(--muted);}
+.phase-card ul{padding-left:16px;color:var(--muted);font-size:12.5px;margin-top:6px;}
+.phase-card ul li{margin-bottom:3px;}
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px;margin-bottom:24px;}
+.timeline::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:22px;}
+.tl-dot{position:absolute;left:-25px;top:2px;width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px currentColor;}
+.tl-dot.blue{background:var(--accent);color:var(--accent);}
+.tl-dot.green{background:var(--green);color:var(--green);}
+.tl-dot.purple{background:var(--purple);color:var(--purple);}
+.tl-dot.amber{background:var(--amber);color:var(--amber);}
+.tl-dot.teal{background:var(--teal);color:var(--teal);}
+.tl-dot.gray{background:#94a3b8;color:#94a3b8;}
+.tl-head{font-weight:700;font-size:13.5px;}
+.tl-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+/* ARCH */
+.arch-row{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+.arch-pill{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:12.5px;min-width:180px;flex:1;}
+.arch-pill .ap-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:2px;}
+.arch-pill .ap-name{font-weight:700;color:var(--text);}
+.arch-pill .ap-std{font-size:11.5px;color:var(--muted);}
+/* COST SUMMARY BOXES */
+.cost-boxes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.cost-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;text-align:center;}
+.cost-box .cb-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px;}
+.cost-box .cb-val{font-size:22px;font-weight:700;}
+.cost-box .cb-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+/* RISK TABLE */
+.risk-high td{border-left:3px solid var(--red);}
+.risk-med td{border-left:3px solid var(--amber);}
+.risk-low td{border-left:3px solid var(--green);}
+/* INFO CALLOUT */
+.callout{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted);}
+.callout strong{color:var(--text);}
+.callout.warn{border-left-color:var(--amber);}
+/* SECTION DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:32px 0;}
+/* FOOTER */
+.footer{text-align:center;font-size:12px;color:var(--muted);margin-top:48px;padding-top:14px;border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="header-block">
+    <h1>Prior Authorization SaaS — Implementation Plan</h1>
+    <p style="margin-bottom:6px">FHIR-native, cloud-portable service built on Da Vinci CRD · DTR · PAS</p>
+    <div class="meta">Prepared for Richard Williams, IBM  ·  July 2026  ·  Classification: Internal — Planning Deliverable</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <span class="badge badge-blue">CMS-0057-F Compliance</span>
+      <span class="badge badge-purple">SMART on FHIR</span>
+      <span class="badge badge-teal">CRD · DTR · PAS</span>
+      <span class="badge badge-amber">Jan 1, 2027 Deadline</span>
+      <span class="badge badge-gray">18-Week Build</span>
+    </div>
+  </div>
+
+  
+  <h2>1. Executive Summary</h2>
+  <p>This plan defines how to build a <strong>FHIR-native Prior Authorization SaaS service</strong> that can be deployed as a managed service on any major cloud — AWS, Azure, or GCP — and consumed by provider EMRs via CDS Hooks and SMART on FHIR. The service replaces IBM's existing watsonx-chatbox-driven PreAuth Portal with a fully standards-conformant implementation of three HL7 Da Vinci implementation guides: <strong>Coverage Requirements Discovery (CRD)</strong>, <strong>Documentation Templates and Rules (DTR)</strong>, and <strong>Prior Authorization Support (PAS)</strong>.</p>
+  <p>Work begins on an existing, load-bearing foundation: the <code>rickwill-ibm/rhtp-fhir-poc</code> repository already contains three completed branches — <strong>phase1</strong> (FHIR server + identity), <strong>phase2</strong> (live FHIR data), and <strong>phase3</strong> (live data wired to all pages). All new work occurs on a new branch: <code>feature/phase4-crd-dtr-pas-integration</code>.</p>
+  <p>The build runs <strong>18 calendar weeks</strong> across six execution phases plus a hardening sprint. The total estimated implementation cost is <strong>~$882K</strong> with an ongoing steady-state run-rate of <strong>~$49K/month ($587K/year)</strong>.</p>
+
+  <div class="cost-boxes">
+    <div class="cost-box">
+      <div class="cb-label">Total Impl. Cost</div>
+      <div class="cb-val" style="color:var(--accent)">~$882K</div>
+      <div class="cb-sub">incl. 15% contingency</div>
+    </div>
+    <div class="cost-box">
+      <div class="cb-label">Steady-State Run-Rate</div>
+      <div class="cb-val" style="color:var(--purple)">~$49K/mo</div>
+      <div class="cb-sub">$587K/year post go-live</div>
+    </div>
+    <div class="cost-box">
+      <div class="cb-label">Build Duration</div>
+      <div class="cb-val" style="color:var(--teal)">18 Weeks</div>
+      <div class="cb-sub">Sprint 0 through Hardening</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <h2>2. End-State: What We Are Building</h2>
+  <p>The end state is a <strong>cloud-portable, containerized, FHIR-native Prior Authorization microservice platform</strong>. It is multi-tenant by design, embeddable in any CDS-Hooks-compatible EMR, and deployable to AWS, Azure, or GCP using cloud-agnostic container orchestration (Kubernetes / ECS / ACA). Below is the full service topology.</p>
+
+  <h3>2.1 Service Topology</h3>
+  <div class="arch-row">
+    <div class="arch-pill">
+      <div class="ap-label">Presentation Layer</div>
+      <div class="ap-name">SMART on FHIR App</div>
+      <div class="ap-std">SMART App Launch 2.0 · CDS Hooks cards · React SPA</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Orchestration</div>
+      <div class="ap-name">Prior Auth Service Hub</div>
+      <div class="ap-std">CDS Hooks 2.0 server · order-select / order-sign · FHIR R4</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Part I — CRD</div>
+      <div class="ap-name">Coverage Requirements Engine</div>
+      <div class="ap-std">Eligibility · Network Status · Milliman / InterQual · PA-Required lookup</div>
+    </div>
+  </div>
+  <div class="arch-row">
+    <div class="arch-pill">
+      <div class="ap-label">Part II — DTR</div>
+      <div class="ap-name">DTR Service + CQL Engine</div>
+      <div class="ap-std">Questionnaire/$package · CQL execution · Med-necessity tree · CDex attachments</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Data Layer</div>
+      <div class="ap-name">PA Aggregation FHIR Server</div>
+      <div class="ap-std">US Core v3 pull · PDex Patient Access pull · clinical-source-wins merge · Provenance</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Policy Intelligence</div>
+      <div class="ap-name">Intelligent Policy Engine</div>
+      <div class="ap-std">watsonx PDF-to-Questionnaire/CQL pipeline · Knowledge Base FHIR Repo</div>
+    </div>
+  </div>
+  <div class="arch-row">
+    <div class="arch-pill">
+      <div class="ap-label">Part III — PAS</div>
+      <div class="ap-name">PAS Submission Service</div>
+      <div class="ap-std">Claim/$submit (FHIR PAS Bundle) · X12 278/275 EDI Translator · channel routing</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Case Management</div>
+      <div class="ap-name">PA Portal + Status Sync</div>
+      <div class="ap-std">FHIR Subscription rest-hook · Claim/$inquiry fallback · case lifecycle management</div>
+    </div>
+    <div class="arch-pill">
+      <div class="ap-label">Audit</div>
+      <div class="ap-name">Evidence Record Generator</div>
+      <div class="ap-std">Immutable PDF snapshot at submission · Provenance audit trail · 6-mo retention</div>
+    </div>
+  </div>
+
+  <h3>2.2 Cloud-Portability Design Principles</h3>
+  <table>
+    <thead><tr><th>Concern</th><th>Decision</th><th>AWS</th><th>Azure</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Compute</strong></td><td>Containerized microservices (Docker + K8s manifest)</td><td>AWS Fargate (ECS)</td><td>Azure Container Apps</td></tr>
+      <tr><td><strong>FHIR Datastore</strong></td><td>Managed FHIR service — no custom FHIR server required</td><td>AWS HealthLake</td><td>Azure Health Data Services</td></tr>
+      <tr><td><strong>Relational DB</strong></td><td>PostgreSQL-compatible managed service</td><td>RDS PostgreSQL</td><td>Azure Database for PostgreSQL</td></tr>
+      <tr><td><strong>Object Storage</strong></td><td>S3-compatible blob (PDF evidence records, DTR packages)</td><td>Amazon S3</td><td>Azure Blob Storage</td></tr>
+      <tr><td><strong>CDN / SMART App Host</strong></td><td>Static SPA served from CDN edge</td><td>CloudFront + S3</td><td>Azure Static Web Apps + CDN</td></tr>
+      <tr><td><strong>API Gateway</strong></td><td>Managed gateway with auth passthrough</td><td>AWS API Gateway + ALB</td><td>Azure API Management</td></tr>
+      <tr><td><strong>Security</strong></td><td>WAF + secrets management + key rotation</td><td>WAF + KMS + Secrets Manager</td><td>Front Door WAF + Key Vault</td></tr>
+      <tr><td><strong>Observability</strong></td><td>Structured logs + distributed tracing</td><td>CloudWatch</td><td>Azure Monitor</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:4px">All service-to-service calls use environment-variable-injected endpoints, making the codebase identical across clouds. Infrastructure-as-Code (Terraform or Bicep) provides cloud-specific deployment manifests from a shared module base.</p>
+
+  <hr class="divider" />
+
+  
+  <h2>3. Existing Foundation (Do Not Modify)</h2>
+  <div class="callout"><strong>Repository:</strong> <a href="https://github.com/rickwill-ibm/rhtp-fhir-poc">github.com/rickwill-ibm/rhtp-fhir-poc</a> — three completed phase branches are the stable build base. Do not rewrite or overwrite them.</div>
+  <table>
+    <thead><tr><th>Branch</th><th>Contents</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>feature/phase1-fhir-server-identity</code></td><td>FHIR server + OAuth2 / SMART App Launch identity plumbing</td><td><span class="badge badge-green">Complete</span></td></tr>
+      <tr><td><code>feature/phase2-live-fhir-data</code></td><td>Live FHIR data wiring</td><td><span class="badge badge-green">Complete</span></td></tr>
+      <tr><td><code>feature/phase3-live-data-all-pages</code></td><td>Live data connected to all UI pages</td><td><span class="badge badge-green">Complete</span></td></tr>
+      <tr><td><code>feature/phase4-crd-dtr-pas-integration</code></td><td><strong>All new work lives here</strong> — branched from main</td><td><span class="badge badge-blue">New Branch</span></td></tr>
+    </tbody>
+  </table>
+  <p>Before Phase 4 kickoff, the Tech Lead must conduct a technical review of the existing FHIR server implementation, identity/auth pattern, and UI framework to confirm compatibility assumptions. This is task <strong>S0-01</strong>.</p>
+
+  <hr class="divider" />
+
+  
+  <h2>4. Phased Build Plan</h2>
+
+  <div class="callout warn"><strong>Pre-condition before cutting the Phase 4 branch:</strong> Complete Sprint 0 tasks first — particularly the Intelligent Policy Engine schema spike (S0-03) and Milliman/InterQual licensing confirmation (S0-04). These gate every downstream phase.</div>
+
+  
+  <h3>Sprint 0 — Foundation &amp; Design Spike (Weeks 1–2)</h3>
+  <p>Validate architecture assumptions, unblock the highest-risk component (Intelligent Policy Engine), and establish CI/CD before any feature work begins.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">S0-01</td><td>Repo &amp; Environment Review — confirm existing FHIR server, auth patterns, UI framework</td><td>Tech Lead</td><td class="col-days">3</td><td class="col-cost">$4,350</td></tr>
+      <tr><td class="col-id">S0-02</td><td>Cut <code>feature/phase4-crd-dtr-pas-integration</code> branch from main</td><td>Tech Lead</td><td class="col-days">0.5</td><td class="col-cost">$725</td></tr>
+      <tr><td class="col-id">S0-03</td><td>Intelligent Policy Engine schema spike — validate PDF→Questionnaire/CQL/ValueSet pipeline on one sample bariatric policy</td><td>Data/Integration Eng.</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">S0-04</td><td>Milliman/InterQual API access &amp; licensing confirmation</td><td>Product/Clinical SME</td><td class="col-days">3</td><td class="col-cost">$3,900</td></tr>
+      <tr><td class="col-id">S0-05</td><td>Payer endpoint directory &amp; capability schema design</td><td>BE/FHIR Engineer 1</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">S0-06</td><td>CI/CD pipeline &amp; environment setup (dev / staging / prod)</td><td>Tech Lead</td><td class="col-days">2</td><td class="col-cost">$2,900</td></tr>
+      <tr><td class="col-id">S0-07</td><td>Confidence-threshold policy workshop — define NLP-match auto-approve vs. clinical-review thresholds</td><td>Product/Clinical SME</td><td class="col-days">2</td><td class="col-cost">$2,600</td></tr>
+      <tr class="subtotal"><td colspan="3">Sprint 0 Total</td><td class="col-days">18.5</td><td class="col-cost">$23,275</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Phase 4a — CRD Integration &amp; Checklist UI (Weeks 3–5)</h3>
+  <p>Implement the CDS Hooks pipeline and all Part I checks. EMR fires <code>order-select</code> / <code>order-sign</code>; the service returns Coverage Information cards and populates the CRD Checklist screen.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">4A-01</td><td>CDS Hooks client — <code>order-select</code> &amp; <code>order-sign</code> hook integration</td><td>BE/FHIR Engineer 1</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4A-02</td><td>Prior Auth Service orchestrator skeleton — endpoint routing, payer capability lookup</td><td>BE/FHIR Engineer 1</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4A-03</td><td>Eligibility &amp; enrollment check — CoverageEligibilityRequest/Response; X12 270/271 fallback</td><td>BE/FHIR Engineer 2</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4A-04</td><td>Provider network status check — PractitionerRole + Da Vinci PDex Plan-Net</td><td>BE/FHIR Engineer 2</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4A-05</td><td>Milliman/InterQual guideline check integration</td><td>BE/FHIR Engineer 2</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4A-06</td><td>PA-required policy lookup — procedure code → PA required yes/no from policy engine</td><td>BE/FHIR Engineer 1</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4A-07</td><td>CDS card / Coverage Information system action builder</td><td>BE/FHIR Engineer 1</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4A-08</td><td>CRD Checklist UI screen — 5-item checklist with pass/fail, source badges, manual-review path</td><td>Frontend Engineer</td><td class="col-days">5</td><td class="col-cost">$5,000</td></tr>
+      <tr><td class="col-id">4A-09</td><td>Manual-review routing — fail path handling when any precondition fails</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4A-10</td><td>Phase 4a test pass — CRD end-to-end, mock payer endpoints, eligibility edge cases</td><td>QA Engineer</td><td class="col-days">4</td><td class="col-cost">$3,600</td></tr>
+      <tr><td class="col-id">4A-11</td><td>Phase 4a demo &amp; stakeholder review</td><td>Project Manager</td><td class="col-days">1</td><td class="col-cost">$1,050</td></tr>
+      <tr class="subtotal"><td colspan="3">Phase 4a Total</td><td class="col-days">41</td><td class="col-cost">$43,750</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Phase 4b — DTR, Aggregation FHIR Server &amp; Medical Necessity Tree UI (Weeks 6–10)</h3>
+  <p>The largest phase. Builds the data layer (PA Aggregation FHIR Server), the CQL medical necessity execution engine, and the DTR tree UI with CDex document upload.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">4B-01</td><td>PA Aggregation FHIR Server provisioning — AWS HealthLake or Azure Health Data Services</td><td>Data/Integration Eng.</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4B-02</td><td>EMR US Core v3 pull service — SMART OAuth, Patient/Condition/Observation/Medication/DiagnosticReport</td><td>BE/FHIR Engineer 2</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4B-03</td><td>Payer Patient Access API pull service — separate patient-authorized token, PDex resources</td><td>BE/FHIR Engineer 2</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4B-04</td><td>Merge, priority &amp; Provenance logic — clinical-source-wins conflict resolution, source tagging on every fact</td><td>Data/Integration Eng.</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4B-05</td><td>Questionnaire Package retrieval — <code>$questionnaire-package</code> operation, pre-embedded &amp; on-demand paths</td><td>BE/FHIR Engineer 1</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4B-06</td><td>DTR SMART app launch — SMART link from CRD card, app context propagation</td><td>Frontend Engineer</td><td class="col-days">4</td><td class="col-cost">$4,000</td></tr>
+      <tr><td class="col-id">4B-07</td><td>CQL execution engine integration — execute criteria rules against aggregated FHIR store, produce met/gap tree</td><td>BE/FHIR Engineer 1</td><td class="col-days">6</td><td class="col-cost">$6,600</td></tr>
+      <tr><td class="col-id">4B-08</td><td>Medical Necessity Tree UI — criteria tree, Met/Gap per leaf, evidence source citations, collapsible groups</td><td>Frontend Engineer</td><td class="col-days">6</td><td class="col-cost">$6,000</td></tr>
+      <tr><td class="col-id">4B-09</td><td>CDex attachment upload — DocumentReference wrap for PDF/C-CDA/text supporting docs, linked to Claim.supportingInfo</td><td>BE/FHIR Engineer 2</td><td class="col-days">5</td><td class="col-cost">$5,500</td></tr>
+      <tr><td class="col-id">4B-10</td><td>Re-run match on upload — re-execute CQL after document upload, refresh tree state</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4B-11</td><td>Phase 4b test pass — CQL evaluation, merge logic, upload round-trip, EMR integration test</td><td>QA Engineer</td><td class="col-days">5</td><td class="col-cost">$4,500</td></tr>
+      <tr><td class="col-id">4B-12</td><td>Phase 4b demo &amp; stakeholder review</td><td>Project Manager</td><td class="col-days">1</td><td class="col-cost">$1,050</td></tr>
+      <tr class="subtotal"><td colspan="3">Phase 4b Total</td><td class="col-days">52</td><td class="col-cost">$55,150</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Phase 4c — PAS Submission &amp; Channel Routing (Weeks 11–13)</h3>
+  <p>Assembles the PASBundle, implements <code>Claim/$submit</code> for FHIR-capable payers, and the X12 278/275 EDI translator for legacy payers. Channel selection is capability-driven and automatic.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">4C-01</td><td>PASBundle assembly service — assemble Claim, Patient, Practitioner, Coverage, DocumentReference resources</td><td>BE/FHIR Engineer 1</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4C-02</td><td><code>Claim/$submit</code> integration — FHIR PAS synchronous submit to payer endpoint</td><td>BE/FHIR Engineer 1</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4C-03</td><td>EDI Translator — X12 278 (PA request) + X12 275 (attachment; BDS01=B64, CAT02=HL) via clearinghouse</td><td>BE/FHIR Engineer 2</td><td class="col-days">6</td><td class="col-cost">$6,600</td></tr>
+      <tr><td class="col-id">4C-04</td><td>Channel selection logic — read payer capability metadata; route FHIR vs. EDI automatically</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4C-05</td><td>Review &amp; Submit UI screen — summary cards, channel selector, submit CTA, PA number display</td><td>Frontend Engineer</td><td class="col-days">4</td><td class="col-cost">$4,000</td></tr>
+      <tr><td class="col-id">4C-06</td><td>PA number &amp; case record generation — internal tracking ID, payer-returned identifiers, initial status write</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4C-07</td><td>PA Portal status vocabulary update — add Pended and Modified tabs; expand beyond Submitted/Approved/Denied/Pending</td><td>Frontend Engineer</td><td class="col-days">3</td><td class="col-cost">$3,000</td></tr>
+      <tr><td class="col-id">4C-08</td><td>Phase 4c test pass — submit round-trip, EDI encode/decode validation, channel routing logic</td><td>QA Engineer</td><td class="col-days">4</td><td class="col-cost">$3,600</td></tr>
+      <tr class="subtotal"><td colspan="3">Phase 4c Total</td><td class="col-days">28</td><td class="col-cost">$29,300</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Phase 4d — Evidence Record &amp; Subscription-Based Status Sync (Weeks 13–15)</h3>
+  <p>Implements immutable PDF evidence records, FHIR Subscription rest-hook for pended-case updates, and the full Case Detail / Adjudication Timeline screen.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">4D-01</td><td>Evidence Record PDF generator — immutable snapshot of PASBundle + CRD checklist + DTR match tree at submission time</td><td>BE/FHIR Engineer 2</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4D-02</td><td>FHIR Subscription (rest-hook, R5 backport) listener — receive payer push updates on pended cases</td><td>BE/FHIR Engineer 1</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4D-03</td><td><code>Claim/$inquiry</code> manual polling fallback — available when Subscription not supported by payer</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4D-04</td><td>ClaimResponse processing &amp; status mapping — reviewAction codes → Portal status vocabulary (A6-Modified etc.)</td><td>BE/FHIR Engineer 1</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4D-05</td><td>Case Detail / Timeline UI — checklist + DTR snapshot + submission + evidence record + adjudication timeline subtabs</td><td>Frontend Engineer</td><td class="col-days">5</td><td class="col-cost">$5,000</td></tr>
+      <tr><td class="col-id">4D-06</td><td>Resubmit vs. Update/Cancel logic — denied cases require new request; pended cases support update/cancel</td><td>BE/FHIR Engineer 2</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4D-07</td><td>Phase 4d test pass — subscription mock, ClaimResponse parsing, evidence record integrity check</td><td>QA Engineer</td><td class="col-days">4</td><td class="col-cost">$3,600</td></tr>
+      <tr class="subtotal"><td colspan="3">Phase 4d Total</td><td class="col-days">25</td><td class="col-cost">$26,200</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Phase 4e — Back-Office Batch Worklist (Weeks 15–16)</h3>
+  <p>Queue-style screen for staff to work orders that could not be automated at the point of care, with assignment workflow, manual override capability, and audited justifications.</p>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">4E-01</td><td>Batch worklist queue service — ingest non-real-time orders, prioritization, age-out logic, 6-mo retention</td><td>BE/FHIR Engineer 2</td><td class="col-days">4</td><td class="col-cost">$4,400</td></tr>
+      <tr><td class="col-id">4E-02</td><td>Back-Office Worklist UI — queue list, filters, assignment panel, case launch from worklist</td><td>Frontend Engineer</td><td class="col-days">5</td><td class="col-cost">$5,000</td></tr>
+      <tr><td class="col-id">4E-03</td><td>Staff assignment &amp; override workflow — assign to reviewer, override DTR gap with attestation</td><td>BE/FHIR Engineer 2</td><td class="col-days">3</td><td class="col-cost">$3,300</td></tr>
+      <tr><td class="col-id">4E-04</td><td>Audit trail for manual overrides — Provenance resource for every staff-driven override or attestation</td><td>BE/FHIR Engineer 1</td><td class="col-days">2</td><td class="col-cost">$2,200</td></tr>
+      <tr><td class="col-id">4E-05</td><td>Phase 4e test pass — queue ingestion, assignment logic, override audit record verification</td><td>QA Engineer</td><td class="col-days">3</td><td class="col-cost">$2,700</td></tr>
+      <tr class="subtotal"><td colspan="3">Phase 4e Total</td><td class="col-days">17</td><td class="col-cost">$17,600</td></tr>
+    </tbody>
+  </table>
+
+  
+  <h3>Hardening Sprint — Integration, Security, Compliance &amp; UAT (Weeks 17–18)</h3>
+  <table>
+    <thead><tr><th class="col-id">ID</th><th>Task</th><th>Owner</th><th class="col-days">Days</th><th class="col-cost">Cost</th></tr></thead>
+    <tbody>
+      <tr><td class="col-id">HD-01</td><td>End-to-end integration test — all three payer profiles, all four EMR platforms, FHIR + EDI channels</td><td>QA Engineer</td><td class="col-days">5</td><td class="col-cost">$4,500</td></tr>
+      <tr><td class="col-id">HD-02</td><td>Security penetration test (external) — ahead of go-live</td><td>Security Engineer</td><td class="col-days">4</td><td class="col-cost">$5,000</td></tr>
+      <tr><td class="col-id">HD-03</td><td>HIPAA risk assessment &amp; gap remediation</td><td>Security Engineer</td><td class="col-days">—</td><td class="col-cost">$30,000</td></tr>
+      <tr><td class="col-id">HD-04</td><td>SOC 2 Type II readiness &amp; Year 1 audit engagement</td><td>Security Engineer</td><td class="col-days">—</td><td class="col-cost">$45,000</td></tr>
+      <tr><td class="col-id">HD-05</td><td>BAA legal review &amp; execution with all EMR/payer trading partners</td><td>Product/Clinical SME</td><td class="col-days">—</td><td class="col-cost">$5,000</td></tr>
+      <tr><td class="col-id">HD-06</td><td>UAT with clinical end users — provider workflow validation, staff worklist sign-off</td><td>Clinical Policy Reviewer</td><td class="col-days">—</td><td class="col-cost">$8,000</td></tr>
+      <tr><td class="col-id">HD-07</td><td>Performance &amp; SLA validation — 15-sec Claim/$submit round-trip, 72-hr / 24-hr decision SLAs</td><td>QA Engineer</td><td class="col-days">3</td><td class="col-cost">$2,700</td></tr>
+      <tr><td class="col-id">HD-08</td><td>Documentation — runbook, API reference, ops guide, payer onboarding playbook</td><td>Tech Lead</td><td class="col-days">2</td><td class="col-cost">$2,900</td></tr>
+      <tr class="subtotal"><td colspan="3">Hardening Total</td><td class="col-days">14+</td><td class="col-cost">$26,300 + compliance</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>5. Master Timeline</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <span class="tl-dot blue"></span>
+      <div class="tl-head">Weeks 1–2  <span class="badge badge-blue">Sprint 0</span></div>
+      <div class="tl-sub">Repo review · CI/CD setup · Policy Engine schema spike · Milliman/InterQual licensing · Payer endpoint directory · Confidence threshold workshop</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot purple"></span>
+      <div class="tl-head">Weeks 3–5  <span class="badge badge-purple">Phase 4a — CRD</span></div>
+      <div class="tl-sub">CDS Hooks client · Prior Auth Service orchestrator · Eligibility + network + guideline checks · CRD Checklist UI · Manual-review routing</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot blue"></span>
+      <div class="tl-head">Weeks 6–10  <span class="badge badge-blue">Phase 4b — DTR</span> <em style="font-size:12px;font-weight:400;color:var(--muted)">(longest phase)</em></div>
+      <div class="tl-sub">PA Aggregation FHIR Server · EMR US Core pull · Payer Patient Access pull · Merge + Provenance logic · Questionnaire Package retrieval · CQL engine · Medical Necessity Tree UI · CDex attachment upload</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot teal"></span>
+      <div class="tl-head">Weeks 11–13  <span class="badge badge-teal">Phase 4c — PAS Submission</span></div>
+      <div class="tl-sub">PASBundle assembly · Claim/$submit · X12 278/275 EDI Translator · Channel routing · Review &amp; Submit UI · PA Portal vocabulary expansion</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot teal"></span>
+      <div class="tl-head">Weeks 13–15  <span class="badge badge-teal">Phase 4d — Evidence &amp; Status Sync</span></div>
+      <div class="tl-sub">Immutable PDF Evidence Records · FHIR Subscription rest-hook · Claim/$inquiry fallback · ClaimResponse mapping · Case Detail / Timeline UI</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot amber"></span>
+      <div class="tl-head">Weeks 15–16  <span class="badge badge-amber">Phase 4e — Back-Office Worklist</span></div>
+      <div class="tl-sub">Batch queue service · Back-Office Worklist UI · Staff assignment &amp; override · Provenance audit trail for overrides</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot green"></span>
+      <div class="tl-head">Weeks 17–18  <span class="badge badge-green">Hardening · Security · UAT</span></div>
+      <div class="tl-sub">E2E integration · External penetration test · HIPAA risk assessment · SOC 2 readiness · BAA execution · Clinical UAT · Performance SLA validation · Go-live</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot gray"></span>
+      <div class="tl-head">Post Week 18  <span class="badge badge-gray">Steady-State Operations</span></div>
+      <div class="tl-sub">~$49K/mo run-rate · FHIR support labor · infra · licensing · EMR &amp; payer connection maintenance · policy revision reviews · facility monitoring</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  
+  <h2>6. Cost Build-Up</h2>
+
+  <h3>6.1 Labor Cost by Phase</h3>
+  <table>
+    <thead><tr><th>Phase</th><th>Description</th><th class="col-cost">Labor Cost</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-blue">S0</span></td><td>Sprint 0 — Foundation &amp; Design Spike</td><td class="col-cost">$23,275</td></tr>
+      <tr><td><span class="badge badge-purple">4A</span></td><td>CRD Integration &amp; Checklist UI</td><td class="col-cost">$43,750</td></tr>
+      <tr><td><span class="badge badge-blue">4B</span></td><td>DTR, Aggregation FHIR Server &amp; Necessity Tree UI</td><td class="col-cost">$55,150</td></tr>
+      <tr><td><span class="badge badge-teal">4C</span></td><td>PAS Submission &amp; Channel Routing</td><td class="col-cost">$29,300</td></tr>
+      <tr><td><span class="badge badge-teal">4D</span></td><td>Evidence Record &amp; Status Sync</td><td class="col-cost">$26,200</td></tr>
+      <tr><td><span class="badge badge-amber">4E</span></td><td>Back-Office Batch Worklist</td><td class="col-cost">$17,600</td></tr>
+      <tr><td><span class="badge badge-green">HD</span></td><td>Hardening — Integration, Security, Compliance, UAT</td><td class="col-cost">$26,300</td></tr>
+      <tr class="subtotal"><td colspan="2"><strong>Total Labor (57 tasks · 204.5 person-days)</strong></td><td class="col-cost"><strong>$221,575</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.2 Implementation Cost Build-Up (Total)</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Basis</th><th class="col-cost">Amount</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Labor</strong></td><td>57 tasks across all phases</td><td class="col-cost">$221,575</td></tr>
+      <tr><td><strong>Infrastructure — Build Phase</strong></td><td>~$6,300/mo (AWS) × 4.15 build months</td><td class="col-cost">$26,129</td></tr>
+      <tr><td><strong>Third-Party Licensing — Build Phase</strong></td><td>Milliman + InterQual + EDI translator + watsonx (pro-rated)</td><td class="col-cost">$54,263</td></tr>
+      <tr><td><strong>EMR / Payer / Endpoint Onboarding</strong></td><td>3 additional EMRs + 3 payers + clearinghouse + 18 facility installs</td><td class="col-cost">$245,000</td></tr>
+      <tr><td><strong>HIPAA &amp; Compliance Certification</strong></td><td>Risk assessment + BAA + SOC 2 Type II Year 1</td><td class="col-cost">$80,000</td></tr>
+      <tr><td><strong>One-Time Other</strong></td><td>External penetration test + UAT logistics &amp; clinical SME stipends</td><td class="col-cost">$33,000</td></tr>
+      <tr><td><strong>Initial Policy Ingestion / Clinical Review</strong></td><td>450 policies (3 payers × 150) at $237.50/doc, ~1.25 FTEs</td><td class="col-cost">$106,875</td></tr>
+      <tr class="subtotal"><td colspan="2">Subtotal</td><td class="col-cost">$766,842</td></tr>
+      <tr><td colspan="2">Contingency (15%)</td><td class="col-cost">$115,026</td></tr>
+      <tr class="grand-total"><td colspan="2"><strong>TOTAL IMPLEMENTATION COST</strong></td><td class="col-cost"><strong>~$882K</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 Integration Scope Detail</h3>
+  <table>
+    <thead><tr><th>Item</th><th>Count</th><th class="col-cost">One-Time Cost</th><th>Monthly Ongoing</th></tr></thead>
+    <tbody>
+      <tr><td>Additional EMR connections (beyond base build)</td><td>3</td><td class="col-cost">$105,000</td><td>$1,500/mo</td></tr>
+      <tr><td>Production payer connections</td><td>3</td><td class="col-cost">$60,000</td><td>$2,250/mo</td></tr>
+      <tr><td>EDI clearinghouse connection setup</td><td>1</td><td class="col-cost">$8,000</td><td>$1,500/mo (transactions)</td></tr>
+      <tr><td>Idaho facility rollout (18 facilities in scope)</td><td>18</td><td class="col-cost">$72,000</td><td>$2,700/mo</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;margin-top:-8px"><strong>Idaho EMR landscape (18 in-scope facilities):</strong> Epic — 7 facilities (St. Luke's + Kootenai Health) · Oracle Health/Cerner — 2 (Saint Alphonsus Boise + Nampa) · MEDITECH — 9 (HCA EIRMC + ~8 CAH facilities)</p>
+
+  <h3>6.4 Steady-State Monthly Run-Rate</h3>
+  <table>
+    <thead><tr><th>Category</th><th>Basis</th><th class="col-cost">Monthly</th></tr></thead>
+    <tbody>
+      <tr><td>Infrastructure &amp; Hosting (production-scaled)</td><td>Build-phase infra × 1.2 scale factor</td><td class="col-cost">$7,560</td></tr>
+      <tr><td>Third-Party Licensing (recurring)</td><td>Milliman + InterQual + EDI translator + watsonx</td><td class="col-cost">$15,083</td></tr>
+      <tr><td>Backend/FHIR Support Labor</td><td>0.5 FTE support engineer</td><td class="col-cost">$11,935</td></tr>
+      <tr><td>QA Support Labor</td><td>0.25 FTE QA</td><td class="col-cost">$4,883</td></tr>
+      <tr><td>Additional EMR Connections (maintenance)</td><td>3 additional EMRs × $500/mo</td><td class="col-cost">$1,500</td></tr>
+      <tr><td>Payer Connections (monitoring &amp; fees)</td><td>3 payers × $750/mo</td><td class="col-cost">$2,250</td></tr>
+      <tr><td>SOC 2 Type II Annual Renewal (amortized)</td><td>$25K/year ÷ 12</td><td class="col-cost">$2,083</td></tr>
+      <tr><td>Policy Revision — Clinical Review (amortized)</td><td>90 policies/year × $118.75 ÷ 12</td><td class="col-cost">$891</td></tr>
+      <tr><td>Facility Connectivity (per-install, ongoing)</td><td>18 facilities × $150/mo</td><td class="col-cost">$2,700</td></tr>
+      <tr class="subtotal"><td colspan="2"><strong>Total Monthly Run-Rate</strong></td><td class="col-cost"><strong>~$49K/mo</strong></td></tr>
+      <tr><td colspan="2"><strong>Total Annual Run-Rate</strong></td><td class="col-cost"><strong>~$587K/yr</strong></td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>7. Team &amp; Labor Rates</h2>
+  <table>
+    <thead><tr><th>Role</th><th>Daily Rate</th><th>Key Responsibilities</th></tr></thead>
+    <tbody>
+      <tr><td>Tech Lead</td><td>$1,450/day</td><td>Architecture, branch strategy, repo review, final integration decisions</td></tr>
+      <tr><td>Backend/FHIR Engineer 1</td><td>$1,100/day</td><td>CDS Hooks, Prior Auth Service orchestrator, CQL engine, PAS submission, subscriptions</td></tr>
+      <tr><td>Backend/FHIR Engineer 2</td><td>$1,100/day</td><td>Eligibility/network checks, data pull services, CDex, EDI translator, evidence records</td></tr>
+      <tr><td>Data/Integration Engineer</td><td>$1,100/day</td><td>PA Aggregation FHIR Server, merge/priority logic, Provenance tagging, Policy Engine pipeline</td></tr>
+      <tr><td>Frontend Engineer</td><td>$1,000/day</td><td>All 8 screens — CRD Checklist, DTR Tree, Review/Submit, PA Portal, Case Detail, Worklist</td></tr>
+      <tr><td>QA Engineer</td><td>$900/day</td><td>Phase test passes, E2E integration, performance SLA validation</td></tr>
+      <tr><td>Security Engineer</td><td>$1,250/day</td><td>Penetration test, HIPAA gap remediation, WAF &amp; secrets config, OAuth2 review</td></tr>
+      <tr><td>Product/Clinical SME</td><td>$1,300/day</td><td>Confidence threshold policy, Milliman/InterQual licensing, UAT facilitation, BAA review</td></tr>
+      <tr><td>Project Manager</td><td>$1,050/day</td><td>Phase demos, stakeholder reviews, dependency tracking, milestone reporting</td></tr>
+      <tr><td>Clinical Policy Reviewer</td><td>$950/day ($118.75/hr)</td><td>Sign-off on every AI-generated DTR Questionnaire/CQL policy conversion before production use</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px">All rates are illustrative planning-level placeholders. Replace with actuals when known.</p>
+
+  <hr class="divider" />
+
+  
+  <h2>8. Compliance &amp; Non-Functional Requirements</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Target</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Regulatory deadline</strong></td><td>CMS-0057-F CRD/DTR/PAS API conformance by <strong>January 1, 2027</strong></td><td>Product/Clinical SME</td></tr>
+      <tr><td><strong>Decision-time SLAs</strong></td><td>72-hour standard / 24-hour expedited under API pathway; <strong>≤15 seconds</strong> for Claim/$submit round-trip</td><td>BE/FHIR Engineer 1</td></tr>
+      <tr><td><strong>Security</strong></td><td>OAuth2 / SMART App Launch 2.0 for all data pulls (EMR + Patient Access API)</td><td>Security Engineer</td></tr>
+      <tr><td><strong>Patient consent</strong></td><td>Explicit patient consent required before Patient Access API pull of payer-held data</td><td>Product/Clinical SME</td></tr>
+      <tr><td><strong>Audit trail</strong></td><td>Provenance resource on every fact used in a medical necessity determination</td><td>Data/Integration Eng.</td></tr>
+      <tr><td><strong>EDI encoding</strong></td><td>X12 275: BDS01 Filter ID Code = <code>B64</code>; CAT02 Attachment Information Format Code = <code>HL</code></td><td>BE/FHIR Engineer 2</td></tr>
+      <tr><td><strong>Data retention</strong></td><td>Minimum 6-month retention for all pended PA case data</td><td>Data/Integration Eng.</td></tr>
+      <tr><td><strong>HIPAA</strong></td><td>Third-party risk assessment + gap remediation ahead of go-live; BAA with all trading partners</td><td>Security Engineer</td></tr>
+      <tr><td><strong>SOC 2 Type II</strong></td><td>Year 1 readiness + audit ($45K); $25K/year renewal thereafter</td><td>Security Engineer</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>9. Risk Register</h2>
+  <table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Likelihood</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr class="risk-high">
+        <td><strong>Intelligent Policy Engine output quality</strong> — watsonx PDF-to-Questionnaire/CQL conversion errors propagate to every downstream phase</td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td>S0-03 design spike validates pipeline on 1 sample policy before Phase 4 begins; clinical reviewer sign-off required on every converted policy before production use</td>
+      </tr>
+      <tr class="risk-high">
+        <td><strong>Milliman/InterQual API licensing</strong> not yet confirmed — blocks Phase 4a guideline check</td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td>S0-04 confirms licensing before Phase 4a starts; fallback: omit 4A-05 from MVP and add secondary guideline check post-launch</td>
+      </tr>
+      <tr class="risk-med">
+        <td><strong>Existing phase1–3 codebase compatibility</strong> — actual code not yet reviewed; auth pattern or FHIR server version may require adaptation</td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td>S0-01 full technical review before any new work; time-box remediation within Sprint 0</td>
+      </tr>
+      <tr class="risk-med">
+        <td><strong>Payer CMS-0057-F readiness</strong> — payers may not have live CRD/DTR/PAS endpoints by the build window; fallback to policy-engine-backed CRD required</td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td><span class="badge badge-blue">High</span></td>
+        <td>Dual-mode design — client-first with policy-engine fallback; S0-05 maps capability metadata per payer</td>
+      </tr>
+      <tr class="risk-med">
+        <td><strong>Confidence threshold undefined</strong> — NLP-derived matches may over- or under-approve without a defined threshold</td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td><span class="badge badge-amber">Medium</span></td>
+        <td>S0-07 workshop with clinical stakeholders defines threshold before Phase 4b CQL engine build</td>
+      </tr>
+      <tr class="risk-low">
+        <td><strong>Policy library size unknown</strong> — 150 policies/payer is a placeholder; actual count affects clinical review cost and staffing</td>
+        <td><span class="badge badge-blue">Low–Medium</span></td>
+        <td><span class="badge badge-blue">High</span></td>
+        <td>Confirm actual policy count per payer during Sprint 0; update cost model accordingly; ~1.25 Clinical Policy Reviewer FTEs required to clear initial backlog within the build window</td>
+      </tr>
+      <tr class="risk-low">
+        <td><strong>CMS-0057-F January 1, 2027 deadline</strong> — 18-week build + hardening completes by ~November 2026; leaves ~6 weeks of buffer</td>
+        <td><span class="badge badge-red">High</span></td>
+        <td><span class="badge badge-green">Low (with this plan)</span></td>
+        <td>Maintain weekly milestone reviews; any slip in 4B (the longest phase) must trigger immediate scope triage</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>10. Open Questions &amp; Pre-Kickoff Actions</h2>
+  <table>
+    <thead><tr><th>#</th><th>Question / Action</th><th>Owner</th><th>Due</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Review phases 1–3 codebase: confirm FHIR server version, auth library, UI framework, and any dependency conflicts with Phase 4 scope</td><td>Tech Lead</td><td>S0 Week 1</td></tr>
+      <tr><td>2</td><td>Confirm Milliman Care Guidelines and InterQual API licensing terms, access mechanism, and timeline</td><td>Product/Clinical SME</td><td>S0 Week 2</td></tr>
+      <tr><td>3</td><td>Run Intelligent Policy Engine schema spike on one real bariatric-surgery payer policy PDF; validate Questionnaire + CQL + ValueSet output before Phase 4b depends on it</td><td>Data/Integration Eng.</td><td>S0 Week 2</td></tr>
+      <tr><td>4</td><td>Confirm actual policy library size per target payer (placeholder: 150/payer); update clinical review staffing and cost model</td><td>Product/Clinical SME</td><td>S0 Week 2</td></tr>
+      <tr><td>5</td><td>Define confidence threshold distinguishing auto-approve (deterministic, coded EMR data) from flagged (NLP-derived) matches</td><td>Clinical Stakeholders</td><td>S0 Workshop</td></tr>
+      <tr><td>6</td><td>Confirm CRD server vs. client role for non-compliant payers — recommendation is dual-mode (client-first + policy-engine fallback); validate with architecture review board</td><td>Tech Lead</td><td>S0 Week 1</td></tr>
+      <tr><td>7</td><td>Identify and confirm the three production payer connections in scope; begin trading-partner agreement negotiations (4C is blocked without payer sandbox access)</td><td>Product/Clinical SME</td><td>Sprint 0</td></tr>
+      <tr><td>8</td><td>Confirm cloud provider selection (AWS vs. Azure) — drives Terraform/Bicep module choice and managed FHIR service selection; cost delta is ~$400/mo in favor of AWS</td><td>Tech Lead</td><td>S0 Week 1</td></tr>
+    </tbody>
+  </table>
+
+  <hr class="divider" />
+
+  
+  <h2>11. Immediate Next Steps to Execute</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <span class="tl-dot blue"></span>
+      <div class="tl-head">This week</div>
+      <div class="tl-sub">Cut <code>feature/phase4-crd-dtr-pas-integration</code> branch from main on <code>rickwill-ibm/rhtp-fhir-poc</code> · Assign Tech Lead to S0-01 codebase review · Schedule S0-07 confidence-threshold workshop with clinical stakeholders</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot purple"></span>
+      <div class="tl-head">Week 1</div>
+      <div class="tl-sub">Complete S0-01 (repo review) and S0-06 (CI/CD) · Begin S0-03 policy engine spike · Initiate S0-04 Milliman/InterQual licensing process · Confirm cloud provider and begin S0-05 payer endpoint directory design</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot purple"></span>
+      <div class="tl-head">Week 2 — Sprint 0 Gate</div>
+      <div class="tl-sub">All Sprint 0 tasks complete · Policy engine schema spike result reviewed and approved · Licensing status confirmed (or fallback plan activated) · Confidence threshold documented · Phase 4a kickoff</div>
+    </div>
+    <div class="tl-item">
+      <span class="tl-dot green"></span>
+      <div class="tl-head">Week 3 — Phase 4a Begins</div>
+      <div class="tl-sub">Backend team starts CDS Hooks client (4A-01) and Prior Auth Service skeleton (4A-02) in parallel · Frontend starts CRD Checklist UI scaffold (4A-08)</div>
+    </div>
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

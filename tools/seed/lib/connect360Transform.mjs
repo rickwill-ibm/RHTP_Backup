@@ -124,12 +124,15 @@ export function transformBundle(bundle) {
   // unchanged when it does not resolve to an in-bundle resource.
   const remapReference = (ref) => {
     if (typeof ref !== 'string') return ref;
-    if (byFullUrl.has(ref)) return `urn:uuid:${byFullUrl.get(ref)}`;
+    // Logical Type/id refs keep their logical form (preserve-form design) — checked
+    // BEFORE byFullUrl so a relative-fullUrl bundle (fullUrl === "Type/slug") does not
+    // force logical refs (e.g. coding-gap evidence) into urn:uuid form.
     if (byLogical.has(ref)) {
       const slashAt = ref.indexOf('/');
       const type = ref.slice(0, slashAt);
       return `${type}/${byLogical.get(ref)}`;
     }
+    if (byFullUrl.has(ref)) return `urn:uuid:${byFullUrl.get(ref)}`;
     return ref; // external / contained / canonical / unresolved — untouched
   };
 

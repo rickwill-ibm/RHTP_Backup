@@ -6,11 +6,6 @@
  * All FHIR-fed via the domain hooks.
  */
 import React, { useMemo, useState } from 'react';
-import AddConditionForm from '../AddConditionForm';
-import AddAllergyForm from '../AddAllergyForm';
-import AddMedicationForm from '../AddMedicationForm';
-import { mapAllergiesToMtm } from '@/lib/agents/mtm/allergyMapper';
-import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
 import {
   LineChart,
   Line,
@@ -59,14 +54,6 @@ type OpenResourceFn = (resourceType: string, resourceId: string, label: string) 
 interface PageProps {
   patientId: string;
   onOpenResource: OpenResourceFn;
-  /** Optional — required only for write-capable pages */
-  launchContext?: SmartLaunchContext;
-  encounterId?: string;
-  onClinicalWrite?: (
-    kind: 'condition-added' | 'allergy-added' | 'medication-added',
-    display: string,
-    resourceId: string
-  ) => void;
 }
 
 // ── Results Review ───────────────────────────────────────────────────────────
@@ -238,293 +225,181 @@ export function ResultsReviewPage({ patientId, onOpenResource }: PageProps) {
 
 // ── Medication List ──────────────────────────────────────────────────────────
 
-export function MedicationListPage({
-  patientId,
-  onOpenResource,
-  launchContext,
-  encounterId,
-  onClinicalWrite,
-}: PageProps) {
+export function MedicationListPage({ patientId, onOpenResource }: PageProps) {
   const meds = useActiveMedications(patientId);
-  const allergies = useAllergies(patientId);
-  const [showAdd, setShowAdd] = useState(false);
   return (
-    <>
-      {showAdd && launchContext && (
-        <AddMedicationForm
-          patientId={patientId}
-          encounterId={encounterId ?? ''}
-          launchContext={launchContext}
-          currentMedications={meds.data.map((m) => ({
-            rxcui: m.medicationCodeableConcept?.coding?.[0]?.code ?? '',
-            name:
-              m.medicationCodeableConcept?.text ??
-              m.medicationCodeableConcept?.coding?.[0]?.display ??
-              '',
-            lastFillDate: m.authoredOn,
-          }))}
-          allergies={mapAllergiesToMtm(allergies.data)}
-          onSaved={(id, display) => {
-            meds.refresh();
-            onClinicalWrite?.('medication-added', display, id);
-            setShowAdd(false);
-          }}
-          onCancel={() => setShowAdd(false)}
-        />
-      )}
-      <MPageCard
-        title="Medication List — Active"
-        count={meds.data.length}
-        fetchedAt={meds.fetchedAt}
-        loading={meds.loading}
-        error={meds.error}
-        onRefresh={meds.refresh}
-        actions={
-          launchContext ? (
-            <button
-              className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
-              onClick={() => setShowAdd(true)}
-            >
-              + Add Med
-            </button>
-          ) : undefined
-        }
-      >
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
-              <th className="px-3 py-1 font-semibold">Medication</th>
-              <th className="px-2 py-1 font-semibold">Sig</th>
-              <th className="px-2 py-1 font-semibold">Prescriber</th>
-              <th className="px-2 py-1 font-semibold">Start</th>
-              <th className="px-2 py-1 font-semibold">Refills</th>
-              <th className="px-2 py-1 font-semibold text-right">Adherence</th>
-            </tr>
-          </thead>
-          <tbody>
-            {meds.data.map((m) => {
-              const pdc = adherencePdc(m);
-              return (
-                <tr key={m.id} className="border-b border-[#eef1f4] last:border-0">
-                  <td className="px-3 py-1">
-                    <button
-                      className={`hover:underline text-left text-[#00539b] ${statusTextCls(m.status)}`}
-                      onClick={() =>
-                        m.id &&
-                        onOpenResource(
-                          'MedicationRequest',
-                          m.id,
-                          ccText(m.medicationCodeableConcept)
-                        )
-                      }
+    <MPageCard
+      title="Medication List — Active"
+      count={meds.data.length}
+      fetchedAt={meds.fetchedAt}
+      loading={meds.loading}
+      error={meds.error}
+      onRefresh={meds.refresh}
+    >
+      <table className="w-full">
+        <thead>
+          <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
+            <th className="px-3 py-1 font-semibold">Medication</th>
+            <th className="px-2 py-1 font-semibold">Sig</th>
+            <th className="px-2 py-1 font-semibold">Prescriber</th>
+            <th className="px-2 py-1 font-semibold">Start</th>
+            <th className="px-2 py-1 font-semibold">Refills</th>
+            <th className="px-2 py-1 font-semibold text-right">Adherence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {meds.data.map((m) => {
+            const pdc = adherencePdc(m);
+            return (
+              <tr key={m.id} className="border-b border-[#eef1f4] last:border-0">
+                <td className="px-3 py-1">
+                  <button
+                    className={`hover:underline text-left text-[#00539b] ${statusTextCls(m.status)}`}
+                    onClick={() =>
+                      m.id &&
+                      onOpenResource('MedicationRequest', m.id, ccText(m.medicationCodeableConcept))
+                    }
+                  >
+                    {ccText(m.medicationCodeableConcept)}
+                  </button>
+                </td>
+                <td className="px-2 py-1">{m.dosageInstruction?.[0]?.text ?? '—'}</td>
+                <td className="px-2 py-1 text-[11.5px]">{m.requester?.display ?? '—'}</td>
+                <td className="px-2 py-1 text-[11.5px] whitespace-nowrap">
+                  {fmtDate(m.authoredOn)}
+                </td>
+                <td className="px-2 py-1 text-[11.5px]">
+                  {m.dispenseRequest?.numberOfRepeatsAllowed ?? '—'}
+                </td>
+                <td className="px-2 py-1 text-right">
+                  {pdc !== undefined && (
+                    <span
+                      className={`text-[11px] px-1.5 rounded-sm border font-semibold ${
+                        pdc < 70
+                          ? 'bg-[#fdecea] text-[#c8102e] border-[#c8102e]'
+                          : 'bg-[#eef6ee] text-[#1e7e34] border-[#9fce9f]'
+                      }`}
                     >
-                      {ccText(m.medicationCodeableConcept)}
-                    </button>
-                  </td>
-                  <td className="px-2 py-1">{m.dosageInstruction?.[0]?.text ?? '—'}</td>
-                  <td className="px-2 py-1 text-[11.5px]">{m.requester?.display ?? '—'}</td>
-                  <td className="px-2 py-1 text-[11.5px] whitespace-nowrap">
-                    {fmtDate(m.authoredOn)}
-                  </td>
-                  <td className="px-2 py-1 text-[11.5px]">
-                    {m.dispenseRequest?.numberOfRepeatsAllowed ?? '—'}
-                  </td>
-                  <td className="px-2 py-1 text-right">
-                    {pdc !== undefined && (
-                      <span
-                        className={`text-[11px] px-1.5 rounded-sm border font-semibold ${
-                          pdc < 70
-                            ? 'bg-[#fdecea] text-[#c8102e] border-[#c8102e]'
-                            : 'bg-[#eef6ee] text-[#1e7e34] border-[#9fce9f]'
-                        }`}
-                      >
-                        {pdc}%
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </MPageCard>
-    </>
+                      {pdc}%
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </MPageCard>
   );
 }
 
 // ── Problems & Diagnoses ─────────────────────────────────────────────────────
 
-export function ProblemsPage({
-  patientId,
-  onOpenResource,
-  launchContext,
-  encounterId,
-  onClinicalWrite,
-}: PageProps) {
+export function ProblemsPage({ patientId, onOpenResource }: PageProps) {
   const problems = useProblemList(patientId);
-  const [showAdd, setShowAdd] = useState(false);
   return (
-    <>
-      {showAdd && launchContext && (
-        <AddConditionForm
-          patientId={patientId}
-          encounterId={encounterId ?? ''}
-          launchContext={launchContext}
-          onSaved={(id, display) => {
-            problems.refresh();
-            onClinicalWrite?.('condition-added', display, id);
-            setShowAdd(false);
-          }}
-          onCancel={() => setShowAdd(false)}
-        />
-      )}
-      <MPageCard
-        title="Problems and Diagnoses"
-        count={problems.data.length}
-        fetchedAt={problems.fetchedAt}
-        loading={problems.loading}
-        error={problems.error}
-        onRefresh={problems.refresh}
-        actions={
-          launchContext ? (
-            <button
-              className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
-              onClick={() => setShowAdd(true)}
-            >
-              + Add Problem
-            </button>
-          ) : undefined
-        }
-      >
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
-              <th className="px-3 py-1 font-semibold">Problem</th>
-              <th className="px-2 py-1 font-semibold">ICD-10</th>
-              <th className="px-2 py-1 font-semibold">Onset</th>
-              <th className="px-2 py-1 font-semibold">Status</th>
-              <th className="px-2 py-1 font-semibold">Notes</th>
+    <MPageCard
+      title="Problems and Diagnoses"
+      count={problems.data.length}
+      fetchedAt={problems.fetchedAt}
+      loading={problems.loading}
+      error={problems.error}
+      onRefresh={problems.refresh}
+    >
+      <table className="w-full">
+        <thead>
+          <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
+            <th className="px-3 py-1 font-semibold">Problem</th>
+            <th className="px-2 py-1 font-semibold">ICD-10</th>
+            <th className="px-2 py-1 font-semibold">Onset</th>
+            <th className="px-2 py-1 font-semibold">Status</th>
+            <th className="px-2 py-1 font-semibold">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {problems.data.map((p) => (
+            <tr key={p.id} className="border-b border-[#eef1f4] last:border-0 align-top">
+              <td className="px-3 py-1">
+                <button
+                  className="text-[#00539b] hover:underline text-left font-medium"
+                  onClick={() => p.id && onOpenResource('Condition', p.id, ccText(p.code))}
+                >
+                  {ccText(p.code)}
+                </button>
+              </td>
+              <td className="px-2 py-1 font-mono text-[11.5px]">
+                {codeOf(p.code, 'http://hl7.org/fhir/sid/icd-10-cm') ?? '—'}
+              </td>
+              <td className="px-2 py-1 text-[11.5px] whitespace-nowrap">
+                {fmtDate(p.onsetDateTime)}
+              </td>
+              <td className="px-2 py-1 text-[11.5px]">{ccText(p.clinicalStatus)}</td>
+              <td className="px-2 py-1 text-[11.5px] text-[#5b6770]">{p.note?.[0]?.text ?? ''}</td>
             </tr>
-          </thead>
-          <tbody>
-            {problems.data.map((p) => (
-              <tr key={p.id} className="border-b border-[#eef1f4] last:border-0 align-top">
-                <td className="px-3 py-1">
-                  <button
-                    className="text-[#00539b] hover:underline text-left font-medium"
-                    onClick={() => p.id && onOpenResource('Condition', p.id, ccText(p.code))}
-                  >
-                    {ccText(p.code)}
-                  </button>
-                </td>
-                <td className="px-2 py-1 font-mono text-[11.5px]">
-                  {codeOf(p.code, 'http://hl7.org/fhir/sid/icd-10-cm') ?? '—'}
-                </td>
-                <td className="px-2 py-1 text-[11.5px] whitespace-nowrap">
-                  {fmtDate(p.onsetDateTime)}
-                </td>
-                <td className="px-2 py-1 text-[11.5px]">{ccText(p.clinicalStatus)}</td>
-                <td className="px-2 py-1 text-[11.5px] text-[#5b6770]">
-                  {p.note?.[0]?.text ?? ''}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </MPageCard>
-    </>
+          ))}
+        </tbody>
+      </table>
+    </MPageCard>
   );
 }
 
 // ── Allergies ────────────────────────────────────────────────────────────────
 
-export function AllergiesPage({
-  patientId,
-  onOpenResource,
-  launchContext,
-  onClinicalWrite,
-}: PageProps) {
+export function AllergiesPage({ patientId, onOpenResource }: PageProps) {
   const allergies = useAllergies(patientId);
-  const [showAdd, setShowAdd] = useState(false);
   return (
-    <>
-      {showAdd && launchContext && (
-        <AddAllergyForm
-          patientId={patientId}
-          launchContext={launchContext}
-          onSaved={(id, display) => {
-            allergies.refresh();
-            onClinicalWrite?.('allergy-added', display, id);
-            setShowAdd(false);
-          }}
-          onCancel={() => setShowAdd(false)}
-        />
-      )}
-      <MPageCard
-        title="Allergies"
-        count={allergies.data.length}
-        fetchedAt={allergies.fetchedAt}
-        loading={allergies.loading}
-        error={allergies.error}
-        onRefresh={allergies.refresh}
-        actions={
-          launchContext ? (
-            <button
-              className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
-              onClick={() => setShowAdd(true)}
-            >
-              + Add Allergy
-            </button>
-          ) : undefined
-        }
-      >
-        <table className="w-full">
-          <thead>
-            <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
-              <th className="px-3 py-1 font-semibold">Substance</th>
-              <th className="px-2 py-1 font-semibold">Category</th>
-              <th className="px-2 py-1 font-semibold">Reaction</th>
-              <th className="px-2 py-1 font-semibold">Severity</th>
-              <th className="px-2 py-1 font-semibold text-right">Recorded</th>
+    <MPageCard
+      title="Allergies"
+      count={allergies.data.length}
+      fetchedAt={allergies.fetchedAt}
+      loading={allergies.loading}
+      error={allergies.error}
+      onRefresh={allergies.refresh}
+    >
+      <table className="w-full">
+        <thead>
+          <tr className="text-left text-[11px] uppercase text-[#5b6770] border-b border-[#d5dce2]">
+            <th className="px-3 py-1 font-semibold">Substance</th>
+            <th className="px-2 py-1 font-semibold">Category</th>
+            <th className="px-2 py-1 font-semibold">Reaction</th>
+            <th className="px-2 py-1 font-semibold">Severity</th>
+            <th className="px-2 py-1 font-semibold text-right">Recorded</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allergies.data.map((a) => (
+            <tr key={a.id} className="border-b border-[#eef1f4] last:border-0">
+              <td className="px-3 py-1">
+                <button
+                  className="text-[#b30000] font-semibold hover:underline"
+                  onClick={() => a.id && onOpenResource('AllergyIntolerance', a.id, ccText(a.code))}
+                >
+                  {ccText(a.code)}
+                </button>
+              </td>
+              <td className="px-2 py-1 text-[11.5px]">{a.category?.join(', ') ?? '—'}</td>
+              <td className="px-2 py-1 text-[11.5px]">
+                {a.reaction?.[0]?.manifestation?.map((m) => ccText(m)).join(', ') ?? '—'}
+              </td>
+              <td className="px-2 py-1">
+                <span
+                  className={
+                    a.reaction?.[0]?.severity === 'severe'
+                      ? 'text-[#c8102e] font-bold'
+                      : 'text-[#5b6770]'
+                  }
+                >
+                  {a.reaction?.[0]?.severity ?? a.criticality ?? '—'}
+                </span>
+              </td>
+              <td className="px-2 py-1 text-right text-[11.5px] text-[#5b6770]">
+                {fmtDate(a.recordedDate)}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {allergies.data.map((a) => (
-              <tr key={a.id} className="border-b border-[#eef1f4] last:border-0">
-                <td className="px-3 py-1">
-                  <button
-                    className="text-[#b30000] font-semibold hover:underline"
-                    onClick={() =>
-                      a.id && onOpenResource('AllergyIntolerance', a.id, ccText(a.code))
-                    }
-                  >
-                    {ccText(a.code)}
-                  </button>
-                </td>
-                <td className="px-2 py-1 text-[11.5px]">{a.category?.join(', ') ?? '—'}</td>
-                <td className="px-2 py-1 text-[11.5px]">
-                  {a.reaction?.[0]?.manifestation?.map((m) => ccText(m)).join(', ') ?? '—'}
-                </td>
-                <td className="px-2 py-1">
-                  <span
-                    className={
-                      a.reaction?.[0]?.severity === 'severe'
-                        ? 'text-[#c8102e] font-bold'
-                        : 'text-[#5b6770]'
-                    }
-                  >
-                    {a.reaction?.[0]?.severity ?? a.criticality ?? '—'}
-                  </span>
-                </td>
-                <td className="px-2 py-1 text-right text-[11.5px] text-[#5b6770]">
-                  {fmtDate(a.recordedDate)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </MPageCard>
-    </>
+          ))}
+        </tbody>
+      </table>
+    </MPageCard>
   );
 }
 

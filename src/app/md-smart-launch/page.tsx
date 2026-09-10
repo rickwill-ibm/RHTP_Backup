@@ -82,12 +82,6 @@ export default function MdSmartLaunchPage() {
   const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
   const [cdsPanelOpen, setCdsPanelOpen] = useState(false);
-
-  // ③ Bind CDS cards to the launched member (Maria keeps her authored cards).
-  useEffect(() => {
-    if (!launchReady || !launchContext?.patientId) return;
-    setCdsCards(buildCdsCardsForMember(launchContext.patientId.replace(/^patient\//, '')));
-  }, [launchReady, launchContext]);
   const [completedOrders, setCompletedOrders] = useState<MdOrder[]>([]);
   const [confirmedAssignments, setConfirmedAssignments] = useState<CareTeamAssignment[]>([]);
   const [closedGapIds, setClosedGapIds] = useState<string[]>([]);
@@ -384,7 +378,16 @@ export default function MdSmartLaunchPage() {
     setViewer({ resourceType, resourceId, label });
   }, []);
 
-  // ── Seed CDS cards from patient's FHIR flags (non-Maria patients) ─────────
+  // ── CDS cards: layered fallback ───────────────────────
+  // Layer 1 (default): each launched member shows their OWN registry-derived
+  // cards (care gaps / BH / RAF); Maria keeps her authored mockCdsCards. A member
+  // never shows another member's cards under their name.
+  useEffect(() => {
+    if (!launchReady || !launchContext?.patientId) return;
+    setCdsCards(buildCdsCardsForMember(launchContext.patientId.replace(/^patient\//, '')));
+  }, [launchReady, launchContext]);
+  // Layer 2 (override): non-Maria members with live FHIR Flags get flag-derived
+  // cards instead — only when such flags exist, else Layer 1 stands.
   useCdsFlagsEffect({ launchReady, launchContext, useMockData, setCdsCards });
 
   // ── Live CDS Hooks invocation (patient-view) with demo-card fallback ──────

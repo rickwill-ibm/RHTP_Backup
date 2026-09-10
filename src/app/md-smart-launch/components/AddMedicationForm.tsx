@@ -9,6 +9,7 @@ import ClinicalEntryModal from './ClinicalEntryModal';
 import MtmCheckStatus from './MtmCheckStatus';
 import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
 import type { DrugLookupResult, PatientAllergy, CurrentMedication } from '@/lib/agents/mtm/types';
+import { searchDrugs, fetchNdcForRxcui } from '@/lib/agents/mtm/drugLookup';
 import { useMtmScreening } from '../hooks/useMtmScreening';
 import { useMedicationSubmit } from '../hooks/useMedicationSubmit';
 
@@ -121,16 +122,9 @@ export default function AddMedicationForm({
     debounceRef.current = setTimeout(async () => {
       setLookingUp(true);
       try {
-        const res = await fetch('/api/mtm/drug-lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ term: value.trim() }),
-        });
-        if (res.ok) {
-          const data = (await res.json()) as { results: DrugLookupResult[] };
-          setSuggestions(data.results ?? []);
-          setShowSuggestions(true);
-        }
+        const results = await searchDrugs(value.trim());
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
       } finally {
         setLookingUp(false);
       }
@@ -151,19 +145,8 @@ export default function AddMedicationForm({
     if (drug.ndcList.length > 0) {
       setNdcCode(drug.ndcList[0]);
     } else {
-      try {
-        const res = await fetch('/api/mtm/ndc', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rxcui: drug.rxcui }),
-        });
-        if (res.ok) {
-          const data = (await res.json()) as { ndcList: string[] };
-          setNdcCode(data.ndcList?.[0] ?? '');
-        }
-      } catch {
-        /* NDC is optional */
-      }
+      const ndcList = await fetchNdcForRxcui(drug.rxcui);
+      setNdcCode(ndcList[0] ?? '');
     }
 
     // MTM screening

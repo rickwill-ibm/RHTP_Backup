@@ -8,6 +8,7 @@ import {
   canView, canEdit, canFull, type AdminRole,
 } from '@/lib/adminConsoleRoles';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import { MTM_AGENT_MANIFEST } from '@/lib/agents/mtm/manifest';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ const OUTCOME_PILL: Record<AgentActivityRow['outcome'], string> = {
   blocked: 'bg-[#f4f4f4] text-[#525252] font-semibold',
 };
 
-type Tab = 'pending' | 'guardrails' | 'activity';
+type Tab = 'pending' | 'guardrails' | 'activity' | 'agents';
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,7 @@ export default function AgentOversight() {
     { key: 'pending',    label: 'Pending Approval' },
     { key: 'guardrails', label: 'Guardrails'        },
     { key: 'activity',   label: 'Activity Log'      },
+    { key: 'agents',     label: 'Registered Agents' },
   ];
 
   return (
@@ -337,6 +339,41 @@ export default function AgentOversight() {
           </table>
           <div className="px-4 py-2 border-t border-carbon-gray-20 text-xs text-carbon-gray-50">
             {isMock ? 'Mock activity data' : 'Live FHIR AuditEvent resources'}
+          </div>
+        </div>
+      )}
+
+      {/* ── Registered Agents tab ── */}
+      {tab === 'agents' && (
+        <div className="space-y-4">
+          <div className="bg-white border border-carbon-gray-20">
+            <div className="px-4 py-3 border-b border-carbon-gray-20 flex items-center justify-between">
+              <div>
+                <span className="text-sm font-semibold text-carbon-gray-100">{MTM_AGENT_MANIFEST.name}</span>
+                <span className="ml-3 text-xs font-mono text-carbon-gray-50">{MTM_AGENT_MANIFEST.id}</span>
+                <span className="ml-2 text-xs px-1.5 py-0.5 bg-[#e8f4fd] text-[#0043ce] font-semibold">{MTM_AGENT_MANIFEST.autonomyTier}</span>
+              </div>
+              <span className="text-xs text-carbon-gray-50">v{MTM_AGENT_MANIFEST.version}</span>
+            </div>
+            <div className="px-4 py-3 text-xs text-carbon-gray-70">{MTM_AGENT_MANIFEST.description}</div>
+            <div className="px-4 py-3 border-t border-carbon-gray-20">
+              <p className="text-xs font-semibold text-carbon-gray-70 mb-2">Tools</p>
+              <ul className="space-y-1">
+                {MTM_AGENT_MANIFEST.tools.map(t => (
+                  <li key={t.id} className="text-xs text-carbon-gray-70">
+                    <span className="font-mono text-carbon-gray-100 mr-2">{t.id}</span>{t.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="px-4 py-3 border-t border-carbon-gray-20">
+              <p className="text-xs font-semibold text-carbon-gray-70 mb-2">Invariants</p>
+              <ul className="space-y-1">
+                {MTM_AGENT_MANIFEST.invariants.map((inv, i) => (
+                  <li key={i} className="text-xs text-carbon-gray-50 font-mono">{inv}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       )}

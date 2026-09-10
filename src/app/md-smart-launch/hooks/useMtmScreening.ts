@@ -17,9 +17,9 @@ import type {
   DrugInteraction,
   MtmFinding,
   PatientAllergy,
-} from '@/lib/agents/mtm/types';
-import type { CurrentMedication } from '@/lib/agents/mtm/types';
-import { evaluate } from '@/lib/agents/mtm/mtmEngine';
+  CurrentMedication,
+} from '@/lib/agents/mtm';
+import { evaluate } from '@/lib/agents/mtm';
 
 interface UseMtmScreeningOptions {
   currentMedications: CurrentMedication[];

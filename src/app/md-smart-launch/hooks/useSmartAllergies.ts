@@ -8,10 +8,10 @@
  * Falls back to an empty array on any error.
  */
 import { useState, useEffect, useCallback } from 'react';
-import type { PatientAllergy } from '@/lib/agents/mtm/types';
+import type { PatientAllergy } from '@/lib/agents/mtm';
+import { normaliseAllergyClasses } from '@/lib/agents/mtm';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
 import { storeSearch } from '@/lib/fhir/store';
-import { normaliseAllergyClasses } from '@/lib/agents/mtm/allergyChecker';
 
 function mapAllergyResource(r: Record<string, unknown>): PatientAllergy {
   const cc = r['code'] as Record<string, unknown> | undefined;

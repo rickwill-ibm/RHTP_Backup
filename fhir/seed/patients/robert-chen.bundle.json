@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7",
+      "fullUrl": "Organization/robert-chen-organization-1",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -27,7 +27,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6890b3bd-34d4-4e5f-b516-828c01829362",
+      "fullUrl": "Organization/robert-chen-organization-2",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54",
+      "fullUrl": "Patient/patient-robert-103",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -72,7 +72,7 @@
         "gender": "male",
         "birthDate": "1964-11-03",
         "managingOrganization": {
-          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+          "reference": "Organization/robert-chen-organization-1"
         },
         "address": [
           {
@@ -103,7 +103,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938",
+      "fullUrl": "Practitioner/robert-chen-practitioner-1",
       "resource": {
         "resourceType": "Practitioner",
         "active": true,
@@ -132,15 +132,15 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b3b218d4-661f-49f5-9d6e-6697ca28cc89",
+      "fullUrl": "PractitionerRole/robert-chen-practitionerrole-1",
       "resource": {
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "organization": {
-          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+          "reference": "Organization/robert-chen-organization-1"
         },
         "code": [
           {
@@ -161,7 +161,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d2497c96-9e96-42e4-aaca-19baa21b16bb",
+      "fullUrl": "Coverage/robert-chen-coverage-1",
       "resource": {
         "resourceType": "Coverage",
         "status": "active",
@@ -175,11 +175,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "payor": [
           {
-            "reference": "urn:uuid:6890b3bd-34d4-4e5f-b516-828c01829362"
+            "reference": "Organization/robert-chen-organization-2"
           }
         ],
         "relationship": {
@@ -198,7 +198,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3125c147-0cec-42f0-ae15-6528733fb2e8",
+      "fullUrl": "Encounter/robert-chen-encounter-1",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -219,17 +219,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+              "reference": "Practitioner/robert-chen-practitioner-1"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+          "reference": "Organization/robert-chen-organization-1"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -253,7 +253,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:fd2868b9-5be2-4c29-8f0d-c523963848fd",
+      "fullUrl": "Condition/robert-chen-condition-1",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -294,7 +294,7 @@
           "text": "Essential (primary) hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "onsetDateTime": "2014-06-01",
         "id": "robert-chen-condition-1"
@@ -305,7 +305,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:02d7cde7-b205-40f0-bb3f-2d4e9d4663b6",
+      "fullUrl": "Condition/robert-chen-condition-2",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -346,7 +346,7 @@
           "text": "Chronic kidney disease, stage 3b"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "onsetDateTime": "2020-10-01",
         "id": "robert-chen-condition-2",
@@ -380,7 +380,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:70273f4d-c1b1-4412-8382-e6f8eb026f5f",
+      "fullUrl": "Condition/robert-chen-condition-3",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -421,7 +421,7 @@
           "text": "Alcohol use disorder, mild"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "onsetDateTime": "2023-05-01",
         "id": "robert-chen-condition-3"
@@ -432,7 +432,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:30701d4f-39aa-4d5b-8fef-2ec9df38616f",
+      "fullUrl": "MedicationRequest/robert-chen-medicationrequest-1",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -448,11 +448,11 @@
           "text": "Amlodipine 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -467,7 +467,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8cc8d3e9-6f1c-4c22-8e1d-2e2afb0a3c24",
+      "fullUrl": "MedicationRequest/robert-chen-medicationrequest-2",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -483,11 +483,11 @@
           "text": "Losartan potassium 100 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -502,7 +502,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:cb433f85-1ad3-4969-8890-bae312b92dca",
+      "fullUrl": "MedicationRequest/robert-chen-medicationrequest-3",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -518,11 +518,11 @@
           "text": "Atorvastatin 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -537,7 +537,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c85e4465-46e7-42d1-82f1-c9c69c1b85f6",
+      "fullUrl": "Observation/robert-chen-observation-1",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -562,7 +562,7 @@
           "text": "Blood pressure panel"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-03-15",
         "component": [
@@ -621,7 +621,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d1c1210a-bfa6-405d-bbdd-e45a7233d393",
+      "fullUrl": "Observation/robert-chen-observation-2",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -646,7 +646,7 @@
           "text": "eGFR"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-02-28",
         "valueQuantity": {
@@ -673,7 +673,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:979632f5-ef6d-4dcf-9283-20bc16e2678e",
+      "fullUrl": "ServiceRequest/robert-chen-servicerequest-1",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -700,11 +700,11 @@
           "text": "Urine albumin/creatinine ratio"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-02-15",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "id": "robert-chen-servicerequest-1"
       },
@@ -714,7 +714,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:91c99f8b-5327-4151-82a4-8118a9b0ee57",
+      "fullUrl": "ServiceRequest/robert-chen-servicerequest-2",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -741,11 +741,11 @@
           "text": "Nephrology referral"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-04-10",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "id": "robert-chen-servicerequest-2"
       },
@@ -755,7 +755,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b7fa3bf5-6107-48f0-b2e1-27bc2f4e0458",
+      "fullUrl": "Observation/robert-chen-observation-3",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -781,7 +781,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -795,7 +795,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:69590b24-5d73-4957-a8fd-cba877dcbf30",
+      "fullUrl": "Observation/robert-chen-observation-4",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -821,7 +821,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -835,7 +835,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:17a4c440-8ce2-484a-96fe-5118789e830b",
+      "fullUrl": "Observation/robert-chen-observation-5",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -861,7 +861,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -875,7 +875,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:cde9130f-e5d4-4081-bcc8-f7e810a4ec8c",
+      "fullUrl": "Observation/robert-chen-observation-6",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -901,7 +901,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -915,7 +915,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d4e5ba72-d9f7-4d34-b324-18a40aead7c2",
+      "fullUrl": "Condition/robert-chen-condition-4",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -965,7 +965,7 @@
           "text": "Financial insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "onsetDateTime": "2026-04-01",
         "id": "robert-chen-condition-4"
@@ -976,7 +976,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c",
+      "fullUrl": "Organization/robert-chen-organization-3",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -1001,7 +1001,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:07a8a20f-acd9-42f6-98e6-ed74ed6c189e",
+      "fullUrl": "ServiceRequest/robert-chen-servicerequest-3",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -1028,20 +1028,20 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "authoredOn": "2026-04-01",
         "requester": {
-          "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+          "reference": "Practitioner/robert-chen-practitioner-1"
         },
         "performer": [
           {
-            "reference": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c"
+            "reference": "Organization/robert-chen-organization-3"
           }
         ],
         "reasonReference": [
           {
-            "reference": "urn:uuid:d4e5ba72-d9f7-4d34-b324-18a40aead7c2"
+            "reference": "Condition/robert-chen-condition-4"
           }
         ],
         "extension": [
@@ -1058,7 +1058,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4c790aa1-9a0a-4c34-910c-16e4daad0017",
+      "fullUrl": "Task/robert-chen-task-1",
       "resource": {
         "resourceType": "Task",
         "status": "in-progress",
@@ -1074,13 +1074,13 @@
         },
         "description": "Closed-loop CBO referral: Medication cost assistance / patient-assistance program",
         "focus": {
-          "reference": "urn:uuid:07a8a20f-acd9-42f6-98e6-ed74ed6c189e"
+          "reference": "ServiceRequest/robert-chen-servicerequest-3"
         },
         "for": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "owner": {
-          "reference": "urn:uuid:28290f51-6bee-4957-989e-ce0638ffdc2c"
+          "reference": "Organization/robert-chen-organization-3"
         },
         "authoredOn": "2026-04-01",
         "businessStatus": {
@@ -1094,7 +1094,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:cd66376e-f7c7-4d71-9048-d88ef688c1b3",
+      "fullUrl": "Observation/robert-chen-observation-7",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1120,7 +1120,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1147,7 +1147,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3b0b5f8b-f5ab-48f7-9b40-db43271cb439",
+      "fullUrl": "Consent/robert-chen-consent-1",
       "resource": {
         "resourceType": "Consent",
         "status": "active",
@@ -1172,7 +1172,7 @@
           }
         ],
         "patient": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "dateTime": "2026-04-15",
         "policy": [
@@ -1205,7 +1205,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c043d530-d142-499b-a51e-e256d170126d",
+      "fullUrl": "Goal/robert-chen-goal-1",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1220,7 +1220,7 @@
           "text": "Blood pressure control"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "id": "robert-chen-goal-1"
       },
@@ -1230,7 +1230,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:96ebe86f-6c23-4f7a-8542-38dd12212a1b",
+      "fullUrl": "Goal/robert-chen-goal-2",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1245,7 +1245,7 @@
           "text": "eGFR / creatinine monitoring (CKD 3b)"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "id": "robert-chen-goal-2"
       },
@@ -1255,7 +1255,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1858a465-4aa5-408c-975a-8903e0328411",
+      "fullUrl": "Goal/robert-chen-goal-3",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1270,7 +1270,7 @@
           "text": "AUDIT-C follow-up counseling"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "id": "robert-chen-goal-3"
       },
@@ -1280,12 +1280,12 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bc2e8f50-7438-488c-a639-82881047e8ff",
+      "fullUrl": "CareTeam/robert-chen-careteam-1",
       "resource": {
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "participant": [
           {
@@ -1301,13 +1301,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:66aea439-c319-40a5-bee5-04c499af3938"
+              "reference": "Practitioner/robert-chen-practitioner-1"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:642cd004-26a3-4d83-b9e3-cbdd56d389e7"
+            "reference": "Organization/robert-chen-organization-1"
           }
         ],
         "id": "robert-chen-careteam-1"
@@ -1318,7 +1318,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d7a9e2e3-4ef4-4e28-a604-84dbeab7a8f5",
+      "fullUrl": "CarePlan/robert-chen-careplan-1",
       "resource": {
         "resourceType": "CarePlan",
         "status": "active",
@@ -1335,33 +1335,33 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:bc2e8f50-7438-488c-a639-82881047e8ff"
+            "reference": "CareTeam/robert-chen-careteam-1"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:fd2868b9-5be2-4c29-8f0d-c523963848fd"
+            "reference": "Condition/robert-chen-condition-1"
           },
           {
-            "reference": "urn:uuid:02d7cde7-b205-40f0-bb3f-2d4e9d4663b6"
+            "reference": "Condition/robert-chen-condition-2"
           },
           {
-            "reference": "urn:uuid:70273f4d-c1b1-4412-8382-e6f8eb026f5f"
+            "reference": "Condition/robert-chen-condition-3"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:c043d530-d142-499b-a51e-e256d170126d"
+            "reference": "Goal/robert-chen-goal-1"
           },
           {
-            "reference": "urn:uuid:96ebe86f-6c23-4f7a-8542-38dd12212a1b"
+            "reference": "Goal/robert-chen-goal-2"
           },
           {
-            "reference": "urn:uuid:1858a465-4aa5-408c-975a-8903e0328411"
+            "reference": "Goal/robert-chen-goal-3"
           }
         ],
         "id": "robert-chen-careplan-1"
@@ -1372,7 +1372,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ca4509b0-510c-4703-abd2-e4fee231aba9",
+      "fullUrl": "Observation/robert-chen-observation-8",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1409,7 +1409,7 @@
           "text": "BP Control Check"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "valueInteger": 28,
         "note": [
@@ -1425,7 +1425,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3433913b-83b7-461d-a390-16aa6120d135",
+      "fullUrl": "Observation/robert-chen-observation-9",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1462,7 +1462,7 @@
           "text": "eGFR / Creatinine (CKD)"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "valueInteger": 42,
         "note": [
@@ -1478,7 +1478,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:267467c2-be6d-43b4-9a3c-f5c76de8cd33",
+      "fullUrl": "Observation/robert-chen-observation-10",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1515,7 +1515,7 @@
           "text": "AUDIT-C Follow-up Counseling"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "valueInteger": 21,
         "note": [
@@ -1531,7 +1531,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c9fdb70d-6cab-4450-8114-148a10fc68de",
+      "fullUrl": "Flag/robert-chen-flag-1",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1567,7 +1567,7 @@
           "text": "BP control check overdue — hypertension gap"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "id": "robert-chen-flag-1",
         "period": {
@@ -1580,7 +1580,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c52e9a67-0787-4ae2-ae44-6f314be99e49",
+      "fullUrl": "Flag/robert-chen-flag-2",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1616,7 +1616,7 @@
           "text": "eGFR overdue — CKD monitoring gap"
         },
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "id": "robert-chen-flag-2",
         "period": {
@@ -1629,7 +1629,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1791ed1c-654b-4368-b37d-2f890bb3111a",
+      "fullUrl": "RiskAssessment/robert-chen-riskassessment-1",
       "resource": {
         "resourceType": "RiskAssessment",
         "extension": [
@@ -1648,7 +1648,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "prediction": [
           {
@@ -1667,7 +1667,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:robert-chen-codinggap-1",
+      "fullUrl": "MeasureReport/robert-chen-codinggap-1",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "robert-chen-codinggap-1",
@@ -1675,7 +1675,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "period": {
           "start": "2026-01-01",
@@ -1761,7 +1761,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:robert-chen-codinggap-2",
+      "fullUrl": "MeasureReport/robert-chen-codinggap-2",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "robert-chen-codinggap-2",
@@ -1769,7 +1769,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:90629ec1-1ae3-4f88-9e43-ed1ea35b3d54"
+          "reference": "Patient/patient-robert-103"
         },
         "period": {
           "start": "2026-01-01",

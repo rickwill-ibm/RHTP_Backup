@@ -6,13 +6,13 @@
  * without a live FHIR server.
  *
  * When NEXT_PUBLIC_USE_MOCK_DATA=false the client issues real HTTP requests
- * against NEXT_PUBLIC_FHIR_BASE_URL (default http://localhost:8080/fhir).
+ * against NEXT_PUBLIC_FHIR_BASE_URL (default http://localhost:8090/fhir).
  */
 
 import type { RegistryPatient } from '../patientRegistry';
 import { storeRead, storeSearch, storeCreate, storeUpdate, storeDelete } from '../fhir/store';
 
-const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8080/fhir';
+const FHIR_BASE = process.env.NEXT_PUBLIC_FHIR_BASE_URL ?? 'http://localhost:8090/fhir';
 
 const TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_FHIR_TIMEOUT ?? 30_000);
 

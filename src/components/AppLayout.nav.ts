@@ -393,7 +393,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'nav-cdp-assembly-new',
-    label: 'CDP Assembly',
+    label: 'Whole Person Care Record Assembly',
     icon: 'CircleStackIcon',
     href: '/cdp-assembly',
     group: 'Backup',

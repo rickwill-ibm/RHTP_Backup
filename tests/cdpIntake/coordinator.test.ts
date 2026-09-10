@@ -6,8 +6,6 @@ import type { IngestBundleResult } from '@/lib/runtime/ingestBundle';
 
 const DIR = join(process.cwd(), 'src', 'lib', 'cdp-intake', 'sample-sources');
 
-// Mock the two front doors. Only the fields the coordinator reads are populated;
-// the rest of IngestBundleResult is satisfied via a cast (a test convenience).
 const dispatch: IntakeDispatch = {
   async ingestFhir(_payload, sourceSystem): Promise<IngestBundleResult> {
     return {
@@ -36,27 +34,27 @@ const dispatch: IntakeDispatch = {
 describe('cdp-intake/coordinator', () => {
   it('runs the folder through injected front doors and reconciles', async () => {
     const res = await runIntake(DIR, dispatch);
-    expect(res.receipt.files).toHaveLength(2);
-    expect(res.outcomes).toHaveLength(2);
-    // fhir bundle admitted 4 + 834 adapter loaded 1
-    expect(res.totals.loaded).toBe(5);
+    // Seeded population: 5 FHIR bundles, one per demo patient.
+    expect(res.receipt.files).toHaveLength(5);
+    expect(res.outcomes).toHaveLength(5);
+    // Each FHIR bundle admits coverage1 + conditions2 + observation1 = 4; 5 bundles = 20.
+    expect(res.totals.loaded).toBe(20);
     expect(res.totals.quarantined).toBe(0);
-    // attribution is authoritative: the 834 outcome carries its real filename
-    const raw = res.outcomes.find((o) => o.sourceSystem === 'SD_MEDICAID_MMIS');
-    expect(raw?.file).toBe('eligibility.834.txt');
+    // attribution is authoritative: each outcome carries its real filename.
+    const maria = res.outcomes.find((o) => o.file === 'sd-medicaid-mmis.maria.fhir.json');
+    expect(maria?.sourceSystem).toBe('SD_MEDICAID_MMIS');
   });
 
   it('orders anchor-first and by source (deterministic)', async () => {
     const res = await runIntake(DIR, dispatch);
-    // BENNETT_COUNTY_EHR sorts before SD_MEDICAID_MMIS
+    // All batch; BENNETT_COUNTY_EHR sorts before the other source systems.
     expect(res.outcomes[0].sourceSystem).toBe('BENNETT_COUNTY_EHR');
   });
 
-  it('planIntake routes each file to the right door without ingesting', () => {
+  it('planIntake routes each file to the fhir door without ingesting', () => {
     const { plan } = planIntake(DIR);
-    const fhir = plan.find((p) => p.file === 'member.fhir.json');
-    const x12 = plan.find((p) => p.file === 'eligibility.834.txt');
-    expect(fhir?.door).toBe('fhir');
-    expect(x12?.door).toBe('adapter');
+    // Every seeded source is a FHIR bundle -> the fhir door.
+    expect(plan).toHaveLength(5);
+    expect(plan.every((p) => p.door === 'fhir')).toBe(true);
   });
 });

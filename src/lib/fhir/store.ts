@@ -14,10 +14,50 @@
  */
 import type { FhirBundle, FhirResource } from './types';
 import mariaBundle from '../../../fhir/seed/maria-redhawk.bundle.json';
+import dorothyBundle from '../../../fhir/seed/patients/dorothy-simmons.bundle.json';
+import jamesBundle from '../../../fhir/seed/patients/james-wilson.bundle.json';
+import robertBundle from '../../../fhir/seed/patients/robert-chen.bundle.json';
+import lisaBundle from '../../../fhir/seed/patients/lisa-thompson.bundle.json';
 
 type AnyResource = FhirResource & Record<string, unknown>;
 
-const SEED_BUNDLES: FhirBundle[] = [mariaBundle as unknown as FhirBundle];
+const SEED_BUNDLES: FhirBundle[] = [
+  mariaBundle as unknown as FhirBundle,
+  dorothyBundle as unknown as FhirBundle,
+  jamesBundle as unknown as FhirBundle,
+  robertBundle as unknown as FhirBundle,
+  lisaBundle as unknown as FhirBundle,
+];
+
+/**
+ * Platform-layer patient IDs → FHIR resource IDs.
+ * patientContext / appContext use platform IDs (e.g. 'MARIA_SD_001') while
+ * the FHIR seed bundle uses resource IDs (e.g. 'patient-maria-001').
+ * Any query arriving with a platform ID is silently normalised here so
+ * medications, allergies, and problem-list items resolve correctly on all
+ * non-SmartApp screens.
+ */
+const PATIENT_ID_ALIASES: Record<string, string> = {
+  // Maria
+  MARIA_SD_001: 'patient-maria-001',
+  'patient-maria': 'patient-maria-001',
+  // Dorothy
+  'PAT-0042': 'patient-dorothy-042',
+  'patient-0042': 'patient-dorothy-042',
+  // James
+  'PAT-0087': 'patient-james-087',
+  'patient-0087': 'patient-james-087',
+  // Robert
+  'PAT-0103': 'patient-robert-103',
+  'patient-0103': 'patient-robert-103',
+  // Lisa
+  'PAT-0156': 'patient-lisa-156',
+  'patient-0156': 'patient-lisa-156',
+};
+
+function normPatientId(id: string): string {
+  return PATIENT_ID_ALIASES[id] ?? id;
+}
 
 // resourceType -> id -> resource
 let db: Map<string, Map<string, AnyResource>> | null = null;
@@ -80,7 +120,8 @@ function effectiveDate(res: AnyResource): string {
 }
 
 function matchesParam(res: AnyResource, key: string, raw: string): boolean {
-  const value = String(raw);
+  // Normalise platform patient IDs → FHIR resource IDs before matching
+  const value = key === 'patient' || key === 'subject' ? normPatientId(String(raw)) : String(raw);
   switch (key) {
     case 'patient':
     case 'subject':
@@ -115,7 +156,7 @@ function matchesParam(res: AnyResource, key: string, raw: string): boolean {
 // ── Public API (mirrors FhirClient method shapes) ────────────────────────────
 
 export function storeRead<T = unknown>(resourceType: string, id: string): T | undefined {
-  return load().get(resourceType)?.get(id) as T | undefined;
+  return load().get(resourceType)?.get(normPatientId(id)) as T | undefined;
 }
 
 export function storeSearch<T = unknown>(

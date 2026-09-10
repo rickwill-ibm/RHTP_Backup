@@ -513,6 +513,143 @@ const ALL_STEPS: (DemoStep & { personaId: string; personaColor: string })[] = DE
   (p) => p.steps.map((s) => ({ ...s, personaId: p.id, personaColor: p.color }))
 );
 
+// ─── SLED track (17 steps) — a peer mode alongside Full Sequence and Story Mode.
+// Its own numbering space (1..17): SLED is never merged into ALL_STEPS, so a route it
+// shares with a persona step can never mis-resolve across tracks.
+const SLED_COLOR = '#8e6a00';
+const SLED_STEPS: DemoStep[] = [
+  {
+    stepNum: 1,
+    route: '/contract-program-selection',
+    label: 'WPCO Overview',
+    storyBeat:
+      'Whole-person care operations across the program — every contract, region and network in one frame',
+  },
+  {
+    stepNum: 2,
+    route: '/region-view',
+    label: 'Region View',
+    storyBeat:
+      'Drill to a region: rural counties, HPSA gaps, facility mix, and where the population actually sits',
+  },
+  {
+    stepNum: 3,
+    route: '/provider-level',
+    label: 'Program Networks',
+    storyBeat:
+      'Network composition — CAHs, RHCs, tribal and 638 facilities, CBOs, and the referral paths between them',
+  },
+  {
+    stepNum: 4,
+    route: '/panel-cohort-view',
+    label: 'Panel & Cohort',
+    storyBeat:
+      'Narrow to a cohort: attributed panel, open gaps, and barrier signals ranked for action',
+  },
+  {
+    stepNum: 5,
+    route: '/patient-detail',
+    label: 'Citizen Detail',
+    storyBeat: 'Zoom to one citizen in the cohort — the record as it exists today, before assembly',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 6,
+    route: '/uhg-orchestrate/fragmentation-split-system-view',
+    label: 'One Enterprise, Five Views',
+    storyBeat:
+      'The same citizen as five disconnected records — clinical linked by the HIE, everything else siloed',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 7,
+    route: '/uhg-orchestrate/cdp-assembly-split',
+    label: 'CDP Assembly',
+    storyBeat:
+      'Identity resolved across clinical, behavioral, social and administrative sources — one governed record',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 8,
+    route: '/whole-person-care-summary',
+    label: 'Whole Person Care View',
+    storyBeat:
+      'The knowledge graph: needs, people and barriers as first-class edges — not just what is overdue, but why',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 9,
+    route: '/uhg-orchestrate/consumer-360',
+    label: 'Journey-Aware Context',
+    storyBeat:
+      'Where the member sits in their journey — the episode window, and what it changes about timing and outreach',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 10,
+    route: '/uhg-orchestrate/whole-person-care',
+    label: 'Whole Person Intelligence',
+    storyBeat:
+      'Clinical, behavioral, social and caregiver context assembled into one reviewable picture',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 11,
+    route: '/uhg-orchestrate/family-sofia',
+    label: 'Family Thread',
+    storyBeat:
+      'The dependent in the same household, behind the same barrier — one household, one coordinated outreach',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 12,
+    route: '/uhg-orchestrate/caregiver-elena',
+    label: 'Caregiver Intelligence',
+    storyBeat:
+      'The caregiving load that limits availability, held inside a consent scope the member controls',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 13,
+    route: '/uhg-orchestrate/signal-disposition-engine',
+    label: 'Signal Disposition Engine',
+    storyBeat:
+      'Signals deduped, superseded, bundled and ranked — what to act on, what to suppress, in what order',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 14,
+    route: '/patient-detail',
+    label: 'Citizen Detail — Assembled',
+    storyBeat: 'The same screen as step 5, now whole — every dimension the fragments were hiding',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 15,
+    route: '/md-smart-launch',
+    label: 'SmartApp — Care Plan',
+    storyBeat:
+      'FHIR-native SmartApp inside the clinical workflow: sequenced plan, barrier first, human approves',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 16,
+    route: '/care-gap-closure-verification',
+    label: 'Care Gap Closure',
+    storyBeat:
+      'Closed at the source, not in a reminder — evidence captured, attributable and audit-defensible',
+    activePatient: 'MARIA_SD_001',
+  },
+  {
+    stepNum: 17,
+    route: '/uhg-orchestrate/portfolio-scale',
+    label: 'Live Population Filter',
+    storyBeat:
+      'Zoom back out: the same pattern across the population — barriers as data, visible live, not quarterly',
+    activePatient: 'MARIA_SD_001',
+  },
+];
+
 // ─── Story Mode definitions ──────────────────────────────────────────────────
 // `StoryStep`, `ChapterCard`, and the per-patient chapter/step content now live in
 // `@/uhg/data/storyNarrative` (getStoryChapters / getStorySteps). They are composed
@@ -1034,7 +1171,7 @@ function StoryTellingOverlay({ onClose }: { onClose: () => void }) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type DemoMode = 'full' | 'story';
+type DemoMode = 'full' | 'story' | 'sled';
 
 // When the current pathname is a real step route whose beat was filtered OUT for the selected
 // patient (so it's absent from the composed list), resolve navigation to the nearest surviving
@@ -1081,9 +1218,9 @@ export default function DemoNavigator() {
 
   // Active step list depends on mode — and is COMPOSED for the selected patient: beats that
   // don't apply (e.g. a Family/dependent beat for a member with no dependent) drop out entirely.
-  const activeSteps = (demoMode === 'story' ? storySteps : ALL_STEPS).filter((s) =>
-    beatApplies(s.route, activeCitizenId)
-  );
+  const stepsForMode: (DemoStep | StoryStep)[] =
+    demoMode === 'story' ? storySteps : demoMode === 'sled' ? SLED_STEPS : ALL_STEPS;
+  const activeSteps = stepsForMode.filter((s) => beatApplies(s.route, activeCitizenId));
   const totalSteps = activeSteps.length;
 
   // Mode-tab counts are the COMPOSED counts for the selected patient (a beat that doesn't apply
@@ -1091,6 +1228,7 @@ export default function DemoNavigator() {
   // which mode is currently active.
   const fullStepCount = ALL_STEPS.filter((s) => beatApplies(s.route, activeCitizenId)).length;
   const storyStepCount = storySteps.filter((s) => beatApplies(s.route, activeCitizenId)).length;
+  const sledStepCount = SLED_STEPS.filter((s) => beatApplies(s.route, activeCitizenId)).length;
 
   // Disambiguated lookup: if multiple steps share a pathname, prefer the one
   // whose stepNum matches the last navigation; otherwise fall back to first match.
@@ -1108,7 +1246,7 @@ export default function DemoNavigator() {
   // If the pathname maps to a beat filtered OUT for this patient, currentStepIndex is -1 even
   // though the route is a real step. Resolve to the nearest surviving neighbours (by original
   // order) so the label + prev/next never dead-end on a dropped beat.
-  const baseSteps = demoMode === 'story' ? storySteps : ALL_STEPS;
+  const baseSteps = stepsForMode;
   const neighbours =
     currentStepIndex === -1
       ? nearestApplicableNeighbours(baseSteps, pathname, activeCitizenId, totalSteps)
@@ -1132,9 +1270,11 @@ export default function DemoNavigator() {
 
   // Pill colour: story mode uses chapter colour; full mode uses persona colour
   const pillColor =
-    demoMode === 'story'
-      ? ((currentStep as StoryStep | null)?.chapterColor ?? '#0043ce')
-      : (currentPersonaFull?.color ?? '#0043ce');
+    demoMode === 'sled'
+      ? SLED_COLOR
+      : demoMode === 'story'
+        ? ((currentStep as StoryStep | null)?.chapterColor ?? '#0043ce')
+        : (currentPersonaFull?.color ?? '#0043ce');
 
   const prevStep =
     currentStepIndex > 0
@@ -1274,6 +1414,78 @@ export default function DemoNavigator() {
   };
 
   // ── Full sequence panel content ─────────────────────────────────────────────
+  // SLED — a single flat ordered track. The position number is derived at render from the
+  // COMPOSED list, so a dropped household beat renumbers cleanly instead of leaving a hole.
+  const SledPanel = () => {
+    const shown = SLED_STEPS.filter((step) => beatApplies(step.route, activeCitizenId));
+    return (
+      <div className="flex-1 overflow-y-auto py-2">
+        <div className="flex items-center gap-2 px-4 py-2" style={{ backgroundColor: '#fcf4d6' }}>
+          <div
+            className="w-6 h-6 flex items-center justify-center flex-shrink-0 text-2xs font-bold text-white"
+            style={{ backgroundColor: SLED_COLOR, borderRadius: 0 }}
+          >
+            SL
+          </div>
+          <div className="min-w-0">
+            <p
+              className="text-2xs font-semibold uppercase tracking-wide"
+              style={{ color: SLED_COLOR }}
+            >
+              SLED
+            </p>
+            <p className="text-xs font-medium text-carbon-gray-100 truncate">
+              State · Local · Education · Government
+            </p>
+          </div>
+        </div>
+        {shown.map((step, i) => {
+          const isCurrentStep = step.route === pathname && step.stepNum === currentStep?.stepNum;
+          const beat = resolveBeat(step.route, step.storyBeat, step.activePatient, activeCitizenId);
+          return (
+            <button
+              key={step.stepNum}
+              onClick={() => navigateToStep(step)}
+              className={`w-full flex items-start gap-3 px-4 py-2 text-left transition-colors hover:bg-carbon-gray-10 ${
+                isCurrentStep ? 'bg-carbon-gray-10' : ''
+              }`}
+            >
+              <div
+                className="w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5 text-2xs font-bold"
+                style={{
+                  backgroundColor: isCurrentStep ? SLED_COLOR : 'transparent',
+                  color: isCurrentStep ? '#fff' : SLED_COLOR,
+                  border: `1.5px solid ${SLED_COLOR}`,
+                  borderRadius: 0,
+                }}
+              >
+                {i + 1}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-xs font-medium ${isCurrentStep ? 'text-carbon-gray-100' : 'text-carbon-gray-70'}`}
+                >
+                  {step.label}
+                </p>
+                <p className="text-2xs text-carbon-gray-50 line-clamp-2" title={beat}>
+                  {beat}
+                </p>
+              </div>
+              {isCurrentStep && (
+                <Icon
+                  name="ChevronRightIcon"
+                  size={12}
+                  className="flex-shrink-0 mt-1"
+                  style={{ color: SLED_COLOR } as React.CSSProperties}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   const FullPanel = () => (
     <div className="flex-1 overflow-y-auto py-2">
       {DEMO_PERSONAS.map((persona) => {
@@ -1392,11 +1604,11 @@ export default function DemoNavigator() {
               </button>
             </div>
 
-            {/* Mode toggle */}
+            {/* Mode toggle — Full Sequence · Story · SLED are peers */}
             <div className="flex border-b border-carbon-gray-20 flex-shrink-0">
               <button
                 onClick={() => switchMode('full')}
-                className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                className={`flex-1 py-2 px-1 text-2xs font-semibold leading-tight transition-colors ${
                   demoMode === 'full'
                     ? 'bg-carbon-gray-100 text-white'
                     : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20'
@@ -1404,14 +1616,14 @@ export default function DemoNavigator() {
               >
                 Full Sequence
                 <span
-                  className={`ml-1 text-2xs font-normal ${demoMode === 'full' ? 'text-white/70' : 'text-carbon-gray-50'}`}
+                  className={`block text-2xs font-normal ${demoMode === 'full' ? 'text-white/70' : 'text-carbon-gray-50'}`}
                 >
                   {fullStepCount} steps
                 </span>
               </button>
               <button
                 onClick={() => switchMode('story')}
-                className={`flex-1 py-2 text-xs font-semibold transition-colors border-l border-carbon-gray-20 ${
+                className={`flex-1 py-2 px-1 text-2xs font-semibold leading-tight transition-colors border-l border-carbon-gray-20 ${
                   demoMode === 'story'
                     ? 'bg-carbon-gray-100 text-white'
                     : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20'
@@ -1419,9 +1631,25 @@ export default function DemoNavigator() {
               >
                 ▶ Story Mode
                 <span
-                  className={`ml-1 text-2xs font-normal ${demoMode === 'story' ? 'text-white/70' : 'text-carbon-gray-50'}`}
+                  className={`block text-2xs font-normal ${demoMode === 'story' ? 'text-white/70' : 'text-carbon-gray-50'}`}
                 >
                   {storyStepCount} steps
+                </span>
+              </button>
+              <button
+                onClick={() => switchMode('sled')}
+                className={`flex-1 py-2 px-1 text-2xs font-semibold leading-tight transition-colors border-l border-carbon-gray-20 ${
+                  demoMode === 'sled'
+                    ? 'bg-carbon-gray-100 text-white'
+                    : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20'
+                }`}
+                style={demoMode === 'sled' ? { backgroundColor: SLED_COLOR } : undefined}
+              >
+                SLED
+                <span
+                  className={`block text-2xs font-normal ${demoMode === 'sled' ? 'text-white/70' : 'text-carbon-gray-50'}`}
+                >
+                  {sledStepCount} steps
                 </span>
               </button>
             </div>
@@ -1448,7 +1676,13 @@ export default function DemoNavigator() {
             )}
 
             {/* Step list — switches by mode */}
-            {demoMode === 'story' ? <StoryPanel /> : <FullPanel />}
+            {demoMode === 'story' ? (
+              <StoryPanel />
+            ) : demoMode === 'sled' ? (
+              <SledPanel />
+            ) : (
+              <FullPanel />
+            )}
 
             {/* Prev / Next footer */}
             <div className="border-t border-carbon-gray-20 flex items-stretch flex-shrink-0">
@@ -1512,10 +1746,12 @@ export default function DemoNavigator() {
             title={
               demoMode === 'story'
                 ? `Story Mode — ${storyStepCount} steps`
-                : `Full Sequence — ${fullStepCount} steps`
+                : demoMode === 'sled'
+                  ? `SLED — ${sledStepCount} steps`
+                  : `Full Sequence — ${fullStepCount} steps`
             }
           >
-            {demoMode === 'story' ? 'STORY' : 'FULL'}
+            {demoMode === 'story' ? 'STORY' : demoMode === 'sled' ? 'SLED' : 'FULL'}
           </div>
 
           {/* ▶ Next */}

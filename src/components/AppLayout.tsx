@@ -7,6 +7,8 @@ import Icon from '@/components/ui/AppIcon';
 import { useAppContext } from '@/lib/appContext';
 import type { UserSession } from '@/lib/appContext';
 import DemoNavigator from '@/components/DemoNavigator';
+import FhirModeSyncMount from '@/components/FhirModeSyncMount';
+import AppTopBarActions from '@/components/AppTopBarActions';
 
 // ─── Authorship ────────────────────────────────────────────────────────────────
 // Author: Richard Hennessy — TCOC Total Cost of Care Clinical Platform
@@ -446,6 +448,8 @@ interface AppLayoutProps {
   pageTitle?: string;
   breadcrumbs?: { label: string; href?: string }[];
   contextBanner?: React.ReactNode;
+  /** When true, removes max-width constraints for full-bleed layouts */
+  fullBleed?: boolean;
 }
 
 export default function AppLayout({
@@ -453,11 +457,21 @@ export default function AppLayout({
   pageTitle,
   breadcrumbs,
   contextBanner,
+  fullBleed: _fullBleed,
 }: AppLayoutProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, setUser, entryContext, setEntryContext } = useAppContext();
+  const {
+    user,
+    setUser,
+    entryContext,
+    setEntryContext,
+    useMockData,
+    setUseMockData,
+    activePatientId,
+    setActivePatientId,
+  } = useAppContext();
 
   const grouped = groupOrder.map((g) => ({
     group: g,
@@ -584,6 +598,45 @@ export default function AppLayout({
                   </button>
                 ))}
               </div>
+              {/* Mock / Live FHIR toggle */}
+              <div className="flex gap-1">
+                {([true, false] as const).map((mock) => (
+                  <button
+                    key={String(mock)}
+                    onClick={() => setUseMockData(mock)}
+                    className={`flex-1 text-2xs py-1 px-1.5 font-medium transition-colors ${
+                      useMockData === mock
+                        ? 'bg-[#007d79] text-white'
+                        : 'bg-carbon-gray-80 text-carbon-gray-30 hover:bg-carbon-gray-70'
+                    }`}
+                    title={mock ? 'Use mock FHIR fixture data' : 'Use live FHIR server'}
+                  >
+                    {mock ? 'Mock' : 'Live'}
+                  </button>
+                ))}
+              </div>
+              {/* Active patient toggle */}
+              <div className="flex gap-1">
+                {(
+                  [
+                    { id: 'MARIA_SD_001', label: 'Maria' },
+                    { id: 'patient-001', label: 'Other' },
+                  ] as const
+                ).map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setActivePatientId(p.id)}
+                    className={`flex-1 text-2xs py-1 px-1.5 font-medium transition-colors ${
+                      activePatientId === p.id
+                        ? 'bg-[#da1e28] text-white'
+                        : 'bg-carbon-gray-80 text-carbon-gray-30 hover:bg-carbon-gray-70'
+                    }`}
+                    title={p.id}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -645,35 +698,7 @@ export default function AppLayout({
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Role + context indicator */}
-            <div className="hidden md:flex items-center gap-1.5 mr-2">
-              <span
-                className={`text-2xs font-semibold px-2 py-1 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}
-              >
-                {user.role === 'physician' ? 'Physician' : 'Care Manager'}
-              </span>
-              <span
-                className={`text-2xs font-medium px-2 py-1 ${entryContext === 'cerner-launch' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-carbon-gray-10 text-carbon-gray-50'}`}
-              >
-                {entryContext === 'cerner-launch' ? '⚡ Cerner' : 'Browse'}
-              </span>
-            </div>
-            <button className="p-2 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10 transition-colors relative">
-              <Icon name="BellIcon" size={18} />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-carbon-red rounded-full" />
-            </button>
-            <button className="p-2 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-10 transition-colors">
-              <Icon name="QuestionMarkCircleIcon" size={18} />
-            </button>
-            <div className="w-px h-6 bg-carbon-gray-20 mx-1" />
-            <div className="flex items-center gap-2 text-sm">
-              <div className={`w-7 h-7 rounded-full ${roleColor} flex items-center justify-center`}>
-                <span className="text-white text-xs font-semibold">{user.initials}</span>
-              </div>
-              <span className="text-carbon-gray-70 text-xs hidden md:block">{user.name}</span>
-            </div>
-          </div>
+          <AppTopBarActions roleColor={roleColor} />
         </header>
 
         {/* Context banner */}
@@ -688,6 +713,8 @@ export default function AppLayout({
       </div>
       {/* Floating Demo Navigator — visible on all screens */}
       <DemoNavigator />
+      {/* Syncs AppContext.useMockData → fhirClient singleton on every render */}
+      <FhirModeSyncMount />
     </div>
   );
 }

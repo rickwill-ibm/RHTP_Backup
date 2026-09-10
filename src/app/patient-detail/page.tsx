@@ -35,9 +35,11 @@ function PatientDetailContent() {
   const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
   const activePatientId = activeCitizenId;
 
-  // URL param takes precedence; otherwise fall back to global activePatientId (default: MARIA_SD_001)
+  // The store is authoritative after initial load.
+  // ?id= in the URL seeds the store on first mount (via the useEffect below),
+  // but once it's written, the PatientSwitcherDropdown controls the active patient.
   const urlId = searchParams?.get('id') ?? '';
-  const rawId = urlId || activePatientId || 'MARIA_SD_001';
+  const rawId = activePatientId || urlId || 'MARIA_SD_001';
 
   // Resolve mockData IDs or legacy IDs to registry platform IDs
   const resolvedId = MOCK_ID_TO_PLATFORM_ID[rawId] ?? rawId;

@@ -14,6 +14,11 @@ import CarePlanForm from '@/app/patient-detail/components/CarePlanForm';
 import ReferralModal, { type ReferralFormData } from './ReferralModal';
 import GapClosureMetricsPanel from './GapClosureMetricsPanel';
 import FhirResourceViewer from './FhirResourceViewer';
+import AddMedicationForm from './AddMedicationForm';
+import AddAllergyForm from './AddAllergyForm';
+import AddConditionForm from './AddConditionForm';
+import { useActiveMedications } from '../hooks/useActiveMedications';
+import { useSmartAllergies } from '../hooks/useSmartAllergies';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
 import {
   type FhirRef,
@@ -238,6 +243,23 @@ export default function MdSmartSummaryScreen({
   const [referralsPage, setReferralsPage] = useState(0);
   const [activityPage, setActivityPage] = useState(0);
 
+  // ── MTM / Clinical entry modals ──────────────────────────────────────────────
+  const [showAddMed, setShowAddMed] = useState(false);
+  const [showAddAllergy, setShowAddAllergy] = useState(false);
+  const [showAddCondition, setShowAddCondition] = useState(false);
+  const [recentlyAddedMed, setRecentlyAddedMed] = useState<string | null>(null);
+  const [recentlyAddedAllergy, setRecentlyAddedAllergy] = useState<string | null>(null);
+  const [recentlyAddedCondition, setRecentlyAddedCondition] = useState<string | null>(null);
+
+  // Live FHIR-backed lists for MTM screening
+  const currentMedications = useActiveMedications(launchContext.patientId);
+  const [patientAllergies, refreshAllergies] = useSmartAllergies(launchContext.patientId);
+
+  // Patient age from registry (for Beers Criteria)
+  const patientAgeYears = registryPatient?.age
+    ? parseInt(String(registryPatient.age), 10)
+    : undefined;
+
   const currentPhaseIdx = JOURNEY_PHASES.findIndex((p) => p.key === CURRENT_PHASE_KEY);
   const currentPhase = JOURNEY_PHASES[currentPhaseIdx];
   const totalRafAtRisk = CDI_OPPORTUNITIES.reduce((s, c) => s + parseFloat(c.rafDelta), 0);
@@ -444,6 +466,57 @@ export default function MdSmartSummaryScreen({
         />
       )}
 
+      {/* ── MTM: Add Medication modal ────────────────────────────────────────── */}
+      {showAddMed && (
+        <AddMedicationForm
+          patientId={launchContext.patientId}
+          encounterId={launchContext.encounterId}
+          launchContext={launchContext}
+          currentMedications={currentMedications}
+          allergies={patientAllergies}
+          patientAgeYears={patientAgeYears}
+          onSaved={(resourceId, display) => {
+            setShowAddMed(false);
+            setRecentlyAddedMed(display);
+            setTimeout(() => setRecentlyAddedMed(null), 8000);
+            onAuditEntry?.('medication-added', { resourceId, display });
+          }}
+          onCancel={() => setShowAddMed(false)}
+        />
+      )}
+
+      {/* ── Add Allergy modal ────────────────────────────────────────────────── */}
+      {showAddAllergy && (
+        <AddAllergyForm
+          patientId={launchContext.patientId}
+          launchContext={launchContext}
+          onSaved={(resourceId, display) => {
+            setShowAddAllergy(false);
+            setRecentlyAddedAllergy(display);
+            refreshAllergies();
+            setTimeout(() => setRecentlyAddedAllergy(null), 8000);
+            onAuditEntry?.('allergy-added', { resourceId, display });
+          }}
+          onCancel={() => setShowAddAllergy(false)}
+        />
+      )}
+
+      {/* ── Add Condition modal ──────────────────────────────────────────────── */}
+      {showAddCondition && (
+        <AddConditionForm
+          patientId={launchContext.patientId}
+          encounterId={launchContext.encounterId}
+          launchContext={launchContext}
+          onSaved={(resourceId, display) => {
+            setShowAddCondition(false);
+            setRecentlyAddedCondition(display);
+            setTimeout(() => setRecentlyAddedCondition(null), 8000);
+            onAuditEntry?.('condition-added', { resourceId, display });
+          }}
+          onCancel={() => setShowAddCondition(false)}
+        />
+      )}
+
       {/* â”€â”€ ER/Admission Alert Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-[#fef3cd] border-b border-[#e8a200] px-4 py-2 flex items-center gap-3 flex-shrink-0">
         <Icon name="ExclamationTriangleIcon" size={14} className="text-[#c87400]" />
@@ -543,9 +616,24 @@ export default function MdSmartSummaryScreen({
                           {launchContext.encounterId}
                         </span>
                       </span>
-                      <span>
+                      <span className="flex items-center gap-1.5">
                         <span className="text-[#706e6b] mr-0.5">Allergies</span>
-                        <span className="font-medium text-[#c23934]">Penicillin, Sulfa</span>
+                        <span className="font-medium text-[#c23934]">
+                          {patientAllergies.length > 0
+                            ? patientAllergies.map((a) => a.substanceName).join(', ')
+                            : 'Penicillin, Sulfa'}
+                        </span>
+                        {recentlyAddedAllergy && (
+                          <span className="text-2xs text-[#166534] bg-[#f0fdf4] border border-[#86efac] px-1 py-0.5 rounded-sm">
+                            ✓ Added
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setShowAddAllergy(true)}
+                          className="text-2xs font-semibold px-1.5 py-0 border border-[#c23934] text-[#c23934] hover:bg-[#fce9e9] transition-colors rounded-sm"
+                        >
+                          + Add
+                        </button>
                       </span>
                     </div>
                   </div>
@@ -1055,8 +1143,21 @@ export default function MdSmartSummaryScreen({
               <div className="px-3 py-2.5 border-b border-[#dddbda] flex items-center gap-2 flex-shrink-0 bg-[#f4f6f9] min-h-[42px]">
                 <Icon name="HeartIcon" size={13} className="text-[#da1e28]" />
                 <span className="text-xs font-semibold text-[#3e3e3c]">Conditions</span>
-                <span className="ml-auto text-2xs font-semibold bg-[#fce9e9] text-[#c23934] border border-[#f5a9a9] px-1.5 py-0.5">
-                  {CHRONIC_CONDITIONS.length}
+                {recentlyAddedCondition && (
+                  <span className="text-2xs text-[#166534] bg-[#f0fdf4] border border-[#86efac] px-1.5 py-0.5 rounded-sm">
+                    ✓ Added
+                  </span>
+                )}
+                <span className="ml-auto flex items-center gap-2">
+                  <span className="text-2xs font-semibold bg-[#fce9e9] text-[#c23934] border border-[#f5a9a9] px-1.5 py-0.5">
+                    {CHRONIC_CONDITIONS.length}
+                  </span>
+                  <button
+                    onClick={() => setShowAddCondition(true)}
+                    className="text-2xs font-semibold px-2 py-0.5 bg-[#da1e28] text-white hover:bg-[#a91b1b] transition-colors rounded-sm"
+                  >
+                    + Add
+                  </button>
                 </span>
               </div>
               <div className="divide-y divide-carbon-gray-10 flex-1">
@@ -1102,8 +1203,21 @@ export default function MdSmartSummaryScreen({
               <div className="px-3 py-2.5 border-b border-[#dddbda] flex items-center gap-2 flex-shrink-0 bg-[#f4f6f9] min-h-[42px]">
                 <Icon name="PlusCircleIcon" size={13} className="text-[#0e6027]" />
                 <span className="text-xs font-semibold text-[#3e3e3c]">Medications</span>
-                <span className="ml-auto text-2xs font-medium text-[#706e6b]">
-                  {MEDS_DATA.length} active
+                {recentlyAddedMed && (
+                  <span className="text-2xs text-[#166534] bg-[#f0fdf4] border border-[#86efac] px-1.5 py-0.5 rounded-sm">
+                    ✓ {recentlyAddedMed} added
+                  </span>
+                )}
+                <span className="ml-auto flex items-center gap-2">
+                  <span className="text-2xs font-medium text-[#706e6b]">
+                    {MEDS_DATA.length} active
+                  </span>
+                  <button
+                    onClick={() => setShowAddMed(true)}
+                    className="text-2xs font-semibold px-2 py-0.5 bg-[#0e6027] text-white hover:bg-[#0a4a1e] transition-colors rounded-sm"
+                  >
+                    + Add
+                  </button>
                 </span>
               </div>
               <div className="divide-y divide-carbon-gray-10 flex-1">

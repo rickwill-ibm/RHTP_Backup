@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "urn:uuid:6d92e24c-a3ba-4f27-b03e-4fad9523c3ea",
+      "fullUrl": "Organization/james-wilson-organization-1",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -27,7 +27,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2cd512b2-a80b-420c-8b38-fbc38751ca7a",
+      "fullUrl": "Organization/james-wilson-organization-2",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc",
+      "fullUrl": "Patient/patient-james-087",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -72,7 +72,7 @@
         "gender": "male",
         "birthDate": "1968-07-14",
         "managingOrganization": {
-          "reference": "urn:uuid:6d92e24c-a3ba-4f27-b03e-4fad9523c3ea"
+          "reference": "Organization/james-wilson-organization-1"
         },
         "address": [
           {
@@ -103,7 +103,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610",
+      "fullUrl": "Practitioner/james-wilson-practitioner-1",
       "resource": {
         "resourceType": "Practitioner",
         "active": true,
@@ -132,15 +132,15 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:74fa2077-0942-4f78-b028-9939fc6a34f6",
+      "fullUrl": "PractitionerRole/james-wilson-practitionerrole-1",
       "resource": {
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "organization": {
-          "reference": "urn:uuid:6d92e24c-a3ba-4f27-b03e-4fad9523c3ea"
+          "reference": "Organization/james-wilson-organization-1"
         },
         "code": [
           {
@@ -161,7 +161,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f617807f-3c0a-4766-be0b-f5774af5a68b",
+      "fullUrl": "Coverage/james-wilson-coverage-1",
       "resource": {
         "resourceType": "Coverage",
         "status": "active",
@@ -175,11 +175,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "payor": [
           {
-            "reference": "urn:uuid:2cd512b2-a80b-420c-8b38-fbc38751ca7a"
+            "reference": "Organization/james-wilson-organization-2"
           }
         ],
         "relationship": {
@@ -198,7 +198,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:efed3e6f-40e5-4cc2-b576-4e8a73407bc0",
+      "fullUrl": "Encounter/james-wilson-encounter-1",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -219,17 +219,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+              "reference": "Practitioner/james-wilson-practitioner-1"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:6d92e24c-a3ba-4f27-b03e-4fad9523c3ea"
+          "reference": "Organization/james-wilson-organization-1"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -253,7 +253,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2af9d120-cee7-4a7d-b438-6cfb64415a8a",
+      "fullUrl": "Condition/james-wilson-condition-1",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -294,7 +294,7 @@
           "text": "Chronic diastolic (congestive) heart failure"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "onsetDateTime": "2022-01-01",
         "id": "james-wilson-condition-1"
@@ -305,7 +305,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:49b8e082-e13e-4e61-aee9-374a129e7a72",
+      "fullUrl": "Condition/james-wilson-condition-2",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -346,7 +346,7 @@
           "text": "Type 2 diabetes mellitus without complications"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "onsetDateTime": "2015-04-01",
         "id": "james-wilson-condition-2",
@@ -380,7 +380,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6b8cd719-20ee-4320-afca-4bf6682d76dc",
+      "fullUrl": "Condition/james-wilson-condition-3",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -421,7 +421,7 @@
           "text": "Essential (primary) hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "onsetDateTime": "2013-08-01",
         "id": "james-wilson-condition-3"
@@ -432,7 +432,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9a616b98-f5c1-4a9a-b434-d2b74664cdae",
+      "fullUrl": "Condition/james-wilson-condition-4",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -473,7 +473,7 @@
           "text": "Major depressive disorder, single episode, mild"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "onsetDateTime": "2024-02-01",
         "id": "james-wilson-condition-4"
@@ -484,7 +484,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6352c6bd-3457-46b9-b0fc-ee6a2ba5a285",
+      "fullUrl": "MedicationRequest/james-wilson-medicationrequest-1",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -500,11 +500,11 @@
           "text": "Metformin hydrochloride 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -519,7 +519,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0c1f193e-6d8e-4aac-8d1b-d15ed5767d02",
+      "fullUrl": "MedicationRequest/james-wilson-medicationrequest-2",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -535,11 +535,11 @@
           "text": "Carvedilol 12.5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -554,7 +554,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0d2dc30e-56f7-4db3-8a63-ec6b6dc3fd65",
+      "fullUrl": "MedicationRequest/james-wilson-medicationrequest-3",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -570,11 +570,11 @@
           "text": "Lisinopril 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -589,7 +589,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f5a0182c-aedb-40df-b8ac-79486dc796ac",
+      "fullUrl": "MedicationRequest/james-wilson-medicationrequest-4",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -605,11 +605,11 @@
           "text": "Furosemide 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -624,7 +624,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ce457505-6560-45f8-b497-b7bfc3081c79",
+      "fullUrl": "MedicationRequest/james-wilson-medicationrequest-5",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -640,11 +640,11 @@
           "text": "Atorvastatin 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -659,7 +659,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a2d9eb0e-a47d-4a4e-8095-b5248d044492",
+      "fullUrl": "ServiceRequest/james-wilson-servicerequest-1",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -686,11 +686,11 @@
           "text": "Hemoglobin A1c"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-02-28",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "id": "james-wilson-servicerequest-1"
       },
@@ -700,7 +700,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2c14117b-0092-40d1-b8cf-b66c0f8322c9",
+      "fullUrl": "ServiceRequest/james-wilson-servicerequest-2",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -727,11 +727,11 @@
           "text": "B-type natriuretic peptide panel"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-03-21",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "id": "james-wilson-servicerequest-2"
       },
@@ -741,7 +741,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c75a4a7e-070d-4020-ae1f-b12a42fea31d",
+      "fullUrl": "ServiceRequest/james-wilson-servicerequest-3",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -768,11 +768,11 @@
           "text": "Diabetic retinal exam"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2025-12-01",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "id": "james-wilson-servicerequest-3"
       },
@@ -782,7 +782,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:89d11b0d-10b0-4f31-b835-5589f96d8b2c",
+      "fullUrl": "ServiceRequest/james-wilson-servicerequest-4",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -809,11 +809,11 @@
           "text": "Cardiology consultation"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-04-01",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "id": "james-wilson-servicerequest-4"
       },
@@ -823,7 +823,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0b65ddf6-5a7a-470d-a022-1d43e8c2c0c4",
+      "fullUrl": "Observation/james-wilson-observation-1",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -849,7 +849,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -863,7 +863,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:881c93ed-af78-461f-acdc-c6553e5fc239",
+      "fullUrl": "Observation/james-wilson-observation-2",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -889,7 +889,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -903,7 +903,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:87b6f693-437f-4b1f-9459-6841060ccc58",
+      "fullUrl": "Observation/james-wilson-observation-3",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -929,7 +929,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -943,7 +943,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0c69cd5f-a74d-4b35-bf10-cfab0abe8a21",
+      "fullUrl": "Observation/james-wilson-observation-4",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -969,7 +969,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -983,7 +983,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c491cb20-a306-44cb-bada-3d9b1012742f",
+      "fullUrl": "Condition/james-wilson-condition-5",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1033,7 +1033,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "onsetDateTime": "2026-03-01",
         "id": "james-wilson-condition-5"
@@ -1044,7 +1044,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4fb86462-c905-4351-bd7c-820156b808fd",
+      "fullUrl": "Organization/james-wilson-organization-3",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -1069,7 +1069,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:956c54c4-8b01-48f1-8e47-4693242a6c83",
+      "fullUrl": "ServiceRequest/james-wilson-servicerequest-5",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -1096,20 +1096,20 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "authoredOn": "2026-03-01",
         "requester": {
-          "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+          "reference": "Practitioner/james-wilson-practitioner-1"
         },
         "performer": [
           {
-            "reference": "urn:uuid:4fb86462-c905-4351-bd7c-820156b808fd"
+            "reference": "Organization/james-wilson-organization-3"
           }
         ],
         "reasonReference": [
           {
-            "reference": "urn:uuid:c491cb20-a306-44cb-bada-3d9b1012742f"
+            "reference": "Condition/james-wilson-condition-5"
           }
         ],
         "id": "james-wilson-servicerequest-5"
@@ -1120,7 +1120,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:19c083af-2945-46f3-8fe5-146f3e5cdabe",
+      "fullUrl": "Task/james-wilson-task-1",
       "resource": {
         "resourceType": "Task",
         "status": "in-progress",
@@ -1136,13 +1136,13 @@
         },
         "description": "Closed-loop CBO referral: Transportation to specialist visits",
         "focus": {
-          "reference": "urn:uuid:956c54c4-8b01-48f1-8e47-4693242a6c83"
+          "reference": "ServiceRequest/james-wilson-servicerequest-5"
         },
         "for": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "owner": {
-          "reference": "urn:uuid:4fb86462-c905-4351-bd7c-820156b808fd"
+          "reference": "Organization/james-wilson-organization-3"
         },
         "authoredOn": "2026-03-01",
         "businessStatus": {
@@ -1156,7 +1156,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:843ca985-f7e3-47a9-9e5c-027de0af503d",
+      "fullUrl": "Observation/james-wilson-observation-5",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1182,7 +1182,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1199,7 +1199,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:df594c3a-a16a-4bff-a31d-21a17b72b925",
+      "fullUrl": "Observation/james-wilson-observation-6",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1225,7 +1225,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1242,7 +1242,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1324708f-cd73-4453-9d47-df7948796bc2",
+      "fullUrl": "Goal/james-wilson-goal-1",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1257,7 +1257,7 @@
           "text": "A1C recheck and control"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "id": "james-wilson-goal-1"
       },
@@ -1267,7 +1267,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ab5c4b69-a76d-41fb-a964-50f05aed19dd",
+      "fullUrl": "Goal/james-wilson-goal-2",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1282,7 +1282,7 @@
           "text": "BNP panel for CHF monitoring"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "id": "james-wilson-goal-2"
       },
@@ -1292,7 +1292,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c987b4c1-088d-41bd-a8f4-d1052928eec6",
+      "fullUrl": "Goal/james-wilson-goal-3",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1307,7 +1307,7 @@
           "text": "PHQ-9 follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "id": "james-wilson-goal-3"
       },
@@ -1317,12 +1317,12 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9ebbca2e-40f1-46f1-aec9-d9a3659f0f38",
+      "fullUrl": "CareTeam/james-wilson-careteam-1",
       "resource": {
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "participant": [
           {
@@ -1338,13 +1338,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:a0882682-f48c-45aa-aeb3-16b6ec3a9610"
+              "reference": "Practitioner/james-wilson-practitioner-1"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:6d92e24c-a3ba-4f27-b03e-4fad9523c3ea"
+            "reference": "Organization/james-wilson-organization-1"
           }
         ],
         "id": "james-wilson-careteam-1"
@@ -1355,7 +1355,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:826f57a5-60f5-4c4d-a287-28b338e9182e",
+      "fullUrl": "CarePlan/james-wilson-careplan-1",
       "resource": {
         "resourceType": "CarePlan",
         "status": "active",
@@ -1372,36 +1372,36 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:9ebbca2e-40f1-46f1-aec9-d9a3659f0f38"
+            "reference": "CareTeam/james-wilson-careteam-1"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:2af9d120-cee7-4a7d-b438-6cfb64415a8a"
+            "reference": "Condition/james-wilson-condition-1"
           },
           {
-            "reference": "urn:uuid:49b8e082-e13e-4e61-aee9-374a129e7a72"
+            "reference": "Condition/james-wilson-condition-2"
           },
           {
-            "reference": "urn:uuid:6b8cd719-20ee-4320-afca-4bf6682d76dc"
+            "reference": "Condition/james-wilson-condition-3"
           },
           {
-            "reference": "urn:uuid:9a616b98-f5c1-4a9a-b434-d2b74664cdae"
+            "reference": "Condition/james-wilson-condition-4"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:1324708f-cd73-4453-9d47-df7948796bc2"
+            "reference": "Goal/james-wilson-goal-1"
           },
           {
-            "reference": "urn:uuid:ab5c4b69-a76d-41fb-a964-50f05aed19dd"
+            "reference": "Goal/james-wilson-goal-2"
           },
           {
-            "reference": "urn:uuid:c987b4c1-088d-41bd-a8f4-d1052928eec6"
+            "reference": "Goal/james-wilson-goal-3"
           }
         ],
         "id": "james-wilson-careplan-1"
@@ -1412,7 +1412,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a8dfe15d-570f-460b-91cc-78c4d4e9df94",
+      "fullUrl": "Observation/james-wilson-observation-7",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1449,7 +1449,7 @@
           "text": "A1C Recheck (Diabetes)"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "valueInteger": 45,
         "note": [
@@ -1465,7 +1465,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4f65eebb-d861-4313-bce8-21c44276f0a6",
+      "fullUrl": "Observation/james-wilson-observation-8",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1502,7 +1502,7 @@
           "text": "BNP Lab Panel (CHF)"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "valueInteger": 22,
         "note": [
@@ -1518,7 +1518,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:78e95ec2-ef50-45a5-b53c-166d473e5d3c",
+      "fullUrl": "Observation/james-wilson-observation-9",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1555,7 +1555,7 @@
           "text": "PHQ-9 Follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "valueInteger": 30,
         "note": [
@@ -1571,7 +1571,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:123d3f66-9d94-48d3-8e2a-edb0684d8a42",
+      "fullUrl": "Observation/james-wilson-observation-10",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1608,7 +1608,7 @@
           "text": "Transportation — Specialist Visits"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "valueInteger": 45,
         "note": [
@@ -1624,7 +1624,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:98ca4165-c92f-4943-90e8-2786593eda34",
+      "fullUrl": "Flag/james-wilson-flag-1",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1660,7 +1660,7 @@
           "text": "A1C — diabetes management gap"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "id": "james-wilson-flag-1",
         "period": {
@@ -1673,7 +1673,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e6f52af4-d657-4ad7-a147-5e346aca3100",
+      "fullUrl": "Flag/james-wilson-flag-2",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1709,7 +1709,7 @@
           "text": "BNP panel — CHF monitoring gap"
         },
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "id": "james-wilson-flag-2",
         "period": {
@@ -1722,7 +1722,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:313dcd30-d4b6-4674-9b5f-dd40ea556d36",
+      "fullUrl": "RiskAssessment/james-wilson-riskassessment-1",
       "resource": {
         "resourceType": "RiskAssessment",
         "extension": [
@@ -1741,7 +1741,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "prediction": [
           {
@@ -1760,7 +1760,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:james-wilson-codinggap-1",
+      "fullUrl": "MeasureReport/james-wilson-codinggap-1",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "james-wilson-codinggap-1",
@@ -1768,7 +1768,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "period": {
           "start": "2026-01-01",
@@ -1854,7 +1854,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:james-wilson-codinggap-2",
+      "fullUrl": "MeasureReport/james-wilson-codinggap-2",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "james-wilson-codinggap-2",
@@ -1862,7 +1862,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:93f537bd-218a-4981-9631-28e495cedcfc"
+          "reference": "Patient/patient-james-087"
         },
         "period": {
           "start": "2026-01-01",

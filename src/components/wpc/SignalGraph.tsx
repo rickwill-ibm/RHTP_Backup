@@ -539,7 +539,7 @@ export function SignalGraph({
             ● <span style={{ color: '#e5484d' }}>Act now</span> (3 max)
           </span>
           <span>
-            ● <span style={{ color: '#d6a419' }}>Watch</span> (5 max)
+            ● <span style={{ color: '#d6a419' }}>Watch</span> · causal chain
           </span>
           <span>● Context — unlabelled</span>
           <span style={{ color: '#4b5563' }}>· pulsing = live act path</span>

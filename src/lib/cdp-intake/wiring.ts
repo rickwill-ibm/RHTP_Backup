@@ -13,13 +13,16 @@ import { ingestBundleJson, type IngestStores } from '@/lib/runtime/ingestBundle'
 import { defaultCrossReferenceStore } from '@/lib/identity';
 import type { IntakeDispatch, SourceLoadOutcome, IntakeRunResult } from './types';
 import { runIntake } from './coordinator';
+import { seededIdentitySource } from './seededIdentitySource';
 
 /**
  * A live dispatch bound to the shared projection stores AND the process-shared
- * cross-reference seam (defaultCrossReferenceStore().index), so identity persists
- * across runs and consolidates across sources / the batch↔stream seam — the same
- * xref every reader and the stream door use. (Production swaps the durable xref
- * behind the same seam.) Projects into the same graph the WPC record + KG read.
+ * in-memory cross-reference index (defaultCrossReferenceStore().index) — the XrefIndex
+ * ingestBundleJson resolves identity against, shared with every in-process reader and
+ * the stream door, so identity persists across runs and consolidates across sources /
+ * the batch↔stream seam. (Productionising durable xref is a composition-root concern
+ * behind the crossReference seam, not wired here.) Projects into the same graph the
+ * WPC record + KG read.
  */
 export function makeLiveDispatch(): IntakeDispatch {
   const proj = getSharedProjectionStores();
@@ -31,7 +34,13 @@ export function makeLiveDispatch(): IntakeDispatch {
   };
   return {
     async ingestFhir(payload: string, sourceSystem: string) {
-      return ingestBundleJson(payload, { sourceSystem }, stores);
+      // seededIdentitySource resolves the 5 demo patients deterministically (medicaidId-exact)
+      // to stable member ids instead of minting orphans; passed by value, no engine edit.
+      return ingestBundleJson(
+        payload,
+        { sourceSystem, identitySource: seededIdentitySource },
+        stores
+      );
     },
     async runAdapter(
       _adapter: string,
@@ -54,7 +63,30 @@ export function makeLiveDispatch(): IntakeDispatch {
   };
 }
 
-/** Run a whole source folder through the REAL pipeline into the shared projected graph. */
-export async function runPopulationLoad(dir: string): Promise<IntakeRunResult> {
-  return runIntake(dir, makeLiveDispatch(), { receivedAt: new Date().toISOString() });
+/** Cumulative size of the projected knowledge graph after a load — REAL, read back
+ * from the shared GraphStore (listNodes/listEdges), never a fabricated figure. */
+export interface GraphSize {
+  nodes: number;
+  edges: number;
+}
+
+/** IntakeRunResult plus the real projected-graph size — what the screen shows as the
+ * population's knowledge-graph footprint. The graph is process-shared and accumulates
+ * across runs, so this is the graph's CURRENT size, not this run's delta. */
+export interface PopulationLoadResult extends IntakeRunResult {
+  graph: GraphSize;
+}
+
+/**
+ * Run a whole source folder through the REAL pipeline into the shared projected graph,
+ * then read back the graph's true node/edge counts from the SAME shared store the
+ * dispatch projected into (getSharedProjectionStores is memoized → same instance).
+ */
+export async function runPopulationLoad(dir: string): Promise<PopulationLoadResult> {
+  const result = await runIntake(dir, makeLiveDispatch(), {
+    receivedAt: new Date().toISOString(),
+  });
+  const { graph } = getSharedProjectionStores();
+  const [nodes, edges] = await Promise.all([graph.listNodes(), graph.listEdges()]);
+  return { ...result, graph: { nodes: nodes.length, edges: edges.length } };
 }

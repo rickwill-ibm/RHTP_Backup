@@ -1,7 +1,6 @@
 'use client';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { mockPatients } from '@/lib/mockData';
 import type { Patient } from '@/lib/mockData';
 import type { PanelFilters } from '../page';
 import RiskBadge from '@/components/ui/RiskBadge';
@@ -221,7 +220,8 @@ export default function PatientPanelTable({
 }: PatientPanelTableProps & { physicianName?: string }) {
   const router = useRouter();
   const { useMockData } = useAppContext();
-  const { setActiveCitizen } = useActiveCitizen();
+  const { activeCitizenId, setActiveCitizen } = useActiveCitizen();
+  const activeRowRef = useRef<HTMLTableRowElement | null>(null);
   const [page, setPage] = useState(1);
   const perPage = 10;
 
@@ -279,13 +279,11 @@ export default function PatientPanelTable({
     activeAlerts: rp.cdsCards?.filter((c) => c.indicator === 'critical').length ?? 0,
   }));
 
-  // Merge: registry patients first, then any mock patients not already present
-  // (avoids duplicating entries when mock and registry overlap).
-  const registryIds = new Set(registryAsMockPatients.map((p) => p.id));
-  const mockFallback = mockPatients.filter(
-    (p) => p.contractId === 'contract-001' && !registryIds.has(p.id)
-  );
-  const basePatients = [...registryAsMockPatients, ...mockFallback];
+  // Registry is the single source of truth (matches the top-bar patient switcher).
+  // The legacy mock-data filler was removed: it injected demo patients absent from the
+  // registry (e.g. a duplicate 'Maria Reyes' distinct from the golden-demo Maria Redhawk),
+  // so the panel disagreed with every other screen about who the members are.
+  const basePatients = registryAsMockPatients;
 
   const filteredPatients = useMemo(() => {
     let result = [...basePatients];
@@ -401,6 +399,21 @@ export default function PatientPanelTable({
   const totalPages = Math.ceil(filteredPatients.length / perPage);
   const paged = filteredPatients.slice((page - 1) * perPage, page * perPage);
 
+  // Follow the active/selected patient (Maria by default): jump to their page and scroll
+  // their row into view. Additive only — no data change; keyed on activeCitizenId so manual
+  // pagination is never fought.
+  useEffect(() => {
+    if (!activeCitizenId) return;
+    const idx = filteredPatients.findIndex((pt) => pt.id === activeCitizenId);
+    if (idx < 0) return;
+    const targetPage = Math.floor(idx / perPage) + 1;
+    setPage((prev) => (prev !== targetPage ? targetPage : prev));
+  }, [activeCitizenId, filteredPatients]);
+
+  useEffect(() => {
+    activeRowRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [activeCitizenId, page]);
+
   return (
     <div className="bg-white border border-carbon-gray-20 overflow-x-auto scrollbar-thin">
       {/* Attribution legend */}
@@ -472,7 +485,8 @@ export default function PatientPanelTable({
             {paged.map((patient) => (
               <tr
                 key={patient.id}
-                className={`group hover:bg-[#edf5ff] transition-colors cursor-pointer ${selectedPatients.has(patient.id) ? 'bg-[#d0e2ff]/30' : ''}`}
+                ref={patient.id === activeCitizenId ? activeRowRef : undefined}
+                className={`group hover:bg-[#edf5ff] transition-colors cursor-pointer ${patient.id === activeCitizenId ? 'bg-[#d0e2ff] ring-2 ring-inset ring-[#0f62fe]' : selectedPatients.has(patient.id) ? 'bg-[#d0e2ff]/30' : ''}`}
                 onClick={() => {
                   setActiveCitizen(patient.id);
                   router.push(`/patient-detail?id=${patient.id}`);

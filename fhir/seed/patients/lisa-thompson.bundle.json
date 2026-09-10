@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "urn:uuid:22fce8a5-d31f-4e7a-a97a-17d2ba657bfd",
+      "fullUrl": "Organization/lisa-thompson-organization-1",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -27,7 +27,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7c7b40b9-885b-4ffd-a391-e26a23490287",
+      "fullUrl": "Organization/lisa-thompson-organization-2",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e",
+      "fullUrl": "Patient/patient-lisa-156",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -72,7 +72,7 @@
         "gender": "female",
         "birthDate": "1985-05-19",
         "managingOrganization": {
-          "reference": "urn:uuid:22fce8a5-d31f-4e7a-a97a-17d2ba657bfd"
+          "reference": "Organization/lisa-thompson-organization-1"
         },
         "address": [
           {
@@ -103,7 +103,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d",
+      "fullUrl": "Practitioner/lisa-thompson-practitioner-1",
       "resource": {
         "resourceType": "Practitioner",
         "active": true,
@@ -132,15 +132,15 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1cd9b27f-96ee-4eb5-91d2-8a2486410801",
+      "fullUrl": "PractitionerRole/lisa-thompson-practitionerrole-1",
       "resource": {
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "organization": {
-          "reference": "urn:uuid:22fce8a5-d31f-4e7a-a97a-17d2ba657bfd"
+          "reference": "Organization/lisa-thompson-organization-1"
         },
         "code": [
           {
@@ -161,7 +161,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:98b2f171-31a8-4d4c-9aa1-056a0557d01d",
+      "fullUrl": "Coverage/lisa-thompson-coverage-1",
       "resource": {
         "resourceType": "Coverage",
         "status": "active",
@@ -175,11 +175,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "payor": [
           {
-            "reference": "urn:uuid:7c7b40b9-885b-4ffd-a391-e26a23490287"
+            "reference": "Organization/lisa-thompson-organization-2"
           }
         ],
         "relationship": {
@@ -198,7 +198,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2f01107e-914d-4c64-b1f1-4b6e36959b57",
+      "fullUrl": "Encounter/lisa-thompson-encounter-1",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -219,17 +219,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+              "reference": "Practitioner/lisa-thompson-practitioner-1"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:22fce8a5-d31f-4e7a-a97a-17d2ba657bfd"
+          "reference": "Organization/lisa-thompson-organization-1"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -253,7 +253,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f38db878-ddf8-4d94-bb47-832fd76e25bd",
+      "fullUrl": "Condition/lisa-thompson-condition-1",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -294,7 +294,7 @@
           "text": "Severe persistent asthma, uncomplicated"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "onsetDateTime": "2012-03-01",
         "id": "lisa-thompson-condition-1"
@@ -305,7 +305,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d5b011fc-857d-484f-9b49-39ac999f4003",
+      "fullUrl": "Condition/lisa-thompson-condition-2",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -346,7 +346,7 @@
           "text": "Obesity, unspecified"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "onsetDateTime": "2018-09-01",
         "id": "lisa-thompson-condition-2"
@@ -357,7 +357,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:225e874b-605e-470c-b29b-06c753984498",
+      "fullUrl": "MedicationRequest/lisa-thompson-medicationrequest-1",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -373,11 +373,11 @@
           "text": "Fluticasone 250 mcg / salmeterol 50 mcg inhalation powder"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -392,7 +392,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8a0833a5-3c42-4298-86ba-dd720d604f6f",
+      "fullUrl": "MedicationRequest/lisa-thompson-medicationrequest-2",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -408,11 +408,11 @@
           "text": "Albuterol 90 mcg/actuation inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -427,7 +427,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6cf0d1c5-db92-4933-a4c7-768900c8d54f",
+      "fullUrl": "MedicationRequest/lisa-thompson-medicationrequest-3",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -443,11 +443,11 @@
           "text": "Montelukast 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -462,7 +462,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6e317524-4758-47cb-b117-27918812f384",
+      "fullUrl": "Observation/lisa-thompson-observation-1",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -487,7 +487,7 @@
           "text": "Body mass index (BMI)"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-03-28",
         "valueQuantity": {
@@ -514,7 +514,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8c176e87-b441-4f6d-9125-f6c6a1435a36",
+      "fullUrl": "ServiceRequest/lisa-thompson-servicerequest-1",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -541,11 +541,11 @@
           "text": "Spirometry"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-03-28",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "id": "lisa-thompson-servicerequest-1"
       },
@@ -555,7 +555,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d2a7072f-db89-412f-b1e6-9b4a46c6ff2a",
+      "fullUrl": "ServiceRequest/lisa-thompson-servicerequest-2",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -582,11 +582,11 @@
           "text": "Weight management program referral"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-02-20",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "id": "lisa-thompson-servicerequest-2"
       },
@@ -596,7 +596,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:96d3e218-c87d-4a15-8d86-812d4ea73815",
+      "fullUrl": "Observation/lisa-thompson-observation-2",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -622,7 +622,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -636,7 +636,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6be26b7c-c4a9-4432-b4ff-da520d386a32",
+      "fullUrl": "Observation/lisa-thompson-observation-3",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -662,7 +662,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -676,7 +676,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e58883ee-91cf-43bc-8bb9-2e651d4c5fb9",
+      "fullUrl": "Observation/lisa-thompson-observation-4",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -702,7 +702,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -716,7 +716,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:5b8d15b7-b08d-4545-ac99-f056e4e43624",
+      "fullUrl": "Observation/lisa-thompson-observation-5",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -742,7 +742,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -756,7 +756,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1ee7bc00-a270-46a2-8a95-cb60edc5592b",
+      "fullUrl": "Organization/lisa-thompson-organization-3",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -781,7 +781,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:960ea36b-e8e1-4ec4-8dbe-ece14b458585",
+      "fullUrl": "ServiceRequest/lisa-thompson-servicerequest-3",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -808,15 +808,15 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "authoredOn": "2026-04-01",
         "requester": {
-          "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+          "reference": "Practitioner/lisa-thompson-practitioner-1"
         },
         "performer": [
           {
-            "reference": "urn:uuid:1ee7bc00-a270-46a2-8a95-cb60edc5592b"
+            "reference": "Organization/lisa-thompson-organization-3"
           }
         ],
         "id": "lisa-thompson-servicerequest-3"
@@ -827,7 +827,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:17a80e31-e81d-43f0-a997-24e1d1cd6aad",
+      "fullUrl": "Task/lisa-thompson-task-1",
       "resource": {
         "resourceType": "Task",
         "status": "in-progress",
@@ -843,13 +843,13 @@
         },
         "description": "Closed-loop CBO referral: Nutrition counseling (SNAP-Ed)",
         "focus": {
-          "reference": "urn:uuid:960ea36b-e8e1-4ec4-8dbe-ece14b458585"
+          "reference": "ServiceRequest/lisa-thompson-servicerequest-3"
         },
         "for": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "owner": {
-          "reference": "urn:uuid:1ee7bc00-a270-46a2-8a95-cb60edc5592b"
+          "reference": "Organization/lisa-thompson-organization-3"
         },
         "authoredOn": "2026-04-01",
         "businessStatus": {
@@ -863,7 +863,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ea4130bb-040d-4dcc-99a2-40a137d282fe",
+      "fullUrl": "Observation/lisa-thompson-observation-6",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -889,7 +889,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -906,7 +906,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8b863856-7d02-48b3-8f65-cc1c204692c6",
+      "fullUrl": "Observation/lisa-thompson-observation-7",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -932,7 +932,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -949,7 +949,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4e877f9a-9a08-44d7-a57e-e86810cda8d4",
+      "fullUrl": "Goal/lisa-thompson-goal-1",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -964,7 +964,7 @@
           "text": "Asthma action plan update"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "id": "lisa-thompson-goal-1"
       },
@@ -974,7 +974,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a450a6cd-af41-483d-a09d-5866833c4a0c",
+      "fullUrl": "Goal/lisa-thompson-goal-2",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -989,7 +989,7 @@
           "text": "BMI / weight management"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "id": "lisa-thompson-goal-2"
       },
@@ -999,7 +999,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bf8652b2-d5c5-4354-86b6-81798b27d60d",
+      "fullUrl": "Goal/lisa-thompson-goal-3",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1014,7 +1014,7 @@
           "text": "PHQ-9 annual screening"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "id": "lisa-thompson-goal-3"
       },
@@ -1024,12 +1024,12 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:245a4d3d-7074-41fb-a940-cb8744849eda",
+      "fullUrl": "CareTeam/lisa-thompson-careteam-1",
       "resource": {
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "participant": [
           {
@@ -1045,13 +1045,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:f971bde2-2090-4273-b9e2-93ba13ff797d"
+              "reference": "Practitioner/lisa-thompson-practitioner-1"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:22fce8a5-d31f-4e7a-a97a-17d2ba657bfd"
+            "reference": "Organization/lisa-thompson-organization-1"
           }
         ],
         "id": "lisa-thompson-careteam-1"
@@ -1062,7 +1062,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:de15de67-730b-407e-ac0a-507e1c4a5bf8",
+      "fullUrl": "CarePlan/lisa-thompson-careplan-1",
       "resource": {
         "resourceType": "CarePlan",
         "status": "active",
@@ -1079,30 +1079,30 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:245a4d3d-7074-41fb-a940-cb8744849eda"
+            "reference": "CareTeam/lisa-thompson-careteam-1"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:f38db878-ddf8-4d94-bb47-832fd76e25bd"
+            "reference": "Condition/lisa-thompson-condition-1"
           },
           {
-            "reference": "urn:uuid:d5b011fc-857d-484f-9b49-39ac999f4003"
+            "reference": "Condition/lisa-thompson-condition-2"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:4e877f9a-9a08-44d7-a57e-e86810cda8d4"
+            "reference": "Goal/lisa-thompson-goal-1"
           },
           {
-            "reference": "urn:uuid:a450a6cd-af41-483d-a09d-5866833c4a0c"
+            "reference": "Goal/lisa-thompson-goal-2"
           },
           {
-            "reference": "urn:uuid:bf8652b2-d5c5-4354-86b6-81798b27d60d"
+            "reference": "Goal/lisa-thompson-goal-3"
           }
         ],
         "id": "lisa-thompson-careplan-1"
@@ -1113,7 +1113,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6a7f2c20-3e3d-41c1-8386-a359f16965a9",
+      "fullUrl": "Observation/lisa-thompson-observation-8",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1150,7 +1150,7 @@
           "text": "Asthma Action Plan Update"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "valueInteger": 35,
         "note": [
@@ -1166,7 +1166,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9004d089-06ec-418a-a43d-3bc5e55ac965",
+      "fullUrl": "Observation/lisa-thompson-observation-9",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1203,7 +1203,7 @@
           "text": "BMI / Weight Management Referral"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "valueInteger": 60,
         "note": [
@@ -1219,7 +1219,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:18db34ee-0b08-4c76-88e5-6fe18122a180",
+      "fullUrl": "Observation/lisa-thompson-observation-10",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1256,7 +1256,7 @@
           "text": "PHQ-9 Annual Screening"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "valueInteger": 18,
         "note": [
@@ -1272,7 +1272,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:988ad482-135b-45a5-b342-dab1ba8397f4",
+      "fullUrl": "Observation/lisa-thompson-observation-11",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1309,7 +1309,7 @@
           "text": "Nutrition Counseling Enrollment"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "valueInteger": 45,
         "note": [
@@ -1325,7 +1325,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c61955b7-467b-4db6-918f-ecae8fe8aad8",
+      "fullUrl": "Flag/lisa-thompson-flag-1",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1361,7 +1361,7 @@
           "text": "Asthma action plan update overdue"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "id": "lisa-thompson-flag-1",
         "period": {
@@ -1374,7 +1374,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:98b40a52-f039-4d74-be3e-7dd30d5015aa",
+      "fullUrl": "Flag/lisa-thompson-flag-2",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -1410,7 +1410,7 @@
           "text": "Weight management referral in progress — BMI elevated"
         },
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "id": "lisa-thompson-flag-2"
       },
@@ -1420,7 +1420,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:13d06e7b-9db2-4b11-8dbe-2108b1437abe",
+      "fullUrl": "RiskAssessment/lisa-thompson-riskassessment-1",
       "resource": {
         "resourceType": "RiskAssessment",
         "extension": [
@@ -1439,7 +1439,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "prediction": [
           {
@@ -1458,7 +1458,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:lisa-thompson-codinggap-1",
+      "fullUrl": "MeasureReport/lisa-thompson-codinggap-1",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "lisa-thompson-codinggap-1",
@@ -1466,7 +1466,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:df9a8c65-116b-4a5c-b2d4-d5b0c6b9435e"
+          "reference": "Patient/patient-lisa-156"
         },
         "period": {
           "start": "2026-01-01",

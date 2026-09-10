@@ -1,6 +1,13 @@
 ﻿// SMART on FHIR mock data and service utilities
 
-import type { SmartLaunchContext, CdsCard, PatientJourneyPosition, MdOrder, CareTeamAssignment,  } from './smartFhirTypes';
+import type {
+  SmartLaunchContext,
+  CdsCard,
+  PatientJourneyPosition,
+  MdOrder,
+  CareTeamAssignment,
+} from './smartFhirTypes';
+import { getPatientByFhirId, getPatientById } from './patientRegistry';
 
 // ─── Mock SMART Launch Context ────────────────────────────────────────────────
 export const mockSmartLaunchContext: SmartLaunchContext = {
@@ -73,7 +80,7 @@ export const mockCdsCards: CdsCard[] = [
     cardType: 'warning',
     summary: 'Well-Child 24-month visit — Sophia overdue 21 days',
     detail:
-      'Daughter Sophia\'s 24-month well-child visit is 21 days overdue. Transportation barrier (47 miles) preventing appointment attendance. Bundle with Maria\'s HbA1c lab to reduce trips. Childcare coordination needed.',
+      "Daughter Sophia's 24-month well-child visit is 21 days overdue. Transportation barrier (47 miles) preventing appointment attendance. Bundle with Maria's HbA1c lab to reduce trips. Childcare coordination needed.",
     source: 'CDS Hooks / Pediatric Care Gap Engine',
     indicator: 'warning',
     timestamp: new Date().toISOString(),
@@ -88,9 +95,7 @@ export const mockCdsCards: CdsCard[] = [
       'Maria is eligible for multiple benefits not currently enrolled: Childcare Subsidy ($487/mo), WIC Re-enrollment ($320/mo), LIHEAP (utility assistance), and Medicaid Non-Emergency Transport. Total monthly benefit value: $807. Enrollment would significantly improve care access and financial stability.',
     source: 'CDS Hooks / Social Needs Engine',
     indicator: 'info',
-    links: [
-      { label: 'View Social Needs Detail', url: '/patient-detail', type: 'absolute' },
-    ],
+    links: [{ label: 'View Social Needs Detail', url: '/patient-detail', type: 'absolute' }],
     timestamp: new Date().toISOString(),
   },
   // Info: HCC Suspects
@@ -118,10 +123,20 @@ export const mockPatientJourney: PatientJourneyPosition = {
   nextMilestone: 'HbA1c lab due June 22, 2026 (38 days overdue)',
   urgencyScore: 82,
   signals: [
-    { source: 'EMR', label: 'Edinburgh PND', value: 'Score 11 (Moderate) — 427d untreated', flagged: true },
+    {
+      source: 'EMR',
+      label: 'Edinburgh PND',
+      value: 'Score 11 (Moderate) — 427d untreated',
+      flagged: true,
+    },
     { source: 'EMR', label: 'Last HbA1c', value: '6.2% (Pre-diabetic)', flagged: true },
     { source: 'HIE', label: 'Transportation', value: '47 miles — no vehicle', flagged: true },
-    { source: 'HIE', label: 'Childcare', value: 'No support — 2 children (24mo, infant)', flagged: true },
+    {
+      source: 'HIE',
+      label: 'Childcare',
+      value: 'No support — 2 children (24mo, infant)',
+      flagged: true,
+    },
     { source: 'HIE', label: 'WIC Status', value: 'Expired May 1, 2025 — 5mo gap', flagged: true },
     { source: 'Claims', label: 'PMPM Cost', value: '$1,240 vs $780 target (+59%)', flagged: true },
     { source: 'EMR', label: 'Well-Child Visit', value: 'Sophia 24mo — 21d overdue', flagged: true },
@@ -130,7 +145,11 @@ export const mockPatientJourney: PatientJourneyPosition = {
 };
 
 // ─── Mock Orders ──────────────────────────────────────────────────────────────
-export const mockOrderCatalog: Array<{ code: string; display: string; category: MdOrder['category'] }> = [
+export const mockOrderCatalog: Array<{
+  code: string;
+  display: string;
+  category: MdOrder['category'];
+}> = [
   // Labs
   { code: 'HBA1C', display: 'Hemoglobin A1c', category: 'lab' },
   { code: 'BMP', display: 'Basic Metabolic Panel', category: 'lab' },
@@ -173,7 +192,8 @@ export const mockCareTeamCandidates: CareTeamAssignment[] = [
     waitDays: 8,
     distance: 2.4,
     autoSelected: true,
-    selectionReason: 'Preferred network, highest quality score, accepting new patients, closest to patient address',
+    selectionReason:
+      'Preferred network, highest quality score, accepting new patients, closest to patient address',
     status: 'proposed',
     confirmedAt: undefined,
   },
@@ -212,3 +232,59 @@ export const mockCareTeamCandidates: CareTeamAssignment[] = [
     status: 'proposed',
   },
 ];
+
+// ─── Member-specific CDS cards (MD SMART fix ③) ──────────────────────────────
+// Maria keeps her hand-authored golden-demo cards (mockCdsCards) byte-identical.
+// Every other member gets cards derived from their own registry data (care gaps,
+// behavioral health, RAF) so the CDS panel is never Maria's content under another
+// member's name.
+export function buildCdsCardsForMember(idOrFhir: string): CdsCard[] {
+  const p = getPatientByFhirId(idOrFhir) ?? getPatientById(idOrFhir);
+  if (p && p.platformId === 'MARIA_SD_001') return mockCdsCards;
+  if (!p) return []; // unknown member: empty CDS, never Maria's cards
+  const now = new Date().toISOString();
+  const cards: CdsCard[] = [];
+  const openGaps = (p.careGaps ?? []).filter((g) => g.status !== 'Closed');
+  openGaps.slice(0, 4).forEach((g, i) => {
+    const critical = g.daysOpen >= 90;
+    cards.push({
+      id: `cds-${p.platformId}-gap-${i}`,
+      hookType: 'patient-view',
+      cardType: critical ? 'critical' : 'warning',
+      summary: `${g.name} — ${g.daysOpen} days open`,
+      detail: `${g.domain} care gap for ${p.name}. Open ${g.daysOpen} days; owner ${g.assignedTo}. Address to close the gap.`,
+      source: 'CDS Hooks / Care Gap Engine',
+      indicator: critical ? 'critical' : 'warning',
+      suggestions: [],
+      timestamp: now,
+    });
+  });
+  if (p.bhScoreLabel && p.bhScoreLabel !== '—') {
+    cards.push({
+      id: `cds-${p.platformId}-bh`,
+      hookType: 'patient-view',
+      cardType: 'warning',
+      summary: `Behavioral health — ${p.bhScoreLabel}`,
+      detail: `BH risk ${p.bhRisk}. Referral status: ${p.bhReferralStatus ?? 'n/a'}.`,
+      source: 'CDS Hooks / BH Screening Engine',
+      indicator: 'warning',
+      suggestions: [],
+      timestamp: now,
+    });
+  }
+  if (p.hccSuspects) {
+    const val = (p.hccValue ?? 0).toLocaleString();
+    cards.push({
+      id: `cds-${p.platformId}-raf`,
+      hookType: 'patient-view',
+      cardType: 'info',
+      summary: `RAF opportunity — ${p.hccSuspects} HCC suspects, $${val} value`,
+      detail: `Risk-adjustment coding opportunity for ${p.name}: ${p.hccSuspects} suspected HCC(s), estimated $${val}.`,
+      source: 'CDS Hooks / RAF Engine',
+      indicator: 'info',
+      suggestions: [],
+      timestamp: now,
+    });
+  }
+  return cards; // may be [] for a member with no derivable signals — never Maria's cards
+}

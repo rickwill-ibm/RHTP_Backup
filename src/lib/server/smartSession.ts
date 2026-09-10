@@ -87,7 +87,7 @@ export async function beginSmartLaunch(opts?: { aud?: string; scope?: string }):
   jar.set(PKCE_COOKIE, seal({ verifier, state, nonce }, env), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' && !env.allowDevMockAuth,
     path: '/',
     maxAge: 600,
   });
@@ -195,6 +195,14 @@ export async function getSessionPatient(): Promise<string | null> {
   const env = serverEnv();
   const jar = await cookies();
   const session = open<SessionData>(jar.get(SESSION_COOKIE)?.value ?? '', env);
+  if (session?.patient) return session.patient;
+  // Dev offline path: mirror isAuthenticated's auto-established dev session so the
+  // launch/patient context is available on the first call (offline install).
+  if (!env.tokenUrl && env.allowDevMockAuth) {
+    await startDevSession();
+    const dev = open<SessionData>((await cookies()).get(SESSION_COOKIE)?.value ?? '', env);
+    return dev?.patient ?? DEMO_MEMBER_ID;
+  }
   return session?.patient ?? null;
 }
 
@@ -256,7 +264,7 @@ export async function startDevSession(patient = DEMO_MEMBER_ID): Promise<boolean
   jar.set(SESSION_COOKIE, seal(session, env), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' && !env.allowDevMockAuth,
     path: '/',
     maxAge: 60 * 60 * 8,
   });
@@ -289,7 +297,7 @@ async function writeSession(tok: TokenResponse, env: ServerEnv): Promise<void> {
   jar.set(SESSION_COOKIE, seal(session, env), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.NODE_ENV === 'production' && !env.allowDevMockAuth,
     path: '/',
     maxAge: 60 * 60 * 8,
   });

@@ -2,6 +2,9 @@ import { imageHosts } from './image-hosts.config.mjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Portable/offline packaging only (guarded): `STANDALONE_PORTABLE=true npm run build`
+  // emits a self-contained OS-agnostic server + drops sharp via unoptimized images.
+  output: process.env.STANDALONE_PORTABLE === 'true' ? 'standalone' : undefined,
   productionBrowserSourceMaps: false,
   distDir: process.env.DIST_DIR || '.next',
   assetPrefix: process.env.ASSET_PREFIX || '',
@@ -13,6 +16,7 @@ const nextConfig = {
 
   images: {
     remotePatterns: imageHosts,
+    unoptimized: process.env.STANDALONE_PORTABLE === 'true',
     minimumCacheTTL: 60,
     qualities: [75, 85, 100],
   },

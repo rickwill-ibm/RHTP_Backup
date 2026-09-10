@@ -64,15 +64,13 @@
           {
             "use": "official",
             "family": "Thompson",
-            "given": [
-              "Lisa"
-            ]
+            "given": ["Lisa"]
           }
         ],
         "gender": "female",
         "birthDate": "1985-05-19",
         "managingOrganization": {
-          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+          "reference": "Organization/58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
         },
         "address": [
           {
@@ -110,12 +108,8 @@
         "name": [
           {
             "family": "Torres",
-            "given": [
-              "—"
-            ],
-            "prefix": [
-              "Dr."
-            ]
+            "given": ["—"],
+            "prefix": ["Dr."]
           }
         ],
         "id": "17a71c5e-ed0d-4318-a7b3-8dee369e883a",
@@ -137,10 +131,10 @@
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "organization": {
-          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+          "reference": "Organization/58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
         },
         "code": [
           {
@@ -175,11 +169,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "payor": [
           {
-            "reference": "urn:uuid:b745c1b8-ed3c-4458-b3cb-0c38f9b446e9"
+            "reference": "Organization/b745c1b8-ed3c-4458-b3cb-0c38f9b446e9"
           }
         ],
         "relationship": {
@@ -219,17 +213,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+              "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+          "reference": "Organization/58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -294,7 +288,7 @@
           "text": "Severe persistent asthma, uncomplicated"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "onsetDateTime": "2012-03-01",
         "id": "81f8b207-e45c-4064-aaf2-fa7779c68fa7"
@@ -346,7 +340,7 @@
           "text": "Obesity, unspecified"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "onsetDateTime": "2018-09-01",
         "id": "1c610260-a526-4295-9b80-b8c430615cab"
@@ -373,11 +367,11 @@
           "text": "Fluticasone 250 mcg / salmeterol 50 mcg inhalation powder"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "dosageInstruction": [
           {
@@ -408,11 +402,11 @@
           "text": "Albuterol 90 mcg/actuation inhaler"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "dosageInstruction": [
           {
@@ -443,11 +437,11 @@
           "text": "Montelukast 10 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "dosageInstruction": [
           {
@@ -487,7 +481,7 @@
           "text": "Body mass index (BMI)"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-28",
         "valueQuantity": {
@@ -541,11 +535,11 @@
           "text": "Spirometry"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-03-28",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "id": "379685b4-a233-4831-8197-8d04ad4ea5ea"
       },
@@ -582,11 +576,11 @@
           "text": "Weight management program referral"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-02-20",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "id": "c7914f6b-6481-4237-b863-0735ef212aa2"
       },
@@ -622,7 +616,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -662,7 +656,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -702,7 +696,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -742,7 +736,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -808,15 +802,15 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "authoredOn": "2026-04-01",
         "requester": {
-          "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+          "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
         },
         "performer": [
           {
-            "reference": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682"
+            "reference": "Organization/4fb5967a-5de9-4838-8f82-23a33e5da682"
           }
         ],
         "id": "27b74379-d20e-4772-8c82-cee420d20ab4"
@@ -843,13 +837,13 @@
         },
         "description": "Closed-loop CBO referral: Nutrition counseling (SNAP-Ed)",
         "focus": {
-          "reference": "urn:uuid:27b74379-d20e-4772-8c82-cee420d20ab4"
+          "reference": "ServiceRequest/27b74379-d20e-4772-8c82-cee420d20ab4"
         },
         "for": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "owner": {
-          "reference": "urn:uuid:4fb5967a-5de9-4838-8f82-23a33e5da682"
+          "reference": "Organization/4fb5967a-5de9-4838-8f82-23a33e5da682"
         },
         "authoredOn": "2026-04-01",
         "businessStatus": {
@@ -889,7 +883,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -932,7 +926,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -964,7 +958,7 @@
           "text": "Asthma action plan update"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "981db8c3-8015-43a0-808e-55a0e8c3b932"
       },
@@ -989,7 +983,7 @@
           "text": "BMI / weight management"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
       },
@@ -1014,7 +1008,7 @@
           "text": "PHQ-9 annual screening"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "3a763e8d-795b-4f34-b47d-ad12a60f00fe"
       },
@@ -1029,7 +1023,7 @@
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "participant": [
           {
@@ -1045,13 +1039,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:17a71c5e-ed0d-4318-a7b3-8dee369e883a"
+              "reference": "Practitioner/17a71c5e-ed0d-4318-a7b3-8dee369e883a"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
+            "reference": "Organization/58cc5490-31c2-4ca4-8e99-6c7cf6a288eb"
           }
         ],
         "id": "1e679417-ccfd-40ee-880c-6deab7319e22"
@@ -1079,30 +1073,30 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:1e679417-ccfd-40ee-880c-6deab7319e22"
+            "reference": "CareTeam/1e679417-ccfd-40ee-880c-6deab7319e22"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:81f8b207-e45c-4064-aaf2-fa7779c68fa7"
+            "reference": "Condition/81f8b207-e45c-4064-aaf2-fa7779c68fa7"
           },
           {
-            "reference": "urn:uuid:1c610260-a526-4295-9b80-b8c430615cab"
+            "reference": "Condition/1c610260-a526-4295-9b80-b8c430615cab"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:981db8c3-8015-43a0-808e-55a0e8c3b932"
+            "reference": "Goal/981db8c3-8015-43a0-808e-55a0e8c3b932"
           },
           {
-            "reference": "urn:uuid:ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
+            "reference": "Goal/ae774ca5-1fc0-4252-98cc-d10d9940a3ac"
           },
           {
-            "reference": "urn:uuid:3a763e8d-795b-4f34-b47d-ad12a60f00fe"
+            "reference": "Goal/3a763e8d-795b-4f34-b47d-ad12a60f00fe"
           }
         ],
         "id": "abb1b27d-d5c7-4738-896c-333b72bb131b"
@@ -1150,7 +1144,7 @@
           "text": "Asthma Action Plan Update"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 35,
         "note": [
@@ -1203,7 +1197,7 @@
           "text": "BMI / Weight Management Referral"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 60,
         "note": [
@@ -1256,7 +1250,7 @@
           "text": "PHQ-9 Annual Screening"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 18,
         "note": [
@@ -1309,7 +1303,7 @@
           "text": "Nutrition Counseling Enrollment"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "valueInteger": 45,
         "note": [
@@ -1361,7 +1355,7 @@
           "text": "Asthma action plan update overdue"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "0e081f67-4bf6-4bdc-9323-7ace97ef4259",
         "period": {
@@ -1410,7 +1404,7 @@
           "text": "Weight management referral in progress — BMI elevated"
         },
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "id": "726d0840-20b8-443a-a121-877e58a637f1"
       },
@@ -1439,7 +1433,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "prediction": [
           {
@@ -1466,7 +1460,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:64b13566-9345-48b2-8da8-4011d9547721"
+          "reference": "Patient/64b13566-9345-48b2-8da8-4011d9547721"
         },
         "period": {
           "start": "2026-01-01",

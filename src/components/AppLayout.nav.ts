@@ -81,21 +81,6 @@ export const navItems: NavItem[] = [
     href: '/outcomes-linkage',
     group: 'RHTP Program',
   },
-  // CMS-0057-F
-  {
-    key: 'nav-cms0057f',
-    label: 'CMS-0057-F',
-    icon: 'ShieldCheckIcon',
-    href: '/cms',
-    group: 'CMS-0057-F',
-  },
-  {
-    key: 'nav-policy-engine',
-    label: 'Policy Engine',
-    icon: 'CpuChipIcon',
-    href: '/policy-engine',
-    group: 'CMS-0057-F',
-  },
   // Care Team Workflows
   {
     key: 'nav-care-team-inbox',
@@ -289,6 +274,49 @@ export const navItems: NavItem[] = [
     href: '/uhg-orchestrate/reporting-dashboard',
     group: 'Agentic_Orchestrate-Screens',
   },
+  // CMS-0057-F  (compliance suite — grouped just before Admin Console)
+  {
+    key: 'nav-cms0057f',
+    label: 'CMS-0057-F Overview',
+    icon: 'ShieldCheckIcon',
+    href: '/cms',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-cms-patient-access',
+    label: 'Patient Access',
+    icon: 'UserIcon',
+    href: '/access',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-cms-payer-to-payer',
+    label: 'Payer-to-Payer',
+    icon: 'ArrowsRightLeftIcon',
+    href: '/payer-to-payer',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-cms-prior-auth',
+    label: 'Prior Authorization (CRD \u00b7 DTR \u00b7 PAS)',
+    icon: 'BoltIcon',
+    href: '/prior-auth',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-policy-engine',
+    label: 'Policy Engine (DTR authoring)',
+    icon: 'CpuChipIcon',
+    href: '/policy-engine',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-cms-api-explorer',
+    label: 'API Explorer',
+    icon: 'BeakerIcon',
+    href: '/api-explorer',
+    group: 'CMS-0057-F',
+  },
   // Admin Console
   {
     key: 'nav-ac-home',
@@ -393,7 +421,7 @@ export const navItems: NavItem[] = [
   },
   {
     key: 'nav-cdp-assembly-new',
-    label: 'CDP Assembly',
+    label: 'Whole Person Care Record Assembly',
     icon: 'CircleStackIcon',
     href: '/cdp-assembly',
     group: 'Backup',
@@ -500,10 +528,10 @@ export const navItems: NavItem[] = [
 
 export const groupOrder = [
   'RHTP Program',
-  'CMS-0057-F',
   'Care Team Workflows',
   'Whole Person Care',
   'Agentic_Orchestrate-Screens',
+  'CMS-0057-F',
   'Admin Console',
   'System',
   'Backup',

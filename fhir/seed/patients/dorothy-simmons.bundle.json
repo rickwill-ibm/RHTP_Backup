@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e",
+      "fullUrl": "Organization/dorothy-simmons-organization-1",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -27,7 +27,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c04f6d57-22fd-4d9e-8dc5-d6465126de29",
+      "fullUrl": "Organization/dorothy-simmons-organization-2",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e",
+      "fullUrl": "Patient/patient-dorothy-042",
       "resource": {
         "resourceType": "Patient",
         "active": true,
@@ -72,7 +72,7 @@
         "gender": "female",
         "birthDate": "1951-03-14",
         "managingOrganization": {
-          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+          "reference": "Organization/dorothy-simmons-organization-1"
         },
         "telecom": [
           {
@@ -110,7 +110,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0",
+      "fullUrl": "Practitioner/dorothy-simmons-practitioner-1",
       "resource": {
         "resourceType": "Practitioner",
         "active": true,
@@ -139,15 +139,15 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:dfa28d4c-5358-43ba-9bfa-9264c1317375",
+      "fullUrl": "PractitionerRole/dorothy-simmons-practitionerrole-1",
       "resource": {
         "resourceType": "PractitionerRole",
         "active": true,
         "practitioner": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "organization": {
-          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+          "reference": "Organization/dorothy-simmons-organization-1"
         },
         "code": [
           {
@@ -168,7 +168,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d8c5c63f-57af-4328-a572-7f2f9b5fd362",
+      "fullUrl": "Coverage/dorothy-simmons-coverage-1",
       "resource": {
         "resourceType": "Coverage",
         "status": "active",
@@ -182,11 +182,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "payor": [
           {
-            "reference": "urn:uuid:c04f6d57-22fd-4d9e-8dc5-d6465126de29"
+            "reference": "Organization/dorothy-simmons-organization-2"
           }
         ],
         "relationship": {
@@ -205,7 +205,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:694394f7-bc7e-4455-9c22-939a0a6da485",
+      "fullUrl": "Encounter/dorothy-simmons-encounter-1",
       "resource": {
         "resourceType": "Encounter",
         "status": "finished",
@@ -226,17 +226,17 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "participant": [
           {
             "individual": {
-              "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+              "reference": "Practitioner/dorothy-simmons-practitioner-1"
             }
           }
         ],
         "serviceProvider": {
-          "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+          "reference": "Organization/dorothy-simmons-organization-1"
         },
         "period": {
           "start": "2026-04-15T09:00:00Z",
@@ -260,7 +260,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4043684c-41eb-4c4b-9403-0624c412976b",
+      "fullUrl": "Condition/dorothy-simmons-condition-1",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -301,7 +301,7 @@
           "text": "Chronic diastolic (congestive) heart failure"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2019-03-01",
         "id": "dorothy-simmons-condition-1"
@@ -312,7 +312,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:eec307c5-4c1d-4a34-b34f-df23e4f8ad7e",
+      "fullUrl": "Condition/dorothy-simmons-condition-2",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -353,7 +353,7 @@
           "text": "Type 2 diabetes mellitus with hyperglycemia"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2014-07-01",
         "id": "dorothy-simmons-condition-2",
@@ -387,7 +387,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d4b41790-3981-4435-9461-d94d101ec068",
+      "fullUrl": "Condition/dorothy-simmons-condition-3",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -428,7 +428,7 @@
           "text": "COPD with (acute) exacerbation"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2021-11-01",
         "id": "dorothy-simmons-condition-3"
@@ -439,7 +439,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4795ec01-effb-4963-9a11-ab06365838ad",
+      "fullUrl": "Condition/dorothy-simmons-condition-4",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -480,7 +480,7 @@
           "text": "Essential (primary) hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2012-03-01",
         "id": "dorothy-simmons-condition-4"
@@ -491,7 +491,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b66fb18a-1575-457c-933a-f05033cad471",
+      "fullUrl": "Condition/dorothy-simmons-condition-5",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -532,7 +532,7 @@
           "text": "Morbid (severe) obesity due to excess calories"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2016-05-01",
         "id": "dorothy-simmons-condition-5"
@@ -543,7 +543,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:31d33f5f-8c34-4b60-9e3d-7bb085ac62ae",
+      "fullUrl": "Condition/dorothy-simmons-condition-6",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -584,7 +584,7 @@
           "text": "Chronic kidney disease, stage 3 (moderate)"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2022-09-01",
         "id": "dorothy-simmons-condition-6"
@@ -595,7 +595,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d818e6d3-f37f-4d89-9d09-06fbb865c3c1",
+      "fullUrl": "Condition/dorothy-simmons-condition-7",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -636,7 +636,7 @@
           "text": "Major depressive disorder, single episode, moderate"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2023-02-01",
         "id": "dorothy-simmons-condition-7"
@@ -647,7 +647,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:fd57e108-c867-4a66-9847-31114f314f85",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-1",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -663,11 +663,11 @@
           "text": "Furosemide 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -682,7 +682,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:fd239b64-cee9-43f6-994e-f99eb437084f",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-2",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -698,11 +698,11 @@
           "text": "Metformin hydrochloride 1000 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -717,7 +717,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:fa90d570-c0db-4018-bf11-00a01cbcd6b4",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-3",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -733,11 +733,11 @@
           "text": "Warfarin sodium 5 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -752,7 +752,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0e37ff63-bb4d-45ca-830f-850a1b3d3517",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-4",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -768,11 +768,11 @@
           "text": "Tiotropium bromide 18 mcg inhalation powder"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -787,7 +787,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d29189a3-362f-41db-bfed-56e1dd0a483d",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-5",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -803,11 +803,11 @@
           "text": "Lisinopril 20 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -822,7 +822,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7cc9dd8e-708c-4664-8b79-66f5204dd845",
+      "fullUrl": "MedicationRequest/dorothy-simmons-medicationrequest-6",
       "resource": {
         "resourceType": "MedicationRequest",
         "status": "active",
@@ -838,11 +838,11 @@
           "text": "Atorvastatin 40 mg oral tablet"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-04-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "dosageInstruction": [
           {
@@ -857,7 +857,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7329d16a-6560-4c06-896f-b9aeff94a656",
+      "fullUrl": "Observation/dorothy-simmons-observation-1",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -882,7 +882,7 @@
           "text": "Hemoglobin A1c"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -909,7 +909,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:527e48cc-e1dc-4dee-96b1-761bf6096acf",
+      "fullUrl": "Observation/dorothy-simmons-observation-2",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -934,7 +934,7 @@
           "text": "Natriuretic peptide B (BNP)"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-28",
         "valueQuantity": {
@@ -961,7 +961,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1449c168-a1cd-4bbd-8e36-d2b041ed14d9",
+      "fullUrl": "Observation/dorothy-simmons-observation-3",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -986,7 +986,7 @@
           "text": "eGFR"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1013,7 +1013,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1eb013d1-a97f-4c69-a5b0-09af9d84e125",
+      "fullUrl": "Observation/dorothy-simmons-observation-4",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1038,7 +1038,7 @@
           "text": "Left ventricular ejection fraction"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-12",
         "valueQuantity": {
@@ -1065,7 +1065,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3955d2eb-c60b-4545-8bd6-f920739b8dbc",
+      "fullUrl": "Observation/dorothy-simmons-observation-5",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1091,7 +1091,7 @@
           "text": "Housing status"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1105,7 +1105,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:63833525-f398-438d-8338-dcaa32df509d",
+      "fullUrl": "Observation/dorothy-simmons-observation-6",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1131,7 +1131,7 @@
           "text": "Food insecurity risk"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1145,7 +1145,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:aca47096-0da7-4fc7-a6f4-517388b3a1fd",
+      "fullUrl": "Observation/dorothy-simmons-observation-7",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1171,7 +1171,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1185,7 +1185,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:5926afa4-24ad-4b05-852f-8377a384d61e",
+      "fullUrl": "Observation/dorothy-simmons-observation-8",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1211,7 +1211,7 @@
           "text": "Financial resource strain"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-01-08",
         "valueCodeableConcept": {
@@ -1225,7 +1225,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1162406e-82f1-49c1-9f09-9dd6d0fa3958",
+      "fullUrl": "Condition/dorothy-simmons-condition-8",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1275,7 +1275,7 @@
           "text": "Transportation insecurity"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "onsetDateTime": "2026-02-14",
         "id": "dorothy-simmons-condition-8"
@@ -1286,7 +1286,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08",
+      "fullUrl": "Organization/dorothy-simmons-organization-3",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -1311,7 +1311,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:02a9b59e-cf9f-47fd-9ffe-db6ae2a510a4",
+      "fullUrl": "ServiceRequest/dorothy-simmons-servicerequest-1",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -1338,20 +1338,20 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-02-14",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "performer": [
           {
-            "reference": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08"
+            "reference": "Organization/dorothy-simmons-organization-3"
           }
         ],
         "reasonReference": [
           {
-            "reference": "urn:uuid:1162406e-82f1-49c1-9f09-9dd6d0fa3958"
+            "reference": "Condition/dorothy-simmons-condition-8"
           }
         ],
         "id": "dorothy-simmons-servicerequest-1"
@@ -1362,7 +1362,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:db88af15-1741-4cf2-aa15-414e42bcac94",
+      "fullUrl": "Task/dorothy-simmons-task-1",
       "resource": {
         "resourceType": "Task",
         "status": "in-progress",
@@ -1378,13 +1378,13 @@
         },
         "description": "Closed-loop CBO referral: Non-emergency medical transportation",
         "focus": {
-          "reference": "urn:uuid:02a9b59e-cf9f-47fd-9ffe-db6ae2a510a4"
+          "reference": "ServiceRequest/dorothy-simmons-servicerequest-1"
         },
         "for": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "owner": {
-          "reference": "urn:uuid:a837875e-0dbd-40bd-8d02-7a8c46213c08"
+          "reference": "Organization/dorothy-simmons-organization-3"
         },
         "authoredOn": "2026-02-14",
         "businessStatus": {
@@ -1398,7 +1398,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:5e481b32-1b97-4908-86fe-66fc83d8fd07",
+      "fullUrl": "Observation/dorothy-simmons-observation-9",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1424,7 +1424,7 @@
           "text": "PHQ-9 total score"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1451,7 +1451,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:485bf06f-dea0-416b-8cdd-8ac17d874f9b",
+      "fullUrl": "Observation/dorothy-simmons-observation-10",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -1477,7 +1477,7 @@
           "text": "AUDIT-C total score"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1494,7 +1494,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f",
+      "fullUrl": "Organization/dorothy-simmons-organization-4",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -1519,7 +1519,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7d0038ed-3fdf-4d0f-8870-65ecfe2b5c53",
+      "fullUrl": "ServiceRequest/dorothy-simmons-servicerequest-2",
       "resource": {
         "resourceType": "ServiceRequest",
         "status": "active",
@@ -1546,15 +1546,15 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "authoredOn": "2026-03-15",
         "requester": {
-          "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+          "reference": "Practitioner/dorothy-simmons-practitioner-1"
         },
         "performer": [
           {
-            "reference": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f"
+            "reference": "Organization/dorothy-simmons-organization-4"
           }
         ],
         "reasonCode": [
@@ -1570,7 +1570,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ffa4abc0-8dc8-4316-aa01-1ef1608f627a",
+      "fullUrl": "Task/dorothy-simmons-task-2",
       "resource": {
         "resourceType": "Task",
         "status": "requested",
@@ -1585,13 +1585,13 @@
         },
         "description": "Closed-loop behavioral-health referral",
         "focus": {
-          "reference": "urn:uuid:7d0038ed-3fdf-4d0f-8870-65ecfe2b5c53"
+          "reference": "ServiceRequest/dorothy-simmons-servicerequest-2"
         },
         "for": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "owner": {
-          "reference": "urn:uuid:073187e8-d56f-4ac2-a3f0-61f0c5266e9f"
+          "reference": "Organization/dorothy-simmons-organization-4"
         },
         "authoredOn": "2026-03-15",
         "businessStatus": {
@@ -1605,7 +1605,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b146c480-5373-4a22-8ca6-9cf64b83fcf1",
+      "fullUrl": "Goal/dorothy-simmons-goal-1",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1620,7 +1620,7 @@
           "text": "A1C < 8.0% by Q3 2026"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-goal-1"
       },
@@ -1630,7 +1630,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:665ed6c8-d97c-4475-8a66-63c250d76ade",
+      "fullUrl": "Goal/dorothy-simmons-goal-2",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1645,7 +1645,7 @@
           "text": "Blood pressure < 130/80 by Q2 2026"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-goal-2"
       },
@@ -1655,7 +1655,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:82399483-2986-44d4-80d8-ad3505d7a962",
+      "fullUrl": "Goal/dorothy-simmons-goal-3",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1670,7 +1670,7 @@
           "text": "Spirometry completed by May 2026"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-goal-3"
       },
@@ -1680,7 +1680,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b25558fc-7b46-4793-8fd3-74ab015a5b6f",
+      "fullUrl": "Goal/dorothy-simmons-goal-4",
       "resource": {
         "resourceType": "Goal",
         "lifecycleStatus": "active",
@@ -1695,7 +1695,7 @@
           "text": "PHQ-9 score < 10 by Q3 2026"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-goal-4"
       },
@@ -1705,12 +1705,12 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3eb76341-3326-4e22-b50e-6752aa9e8042",
+      "fullUrl": "CareTeam/dorothy-simmons-careteam-1",
       "resource": {
         "resourceType": "CareTeam",
         "status": "active",
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "participant": [
           {
@@ -1726,13 +1726,13 @@
               }
             ],
             "member": {
-              "reference": "urn:uuid:bbd36b84-19b8-4c2a-a1e7-57fdb8eee2d0"
+              "reference": "Practitioner/dorothy-simmons-practitioner-1"
             }
           }
         ],
         "managingOrganization": [
           {
-            "reference": "urn:uuid:23c54c9f-c0c5-4c9d-89fc-5441ae738f2e"
+            "reference": "Organization/dorothy-simmons-organization-1"
           }
         ],
         "id": "dorothy-simmons-careteam-1"
@@ -1743,7 +1743,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9fcdf991-2fbc-4301-9fae-c99631b696f2",
+      "fullUrl": "CarePlan/dorothy-simmons-careplan-1",
       "resource": {
         "resourceType": "CarePlan",
         "status": "active",
@@ -1760,48 +1760,48 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "careTeam": [
           {
-            "reference": "urn:uuid:3eb76341-3326-4e22-b50e-6752aa9e8042"
+            "reference": "CareTeam/dorothy-simmons-careteam-1"
           }
         ],
         "addresses": [
           {
-            "reference": "urn:uuid:4043684c-41eb-4c4b-9403-0624c412976b"
+            "reference": "Condition/dorothy-simmons-condition-1"
           },
           {
-            "reference": "urn:uuid:eec307c5-4c1d-4a34-b34f-df23e4f8ad7e"
+            "reference": "Condition/dorothy-simmons-condition-2"
           },
           {
-            "reference": "urn:uuid:d4b41790-3981-4435-9461-d94d101ec068"
+            "reference": "Condition/dorothy-simmons-condition-3"
           },
           {
-            "reference": "urn:uuid:4795ec01-effb-4963-9a11-ab06365838ad"
+            "reference": "Condition/dorothy-simmons-condition-4"
           },
           {
-            "reference": "urn:uuid:b66fb18a-1575-457c-933a-f05033cad471"
+            "reference": "Condition/dorothy-simmons-condition-5"
           },
           {
-            "reference": "urn:uuid:31d33f5f-8c34-4b60-9e3d-7bb085ac62ae"
+            "reference": "Condition/dorothy-simmons-condition-6"
           },
           {
-            "reference": "urn:uuid:d818e6d3-f37f-4d89-9d09-06fbb865c3c1"
+            "reference": "Condition/dorothy-simmons-condition-7"
           }
         ],
         "goal": [
           {
-            "reference": "urn:uuid:b146c480-5373-4a22-8ca6-9cf64b83fcf1"
+            "reference": "Goal/dorothy-simmons-goal-1"
           },
           {
-            "reference": "urn:uuid:665ed6c8-d97c-4475-8a66-63c250d76ade"
+            "reference": "Goal/dorothy-simmons-goal-2"
           },
           {
-            "reference": "urn:uuid:82399483-2986-44d4-80d8-ad3505d7a962"
+            "reference": "Goal/dorothy-simmons-goal-3"
           },
           {
-            "reference": "urn:uuid:b25558fc-7b46-4793-8fd3-74ab015a5b6f"
+            "reference": "Goal/dorothy-simmons-goal-4"
           }
         ],
         "id": "dorothy-simmons-careplan-1"
@@ -1812,7 +1812,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7cdf340e-a6b2-410f-a65f-fca7ac1fd3f0",
+      "fullUrl": "Observation/dorothy-simmons-observation-11",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1849,7 +1849,7 @@
           "text": "Spirometry (COPD)"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "valueInteger": 42,
         "note": [
@@ -1865,7 +1865,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e7a7f266-fe26-4654-9356-f63379ad815f",
+      "fullUrl": "Observation/dorothy-simmons-observation-12",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1902,7 +1902,7 @@
           "text": "A1C Recheck"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "valueInteger": 61,
         "note": [
@@ -1918,7 +1918,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d40362cc-2b00-496f-a067-414f6059379a",
+      "fullUrl": "Observation/dorothy-simmons-observation-13",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1955,7 +1955,7 @@
           "text": "PHQ-9 Follow-up"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "valueInteger": 21,
         "note": [
@@ -1971,7 +1971,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:516b009d-a98d-4827-8fc2-2d1cc9a83256",
+      "fullUrl": "Observation/dorothy-simmons-observation-14",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -2008,7 +2008,7 @@
           "text": "Transport Referral — Active"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "valueInteger": 18,
         "note": [
@@ -2024,7 +2024,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:10fe1bef-88dd-4f01-b183-6d4cbaa36b32",
+      "fullUrl": "Flag/dorothy-simmons-flag-1",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -2060,7 +2060,7 @@
           "text": "PHQ-9 14 — BH referral open, not engaged"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-flag-1",
         "period": {
@@ -2073,7 +2073,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:19dc2549-9b4d-4741-aa7f-2791e176922e",
+      "fullUrl": "Flag/dorothy-simmons-flag-2",
       "resource": {
         "resourceType": "Flag",
         "extension": [
@@ -2109,7 +2109,7 @@
           "text": "COPD Exacerbation — spirometry overdue"
         },
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "id": "dorothy-simmons-flag-2",
         "period": {
@@ -2122,7 +2122,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:c2840782-375b-4f29-be24-42cba0798afb",
+      "fullUrl": "RiskAssessment/dorothy-simmons-riskassessment-1",
       "resource": {
         "resourceType": "RiskAssessment",
         "extension": [
@@ -2141,7 +2141,7 @@
         ],
         "status": "final",
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "prediction": [
           {
@@ -2160,7 +2160,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:dorothy-simmons-codinggap-1",
+      "fullUrl": "MeasureReport/dorothy-simmons-codinggap-1",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "dorothy-simmons-codinggap-1",
@@ -2168,7 +2168,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "period": {
           "start": "2026-01-01",
@@ -2254,7 +2254,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:dorothy-simmons-codinggap-2",
+      "fullUrl": "MeasureReport/dorothy-simmons-codinggap-2",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "dorothy-simmons-codinggap-2",
@@ -2262,7 +2262,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|24",
         "subject": {
-          "reference": "urn:uuid:f8f202da-f445-4826-ac93-75dfa539042e"
+          "reference": "Patient/patient-dorothy-042"
         },
         "period": {
           "start": "2026-01-01",

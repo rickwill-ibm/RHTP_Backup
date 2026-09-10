@@ -1,8 +1,11 @@
 // wpcGraph/attention.ts — attention hierarchy for the member graph.
-// Scores every node into act (≤3) / watch (≤5) / context, and exposes edge
-// confidence/inference + the causal BLOCKS chain to emphasize. Pure & deterministic.
-// Keeps the golden demo intact by carrying the causal story on EDGES (emphasizedChain),
-// not by forcing a barrier into the act tier.
+// Salience is derived from GRAPH STRUCTURE, not node type. Clinical findings
+// (CareGap / SDOHNode) are scored intrinsically into act / watch / context; any node
+// that sits on a causal chain feeding an emphasized finding — a resolver, driver, or
+// compounder (WOULD_RESOLVE / COMPOUNDS / DRIVES / …) — is then promoted onto a label.
+// Type-agnostic and member-agnostic: a node earns emphasis by its role in the graph,
+// so the engine behaves identically for every member with no per-node tuning.
+// Pure & deterministic.
 
 import type { GraphNode, GraphEdge } from './types';
 import {
@@ -29,6 +32,32 @@ interface Scored {
   urgency: number;
 }
 
+// Edge types that express a causal relationship the SOURCE node has TO its TARGET —
+// it resolves, reduces, addresses, blocks, drives, delays, deprioritises, exacerbates,
+// or compounds the target. Walking these backward from an emphasized finding surfaces
+// the signals that explain it or would resolve it.
+// GATED_BY and EXPOSES_GAP are intentionally excluded: their source/target direction is
+// reversed (the emphasized node is the SOURCE) or points at the member anchor, so they
+// do not express "source feeds target" and would promote the wrong end of the edge.
+const CAUSAL_EDGE = new Set([
+  'BLOCKS',
+  'COMPOUNDS',
+  'DRIVES',
+  'DELAYS',
+  'DEPRIORITIZES',
+  'EXACERBATES',
+  'WOULD_RESOLVE',
+  'WOULD_REDUCE',
+  'WOULD_ADDRESS',
+]);
+// Decisive / actionable relationships (a concrete fix, or a hard block) outrank mere
+// aggravators when a density budget must choose which supporters to surface.
+const DECISIVE_EDGE = new Set(['WOULD_RESOLVE', 'WOULD_ADDRESS', 'WOULD_REDUCE', 'BLOCKS']);
+// Safety valve for pathologically dense graphs. On a typical member the whole causal
+// chain is well under this, so the budget never binds and nothing real is evicted; it
+// only bounds a runaway graph. A global knob, not a per-member tune.
+const MAX_SUPPORTERS = 8;
+
 function rawScore(n: GraphNode, edges: GraphEdge[]): number {
   if (n.type === 'Member') return -1; // anchor, never competes
   if (n.type === 'CareGap') {
@@ -52,14 +81,74 @@ function rawScore(n: GraphNode, edges: GraphEdge[]): number {
   }
   if (n.pulse) return 46; // authored-emphasis nodes never fall to context
   if (n.consentPending || n.locked) return 42;
-  return 20;
+  return 20; // everything else starts in context; a causal edge can still promote it
+}
+
+interface Supporter {
+  id: string;
+  targetTop: boolean; // feeds an act/signal (vs watch) node → higher priority
+  decisive: boolean;
+  hop: number;
 }
 
 /**
- * The CareGap the attention scorer ranks highest — i.e. the node the graph
- * emphasizes as the member's primary act signal (overdue > near-deadline > blocked
- * > oldest, via the same rawScore the graph uses). Keeps the story headline and the
- * graph's red act node in agreement instead of running two different priorities.
+ * Nodes on a causal chain leading INTO an emphasized node — the resolver, driver, or
+ * compounder of a surfaced finding. Backward breadth-first walk from the emphasized set
+ * along CAUSAL edges (collect `source` when `target` is in the frontier), up to maxHops.
+ * Type- and member-agnostic, so it behaves identically for every member. Returned in a
+ * deterministic priority order (feeders of the top tier first, decisive edges first,
+ * nearer hops, higher intrinsic score, then id) so a density budget can bound a dense
+ * graph without evicting the highest-value links. Output is independent of edge order.
+ */
+export function causalSupporters(
+  emphasized: ReadonlyMap<string, string>,
+  nodes: GraphNode[],
+  edges: GraphEdge[],
+  maxHops = 2
+): string[] {
+  const emphIds = new Set(
+    [...emphasized]
+      .filter(([, t]) => t === 'act' || t === 'watch' || t === 'signal')
+      .map(([id]) => id)
+  );
+  if (emphIds.size === 0) return [];
+  const scoreById = new Map(nodes.map((n) => [n.id, rawScore(n, edges)] as const));
+  const found = new Map<string, Supporter>();
+  let frontier = new Set(emphIds);
+  for (let hop = 0; hop < maxHops; hop++) {
+    const next = new Set<string>();
+    for (const e of edges) {
+      if (!e.source || !e.target) continue;
+      if (!CAUSAL_EDGE.has((e.type || '').toUpperCase())) continue;
+      if (!frontier.has(e.target)) continue;
+      if (emphIds.has(e.source) || found.has(e.source)) continue;
+      const tt = emphasized.get(e.target);
+      found.set(e.source, {
+        id: e.source,
+        targetTop: tt === 'act' || tt === 'signal',
+        decisive: DECISIVE_EDGE.has((e.type || '').toUpperCase()),
+        hop,
+      });
+      next.add(e.source);
+    }
+    if (next.size === 0) break;
+    frontier = next;
+  }
+  return [...found.values()]
+    .sort(
+      (a, b) =>
+        Number(b.targetTop) - Number(a.targetTop) ||
+        Number(b.decisive) - Number(a.decisive) ||
+        a.hop - b.hop ||
+        (scoreById.get(b.id) ?? 0) - (scoreById.get(a.id) ?? 0) ||
+        (a.id < b.id ? -1 : 1)
+    )
+    .map((s) => s.id);
+}
+
+/**
+ * The CareGap the attention scorer ranks highest — the member's primary act signal.
+ * Keeps the story headline and the graph's red act node in agreement.
  */
 export function topAttentionGap(nodes: GraphNode[], edges: GraphEdge[]): GraphNode | undefined {
   return [...nodes.filter((n) => n.type === 'CareGap')].sort(
@@ -95,31 +184,43 @@ export function scoreAttention(nodes: GraphNode[], edges: GraphEdge[]): Attentio
   for (const s of scored) {
     out.set(s.id, actIds.has(s.id) ? 'act' : watchIds.has(s.id) ? 'watch' : 'context');
   }
+
+  // Structural promotion: surface the causal chain (resolver / driver / compounder)
+  // feeding any emphasized finding, so the graph shows WHY a signal is stuck and WHAT
+  // would clear it — read from the graph's own edges, identically for every member.
+  const supporters = causalSupporters(out, nodes, edges).slice(0, MAX_SUPPORTERS);
+  for (const id of supporters) if (out.get(id) === 'context') out.set(id, 'watch');
   return out;
 }
 
-/** Edge ids on the causal barrier→BLOCKS→gap chain feeding an act/watch gap. */
+/** Edge ids on the causal chain feeding an act/watch node — for edge emphasis. */
 export function emphasizedChain(
-  nodes: GraphNode[],
+  _nodes: GraphNode[],
   edges: GraphEdge[],
   attn: AttentionMap
 ): Set<string> {
   const out = new Set<string>();
+  const isEmph = (id: string | undefined) => {
+    const t = id ? attn.get(id) : undefined;
+    return t === 'act' || t === 'watch';
+  };
   for (const e of edges) {
     if ((e.type || '').toUpperCase() !== 'BLOCKS') continue;
-    const t = attn.get(e.target);
-    if (t === 'act' || t === 'watch') {
-      out.add(e.id);
-      // one hop upstream: what feeds the barrier
-      for (const up of edges) {
-        if (
-          up.target === e.source &&
-          /COMPOUNDS|DRIVES|DELAYS|DEPRIORITIZES/.test((up.type || '').toUpperCase())
-        ) {
-          out.add(up.id);
-        }
+    if (!isEmph(e.target)) continue;
+    out.add(e.id);
+    // one hop upstream: any causal edge feeding the barrier (driver / compounder / resolver)
+    for (const up of edges) {
+      if (up.target === e.source && CAUSAL_EDGE.has((up.type || '').toUpperCase())) {
+        out.add(up.id);
       }
     }
+  }
+  // Also emphasize causal edges pointing directly into an emphasized node (e.g. a
+  // benefit's WOULD_RESOLVE edge into a watch-tier barrier) so promoted supporters read
+  // as connected to the finding they explain.
+  for (const e of edges) {
+    if (!CAUSAL_EDGE.has((e.type || '').toUpperCase())) continue;
+    if (isEmph(e.target)) out.add(e.id);
   }
   return out;
 }
@@ -145,10 +246,10 @@ export function attnNodeStyle(tier: AttentionTier): {
   return { radiusMul: 0.68, alpha: 0.32, ring: false };
 }
 
-// ── Non-golden attention (Phase 1) ────────────────────────────────────────────
-// Maria (golden) keeps scoreAttention above untouched. Real members get a sharper
-// hierarchy: exactly ONE signal, relative score gates, and an enforced dim-floor so
-// context nodes genuinely recede even in a small 5–8 node lens.
+// ── Non-golden attention ──────────────────────────────────────────────────────
+// Real members get a sharper hierarchy: exactly ONE signal, relative score gates, and
+// an enforced dim-floor so context nodes genuinely recede in a small lens. Salience is
+// promoted from the SAME structural causal-chain rule as the golden path.
 
 export type NGTier = 'signal' | 'act' | 'watch' | 'context';
 
@@ -173,15 +274,25 @@ export function scoreAttentionNG(nodes: GraphNode[], edges: GraphEdge[]): Map<st
     if (s.score < 0.55 * top) return 'context';
     return 'watch';
   });
-  // Enforce the dim-floor: demote the lowest-scored WATCH nodes to context until met.
-  let ctxCount = tier.filter((t) => t === 'context').length;
+  scored.forEach((s, i) => out.set(s.id, tier[i]));
+
+  // Structural promotion (same rule as the golden path): lift causal-chain supporters
+  // of any emphasized node onto a label. Runs BEFORE the context-floor demotion so the
+  // floor dims NON-supporter noise, never the chain.
+  const supporters = new Set(causalSupporters(out, nodes, edges).slice(0, MAX_SUPPORTERS));
+  for (const id of supporters) if (out.get(id) === 'context') out.set(id, 'watch');
+
+  // Context dim-floor: keep ~40% of the lens genuinely receded, demoting the
+  // lowest-scored NON-supporter watch nodes first so causal-chain links are never
+  // dimmed just to satisfy the floor.
+  let ctxCount = [...out.values()].filter((t) => t === 'context').length;
   for (let i = n - 1; i >= 1 && ctxCount < minContext; i--) {
-    if (tier[i] === 'watch') {
-      tier[i] = 'context';
+    const id = scored[i].id;
+    if (out.get(id) === 'watch' && !supporters.has(id)) {
+      out.set(id, 'context');
       ctxCount++;
     }
   }
-  scored.forEach((s, i) => out.set(s.id, tier[i]));
   return out;
 }
 

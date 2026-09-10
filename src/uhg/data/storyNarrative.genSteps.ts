@@ -1,8 +1,8 @@
-// storyNarrative.genSteps.ts — the fifteen narrated Story Mode steps, per patient.
+// storyNarrative.genSteps.ts — the seventeen narrated Story Mode steps, per patient.
 //
 // Same arc, routes, order, personas, moods and metric intent as the authored Maria
 // keynote; every asserted fact rewritten from the patient's real registry data.
-// Steps 1, 14 and 15 are system/compliance-level and returned verbatim. The final
+// Steps 1, 16 and 17 are system/compliance-level and returned verbatim. The final
 // re-map keeps each step's `chapter` in sync with the per-patient Ch.2 card so the
 // overlay's chapters.find(c => c.chapter === step.chapter) never misses.
 
@@ -115,9 +115,31 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         "Let the map sit for a moment. Those regions represent real people already enrolled in this program — and the platform already knows where they're underserved.",
     },
 
-    // Step 3 — Panel & Cohort.
+    // Step 3 — Program Networks — network context; member name localized per patient.
     {
       ...MARIA_STEPS[2],
+      narratorLines: [
+        "Those red counties don't fix themselves. Someone is accountable for them — a provider network.",
+        'This is the RHTP Track 3 network: the PCPs, community health workers, and behavioral-health providers who carry these attributed lives.',
+        'Watch the coverage — some counties have depth, others rest on a single practice. That thin coverage is where members fall through.',
+        `So before we open a single chart, we know who is supposed to be catching ${f.first}.`,
+      ],
+    },
+
+    // Step 4 — Care Team Members — accountability layer; member name localized per patient.
+    {
+      ...MARIA_STEPS[3],
+      narratorLines: [
+        'Drill into one practice and you see the people, not just the network.',
+        "Here's the concentration risk the platform flags: the clinical panel rests on very few providers.",
+        `This is the accountability layer — the clinicians, CHWs, and BH providers who will act on ${f.possFirst} plan.`,
+        'Now we have the system and the team. Time to meet the member they exist to serve.',
+      ],
+    },
+
+    // Step 5 — Panel & Cohort.
+    {
+      ...MARIA_STEPS[4],
       chapterIntro: `Ch.2 · Meet ${f.first}`,
       activePatient: id,
       persona: `Primary Care Physician — ${f.pcp}`,
@@ -128,12 +150,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         `Old systems show one problem at a time. This one shows all of them — because treating ${f.diseases[0] ? f.diseases[0] : 'the clinical need'} while missing the social barrier means the clinical problem comes right back.`,
         `Notice the attribution columns. Clinical PCP: ${f.pcp}. Care Manager: ${f.cm}. BH Provider: ${attribBH}.`,
       ],
-      pausePrompt: MARIA_STEPS[2].pausePrompt,
+      pausePrompt: MARIA_STEPS[4].pausePrompt,
     },
 
-    // Step 4 — Whole Person Care Plan.
+    // Step 6 — Whole Person Care Plan.
     {
-      ...MARIA_STEPS[3],
+      ...MARIA_STEPS[5],
       activePatient: id,
       persona: `Primary Care Physician — ${f.pcp}`,
       storyBeat: `Every dimension of ${f.possFirst} life — clinical, behavioral, social${cg ? ', and the caregiving ' + f.P.subj + ' carries' : ''} — unified in one plan.`,
@@ -148,12 +170,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         `And at the bottom — ${money(p.hccValue)} in documented HCC value tied to ${f.possFirst} open gaps: the revenue at risk if they aren't captured and closed this measurement year.`,
         'This is the financial alignment that makes whole-person care sustainable, not just aspirational.',
       ],
-      pausePrompt: MARIA_STEPS[3].pausePrompt,
+      pausePrompt: MARIA_STEPS[5].pausePrompt,
     },
 
-    // Step 5 — MD Smart Launch.
+    // Step 7 — MD Smart Launch.
     {
-      ...MARIA_STEPS[4],
+      ...MARIA_STEPS[6],
       activePatient: id,
       persona: `Primary Care Physician — ${f.pcp}`,
       storyBeat: `The same data, inside the EHR — SMART on FHIR. ${f.pcp} never leaves ${f.org}'s system.`,
@@ -165,9 +187,9 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
       ],
     },
 
-    // Step 6 — Prior Authorization.
+    // Step 8 — Prior Authorization.
     {
-      ...MARIA_STEPS[5],
+      ...MARIA_STEPS[7],
       activePatient: id,
       persona: `Primary Care Physician — ${f.pcp}`,
       storyBeat: `${cap(f.paItem)} ordered. AI prepares the PA. ${f.pcp} reviews and approves — the AI never submits on its own.`,
@@ -178,12 +200,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         'Important: the AI never submits on its own. Human in the loop. Always.',
         'Total elapsed time: under 90 seconds. From order to submitted PA.',
       ],
-      pausePrompt: MARIA_STEPS[5].pausePrompt,
+      pausePrompt: MARIA_STEPS[7].pausePrompt,
     },
 
-    // Step 7 — CHW Workflow.
+    // Step 9 — CHW Workflow.
     {
-      ...MARIA_STEPS[6],
+      ...MARIA_STEPS[8],
       chapterIntro: 'Ch.3 · In the Community',
       activePatient: id,
       persona: 'Community Health Worker',
@@ -195,12 +217,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         householdLine || 'The platform has told the worker exactly what to do — and exactly why they are there.',
         'Click "Start Visit." Documentation begins in real time, at the kitchen table, on a phone.',
       ],
-      pausePrompt: MARIA_STEPS[6].pausePrompt,
+      pausePrompt: MARIA_STEPS[8].pausePrompt,
     },
 
-    // Step 8 — Social Needs Screening.
+    // Step 10 — Social Needs Screening.
     {
-      ...MARIA_STEPS[7],
+      ...MARIA_STEPS[9],
       activePatient: id,
       persona: 'Community Health Worker',
       storyBeat: step8Beat,
@@ -214,12 +236,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         'And somewhere, the Quality & Compliance analyst sees the PRAPARE measure numerator increase by one.',
         'One conversation at a kitchen table. Downstream systems updated. Zero manual data entry.',
       ],
-      pausePrompt: MARIA_STEPS[7].pausePrompt,
+      pausePrompt: MARIA_STEPS[9].pausePrompt,
     },
 
-    // Step 9 — Crisis Pathway (capability, not a fabricated event).
+    // Step 11 — Crisis Pathway (capability, not a fabricated event).
     {
-      ...MARIA_STEPS[8],
+      ...MARIA_STEPS[10],
       storyBeat: `If ${f.first} ever reaches a crisis line, the BH specialist sees ${f.possFirst} full context instantly — and that context changes the dispatch, away from a $4,200 ED visit.`,
       narratorLines: [
         'Behavioral health is where whole-person care gets tested.',
@@ -228,12 +250,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         `A behavioral-health follow-up task is created automatically and lands in ${poss(f.cm)} worklist.`,
         `${f.first} doesn't fall through the cracks. The platform holds the thread back to the care team.`,
       ],
-      pausePrompt: MARIA_STEPS[8].pausePrompt,
+      pausePrompt: MARIA_STEPS[10].pausePrompt,
     },
 
-    // Step 10 — Care Gap Closure & Verification.
+    // Step 12 — Care Gap Closure & Verification.
     {
-      ...MARIA_STEPS[9],
+      ...MARIA_STEPS[11],
       chapterIntro: 'Ch.4 · The Closed Loop',
       activePatient: id,
       storyBeat: `The tracked gaps close with FHIR provenance chains: ${joinList([f.topGap ? niceGap(f.topGap.name) : 'clinical', (p.careGaps || []).find((g) => g.domain === 'BH')?.name || '', (p.careGaps || []).find((g) => g.domain === 'Social')?.name || ''].filter(Boolean))}.`,
@@ -259,12 +281,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         lines.push('98.7% of resources passed automated validation before submission. The 1.3% were flagged and corrected by the analyst.');
         return lines;
       })(),
-      pausePrompt: MARIA_STEPS[9].pausePrompt,
+      pausePrompt: MARIA_STEPS[11].pausePrompt,
     },
 
-    // Step 11 — Outcomes Linkage.
+    // Step 13 — Outcomes Linkage.
     {
-      ...MARIA_STEPS[10],
+      ...MARIA_STEPS[12],
       storyBeat: `Social stability drives medical outcomes across a population. For ${f.first}: ${outcome.value}. This is the ROI the state needs.`,
       metric: outcome,
       narratorLines: [
@@ -274,12 +296,12 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
         "Every dollar invested in social program intervention generates $2.80 in avoided medical cost. That's the ROI number.",
         'This screen is the closing argument for continued social program funding. Show it slowly.',
       ],
-      pausePrompt: MARIA_STEPS[10].pausePrompt,
+      pausePrompt: MARIA_STEPS[12].pausePrompt,
     },
 
-    // Step 12 — Social Needs Dashboard.
+    // Step 14 — Social Needs Dashboard.
     {
-      ...MARIA_STEPS[11],
+      ...MARIA_STEPS[13],
       storyBeat: `2,400 members screened. ${f.first} wasn't an edge case — ${f.P.subj} was the pattern: ${patternPhrase}.`,
       narratorLines: [
         `The executive asks: "Is ${f.first} an outlier, or is ${f.P.subj} the pattern?"`,
@@ -289,9 +311,9 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
       ],
     },
 
-    // Step 13 — Executive Dashboard.
+    // Step 15 — Executive Dashboard.
     {
-      ...MARIA_STEPS[12],
+      ...MARIA_STEPS[14],
       storyBeat: `From ${f.possFirst} kitchen table in ${f.place} to the state's dashboard — one closed loop. 6,842 gaps closed, $1.1M reinvested.`,
       narratorLines: [
         `Back to the top. From ${f.possFirst} kitchen table to the executive's screen.`,
@@ -302,11 +324,11 @@ export function genSteps(p: RegistryPatient): StoryStep[] {
       pausePrompt: `This is the closed loop. One patient — ${f.first}. One kitchen table. One care team. One line item on the executive dashboard. That's what whole-person care looks like when it's measured end-to-end.`,
     },
 
-    // Step 14 — Quality Gaps & Attribution — patient-independent — VERBATIM.
-    { ...MARIA_STEPS[13] },
+    // Step 16 — Quality Gaps & Attribution — patient-independent — VERBATIM.
+    { ...MARIA_STEPS[15] },
 
-    // Step 15 — CMS-0057-F API Explorer — patient-independent — VERBATIM.
-    { ...MARIA_STEPS[14] },
+    // Step 17 — CMS-0057-F API Explorer — patient-independent — VERBATIM.
+    { ...MARIA_STEPS[16] },
   ];
   // Keep each generated step's chapter label in sync with the per-patient chapter card — Ch.2
   // ("Meet {name}") is the only name-bearing chapter, and genSteps spreads the Maria template

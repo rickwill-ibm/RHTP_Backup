@@ -31,13 +31,15 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    ".next/dev/types/**/*.ts",
+    ".next/next-build/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
     "types/**/*.d.ts",
-    ".next/next-build/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next-portable/types/**/*.ts"
   ],
   "exclude": [
+    "_ship",
     "node_modules",
     "e2e",
     "playwright.config.ts",

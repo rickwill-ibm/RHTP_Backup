@@ -3,8 +3,8 @@
 // POST runs the demo source folder (the seeded population's source data) through the
 // REAL pipeline — EMPI identity resolution, the semantic/terminology gate, projection
 // into the shared graph — and returns aggregate load telemetry (members resolved,
-// resources admitted per domain, quarantine, per-source outcomes). The CDP Assembly
-// screen's "Run live" mode polls/reads this instead of the scripted cascade.
+// resources admitted per domain, quarantine, per-source outcomes, projected KG size).
+// The CDP Assembly screen's "Live Load" mode calls this instead of the scripted cascade.
 //
 // This is the BFF: the engine runs server-side, the browser only sees PHI-safe counts.
 
@@ -33,6 +33,7 @@ export async function POST(_req: NextRequest): Promise<NextResponse> {
       ok: true,
       receipt: result.receipt,
       totals: result.totals,
+      graph: result.graph,
       outcomes: result.outcomes.map((o) => ({
         sourceSystem: o.sourceSystem,
         file: o.file,

@@ -7,8 +7,9 @@ const DIR = join(process.cwd(), 'src', 'lib', 'cdp-intake', 'sample-sources');
 describe('cdp-intake/folderSource', () => {
   it('reads source files verbatim and skips the manifest', () => {
     const names = readFolder(DIR).map((f) => f.file);
-    expect(names).toContain('member.fhir.json');
-    expect(names).toContain('eligibility.834.txt');
+    // Seeded 5-patient population (FHIR bundles); the manifest itself is never a source.
+    expect(names).toContain('sd-medicaid-mmis.maria.fhir.json');
+    expect(names).toContain('bennett-county-ehr.dorothy.fhir.json');
     expect(names).not.toContain('index.json');
   });
 
@@ -19,7 +20,7 @@ describe('cdp-intake/folderSource', () => {
 
   it('reads the manifest', () => {
     const m = readManifest(DIR);
-    expect(m?.sources.length).toBe(2);
+    expect(m?.sources.length).toBe(5);
     expect(m?.sources.map((s) => s.sourceSystem)).toContain('SD_MEDICAID_MMIS');
   });
 });

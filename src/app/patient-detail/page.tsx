@@ -33,23 +33,28 @@ function PatientDetailContent() {
   const { useMockData } = useAppContext();
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
-  const activePatientId = activeCitizenId;
-
-  // URL param takes precedence; otherwise fall back to global activePatientId (default: MARIA_SD_001)
+  // ── DEMO HOTFIX (pre-EMPI remediation) ──────────────────────────────
+  // The top-bar patient switcher (demoStore.activeCitizenId) is the SINGLE source
+  // of truth for the active patient. The URL ?id= is treated as a SEED only: it
+  // sets the store on navigation, after which this screen renders from the store,
+  // so switching patients always updates the entire record. Previously the URL
+  // param took precedence over the store, pinning the body to the navigated patient
+  // while the switcher (store-only) silently diverged (header vs body mismatch).
+  // Full system-generated EMPI enterprise-member-id resolution is tracked in the
+  // post-demo remediation plan.
   const urlId = searchParams?.get('id') ?? '';
-  const rawId = urlId || activePatientId || 'MARIA_SD_001';
+  const seedId = urlId ? (MOCK_ID_TO_PLATFORM_ID[urlId] ?? urlId) : '';
 
-  // Resolve mockData IDs or legacy IDs to registry platform IDs
-  const resolvedId = MOCK_ID_TO_PLATFORM_ID[rawId] ?? rawId;
-
-  // Keep AppContext.activePatientId in sync when navigated here via URL param.
-  // This ensures care-team-inbox, specialist-inbox, etc. all show the same patient.
+  // Seed the store from the URL param on navigation (only when the URL id changes).
   useEffect(() => {
-    if (resolvedId && resolvedId !== activeCitizenId) {
-      setActiveCitizen(resolvedId);
+    if (seedId && seedId !== activeCitizenId) {
+      setActiveCitizen(seedId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedId]);
+  }, [seedId]);
+
+  // Render from the store — the switcher's target. URL is a seed, never a 2nd source.
+  const resolvedId = activeCitizenId || seedId || 'MARIA_SD_001';
 
   // Look up patient from registry — works for any patient, not just Maria
   const registryPatient = getPatientSync(resolvedId);

@@ -3,7 +3,7 @@
   "type": "transaction",
   "entry": [
     {
-      "fullUrl": "urn:uuid:6e720e3e-6e00-4b05-8c30-a1cfde5432d2",
+      "fullUrl": "Organization/alex-kirby-organization-1",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -27,7 +27,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8d340409-7f68-4913-8873-de4fc25bc912",
+      "fullUrl": "Organization/alex-kirby-organization-2",
       "resource": {
         "resourceType": "Organization",
         "active": true,
@@ -40,7 +40,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227",
+      "fullUrl": "Patient/patient-alex-kirby",
       "resource": {
         "resourceType": "Patient",
         "identifier": [
@@ -131,7 +131,7 @@
           }
         ],
         "managingOrganization": {
-          "reference": "urn:uuid:6e720e3e-6e00-4b05-8c30-a1cfde5432d2"
+          "reference": "Organization/alex-kirby-organization-1"
         },
         "id": "patient-alex-kirby"
       },
@@ -141,7 +141,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f43c5a34-908b-4e1a-9d8c-4a7ea571eb81",
+      "fullUrl": "Coverage/alex-kirby-coverage-1",
       "resource": {
         "resourceType": "Coverage",
         "status": "active",
@@ -155,11 +155,11 @@
           ]
         },
         "beneficiary": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "payor": [
           {
-            "reference": "urn:uuid:8d340409-7f68-4913-8873-de4fc25bc912"
+            "reference": "Organization/alex-kirby-organization-2"
           }
         ],
         "relationship": {
@@ -178,7 +178,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:1b927efa-de36-46b6-a871-ff834b5fbcd6",
+      "fullUrl": "Observation/alex-kirby-observation-1",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -195,7 +195,7 @@
           "text": "Total Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -219,7 +219,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:5849a390-d788-40b9-b5fa-cf92ba9b185e",
+      "fullUrl": "Observation/alex-kirby-observation-2",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -236,7 +236,7 @@
           "text": "Triglycerides"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -260,7 +260,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:47b45f5d-d84f-439e-a053-acc5c534dbc0",
+      "fullUrl": "Observation/alex-kirby-observation-3",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -277,7 +277,7 @@
           "text": "Creatinine"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-20",
         "valueQuantity": {
@@ -305,7 +305,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d90490b8-4afc-444d-8aa7-c9b4bedb6805",
+      "fullUrl": "Observation/alex-kirby-observation-4",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -322,7 +322,7 @@
           "text": "TSH"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-10",
         "valueQuantity": {
@@ -350,7 +350,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0a032369-0d25-4517-b5fc-0b670123be52",
+      "fullUrl": "Observation/alex-kirby-observation-5",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -367,7 +367,7 @@
           "text": "Social Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueQuantity": {
@@ -382,7 +382,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:59b5efcb-55a0-464e-85cd-82c05f2281c8",
+      "fullUrl": "Observation/alex-kirby-observation-6",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -399,7 +399,7 @@
           "text": "Food Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "High",
@@ -411,7 +411,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b7c73b9e-bcfa-4079-9315-53fb986dded2",
+      "fullUrl": "Observation/alex-kirby-observation-7",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -428,7 +428,7 @@
           "text": "Housing Stability Risk Score"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "High",
@@ -440,7 +440,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:84ff3087-5599-4b15-85dc-a452b9e1d3b4",
+      "fullUrl": "Observation/alex-kirby-observation-8",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -457,7 +457,7 @@
           "text": "Lifestyle: Smoking Status"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Ex-smoker (Quit 15 years ago)",
@@ -469,7 +469,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:10ed7062-cd37-4723-ae54-2b3c969f84fa",
+      "fullUrl": "Observation/alex-kirby-observation-9",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -486,7 +486,7 @@
           "text": "Lifestyle: History"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "20 pack-years (1976-2011)",
@@ -498,7 +498,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ab7d36da-7e6a-401e-a614-ad55430b2dd5",
+      "fullUrl": "Observation/alex-kirby-observation-10",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -515,7 +515,7 @@
           "text": "Lifestyle: Alcohol Consumption"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Moderate - 6 units per week",
@@ -527,7 +527,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2eecb6dd-e109-4eac-a3f5-077f73c9f715",
+      "fullUrl": "Observation/alex-kirby-observation-11",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -544,7 +544,7 @@
           "text": "Lifestyle: Typical"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Usually wine with evening meals",
@@ -556,7 +556,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:4d603894-b11e-466e-8762-e4452ccd0849",
+      "fullUrl": "Observation/alex-kirby-observation-12",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -573,7 +573,7 @@
           "text": "Lifestyle: Exercise"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Light to moderate activity",
@@ -585,7 +585,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6c1a9a88-73e2-4a0a-82aa-0793d1a6a424",
+      "fullUrl": "Observation/alex-kirby-observation-13",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -602,7 +602,7 @@
           "text": "Lifestyle: Routine"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Walking 30 minutes, 4-5 days/week",
@@ -614,7 +614,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a761d6c7-0a69-424c-9ffb-74b0f99261b8",
+      "fullUrl": "Observation/alex-kirby-observation-14",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -631,7 +631,7 @@
           "text": "Lifestyle: Diet"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Following diabetic diet plan",
@@ -643,7 +643,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7ec59f70-0702-4891-a09c-b6a6c163be68",
+      "fullUrl": "Observation/alex-kirby-observation-15",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -660,7 +660,7 @@
           "text": "Lifestyle: Note"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Reduced carbohydrate intake since diagnosis",
@@ -672,7 +672,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0f806410-726b-44fd-aef0-d48c5163bff7",
+      "fullUrl": "Observation/alex-kirby-observation-16",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -689,7 +689,7 @@
           "text": "Living Situation: Marital Status"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Married",
@@ -701,7 +701,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:0d26cbb2-fbf1-4186-af5a-0d9e8ff8c15e",
+      "fullUrl": "Observation/alex-kirby-observation-17",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -718,7 +718,7 @@
           "text": "Living Situation: Living Arrangements"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Lives with husband in own home",
@@ -730,7 +730,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bdaeceb7-ebb6-407a-a73f-e9f9279ef7d0",
+      "fullUrl": "Observation/alex-kirby-observation-18",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -747,7 +747,7 @@
           "text": "Living Situation: Home"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "2-story house, stairs manageable",
@@ -759,7 +759,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:edcf25f4-becb-4929-a366-1b57fe776008",
+      "fullUrl": "Observation/alex-kirby-observation-19",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -776,7 +776,7 @@
           "text": "Living Situation: Support Network"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Good family support",
@@ -788,7 +788,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:79e125a0-9395-47b1-8edc-325fad78b78c",
+      "fullUrl": "Observation/alex-kirby-observation-20",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -805,7 +805,7 @@
           "text": "Living Situation: Family"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Husband, 2 adult children nearby",
@@ -817,7 +817,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:6a87cd00-6012-4436-921e-23aae15a43e1",
+      "fullUrl": "Observation/alex-kirby-observation-21",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -834,7 +834,7 @@
           "text": "Living Situation: Occupation"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "Retired Primary School Teacher",
@@ -846,7 +846,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d870ccfb-35c4-4269-b17a-40909e84ccf1",
+      "fullUrl": "Observation/alex-kirby-observation-22",
       "resource": {
         "resourceType": "Observation",
         "status": "final",
@@ -863,7 +863,7 @@
           "text": "Living Situation: Retired"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-27",
         "valueString": "June 2021",
@@ -875,7 +875,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:ca85de95-3db3-47d5-884c-3bd9922374c5",
+      "fullUrl": "Observation/alex-kirby-observation-23",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -907,7 +907,7 @@
           "text": "BMI"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -936,7 +936,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bf1e38d8-b64a-4f96-876a-68364d1c6469",
+      "fullUrl": "Observation/alex-kirby-observation-24",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -968,7 +968,7 @@
           "text": "Blood Pressure"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "referenceRange": [
@@ -1028,7 +1028,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9933fc54-42a2-4622-a7e8-211e20e3210a",
+      "fullUrl": "Observation/alex-kirby-observation-25",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1060,7 +1060,7 @@
           "text": "Waist/Height Ratio"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1089,7 +1089,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e88d4802-a723-4bc3-8281-4875bd2110e3",
+      "fullUrl": "Observation/alex-kirby-observation-26",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1121,7 +1121,7 @@
           "text": "Triglycerides"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1146,7 +1146,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:807888f9-e1d4-495e-b58b-8f200a156e1b",
+      "fullUrl": "Observation/alex-kirby-observation-27",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1178,7 +1178,7 @@
           "text": "Liver Function Test (ALT/AST, U/L)"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1207,7 +1207,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:529ff6f0-5adf-4a8f-910c-7470887feea5",
+      "fullUrl": "Observation/alex-kirby-observation-28",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1239,7 +1239,7 @@
           "text": "Urine Albumin/Creatine Ratio (UACR)"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1264,7 +1264,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a6cbfe1b-b5a7-47db-b4a3-9870b5d49bb8",
+      "fullUrl": "Observation/alex-kirby-observation-29",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1296,7 +1296,7 @@
           "text": "HbA1c"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1325,7 +1325,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a54b914c-5885-4b30-a9ba-4ac018bfb7d8",
+      "fullUrl": "Observation/alex-kirby-observation-30",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1357,7 +1357,7 @@
           "text": "Fasting Plasma Glucose (FPG)"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1386,7 +1386,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3fce39ff-c82f-4d99-869f-24d0741d0524",
+      "fullUrl": "Observation/alex-kirby-observation-31",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1418,7 +1418,7 @@
           "text": "LDL Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1443,7 +1443,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:bc3bd2a3-b90e-40fb-95ea-dacacc9003d9",
+      "fullUrl": "Observation/alex-kirby-observation-32",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1475,7 +1475,7 @@
           "text": "HDL Cholesterol"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1500,7 +1500,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:318e380f-bac4-497e-bd8d-2866b1071bce",
+      "fullUrl": "Observation/alex-kirby-observation-33",
       "resource": {
         "resourceType": "Observation",
         "extension": [
@@ -1532,7 +1532,7 @@
           "text": "Serum Creatinine/eGFR"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "effectiveDateTime": "2026-03-15",
         "valueQuantity": {
@@ -1561,7 +1561,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:7d066d07-b173-40f7-8b50-3cd354123d0e",
+      "fullUrl": "Condition/alex-kirby-condition-1",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1577,7 +1577,7 @@
           "text": "Type 2 Diabetes Mellitus"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "note": [
           {
@@ -1595,7 +1595,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9d25a00b-76c0-4b1f-8828-08f4c8268ab3",
+      "fullUrl": "Condition/alex-kirby-condition-2",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1611,7 +1611,7 @@
           "text": "Essential Hypertension"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "note": [
           {
@@ -1629,7 +1629,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f950584e-82a9-4c77-adf4-713c216c37e4",
+      "fullUrl": "Condition/alex-kirby-condition-3",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1645,7 +1645,7 @@
           "text": "Asthma"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "note": [
           {
@@ -1663,7 +1663,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:9f731b48-915d-46a0-a1da-992b52ecc92f",
+      "fullUrl": "Condition/alex-kirby-condition-4",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1679,7 +1679,7 @@
           "text": "Obesity (BMI 31.2)"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "note": [
           {
@@ -1697,7 +1697,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:3900ba3c-8de6-4980-8baf-ee82cf406711",
+      "fullUrl": "Condition/alex-kirby-condition-5",
       "resource": {
         "resourceType": "Condition",
         "clinicalStatus": {
@@ -1713,7 +1713,7 @@
           "text": "Coronary artery disease"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "note": [
           {
@@ -1731,7 +1731,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f1e47bd1-6f47-4241-9af5-e9676228bd1b",
+      "fullUrl": "ServiceRequest/alex-kirby-servicerequest-1",
       "resource": {
         "resourceType": "ServiceRequest",
         "basedOn": [
@@ -1752,7 +1752,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "authoredOn": "2026-04-15T16:48:53.221Z",
         "requester": {
@@ -1781,7 +1781,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2fbb3e3c-8e72-41e2-97ab-910c85f05c6d",
+      "fullUrl": "ServiceRequest/alex-kirby-servicerequest-2",
       "resource": {
         "resourceType": "ServiceRequest",
         "basedOn": [
@@ -1802,7 +1802,7 @@
           ]
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "authoredOn": "2026-04-15T16:48:53.221Z",
         "requester": {
@@ -1831,7 +1831,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:8c9b3021-c64c-4928-b2f1-f0bbffca156a",
+      "fullUrl": "Task/alex-kirby-task-1",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -1852,7 +1852,7 @@
           "text": "A1C for diabetes"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-1"
       },
@@ -1862,7 +1862,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f72591f0-9d87-4387-a474-3b2c7b05f2b3",
+      "fullUrl": "Task/alex-kirby-task-2",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -1883,7 +1883,7 @@
           "text": "Screening for SDoH"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-2"
       },
@@ -1893,7 +1893,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:21c0af17-e885-4fd1-a281-4d0bd5be46c1",
+      "fullUrl": "Task/alex-kirby-task-3",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -1914,7 +1914,7 @@
           "text": "Mental/Behavioral Health (Clinical)"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-3"
       },
@@ -1924,7 +1924,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e8932ad7-e333-4674-855a-3715499fe80c",
+      "fullUrl": "Task/alex-kirby-task-4",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -1945,7 +1945,7 @@
           "text": "Statin Therapy for the Prevention and Treatment of Cardiovascular Disease"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-4"
       },
@@ -1955,7 +1955,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:2210702d-b7d3-4827-95ed-e0e71622af6d",
+      "fullUrl": "Task/alex-kirby-task-5",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -1976,7 +1976,7 @@
           "text": "Control of Hypertension"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-5"
       },
@@ -1986,7 +1986,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:b01b3811-4b45-47ca-8fd2-411be2be0c79",
+      "fullUrl": "Task/alex-kirby-task-6",
       "resource": {
         "resourceType": "Task",
         "identifier": [
@@ -2007,7 +2007,7 @@
           "text": "Preventive Care and Screening"
         },
         "for": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-task-6"
       },
@@ -2017,7 +2017,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e4fb1a2d-e132-4f5c-bd7d-cb5a4bb1d7d1",
+      "fullUrl": "Flag/alex-kirby-flag-1",
       "resource": {
         "resourceType": "Flag",
         "status": "active",
@@ -2037,7 +2037,7 @@
           "text": "Patient seen in ER"
         },
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "id": "alex-kirby-flag-1",
         "period": {
@@ -2050,7 +2050,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:alex-kirby-codinggap-1",
+      "fullUrl": "MeasureReport/alex-kirby-codinggap-1",
       "resource": {
         "resourceType": "MeasureReport",
         "id": "alex-kirby-codinggap-1",
@@ -2058,7 +2058,7 @@
         "type": "individual",
         "measure": "http://tcoc.example.org/Measure/RA-CMS-HCC|28",
         "subject": {
-          "reference": "urn:uuid:8b04e80c-34a5-46b9-be38-9c27a3991227"
+          "reference": "Patient/patient-alex-kirby"
         },
         "period": {
           "start": "2026-01-01",

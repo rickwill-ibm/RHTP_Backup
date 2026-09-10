@@ -46,7 +46,7 @@ import type {
   CareTeamAssignment,
   FhirServiceRequest,
 } from '@/lib/smartFhirTypes';
-import { mockCdsCards } from '@/lib/smartFhirMockData';
+import { mockCdsCards, buildCdsCardsForMember } from '@/lib/smartFhirMockData';
 import { useAppContext } from '@/lib/appContext';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
 import { useDataModeFromUrl } from '@/lib/hooks/useDataModeFromUrl';
@@ -82,6 +82,12 @@ export default function MdSmartLaunchPage() {
   const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
   const [cdsPanelOpen, setCdsPanelOpen] = useState(false);
+
+  // ③ Bind CDS cards to the launched member (Maria keeps her authored cards).
+  useEffect(() => {
+    if (!launchReady || !launchContext?.patientId) return;
+    setCdsCards(buildCdsCardsForMember(launchContext.patientId.replace(/^patient\//, '')));
+  }, [launchReady, launchContext]);
   const [completedOrders, setCompletedOrders] = useState<MdOrder[]>([]);
   const [confirmedAssignments, setConfirmedAssignments] = useState<CareTeamAssignment[]>([]);
   const [closedGapIds, setClosedGapIds] = useState<string[]>([]);
@@ -500,7 +506,7 @@ export default function MdSmartLaunchPage() {
             <PatientBanner
               patientId={patientId}
               encounterId={encounterId}
-              finNumber={launchContext.encounterId}
+              finNumber={encounterId}
               onOpenResource={openResource}
             />
 

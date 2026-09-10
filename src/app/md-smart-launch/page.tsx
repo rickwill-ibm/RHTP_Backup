@@ -9,6 +9,8 @@
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDemoStore } from '@/uhg/store/demoStore';
+import { resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
 import CdsCardRenderer from './components/CdsCardRenderer';
 import OrderEntryModule from './components/OrderEntryModule';
@@ -51,16 +53,11 @@ import { useAppContext } from '@/lib/appContext';
 import { useFhirModeSync } from '@/lib/hooks/useFhirModeSync';
 import { useDataModeFromUrl } from '@/lib/hooks/useDataModeFromUrl';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import { DEMO_PATIENT_ID, DEMO_ENCOUNTER_ID, storeRead } from '@/lib/fhir/store';
 import { invokePatientViewHook } from '@/lib/fhir/cdsHooks';
-import { resolveIds } from './lib/resolveIds';
-import { useCdsFlagsEffect } from './hooks/useCdsFlagsEffect';
 import AppLayout from '@/components/AppLayout';
 
-let auditSeq = 0;
-function makeAuditId(): string {
-  auditSeq += 1;
-  return `AUD-${Date.now().toString(36).toUpperCase()}-${String(auditSeq).padStart(3, '0')}`;
-}
+import { makeAuditId, resolveIds } from './launch.helpers';
 
 interface ViewerTarget {
   resourceType: string;
@@ -79,9 +76,25 @@ export default function MdSmartLaunchPage() {
 
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
+  const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
+  // Launch precedence: the SMART launch's ?patientId= is AUTHORITATIVE. Set the global active
+  // member to the launched patient so the shell and any member screen agree with the EHR
+  // context — the URL wins over whatever member was previously active (wrong-patient guard).
+  useEffect(() => {
+    if (!launchReady || !launchContext?.patientId) return;
+    const fhir = launchContext.patientId.replace(/^patient\//, '');
+    const platform = resolveFhirToPlatformId(fhir) ?? resolveFhirToPlatformId(`patient-${fhir}`);
+    if (platform) setActiveCitizen(platform);
+  }, [launchReady, launchContext, setActiveCitizen]);
   const [activeMenu, setActiveMenu] = useState<MenuKey>('provider-view');
   const [cdsCards, setCdsCards] = useState<CdsCard[]>(mockCdsCards);
   const [cdsPanelOpen, setCdsPanelOpen] = useState(false);
+
+  // ③ Bind CDS cards to the launched member (Maria keeps her authored cards).
+  useEffect(() => {
+    if (!launchReady || !launchContext?.patientId) return;
+    setCdsCards(buildCdsCardsForMember(launchContext.patientId.replace(/^patient\//, '')));
+  }, [launchReady, launchContext]);
   const [completedOrders, setCompletedOrders] = useState<MdOrder[]>([]);
   const [confirmedAssignments, setConfirmedAssignments] = useState<CareTeamAssignment[]>([]);
   const [closedGapIds, setClosedGapIds] = useState<string[]>([]);
@@ -297,30 +310,6 @@ export default function MdSmartLaunchPage() {
     [pushAudit, addSessionAction]
   );
 
-  // ── Point-of-care clinical writes ─────────────────────────────────────────
-  const handleClinicalWrite = useCallback(
-    (
-      kind: 'condition-added' | 'allergy-added' | 'medication-added',
-      display: string,
-      resourceId: string
-    ) => {
-      const fhirTypes = {
-        'condition-added': 'Condition',
-        'allergy-added': 'AllergyIntolerance',
-        'medication-added': 'MedicationRequest',
-      } as const;
-      pushAudit(kind, `${display} added to patient record`, {
-        resourceId,
-        fhirResourceType: fhirTypes[kind],
-        dateOfService: new Date().toISOString().slice(0, 10),
-        attendingPhysician: launchContext?.practitionerName ?? 'Unknown',
-        attendingId: launchContext?.practitionerId ?? 'unknown',
-      });
-      addSessionAction(`${display} → ${fhirTypes[kind]}/${resourceId}`);
-    },
-    [pushAudit, addSessionAction, launchContext]
-  );
-
   // ── Legacy order module ───────────────────────────────────────────────────
   const handleOrderSigned = useCallback(
     (orders: MdOrder[], _serviceRequests: FhirServiceRequest[]) => {
@@ -377,18 +366,6 @@ export default function MdSmartLaunchPage() {
   const openResource = useCallback((resourceType: string, resourceId: string, label: string) => {
     setViewer({ resourceType, resourceId, label });
   }, []);
-
-  // ── CDS cards: layered fallback ───────────────────────
-  // Layer 1 (default): each launched member shows their OWN registry-derived
-  // cards (care gaps / BH / RAF); Maria keeps her authored mockCdsCards. A member
-  // never shows another member's cards under their name.
-  useEffect(() => {
-    if (!launchReady || !launchContext?.patientId) return;
-    setCdsCards(buildCdsCardsForMember(launchContext.patientId.replace(/^patient\//, '')));
-  }, [launchReady, launchContext]);
-  // Layer 2 (override): non-Maria members with live FHIR Flags get flag-derived
-  // cards instead — only when such flags exist, else Layer 1 stands.
-  useCdsFlagsEffect({ launchReady, launchContext, useMockData, setCdsCards });
 
   // ── Live CDS Hooks invocation (patient-view) with demo-card fallback ──────
   useEffect(() => {
@@ -530,10 +507,8 @@ export default function MdSmartLaunchPage() {
                     <ProviderViewReview
                       patientId={patientId}
                       encounterId={encounterId}
-                      launchContext={launchContext}
                       onOpenResource={openResource}
                       onMarkReviewed={handleMarkReviewed}
-                      onClinicalWrite={handleClinicalWrite}
                       reviewed={reviewed}
                     />
                     <ProviderViewAct
@@ -557,29 +532,9 @@ export default function MdSmartLaunchPage() {
                 )}
 
                 {activeMenu === 'results' && <ResultsReviewPage {...pageProps} />}
-                {activeMenu === 'medications' && (
-                  <MedicationListPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    encounterId={encounterId}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
-                {activeMenu === 'problems' && (
-                  <ProblemsPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    encounterId={encounterId}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
-                {activeMenu === 'allergies' && (
-                  <AllergiesPage
-                    {...pageProps}
-                    launchContext={launchContext}
-                    onClinicalWrite={handleClinicalWrite}
-                  />
-                )}
+                {activeMenu === 'medications' && <MedicationListPage {...pageProps} />}
+                {activeMenu === 'problems' && <ProblemsPage {...pageProps} />}
+                {activeMenu === 'allergies' && <AllergiesPage {...pageProps} />}
                 {activeMenu === 'vitals' && <VitalsPage {...pageProps} />}
                 {activeMenu === 'documentation' && <DocumentationPage {...pageProps} />}
                 {activeMenu === 'histories' && <HistoriesPage {...pageProps} />}
@@ -601,7 +556,6 @@ export default function MdSmartLaunchPage() {
                     <CarePlanFhirPage {...pageProps} />
                     <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                       <CarePlanPanel
-                        patientId={patientId}
                         launchContext={launchContext}
                         completedOrders={completedOrders}
                         confirmedAssignments={confirmedAssignments}
@@ -654,7 +608,7 @@ export default function MdSmartLaunchPage() {
 
                 {activeMenu === 'cdi' && (
                   <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                    <MdPatientSummary patientId={patientId} launchContext={launchContext} />
+                    <MdPatientSummary launchContext={launchContext} />
                   </div>
                 )}
 

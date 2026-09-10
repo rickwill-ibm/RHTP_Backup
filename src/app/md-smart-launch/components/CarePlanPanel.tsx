@@ -2,10 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import { mockCareGaps, mockPatients, mockHCCSuspects, referralStore } from '@/lib/mockData';
-import type { SmartLaunchContext, MdOrder, CareTeamAssignment } from '@/lib/smartFhirTypes';
-import { usePatient } from '@/lib/fhir/hooks';
-import { bannerName } from '@/lib/fhir/types';
-import { DEMO_PATIENT_ID } from '@/lib/fhir/store';
+import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
+import type { MdOrder, CareTeamAssignment } from '@/lib/smartFhirTypes';
 import {
   generateComprehensiveCarePlan,
   generateHolisticCarePlan,
@@ -19,28 +17,162 @@ import {
 import { useAppContext } from '@/lib/appContext';
 import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
-import {
-  CHRONIC_CONDITIONS,
-  CARE_GOALS,
-  ACUITY_STYLE,
-  STATUS_STYLE,
-  GOAL_PRIORITY_STYLE,
-  GOAL_STATUS_ICON,
-} from '../data/carePlanData';
-import { useFhirCarePlanRead } from '../hooks/useFhirCarePlanRead';
-import { saveCarePlanToFhir } from '../lib/saveCarePlanToFhir';
 
 interface CarePlanPanelProps {
-  patientId: string;
   launchContext: SmartLaunchContext;
   completedOrders: MdOrder[];
   confirmedAssignments: CareTeamAssignment[];
 }
 
+const CHRONIC_CONDITIONS = [
+  {
+    code: 'T2DM',
+    label: 'Type 2 Diabetes Mellitus',
+    icd: 'E11.65',
+    hcc: 'HCC 18',
+    acuity: 'critical',
+    goal: 'A1C < 8.0%',
+    current: 'A1C 9.2%',
+    status: 'Off Target',
+    lastReview: '2026-02-10',
+    nextReview: '2026-05-10',
+  },
+  {
+    code: 'CKD',
+    label: 'Chronic Kidney Disease Stage 3b',
+    icd: 'N18.32',
+    hcc: 'HCC 136',
+    acuity: 'critical',
+    goal: 'eGFR stable ≥ 40',
+    current: 'eGFR 42',
+    status: 'Monitoring',
+    lastReview: '2026-03-15',
+    nextReview: '2026-06-15',
+  },
+  {
+    code: 'HTN',
+    label: 'Hypertension',
+    icd: 'I10',
+    hcc: 'HCC 85',
+    acuity: 'high',
+    goal: 'BP < 130/80',
+    current: 'BP 158/96',
+    status: 'Off Target',
+    lastReview: '2026-04-01',
+    nextReview: '2026-05-01',
+  },
+  {
+    code: 'HF',
+    label: 'Heart Failure (HFpEF)',
+    icd: 'I50.30',
+    hcc: 'HCC 85',
+    acuity: 'high',
+    goal: 'EF ≥ 50%, no decompensation',
+    current: 'EF 55% — stable',
+    status: 'On Target',
+    lastReview: '2026-03-20',
+    nextReview: '2026-06-20',
+  },
+  {
+    code: 'AFIB',
+    label: 'Atrial Fibrillation',
+    icd: 'I48.91',
+    hcc: 'HCC 96',
+    acuity: 'moderate',
+    goal: 'Rate controlled, anticoagulated',
+    current: 'Rate 72 bpm — stable',
+    status: 'On Target',
+    lastReview: '2026-01-20',
+    nextReview: '2026-07-20',
+  },
+];
+
+// NOTE: These are DEMO goals for non-Maria patients. For Maria, use generated care plan.
+const CARE_GOALS = [
+  {
+    id: 'goal-1',
+    category: 'Clinical',
+    goal: 'Achieve A1C < 8.0% within 6 months',
+    owner: 'Primary Care',
+    targetDate: '2026-10-16',
+    status: 'In Progress',
+    priority: 'high',
+  },
+  {
+    id: 'goal-2',
+    category: 'Clinical',
+    goal: 'Resolve duplicate anticoagulant therapy and maintain safe medication regimen',
+    owner: 'Primary Care',
+    targetDate: '2026-06-20',
+    status: 'In Progress',
+    priority: 'critical',
+  },
+  {
+    id: 'goal-3',
+    category: 'Clinical',
+    goal: 'Route HbA1c testing to Labcorp and confirm result return to PCP workflow',
+    owner: 'Labcorp',
+    targetDate: '2026-06-18',
+    status: 'In Progress',
+    priority: 'high',
+  },
+  {
+    id: 'goal-4',
+    category: 'SDoH',
+    goal: 'Transportation barrier routed to Unite Us and outreach initiated',
+    owner: 'Unite Us',
+    targetDate: '2026-06-18',
+    status: 'In Progress',
+    priority: 'high',
+  },
+  {
+    id: 'goal-5',
+    category: 'Financial',
+    goal: 'Capture gainshare after care gaps close and documentation is returned',
+    owner: 'Value-Based Operations',
+    targetDate: '2026-06-30',
+    status: 'Pending',
+    priority: 'moderate',
+  },
+  {
+    id: 'goal-7',
+    category: 'Preventive',
+    goal: 'Schedule annual wellness visit when due',
+    owner: 'Primary Care',
+    targetDate: '2026-10-15',
+    status: 'Pending',
+    priority: 'moderate',
+  },
+];
+
+const ACUITY_STYLE: Record<string, { dot: string; badge: string }> = {
+  critical: { dot: 'bg-[#da1e28]', badge: 'bg-[#fff1f1] text-[#da1e28] border-[#ffb3b8]' },
+  high: { dot: 'bg-[#f1c21b]', badge: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]' },
+  moderate: { dot: 'bg-[#0043ce]', badge: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]' },
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  'Off Target': 'bg-[#fff1f1] text-[#da1e28] border border-[#ffb3b8]',
+  'On Target': 'bg-[#defbe6] text-[#24a148] border border-[#a7f0ba]',
+  Monitoring: 'bg-[#fdf6dd] text-[#b45309] border border-[#f1c21b]',
+};
+
+const GOAL_PRIORITY_STYLE: Record<string, string> = {
+  critical: 'bg-[#fff1f1] text-[#da1e28] border-[#ffb3b8]',
+  high: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+  moderate: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+};
+
+const GOAL_STATUS_ICON: Record<string, { icon: string; color: string }> = {
+  'In Progress': { icon: 'ClockIcon', color: 'text-[#b45309]' },
+  Active: { icon: 'BoltIcon', color: 'text-[#da1e28]' },
+  Pending: { icon: 'EllipsisHorizontalCircleIcon', color: 'text-carbon-gray-50' },
+  Completed: { icon: 'CheckCircleIcon', color: 'text-[#24a148]' },
+};
+
 type Section = 'conditions' | 'gaps' | 'goals' | 'team' | 'closed-gaps';
 
 export default function CarePlanPanel({
-  patientId,
   launchContext,
   completedOrders,
   confirmedAssignments,
@@ -56,22 +188,69 @@ export default function CarePlanPanel({
   const [gainshare, setGainshare] = useState<any>(null);
 
   // ── Live FHIR: read the patient's persisted CarePlan on mount ───────────────
-  const { carePlan: fhirCarePlan, setCarePlan: setFhirCarePlan } = useFhirCarePlanRead(
-    launchContext.patientId
-  );
+  const [fhirCarePlan, setFhirCarePlan] = useState<{
+    title: string;
+    description?: string;
+    status: string;
+    lastUpdated?: string;
+    domainCount: number;
+  } | null>(null);
 
-  // Identity: for Maria/demo use mock registry; for other patients use FHIR Patient resource
-  const isMockPatient = patientId === DEMO_PATIENT_ID;
-  const fhirPatient = usePatient(isMockPatient ? undefined : patientId);
-  const mockPatient = mockPatients.find((p) => p.id === launchContext.patientId) || mockPatients[0];
-  const patient = mockPatient; // keep reference for mock-data lookups below
+  useEffect(() => {
+    if (getFhirMockMode()) return;
+    // Normalize: replace slashes first so 'patient/maria-redhawk-001' → 'patient-maria-redhawk-001'
+    const safePlatformId = launchContext.patientId
+      .replace(/\//g, '-')
+      .replace(/[^A-Za-z0-9\-.]/g, '-');
+    const carePlanId = `cp-${safePlatformId}`;
+    getFhirClient()
+      .read<{
+        resourceType: string;
+        title?: string;
+        description?: string;
+        status?: string;
+        meta?: { lastUpdated?: string };
+        extension?: { url: string; valueString?: string }[];
+        note?: { text?: string }[];
+      }>('CarePlan', carePlanId)
+      .then((cp) => {
+        if (cp?.resourceType !== 'CarePlan') return;
+        const ext = cp.extension?.find(
+          (e) => e.url === 'http://tcoc.example.org/fhir/StructureDefinition/care-plan-domains'
+        );
+        const raw = ext?.valueString ?? cp.note?.[0]?.text ?? null;
+        let domainCount = 0;
+        if (raw) {
+          try {
+            domainCount = (JSON.parse(raw) as unknown[]).length;
+          } catch {
+            /* ignore */
+          }
+        }
+        setFhirCarePlan({
+          title: cp.title ?? 'Comprehensive Care Plan',
+          description: cp.description,
+          status: cp.status ?? 'active',
+          lastUpdated: cp.meta?.lastUpdated
+            ? new Date(cp.meta.lastUpdated).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : undefined,
+          domainCount,
+        });
+        console.info(`[CarePlanPanel] Loaded CarePlan/${carePlanId} from FHIR`);
+      })
+      .catch(() => {
+        /* not yet created — silent */
+      });
+  }, [launchContext.patientId]);
+
+  const patient = mockPatients.find((p) => p.id === launchContext.patientId) || mockPatients[0];
   const careGaps = mockCareGaps.filter((g) => g.patientId === patient.id);
   const openGaps = careGaps.filter((g) => g.status === 'Open' || g.status === 'In Progress');
   const hccSuspects = mockHCCSuspects.filter((h) => h.patientId === patient.id);
-  // Resolved display name: prefer FHIR for non-demo patients
-  const resolvedName =
-    !isMockPatient && fhirPatient.data ? bannerName(fhirPatient.data.name) : patient.name;
-  const resolvedPcp = patient.primaryCareProvider || 'Primary Care Provider (to be assigned)';
 
   // Subscribe to referral store updates for real-time gap closure
   useEffect(() => {
@@ -92,7 +271,7 @@ export default function CarePlanPanel({
   // Merge confirmed assignments + order-based referrals into care team
   const careTeamMembers = [
     {
-      name: resolvedPcp,
+      name: patient.primaryCareProvider || 'Primary Care Provider (to be assigned)',
       role: 'Primary Care Physician',
       specialty: 'Internal Medicine',
       type: 'PCP',
@@ -161,23 +340,183 @@ export default function CarePlanPanel({
 
   const handleSave = async (planData: any) => {
     setSaveError(null);
+    const now = new Date().toISOString();
+    const safePlatformId = (patient.id ?? launchContext.patientId)
+      .replace(/\//g, '-')
+      .replace(/[^A-Za-z0-9\-.]/g, '-');
+    const fhirPatientId = PLATFORM_TO_FHIR_ID_MAP[patient.id] ?? patient.id;
+    const carePlanId = `cp-${safePlatformId}`;
     const performer = activePhysician?.displayName ?? 'Physician';
-    setIsSaving(true);
-    try {
-      const summary = await saveCarePlanToFhir({
-        platformPatientId: patient.id ?? launchContext.patientId,
-        encounterId: launchContext.encounterId,
-        performer,
-        planData,
-        careGaps,
+    const planTitle = planData.title ?? 'Comprehensive Care Plan';
+    const planDescription: string | undefined = planData.description ?? undefined;
+
+    // Build domainsPayload in the correct CarePlanDomain shape so
+    // WholePersonCarePlanTab can parse and render the domains.
+    // Group mockCareGaps by domain category using the registry careGap domain field.
+    const DOMAIN_META: Record<string, { color: string; icon: string }> = {
+      Clinical: { color: '#0043ce', icon: 'HeartIcon' },
+      'Behavioral Health': { color: '#6929c4', icon: 'SparklesIcon' },
+      BH: { color: '#6929c4', icon: 'SparklesIcon' },
+      Social: { color: '#b45309', icon: 'HomeIcon' },
+      'Social Needs': { color: '#b45309', icon: 'HomeIcon' },
+    };
+    const domainMap: Record<string, { color: string; icon: string; goals: any[] }> = {};
+    careGaps.forEach((g) => {
+      // program field is derived from careGap.domain:
+      //   Clinical → HEDIS, BH → MIPS, Social → HEDIS (not STARS)
+      // So map back to domain using the original gap domain name from notes field
+      // or fall back gracefully: MIPS → BH, anything else → Clinical
+      const domainKey =
+        g.program === 'MIPS'
+          ? 'Behavioral Health'
+          : g.notes?.startsWith('Social') || g.notes?.startsWith('BH')
+            ? g.notes.split(' ')[0] === 'BH'
+              ? 'Behavioral Health'
+              : 'Social Needs'
+            : 'Clinical';
+      if (!domainMap[domainKey]) {
+        const meta = DOMAIN_META[domainKey] ?? { color: '#0043ce', icon: 'DocumentTextIcon' };
+        domainMap[domainKey] = { color: meta.color, icon: meta.icon, goals: [] };
+      }
+      domainMap[domainKey].goals.push({
+        goal: g.measureName,
+        status:
+          g.status === 'Open' ? 'open' : g.status === 'In Progress' ? 'in-progress' : 'closed',
+        owner: g.assignedTo || performer,
+        dueDate: g.dueDate,
+        tasks: [g.closureRequirement ?? g.measureName],
       });
-      setFhirCarePlan(summary);
-    } catch (err) {
-      console.warn('[CarePlan] FHIR save failed:', err);
-      setSaveError('FHIR save failed — plan saved locally only. Retry or check network.');
-    } finally {
-      setIsSaving(false);
+    });
+    const domainsPayload = Object.entries(domainMap).map(([domain, v]) => ({
+      domain,
+      color: v.color,
+      icon: v.icon,
+      goals: v.goals,
+    }));
+
+    if (!getFhirMockMode()) {
+      setIsSaving(true);
+      try {
+        await getFhirClient().update({
+          resourceType: 'CarePlan',
+          id: carePlanId,
+          status: 'active',
+          intent: 'plan',
+          title: planTitle,
+          description: planDescription,
+          subject: { reference: `Patient/${fhirPatientId}` },
+          author: { display: performer },
+          created: now,
+          note: [
+            {
+              text: `Generated via MD SMART Launch · Encounter: ${launchContext.encounterId} · Saved by: ${performer}`,
+            },
+          ],
+          extension: [
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/care-plan-domains',
+              valueString: JSON.stringify(domainsPayload),
+            },
+          ],
+          ...(planData.addresses?.length
+            ? { addresses: planData.addresses.map((a: string) => ({ display: a })) }
+            : {}),
+        });
+
+        console.info(`[CarePlan] ${carePlanId} approved & saved to FHIR`);
+
+        // Update local fhirCarePlan state immediately — no re-fetch needed
+        setFhirCarePlan({
+          title: planTitle,
+          description: planDescription,
+          status: 'active',
+          lastUpdated: new Date(now).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          }),
+          domainCount: domainsPayload.length,
+        });
+
+        // Fire-and-forget: AuditEvent
+        getFhirClient()
+          .create({
+            resourceType: 'AuditEvent',
+            type: {
+              system: 'http://terminology.hl7.org/CodeSystem/audit-event-type',
+              code: 'rest',
+              display: 'RESTful Operation',
+            },
+            subtype: [
+              {
+                system: 'http://hl7.org/fhir/restful-interaction',
+                code: 'update',
+                display: 'update',
+              },
+            ],
+            action: 'U',
+            recorded: now,
+            outcome: '0',
+            agent: [{ who: { display: performer }, requestor: true }],
+            source: { observer: { display: 'TCOC-SMART-Launch' } },
+            entity: [
+              {
+                what: { reference: `CarePlan/${carePlanId}` },
+                type: { code: '4', display: 'Other' },
+              },
+            ],
+          })
+          .catch((err) => console.warn('[AuditEvent] CarePlan audit post failed:', err));
+
+        // Fire-and-forget: ServiceRequest per open gap
+        careGaps
+          .filter((g) => g.status === 'Open' || g.status === 'In Progress')
+          .forEach((gap) => {
+            getFhirClient()
+              .create({
+                resourceType: 'ServiceRequest',
+                status: 'active',
+                intent: 'plan',
+                code: { text: gap.measureName },
+                subject: { reference: `Patient/${fhirPatientId}` },
+                requester: { display: performer },
+                authoredOn: now,
+                note: [{ text: `Care gap: ${gap.measureName} — care plan intervention` }],
+                extension: [
+                  {
+                    url: 'http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id',
+                    valueString: gap.id,
+                  },
+                  {
+                    url: 'http://tcoc.example.org/fhir/StructureDefinition/care-plan-id',
+                    valueString: carePlanId,
+                  },
+                ],
+              })
+              .catch((err) => console.warn(`[ServiceRequest] Gap ${gap.id} POST failed:`, err));
+          });
+      } catch (err) {
+        console.warn('[CarePlan] FHIR save failed:', err);
+        setSaveError('FHIR save failed — plan saved locally only. Retry or check network.');
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      // Mock mode: still update local display state
+      setFhirCarePlan({
+        title: planTitle,
+        description: planDescription,
+        status: 'active',
+        lastUpdated: new Date(now).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        domainCount: domainsPayload.length,
+      });
     }
+
+    // Return to the panel view, showing the FHIR banner
     setShowGeneratedPlan(false);
     setGeneratedPlan(null);
   };
@@ -237,7 +576,7 @@ export default function CarePlanPanel({
               Active Care Plan
             </h2>
             <p className="text-xs text-carbon-gray-50 mt-0.5">
-              {resolvedName} · MRN {patient.mrn} · Enc:{' '}
+              {patient.name} · MRN {patient.mrn} · Enc:{' '}
               <span className="font-mono">{launchContext.encounterId}</span>
             </p>
           </div>
@@ -610,7 +949,7 @@ export default function CarePlanPanel({
             <p className="text-xs font-semibold text-[#6929c4]">Maria-specific workflow note</p>
             <p className="text-xs text-carbon-gray-70 mt-1">
               Transportation support has been routed to Unite Us. Eye exam and annual wellness visit
-              are shown as upcoming scheduling needs, not active gaps already present in Maria's
+              are shown as upcoming scheduling needs, not active gaps already present in Maria&apos;s
               record.
             </p>
           </div>

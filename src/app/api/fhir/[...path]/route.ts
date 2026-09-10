@@ -18,7 +18,6 @@ import {
 import { getPrincipal } from '@/lib/authz/principal';
 import { canAccessMemberTenantAware } from '@/lib/security/tenant';
 import { fhirRead, fhirCreate } from '@/lib/server/fhirServer';
-import { storeCreate } from '@/lib/fhir/store';
 import { correlationFrom, CORRELATION_HEADER } from '@/lib/server/correlation';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { devMockEnabled, devBulkStatus } from '@/lib/server/devStubs';
@@ -338,18 +337,6 @@ export async function POST(
   const type = path[0];
   const body = await req.json().catch(() => null);
   const actorId = getPrincipal(await getSessionAuthContext().catch(() => null)).userId;
-
-  // Mock bypass — persist to the in-memory fixture store (same store that
-  // seeded GET reads use), so demo write-back flows work end-to-end.
-  if (devMockEnabled()) {
-    const resource = body && typeof body === 'object' ? (body as Record<string, unknown>) : {};
-    const created = storeCreate<Record<string, unknown>>({ ...resource, resourceType: type });
-    return NextResponse.json(created, {
-      status: 201,
-      headers: { [CORRELATION_HEADER]: correlationId },
-    });
-  }
-
   const result = await fhirCreate(type, body, { actor: actorId, correlationId });
   return NextResponse.json(result.ok ? result.raw : result.error, {
     status: result.status || (result.ok ? 201 : 502),

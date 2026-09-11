@@ -99,3 +99,6 @@ _ship/
 /devlog.txt
 *.bak-hotfix
 **/_to_delete_samples/
+
+tools/cowork-plugin/*/dist/
+tools/cowork-plugin/*.plugin

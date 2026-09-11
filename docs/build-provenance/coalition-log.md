@@ -1353,3 +1353,71 @@ unaffected (no src/app changes). Nothing committed by the agent — staged for t
 - Adjacent hygiene: excluded `_ship` in `tsconfig.json` + `.gitignore` (a stray incomplete bundle copy was polluting `tsc` with 33 phantom import errors).
 **Adversarial-before (design):** enumerated the container's residual imports (MONO/PANEL/BORDER/AMBER/MUTED/TEXT/n + the 4 subcomponents); confirmed no `LIME`/`CARD` leak and the default-export name preserved; confirmed the new view module earns E13 linkage via the `humanizeDomain` test; sized both files < 400.
 **Adversarial-after / verify:** E13 guard **PASS** (no new untested; the 4 modules linked, none in baseline). Sizes: container 226, view 204 (< 400 cap). Pure logic (aggregators, `humanizeDomain`, count formatter, seed medicaidId ordering) verified independently in node — **10/10** assertions pass. **Limitation:** full `tsc --noEmit` and `vitest` could not complete in the bridge sandbox (tsc pathologically slow on this VM; vitest missing the `@rolldown` native binding) — types were reasoned per-file and the changes are localized; authoritative confirmation is the repo gate in the normal dev environment.
+
+## 2026-09-11 · Cowork session adherence — framework packaged as an account-level plugin
+**Problem (root cause, verified on-device, not inferred):** the framework was not decaying
+mid-session — it was never loading. In a Cowork session the working directory is the cloud
+sandbox, not this repo; the repo is reachable only across the device bridge. `CLAUDE.md` and
+`AGENTS.md` auto-load from the session working directory, so neither enters context unless the
+assistant chooses to read it. `.claude/skills/agentic-build-framework` is project-scoped and
+Cowork launches with `--setting-sources user`, which excludes it. Verified live: `git
+config core.hooksPath=tools/hooks` with `pre-commit`/`pre-push` present (the one live control),
+no `.claude/settings.json` in the repo, and account-synced skills/plugins present in the sandbox
+while project-scoped ones are absent. Consequence: during the failing session only the
+commit-path gates were in force, and four of the five observed failures were document
+deliverables that never reach a commit.
+**Failure reclassification:** 2 adherence (solo build against the standing coalition rule;
+skipped render verification) · 4 specification (wrong FRAME ×2 — payer→state, demo-repair→
+production; wrong SHAPE ×2 — strategy scatter vs market map, persona vs mode) · 1 convention
+(recommendation on page 6 of 11). An adherence-only framing generates more framework as the
+answer to failures more framework cannot reach.
+**Change:** new `tools/cowork-plugin/rhtp-delivery-framework/` — an account-level Cowork plugin,
+the delivery path that does materialise in the sandbox.
+- `skills/delivery-preflight` (new): default-deny gate — FRAME · SHAPE · DONE stated and then
+  STOP; METHOD declaration where solo requires an affirmative yes; budgets bound to subagents
+  rather than prose; the six CLAUDE.md non-negotiables restated (CLAUDE.md does not load here);
+  receipts-not-checkmarks reporting, where a check without a receipt is omitted, not asserted.
+- `references/system-prompt.md`: the standing ROLE / TONE / CONSTRAINTS / OUTPUT block, for
+  Cowork project instructions; inherited verbatim as the preamble of both agents so a seat
+  cannot drift from the house standard in its own context.
+- `references/prompt-sections.md`: the two prompt layers, and the box→failure mapping —
+  Context carries FRAME (both frame failures), Output Format carries SHAPE and DONE (both shape
+  failures plus the buried recommendation). Task was being filled; those two were being skipped.
+- `agents/adversarial-reviewer.md`: R1–R5 seat, `tools: Read, Grep, Glob, WebSearch, WebFetch`
+  — **no Write or Edit**, so it is structurally incapable of becoming the builder.
+- `agents/bounded-researcher.md`: default cap 10 min / 12 fetches, no write tools. Exists
+  because a budget in a parent prompt does not bind a subagent (one seat ran 25 min / 51
+  fetches producing nothing).
+- `hooks/hooks.json`: `SessionStart` delivers the standing prompt, `UserPromptSubmit` re-injects
+  the three-field gate every turn. Both emit an `RHTP-HOOK-ALIVE` marker. **Unverified** —
+  whether plugin-supplied hooks fire in Cowork is the open question this ships to test. Hooks
+  do execute in the sandbox (the session git identity is set by one), but from a launcher-owned
+  file. If the marker does not appear, delete `hooks/` — the skills and agents stand alone.
+- `sync.sh` + `docs/framework/cowork-session-adherence.md` (the written-up analysis).
+**Invariants/contracts touched:** none in `src/`. SINGLE SOURCE is the one that governed the
+design — `.claude/skills/agentic-build-framework/` stays the source of truth and `sync.sh`
+regenerates the plugin's copy; an earlier draft shipped a verbatim `AGENTS.md` duplicate into
+the plugin and it was dropped for the same reason, replaced by a reference by name.
+**Fix at source:** `.claude/skills/agentic-build-framework/SKILL.md` frontmatter was invalid
+YAML — an unquoted `Triggers include: ` inside `description` — which fails strict frontmatter
+parsers and rejected the first plugin build. Rewritten as a folded block scalar at the source,
+then synced.
+**Adversarial-before:** ran an adversarial seat against the first recommendation. It retired it.
+Findings adopted: the "no kill switch / hooks unavailable" claim was overstated (delivery
+problem, not capability gap); a paste-before-every-prompt control block is the same failure
+class with a worse duty cycle, since nobody pastes ten fields at turn 34 where the failures
+actually happen; a model-written DoD checklist is unfalsifiable by construction; folding the
+gate into the coalition skill is circular, because that skill failing to fire *was* failure #1;
+and subagent tool grants plus deterministic orchestration are in-session structural controls the
+first recommendation never considered. Ten fields reduced to three on coverage × compliance.
+**Verify-after (receipts):** `yaml.safe_load` passes on all four frontmatter blocks, both on
+disk and re-checked against the files unzipped from the packed archive — the earlier build
+claimed validation while only checking that a `description:` key was present, which is the
+precise failure the receipts rule exists to stop. `sync.sh` runs end-to-end, exit 0, packs
+54,614 bytes. Both hook scripts pass `bash -n` and emit their markers. Plugin installed into the
+live session: both skills and both agents appear in the roster with their tool grants intact.
+**Limitation:** `npm run check:all` was not run — no `src/` change, and the bridge sandbox
+cannot complete `tsc`/`vitest` (documented in the 2026-09-10 entry). `zip` cannot rename into
+the mounted folder from the sandbox, so `sync.sh` builds in scratch and copies in.
+**Open:** the plugin-hook question above. Test by starting a fresh Cowork session and asking
+whether an `RHTP-HOOK-ALIVE` line is in context.

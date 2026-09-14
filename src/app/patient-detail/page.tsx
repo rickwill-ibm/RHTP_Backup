@@ -54,7 +54,11 @@ function PatientDetailContent() {
   }, [seedId]);
 
   // Render from the store — the switcher's target. URL is a seed, never a 2nd source.
-  const resolvedId = activeCitizenId || seedId || 'MARIA_SD_001';
+  // Prefer the fresh URL seed over the (possibly stale, pre-effect) store value on
+  // the very first paint after navigation — the effect above will sync the store to
+  // match seedId a moment later anyway, so this just removes the one-paint window
+  // where the OLD patient's data would otherwise flash/stick before the sync lands.
+  const resolvedId = seedId || activeCitizenId || 'MARIA_SD_001';
 
   // Look up patient from registry — works for any patient, not just Maria
   const registryPatient = getPatientSync(resolvedId);

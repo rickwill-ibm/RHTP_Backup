@@ -4,7 +4,7 @@
  * Reason for Visit, Problem List, Home Medications, Allergies,
  * Vitals & Measurements, Results, Visits. All FHIR-fed.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import MPageCard from './MPageCard';
 import { interpChip, statusTextCls } from './theme';
 import {
@@ -26,6 +26,11 @@ import {
   quantityText,
   type FhirObservation,
 } from '@/lib/fhir/types';
+import AddConditionForm from '../AddConditionForm';
+import AddAllergyForm from '../AddAllergyForm';
+import AddMedicationForm from '../AddMedicationForm';
+import { mapAllergiesToMtm } from '@/lib/agents/mtm/allergyMapper';
+import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
 
 export interface OpenResourceFn {
   (resourceType: string, resourceId: string, label: string): void;
@@ -34,8 +39,14 @@ export interface OpenResourceFn {
 interface ReviewColumnProps {
   patientId: string;
   encounterId?: string;
+  launchContext: SmartLaunchContext;
   onOpenResource: OpenResourceFn;
   onMarkReviewed: (what: string, resourceIds: string[]) => void;
+  onClinicalWrite: (
+    kind: 'condition-added' | 'allergy-added' | 'medication-added',
+    display: string,
+    resourceId: string
+  ) => void;
   reviewed: Record<string, boolean>;
 }
 
@@ -78,10 +89,15 @@ function ReviewedButton({
 export default function ProviderViewReview({
   patientId,
   encounterId,
+  launchContext,
   onOpenResource,
   onMarkReviewed,
+  onClinicalWrite,
   reviewed,
 }: ReviewColumnProps) {
+  const [showAddCondition, setShowAddCondition] = useState(false);
+  const [showAddAllergy, setShowAddAllergy] = useState(false);
+  const [showAddMedication, setShowAddMedication] = useState(false);
   const { data: encounter, fetchedAt: encAt } = useEncounter(encounterId);
   const dx = useEncounterDiagnoses(patientId, encounterId);
   const problems = useProblemList(patientId);
@@ -154,6 +170,19 @@ export default function ProviderViewReview({
       </MPageCard>
 
       {/* ── Problem List ── */}
+      {showAddCondition && (
+        <AddConditionForm
+          patientId={patientId}
+          encounterId={encounterId ?? ''}
+          launchContext={launchContext}
+          onSaved={(id, display) => {
+            problems.refresh();
+            onClinicalWrite('condition-added', display, id);
+            setShowAddCondition(false);
+          }}
+          onCancel={() => setShowAddCondition(false)}
+        />
+      )}
       <MPageCard
         title="Problem List"
         count={problems.data.length}
@@ -162,16 +191,24 @@ export default function ProviderViewReview({
         error={problems.error}
         onRefresh={problems.refresh}
         actions={
-          <ReviewedButton
-            label="problems"
-            done={!!reviewed.problems}
-            onClick={() =>
-              onMarkReviewed(
-                'Problem List',
-                problems.data.map((p) => p.id ?? '')
-              )
-            }
-          />
+          <div className="flex items-center gap-1">
+            <button
+              className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
+              onClick={() => setShowAddCondition(true)}
+            >
+              + Add Problem
+            </button>
+            <ReviewedButton
+              label="problems"
+              done={!!reviewed.problems}
+              onClick={() =>
+                onMarkReviewed(
+                  'Problem List',
+                  problems.data.map((p) => p.id ?? '')
+                )
+              }
+            />
+          </div>
         }
       >
         <table className="w-full">
@@ -218,6 +255,28 @@ export default function ProviderViewReview({
       </MPageCard>
 
       {/* ── Home Medications ── */}
+      {showAddMedication && (
+        <AddMedicationForm
+          patientId={patientId}
+          encounterId={encounterId ?? ''}
+          launchContext={launchContext}
+          currentMedications={meds.data.map((m) => ({
+            rxcui: m.medicationCodeableConcept?.coding?.[0]?.code ?? '',
+            name:
+              m.medicationCodeableConcept?.text ??
+              m.medicationCodeableConcept?.coding?.[0]?.display ??
+              '',
+            lastFillDate: m.authoredOn,
+          }))}
+          allergies={mapAllergiesToMtm(allergies.data)}
+          onSaved={(id, display) => {
+            meds.refresh();
+            onClinicalWrite('medication-added', display, id);
+            setShowAddMedication(false);
+          }}
+          onCancel={() => setShowAddMedication(false)}
+        />
+      )}
       <MPageCard
         title="Home Medications"
         count={meds.data.length}
@@ -226,16 +285,24 @@ export default function ProviderViewReview({
         error={meds.error}
         onRefresh={meds.refresh}
         actions={
-          <ReviewedButton
-            label="medications"
-            done={!!reviewed.medications}
-            onClick={() =>
-              onMarkReviewed(
-                'Medication List',
-                meds.data.map((m) => m.id ?? '')
-              )
-            }
-          />
+          <div className="flex items-center gap-1">
+            <button
+              className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
+              onClick={() => setShowAddMedication(true)}
+            >
+              + Add Med
+            </button>
+            <ReviewedButton
+              label="medications"
+              done={!!reviewed.medications}
+              onClick={() =>
+                onMarkReviewed(
+                  'Medication List',
+                  meds.data.map((m) => m.id ?? '')
+                )
+              }
+            />
+          </div>
         }
       >
         <table className="w-full">
@@ -285,6 +352,18 @@ export default function ProviderViewReview({
       </MPageCard>
 
       {/* ── Allergies ── */}
+      {showAddAllergy && (
+        <AddAllergyForm
+          patientId={patientId}
+          launchContext={launchContext}
+          onSaved={(id, display) => {
+            allergies.refresh();
+            onClinicalWrite('allergy-added', display, id);
+            setShowAddAllergy(false);
+          }}
+          onCancel={() => setShowAddAllergy(false)}
+        />
+      )}
       <MPageCard
         title="Allergies"
         count={allergies.data.length}
@@ -292,6 +371,14 @@ export default function ProviderViewReview({
         loading={allergies.loading}
         error={allergies.error}
         onRefresh={allergies.refresh}
+        actions={
+          <button
+            className="text-[11px] px-2 rounded-sm bg-white/15 border border-white/40 text-white hover:bg-white/25 leading-5"
+            onClick={() => setShowAddAllergy(true)}
+          >
+            + Add Allergy
+          </button>
+        }
       >
         {allergies.data.length === 0 ? (
           <div className="px-3 py-1.5 text-[#1e7e34]">No Known Allergies</div>

@@ -8,7 +8,7 @@
  * VBC features (quality, CDI/HCC, compliance) retained under the Menu.
  */
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDemoStore } from '@/uhg/store/demoStore';
 import { resolveFhirToPlatformId } from '@/lib/patientRegistry';
 import SmartLaunchHandler from './components/SmartLaunchHandler';
@@ -67,6 +67,7 @@ interface ViewerTarget {
 
 export default function MdSmartLaunchPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { useMockData, setUseMockData } = useAppContext();
 
   // Inherit data mode from RHTP platform (?dataMode=mock|live) before the
@@ -76,6 +77,24 @@ export default function MdSmartLaunchPage() {
 
   const [launchReady, setLaunchReady] = useState(false);
   const [launchContext, setLaunchContext] = useState<SmartLaunchContext | null>(null);
+
+  // When the ?patientId= URL param changes (patient switcher fired router.replace
+  // while already on this page) reset the launch state so SmartLaunchHandler
+  // re-runs its launch sequence for the new patient.
+  const urlPatientId = searchParams?.get('patientId') ?? null;
+  const prevUrlPatientIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (urlPatientId === null) return;                        // no param yet
+    if (prevUrlPatientIdRef.current === null) {               // first render — record and skip
+      prevUrlPatientIdRef.current = urlPatientId;
+      return;
+    }
+    if (urlPatientId !== prevUrlPatientIdRef.current) {       // param actually changed
+      prevUrlPatientIdRef.current = urlPatientId;
+      setLaunchReady(false);
+      setLaunchContext(null);
+    }
+  }, [urlPatientId]);
   const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
   // Launch precedence: the SMART launch's ?patientId= is AUTHORITATIVE. Set the global active
   // member to the launched patient so the shell and any member screen agree with the EHR
@@ -533,8 +552,10 @@ export default function MdSmartLaunchPage() {
                     <ProviderViewReview
                       patientId={patientId}
                       encounterId={encounterId}
+                      launchContext={launchContext}
                       onOpenResource={openResource}
                       onMarkReviewed={handleMarkReviewed}
+                      onClinicalWrite={handleClinicalWrite}
                       reviewed={reviewed}
                     />
                     <ProviderViewAct
@@ -582,6 +603,7 @@ export default function MdSmartLaunchPage() {
                     <CarePlanFhirPage {...pageProps} />
                     <div className="bg-white border border-[#b7c1ca] rounded-sm p-3 mt-2">
                       <CarePlanPanel
+                        patientId={patientId}
                         launchContext={launchContext}
                         completedOrders={completedOrders}
                         confirmedAssignments={confirmedAssignments}
@@ -634,7 +656,7 @@ export default function MdSmartLaunchPage() {
 
                 {activeMenu === 'cdi' && (
                   <div className="bg-white border border-[#b7c1ca] rounded-sm p-3">
-                    <MdPatientSummary launchContext={launchContext} />
+                    <MdPatientSummary patientId={patientId} launchContext={launchContext} />
                   </div>
                 )}
 

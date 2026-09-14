@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useDemoStore } from '@/uhg/store/demoStore';
+import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 import AppLogo from '@/components/ui/AppLogo';
 import Icon from '@/components/ui/AppIcon';
 import { useAppContext } from '@/lib/appContext';
@@ -473,6 +475,8 @@ export default function AppLayout({
     setActivePatientId,
   } = useAppContext();
 
+  const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
+
   const grouped = groupOrder.map((g) => ({
     group: g,
     items: navItems.filter((n) => n.group === g),
@@ -527,11 +531,20 @@ export default function AppLayout({
                   </p>
                 )}
                 {items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href + '?');
+                  // For the SmartApp nav link, inject the currently active patient's
+                  // FHIR ID so SmartLaunchHandler opens the correct patient record.
+                  const fhirId = activeCitizenId
+                    ? PLATFORM_TO_FHIR_ID_MAP[activeCitizenId]
+                    : undefined;
+                  const resolvedHref =
+                    item.key === 'nav-md-smart-launch' && fhirId
+                      ? `/md-smart-launch?patientId=${encodeURIComponent(fhirId)}`
+                      : item.href;
                   return (
                     <Link
                       key={item.key}
-                      href={item.href}
+                      href={resolvedHref}
                       title={item.label}
                       className={`
                         flex items-center gap-3 px-4 py-2.5 mx-2 my-0.5 text-sm font-medium

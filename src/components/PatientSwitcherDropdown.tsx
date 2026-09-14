@@ -9,8 +9,10 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { getAllRegistryPatients } from '@/lib/services/patientService';
 import { useDemoStore } from '@/uhg/store/demoStore';
+import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
 
 const RISK_STYLES: Record<string, { bg: string; text: string }> = {
   Critical: { bg: '#fff1f1', text: '#da1e28' },
@@ -20,6 +22,8 @@ const RISK_STYLES: Record<string, { bg: string; text: string }> = {
 };
 
 export default function PatientSwitcherDropdown() {
+  const router = useRouter();
+  const pathname = usePathname();
   const activeCitizenId = useDemoStore((s) => s.activeCitizenId);
   const setActiveCitizen = useDemoStore((s) => s.setActiveCitizen);
   const [open, setOpen] = useState(false);
@@ -154,6 +158,15 @@ export default function PatientSwitcherDropdown() {
                 onClick={() => {
                   setActiveCitizen(p.platformId);
                   setOpen(false);
+                  // If we're on the SmartApp, reload it with the new patient's
+                  // FHIR ID so SmartLaunchHandler picks the right record.
+                  const fhirId = PLATFORM_TO_FHIR_ID_MAP[p.platformId];
+                  if (fhirId && pathname?.startsWith('/md-smart-launch')) {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set('patientId', fhirId);
+                    params.set('patientName', p.name);
+                    router.replace(`/md-smart-launch?${params.toString()}`);
+                  }
                 }}
                 style={{
                   width: '100%',

@@ -1,4 +1,13 @@
 // patientRegistry.ts — Single source of truth for all canonical patients
+// SEAM: patient-id-resolution — idMaps exports UUID/MRN maps + helpers
+export {
+  UUID_TO_FHIR_ID_MAP,
+  MRN_TO_FHIR_ID_MAP,
+  UUID_V4_REGEX,
+  isUuid,
+  uuidToFhirId,
+  mrnToFhirId,
+} from './patientRegistry.idMaps';
 // Every patient-facing screen reads from this registry via getPatientById(id)
 // FHIR ID mapping bridges EHR launch context to platform patient IDs
 

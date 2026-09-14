@@ -13,7 +13,7 @@
  * without a server.
  */
 import type { FhirBundle, FhirResource } from './types';
-import mariaBundle from '../../../fhir/seed/maria-redhawk.bundle.json';
+import mariaBundle from '../../../fhir/seed/patients/maria-redhawk.bundle.json';
 import dorothyBundle from '../../../fhir/seed/patients/dorothy-simmons.bundle.json';
 import jamesBundle from '../../../fhir/seed/patients/james-wilson.bundle.json';
 import robertBundle from '../../../fhir/seed/patients/robert-chen.bundle.json';
@@ -38,6 +38,7 @@ const SEED_BUNDLES: FhirBundle[] = [
  * non-SmartApp screens.
  */
 const PATIENT_ID_ALIASES: Record<string, string> = {
+  // ── Platform IDs ────────────────────────────────────────────────────────────
   // Maria
   MARIA_SD_001: 'patient-maria-001',
   'patient-maria': 'patient-maria-001',
@@ -53,6 +54,23 @@ const PATIENT_ID_ALIASES: Record<string, string> = {
   // Lisa
   'PAT-0156': 'patient-lisa-156',
   'patient-0156': 'patient-lisa-156',
+  // ── MRNs (safety net — resolver handles these first; store covers edge cases) ─
+  // Maria — system: urn:rhtp:mrn
+  'SD-448291': 'patient-maria-001',
+  // Dorothy — system: http://tcoc.example.org/fhir/sid/mrn
+  'MRN-0042': 'patient-dorothy-042',
+  // James
+  'MRN-0087': 'patient-james-087',
+  // Robert
+  'MRN-0103': 'patient-robert-103',
+  // Lisa
+  'MRN-0156': 'patient-lisa-156',
+  // ── Connect360 UUIDs (safety net — resolver handles these first) ─────────────
+  '5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb': 'patient-dorothy-042',
+  '9c075c8e-9ed6-44ec-a059-80a5d5aaac68': 'patient-james-087',
+  '95fa3e42-7027-47f3-95a7-6c254bfe62a9': 'patient-robert-103',
+  '64b13566-9345-48b2-8da8-4011d9547721': 'patient-lisa-156',
+  '6a5fdc1a-d700-4d69-9ddd-3569543bda5b': 'patient-alex-kirby',
 };
 
 function normPatientId(id: string): string {

@@ -128,6 +128,43 @@ export class FhirClient {
     await fhirFetch<void>(`${resourceType}/${id}`, { method: 'DELETE' });
   }
 
+  /**
+   * DaVinci HRex $member-match
+   * POST /Patient/$member-match — identifies a payer member from a provider-supplied
+   * demographic + coverage record.  Used for Provider Access and Payer-to-Payer.
+   *
+   * Returns the matched FHIR Patient reference (e.g. "Patient/123") or null.
+   */
+  async memberMatch(params: {
+    memberPatient: Record<string, unknown>;
+    coverageToMatch: Record<string, unknown>;
+    consentToAccess: Record<string, unknown>;
+  }): Promise<string | null> {
+    if (isMockMode()) {
+      const id = (params.memberPatient.id as string | undefined) ?? 'demo-matched-001';
+      return `Patient/${id}`;
+    }
+    const body = {
+      resourceType: 'Parameters',
+      parameter: [
+        { name: 'MemberPatient', resource: params.memberPatient },
+        { name: 'CoverageToMatch', resource: params.coverageToMatch },
+        { name: 'Consent', resource: params.consentToAccess },
+      ],
+    };
+    try {
+      const result = await fhirFetch<{
+        parameter?: Array<{ name: string; valueReference?: { reference: string } }>;
+      }>('Patient/$member-match', { method: 'POST', body: JSON.stringify(body) });
+      return (
+        result.parameter?.find((p) => p.name === 'MemberIdentifier')?.valueReference?.reference ??
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
+
   // ── High-level patient helpers ──────────────────────────────────────────────
 
   /**

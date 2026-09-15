@@ -34,6 +34,17 @@ describe('LOB derivation', () => {
     expect(lobFromPayer('Commercial Group')).toBe('commercial');
     expect(lobFromPayer(undefined)).toBe('unknown');
   });
+
+  // Finding 6: an ACA "marketplace" payer must NOT be shadowed by the ' ma'
+  // (Medicare Advantage) substring — "Federal Marketplace" contains " ma".
+  it('classifies a "marketplace" payer as ACA, not medicare-advantage', () => {
+    expect(lobFromPayer('Federal Marketplace')).toBe('aca-exchange');
+    expect(lobFromPayer('Ambetter Health Insurance Marketplace')).toBe('aca-exchange');
+    // and the ' ma' abbreviation still resolves a genuine MA payer
+    expect(lobFromPayer('Aetna MA HMO')).toBe('medicare-advantage');
+    // a dual plan is not shadowed by an 'advantage' match (matched before it)
+    expect(lobFromPayer('Humana Dual Complete Medicare Advantage')).toBe('dsnp');
+  });
 });
 
 describe('demo (mock) disposition — demo preserved (constraint #2)', () => {

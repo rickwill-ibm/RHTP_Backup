@@ -1,15 +1,6 @@
 ---
 name: agentic-build-framework
-description: >-
-  A project-agnostic framework for reliable multi-agent software builds — the operating
-  model, execution unit (the wave), agent persona library (build roles plus a red-team
-  verification panel), and a mechanical enforcement kit (fail-closed seam gate, quality
-  ratchet, namespace pinning, DRY convergence, living risk register). Use when
-  orchestrating a multi-agent build or hardening/verification pass, when a build must
-  meet real-world domain standards a generalist would miss, or when setting up
-  red-team/adversarial review of agent-produced code. Triggers include: multi-agent
-  build, agent coalition, red team review, adversarial verification, harden a codebase,
-  verification panel, stub audit, "what else is missing", agentic engineering process.
+description: A project-agnostic framework for reliable multi-agent software builds — the operating model, execution unit (the wave), agent persona library (build roles plus a red-team verification panel), and a mechanical enforcement kit (fail-closed seam gate, quality ratchet, namespace pinning, DRY convergence, living risk register). Use when orchestrating a multi-agent build or hardening/verification pass, when a build must meet real-world domain standards a generalist would miss, or when setting up red-team/adversarial review of agent-produced code. Triggers include: multi-agent build, agent coalition, red team review, adversarial verification, harden a codebase, verification panel, stub audit, "what else is missing", agentic engineering process.
 ---
 
 # Agentic Build Framework

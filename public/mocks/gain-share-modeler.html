@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Gain-Share Scenario Modeler</title>
+<style>
+  :root{
+    --ground:#f4f6f8;--panel:#fff;--ink:#0b1f33;--mut:#5a6675;--line:#e2e7ee;--deep:#003a63;
+    --payer:#1668c7;--payer-bg:#e4eefb;--prov:#1b7f4b;--prov-bg:#e6f4ec;--warn:#b42318;--warn-bg:#fbeceb;
+    --auth:#b45309;--auth-bg:#fef3c7;--auth-line:#e6c88a;--sdoh:#6d28d9;--sdoh-bg:#f1ebfb;
+    --serif:'Fraunces',Georgia,serif;--sans:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 18px 56px}
+  header.top{background:linear-gradient(135deg,#00243f,#004a80);color:#fff;padding:20px 0 16px}
+  header.top .wrap{padding-bottom:0}
+  .kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9fc2e0;font-weight:600}
+  h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:5px 0 5px;color:#fff}
+  header.top p{margin:0;color:#d6e4f2;font-size:13.5px;max-width:840px}
+  .badge{display:inline-block;margin-top:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#eaf2fb;font-size:11.5px;padding:4px 10px;border-radius:999px;font-weight:600}
+  nav.tabs{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+  nav.tabs .wrap{display:flex;gap:4px;padding:0 18px;flex-wrap:wrap}
+  .tab{border:0;background:none;font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--mut);padding:12px 14px;cursor:pointer;border-bottom:3px solid transparent}
+  .tab[aria-selected="true"]{color:var(--deep);border-bottom-color:var(--deep)}
+  section.screen{display:none;padding-top:18px}section.screen.on{display:block}
+  h2{font-family:var(--serif);font-weight:600;font-size:20px;margin:0 0 3px;color:var(--deep)}
+  .sub{color:var(--mut);font-size:13px;margin:0 0 14px;max-width:920px}
+  .models{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .models button{border:1px solid var(--line);background:#fff;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--mut);padding:8px 12px;border-radius:9px;cursor:pointer}
+  .models button[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .modeToggle{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;margin-bottom:12px}
+  .modeToggle button{border:0;background:#fff;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--mut);padding:8px 14px;cursor:pointer;border-right:1px solid var(--line)}
+  .modeToggle button:last-child{border-right:0}
+  .modeToggle button[aria-pressed="true"]{background:var(--sdoh);color:#fff}
+  .barrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .presets{display:flex;gap:5px;flex-wrap:wrap}
+  .presets button,.savebtn{border:1px solid var(--line);background:#fff;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--deep);padding:6px 11px;border-radius:8px;cursor:pointer}
+  .savebtn{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .card h3{margin:0 0 8px;font-size:13.5px;color:var(--deep);text-transform:uppercase;letter-spacing:.03em}
+  .lev{margin:9px 0}
+  .lev label{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+  .lev label .val{color:var(--deep);font-variant-numeric:tabular-nums}
+  .lev input[type=range]{width:100%;accent-color:var(--deep);height:20px}
+  .grp-title{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 2px;border-top:1px solid var(--line);padding-top:10px}
+  .grp-title:first-of-type{border-top:0;padding-top:0}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:560px){.tiles{grid-template-columns:1fr 1fr}}
+  .tile{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:#fbfcfe}
+  .tile .l{font-size:11.5px;color:var(--mut)}
+  .tile .v{font-family:var(--serif);font-size:21px;font-weight:600;line-height:1.05;margin-top:3px}
+  .tile .a{font-size:12px;color:var(--mut);margin-top:2px;font-variant-numeric:tabular-nums}
+  .tile.prov .v{color:var(--prov)}.tile.pay .v{color:var(--payer)}.tile.gs .v{color:var(--deep)}
+  .tile.rec{background:var(--warn-bg);border-color:#f0d5d2}.tile.rec .v{color:var(--warn);font-size:18px}
+  .tile.down{background:#fff7ed;border-color:var(--auth-line)}.tile.down .v{color:var(--auth);font-size:18px}
+  .splitbar{height:34px;border-radius:8px;overflow:hidden;display:flex;border:1px solid var(--line);margin:6px 0 2px}
+  .splitbar span{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--mut);margin-top:6px}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .flag{border-left:4px solid var(--warn);background:var(--warn-bg);padding:9px 12px;border-radius:0 8px 8px 0;font-size:12.5px;margin-top:10px}
+  .flag.ok{border-left-color:var(--prov);background:var(--prov-bg)}
+  .flag.sdoh{border-left-color:var(--sdoh);background:var(--sdoh-bg)}
+  table.t{width:100%;border-collapse:collapse;font-size:12px}
+  table.t th,table.t td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  table.t th:first-child,table.t td:first-child{text-align:left}
+  table.t th{color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.03em}
+  .mock-note{font-size:11px;color:var(--mut);font-style:italic;margin-top:8px}
+  ul.clean{margin:6px 0 0;padding-left:16px}ul.clean li{margin:4px 0;font-size:12.5px}
+  .foot{font-size:11.5px;color:var(--mut);border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+  /* cohort editor */
+  .coh{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin:7px 0;background:#fbfcfe}
+  .coh.off{opacity:.5}
+  .coh .r1{display:flex;align-items:center;gap:8px}
+  .coh .nm{font-weight:700;font-size:12.5px;flex:1}
+  .coh .desc{font-size:11px;color:var(--mut);margin:2px 0 6px}
+  .coh .r2{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+  .coh .f{display:flex;flex-direction:column}
+  .coh .f label{font-size:10px;color:var(--mut);font-weight:600}
+  .coh .f input,.coh .f select{width:100%;font-size:12px;padding:3px 4px;border:1px solid var(--line);border-radius:5px;font-family:var(--sans)}
+  .chip{font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:5px}
+  .chip.sdoh{background:var(--sdoh-bg);color:var(--sdoh)}
+  .chip.cred{background:var(--warn-bg);color:var(--warn)}
+  .cohsum{font-size:12px;color:var(--mut);margin-top:6px;font-weight:600}
+  .cbar{height:26px;border-radius:7px;overflow:hidden;display:flex;border:1px solid var(--line);margin:4px 0}
+  .cbar span{font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="kick">Golden Thread · Financial Clearance</div>
+  <h1>Gain-Share Scenario Modeler</h1>
+  <p>Pick a contract model and a population lens — a whole panel, or a mix of holistic (whole-person) cohorts. Tune the assumptions, watch the payoff, split, downside and shrinking recovery, and see which cohorts drive savings vs risk. Save A/B/C to compare. Illustrative engine; a <b>mock for your review</b>.</p>
+  <span class="badge">◐ MOCK v5 FOR APPROVAL — holistic cohorts · credibility & fairness guardrails · figures illustrative</span>
+</div></header>
+
+<nav class="tabs"><div class="wrap" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-s="model">Modeler</button>
+  <button class="tab" role="tab" aria-selected="false" data-s="compare">Compare (A/B/C)</button>
+  <button class="tab" role="tab" aria-selected="false" data-s="honesty">Assumptions &amp; honesty</button>
+</div></nav>
+
+<div class="wrap">
+<section class="screen on" id="model">
+  <div class="models" id="models"></div>
+  <div class="modeToggle" role="group" aria-label="Population lens">
+    <button data-mode="panel" aria-pressed="true">Whole panel</button>
+    <button data-mode="cohort" aria-pressed="false">Holistic cohorts</button>
+  </div>
+  <div class="barrow">
+    <span style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em">Presets</span>
+    <div class="presets" id="presets"></div>
+    <span style="flex:1"></span>
+    <button class="savebtn" data-slot="A">Save → A</button>
+    <button class="savebtn" data-slot="B">Save → B</button>
+    <button class="savebtn" data-slot="C">Save → C</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card" id="cohortCard" style="display:none"><h3>Population cohort mix <span style="font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0">· whole-person segments</span></h3>
+        <div id="cohorts"></div>
+        <div class="cohsum" id="cohSum"></div>
+      </div>
+      <div class="card"><h3>Assumptions <span id="modelName" style="font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0"></span></h3>
+        <div id="levers"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Outcome (per member / month · annualized) <span id="outScope" style="font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0"></span></h3>
+        <div class="tiles">
+          <div class="tile gs"><div class="l">Gross savings</div><div class="v" id="o-gs">$0</div><div class="a" id="o-gs-a">$0/yr</div></div>
+          <div class="tile prov"><div class="l">Provider net (Yr 1)</div><div class="v" id="o-prov">$0</div><div class="a" id="o-prov-a">$0/yr</div></div>
+          <div class="tile pay"><div class="l">Payer net (Yr 1)</div><div class="v" id="o-pay">$0</div><div class="a" id="o-pay-a">$0/yr</div></div>
+          <div class="tile rec"><div class="l">Recovery (quarantined)</div><div class="v" id="o-rec">$0</div><div class="a" id="o-rec-a">$0/yr</div></div>
+          <div class="tile down"><div class="l">Provider max downside</div><div class="v" id="o-down">$0</div><div class="a" id="o-down-a">$0/yr</div></div>
+          <div class="tile"><div class="l">Provider payout (upside)</div><div class="v" id="o-payout" style="font-size:18px">$0</div><div class="a" id="o-payout-a">$0/yr</div></div>
+        </div>
+        <div style="margin-top:14px;font-size:12px;font-weight:700;color:var(--mut)">How the gross savings splits</div>
+        <div class="splitbar" id="splitbar"></div>
+        <div class="legend">
+          <span><span class="sw" style="background:var(--prov)"></span>Provider payout</span>
+          <span><span class="sw" style="background:var(--payer)"></span>Payer retained</span>
+          <span><span class="sw" style="background:#94a3b8"></span>Below-MSR / unshared</span>
+        </div>
+        <div id="flags"></div>
+      </div>
+
+      <div class="card" id="breakdownCard" style="display:none">
+        <h3>Cohort contribution — who drives savings vs downside</h3>
+        <div style="overflow-x:auto"><table class="t" id="cohTable"><thead></thead><tbody></tbody></table></div>
+        <div style="font-size:12px;font-weight:700;color:var(--mut);margin-top:10px">Provider net contribution by cohort</div>
+        <div class="cbar" id="cohBar"></div>
+        <div id="cohInsight" class="mock-note"></div>
+      </div>
+
+      <div class="card">
+        <h3>Multi-year — the rebasing tax</h3>
+        <p class="sub" style="margin-bottom:6px">Provider net per year under the contract's rebasing ratchet vs a no-rebase (r=0) counterfactual. The gap is what the annual benchmark reset takes back.</p>
+        <div style="border:1px solid var(--line);border-radius:10px;background:#fff;padding:4px 6px"><svg id="myChart" viewBox="0 0 720 240" width="100%" role="img" aria-label="Provider net by year, contract vs no-rebase counterfactual"></svg></div>
+        <div id="rebaseNote" class="mock-note"></div>
+      </div>
+    </div>
+  </div>
+  <p class="mock-note" id="engineNote"></p>
+</section>
+
+<section class="screen" id="compare">
+  <h2>Saved scenarios</h2>
+  <p class="sub">Build a scenario in the Modeler (whole panel or cohort mix), hit Save → A/B/C, and compare them here.</p>
+  <div class="card"><div style="overflow-x:auto"><table class="t" id="cmpTable"><thead></thead><tbody></tbody></table></div>
+    <p class="mock-note">MLR badge: in regulated lines (Medicaid 85% / MA 85%), payer net that drives medical spend below the floor converts to a rebate — so payer net is effectively capped. Recovery is always quarantined from the savings split.</p></div>
+</section>
+
+<section class="screen" id="honesty">
+  <h2>Assumptions &amp; honesty rules baked into the engine</h2>
+  <p class="sub">This is a deal-modeling tool, so the traps that flatter a bad deal are wired in as guardrails, not footnotes.</p>
+  <div class="card"><ul class="clean">
+    <li><b>Holistic cohorts blend member-weighted.</b> Each whole-person segment (clinical risk + behavioral + social) carries its own size, benchmark, savings rate and variability; deal outcomes are the member-weighted blend, and the breakdown shows which cohort drives savings vs downside. Savings and risk concentrate — a blended panel average hides that.</li>
+    <li><b>Credibility scales the bar.</b> A small cohort isn't statistically credible, so its required MSR is raised by a credibility factor (∝ √members). Sub-credible cohorts are flagged — you can't book savings off 400 members as if they were 40,000.</li>
+    <li><b>Fairness watch on SDOH cohorts.</b> High-SDOH / dual-eligible segments are flagged (Section 1557): savings there must not come from under-service, and disparate-impact must be monitored. The tool surfaces the watch; it does not let SDOH silently drive an adverse split.</li>
+    <li><b>Recovery is quarantined</b> and decays under capitation (κ 1.0→0.75→0.50→0.20→~0). It can never enter gross savings or the provider payout.</li>
+    <li><b>MSR is a step function</b> (first-dollar-after-gate by default; a share-above-threshold toggle is provided).</li>
+    <li><b>Expected ≠ max downside</b> on two-sided / sub-cap / global budget — both shown; max exposure is capped by stop-loss / reserves / reinsurance and honours the loss-share and cohort variability.</li>
+    <li><b>Rebasing tax</b> (realized-savings ratchet only) shown against a no-rebase line; multi-year is NPV-discounted.</li>
+    <li><b>Capitation reframes the payer's gain</b> — under global budget, per-claim + recovery ≈ 0; payer value = risk transfer + predictability + baked-in discount.</li>
+    <li><b>Phantom-savings guard</b> and <b>MLR-floor rebate (directional proxy)</b> fire on payer net.</li>
+  </ul></div>
+  <div class="card"><h3>Known gaps for a production risk tool (not modeled here)</h3><ul class="clean">
+    <li><b>Probability of hitting the savings rate</b> — point estimate; a real underwriting tool needs an outcome distribution and a tail (P95 loss) per cohort.</li>
+    <li><b>Attribution churn</b> across cohorts — members migrate between segments and MCOs mid-period.</li>
+    <li><b>Claims runout / IBNR</b>, reinsurance premium, high-cost-claimant outlier pooling, working-capital timing.</li>
+  </ul></div>
+  <div class="foot"><b>Mock scope.</b> Illustrative deterministic engine to show shape, magnitude and trade-offs. On approval this lands as tested production code bound to the real evidence-record projections and cohort feeds. Nothing wired into the app yet.</div>
+</section>
+</div>
+
+<script>
+// ================= engine (from the VBC economics spec; red-team fixes applied) =================
+const KAPPA={1:{rec:1.00,admin:1.00},2:{rec:0.75,admin:0.85},3:{rec:0.50,admin:0.70},4:{rec:0.20,admin:0.40},5:{rec:0.02,admin:0.10}};
+const MODELS={1:'FFS + clean-claim safe harbor',2:'Upside-only shared savings',3:'Two-sided (savings + losses)',4:'Sub-capitation / partial cap',5:'Global budget / full cap'};
+const CRED_FULL=12000; // members for full statistical credibility (illustrative)
+
+// levers: [key,label,min,max,step,default,unit,models-applicable, panelOnly?]
+const LEVERS=[
+ ['__g1','Panel & benchmark'],
+ ['M','Attributed members (total panel)',1000,500000,1000,25000,'#',[1,2,3,4,5]],
+ ['B','Benchmark PMPM',100,3000,5,450,'$',[1,2,3,4,5],true],
+ ['trend','Medical trend',-5,15,0.5,4.5,'%',[1,2,3,4,5]],
+ ['N','Horizon (years)',1,7,1,3,'yr',[1,2,3,4,5]],
+ ['__g2','Savings & share'],
+ ['s','Achievable savings rate (neg = overspend)',-10,15,0.5,3.0,'%',[1,2,3,4,5],true],
+ ['p','Provider share of savings',0,100,5,50,'%',[2,3,4]],
+ ['__g3','Risk terms'],
+ ['MSR','Minimum savings rate (gate)',0,8,0.5,2.0,'%',[2,3,4]],
+ ['d','Downside (loss) share',0,100,5,50,'%',[3]],
+ ['cap','Loss cap / stop-loss',0,20,1,5,'%',[3]],
+ ['sigma','In-scope capitated share (sub-cap)',5,90,5,30,'%',[4]],
+ ['reserve','Provider reserve limit (of in-scope)',0,100,5,15,'%',[4]],
+ ['reins','Reinsurance attachment',3,40,1,10,'%',[5]],
+ ['baked','Baked-in budget discount (PMPM)',0,40,1,8,'$',[5]],
+ ['__g4','Rebasing · infra · quality'],
+ ['r','Rebasing ratchet',0,100,5,50,'%',[2,3,4,5]],
+ ['infra','PMPM infrastructure payment',0,20,0.5,2.0,'$',[1,2,3,4,5]],
+ ['qw','Quality withhold (of bonus)',0,30,5,10,'%',[2,3,4]],
+ ['qe','Quality earned (of withhold)',0,100,5,90,'%',[2,3,4]],
+ ['__g5','Recovery & admin (payer-side)'],
+ ['rec','Recovery baseline PMPM',0,10,0.25,1.5,'$',[1,2,3,4,5]],
+ ['admin','Admin-savings PMPM',0,10,0.25,1.0,'$',[1,2,3,4,5]],
+ ['__g6','Regulated line (MLR floor) & NPV'],
+ ['prem','Premium PMPM (for MLR floor)',100,3500,10,530,'$',[2,3,4,5]],
+ ['floor','MLR floor',70,95,1,85,'%',[2,3,4,5]],
+ ['disc','Discount rate (NPV, multi-year)',0,10,0.5,3,'%',[2,3,4,5]],
+ ['msrMode','MSR share: 0 first-dollar · 1 above-MSR',0,1,1,0,'#',[2,3]],
+];
+const PRESETS={
+ 'Conservative upside-only':{model:2,v:{M:25000,B:450,trend:4.5,N:3,s:2.5,p:50,MSR:2,r:50,infra:2,qw:10,qe:90,rec:1.5,admin:1}},
+ 'Aggressive two-sided':{model:3,v:{M:50000,B:500,trend:5,N:3,s:5,p:60,MSR:2,d:60,cap:8,r:60,infra:1,qw:15,qe:85,rec:1.5,admin:1}},
+ 'Sub-cap pilot':{model:4,v:{M:15000,B:420,trend:4.5,N:3,s:4,sigma:30,reserve:15,p:50,MSR:2,r:40,infra:3,qw:10,qe:90,rec:1.5,admin:1}},
+ 'Global budget':{model:5,v:{M:30000,B:460,trend:4.5,N:3,s:4,reins:10,baked:8,r:70,infra:0.5,rec:1.5,admin:1}},
+};
+// holistic (whole-person) cohorts — share % of panel, benchmark PMPM, savings rate %, variability, SDOH flag
+const COHORT_DEFAULTS=[
+ {id:'healthy', name:'Healthy / low-utilizing', desc:'Well, prevention-maintained. Large share, low cost, little TCOC savings to take.', on:true, share:55, B:175, s:0.5, vr:'low', sdoh:false},
+ {id:'rising',  name:'Rising-risk', desc:'Emerging chronic; prevention- and care-management-responsive.', on:true, share:20, B:410, s:5.0, vr:'med', sdoh:false},
+ {id:'complex', name:'Complex chronic + behavioral health', desc:'Multi-morbid, high-cost, high-variability; the main savings and risk engine.', on:true, share:12, B:1450, s:7.0, vr:'high', sdoh:false},
+ {id:'dual',    name:'Dual-eligible / high-SDOH (LTSS)', desc:'Duals, long-term services & supports, high social need. High cost, fairness-sensitive.', on:true, share:8, B:2300, s:6.0, vr:'high', sdoh:true},
+ {id:'maternity',name:'Maternity / episodic', desc:'Defined episode of care; moderate, bundle-friendly.', on:true, share:5, B:850, s:4.0, vr:'med', sdoh:false},
+];
+const VR={low:0.6, med:1.0, high:1.6};
+
+let model=2, mode='panel', L={}, COH=JSON.parse(JSON.stringify(COHORT_DEFAULTS));
+LEVERS.forEach(x=>{ if(!x[0].startsWith('__')) L[x[0]]=x[5]; });
+
+// calc: overrides let cohorts pass their own B, s, MSR, variability
+function calc(mdl,B,sPct,msrPct,riskMult,credMult){
+  sPct=(sPct==null?L.s:sPct); msrPct=(msrPct==null?L.MSR:msrPct); riskMult=(riskMult==null?1:riskMult);
+  const cm=(credMult==null?1:credMult);       // credibility shrinkage on BOOKED savings (small cohorts paid less than face)
+  const s=sPct/100, GS=s*B, OS=Math.max(0,-s)*B;
+  const gate=s>=msrPct/100?1:0, lossGate=(-s)>=msrPct/100?1:0;
+  const Q=(1-L.qw/100)+(L.qw/100)*(L.qe/100);
+  const kr=KAPPA[mdl].rec, ka=KAPPA[mdl].admin;
+  const rec=L.rec*kr, admin=L.admin*ka, infra=L.infra, p=L.p/100;
+  const sMin=0.10*riskMult;                 // reachable worst case scales with cohort variability
+  const shareBase = (s>0 ? (L.msrMode ? Math.max(0,s-msrPct/100)*B : GS) : 0) * cm;  // booked-at-credibility
+  let GSr=GS, payout=0, sharedPool=0, retained=0, unshared=0, provNet=0, payerNet=0, maxDown=0, payerSave=0;
+  if(mdl===1){ GSr=0; provNet=infra; payerNet=rec+admin-infra; }
+  else if(mdl===2){ const SS=gate*shareBase; payout=p*SS*Q; sharedPool=SS; retained=Math.max(0,SS-payout); unshared=Math.max(0,GS-SS);
+    provNet=payout+infra; payerSave=GS-payout; payerNet=payerSave+rec+admin-infra; }
+  else if(mdl===3){ const SS=gate*shareBase; payout=p*SS*Q; const down=Math.min(lossGate*(L.d/100)*OS,(L.cap/100)*B);
+    sharedPool=SS; retained=Math.max(0,SS-payout); unshared=Math.max(0,GS-SS);
+    provNet=payout+infra-down; payerSave=GS-payout; payerNet=payerSave+down+rec+admin-infra;
+    maxDown=Math.min((L.d/100)*sMin*B,(L.cap/100)*B); }
+  else if(mdl===4){ const Bs=(L.sigma/100)*B, GSs=s*Bs, OSs=Math.max(0,-s)*Bs;
+    const surplus=Math.max(0,GSs)*cm, deficit=Math.min(OSs,(L.reserve/100)*Bs);
+    const SSoos=gate*Math.max(0,s)*(1-L.sigma/100)*B*cm, payoutOos=p*SSoos*Q;
+    payout=surplus+payoutOos; sharedPool=surplus+SSoos; retained=Math.max(0,SSoos-payoutOos); unshared=Math.max(0,GS-sharedPool);
+    provNet=surplus-deficit+payoutOos+infra; payerSave=GS-payout; payerNet=payerSave+rec+admin-infra;
+    maxDown=Math.min(sMin*Bs,(L.reserve/100)*Bs); }
+  else if(mdl===5){ GSr=GS; const keep=Math.max(0,GS), loss=Math.min(Math.max(0,-GS),(L.reins/100)*B);
+    payout=keep; sharedPool=keep; retained=0; unshared=Math.max(0,GS-keep);
+    provNet=keep-loss+infra; payerSave=0; payerNet=admin+rec-infra+(L.baked||0);
+    maxDown=Math.min(sMin*B,(L.reins/100)*B); }
+  let mlrRebate=0;
+  if(mdl!==1){ const headroom=(1-L.floor/100)*L.prem; mlrRebate=Math.max(0,(Math.max(0,payerSave)+admin)-headroom); payerNet-=mlrRebate; }
+  return {GS:GSr,payout,retained,unshared,provNet,payerNet,maxDown,rec,admin,infra,mlrRebate};
+}
+
+// cohort helpers
+function activeCohorts(){ return COH.filter(c=>c.on && c.share>0); }
+function totalShare(){ const t=activeCohorts().reduce((a,c)=>a+c.share,0); return t>0?t:1; }
+function cohMembers(c){ return c.share/totalShare()*L.M; }   // normalized so Σ members = the panel (shares needn't sum to 100)
+function credOf(c){ return Math.min(1, Math.sqrt(cohMembers(c)/(CRED_FULL*VR[c.vr]))); }  // high-variability cohorts need more experience
+// blended year-1 ledger + per-cohort rows
+function blend(){
+  const acts=activeCohorts(); const dealM=acts.reduce((a,c)=>a+cohMembers(c),0)||1;
+  const rows=acts.map(c=>{ const m=cohMembers(c); const cr=credOf(c); const y=calc(model,c.B,c.s,L.MSR,VR[c.vr],cr);
+    return {c, m, y, cred:cr}; });
+  const w=(f)=>rows.reduce((a,r)=>a+f(r.y)*r.m,0)/dealM;
+  const blended={GS:w(y=>y.GS),payout:w(y=>y.payout),retained:w(y=>y.retained),unshared:w(y=>y.unshared),
+    provNet:w(y=>y.provNet),payerNet:w(y=>y.payerNet),maxDown:w(y=>y.maxDown),rec:w(y=>y.rec),
+    admin:w(y=>y.admin),infra:w(y=>y.infra),mlrRebate:w(y=>y.mlrRebate)};
+  const wS=w2(rows,dealM,r=>r.c.s), wB=w2(rows,dealM,r=>r.c.B);
+  return {blended,rows,dealM,wS,wB};
+}
+function w2(rows,dealM,f){ return rows.reduce((a,r)=>a+f(r)*r.m,0)/dealM; }
+
+// state used by annualization
+let curM=L.M, curB=L.B, curS=L.s;
+const A=v=>v*curM*12;
+function fmtP(v){return (v<0?'-$':'$')+Math.abs(v).toFixed(2);}
+function fmtA(v){const a=Math.abs(v);const sg=v<0?'-':'';return a>=1e6?sg+'$'+(a/1e6).toFixed(2)+'M':a>=1e3?sg+'$'+(a/1e3).toFixed(0)+'K':sg+'$'+a.toFixed(0);}
+
+function multiYear(){
+  const r=L.r/100, tr=L.trend/100, out=[], out0=[];
+  if(mode==='cohort'){
+    // per-cohort rebasing then sum → Year 1 reconciles exactly to the blended provider-net tile
+    const acts=activeCohorts(), totS=totalShare();
+    for(let t=1;t<=L.N;t++){ let sum=0,sum0=0;
+      acts.forEach(c=>{ const m=c.share/totS*L.M, s=c.s/100;
+        const Bt=c.B*Math.pow((1-r*Math.max(0,s))*(1+tr), t-1);
+        const B0=c.B*Math.pow(1+tr, t-1);
+        sum += calc(model,Bt,c.s,L.MSR,VR[c.vr],credOf(c)).provNet*m*12;
+        sum0+= calc(model,B0,c.s,L.MSR,VR[c.vr],credOf(c)).provNet*m*12; });
+      out.push(sum); out0.push(sum0);
+    }
+  } else {
+    let B=L.B, B0=L.B, s=L.s/100;
+    for(let t=1;t<=L.N;t++){ out.push(calc(model,B,L.s).provNet*L.M*12); out0.push(calc(model,B0,L.s).provNet*L.M*12);
+      B=B*(1-r*Math.max(0,s))*(1+tr); B0=B0*(1+tr); }
+  }
+  return {out,out0};
+}
+
+// ---------- render ----------
+const $=s=>document.querySelector(s);
+function buildModels(){ $('#models').innerHTML=Object.entries(MODELS).map(([k,v])=>`<button data-m="${k}" aria-pressed="${+k===model}">${k} · ${v}</button>`).join('');
+  $('#models').querySelectorAll('button').forEach(b=>b.onclick=()=>{model=+b.dataset.m; buildLevers(); render();}); }
+function buildPresets(){ $('#presets').innerHTML=Object.keys(PRESETS).map(n=>`<button data-p="${n}">${n}</button>`).join('');
+  $('#presets').querySelectorAll('button').forEach(b=>b.onclick=()=>{const P=PRESETS[b.dataset.p];model=P.model;LEVERS.forEach(x=>{if(!x[0].startsWith('__'))L[x[0]]=x[5];});Object.assign(L,P.v);buildModels();buildLevers();render();}); }
+function buildLevers(){
+  $('#modelName').textContent='· '+MODELS[model];
+  let h='';
+  LEVERS.forEach(x=>{
+    if(x[0].startsWith('__')){ h+=`<div class="grp-title">${x[1]}</div>`; return; }
+    const [key,label,min,max,step,def,unit,models,panelOnly]=x;
+    if(!models.includes(model)) return;
+    if(panelOnly && mode==='cohort') return;      // B, s are per-cohort in cohort mode
+    const val=L[key];
+    const disp=unit==='#'?(+val).toLocaleString():unit==='$'?'$'+(+val).toFixed(step<1?2:0):unit==='%'?(+val).toFixed(step<1?1:0)+'%':val+' '+unit;
+    h+=`<div class="lev"><label>${label}<span class="val" id="v-${key}">${disp}</span></label>
+      <input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-k="${key}"></div>`;
+  });
+  // strip trailing empty group titles
+  $('#levers').innerHTML=h;
+  $('#levers').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ L[inp.dataset.k]=+inp.value; render(); });
+}
+function buildCohorts(){
+  $('#cohorts').innerHTML=COH.map((c,i)=>`
+   <div class="coh ${c.on?'':'off'}" data-i="${i}">
+     <div class="r1"><input type="checkbox" data-i="${i}" data-f="on" ${c.on?'checked':''}/>
+       <span class="nm">${c.name}</span>${c.sdoh?'<span class="chip sdoh">SDOH</span>':''}</div>
+     <div class="desc">${c.desc}</div>
+     <div class="r2">
+       <div class="f"><label>Share %</label><input type="number" data-i="${i}" data-f="share" value="${c.share}" min="0" max="100" step="1"/></div>
+       <div class="f"><label>Benchmark $</label><input type="number" data-i="${i}" data-f="B" value="${c.B}" min="50" max="5000" step="10"/></div>
+       <div class="f"><label>Savings %</label><input type="number" data-i="${i}" data-f="s" value="${c.s}" min="-10" max="15" step="0.5"/></div>
+       <div class="f"><label>Variability</label><select data-i="${i}" data-f="vr"><option value="low"${c.vr==='low'?' selected':''}>Low</option><option value="med"${c.vr==='med'?' selected':''}>Med</option><option value="high"${c.vr==='high'?' selected':''}>High</option></select></div>
+     </div>
+   </div>`).join('');
+  $('#cohorts').querySelectorAll('input,select').forEach(el=>{
+    const ev = el.type==='checkbox'||el.tagName==='SELECT'?'change':'input';
+    el.addEventListener(ev,()=>{ const i=+el.dataset.i, f=el.dataset.f;
+      COH[i][f]= f==='on'? el.checked : (f==='vr'? el.value : +el.value); buildCohorts(); render(); });
+  });
+}
+function render(){
+  let y1, rows=null, bl=null;
+  if(mode==='cohort'){ bl=blend(); y1=bl.blended; rows=bl.rows; curM=bl.dealM; curB=bl.wB; curS=bl.wS; }
+  else { y1=calc(model,L.B); curM=L.M; curB=L.B; curS=L.s; }
+  $('#outScope').textContent = mode==='cohort'? `· blended over ${Math.round(curM).toLocaleString()} members in ${rows.length} cohorts` : `· ${L.M.toLocaleString()} members`;
+  if(mode==='cohort'){ const ts=activeCohorts().reduce((a,c)=>a+c.share,0); $('#cohSum').innerHTML=`Total ${Math.round(curM).toLocaleString()} members across ${rows.length} cohorts. Shares sum to <b>${ts}%</b>${ts!==100?` — normalized to the ${L.M.toLocaleString()}-member panel`:''}.`; }
+  $('#o-gs').textContent=fmtP(y1.GS); $('#o-gs-a').textContent=fmtA(A(y1.GS))+'/yr';
+  $('#o-prov').textContent=fmtP(y1.provNet); $('#o-prov-a').textContent=fmtA(A(y1.provNet))+'/yr';
+  $('#o-pay').textContent=fmtP(y1.payerNet); $('#o-pay-a').textContent=fmtA(A(y1.payerNet))+'/yr';
+  $('#o-rec').textContent=fmtP(y1.rec); $('#o-rec-a').textContent=fmtA(A(y1.rec))+'/yr';
+  $('#o-down').textContent=y1.maxDown>0?'-'+fmtP(y1.maxDown):'$0'; $('#o-down-a').textContent=y1.maxDown>0?'-'+fmtA(A(y1.maxDown))+'/yr':'no downside';
+  $('#o-payout').textContent=fmtP(y1.payout); $('#o-payout-a').textContent=fmtA(A(y1.payout))+'/yr';
+  // split
+  const gs=Math.max(0.0001,y1.GS), pv=Math.max(0,y1.payout), pr=Math.max(0,y1.retained), un=Math.max(0,y1.unshared);
+  const tot=Math.max(gs,pv+pr+un), pct=x=>Math.max(0,x/tot*100);
+  $('#splitbar').innerHTML= y1.GS<=0 ? `<span style="flex:1;background:#94a3b8;color:#fff">no positive shared savings at this savings rate</span>` :
+    `<span style="width:${pct(pv)}%;background:var(--prov)">${pv>0?'prov '+fmtP(pv):''}</span>`+
+    `<span style="width:${pct(pr)}%;background:var(--payer)">${pr>0?'payer '+fmtP(pr):''}</span>`+
+    `<span style="width:${pct(un)}%;background:#94a3b8">${un>0?'unshared':''}</span>`;
+  // flags
+  let f=`<div class="mock-note" style="margin-top:8px">◦ Point estimate at your chosen savings rate — <b>not</b> a probability-weighted risk range. Underwrite risk models to the max-downside tile, not the base case.</div>`;
+  if((model===2||model===3||model===4)&&y1.payout>0&&y1.GS<=0){ f+=`<div class="flag">⚠ <b>Phantom savings:</b> a bonus is paid while gross savings ≤ $0 — not a true TCOC reduction. Check for shifted, upcoded, or out-of-scope claims, or a mis-set benchmark.</div>`; }
+  const forfeit=(L.rec*1.0)-y1.rec;
+  if(model>1 && forfeit>Math.max(0,y1.GS-y1.payout)){ f+=`<div class="flag">Moving off FFS forfeits <b>${fmtP(forfeit)} PMPM</b> of clean-claim recovery — more than the payer's retained savings here.</div>`; }
+  if(model>=3 && y1.maxDown>0){ f+=`<div class="flag ok">Downside is real: base case shown, and <b>max exposure ${fmtA(A(y1.maxDown))}/yr</b> capped by ${model===3?'stop-loss × loss-share':model===4?'reserves':'reinsurance'}. Underwrite to the max.</div>`; }
+  if(model===5){ f+=`<div class="flag ok">Per-claim payment &amp; recovery ≈ 0 under global budget. Payer value = risk transfer + predictability + baked-in discount (${fmtP(L.baked||0)} PMPM).</div>`; }
+  if(y1.mlrRebate>0){ f+=`<div class="flag">MLR floor (${L.floor}%): payer gain exceeds the non-medical headroom, so <b>${fmtP(y1.mlrRebate)} PMPM (${fmtA(A(y1.mlrRebate))}/yr)</b> rebates to the state/CMS. Payer net above is net of this. <span style="color:var(--mut)">(directional proxy)</span></div>`; }
+  // cohort-specific guardrails
+  if(mode==='cohort' && rows.length){
+    const subcred=rows.filter(r=>r.cred<0.999);
+    if(subcred.length){ f+=`<div class="flag">Credibility: ${subcred.map(r=>r.c.name.split(' /')[0]).join(', ')} ${subcred.length>1?'are':'is'} sub-credible — booked savings are shrunk toward the mean (e.g. ${subcred[0].c.name.split(' /')[0]} booked at ${(subcred[0].cred*100).toFixed(0)}% credibility). Small-sample savings aren't paid at face value.</div>`; }
+    // Section 1557: flag the ADVERSE channels (downside on / credibility-gating of / under-service on SDOH cohorts) — not the benign payout case
+    const rNon=rows.filter(x=>!x.c.sdoh), hasNon=rNon.length>0, mNon=rNon.reduce((a,x)=>a+x.m,0)||1, sNon=rNon.reduce((a,x)=>a+x.c.s*x.m,0)/mNon;
+    const sdConcern=rows.filter(r=>r.c.sdoh && (r.y.maxDown>0 || r.cred<0.999 || (hasNon && r.c.s>sNon+1.5)));
+    if(sdConcern.length){ const c0=sdConcern[0];
+      const why=c0.y.maxDown>0?'carry the deepest downside':c0.cred<0.999?'are gated hardest by credibility':'show savings well above the non-SDOH mean';
+      f+=`<div class="flag sdoh">Fairness watch (Section 1557): high-SDOH cohorts (${sdConcern.map(r=>r.c.name.split(' /')[0]).join(', ')}) ${why} — the disparate-impact channels. Confirm savings come from care coordination, not under-service, and watch that downside/credibility don't create an incentive to avoid these members.</div>`; }
+    else { const sdPay=rows.filter(r=>r.c.sdoh && r.y.payout>0); if(sdPay.length) f+=`<div class="flag ok">SDOH cohorts (${sdPay.map(r=>r.c.name.split(' /')[0]).join(', ')}) earn savings with no downside/credibility penalty flagged — still confirm it's coordination, not under-service.</div>`; }
+    if(y1.maxDown>0) f+=`<div class="mock-note" style="margin-top:6px">Max-downside sums each cohort's worst case — an implicit perfect-correlation (no diversification) assumption; conservative for underwriting.</div>`;
+  }
+  $('#flags').innerHTML=f;
+  // cohort breakdown
+  renderBreakdown(rows);
+  drawMY();
+  $('#engineNote').textContent=`Engine: model ${model} (${MODELS[model]}). ${mode==='cohort'?`Cohort mix blended over ${Math.round(curM).toLocaleString()} members (weighted benchmark $${curB.toFixed(0)}, weighted savings ${curS.toFixed(1)}%).`:''} Recovery decay κ=${KAPPA[model].rec}. All figures illustrative.`;
+}
+function renderBreakdown(rows){
+  const card=$('#breakdownCard');
+  if(mode!=='cohort'||!rows){ card.style.display='none'; return; }
+  card.style.display='';
+  if(rows.length===0){ $('#cohTable thead').innerHTML=''; $('#cohTable tbody').innerHTML='<tr><td style="text-align:center;color:#94a3b8;padding:16px">No cohorts selected — turn at least one on.</td></tr>'; $('#cohBar').innerHTML=''; $('#cohInsight').textContent=''; return; }
+  $('#cohTable thead').innerHTML='<tr><th>Cohort</th><th>Members</th><th>Bench $</th><th>Savings %</th><th>Prov net /yr</th><th>Max downside /yr</th><th>Flags</th></tr>';
+  $('#cohTable tbody').innerHTML=rows.map(r=>{
+    const flags=[]; if(r.cred<0.999)flags.push('<span class="chip cred">sub-credible</span>'); if(r.c.sdoh)flags.push('<span class="chip sdoh">SDOH</span>');
+    return `<tr><td style="text-align:left">${r.c.name}</td><td>${Math.round(r.m).toLocaleString()}</td><td>$${r.c.B}</td><td>${r.c.s}%</td>
+      <td>${fmtA(r.y.provNet*r.m*12)}</td><td style="color:var(--auth)">${r.y.maxDown>0?'-'+fmtA(r.y.maxDown*r.m*12):'—'}</td><td>${flags.join(' ')||'—'}</td></tr>`;
+  }).join('');
+  // contribution bar (provider net $/yr by cohort, positive only)
+  const contrib=rows.map(r=>({name:r.c.name.split(' /')[0], v:Math.max(0,r.y.provNet*r.m*12), sdoh:r.c.sdoh}));
+  const totC=contrib.reduce((a,x)=>a+x.v,0)||1;
+  const cols=['#1b7f4b','#2f9e63','#1668c7','#6d28d9','#b45309'];
+  $('#cohBar').innerHTML=contrib.map((x,i)=>`<span style="width:${x.v/totC*100}%;background:${cols[i%cols.length]}">${x.v/totC>0.08?x.name:''}</span>`).join('');
+  // insight: dominant savings vs dominant downside cohort
+  const bySave=[...rows].sort((a,b)=>(b.y.payout*b.m)-(a.y.payout*a.m))[0];   // earned shared savings, not infra
+  const risky=rows.filter(r=>r.y.maxDown>0).sort((a,b)=>(b.y.maxDown*b.m)-(a.y.maxDown*a.m))[0];
+  const saveTxt = bySave.y.payout>0 ? `Savings concentrate in <b>${bySave.c.name.split(' /')[0]}</b>` : `No cohort is earning shared savings at these terms`;
+  const riskTxt = risky ? `; downside concentrates in <b>${risky.c.name.split(' /')[0]}</b>` : `; this model has no downside`;
+  $('#cohInsight').innerHTML=`${saveTxt}${riskTxt}. That divergence is the whole reason to model cohorts, not a blended average.`;
+}
+function drawMY(){
+  const {out,out0}=multiYear(); const N=out.length;
+  const W=720,H=240,x0=54,x1=700,y0=20,y1=196;
+  const all=out.concat(out0,[0]); const mx=Math.max(...all,1), mn=Math.min(...all,0);
+  const X=i=>x0+(N<=1?0.5:i/(N-1))*(x1-x0);
+  const Y=v=>y0+(mx-v)/((mx-mn)||1)*(y1-y0);
+  let g=`<line x1="${x0}" y1="${Y(0)}" x2="${x1}" y2="${Y(0)}" stroke="#cbd5e1"/>`;
+  g+=`<text x="6" y="${Y(mx)+4}" font-size="10" fill="#94a3b8">${fmtA(mx)}</text><text x="6" y="${Y(0)+4}" font-size="10" fill="#94a3b8">$0</text>`;
+  const bw=Math.min(46,(x1-x0)/(N*1.8));
+  for(let i=0;i<N;i++){ const x=X(i);
+    g+=`<rect x="${x-bw/2}" y="${Math.min(Y(out[i]),Y(0))}" width="${bw}" height="${Math.abs(Y(out[i])-Y(0))}" fill="#1b7f4b" rx="3"/>`;
+    g+=`<text x="${x}" y="${y1+16}" text-anchor="middle" font-size="10.5" fill="#5a6675">Yr ${i+1}</text>`;
+    g+=`<text x="${x}" y="${Y(out[i])-5}" text-anchor="middle" font-size="9.5" fill="#0f5a33" font-weight="700">${fmtA(out[i])}</text>`; }
+  let pts=out0.map((v,i)=>`${X(i)},${Y(v)}`).join(' ');
+  g+=`<polyline points="${pts}" fill="none" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>`;
+  out0.forEach((v,i)=>{g+=`<circle cx="${X(i)}" cy="${Y(v)}" r="3" fill="#b45309"/>`;});
+  g+=`<text x="${x1}" y="${Y(out0[N-1])-8}" text-anchor="end" font-size="10" fill="#b45309" font-weight="700">no-rebase (r=0)</text>`;
+  g+=`<text x="${X(0)}" y="14" font-size="10.5" fill="#0f5a33" font-weight="700">■ contract (with rebasing)</text>`;
+  $('#myChart').innerHTML=g;
+  const disc=L.disc/100, npv=arr=>arr.reduce((a,v,i)=>a+v/Math.pow(1+disc,i),0);
+  const cum=npv(out), cum0=npv(out0);
+  $('#rebaseNote').innerHTML=`Cumulative provider net over ${N} yr (NPV @ ${L.disc}%): <b>${fmtA(cum)}</b> with rebasing vs <b>${fmtA(cum0)}</b> without — the rebasing tax is <b style="color:var(--warn)">${fmtA(cum0-cum)}</b>.${mode==='cohort'?' <span style="color:var(--mut)">(multi-year uses the blended benchmark & savings.)</span>':''}`;
+}
+
+// ---------- save / compare ----------
+const SLOTS={};
+function snapshot(){ let y1,dm,bb; if(mode==='cohort'){const bl=blend();y1=bl.blended;dm=bl.dealM;bb=bl.wB;} else {y1=calc(model,L.B);dm=L.M;bb=L.B;} curM=dm;curB=bb;curS=(mode==='cohort'?blend().wS:L.s); const {out}=multiYear();
+  return {model:MODELS[model],pop:mode==='cohort'?'cohort mix':'whole panel',M:Math.round(dm),B:Math.round(bb),gs:y1.GS*dm*12,payout:y1.payout*dm*12,provNet:y1.provNet*dm*12,provCum:out.reduce((a,b)=>a+b,0),payerNet:y1.payerNet*dm*12,maxDown:y1.maxDown*dm*12,rec:y1.rec*dm*12}; }
+function renderCompare(){
+  const cols=['Scenario','Contract model','Population','Members','Bench','Gross savings','Provider payout','Provider net Yr1','Provider net cum','Payer net','Provider max downside','Recovery (quar.)'];
+  $('#cmpTable thead').innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  const rows=['A','B','C'].filter(k=>SLOTS[k]).map(k=>{const s=SLOTS[k];
+    return `<tr><td><b>${k}</b></td><td style="text-align:left">${s.model}</td><td style="text-align:left">${s.pop}</td><td>${s.M.toLocaleString()}</td><td>$${s.B}</td><td>${fmtA(s.gs)}</td><td>${fmtA(s.payout)}</td><td>${fmtA(s.provNet)}</td><td>${fmtA(s.provCum)}</td><td>${fmtA(s.payerNet)}</td><td style="color:var(--auth)">${s.maxDown>0?'-'+fmtA(s.maxDown):'—'}</td><td style="color:var(--warn)">${fmtA(s.rec)}</td></tr>`;}).join('');
+  $('#cmpTable tbody').innerHTML= rows || '<tr><td colspan="12" style="text-align:center;color:#94a3b8;padding:18px">No saved scenarios yet — build one and hit Save → A.</td></tr>';
+}
+document.querySelectorAll('.savebtn').forEach(b=>b.onclick=()=>{SLOTS[b.dataset.slot]=snapshot();renderCompare();const o=b.textContent;b.textContent='Saved ✓';setTimeout(()=>b.textContent='Save → '+b.dataset.slot,1200);});
+
+// mode toggle
+document.querySelectorAll('.modeToggle button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode; document.querySelectorAll('.modeToggle button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+  $('#cohortCard').style.display = mode==='cohort'?'':'none';
+  buildLevers(); render();
+});
+// tabs
+const tabs=[...document.querySelectorAll('.tab')],screens=[...document.querySelectorAll('.screen')];
+tabs.forEach(t=>t.onclick=()=>{tabs.forEach(x=>x.setAttribute('aria-selected',x===t?'true':'false'));screens.forEach(s=>s.classList.toggle('on',s.id===t.dataset.s));if(t.dataset.s==='compare')renderCompare();window.scrollTo({top:0,behavior:'smooth'});});
+
+buildModels(); buildPresets(); buildLevers(); buildCohorts(); render(); renderCompare();
+</script>
+</body>
+</html>

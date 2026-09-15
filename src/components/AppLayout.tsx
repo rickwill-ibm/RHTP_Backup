@@ -96,7 +96,12 @@ export default function AppLayout({
     }
   }, [pathname, backupCollapsed, agenticCollapsed]);
 
-  // Scroll active menu item and its section into view on navigation
+  // Keep the active menu item visible on navigation — but ONLY scroll when it is
+  // actually outside the nav's visible viewport. `block: 'nearest'` is a no-op when
+  // the item is already in view, so an in-view click never moves the sidebar. This
+  // removes the earlier "scroll the section header to the top, then snap back"
+  // flicker, which was caused by forcing the section header up with `behavior: 'smooth'`
+  // on every navigation regardless of whether the item was even off-screen.
   useEffect(() => {
     // Skip on initial mount to avoid unwanted scrolling on page load
     if (isInitialMount) {
@@ -104,35 +109,27 @@ export default function AppLayout({
       return;
     }
 
-    if (!navRef.current) return;
+    const nav = navRef.current;
+    if (!nav) return;
 
-    // Delay to ensure DOM updates and Backup section expands if needed
-    const timer = setTimeout(() => {
-      const activeLink = navRef.current?.querySelector('.sidebar-item-active');
-      if (activeLink) {
-        // Find the section header (parent group div)
-        const sectionDiv = activeLink.closest('div[class*="mb-4"]');
-        const sectionHeader = sectionDiv?.querySelector('p, button');
+    // rAF lets any sibling section (Backup/Agentic) that auto-expands on this same
+    // navigation settle before we measure, so the off-screen check reads final layout.
+    const raf = requestAnimationFrame(() => {
+      const activeLink = nav.querySelector('.sidebar-item-active') as HTMLElement | null;
+      if (!activeLink) return;
 
-        // Scroll section header to top for better context
-        if (sectionHeader) {
-          sectionHeader.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start', // Scroll section to top
-            inline: 'nearest',
-          });
-        } else {
-          // Fallback: scroll active item into view
-          activeLink.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'nearest',
-          });
-        }
+      const navRect = nav.getBoundingClientRect();
+      const linkRect = activeLink.getBoundingClientRect();
+      const offscreen = linkRect.top < navRect.top || linkRect.bottom > navRect.bottom;
+
+      // Instant, minimal correction only when needed — no smooth animation, no
+      // scroll-to-top. An already-visible item is left exactly where it is.
+      if (offscreen) {
+        activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       }
-    }, 200);
+    });
 
-    return () => clearTimeout(timer);
+    return () => cancelAnimationFrame(raf);
   }, [pathname, isInitialMount]);
 
   const grouped = groupOrder.map((g) => ({

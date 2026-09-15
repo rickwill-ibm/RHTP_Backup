@@ -25,7 +25,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Dev mock mode — patient-aware scenario
   if (devMockEnabled()) {
     await new Promise((r) => setTimeout(r, 600));
-    return NextResponse.json(devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode));
+    try {
+      const result = await devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode);
+      return NextResponse.json(result);
+    } catch (e) {
+      // A registered live policy failed to evaluate (missing/broken PDF asset, misconfigured row, or an
+      // unsupported policy shape). FAIL LOUD — never silently serve an unrelated canned scenario.
+      return NextResponse.json(
+        {
+          error: 'DTR policy evaluation unavailable',
+          detail: String((e as Error).message ?? e),
+          cptCode: body.cptCode,
+        },
+        { status: 502 }
+      );
+    }
   }
 
   // Live mode — forward to Policy Engine
@@ -41,6 +55,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   } catch {
     // Policy Engine offline — fall through to patient-aware mock
     await new Promise((r) => setTimeout(r, 600));
-    return NextResponse.json(devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode));
+    try {
+      const result = await devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode);
+      return NextResponse.json(result);
+    } catch (e) {
+      return NextResponse.json(
+        {
+          error: 'DTR policy evaluation unavailable',
+          detail: String((e as Error).message ?? e),
+          cptCode: body.cptCode,
+        },
+        { status: 502 }
+      );
+    }
   }
 }

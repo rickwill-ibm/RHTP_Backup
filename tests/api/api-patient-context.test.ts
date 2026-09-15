@@ -37,6 +37,10 @@ import {
   PLATFORM_TO_FHIR_ID_MAP,
 } from '@/lib/patientRegistry';
 
+// CG-SURG-83 code set from the registry row directly (bariatricCriteria compat shim removed — E14).
+import { policyById } from '@/lib/policy/dtr/evaluate/policyRegistry';
+const BARIATRIC_CPT_CODES: ReadonlySet<string> = new Set(policyById('CG-SURG-83').cptCodes);
+
 import {
   validateEvidenceId,
   validatePatientId,
@@ -292,49 +296,74 @@ describe('§4B Prior Auth — DTR policy evaluation', () => {
     'PAT-0103':   '99243', 'PAT-0156': '99244',
   };
 
-  it('DTR policyTitle contains the correct CPT for every patient', () => {
+  it('DTR policyTitle contains the correct CPT for every patient', async () => {
     for (const pid of ALL_PIDS) {
       const cpt    = cptMap[pid];
-      const result = devDtrEvaluation(pid, cpt) as { policyTitle: string; cptCode: string; groups: unknown[] };
+      const result = await devDtrEvaluation(pid, cpt) as { policyTitle: string; cptCode: string; groups: unknown[] };
       expect(result.policyTitle, `${pid} policyTitle must include CPT ${cpt}`)
         .toContain(cpt);
     }
   });
 
-  it('DTR for Dorothy (PAT-0042) is DIFFERENT from Maria and contains a gap', () => {
-    const maria   = devDtrEvaluation('MARIA_SD_001', '72148') as { policyTitle: string; groups: { status: string }[] };
-    const dorothy = devDtrEvaluation('PAT-0042',     '75561') as { policyTitle: string; groups: { status: string }[] };
+  it('DTR for Dorothy (PAT-0042) is DIFFERENT from Maria and contains a gap', async () => {
+    const maria   = await devDtrEvaluation('MARIA_SD_001', '72148') as { policyTitle: string; groups: { status: string }[] };
+    const dorothy = await devDtrEvaluation('PAT-0042',     '75561') as { policyTitle: string; groups: { status: string }[] };
     expect(maria.policyTitle).not.toBe(dorothy.policyTitle);
     expect(dorothy.groups.some(g => g.status === 'gap')).toBe(true);
     expect(dorothy.policyTitle).not.toContain('Lumbar'); // Dorothy must not get Maria's lumbar policy
   });
 
-  it('DTR for James Wilson (PAT-0087) has allMet=true (no gaps)', () => {
-    const result = devDtrEvaluation('PAT-0087', '93306') as { allMet: boolean; groups: { status: string }[] };
+  it('DTR for James Wilson (PAT-0087) has allMet=true (no gaps)', async () => {
+    const result = await devDtrEvaluation('PAT-0087', '93306') as { allMet: boolean; groups: { status: string }[] };
     expect(result.allMet).toBe(true);
     expect(result.groups.every(g => g.status === 'met')).toBe(true);
   });
 
-  it('DTR for Robert Chen (PAT-0103) has correct policy — NOT Maria\'s lumbar MRI', () => {
-    const result = devDtrEvaluation('PAT-0103', '99243') as { policyTitle: string };
+  it('DTR for Robert Chen (PAT-0103) has correct policy — NOT Maria\'s lumbar MRI', async () => {
+    const result = await devDtrEvaluation('PAT-0103', '99243') as { policyTitle: string };
     expect(result.policyTitle).toContain('99243');
     expect(result.policyTitle).not.toContain('Lumbar');
     expect(result.policyTitle).not.toContain('72148');
   });
 
-  it('DTR for Lisa Thompson (PAT-0156) has correct policy — NOT Maria\'s lumbar MRI', () => {
-    const result = devDtrEvaluation('PAT-0156', '99244') as { policyTitle: string };
+  it('DTR for Lisa Thompson (PAT-0156) has correct policy — NOT Maria\'s lumbar MRI', async () => {
+    const result = await devDtrEvaluation('PAT-0156', '99244') as { policyTitle: string };
     expect(result.policyTitle).toContain('99244');
     expect(result.policyTitle).not.toContain('Lumbar');
     expect(result.policyTitle).not.toContain('72148');
   });
 
-  it('DTR groups array is non-empty for every patient', () => {
+  it('DTR groups array is non-empty for every patient', async () => {
     for (const pid of ALL_PIDS) {
       const cpt    = cptMap[pid];
-      const result = devDtrEvaluation(pid, cpt) as { groups: unknown[] };
+      const result = await devDtrEvaluation(pid, cpt) as { groups: unknown[] };
       expect(result.groups.length, `${pid} must have at least 1 DTR group`).toBeGreaterThan(0);
     }
+  });
+
+  // Regression coverage for the bariatric DTR fixture fix: the mock endpoint used to hand-copy only
+  // 14 of the 27 real CG-SURG-83 codes into a literal, silently routing the other 13 (e.g. 43848,
+  // C9785) to Maria's unrelated lumbar-MRI scenario, and hard-coded only half of the real policy's
+  // documentation criteria. It now derives every bariatric code's criteria LIVE from the same real
+  // authored PDF the workbench evaluates (`getBariatricDtrCriteria` → `dtrCriteriaFromReview`).
+  it('every one of the 27 real CG-SURG-83 codes routes to the live bariatric policy, not the lumbar-MRI default', async () => {
+    expect(BARIATRIC_CPT_CODES.size).toBe(27);
+    for (const cpt of BARIATRIC_CPT_CODES) {
+      const result = await devDtrEvaluation('MARIA_SD_001', cpt) as { policyTitle: string; cptCode: string };
+      expect(result.policyTitle, `${cpt} must route to the bariatric policy`).toContain('Bariatric');
+      expect(result.policyTitle, `${cpt} must not fall through to Maria's lumbar MRI`).not.toContain('Lumbar');
+      expect(result.cptCode).toBe(cpt);
+    }
+  });
+
+  it('previously-unmapped bariatric codes (e.g. 43848, C9785) now reflect the full real policy, not a truncated literal', async () => {
+    const result = await devDtrEvaluation('MARIA_SD_001', '43848') as {
+      groups: { title: string; required: boolean }[];
+    };
+    // The old hand-typed fixture had exactly 3 documentation criteria (6 groups total: age, BMI,
+    // comorbidity + 3 docs). The real authored policy has 6 documentation criteria across its two
+    // pathways — so a correct, un-truncated derivation must expose more groups than the old fixture did.
+    expect(result.groups.length).toBeGreaterThan(6);
   });
 });
 

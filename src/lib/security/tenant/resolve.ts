@@ -14,22 +14,25 @@
 import { getDataMode } from '@/lib/config/dataMode';
 import { getPatientById } from '@/lib/patientRegistry';
 import type { Principal, PrincipalSession } from '@/lib/authz/principal';
-import {
-  DEMO_TENANT_ID,
-  type TenantContext,
-  type TenantScope,
-  type LineOfBusiness,
-} from './types';
+import { DEMO_TENANT_ID, type TenantContext, type TenantScope, type LineOfBusiness } from './types';
 
 /** Map a free-text payer string to a regulated line of business. */
 export function lobFromPayer(payer: string | undefined | null): LineOfBusiness {
   const p = (payer ?? '').toLowerCase();
-  if (p.includes('advantage') || p.includes(' ma')) return 'medicare-advantage';
+  // Match the MORE-SPECIFIC lines of business first. In particular ACA/exchange is
+  // matched BEFORE the ' ma' (Medicare Advantage abbreviation) substring, because
+  // "marketplace" contains " ma" (e.g. "Federal Marketplace" -> " marketplace")
+  // and would otherwise misclassify an ACA payer as medicare-advantage (Finding 6).
+  // D-SNP/dual is matched before the generic medicare-advantage branch too, so a
+  // dual plan is not shadowed by an 'advantage'/' ma' match.
+  if (p.includes('exchange') || p.includes('aca') || p.includes('marketplace'))
+    return 'aca-exchange';
   if (p.includes('dsnp') || p.includes('dual')) return 'dsnp';
-  if (p.includes('medicare')) return 'medicare-advantage';
   if (p.includes('medicaid')) return 'medicaid';
-  if (p.includes('exchange') || p.includes('aca') || p.includes('marketplace')) return 'aca-exchange';
-  if (p.includes('commercial') || p.includes('employer') || p.includes('group')) return 'commercial';
+  if (p.includes('advantage') || p.includes(' ma') || p.includes('medicare'))
+    return 'medicare-advantage';
+  if (p.includes('commercial') || p.includes('employer') || p.includes('group'))
+    return 'commercial';
   return 'unknown';
 }
 
@@ -59,7 +62,7 @@ export function resolveMemberTenant(memberId: string | null | undefined): Tenant
  */
 export function resolveActorTenantScope(
   principal: Principal,
-  session: PrincipalSession | null | undefined,
+  session: PrincipalSession | null | undefined
 ): TenantScope {
   const mode = getDataMode('tenancy');
   if (mode !== 'production') {

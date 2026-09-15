@@ -9,6 +9,7 @@ export type FeatureFlag =
   | 'priorAuth'
   | 'aiDtrGeneration'
   | 'goldenThread'
+  | 'goldenThreadE2E'
   | 'networkAdequacy'
   | 'richCrdDtr';
 
@@ -19,6 +20,7 @@ const DEFAULTS: Record<FeatureFlag, boolean> = {
   priorAuth: true,
   aiDtrGeneration: false, // off until human-review gate is wired (Slice 5)
   goldenThread: true, // Financial Clearance thread (GT-*) -- demoable on mock data
+  goldenThreadE2E: true, // order→cash continuation — wired in (waves 1-13.1); env NEXT_PUBLIC_FLAG_GOLDEN_THREAD_E2E=false to disable
   networkAdequacy: true, // Network adequacy analytics + analyst copilot (NA-*)
   richCrdDtr: true, // Da Vinci-conformant CRD/DTR runtime screens; classic views are the fallback
 };
@@ -30,6 +32,7 @@ const ENV_KEY: Record<FeatureFlag, string> = {
   priorAuth: 'NEXT_PUBLIC_FLAG_PRIOR_AUTH',
   aiDtrGeneration: 'NEXT_PUBLIC_FLAG_AI_DTR',
   goldenThread: 'NEXT_PUBLIC_FLAG_GOLDEN_THREAD',
+  goldenThreadE2E: 'NEXT_PUBLIC_FLAG_GOLDEN_THREAD_E2E',
   networkAdequacy: 'NEXT_PUBLIC_FLAG_NETWORK_ADEQUACY',
   richCrdDtr: 'NEXT_PUBLIC_FLAG_RICH_CRD_DTR',
 };

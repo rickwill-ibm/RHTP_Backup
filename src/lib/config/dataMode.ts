@@ -67,6 +67,13 @@ export const DATA_MODE_SEAMS = Object.freeze([
   'tenancy', //     wired: tenant/plan/LOB isolation (C-TEN) — single demo tenant (mock/seeded, demo intact) vs per-record tenant + IdP-claim actor scope, fail-closed (lib/security/tenant/)
   // ── I19 HW4 (external DEQM measures ingestion) — appended block ───────────────
   'measures', //    wired: external HEDIS/Stars/MIPS measures (C-MEAS) — authored demo gaps (mock/seeded, demo intact) vs ingested Da Vinci DEQM MeasureReport feed, fail-closed. Platform ingests, does not compute (lib/measures/)
+  // ── Wave-1 order→cash (golden-thread E2E) — appended block ───────────────────
+  'remittanceGateway', // wired: 835 remittance advice loader — seeded ERA (mock/seeded) vs live payer/clearinghouse ERA client, fail-closed until wired (lib/dataSources/remittanceGateway.ts)
+  'contractRepository', // wired: contracted fee-schedule loader — seeded rates (mock/seeded) vs live contract-management client, fail-closed until wired (lib/dataSources/contractRepository.ts)
+  // ── Wave-2 ledger integrity (tamper-evident seal) — appended block ───────────
+  'signingKey', //  wired: ledger signing-key material — demo HMAC key (mock/seeded) vs a real KMS/HSM asymmetric signer, fail-closed until wired (lib/dataSources/signingKey.ts)
+  // ── Wave-4 governed submission (durable resume/submit loop) — appended block ──
+  'submissionGateway', // wired: payer appeal/837 EDI submission transport — mock not-transmitted receipt (mock/seeded) vs a real 837/appeal EDI clearinghouse, fail-closed until wired (lib/dataSources/submissionGateway.ts)
 ] as const);
 export type DataModeSeam = (typeof DATA_MODE_SEAMS)[number];
 

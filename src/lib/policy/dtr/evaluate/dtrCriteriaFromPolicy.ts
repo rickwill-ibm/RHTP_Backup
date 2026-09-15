@@ -11,9 +11,16 @@
  * below), not a per-policy value set — an honest, payer-agnostic default the reviewer can widen.
  */
 import type { PolicyReview } from '@/lib/policy/policyReview';
-import { encodePolicy, repairGlyphs } from '@/lib/policy/encode';
+import {
+  encodePolicy,
+  repairGlyphs,
+  isExclusionCriterion,
+  measureLoincCode,
+  MEASURE_LOINC,
+} from '@/lib/policy/encode';
+import type { BoolExpr } from '@/lib/policy/encode';
 import { buildCriteriaPolicy } from '@/lib/policy/authoring/criteriaPolicy';
-import type { DtrCriteria } from './patientEvaluation';
+import type { ComputableCriterion, DtrCriteria } from './patientEvaluation';
 
 /** A standard set of obesity-related comorbidity ICD-10 codes for the BMI 35–40 band rule. Payer-agnostic;
  *  the policy's own "including but not limited to" phrasing makes a standard set the honest default. */
@@ -31,6 +38,51 @@ export const OBESITY_COMORBIDITY_LABEL =
 
 function clean(s: string): string {
   return repairGlyphs(s).repaired.replace(/\s+/g, ' ').trim();
+}
+
+/** A criterion reference reached from a pathway's boolean tree, carrying whether it sits under an OR
+ *  (an alternative branch) so the group projector can mark it non-required. Leaves under a `not`
+ *  (exclusions) are dropped — an exclusionary threshold must never read as a positive gate. */
+interface LeafRef {
+  criterionId: string;
+  underOr: boolean;
+}
+function collectLeaves(
+  expr: BoolExpr | undefined,
+  underOr: boolean,
+  negated: boolean,
+  out: LeafRef[]
+): void {
+  if (!expr) return;
+  if (expr.op === 'leaf') {
+    if (!negated) out.push({ criterionId: expr.criterionId, underOr });
+    return;
+  }
+  if (expr.op === 'not') {
+    collectLeaves(expr.node, underOr, !negated, out);
+    return;
+  }
+  if (expr.op === 'and') {
+    for (const n of expr.nodes) collectLeaves(n, underOr, negated, out);
+    return;
+  }
+  // or — every child is an alternative
+  for (const n of expr.nodes) collectLeaves(n, true, negated, out);
+}
+
+/** Surface a measure with NO standard coded concept as a documentation gap (provider attests it),
+ *  deduped by title against the documentation already lifted — the honest alternative to dropping it. */
+function addMeasureDoc(
+  sourceText: string,
+  documentation: DtrCriteria['documentation'],
+  seenDoc: Set<string>
+): void {
+  const text = clean(sourceText);
+  if (!text) return;
+  const title = text.length > 90 ? text.slice(0, 88).trim() + '…' : text;
+  if (seenDoc.has(title)) return;
+  seenDoc.add(title);
+  documentation.push({ title, description: text });
 }
 
 /**
@@ -106,12 +158,96 @@ export function dtrCriteriaFromReview(review: PolicyReview, cptCode: string): Dt
     ? { codes: OBESITY_COMORBIDITY_ICD10, label: OBESITY_COMORBIDITY_LABEL }
     : undefined;
 
+  // GENERIC computable lift: walk the eligibility pathways' BOOLEAN TREES (never the flat registry —
+  // that would flatten OR-branches into required ANDs and pull in children/exclusions). For every
+  // non-age/BMI, non-excluded, LOINC-mapped measure leaf, emit a ComputableCriterion carrying the
+  // encoded measure verbatim (evaluated later via the shared engine). `required` is false when the
+  // leaf is under an OR or one of several alternative pathways. A measure field with NO standard coded
+  // concept (stenosis %, tumour size) is surfaced as a documentation gap, never silently dropped.
+  const computable: ComputableCriterion[] = [];
+  const seenComputable = new Set<string>();
+  const eligibility = logic.pathways.filter((p) => p.role === 'eligibility' && p.logic);
+  const multiPathway = eligibility.length > 1;
+  for (const p of eligibility) {
+    const leaves: LeafRef[] = [];
+    collectLeaves(p.logic, false, false, leaves);
+    for (const { criterionId, underOr } of leaves) {
+      const crit = logic.criteria[criterionId];
+      if (!crit || crit.kind !== 'measure') continue;
+      if (isExclusionCriterion(crit)) continue; // exclusion → never a positive eligibility gate
+      // A criterion the encoder flagged for human review (OCR-repaired label, ambiguous operator/
+      // threshold) must NOT be silently auto-evaluated to a confident met/gap — surface it as an
+      // attestation the reviewer verifies. (mirrors evalCriterion's `if (crit.reviewFlag) → unknown`.)
+      if (crit.reviewFlag) {
+        addMeasureDoc(crit.sourceText, documentation, seenDoc);
+        continue;
+      }
+      const ms =
+        crit.measures && crit.measures.length ? crit.measures : crit.measure ? [crit.measure] : [];
+      const required = !underOr && !multiPathway;
+      const excerpt = clean(crit.sourceText).slice(0, 200) || undefined;
+      for (const m of ms) {
+        if (m.negatedLocally) continue; // in-scope negation cue → not an inclusion gate
+        if (m.kind === 'compound') {
+          const subs = m.subMeasures ?? [];
+          const allMapped =
+            subs.length > 0 && subs.every((s) => s.field && measureLoincCode(s.field));
+          const key = `${criterionId}:compound`;
+          if (allMapped && !seenComputable.has(key)) {
+            seenComputable.add(key);
+            computable.push({
+              criterionId,
+              field: subs[0].field as string,
+              label: subs
+                .map((s) => MEASURE_LOINC[s.field as string]?.display ?? s.field)
+                .join(' / '),
+              loinc: undefined,
+              measure: m,
+              required,
+              sourceExcerpt: excerpt,
+            });
+          } else if (!allMapped) {
+            addMeasureDoc(crit.sourceText, documentation, seenDoc);
+          }
+          continue;
+        }
+        const field = m.field;
+        if (!field || field === 'age' || field === 'bmi') continue; // handled by the dedicated groups
+        const loinc = measureLoincCode(field);
+        if (!loinc) {
+          addMeasureDoc(crit.sourceText, documentation, seenDoc);
+          continue;
+        }
+        const key = `${criterionId}:${field}`;
+        if (seenComputable.has(key)) continue;
+        seenComputable.add(key);
+        computable.push({
+          criterionId,
+          field,
+          label: MEASURE_LOINC[field]?.display ?? field,
+          loinc,
+          measure: m,
+          required,
+          sourceExcerpt: excerpt,
+          note: m.thresholdVariant
+            ? 'Population-shifted threshold is attested; evaluated at the base threshold.'
+            : undefined,
+        });
+      }
+    }
+  }
+
   return {
     policyTitle: review.title,
     cptCode,
     minAge,
     bmi,
     comorbidity,
-    documentation: documentation.slice(0, 6),
+    computable,
+    // No cap: the DTR must reflect EVERY documentation-gated criterion the authored policy
+    // states, not a truncated preview. A hardcoded slice here previously dropped criteria
+    // silently once a policy had more than a handful — exactly the "are we showing ALL the
+    // medically necessary criteria?" gap this function exists to close.
+    documentation,
   };
 }

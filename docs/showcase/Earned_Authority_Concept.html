@@ -1,0 +1,305 @@
+<title>Motion Has to Be Earned</title>
+<style>
+  :root{
+    --navy:#0b2140; --navy2:#12325a; --ink:#132339; --paper:#f7f4ee; --card:#fffdf9;
+    --line:#e2dcd0; --teal:#0f766e; --teal2:#0e7490; --amber:#b45309; --red:#b42318;
+    --green:#1f7a3d; --violet:#5b3fa3; --muted:#5c6675; --chip:#eef2f7; --gold:#a86b12;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#0a1a30; --navy2:#0f2540; --ink:#e8ecf2; --paper:#0c1420; --card:#111c2c;
+      --line:#22344c; --muted:#9aa7b8; --chip:#17263a;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#0a1a30; --navy2:#0f2540; --ink:#e8ecf2; --paper:#0c1420; --card:#111c2c;
+    --line:#22344c; --muted:#9aa7b8; --chip:#17263a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;margin:0}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 20px 96px}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.18;letter-spacing:-.01em}
+  a{color:var(--teal2)}
+  header.hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#f4f1ea;padding:52px 0 42px}
+  .kicker{text-transform:uppercase;letter-spacing:.16em;font-size:11.5px;color:#9fc7d6;font-weight:700}
+  header.hero h1{color:#fff;font-size:40px;margin:.3em 0 .16em}
+  header.hero p.sub{color:#cdd8e6;font-size:16.5px;max-width:750px;margin:.2em 0 0}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .badge{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.22);color:#e9f1f7;background:rgba(255,255,255,.06)}
+  .badge b{color:#fff}
+  section{margin-top:40px}
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-family:var(--sans);font-weight:700;border-top:2px solid var(--ink);padding-top:10px;margin:0 0 18px}
+  .diag{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:12px;padding:16px 20px;box-shadow:var(--shadow);font-size:14.5px}
+  .diag code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12.5px;font-family:var(--mono)}
+  /* the principle */
+  .principle{background:linear-gradient(165deg,var(--navy),#16407a);color:#eef4fb;border-radius:16px;padding:30px 30px 26px;box-shadow:var(--shadow)}
+  .principle .big{font-family:var(--serif);font-size:25px;line-height:1.3;margin:0 0 6px;color:#fff}
+  .principle .big .rev{color:#ff9d94;font-style:italic}
+  .principle .big .grant{color:#7fe0c4;font-style:italic}
+  .principle p{color:#c6d4e6;font-size:14px;margin:12px 0 0;max-width:800px}
+  .asym{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+  .asym .a{border-radius:12px;padding:15px 17px}
+  .asym .earn{background:rgba(127,224,196,.10);border:1px solid rgba(127,224,196,.3)}
+  .asym .lose{background:rgba(255,157,148,.10);border:1px solid rgba(255,157,148,.32)}
+  .asym h4{margin:0 0 4px;font-size:15px;color:#fff}
+  .asym .earn h4::before{content:"◷ ";color:#7fe0c4}
+  .asym .lose h4::before{content:"⚡ ";color:#ff9d94}
+  .asym p{margin:2px 0 0;font-size:12.8px;color:#cdd9ea}
+  /* 5-second read — the lock */
+  .locks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .lockcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);text-align:center}
+  .lockcard.hold{border-top:4px solid var(--green)}
+  .lockcard.charge{border-top:4px solid var(--gold)}
+  .lockcard.slam{border-top:4px solid var(--red)}
+  .lockicon{font-size:38px;line-height:1;margin-bottom:6px}
+  .lockcard.hold .lockicon{color:var(--green)} .lockcard.charge .lockicon{color:var(--gold)} .lockcard.slam .lockicon{color:var(--red)}
+  .lockcard h4{margin:2px 0 4px;font-size:16px}
+  .lockcard .st{font-size:12px;color:var(--muted)}
+  .lockcard .rcpt{font-size:11.5px;font-family:var(--mono);background:var(--chip);border-radius:7px;padding:7px 9px;margin-top:10px;text-align:left;color:var(--ink)}
+  .stillnote{font-size:13.5px;color:var(--muted);margin-top:14px;max-width:840px}
+  .stillnote b{color:var(--ink)}
+  /* lifecycle pipeline */
+  .pipe{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;box-shadow:var(--shadow)}
+  .stage{flex:1 1 140px;padding:13px 12px;border-radius:10px;margin:4px;position:relative}
+  .stage .n{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .stage h4{margin:3px 0 4px;font-size:14.5px}
+  .stage p{margin:0;font-size:12px;color:var(--muted)}
+  .stage.s1{background:rgba(91,63,163,.07)} .stage.s2{background:rgba(14,116,144,.07)}
+  .stage.s3{background:rgba(168,107,18,.08)} .stage.s4{background:rgba(31,122,61,.08)}
+  .stage.s5{background:rgba(180,35,24,.06)}
+  .stage .who{font-size:10.5px;font-weight:700;margin-top:6px}
+  .stage.s3 .who,.stage.s1 .who{color:var(--violet)} .stage.s4 .who{color:var(--green)} .stage.s5 .who{color:var(--red)} .stage.s2 .who{color:var(--teal)}
+  /* gates */
+  .gate{display:grid;grid-template-columns:20px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px 16px;box-shadow:var(--shadow);margin-bottom:10px}
+  .gate .k{font-size:16px;line-height:1.3}
+  .gate h4{margin:0 0 3px;font-size:14.5px}
+  .gate p{margin:0;font-size:12.9px;color:var(--muted)}
+  .gate p b{color:var(--ink)}
+  .gate.ratify{border-left:4px solid var(--gold);background:linear-gradient(180deg,rgba(168,107,18,.06),var(--card))}
+  .gate .fixed{font-size:11.5px;color:var(--teal);font-weight:600}
+  .andgate{font-size:12px;text-align:center;color:var(--gold);font-weight:700;letter-spacing:.05em;margin:2px 0 10px}
+  /* distance panel */
+  .dist{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+  .dist .hd{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .dist .hd h4{margin:0;font-size:17px} .dist .hd .cnt{font-size:12.5px;color:var(--muted);font-weight:700}
+  .drow{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+  .drow .ic{font-size:15px} .drow.met .ic{color:var(--green)} .drow.bank .ic{color:var(--gold)} .drow.fail .ic{color:var(--red)}
+  .drow .bar{width:120px;height:7px;border-radius:4px;background:var(--chip);overflow:hidden;justify-self:end}
+  .drow .bar span{display:block;height:100%;border-radius:4px}
+  .drow.met .bar span{background:var(--green)} .drow.bank .bar span{background:var(--gold)}
+  .drow .val{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  /* anti-gaming table */
+  table.g{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+  table.g th,table.g td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.g th{background:var(--navy2);color:#eaf1f8;font-family:var(--sans);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  table.g tr:last-child td{border-bottom:none}
+  table.g td:first-child{color:var(--red);font-weight:600;width:38%}
+  table.g td:last-child b{color:var(--teal)}
+  /* honesty + coalition */
+  .ledger{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .lcol{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+  .lcol.real{border-top:3px solid var(--green)} .lcol.prop{border-top:3px solid var(--amber)}
+  .lcol .tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .lcol.real .tag{color:var(--green)} .lcol.prop .tag{color:var(--amber)}
+  .lcol ul{margin:8px 0 4px;padding-left:16px} .lcol li{font-size:12.6px;margin-bottom:6px}
+  .lcol li code{background:var(--chip);padding:1px 4px;border-radius:4px;font-size:11px;font-family:var(--mono)}
+  .redteam{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .rt{display:grid;grid-template-columns:70px 1fr;border-bottom:1px solid var(--line)}
+  .rt:last-child{border-bottom:none}
+  .rt .sev{font-size:10px;font-weight:800;padding:13px 10px;color:#fff;display:flex;justify-content:center}
+  .rt .sev.h{background:var(--red)} .rt .sev.m{background:var(--amber)}
+  .rt .rtb{padding:12px 16px} .rt .was{font-size:12.3px;color:var(--muted);text-decoration:line-through;margin:0 0 3px}
+  .rt .fix{font-size:13.2px;margin:0} .rt .fix b{color:var(--teal)}
+  .qs{display:grid;gap:12px}
+  .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--navy2);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow)}
+  .q h4{margin:0 0 4px;font-size:15px} .q p{margin:4px 0;font-size:13.4px} .q .rc{font-size:12.4px;color:var(--teal);font-weight:600}
+  .foot{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
+  @media (max-width:760px){.asym,.locks,.ledger{grid-template-columns:1fr}header.hero h1{font-size:30px}.principle .big{font-size:20px}}
+  @media print{header.hero,.principle{-webkit-print-color-adjust:exact;print-color-adjust:exact}.lockcard,.gate,.q,.rt,.lcol{break-inside:avoid}}
+</style>
+
+<header class="hero">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="kicker">Twin-Ladder · Concept v1 (coalition-hardened) · show-thinking</div>
+    <h1>Motion has to be earned</h1>
+    <p class="sub">You were right: the beam between <b>proof</b> and <b>what the machine may do</b> is in perpetual motion, and the ceiling is a dial someone drags. This is the reframe — authority the fleet has to <b>earn</b>, that a human has to <b>grant</b>, and that a single breach can <b>take away</b> instantly. No engine changes yet; this is the thinking.</p>
+    <div class="badges">
+      <span class="badge"><b>Aligned, illustrative</b> — NIST does not certify AI systems</span>
+      <span class="badge"><b>Concept</b> — pressure-tested before any build</span>
+      <span class="badge"><b>Grounded</b> — mapped to the real engine primitives</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2 class="sec">The problem, named exactly</h2>
+    <div class="diag">
+      The beam moves every frame because the spotlight PA’s evidence <b>ratchets stage-by-stage</b> and quick-completing PAs get swapped under it — motion for free, nothing earned frame-to-frame. And the org-wide ceiling — how high the machine may <i>ever</i> act — is literally <code>FLEET_CEIL[maturityBand(s.maturity)]</code>, where <code>s.maturity</code> is a slider you drag. So authority today is <b>set, not earned</b>. Two meters and a slider read as “someone turned it up,” which is precisely what an executive — and a State auditor — should not accept.
+    </div>
+  </section>
+
+  <!-- THE PRINCIPLE -->
+  <section>
+    <h2 class="sec">The correction — the one idea the rest hangs on</h2>
+    <div class="principle">
+      <p class="big">Evidence can <span class="rev">revoke</span> authority automatically. It can never <span class="grant">grant</span> it automatically.</p>
+      <p class="big" style="font-size:18px">A named human <b>grants</b> authority. Evidence only makes a class <b>eligible</b> — and can take authority away the instant it degrades.</p>
+      <p>This is the guardrail a green-lights dashboard destroys. If the screen says “9 of 9 gates met — click to promote,” the human owns the accountability but the machine made the decision. So promotion is a <b>human governance act that can veto even when every metric is green</b>; only revocation is automatic. That asymmetry is the whole trust story — a system you can trust with authority is one that can <i>lose</i> it without asking.</p>
+      <div class="asym">
+        <div class="a earn">
+          <h4>Earning is slow, quiet, human-sealed</h4>
+          <p>A sustained, case-mix-representative, recency-weighted record makes a class <b>eligible</b>. Then a named human ratifies — attestation sealed to the ledger. Nothing on screen “fills up into” a promotion.</p>
+        </div>
+        <div class="a lose">
+          <h4>Losing is instant, automatic, visible</h4>
+          <p>One qualifying breach — a fairness signal, a replay failure, a drift alarm, an override spike — drops the ceiling, freezes promotions, seals a revocation receipt, and triggers a <b>look-back</b> on actions taken since the breach. No human needed to lose it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5-SECOND READ -->
+  <section>
+    <h2 class="sec">How “earned” reads in five seconds — stillness, and a lock</h2>
+    <div class="locks">
+      <div class="lockcard hold">
+        <div class="lockicon">🔒</div>
+        <h4>Holding</h4>
+        <div class="st">A2 · Act with sign-off. Earned, ratified, stable. <b>Perfectly still.</b></div>
+        <div class="rcpt">last moved 14:22 · granted by S. Patel, MD<br>gates held 31 days · sealed #A2-1187</div>
+      </div>
+      <div class="lockcard charge">
+        <div class="lockicon">🔓</div>
+        <h4>Charging</h4>
+        <div class="st">A2→A3 eligibility banking. Not promoted — awaiting a human.</div>
+        <div class="rcpt">4 of 6 eligibility gates met<br>override 0.9%→≤0.5% · banking 12/30d</div>
+      </div>
+      <div class="lockcard slam">
+        <div class="lockicon">⚠</div>
+        <h4>Slammed shut</h4>
+        <div class="st">Fairness signal tripped. Ceiling dropped A2→A1, promotions frozen, look-back opened.</div>
+        <div class="rcpt">14:41 · four-fifths 0.79 &lt; 0.80 (BH cohort)<br>look-back: 38 acts queued for re-review</div>
+      </div>
+    </div>
+    <p class="stillnote"><b>Stillness is the proof.</b> The current panel’s sin is motion without rest. Here the ceiling sits still while it holds; it moves only on a sealed event, and it <b>slams shut</b> on a breach at least once in the walkthrough — Maria’s hero case must hit the adverse→A1 floor or a revocation so the audience sees the “lose-fast” half, not just the happy path. The nine-gate detail is a second-look drill-down, never the hero read.</p>
+  </section>
+
+  <!-- LIFECYCLE -->
+  <section>
+    <h2 class="sec">How a rung is earned — the lifecycle (solves cold-start)</h2>
+    <div class="pipe">
+      <div class="stage s1"><div class="n">0 · cold start</div><h4>Shadow &amp; validate</h4><p>Model runs in shadow; decisions compared to humans; independently validated (SR 11-7 “effective challenge”).</p><div class="who">Independent validator</div></div>
+      <div class="stage s3"><div class="n">1 · entry</div><h4>Provisional grant</h4><p>A governance committee grants a <i>provisional</i> starting authority. Nothing reaches A2/A3 on volume alone.</p><div class="who">Governance committee</div></div>
+      <div class="stage s2"><div class="n">2 · earn</div><h4>Bank eligibility</h4><p>Case-mix-representative record accrues against the gates, per class &amp; population — windowed, recency-weighted.</p><div class="who">Measured, auditable</div></div>
+      <div class="stage s3"><div class="n">3 · grant</div><h4>Human ratifies</h4><p>Eligibility unlocks a <b>proposal</b>; a named human ratifies or vetoes; attestation sealed. Never auto.</p><div class="who">Accountable human</div></div>
+      <div class="stage s4"><div class="n">4 · hold</div><h4>Hold &amp; maintain</h4><p>Authority holds — still — while gates stay green. Stale proof decays the ceiling if not maintained.</p><div class="who">Continuous</div></div>
+      <div class="stage s5"><div class="n">5 · lose</div><h4>Revoke + look-back</h4><p>A breach auto-drops the ceiling, freezes promotions, recalls actions since breach onset (438 Subpart F).</p><div class="who">Fail-closed</div></div>
+    </div>
+  </section>
+
+  <!-- GATES -->
+  <section>
+    <h2 class="sec">The eligibility gates — necessary, never sufficient</h2>
+    <p style="font-size:13.5px;color:var(--muted);margin-top:-6px;max-width:860px">Green gates make a class <b>eligible to be considered</b>; they do not promote it. Each is corrected for a gaming attack the coalition found. Authority is <b>per class × per population</b> — never one org-wide number.</p>
+
+    <div class="gate"><div class="k">🎯</div><div><h4>Representative track record</h4><p>Enough sealed, resolved determinations — <b>stratified by complexity/acuity</b>, and the banked set must mirror the population it will act on. <span class="fixed">Fix: authority earned on easy cases can’t be spent on hard ones.</span></p></div></div>
+    <div class="gate"><div class="k">🔁</div><div><h4>Decision reproducibility (real replay)</h4><p>Re-run the model/rule on the same pinned inputs and match the recorded decision. <b>This is not the hash chain</b> — hash re-derivation only proves the record wasn’t edited. <span class="fixed">Fix: a real replay harness; tamper-evidence ≠ reproducibility.</span></p></div></div>
+    <div class="gate"><div class="k">⚖️</div><div><h4>Fairness — multi-axis, human-signed</h4><p>Intersectional (race × disability × language × age), risk-adjusted, with four-fifths as <i>one</i> input. <b>Never auto-cleared</b> — an MD/equity officer signs, as the engine’s own §1557 ticket already does (A1/HITL). <span class="fixed">Fix: a scalar can’t clear this gate.</span></p></div></div>
+    <div class="gate"><div class="k">🕵️</div><div><h4>Blinded human concurrence</h4><p>On a <b>risk-weighted</b> sample (over-weighting high-harm / near-threshold), a reviewer <b>blind to the agent’s recommendation</b> concurs. <span class="fixed">Fix: kills anchoring bias and the easy-case blind spot.</span></p></div></div>
+    <div class="gate"><div class="k">🖐️</div><div><h4>Override rate — with a dead-man’s switch</h4><p>Overrides stay low <i>and</i> reviewers stay engaged. A suspiciously-low override rate is its own alarm (rubber-stamping), not a win. <span class="fixed">Fix: low override reads two ways; pair it with engagement.</span></p></div></div>
+    <div class="gate"><div class="k">📈</div><div><h4>Stability &amp; drift; independent validation</h4><p>Version pinned, inputs in-distribution, no drift alarm — <b>validated by a party independent of the model builder</b>. Gates can’t all be self-measured by the system that’s earning. <span class="fixed">Fix: adds the missing external challenger.</span></p></div></div>
+
+    <div class="andgate">— then, and only then —</div>
+    <div class="gate ratify"><div class="k">✍️</div><div><h4>Human ratification — a different kind of gate</h4><p>A mandatory final AND-gate: a signature and seal, not a filling bar. It can <b>veto with all gates green</b>, and the ratifier’s rationale is sealed to the ledger (reuse the engine’s <code>proposeOutbound</code>/<code>closeCase</code> human-attributed pattern). <span class="fixed">This is where accountability actually sits.</span></p></div></div>
+  </section>
+
+  <!-- DISTANCE PANEL -->
+  <section>
+    <h2 class="sec">“How do we get to the next level” — the drill-down (second look, not the hero)</h2>
+    <div class="dist">
+      <div class="hd"><h4>Orthopedic PA · UHC Community Plan — A2 → A3 eligibility</h4><span class="cnt">4 of 6 gates met · not promoted (awaiting ratification)</span></div>
+      <div class="drow met"><span class="ic">✓</span><span>Decision reproducibility — 100% on sampled replay</span><span class="bar"><span style="width:100%"></span></span></div>
+      <div class="drow met"><span class="ic">✓</span><span>Fairness — multi-axis held, MD-signed (0.83, risk-adjusted)</span><span class="bar"><span style="width:100%"></span></span></div>
+      <div class="drow met"><span class="ic">✓</span><span>Zero autonomous adverse actions in window</span><span class="bar"><span style="width:100%"></span></span></div>
+      <div class="drow met"><span class="ic">✓</span><span>Independent validation current</span><span class="bar"><span style="width:100%"></span></span></div>
+      <div class="drow bank"><span class="ic">◐</span><span>Override rate 0.9% → need ≤ 0.5% · <span class="val">banking 12 / 30 d</span></span><span class="bar"><span style="width:52%"></span></span></div>
+      <div class="drow bank"><span class="ic">◐</span><span>Representative record (hard-tier) · <span class="val">1,640 / 1,820</span></span><span class="bar"><span style="width:78%"></span></span></div>
+    </div>
+    <p class="stillnote">The visible motion here is these bars <b>banking</b> — and when they’re all green, the class becomes eligible and a proposal goes to a human. The bars never promote on their own.</p>
+  </section>
+
+  <!-- ANTI-GAMING -->
+  <section>
+    <h2 class="sec">Why it can’t be gamed — Goodhart, and the defense</h2>
+    <table class="g">
+      <tr><th>The attack</th><th>The defense built into the gate</th></tr>
+      <tr><td>Bank authority on a flood of trivial approvals, spend it on hard cases</td><td>Track record <b>stratified by acuity</b>; earned-in-stratum authority applies only to that stratum; banked set must be case-mix-representative</td></tr>
+      <tr><td>Pass reproducibility by re-deriving the hash of whatever was sealed</td><td>Gate consumes a <b>real replay</b> of the decision on pinned inputs — hash integrity is a separate, weaker claim</td></tr>
+      <tr><td>Clear fairness by shifting cohort boundaries or approving marginal protected-cohort cases</td><td><b>Multi-axis, risk-adjusted, human-signed</b>; never auto-cleared; fairness is also a revocation trigger</td></tr>
+      <tr><td>Inflate concurrence because the reviewer sees (and anchors on) the agent’s call</td><td>Reviewer is <b>blind</b> to the recommendation; sample over-weights high-harm cases</td></tr>
+      <tr><td>Drive override rate to zero by disengaging the human</td><td>Low override paired with a <b>reviewer-engagement / dead-man’s-switch</b> alarm</td></tr>
+      <tr><td>Corrupt a gate input upstream (label an adverse action “non-adverse” to dodge the A1 floor)</td><td>Provenance/integrity on <b>gate inputs</b>, not just ledger records; adverse→A1 floor stays absolute</td></tr>
+      <tr><td>Keep A3 on last quarter’s performance</td><td><b>Recency decay</b> — stale proof expires; the ceiling recedes without maintenance</td></tr>
+    </table>
+  </section>
+
+  <!-- HONESTY -->
+  <section>
+    <h2 class="sec">Honesty ledger — real vs proposed (corrected)</h2>
+    <div class="ledger">
+      <div class="lcol real"><div class="tag">Real today</div>
+        <ul>
+          <li><code>evLevel</code> ratchets per-txn; <code>execAuthority = min(evLevel, ceiling)</code>, adverse floored to <b>A1</b>.</li>
+          <li>Fleet ceiling from a maturity <b>slider</b> (<code>FLEET_CEIL[maturityBand]</code>) — the thing we’re reframing.</li>
+          <li><code>authUnlockTick</code> marks “authority rose”; spotlight <b>holds</b> a PA until it completes.</li>
+          <li>Hash-chain <b>tamper-evidence</b> (<code>ledgerIntact</code>/<code>verifyEntry</code>) — integrity, <i>not</i> decision reproducibility.</li>
+          <li>§1557 fairness screen at A1/HITL; <code>typeCounts</code>; per-record NIST tag.</li>
+        </ul>
+      </div>
+      <div class="lcol prop"><div class="tag">Proposed (this concept)</div>
+        <ul>
+          <li>Earned ceiling per <b>class × population</b>; slider demoted to a <b>what-if scenario</b> overlay.</li>
+          <li>Eligibility gates + banking + <b>recency decay</b>; a <b>real replay harness</b> for reproducibility.</li>
+          <li><b>Human ratification</b> as a sealed, vetoable governed act (promotion never automatic).</li>
+          <li><b>Auto-revocation</b> wired to fairness/drift/override/replay + <b>look-back/recall</b>; a global human <b>kill-switch</b>; a sealed, time-boxed <b>break-glass</b> override.</li>
+          <li>Cold-start <b>shadow → validate → provisional grant</b>; independent-validator gate; hysteresis + dwell to stop thrash.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- COALITION -->
+  <section>
+    <h2 class="sec">How the coalition hardened this — the thinking, shown</h2>
+    <div class="redteam">
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb"><p class="was">Draft: gates fill green → a “ceremonious click” earns the rung.</p><p class="fix"><b>Flipped:</b> evidence <b>auto-revokes but never auto-promotes</b>. Promotion is a human governance act that can veto at 9/9 green — otherwise the dashboard launders the accountability a State auditor exists to check.</p></div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb"><p class="was">Draft: reproducibility = “the hash chain re-derives.”</p><p class="fix"><b>Corrected:</b> that’s tamper-evidence only. The gate needs a <b>real replay</b> of the decision on pinned inputs. Stopped conflating the two, in the gate and the honesty ledger.</p></div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb"><p class="was">Draft: fairness gate = four-fifths ≥ 0.80, auto-cleared.</p><p class="fix"><b>Corrected:</b> single-axis scalar hides intersectional harm and contradicts the engine’s own richer §1557 ticket. Now <b>multi-axis, risk-adjusted, human-signed</b>; four-fifths is one input; kept as a revocation trigger.</p></div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb"><p class="was">Draft: had no cold-start — nothing could earn A2/A3 the first time, demo opens dead.</p><p class="fix"><b>Added:</b> a <b>shadow → independent validation → human-granted provisional authority</b> entry phase, so the fleet can start and the walkthrough can open mid-story.</p></div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb"><p class="was">Draft: track record counted volume for a whole class (“prior auth”).</p><p class="fix"><b>Corrected:</b> <b>case-mix stratified</b>, authority per intended-use; you can’t bank on easy PAs and spend on hard ones.</p></div></div>
+      <div class="rt"><div class="sev m">MED</div><div class="rtb"><p class="was">Draft: “lose fast” asserted; showcase = nine bars; single org-wide ceiling; “IS NIST MANAGE.”</p><p class="fix"><b>Fixed:</b> honest detection-latency + look-back/recall + break-glass + kill-switch; showcase <b>leads with stillness + one lock that slams shut</b>; ceiling is <b>per class × population</b>; softened to “<b>aligned with</b> AI-RMF MEASURE→MANAGE.” Hysteresis/dwell added against thrash. Version-bump preserve-vs-reset called out.</p></div></div>
+    </div>
+  </section>
+
+  <!-- DECISIONS -->
+  <section>
+    <h2 class="sec">Three decisions before we build</h2>
+    <div class="qs">
+      <div class="q"><h4>1 · Earned ceiling drives; slider becomes scenario?</h4><p>Make the earned, per-class ceiling the real driver and demote the maturity slider to a ghosted “what could it earn at this stage” overlay — the gap between the two is honest headroom still to earn.</p><p class="rc">Recommendation: yes — earned drives, slider = scenario.</p></div>
+      <div class="q"><h4>2 · v1 gate scope?</h4><p>Ship the earning mechanic first with the gates the engine can honestly support now (real replay, human-signed fairness, zero-autonomous-adverse, blinded concurrence + ratification), and stage drift/independent-validation next.</p><p class="rc">Recommendation: that four-plus-ratify set for v1; decay/drift wave 2.</p></div>
+      <div class="q"><h4>3 · Concept now, then build?</h4><p>This turn is concept + thinking — no engine changes. The build is: earned per-class ceiling, the ratification act, the revocation triggers + look-back, and the stillness/lock + distance panel — on the usual checkpoint cadence (adversarial-before → build → adversarial-after → land byte-verified).</p><p class="rc">Recommendation: approve v1 → I scope the build as the next checkpoint.</p></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    Concept v1 · coalition-hardened · <b>no engine changes this turn</b>. Claims about the current engine verified against <code>flowSim.ts</code> / <code>e2eFlow.ts</code> / <code>nistMap.ts</code>. The core rule: evidence revokes automatically, a human grants, adverse always floors to A1. NIST alignment is illustrative — NIST does not certify AI systems.
+  </div>
+</div>

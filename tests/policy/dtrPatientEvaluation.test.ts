@@ -14,10 +14,22 @@ import {
   type PatientBundle,
 } from '@/lib/policy/dtr/evaluate/patientData';
 import { evaluateDtr, type DtrCriteria } from '@/lib/policy/dtr/evaluate/patientEvaluation';
-import {
-  BARIATRIC_DTR_CRITERIA,
-  BARIATRIC_CPT_CODES,
-} from '@/lib/policy/dtr/evaluate/bariatricCriteria';
+import { getDtrCriteriaForCpt, policyById } from '@/lib/policy/dtr/evaluate/policyRegistry';
+
+// CG-SURG-83 code set + a live-criteria getter, derived directly from the registry (the generic
+// live-DTR path). These previously came from a bariatricCriteria compat shim that no production code
+// reached; it was removed (E14 wired-path) and the two symbols inlined here from the registry row.
+const BARIATRIC_CPT_CODES: ReadonlySet<string> = new Set(policyById('CG-SURG-83').cptCodes);
+const getBariatricDtrCriteria = async (cptCode: string): Promise<DtrCriteria> => {
+  const criteria = await getDtrCriteriaForCpt(cptCode);
+  if (!criteria) throw new Error(`Not a registered CG-SURG-83 CPT/HCPCS code: ${cptCode}`);
+  return criteria;
+};
+
+// Bariatric gastric-bypass CPT — the same code the retired hand-typed fixture used to hard-code.
+// getBariatricDtrCriteria() derives criteria LIVE from the real CG-SURG-83 policy PDF (see
+// bariatricCriteria.ts), so these tests must await it instead of importing a static constant.
+const BARIATRIC_CPT = '43644';
 
 const ASOF = new Date('2026-08-30');
 
@@ -40,8 +52,9 @@ describe('patient FHIR helpers', () => {
 });
 
 describe('evaluateDtr — computable status from the record, documentation stays a gap', () => {
-  it('bariatric criteria qualify against the sample patient (age, BMI, comorbidity all met)', () => {
-    const evaln = evaluateDtr(BARIATRIC_DTR_CRITERIA, bariatricPatientBundle, ASOF);
+  it('bariatric criteria qualify against the sample patient (age, BMI, comorbidity all met)', async () => {
+    const criteria = await getBariatricDtrCriteria(BARIATRIC_CPT);
+    const evaln = evaluateDtr(criteria, bariatricPatientBundle, ASOF);
     const g = (t: RegExp) => evaln.groups.find((x) => t.test(x.title));
     expect(g(/age/i)?.status).toBe('met');
     expect(g(/BMI/i)?.status).toBe('met');
@@ -50,16 +63,16 @@ describe('evaluateDtr — computable status from the record, documentation stays
     // evidence is sourced from the record, with provenance
     expect(g(/BMI/i)?.leaf?.evidence).toContain('42.3');
     expect(g(/BMI/i)?.leaf?.recordedDate).toBe('2026-02-28');
-    // documentation criteria are gaps that the provider must attest — so allMet is honestly false
-    expect(
-      evaln.groups
-        .filter((x) => x.status === 'gap')
-        .every((x) => /evaluation|therapy|treatment plan/i.test(x.title))
-    ).toBe(true);
+    // documentation criteria are never auto-satisfied from coded data — every one of the policy's
+    // real documentation requirements (live-derived, not a hand-typed subset) surfaces as a gap the
+    // provider must attest, so allMet is honestly false despite every computable group being met.
+    const gapTitles = evaln.groups.filter((x) => x.status === 'gap').map((x) => x.title);
+    expect(gapTitles).toEqual(criteria.documentation.map((d) => d.title));
+    expect(criteria.documentation.length).toBeGreaterThan(0);
     expect(evaln.allMet).toBe(false);
   });
 
-  it('BMI 35–40 qualifies ONLY with a comorbidity (the band rule), else it is a gap', () => {
+  it('BMI 35–40 qualifies ONLY with a comorbidity (the band rule), else it is a gap', async () => {
     const bundle35: PatientBundle = {
       resourceType: 'Bundle',
       type: 'collection',
@@ -76,7 +89,7 @@ describe('evaluateDtr — computable status from the record, documentation stays
         },
       ],
     };
-    const crit: DtrCriteria = { ...BARIATRIC_DTR_CRITERIA, documentation: [] };
+    const crit: DtrCriteria = { ...(await getBariatricDtrCriteria(BARIATRIC_CPT)), documentation: [] };
     // no comorbidity Condition in the bundle → 37 is below 40 and the band needs a comorbidity → gap
     const noComorbid = evaluateDtr(crit, bundle35, ASOF);
     expect(noComorbid.groups.find((g) => /BMI/i.test(g.title))?.status).toBe('gap');
@@ -99,7 +112,7 @@ describe('evaluateDtr — computable status from the record, documentation stays
     ).toBe('met');
   });
 
-  it('a BMI ≥ 40 patient does NOT need a comorbidity — the comorbidity group is not required', () => {
+  it('a BMI ≥ 40 patient does NOT need a comorbidity — the comorbidity group is not required', async () => {
     const bmi45NoComorbid: PatientBundle = {
       resourceType: 'Bundle',
       type: 'collection',
@@ -117,7 +130,7 @@ describe('evaluateDtr — computable status from the record, documentation stays
       ],
     };
     const evaln = evaluateDtr(
-      { ...BARIATRIC_DTR_CRITERIA, documentation: [] },
+      { ...(await getBariatricDtrCriteria(BARIATRIC_CPT)), documentation: [] },
       bmi45NoComorbid,
       ASOF
     );
@@ -147,13 +160,13 @@ describe('evaluateDtr — computable status from the record, documentation stays
     expect(findCondition(mk('relapse'), ['E11.9'])?.coding.code).toBe('E11.9');
   });
 
-  it('age below the minimum is a gap; a missing Observation is a gap (never invented)', () => {
+  it('age below the minimum is a gap; a missing Observation is a gap (never invented)', async () => {
     const young: PatientBundle = {
       resourceType: 'Bundle',
       type: 'collection',
       entry: [{ resource: { resourceType: 'Patient', id: 'Y', birthDate: '2015-01-01' } }],
     };
-    const evaln = evaluateDtr({ ...BARIATRIC_DTR_CRITERIA, documentation: [] }, young, ASOF);
+    const evaln = evaluateDtr({ ...(await getBariatricDtrCriteria(BARIATRIC_CPT)), documentation: [] }, young, ASOF);
     expect(evaln.groups.find((g) => /age/i.test(g.title))?.status).toBe('gap');
     expect(evaln.groups.find((g) => /BMI/i.test(g.title))?.status).toBe('gap'); // no Observation → gap
     expect(evaln.groups.find((g) => /BMI/i.test(g.title))?.leaf).toBeUndefined();

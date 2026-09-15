@@ -1,0 +1,17 @@
+{
+  "_comment": "Seeded fee schedule (O-2, order->cash). Generic demo data, no persona. Contracted allowed amounts by code+payer. 72148 / UnitedHealthcare Community Plan = 1150 matches MOCK_ALLOWED_AMOUNTS['72148'] in patientEstimation.ts. Data is not code: edit here, never in a .ts file.",
+  "rates": [
+    {
+      "code": "72148",
+      "payer": "UnitedHealthcare Community Plan",
+      "contractedAllowed": 1150,
+      "effectiveOn": "2026-01-01"
+    },
+    {
+      "code": "75561",
+      "payer": "UnitedHealthcare Community Plan",
+      "contractedAllowed": 2400,
+      "effectiveOn": "2026-01-01"
+    }
+  ]
+}

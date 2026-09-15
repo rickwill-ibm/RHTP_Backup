@@ -290,13 +290,14 @@
     },
     {
       "panel": "config.dataModes",
-      "count": 25,
+      "count": 29,
       "ids": [
         "adequacy",
         "agentManifests",
         "agentRuntime",
         "carePlan",
         "consent",
+        "contractRepository",
         "crossReference",
         "deadLetterStore",
         "denialRateFeed",
@@ -311,14 +312,17 @@
         "profileValidation",
         "providerDirectory",
         "providerIdentity",
+        "remittanceGateway",
         "sde",
         "signalDisposition",
+        "signingKey",
+        "submissionGateway",
         "tenancy",
         "terminology",
         "valueSetGovernanceStore",
         "wpcRecord"
       ],
-      "hash": "c1115dd9"
+      "hash": "f87ba47d"
     }
   ]
 }

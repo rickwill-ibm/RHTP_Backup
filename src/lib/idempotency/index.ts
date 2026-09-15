@@ -24,7 +24,7 @@ export class IdempotencyStoreNotConfiguredError extends Error {
       'DATA_MODE idempotencyStore=production: no production idempotency store is ' +
         'wired yet. Register one with ' +
         'setProductionIdempotencyStoreFactory(() => createPgIdempotencyStore(pool)) ' +
-        '(SEAM: idempotency-store) or set DATA_MODE_IDEMPOTENCY_STORE=mock.',
+        '(SEAM: idempotency-store) or set DATA_MODE_IDEMPOTENCY_STORE=mock.'
     );
     this.name = 'IdempotencyStoreNotConfiguredError';
   }
@@ -34,7 +34,7 @@ let productionFactory: (() => IdempotencyStore) | null = null;
 
 /** Register the production store factory (composition root / tests). */
 export function setProductionIdempotencyStoreFactory(
-  factory: (() => IdempotencyStore) | null,
+  factory: (() => IdempotencyStore) | null
 ): void {
   productionFactory = factory;
 }
@@ -86,4 +86,24 @@ export const IDEMPOTENCY_CONSUMERS = Object.freeze({
    * double-transition a record.
    */
   deadLetterReview: 'dead-letter-review',
+  /**
+   * The order→cash 835 remittance consumer (Wave-2 W2-2). Deduped on the
+   * payer-side business keys `${claimRef}:${remittanceId}` — NEVER a synthetic
+   * per-request id — so a replay of the SAME 835 with different request ids/ts is
+   * processed once (no second reconciliation/recovery), while distinct 835s are
+   * independent.
+   */
+  orderToCashRemittance: 'order-to-cash-remittance',
+  /**
+   * RESERVED — NOT yet load-bearing. Namespace id for a future recovery-appeal
+   * SUBMISSION dedupe. The decision route does NOT write this marker today: the
+   * ledger's exactly-once rests entirely on the id-idempotent recorders
+   * (recordSubmission / recordRecoveryTerminal no-op on their deterministic
+   * `${recoveryId}-submission` / `-decision` ids) + the recovery-decision terminal
+   * short-circuit + a re-read-latest guard before save — no idempotency-store marker
+   * is involved. When a REAL 837/appeal EDI transport is wired (see FAKE_FIDELITY.md
+   * row 6), use this namespace for the pre-gateway first-writer-wins claim (CAS) that
+   * must gate transmission so a losing racer never transmits a duplicate appeal.
+   */
+  recoverySubmission: 'recovery-submission',
 } as const);

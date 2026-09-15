@@ -1,4 +1,4 @@
-﻿// SMART on FHIR mock data and service utilities
+// SMART on FHIR mock data and service utilities
 
 import type {
   SmartLaunchContext,
@@ -175,6 +175,13 @@ export const mockOrderCatalog: Array<{
   { code: 'ECHO', display: 'Echocardiogram', category: 'imaging' },
   { code: 'RENAL-US', display: 'Renal Ultrasound', category: 'imaging' },
 ];
+
+/** CPT/internal codes that trigger a synthetic PA-required CDS card from `invokeOrderSignHook`
+ *  in mock mode (@/lib/fhir/cdsHooks) — a demo set, not a real payer PA rule list, so the
+ *  CRD → DTR → PAS flow is exercisable without a live CDS backend. Advanced imaging is a
+ *  standard, uncontroversial PA-trigger category, so the two imaging codes in the mock order
+ *  catalog above are used. */
+export const PA_REQUIRED_CODES: ReadonlySet<string> = new Set(['ECHO', 'RENAL-US']);
 
 // ─── Mock Care Team Candidates ────────────────────────────────────────────────
 export const mockCareTeamCandidates: CareTeamAssignment[] = [

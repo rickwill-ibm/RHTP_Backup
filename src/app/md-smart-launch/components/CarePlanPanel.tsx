@@ -949,8 +949,8 @@ export default function CarePlanPanel({
             <p className="text-xs font-semibold text-[#6929c4]">Maria-specific workflow note</p>
             <p className="text-xs text-carbon-gray-70 mt-1">
               Transportation support has been routed to Unite Us. Eye exam and annual wellness visit
-              are shown as upcoming scheduling needs, not active gaps already present in Maria&apos;s
-              record.
+              are shown as upcoming scheduling needs, not active gaps already present in
+              Maria&apos;s record.
             </p>
           </div>
           {CARE_GOALS.map((goal) => {

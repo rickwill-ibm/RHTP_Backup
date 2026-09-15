@@ -3,7 +3,7 @@
  * OrderView — Step 1: Enter a patient and procedure(s), then run CRD.
  * Ported from PA-Standalone-SmartApp; wired to RHTP BFF + appContext.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { usePaStore } from '@/lib/pa/usePaStore';
 import { useDemoStore } from '@/uhg/store/demoStore';
@@ -12,6 +12,7 @@ import { fhirGet } from '@/lib/client/bff';
 import { toast } from 'sonner';
 import type { CrdResultEntry, OrderProcedure } from '@/lib/pa/pa-types';
 import { getPatientContext, patientBannerFrom } from '@/lib/pa/patientContext';
+import { lookupProcedureCode } from '@/lib/pa/procedureCodeLookup';
 
 interface ProcedureFields {
   procedures: { cpt: string; cptDesc: string; cptSystem: OrderProcedure['cptSystem'] }[];
@@ -54,11 +55,40 @@ export default function OrderView() {
     control,
     handleSubmit,
     reset,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<ProcedureFields>({
     defaultValues: { procedures: isMaria ? MARIA_PREFILL : [EMPTY_ROW] },
   });
   const { fields, append, remove } = useFieldArray({ control, name: 'procedures' });
+
+  // Code → Description auto-fill, LIVE as the user types (debounced per row so a fast typist
+  // doesn't fire a lookup per keystroke) — never overwrites the field for an UNRECOGNIZED code,
+  // only a real match replaces it (see procedureCodeLookup's never-fabricate contract). Each
+  // procedure row gets its own independent timer, keyed by index, so a form with several
+  // procedures resolves every row's code the same way rather than only the one last touched.
+  const lookupTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+
+  async function runCodeLookup(index: number) {
+    const row = getValues(`procedures.${index}`);
+    const display = await lookupProcedureCode(row.cpt, row.cptSystem);
+    if (display) setValue(`procedures.${index}.cptDesc`, display, { shouldDirty: true });
+  }
+
+  function scheduleCodeLookup(index: number) {
+    clearTimeout(lookupTimers.current[index]);
+    lookupTimers.current[index] = setTimeout(() => void runCodeLookup(index), 300);
+  }
+
+  /** Enter in a procedure field must never implicitly submit the whole form (that ran CRD
+   *  before later rows were even touched) — resolve that row's lookup immediately instead. */
+  function handleCodeKeyDown(index: number, e: KeyboardEvent) {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    clearTimeout(lookupTimers.current[index]);
+    void runCodeLookup(index);
+  }
 
   // Pre-populate patient from the seeded coverage context (one universe); fall back to a FHIR
   // read for any patient not in the seeded set. Patient banner + membership come from context —
@@ -221,7 +251,9 @@ export default function OrderView() {
                     {...register(`procedures.${i}.cpt`, {
                       required: true,
                       pattern: /^[A-Za-z0-9]{4,6}$/,
+                      onChange: () => scheduleCodeLookup(i),
                     })}
+                    onKeyDown={(e) => handleCodeKeyDown(i, e)}
                     placeholder="72148"
                     className={`w-full rounded-md border px-2 py-2 text-sm font-mono ${errors.procedures?.[i]?.cpt ? 'border-red-400' : 'border-gray-300'}`}
                   />

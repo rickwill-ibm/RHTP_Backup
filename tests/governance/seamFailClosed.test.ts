@@ -75,6 +75,10 @@ import {
 import { getGoldCardRosterLoader } from '@/lib/dataSources/goldCardRoster';
 import { getDenialRateFeedLoader } from '@/lib/dataSources/denialRateFeed';
 import { getProviderDirectoryLoader } from '@/lib/dataSources/providerDirectory';
+import { getRemittanceGatewayLoader } from '@/lib/dataSources/remittanceGateway';
+import { getContractRepositoryLoader } from '@/lib/dataSources/contractRepository';
+import { getSigningKeyLoader } from '@/lib/dataSources/signingKey';
+import { getSubmissionGatewayLoader } from '@/lib/dataSources/submissionGateway';
 import { DataSourceNotConfiguredError } from '@/lib/dataSources/common';
 import { getFhirMockMode } from '@/lib/services/fhirClient';
 import { agentRuntimeMode } from '@/lib/agentRuntime';
@@ -140,6 +144,19 @@ const COMPLETE_RECORD: NormalizedRecord = {
 //    fail-closed-stub and real-impl seam has one — a new such seam with no prober
 //    fails the gate, so the fail-closed proof can never be skipped. ────────────────
 type Prober = () => void | Promise<void>;
+
+// Data-source loader probers share one shape: production rejects with
+// DataSourceNotConfiguredError (fail-closed, never a fabricated feed) and seeded
+// resolves. Factored so a new external data source is proven by one line.
+type DataSourceLoader = { load: (asOf: string) => Promise<unknown> };
+const dataSourceProber =
+  (seam: DataModeSeam, getLoader: () => DataSourceLoader): Prober =>
+  async () => {
+    setSessionDataMode(seam, 'production');
+    await expect(getLoader().load('2026-01-01')).rejects.toThrow(DataSourceNotConfiguredError);
+    setSessionDataMode(seam, 'seeded');
+    await expect(getLoader().load('2026-01-01')).resolves.toBeTruthy();
+  };
 
 const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
   // ── fail-closed-stub: production throws; mock does not ──────────────────────
@@ -257,30 +274,13 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     expect(getIdempotencyStore()).toBeTruthy(); // in-memory default, no throw
     setProductionIdempotencyStoreFactory(null);
   },
-  goldCardRoster: async () => {
-    setSessionDataMode('goldCardRoster', 'production');
-    await expect(getGoldCardRosterLoader().load('2026-01-01')).rejects.toThrow(
-      DataSourceNotConfiguredError
-    );
-    setSessionDataMode('goldCardRoster', 'seeded');
-    await expect(getGoldCardRosterLoader().load('2026-01-01')).resolves.toBeTruthy();
-  },
-  denialRateFeed: async () => {
-    setSessionDataMode('denialRateFeed', 'production');
-    await expect(getDenialRateFeedLoader().load('2026-01-01')).rejects.toThrow(
-      DataSourceNotConfiguredError
-    );
-    setSessionDataMode('denialRateFeed', 'seeded');
-    await expect(getDenialRateFeedLoader().load('2026-01-01')).resolves.toBeTruthy();
-  },
-  providerDirectory: async () => {
-    setSessionDataMode('providerDirectory', 'production');
-    await expect(getProviderDirectoryLoader().load('2026-01-01')).rejects.toThrow(
-      DataSourceNotConfiguredError
-    );
-    setSessionDataMode('providerDirectory', 'seeded');
-    await expect(getProviderDirectoryLoader().load('2026-01-01')).resolves.toBeTruthy();
-  },
+  goldCardRoster: dataSourceProber('goldCardRoster', getGoldCardRosterLoader),
+  denialRateFeed: dataSourceProber('denialRateFeed', getDenialRateFeedLoader),
+  providerDirectory: dataSourceProber('providerDirectory', getProviderDirectoryLoader),
+  remittanceGateway: dataSourceProber('remittanceGateway', getRemittanceGatewayLoader),
+  contractRepository: dataSourceProber('contractRepository', getContractRepositoryLoader),
+  signingKey: dataSourceProber('signingKey', getSigningKeyLoader),
+  submissionGateway: dataSourceProber('submissionGateway', getSubmissionGatewayLoader),
   // I8A wave C (F5): NPPES provider directory fails closed in production. ───────
   providerIdentity: () => {
     setProductionProviderDirectory(null);

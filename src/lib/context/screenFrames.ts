@@ -66,6 +66,7 @@ const REGISTRY: Record<string, ScreenContext> = {
   '/work-queue': { frame: 'caseload', role: 'UMR' },
   '/prior-auth': { frame: 'caseload', role: 'UMR' },
   '/financial-clearance': { frame: 'caseload', role: 'UMR' },
+  '/golden-thread': { frame: 'caseload', role: 'UMR' },
 
   // ── Population / Executive (no member switcher) ─────────────────────────
   '/contract-program-selection': { frame: 'population', role: 'EXE' },

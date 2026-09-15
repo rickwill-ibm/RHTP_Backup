@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest';
 import { OUTREACH_AGENT_ID } from '@/lib/agents/outreach';
 import { REFERRAL_AGENT_ID } from '@/lib/agents/referral';
 import { PA_AGENT_ID } from '@/lib/agents/pa';
+import { REVENUE_CYCLE_AGENT_ID } from '@/lib/agents/revenueCycle';
 import { loadAgentManifests } from '@/lib/agents/manifest';
 import { loadAgentRouting } from '@/lib/agents/dispatch';
 import { AGENT_C2_EVENT_TYPES } from '@/lib/agentRuntime';
@@ -30,14 +31,36 @@ const TASKKIND_TO_CONSTANT: Record<string, string> = {
   pa: PA_AGENT_ID,
 };
 
-describe('cross-agent namespace integrity', () => {
-  it('the three agent-id surfaces (constants / manifests / routing) name the same ids', () => {
-    const manifestIds = new Set(loadAgentManifests().ids());
-    const constants = new Set(Object.values(TASKKIND_TO_CONSTANT));
+/**
+ * Agents that are NOT reached through the SDE dispatcher (no taskKind route), but
+ * are started directly via `engine.start` from the order→cash core-logic path. Each
+ * entry MUST have a real exported entry-point constant (asserted below) — this is a
+ * pinned allow-set, not a bijection relaxation: the invariant stays "every manifest
+ * agent is either a dispatcher taskKind OR a pinned non-dispatched agent with a real
+ * entry point", never "anything goes". Size-pinned to exactly one.
+ */
+const NON_DISPATCHED_AGENTS = new Set<string>([REVENUE_CYCLE_AGENT_ID]);
 
-    // Exactly three pre-allocated ids, no more, no fewer.
-    expect(manifestIds.size).toBe(3);
-    expect([...manifestIds].sort()).toEqual([...constants].sort());
+describe('cross-agent namespace integrity', () => {
+  it('every manifest agent is a dispatcher taskKind OR a pinned non-dispatched agent', () => {
+    const manifestIds = new Set(loadAgentManifests().ids());
+    const dispatched = new Set(Object.values(TASKKIND_TO_CONSTANT));
+
+    // Pins remain size-fixed: 3 dispatched taskKinds, 1 non-dispatched entry point.
+    expect(dispatched.size).toBe(3);
+    expect(NON_DISPATCHED_AGENTS.size).toBe(1);
+
+    // The manifest ids are EXACTLY the union of the dispatched constants and the
+    // pinned non-dispatched set — no orphan agent, no un-accounted manifest.
+    const accountedFor = new Set([...dispatched, ...NON_DISPATCHED_AGENTS]);
+    expect([...manifestIds].sort()).toEqual([...accountedFor].sort());
+    expect(manifestIds.size).toBe(4);
+
+    // Positive reachability: the non-dispatched agent id is a REAL exported constant
+    // from its module (started via engine.start from the order→cash core-logic).
+    expect(NON_DISPATCHED_AGENTS.has(REVENUE_CYCLE_AGENT_ID)).toBe(true);
+    expect(REVENUE_CYCLE_AGENT_ID).toBe('revenue-cycle-agent');
+    expect(manifestIds.has(REVENUE_CYCLE_AGENT_ID)).toBe(true);
 
     // Every routing agentId is a real manifest id (no orphan/typo route).
     for (const route of loadAgentRouting().routes) {

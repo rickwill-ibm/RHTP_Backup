@@ -4,34 +4,26 @@
 // The per-patient scenario DATA + the questionnaire-package definitions live in
 // `devStubs.dtr.data.json` (AI-CODING-CONVENTIONS v2 §2-3: data → *.json), so this
 // file stays a thin dispatcher well under the size cap regardless of formatting.
-// The only LOGIC here is routing patient/CPT → scenario, and the bariatric branch,
-// which evaluates the CG-SURG-83 criteria against a patient's real FHIR record.
+// The only LOGIC here is routing patient/CPT → scenario. Any policy registered in
+// `policyRegistry.data.json` is evaluated LIVE and generically (no per-policy branch);
+// unregistered codes fall through to the canned scenarios below.
 
 import { profileFor } from './devStubs.profiles';
-import { evaluateDtr } from '@/lib/policy/dtr/evaluate/patientEvaluation';
-import { bariatricPatientBundle } from '@/lib/policy/dtr/evaluate/patientData';
-import {
-  BARIATRIC_DTR_CRITERIA,
-  BARIATRIC_CPT_CODES,
-} from '@/lib/policy/dtr/evaluate/bariatricCriteria';
+import { evaluateLivePolicy } from '@/lib/policy/dtr/evaluate/policyRegistry';
 import data from './devStubs.dtr.data.json';
 
 const SCENARIOS = data.scenarios;
 
-/** DTR policy evaluation — full per-patient scenarios (data-driven), plus the bariatric FHIR evaluation. */
-export function devDtrEvaluation(patientId: string, cptCode: string): unknown {
+/** DTR policy evaluation — generic live registry (data-driven), then canned per-patient scenarios. */
+export async function devDtrEvaluation(patientId: string, cptCode: string): Promise<unknown> {
   profileFor(patientId); // ensure valid patient
 
-  // Bariatric codes: evaluate the CG-SURG-83 computable criteria against a fixed SAMPLE patient bundle
-  // (Maria) through the shared engine — real age/BMI/comorbidity reads, not a hardcoded literal. This is
-  // a fixed demo fixture (the workbench's PatientPrepopPanel evaluates the LIVE authored review).
-  if (BARIATRIC_CPT_CODES.has(cptCode)) {
-    return evaluateDtr(
-      { ...BARIATRIC_DTR_CRITERIA, cptCode },
-      bariatricPatientBundle,
-      new Date('2026-08-30')
-    );
-  }
+  // Any registered live policy (bariatric CG-SURG-83 today; add more via policyRegistry.data.json):
+  // parse the real authored PDF through the shared `dtrCriteriaFromReview` encoder and evaluate it
+  // against the row's sample patient through the shared engine — real reads, not a hand-typed literal,
+  // and NO per-policy branch here. Unregistered codes return undefined and fall through.
+  const live = await evaluateLivePolicy(cptCode);
+  if (live !== undefined) return live;
 
   const scenario =
     patientId === 'PAT-0042' || cptCode === '75561'

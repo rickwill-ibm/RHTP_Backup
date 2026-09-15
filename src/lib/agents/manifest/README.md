@@ -8,14 +8,14 @@ reads an agent's authority from here; nothing about it is implicit in code
 
 ```jsonc
 {
-  "id": "outreach-agent",              // stable registry key (pre-allocated)
-  "version": "1.0.0",                  // additive; a change bumps it
-  "purpose": "…",                      // auditable one-line intent
-  "toolAllowlist": ["…"],              // the MINIMUM tools (least privilege, §10.3)
-  "autonomyTier": "HITL",              // HITL | HOTL | autonomous (§10.5)
-  "escalationPolicyRef": "default",    // names an escalation-as-data policy set
-  "phiPosture": "references-only",     // none | references-only | full
-  "owningModule": "src/lib/agents/outreach"
+  "id": "outreach-agent", // stable registry key (pre-allocated)
+  "version": "1.0.0", // additive; a change bumps it
+  "purpose": "…", // auditable one-line intent
+  "toolAllowlist": ["…"], // the MINIMUM tools (least privilege, §10.3)
+  "autonomyTier": "HITL", // HITL | HOTL | autonomous (§10.5)
+  "escalationPolicyRef": "default", // names an escalation-as-data policy set
+  "phiPosture": "references-only", // none | references-only | full
+  "owningModule": "src/lib/agents/outreach",
 }
 ```
 
@@ -28,8 +28,8 @@ agents are registered (the pre-allocated ids): `outreach-agent`,
 ```ts
 import { getAgentManifest, loadAgentManifests } from '@/lib/agents/manifest';
 
-const m = getAgentManifest('outreach-agent');   // throws UnknownAgentError if absent
-m.autonomyTier;                                  // 'HITL' — READ, never branched on
+const m = getAgentManifest('outreach-agent'); // throws UnknownAgentError if absent
+m.autonomyTier; // 'HITL' — READ, never branched on
 loadAgentManifests().assertToolAllowed('outreach-agent', 'pa-machine.transition');
 // -> throws ToolNotAllowedError (not in the outreach agent's allowlist)
 ```
@@ -48,11 +48,11 @@ through. A call to a tool NOT in the agent's allowlist throws
 `ToolNotAllowedError`. Widening an allowlist is a reviewed manifest change (bump
 `version`), never a code tweak. Example minimums:
 
-| agent | may use | must NOT use |
-|---|---|---|
-| `outreach-agent` | comms-channel.send, person-context.read | pa-machine.transition |
-| `pa-documentation-agent` | pa-machine.transition, dtr.generate | comms-channel.send |
-| `referral-coordination-agent` | referral-status.read, provider-context.read | comms-channel.send |
+| agent                         | may use                                     | must NOT use          |
+| ----------------------------- | ------------------------------------------- | --------------------- |
+| `outreach-agent`              | comms-channel.send, person-context.read     | pa-machine.transition |
+| `pa-documentation-agent`      | pa-machine.transition, dtr.generate         | comms-channel.send    |
+| `referral-coordination-agent` | referral-status.read, provider-context.read | comms-channel.send    |
 
 ## Autonomy is configuration, not a branch (§10.5)
 

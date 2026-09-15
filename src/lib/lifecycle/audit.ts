@@ -7,11 +7,7 @@
  * one spot. Timestamps come from the injected clock via the caller, so audit
  * output is deterministic in tests.
  */
-import type {
-  LifecycleAuditEvent,
-  PurgeSelection,
-  RightToDeleteRequest,
-} from './types';
+import type { LifecycleAuditEvent, PurgeSelection, RightToDeleteRequest } from './types';
 
 /** Audit a record that was actually purged from a mutable store. */
 export function auditPurged(sel: PurgeSelection, ts: string, actor: string): LifecycleAuditEvent {
@@ -45,7 +41,7 @@ export function auditHeldBack(sel: PurgeSelection, ts: string, actor: string): L
 export function auditRightToDelete(
   req: RightToDeleteRequest,
   ts: string,
-  priorVersionCount: number,
+  priorVersionCount: number
 ): LifecycleAuditEvent {
   return {
     ts,
@@ -63,7 +59,7 @@ export function auditRightToDelete(
 export function auditRightToDeleteBlocked(
   req: RightToDeleteRequest,
   ts: string,
-  reason: 'blocked-legal-hold' | 'not-found' | 'already-tombstoned',
+  reason: 'blocked-legal-hold' | 'not-found' | 'already-tombstoned'
 ): LifecycleAuditEvent {
   const noop = reason !== 'blocked-legal-hold';
   return {
@@ -83,7 +79,7 @@ export function auditHoldPlaced(
   subjectRef: string,
   holdId: string,
   ts: string,
-  actor: string,
+  actor: string
 ): LifecycleAuditEvent {
   return {
     ts,
@@ -100,7 +96,7 @@ export function auditHoldReleased(
   subjectRef: string,
   holdId: string,
   ts: string,
-  actor: string,
+  actor: string
 ): LifecycleAuditEvent {
   return {
     ts,

@@ -15,7 +15,7 @@ function useSectionState(key: string, defaultOpen: boolean) {
   });
 
   const toggle = () => {
-    setOpen(prev => {
+    setOpen((prev) => {
       const next = !prev;
       sessionStorage.setItem(key, String(next));
       return next;
@@ -25,10 +25,23 @@ function useSectionState(key: string, defaultOpen: boolean) {
   return [open, toggle] as const;
 }
 
-function SectionRow({ label, color, shape = 'circle', textColor }: { label: string; color: string; shape?: 'circle' | 'square' | 'pill'; textColor?: string }) {
+function SectionRow({
+  label,
+  color,
+  shape = 'circle',
+  textColor,
+}: {
+  label: string;
+  color: string;
+  shape?: 'circle' | 'square' | 'pill';
+  textColor?: string;
+}) {
   const shapeClass =
-    shape === 'circle' ? 'w-3 h-3 rounded-full flex-shrink-0' :
-    shape === 'square'? 'w-3 h-3 rounded-sm flex-shrink-0' : 'px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0';
+    shape === 'circle'
+      ? 'w-3 h-3 rounded-full flex-shrink-0'
+      : shape === 'square'
+        ? 'w-3 h-3 rounded-sm flex-shrink-0'
+        : 'px-1.5 py-0.5 rounded text-[9px] font-bold flex-shrink-0';
 
   return (
     <div className="flex items-center gap-2">
@@ -38,7 +51,15 @@ function SectionRow({ label, color, shape = 'circle', textColor }: { label: stri
   );
 }
 
-function CollapsibleSection({ sectionKey, title, children }: { sectionKey: string; title: string; children: React.ReactNode }) {
+function CollapsibleSection({
+  sectionKey,
+  title,
+  children,
+}: {
+  sectionKey: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   const [open, toggle] = useSectionState(`legend-section-${sectionKey}`, false);
 
   return (
@@ -50,16 +71,15 @@ function CollapsibleSection({ sectionKey, title, children }: { sectionKey: strin
         <span className="text-[11px] font-semibold text-gray-700">{title}</span>
         <svg
           className={`w-3 h-3 text-gray-400 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2.5}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      {open && (
-        <div className="px-3 pb-2.5 space-y-1.5">
-          {children}
-        </div>
-      )}
+      {open && <div className="px-3 pb-2.5 space-y-1.5">{children}</div>}
     </div>
   );
 }
@@ -73,7 +93,7 @@ export default function LegendPanel() {
   }, []);
 
   const togglePanel = () => {
-    setPanelOpen(prev => {
+    setPanelOpen((prev) => {
       const next = !prev;
       sessionStorage.setItem('legend-panel-open', String(next));
       return next;
@@ -88,7 +108,13 @@ export default function LegendPanel() {
         className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-800 hover:bg-gray-700 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="w-3.5 h-3.5 text-gray-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <circle cx="12" cy="12" r="10" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01" />
           </svg>
@@ -96,7 +122,10 @@ export default function LegendPanel() {
         </div>
         <svg
           className={`w-3.5 h-3.5 text-gray-300 transition-transform ${panelOpen ? 'rotate-180' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2.5}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
         </svg>
@@ -105,7 +134,6 @@ export default function LegendPanel() {
       {/* Expandable body */}
       {panelOpen && (
         <div className="max-h-[70vh] overflow-y-auto divide-y divide-gray-100">
-
           {/* Risk Tiers */}
           <CollapsibleSection sectionKey="risk-tiers" title="Risk Tiers">
             <SectionRow label="Critical" color="bg-red-600" />
@@ -157,15 +185,21 @@ export default function LegendPanel() {
           <CollapsibleSection sectionKey="workflow-steps" title="Workflow Step Badges">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 rounded bg-green-600 text-white text-[9px] font-bold">▶</span>
+                <span className="px-1.5 py-0.5 rounded bg-green-600 text-white text-[9px] font-bold">
+                  ▶
+                </span>
                 <span className="text-[11px] text-gray-600">Available — action ready</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-bold">S2</span>
+                <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-bold">
+                  S2
+                </span>
                 <span className="text-[11px] text-gray-600">Step 2 required first</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="px-1.5 py-0.5 rounded bg-gray-500 text-white text-[9px] font-bold">S3</span>
+                <span className="px-1.5 py-0.5 rounded bg-gray-500 text-white text-[9px] font-bold">
+                  S3
+                </span>
                 <span className="text-[11px] text-gray-600">Step 3 required first</span>
               </div>
             </div>
@@ -212,7 +246,6 @@ export default function LegendPanel() {
               </div>
             </div>
           </CollapsibleSection>
-
         </div>
       )}
     </div>

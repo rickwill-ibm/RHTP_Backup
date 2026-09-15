@@ -41,11 +41,12 @@ export const RESOLUTION_ACTIONS = Object.freeze(['retry', 'resolve', 'dismiss'] 
 export type ResolutionAction = (typeof RESOLUTION_ACTIONS)[number];
 
 /** Map a resolution action to the terminal status it drives. */
-export const STATUS_FOR_ACTION: Readonly<Record<ResolutionAction, DeadLetterStatus>> = Object.freeze({
-  retry: 'retried',
-  resolve: 'resolved',
-  dismiss: 'dismissed',
-});
+export const STATUS_FOR_ACTION: Readonly<Record<ResolutionAction, DeadLetterStatus>> =
+  Object.freeze({
+    retry: 'retried',
+    resolve: 'resolved',
+    dismiss: 'dismissed',
+  });
 
 /**
  * One dead-letter record. Immutable once appended; a resolution appends a NEW
@@ -123,7 +124,7 @@ export interface PgQueryResult<Row = Record<string, unknown>> {
 export interface PgLike {
   query<Row = Record<string, unknown>>(
     text: string,
-    values?: readonly unknown[],
+    values?: readonly unknown[]
   ): Promise<PgQueryResult<Row>>;
 }
 

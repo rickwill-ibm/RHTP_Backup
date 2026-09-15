@@ -18,7 +18,7 @@ export interface MemoryCrossReferenceStore extends CrossReferenceStore {
 
 export function createMemoryCrossReferenceStore(
   deps?: Partial<XrefEventDeps>,
-  id = 'mock-cross-reference',
+  id = 'mock-cross-reference'
 ): MemoryCrossReferenceStore {
   const index = createXrefIndex(deps);
   return {

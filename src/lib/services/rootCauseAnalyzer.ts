@@ -18,14 +18,19 @@ import type {
   RootCauseAnalysis,
 } from './rootCauseAnalyzer.types';
 
-export type { Blocker, BlockerType, CompoundingFactor, RootCause, RootCauseAnalysis } from './rootCauseAnalyzer.types';
+export type {
+  Blocker,
+  BlockerType,
+  CompoundingFactor,
+  RootCause,
+  RootCauseAnalysis,
+} from './rootCauseAnalyzer.types';
 
 // ============================================================================
 // ROOT CAUSE ANALYZER
 // ============================================================================
 
 export class RootCauseAnalyzer {
-
   /**
    * Analyze patient context to identify root cause and blockers
    */
@@ -60,11 +65,11 @@ export class RootCauseAnalyzer {
       );
 
       const cannotLeaveHome = context.caregiverStatus.dependents.some(
-        dep => !dep.careRequirements.canBeLeftAlone
+        (dep) => !dep.careRequirements.canBeLeftAlone
       );
 
       const hasSpecialNeedsDependent = context.caregiverStatus.dependents.some(
-        dep => dep.healthStatus === 'special-needs' || dep.healthStatus === 'frail'
+        (dep) => dep.healthStatus === 'special-needs' || dep.healthStatus === 'frail'
       );
 
       blockers.push({
@@ -85,7 +90,10 @@ export class RootCauseAnalyzer {
     }
 
     // Analyze transportation barrier
-    if (context.barriers.transportation.severity === 'high' || context.barriers.transportation.severity === 'critical') {
+    if (
+      context.barriers.transportation.severity === 'high' ||
+      context.barriers.transportation.severity === 'critical'
+    ) {
       const severityScore = context.barriers.transportation.severity === 'critical' ? 90 : 80;
 
       blockers.push({
@@ -135,8 +143,9 @@ export class RootCauseAnalyzer {
     }
 
     // Analyze time scarcity (related to caregiver burden)
-    const availableTimeSlots = Object.values(context.caregiverStatus.timeAvailability)
-      .filter(slot => slot === 'available').length;
+    const availableTimeSlots = Object.values(context.caregiverStatus.timeAvailability).filter(
+      (slot) => slot === 'available'
+    ).length;
 
     if (availableTimeSlots <= 1) {
       blockers.push({
@@ -167,7 +176,10 @@ export class RootCauseAnalyzer {
     }
 
     // Analyze geographic isolation
-    if (context.accessProfile.ruralStatus === 'rural' || context.accessProfile.ruralStatus === 'frontier') {
+    if (
+      context.accessProfile.ruralStatus === 'rural' ||
+      context.accessProfile.ruralStatus === 'frontier'
+    ) {
       blockers.push({
         type: 'geographic-isolation',
         severity: 50,
@@ -202,11 +214,11 @@ export class RootCauseAnalyzer {
   ): CompoundingFactor[] {
     const factors: CompoundingFactor[] = [];
 
-    const hasCaregiverBurden = blockers.some(b => b.type === 'caregiver-burden');
-    const hasTransportation   = blockers.some(b => b.type === 'transportation');
-    const hasFinancial        = blockers.some(b => b.type === 'financial');
-    const hasClinical         = blockers.some(b => b.type === 'clinical-complexity');
-    const hasSocialIsolation  = blockers.some(b => b.type === 'social-isolation');
+    const hasCaregiverBurden = blockers.some((b) => b.type === 'caregiver-burden');
+    const hasTransportation = blockers.some((b) => b.type === 'transportation');
+    const hasFinancial = blockers.some((b) => b.type === 'financial');
+    const hasClinical = blockers.some((b) => b.type === 'clinical-complexity');
+    const hasSocialIsolation = blockers.some((b) => b.type === 'social-isolation');
 
     if (hasCaregiverBurden && hasTransportation) {
       factors.push({
@@ -240,7 +252,10 @@ export class RootCauseAnalyzer {
       });
     }
 
-    if (context.clinicalProfile.conditionCount >= 5 && context.clinicalProfile.medications.length >= 10) {
+    if (
+      context.clinicalProfile.conditionCount >= 5 &&
+      context.clinicalProfile.medications.length >= 10
+    ) {
       factors.push({
         factor: 'Multiple chronic conditions + Polypharmacy',
         description: 'Managing 5+ conditions with 10+ medications',
@@ -254,10 +269,7 @@ export class RootCauseAnalyzer {
   /**
    * Determine the root cause (primary blocker that causes cascading effects)
    */
-  private determineRootCause(
-    blockers: Blocker[],
-    _context: HolisticPatientContext
-  ): RootCause {
+  private determineRootCause(blockers: Blocker[], _context: HolisticPatientContext): RootCause {
     if (blockers[0]?.type === 'caregiver-burden') {
       return {
         type: 'caregiver-burden',
@@ -324,7 +336,7 @@ export class RootCauseAnalyzer {
     return {
       type: (blockers[0]?.type ?? 'clinical-complexity') as BlockerType,
       description: 'Multiple compounding barriers without single root cause',
-      cascadingEffects: blockers.map(b => b.description),
+      cascadingEffects: blockers.map((b) => b.description),
       criticalIntervention: 'Address highest-impact barrier first',
       interventionDependencies: ['Prioritize interventions by impact'],
     };
@@ -333,29 +345,32 @@ export class RootCauseAnalyzer {
   /**
    * Generate critical insight about the patient's situation
    */
-  private generateCriticalInsight(
-    rootCause: RootCause,
-    context: HolisticPatientContext
-  ): string {
+  private generateCriticalInsight(rootCause: RootCause, context: HolisticPatientContext): string {
     if (rootCause.type === 'caregiver-burden') {
       const dependentNames = context.caregiverStatus.dependents
-        .map(d => `${d.name} (${d.age}, ${d.healthStatus})`)
+        .map((d) => `${d.name} (${d.age}, ${d.healthStatus})`)
         .join(' and ');
 
-      return `${context.patient.name}'s health cannot improve until caregiver burden is addressed. ` +
+      return (
+        `${context.patient.name}'s health cannot improve until caregiver burden is addressed. ` +
         `As primary caregiver for ${dependentNames}, with no respite care or support system, ` +
         `${context.patient.name} cannot attend appointments or engage in self-care. ` +
-        `All other interventions will fail without first establishing respite care and caregiver support.`;
+        `All other interventions will fail without first establishing respite care and caregiver support.`
+      );
     }
 
     if (rootCause.type === 'transportation') {
-      return `${context.patient.name} cannot access healthcare due to transportation barrier. ` +
+      return (
+        `${context.patient.name} cannot access healthcare due to transportation barrier. ` +
         `Living ${context.accessProfile.distanceToProvider} miles from provider with no reliable transport, ` +
-        `care gaps will remain open without transportation assistance or alternative care delivery methods.`;
+        `care gaps will remain open without transportation assistance or alternative care delivery methods.`
+      );
     }
 
-    return `${context.patient.name} faces multiple barriers that must be addressed systematically. ` +
-      `The primary blocker (${rootCause.type}) must be resolved before other interventions can succeed.`;
+    return (
+      `${context.patient.name} faces multiple barriers that must be addressed systematically. ` +
+      `The primary blocker (${rootCause.type}) must be resolved before other interventions can succeed.`
+    );
   }
 
   /**
@@ -377,7 +392,7 @@ export class RootCauseAnalyzer {
       }
     }
 
-    Object.values(context.barriers).forEach(barrier => {
+    Object.values(context.barriers).forEach((barrier) => {
       if (barrier.severity === 'high' || barrier.severity === 'critical') {
         if (withRootCauseIntervention && barrier.status === 'intervention-active') {
           baseProbability += 10;

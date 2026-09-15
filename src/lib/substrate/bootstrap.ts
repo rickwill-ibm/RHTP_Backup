@@ -41,7 +41,7 @@ export class SubstrateNotConfiguredError extends Error {
       'Substrate not configured: no DATABASE_URL is set and no pg connection was injected. ' +
         'Set DATABASE_URL to the persistence cluster (or pass config.databaseUrl / config.pg), ' +
         'or run the affected seams in mock mode. Refusing to boot a silent in-memory ' +
-        'substrate in place of durable persistence (E9, fail closed).',
+        'substrate in place of durable persistence (E9, fail closed).'
     );
     this.name = 'SubstrateNotConfiguredError';
   }

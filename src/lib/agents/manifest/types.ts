@@ -65,7 +65,7 @@ export interface AgentManifestRegistryData {
 export class AgentManifestError extends Error {
   constructor(
     public readonly field: string,
-    detail: string,
+    detail: string
   ) {
     super(`Agent manifest invalid at "${field}": ${detail}`);
     this.name = 'AgentManifestError';
@@ -89,11 +89,11 @@ export class ToolNotAllowedError extends Error {
   constructor(
     public readonly agentId: string,
     public readonly tool: string,
-    public readonly allowlist: string[],
+    public readonly allowlist: string[]
   ) {
     super(
       `Agent "${agentId}" is not allowed to use tool "${tool}" ` +
-        `(allowlist: ${allowlist.length ? allowlist.join(', ') : 'empty'})`,
+        `(allowlist: ${allowlist.length ? allowlist.join(', ') : 'empty'})`
     );
     this.name = 'ToolNotAllowedError';
   }

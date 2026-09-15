@@ -1,13 +1,16 @@
 import React from 'react';
 
-
 interface FreshnessIndicatorProps {
   source: string;
   date: string;
   available?: boolean;
 }
 
-export default function FreshnessIndicator({ source, date, available = true }: FreshnessIndicatorProps) {
+export default function FreshnessIndicator({
+  source,
+  date,
+  available = true,
+}: FreshnessIndicatorProps) {
   if (!available) {
     return (
       <span className="inline-flex items-center gap-1 text-2xs text-[#da1e28]">
@@ -23,8 +26,12 @@ export default function FreshnessIndicator({ source, date, available = true }: F
   const isStale = diffDays > 3 && diffDays <= 14;
 
   return (
-    <span className={`inline-flex items-center gap-1 text-2xs ${isFresh ? 'text-[#24a148]' : isStale ? 'text-[#b45309]' : 'text-[#da1e28]'}`}>
-      <span className={`w-1.5 h-1.5 rounded-full inline-block ${isFresh ? 'bg-[#24a148]' : isStale ? 'bg-[#f1c21b]' : 'bg-[#da1e28]'}`} />
+    <span
+      className={`inline-flex items-center gap-1 text-2xs ${isFresh ? 'text-[#24a148]' : isStale ? 'text-[#b45309]' : 'text-[#da1e28]'}`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full inline-block ${isFresh ? 'bg-[#24a148]' : isStale ? 'bg-[#f1c21b]' : 'bg-[#da1e28]'}`}
+      />
       {source}: {diffDays === 0 ? 'Today' : `${diffDays}d ago`}
     </span>
   );

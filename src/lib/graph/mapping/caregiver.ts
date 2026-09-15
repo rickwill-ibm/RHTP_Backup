@@ -51,7 +51,7 @@ export const caregiverSpec = {
         role,
         active: bool(p.active),
         provenance: str(p.provenance),
-      }),
+      })
     );
     // The member is RELATED_TO this person — a factual relationship-record link
     // (associative), dated from the period start. The relationship ROLE rides the

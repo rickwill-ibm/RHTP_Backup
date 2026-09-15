@@ -28,7 +28,7 @@ export interface CategoryRollup {
 
 /** Group withheld captures by ICD category, for a RADV remediation worklist. */
 export function rollupWithheldByCategory(
-  withheld: Array<{ capture: HccCapture; decision: SubmissionDecision }>,
+  withheld: Array<{ capture: HccCapture; decision: SubmissionDecision }>
 ): CategoryRollup[] {
   const byCat = new Map<string, CategoryRollup>();
   for (const w of withheld) {
@@ -38,5 +38,7 @@ export function rollupWithheldByCategory(
     if (!entry.hccCodes.includes(w.capture.hccCode)) entry.hccCodes.push(w.capture.hccCode);
     byCat.set(category, entry);
   }
-  return [...byCat.values()].sort((a, b) => b.count - a.count || a.category.localeCompare(b.category));
+  return [...byCat.values()].sort(
+    (a, b) => b.count - a.count || a.category.localeCompare(b.category)
+  );
 }

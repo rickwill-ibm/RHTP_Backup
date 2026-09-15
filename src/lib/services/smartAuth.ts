@@ -1,6 +1,6 @@
 /**
  * SMART Auth Service Stub for Standalone Demo
- * 
+ *
  * This is a simplified stub for the standalone demo.
  * The full implementation exists in the main TCoC project.
  */
@@ -24,7 +24,7 @@ class MockSmartAuthService implements SmartAuthService {
     return {
       id: 'practitioner-001',
       name: 'Dr. James Whitfield',
-      role: 'physician'
+      role: 'physician',
     };
   }
 }

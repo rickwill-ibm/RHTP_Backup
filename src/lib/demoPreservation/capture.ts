@@ -10,12 +10,7 @@
  */
 
 import { fingerprintPanel, type PanelFingerprint } from './fingerprint';
-import {
-  graphNodes,
-  graphEdges,
-  lensDefinitions,
-  activeSignals,
-} from '../wholePersonGraphData';
+import { graphNodes, graphEdges, lensDefinitions, activeSignals } from '../wholePersonGraphData';
 import { mockCdsCards, mockOrderCatalog, mockCareTeamCandidates } from '../smartFhirMockData';
 import {
   mockPatients,

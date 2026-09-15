@@ -60,9 +60,7 @@ export interface Part2AccessRequest {
 }
 
 export type Part2AuditClass =
-  | 'part2-consent-disclosure'
-  | 'part2-break-glass'
-  | 'part2-held-restricted';
+  'part2-consent-disclosure' | 'part2-break-glass' | 'part2-held-restricted';
 
 /**
  * A PHI-safe Part 2 access audit entry. Records the decision, the named
@@ -114,7 +112,7 @@ function directiveCovers(
   d: Part2ConsentDirective,
   req: Part2AccessRequest,
   wanted: string[],
-  nowIso: string,
+  nowIso: string
 ): boolean {
   if (d.memberId !== req.memberId) return false;
   if (d.recipient !== req.recipient) return false;
@@ -134,7 +132,7 @@ function directiveCovers(
 export function evaluatePart2Access(
   req: Part2AccessRequest,
   directives: readonly Part2ConsentDirective[],
-  deps: Clock,
+  deps: Clock
 ): Part2AccessDecision {
   const wanted = req.segments && req.segments.length > 0 ? req.segments : DEFAULT_SEGMENTS;
   const at = new Date(deps.now()).toISOString();

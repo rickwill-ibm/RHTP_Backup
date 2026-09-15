@@ -35,7 +35,7 @@ export function buildQuarantineRecord<Raw>(
   issues: { reasonCode: string; fieldPath: string }[],
   batchId: string,
   source: SourceDescriptor,
-  deps: PipelineDeps,
+  deps: PipelineDeps
 ): QuarantineRecord {
   return {
     quarantineId: `q-${stableHash(`${batchId}:${raw.sourceRef}`)}`,
@@ -59,7 +59,7 @@ export function buildHeldRecord<Raw>(
   signal: HeldIdentitySignal,
   batchId: string,
   source: SourceDescriptor,
-  deps: PipelineDeps,
+  deps: PipelineDeps
 ): QuarantineRecord {
   return {
     quarantineId: `hold-${stableHash(`${batchId}:${raw.sourceRef}`)}`,
@@ -89,13 +89,16 @@ export function runTransform<Raw>(
   adapter: DomainAdapter<Raw>,
   raw: RawRecord<Raw>,
   deps: PipelineDeps,
-  landed?: LandedBatch,
+  landed?: LandedBatch
 ): TransformOutcome {
   const batchId = landed?.batchId ?? adapter.source.batchId ?? `adhoc-${adapter.source.feed}`;
   const source = landed?.source ?? adapter.source;
   const validation = adapter.validate(raw);
   if (!validation.ok) {
-    return { ok: false, quarantine: buildQuarantineRecord(raw, validation.issues, batchId, source, deps) };
+    return {
+      ok: false,
+      quarantine: buildQuarantineRecord(raw, validation.issues, batchId, source, deps),
+    };
   }
   let normalized: NormalizedRecord;
   try {
@@ -117,7 +120,10 @@ export function runTransform<Raw>(
   if (isCodeCarryingDomain(record.domain)) {
     const semantic = bindSemantics(record, { now: deps.now });
     if (!semantic.ok) {
-      return { ok: false, quarantine: buildQuarantineRecord(raw, semantic.issues, batchId, source, deps) };
+      return {
+        ok: false,
+        quarantine: buildQuarantineRecord(raw, semantic.issues, batchId, source, deps),
+      };
     }
   }
   return { ok: true, record };
@@ -154,7 +160,7 @@ export function streamConsumer<Raw>(adapter: DomainAdapter<Raw>) {
     const raws = adapter.parse(landed.payload);
     if (raws.length !== 1) {
       throw new Error(
-        `stream consumer for feed "${adapter.source.feed}" expects one record per message, got ${raws.length}`,
+        `stream consumer for feed "${adapter.source.feed}" expects one record per message, got ${raws.length}`
       );
     }
     return runTransform(adapter, raws[0], deps, landed);
@@ -171,7 +177,7 @@ export function reconcile(
   batchId: string,
   countIn: number,
   loaded: number,
-  rejected: number,
+  rejected: number
 ): ReconciliationReport {
   return { batchId, countIn, loaded, rejected, balanced: countIn === loaded + rejected };
 }
@@ -187,7 +193,7 @@ export class ReconciliationError extends Error {
   constructor(public readonly report: ReconciliationReport) {
     super(
       `reconciliation gate failed for batch ${report.batchId}: ` +
-        `in=${report.countIn} != loaded=${report.loaded} + rejected=${report.rejected}`,
+        `in=${report.countIn} != loaded=${report.loaded} + rejected=${report.rejected}`
     );
     this.name = 'ReconciliationError';
   }

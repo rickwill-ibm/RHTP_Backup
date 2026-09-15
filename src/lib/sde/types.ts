@@ -127,10 +127,7 @@ export interface DelayDisposition extends DispositionBase {
 }
 
 export type Disposition =
-  | ActDisposition
-  | BundleDisposition
-  | SuppressDisposition
-  | DelayDisposition;
+  ActDisposition | BundleDisposition | SuppressDisposition | DelayDisposition;
 
 /** An approved disposition (act or bundle) counts toward "approved". */
 export function isApproved(d: Disposition): d is ActDisposition | BundleDisposition {

@@ -30,22 +30,37 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
   return (
     <div className="flex items-start gap-0 overflow-x-auto pb-1">
       {steps.map((s, idx) => {
-        const isCompleted = status === 'completed' || (status !== 'rejected' && s.step < currentStep);
+        const isCompleted =
+          status === 'completed' || (status !== 'rejected' && s.step < currentStep);
         const isActive = s.step === currentStep && status !== 'completed' && status !== 'rejected';
         const isRejected = status === 'rejected' && s.step === currentStep;
         return (
           <div key={s.step} className="flex items-start flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1 min-w-0">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
-                ${isCompleted ? 'bg-[#24a148] border-[#24a148] text-white' :
-                  isActive ? 'bg-[#6929c4] border-[#6929c4] text-white': isRejected ?'bg-[#da1e28] border-[#da1e28] text-white': 'bg-white border-carbon-gray-30 text-carbon-gray-50'}`}
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
+                ${
+                  isCompleted
+                    ? 'bg-[#24a148] border-[#24a148] text-white'
+                    : isActive
+                      ? 'bg-[#6929c4] border-[#6929c4] text-white'
+                      : isRejected
+                        ? 'bg-[#da1e28] border-[#da1e28] text-white'
+                        : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
+                }`}
               >
-                {isCompleted ? <Icon name="CheckIcon" size={12} /> :
-                 isRejected ? <Icon name="XMarkIcon" size={12} /> :
-                 s.step}
+                {isCompleted ? (
+                  <Icon name="CheckIcon" size={12} />
+                ) : isRejected ? (
+                  <Icon name="XMarkIcon" size={12} />
+                ) : (
+                  s.step
+                )}
               </div>
               <div className="mt-1.5 text-center px-1">
-                <p className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#6929c4]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}>
+                <p
+                  className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#6929c4]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}
+                >
                   {s.label}
                 </p>
                 <p className="text-2xs text-carbon-gray-30 mt-0.5 hidden sm:block leading-tight">
@@ -54,7 +69,9 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
               </div>
             </div>
             {idx < steps.length - 1 && (
-              <div className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+              <div
+                className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+              />
             )}
           </div>
         );
@@ -76,7 +93,9 @@ function AttributionSummaryCard({ record }: { record: AttributionRecord }) {
             <span className="font-mono text-xs font-bold text-carbon-gray-70">{record.id}</span>
           </div>
           <p className="text-sm font-semibold text-carbon-gray-100">{record.patientName}</p>
-          <p className="text-xs text-carbon-gray-50 mt-0.5">{record.payer} · Attributed PCP: {record.attributedPCP}</p>
+          <p className="text-xs text-carbon-gray-50 mt-0.5">
+            {record.payer} · Attributed PCP: {record.attributedPCP}
+          </p>
         </div>
         <div className="text-right flex-shrink-0">
           <p className="text-2xs text-carbon-gray-50">RAF Impact</p>
@@ -131,17 +150,23 @@ function Step1SurfaceDiscrepancy({ record, onAdvance, onWithdraw }: Step1Props) 
           Attribution Discrepancy Detected
         </h4>
         <p className="text-xs text-carbon-gray-50">
-          Review the attribution record and confirm the type of discrepancy before proceeding to evidence collection.
+          Review the attribution record and confirm the type of discrepancy before proceeding to
+          evidence collection.
         </p>
       </div>
 
       {/* Discrepancy type selection */}
       <div>
-        <p className="carbon-label mb-2">Discrepancy Type <span className="text-[#da1e28]">*</span></p>
+        <p className="carbon-label mb-2">
+          Discrepancy Type <span className="text-[#da1e28]">*</span>
+        </p>
         <div className="space-y-1.5">
           {DISCREPANCY_TYPES.map((type) => (
-            <label key={type} className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors
-              ${selectedDiscrepancy === type ? 'border-[#6929c4] bg-[#f6f2ff]' : 'border-carbon-gray-20 hover:border-carbon-gray-30 bg-white'}`}>
+            <label
+              key={type}
+              className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors
+              ${selectedDiscrepancy === type ? 'border-[#6929c4] bg-[#f6f2ff]' : 'border-carbon-gray-20 hover:border-carbon-gray-30 bg-white'}`}
+            >
               <input
                 type="radio"
                 name="discrepancy-type"
@@ -158,7 +183,9 @@ function Step1SurfaceDiscrepancy({ record, onAdvance, onWithdraw }: Step1Props) 
 
       {/* Supporting notes */}
       <div>
-        <label className="carbon-label mb-1 block">Clinical Basis for Dispute <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1 block">
+          Clinical Basis for Dispute <span className="text-[#da1e28]">*</span>
+        </label>
         <textarea
           value={discrepancyNotes}
           onChange={(e) => setDiscrepancyNotes(e.target.value)}
@@ -170,19 +197,35 @@ function Step1SurfaceDiscrepancy({ record, onAdvance, onWithdraw }: Step1Props) 
 
       {/* Payer attribution rule reference */}
       <div className="bg-carbon-gray-10 border border-carbon-gray-20 p-3">
-        <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">Payer Attribution Rules Reference</p>
+        <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">
+          Payer Attribution Rules Reference
+        </p>
         <div className="space-y-1 text-xs text-carbon-gray-50">
-          <p>• <span className="font-medium text-carbon-gray-70">Plurality Rule:</span> Patient attributed to PCP with most E&amp;M visits in prior 12 months</p>
-          <p>• <span className="font-medium text-carbon-gray-70">Prospective Attribution:</span> Requires active PCP relationship at start of performance period</p>
-          <p>• <span className="font-medium text-carbon-gray-70">Dispute Window:</span> 90 days from attribution roster publication date</p>
-          <p>• <span className="font-medium text-carbon-gray-70">Required Evidence:</span> Claims data, visit history, enrollment records, or clinical attestation</p>
+          <p>
+            • <span className="font-medium text-carbon-gray-70">Plurality Rule:</span> Patient
+            attributed to PCP with most E&amp;M visits in prior 12 months
+          </p>
+          <p>
+            • <span className="font-medium text-carbon-gray-70">Prospective Attribution:</span>{' '}
+            Requires active PCP relationship at start of performance period
+          </p>
+          <p>
+            • <span className="font-medium text-carbon-gray-70">Dispute Window:</span> 90 days from
+            attribution roster publication date
+          </p>
+          <p>
+            • <span className="font-medium text-carbon-gray-70">Required Evidence:</span> Claims
+            data, visit history, enrollment records, or clinical attestation
+          </p>
         </div>
       </div>
 
       {/* Withdraw option */}
       {showWithdraw ? (
         <div className="border border-carbon-gray-20 p-3 space-y-2">
-          <p className="text-xs font-semibold text-carbon-gray-70">Reason for withdrawing dispute flag</p>
+          <p className="text-xs font-semibold text-carbon-gray-70">
+            Reason for withdrawing dispute flag
+          </p>
           <textarea
             value={withdrawReason}
             onChange={(e) => setWithdrawReason(e.target.value)}
@@ -198,7 +241,10 @@ function Step1SurfaceDiscrepancy({ record, onAdvance, onWithdraw }: Step1Props) 
             >
               Confirm Withdraw
             </button>
-            <button onClick={() => setShowWithdraw(false)} className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100 px-3">
+            <button
+              onClick={() => setShowWithdraw(false)}
+              className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100 px-3"
+            >
               Cancel
             </button>
           </div>
@@ -234,12 +280,44 @@ interface Step2Props {
 }
 
 const EVIDENCE_SOURCES = [
-  { id: 'ev-claims', label: 'Claims Visit History', description: 'E&M visit claims from prior 12-month period showing primary care relationship', icon: 'DocumentTextIcon' },
-  { id: 'ev-enrollment', label: 'Enrollment Records', description: 'Health plan enrollment data confirming PCP designation at time of attribution', icon: 'ClipboardDocumentListIcon' },
-  { id: 'ev-ehr', label: 'EHR Encounter Data', description: 'Cerner encounter records documenting longitudinal care relationship', icon: 'ComputerDesktopIcon' },
-  { id: 'ev-attestation', label: 'Physician Attestation', description: 'Signed attestation from attributed or correct PCP confirming care relationship', icon: 'PencilSquareIcon' },
-  { id: 'ev-referral', label: 'Referral Documentation', description: 'Referral orders or care coordination records establishing primary care attribution', icon: 'ArrowTopRightOnSquareIcon' },
-  { id: 'ev-hie', label: 'HIE Data Extract', description: 'Health information exchange records corroborating visit history across facilities', icon: 'CircleStackIcon' },
+  {
+    id: 'ev-claims',
+    label: 'Claims Visit History',
+    description: 'E&M visit claims from prior 12-month period showing primary care relationship',
+    icon: 'DocumentTextIcon',
+  },
+  {
+    id: 'ev-enrollment',
+    label: 'Enrollment Records',
+    description: 'Health plan enrollment data confirming PCP designation at time of attribution',
+    icon: 'ClipboardDocumentListIcon',
+  },
+  {
+    id: 'ev-ehr',
+    label: 'EHR Encounter Data',
+    description: 'Cerner encounter records documenting longitudinal care relationship',
+    icon: 'ComputerDesktopIcon',
+  },
+  {
+    id: 'ev-attestation',
+    label: 'Physician Attestation',
+    description: 'Signed attestation from attributed or correct PCP confirming care relationship',
+    icon: 'PencilSquareIcon',
+  },
+  {
+    id: 'ev-referral',
+    label: 'Referral Documentation',
+    description:
+      'Referral orders or care coordination records establishing primary care attribution',
+    icon: 'ArrowTopRightOnSquareIcon',
+  },
+  {
+    id: 'ev-hie',
+    label: 'HIE Data Extract',
+    description:
+      'Health information exchange records corroborating visit history across facilities',
+    icon: 'CircleStackIcon',
+  },
 ];
 
 function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
@@ -264,7 +342,8 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
           Gather Clinical Evidence
         </h4>
         <p className="text-xs text-carbon-gray-50">
-          Select all evidence sources that support the attribution dispute. At least one source is required before submission.
+          Select all evidence sources that support the attribution dispute. At least one source is
+          required before submission.
         </p>
       </div>
 
@@ -295,13 +374,18 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
 
       {/* Evidence source selection */}
       <div>
-        <p className="carbon-label mb-2">Evidence Sources <span className="text-[#da1e28]">*</span></p>
+        <p className="carbon-label mb-2">
+          Evidence Sources <span className="text-[#da1e28]">*</span>
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {EVIDENCE_SOURCES.map((src) => {
             const selected = selectedSources.includes(src.id);
             return (
-              <label key={src.id} className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors
-                ${selected ? 'border-[#6929c4] bg-[#f6f2ff]' : 'border-carbon-gray-20 hover:border-carbon-gray-30 bg-white'}`}>
+              <label
+                key={src.id}
+                className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors
+                ${selected ? 'border-[#6929c4] bg-[#f6f2ff]' : 'border-carbon-gray-20 hover:border-carbon-gray-30 bg-white'}`}
+              >
                 <input
                   type="checkbox"
                   checked={selected}
@@ -310,7 +394,11 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <Icon name={src.icon as Parameters<typeof Icon>[0]['name']} size={13} className={selected ? 'text-[#6929c4]' : 'text-carbon-gray-50'} />
+                    <Icon
+                      name={src.icon as Parameters<typeof Icon>[0]['name']}
+                      size={13}
+                      className={selected ? 'text-[#6929c4]' : 'text-carbon-gray-50'}
+                    />
                     <span className="text-xs font-semibold text-carbon-gray-100">{src.label}</span>
                   </div>
                   <p className="text-2xs text-carbon-gray-50 leading-tight">{src.description}</p>
@@ -323,7 +411,9 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
 
       {/* Evidence summary notes */}
       <div>
-        <label className="carbon-label mb-1 block">Evidence Summary <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1 block">
+          Evidence Summary <span className="text-[#da1e28]">*</span>
+        </label>
         <textarea
           value={evidenceNotes}
           onChange={(e) => setEvidenceNotes(e.target.value)}
@@ -331,7 +421,9 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
           placeholder="Summarize the clinical evidence supporting this attribution dispute. Include visit dates, provider names, and any relevant clinical context..."
           className="w-full border border-carbon-gray-30 px-3 py-2 text-xs text-carbon-gray-100 focus:outline-none focus:border-[#6929c4] resize-none"
         />
-        <p className="text-2xs text-carbon-gray-50 mt-1">{evidenceNotes.length} characters — minimum 50 recommended</p>
+        <p className="text-2xs text-carbon-gray-50 mt-1">
+          {evidenceNotes.length} characters — minimum 50 recommended
+        </p>
       </div>
 
       {/* Selected sources summary */}
@@ -344,7 +436,10 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
             {selectedSources.map((id) => {
               const src = EVIDENCE_SOURCES.find((s) => s.id === id);
               return (
-                <span key={id} className="text-2xs bg-[#e8daff] text-[#6929c4] px-2 py-0.5 font-medium">
+                <span
+                  key={id}
+                  className="text-2xs bg-[#e8daff] text-[#6929c4] px-2 py-0.5 font-medium"
+                >
                   {src?.label}
                 </span>
               );
@@ -355,10 +450,12 @@ function Step2GatherEvidence({ record, onAdvance }: Step2Props) {
 
       <div className="flex items-center justify-end pt-2 border-t border-carbon-gray-20">
         <button
-          onClick={() => onAdvance(
-            `Evidence: ${selectedSources.join(', ')}. Correct PCP: ${correctPCP || 'TBD'}. Visits: ${visitCount || 'N/A'}. ${evidenceNotes}`,
-            selectedSources
-          )}
+          onClick={() =>
+            onAdvance(
+              `Evidence: ${selectedSources.join(', ')}. Correct PCP: ${correctPCP || 'TBD'}. Visits: ${visitCount || 'N/A'}. ${evidenceNotes}`,
+              selectedSources
+            )
+          }
           disabled={!canAdvance}
           className="carbon-btn-primary text-xs py-2 px-5 disabled:opacity-40 flex items-center gap-2"
           style={{ background: '#6929c4', borderColor: '#6929c4' }}
@@ -406,14 +503,17 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
           Submit Dispute to Payer
         </h4>
         <p className="text-xs text-carbon-gray-50">
-          Review the dispute package and submit to {record.payer}. This action creates an immutable audit record.
+          Review the dispute package and submit to {record.payer}. This action creates an immutable
+          audit record.
         </p>
       </div>
 
       {/* Dispute package summary */}
       <div className="border border-carbon-gray-20 overflow-hidden">
         <div className="bg-carbon-gray-10 px-4 py-2.5 border-b border-carbon-gray-20">
-          <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Dispute Package Summary</p>
+          <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+            Dispute Package Summary
+          </p>
         </div>
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3 text-xs">
@@ -435,22 +535,37 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
             </div>
           </div>
           <div>
-            <p className="carbon-label mb-1.5">Evidence Sources Attached ({evidenceSources.length})</p>
+            <p className="carbon-label mb-1.5">
+              Evidence Sources Attached ({evidenceSources.length})
+            </p>
             <div className="flex flex-wrap gap-1.5">
-              {evidenceSources.length > 0 ? evidenceSources.map((id) => (
-                <span key={id} className="text-2xs bg-[#e8daff] text-[#6929c4] px-2 py-0.5 font-medium flex items-center gap-1">
-                  <Icon name="CheckIcon" size={9} />
-                  {id.replace('ev-', '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                </span>
-              )) : (
+              {evidenceSources.length > 0 ? (
+                evidenceSources.map((id) => (
+                  <span
+                    key={id}
+                    className="text-2xs bg-[#e8daff] text-[#6929c4] px-2 py-0.5 font-medium flex items-center gap-1"
+                  >
+                    <Icon name="CheckIcon" size={9} />
+                    {id
+                      .replace('ev-', '')
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </span>
+                ))
+              ) : (
                 <span className="text-2xs text-carbon-gray-50">No evidence sources attached</span>
               )}
             </div>
           </div>
           <div className="flex items-center gap-2 p-2 bg-[#fff8f8] border border-[#ffb3b8]">
-            <Icon name="ExclamationTriangleIcon" size={13} className="text-[#da1e28] flex-shrink-0" />
+            <Icon
+              name="ExclamationTriangleIcon"
+              size={13}
+              className="text-[#da1e28] flex-shrink-0"
+            />
             <p className="text-2xs text-[#da1e28]">
-              <span className="font-semibold">RAF Impact:</span> {record.rafImpact} · <span className="font-semibold">Contract Impact:</span> {record.contractImpact}
+              <span className="font-semibold">RAF Impact:</span> {record.rafImpact} ·{' '}
+              <span className="font-semibold">Contract Impact:</span> {record.contractImpact}
             </p>
           </div>
         </div>
@@ -458,14 +573,18 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
 
       {/* Submission channel */}
       <div>
-        <label className="carbon-label mb-1 block">Submission Channel <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1 block">
+          Submission Channel <span className="text-[#da1e28]">*</span>
+        </label>
         <select
           value={channel}
           onChange={(e) => setChannel(e.target.value)}
           className="w-full border border-carbon-gray-30 px-3 py-2 text-xs text-carbon-gray-100 focus:outline-none focus:border-[#6929c4] bg-white"
         >
           {SUBMISSION_CHANNELS.map((ch) => (
-            <option key={ch} value={ch}>{ch}</option>
+            <option key={ch} value={ch}>
+              {ch}
+            </option>
           ))}
         </select>
       </div>
@@ -493,7 +612,9 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
       </div>
 
       <div>
-        <label className="carbon-label mb-1 block">Submission Notes <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1 block">
+          Submission Notes <span className="text-[#da1e28]">*</span>
+        </label>
         <textarea
           value={submissionNotes}
           onChange={(e) => setSubmissionNotes(e.target.value)}
@@ -509,7 +630,9 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
         <div>
           <p className="text-xs font-semibold text-[#0043ce] mb-0.5">Immutable Audit Trail</p>
           <p className="text-2xs text-carbon-gray-70">
-            Submitting this dispute creates a permanent, timestamped audit record including your identity, role, all evidence sources, submission channel, and payer reference. This record cannot be modified after submission.
+            Submitting this dispute creates a permanent, timestamped audit record including your
+            identity, role, all evidence sources, submission channel, and payer reference. This
+            record cannot be modified after submission.
           </p>
         </div>
       </div>
@@ -523,14 +646,17 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
           className="mt-0.5 accent-[#6929c4]"
         />
         <span className="text-xs text-carbon-gray-70">
-          I confirm that the evidence gathered is accurate and complete, and I authorize submission of this attribution dispute to {record.payer} on behalf of the care organization.
+          I confirm that the evidence gathered is accurate and complete, and I authorize submission
+          of this attribution dispute to {record.payer} on behalf of the care organization.
         </span>
       </label>
 
       {/* Withdraw option */}
       {showWithdraw ? (
         <div className="border border-carbon-gray-20 p-3 space-y-2">
-          <p className="text-xs font-semibold text-carbon-gray-70">Reason for withdrawing dispute</p>
+          <p className="text-xs font-semibold text-carbon-gray-70">
+            Reason for withdrawing dispute
+          </p>
           <textarea
             value={withdrawReason}
             onChange={(e) => setWithdrawReason(e.target.value)}
@@ -546,7 +672,10 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
             >
               Confirm Withdraw
             </button>
-            <button onClick={() => setShowWithdraw(false)} className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100 px-3">
+            <button
+              onClick={() => setShowWithdraw(false)}
+              className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100 px-3"
+            >
               Cancel
             </button>
           </div>
@@ -562,9 +691,11 @@ function Step3SubmitDispute({ record, evidenceSources, onComplete, onWithdraw }:
           Withdraw Dispute
         </button>
         <button
-          onClick={() => onComplete(
-            `Channel: ${channel}. Ref: ${referenceNumber || 'N/A'}. Expected: ${expectedResolution || 'TBD'}. ${submissionNotes}`
-          )}
+          onClick={() =>
+            onComplete(
+              `Channel: ${channel}. Ref: ${referenceNumber || 'N/A'}. Expected: ${expectedResolution || 'TBD'}. ${submissionNotes}`
+            )
+          }
           disabled={!canSubmit}
           className="carbon-btn-primary text-xs py-2 px-5 disabled:opacity-40 flex items-center gap-2"
           style={{ background: '#6929c4', borderColor: '#6929c4' }}
@@ -585,13 +716,18 @@ function CompletedView({ record }: { record: AttributionRecord }) {
         <Icon name="CheckBadgeIcon" size={28} className="text-[#24a148]" />
       </div>
       <div>
-        <p className="text-base font-semibold text-carbon-gray-100">Dispute Submitted Successfully</p>
+        <p className="text-base font-semibold text-carbon-gray-100">
+          Dispute Submitted Successfully
+        </p>
         <p className="text-xs text-carbon-gray-50 mt-1">
-          Attribution dispute for <span className="font-medium">{record.patientName}</span> has been submitted to <span className="font-medium">{record.payer}</span>.
+          Attribution dispute for <span className="font-medium">{record.patientName}</span> has been
+          submitted to <span className="font-medium">{record.payer}</span>.
         </p>
       </div>
       <div className="bg-[#f6f2ff] border border-[#d4bbff] p-4 w-full max-w-sm text-left space-y-2">
-        <p className="text-2xs font-semibold text-[#6929c4] uppercase tracking-wide">Dispute Record</p>
+        <p className="text-2xs font-semibold text-[#6929c4] uppercase tracking-wide">
+          Dispute Record
+        </p>
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <span className="text-carbon-gray-50">Status</span>
@@ -603,7 +739,9 @@ function CompletedView({ record }: { record: AttributionRecord }) {
           </div>
           <div className="flex justify-between">
             <span className="text-carbon-gray-50">Contract Impact</span>
-            <span className="font-mono font-semibold text-carbon-gray-100">{record.contractImpact}</span>
+            <span className="font-mono font-semibold text-carbon-gray-100">
+              {record.contractImpact}
+            </span>
           </div>
         </div>
       </div>
@@ -623,7 +761,8 @@ function WithdrawnView({ record }: { record: AttributionRecord }) {
       </div>
       <p className="text-sm font-semibold text-carbon-gray-100">Dispute Withdrawn</p>
       <p className="text-xs text-carbon-gray-50">
-        The attribution dispute for <span className="font-medium">{record.patientName}</span> has been withdrawn and logged in the audit trail.
+        The attribution dispute for <span className="font-medium">{record.patientName}</span> has
+        been withdrawn and logged in the audit trail.
       </p>
     </div>
   );
@@ -636,9 +775,21 @@ interface AttributionDisputeJourneyProps {
   onClose: () => void;
 }
 
-export default function AttributionDisputeJourney({ disputeId, record, onClose }: AttributionDisputeJourneyProps) {
+export default function AttributionDisputeJourney({
+  disputeId,
+  record,
+  onClose,
+}: AttributionDisputeJourneyProps) {
   const { user } = useAppContext();
-  const { getWorkflow, getWorkflowStatus, startWorkflow, advanceStep, completeWorkflow, rejectWorkflow, resetWorkflow } = useWorkflowMachine();
+  const {
+    getWorkflow,
+    getWorkflowStatus,
+    startWorkflow,
+    advanceStep,
+    completeWorkflow,
+    rejectWorkflow,
+    resetWorkflow,
+  } = useWorkflowMachine();
   const wfDef = workflowDefinitions['attribution-dispute'];
   const wf = getWorkflow('attribution-dispute', disputeId);
   const status = getWorkflowStatus('attribution-dispute', disputeId);
@@ -686,8 +837,12 @@ export default function AttributionDisputeJourney({ disputeId, record, onClose }
             <Icon name="ScaleIcon" size={14} className="text-white" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-carbon-gray-100">Attribution Dispute Journey</p>
-            <p className="text-2xs text-carbon-gray-50">{record.payer} · {record.patientName}</p>
+            <p className="text-xs font-semibold text-carbon-gray-100">
+              Attribution Dispute Journey
+            </p>
+            <p className="text-2xs text-carbon-gray-50">
+              {record.payer} · {record.patientName}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -700,7 +855,10 @@ export default function AttributionDisputeJourney({ disputeId, record, onClose }
               Reset
             </button>
           )}
-          <button onClick={onClose} className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-20 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-20 transition-colors"
+          >
             <Icon name="XMarkIcon" size={15} />
           </button>
         </div>
@@ -709,11 +867,7 @@ export default function AttributionDisputeJourney({ disputeId, record, onClose }
       {/* Step indicator */}
       {status !== 'idle' && (
         <div className="px-6 pt-4 pb-2 border-b border-carbon-gray-20">
-          <StepIndicator
-            steps={wfDef.steps}
-            currentStep={wf?.currentStep ?? 1}
-            status={status}
-          />
+          <StepIndicator steps={wfDef.steps} currentStep={wf?.currentStep ?? 1} status={status} />
         </div>
       )}
 
@@ -724,8 +878,12 @@ export default function AttributionDisputeJourney({ disputeId, record, onClose }
             <AttributionSummaryCard record={record} />
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-carbon-gray-100">Ready to initiate attribution dispute workflow</p>
-                <p className="text-2xs text-carbon-gray-50 mt-0.5">3-step process: Surface Discrepancy → Gather Evidence → Submit to Payer</p>
+                <p className="text-xs font-semibold text-carbon-gray-100">
+                  Ready to initiate attribution dispute workflow
+                </p>
+                <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                  3-step process: Surface Discrepancy → Gather Evidence → Submit to Payer
+                </p>
               </div>
               <button
                 onClick={handleStart}
@@ -753,10 +911,7 @@ export default function AttributionDisputeJourney({ disputeId, record, onClose }
         )}
 
         {status === 'in-progress' && wf?.currentStep === 2 && (
-          <Step2GatherEvidence
-            record={record}
-            onAdvance={handleStep2Advance}
-          />
+          <Step2GatherEvidence record={record} onAdvance={handleStep2Advance} />
         )}
 
         {(status === 'in-progress' || status === 'awaiting-review') && wf?.currentStep === 3 && (

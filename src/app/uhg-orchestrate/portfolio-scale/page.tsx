@@ -17,15 +17,44 @@ interface MemberProfile {
 
 function generatePortfolioMembers(): MemberProfile[] {
   const highRiskConditions = [
-    'Postpartum Health', 'CHF · CKD', 'COPD · Diabetes', 'Postpartum · Hypertension',
-    'Diabetes · Obesity', 'CHF · Diabetes', 'COPD · CKD', 'Postpartum · CKD',
-    'Diabetes · Depression', 'CHF · COPD',
+    'Postpartum Health',
+    'CHF · CKD',
+    'COPD · Diabetes',
+    'Postpartum · Hypertension',
+    'Diabetes · Obesity',
+    'CHF · Diabetes',
+    'COPD · CKD',
+    'Postpartum · CKD',
+    'Diabetes · Depression',
+    'CHF · COPD',
   ];
   const medRiskConditions = [
-    'Hypertension', 'Diabetes', 'Asthma', 'Obesity', 'Depression',
-    'Arthritis', 'Hypertension · Obesity', 'Diabetes · Asthma',
+    'Hypertension',
+    'Diabetes',
+    'Asthma',
+    'Obesity',
+    'Depression',
+    'Arthritis',
+    'Hypertension · Obesity',
+    'Diabetes · Asthma',
   ];
-  const initials = ['MR', 'JD', 'SK', 'PL', 'AT', 'RN', 'CW', 'BH', 'LM', 'TK', 'GF', 'NP', 'VR', 'DQ', 'EJ'];
+  const initials = [
+    'MR',
+    'JD',
+    'SK',
+    'PL',
+    'AT',
+    'RN',
+    'CW',
+    'BH',
+    'LM',
+    'TK',
+    'GF',
+    'NP',
+    'VR',
+    'DQ',
+    'EJ',
+  ];
   const members: MemberProfile[] = [];
 
   for (let i = 0; i < 48; i++) {
@@ -74,7 +103,11 @@ const ENTITY_ROWS = [
     entity: 'Martin Pharmacy',
     color: '#a78bfa',
     lines: [
-      { label: 'Med review program enrollment', value: '+$1,200', note: 'Pharmacy program revenue' },
+      {
+        label: 'Med review program enrollment',
+        value: '+$1,200',
+        note: 'Pharmacy program revenue',
+      },
       { label: 'Medication adherence retained', value: '+$2,800', note: 'Ongoing fill revenue' },
       { label: 'Duplicate therapy resolved', value: '+$8,400', note: 'Avoided adverse event cost' },
     ],
@@ -96,8 +129,16 @@ const ENTITY_ROWS = [
     entity: 'Provider (Bennett County Health)',
     color: '#42be65',
     lines: [
-      { label: 'Unnecessary utilization avoided', value: '+$4,200', note: 'Point-of-care decision support' },
-      { label: 'Adverse event prevented (A1C)', value: '+$12,000', note: 'Duplicate therapy caught pre-visit' },
+      {
+        label: 'Unnecessary utilization avoided',
+        value: '+$4,200',
+        note: 'Point-of-care decision support',
+      },
+      {
+        label: 'Adverse event prevented (A1C)',
+        value: '+$12,000',
+        note: 'Duplicate therapy caught pre-visit',
+      },
       { label: 'Auth friction eliminated', value: '+$2,100', note: 'Pre-approval visible in EHR' },
     ],
     subtotal: '$18,300',
@@ -179,13 +220,24 @@ export default function PortfolioScaleScreen() {
           <div className="flex items-center gap-4">
             <div
               className="rounded px-3 py-1.5 flex items-center gap-2"
-              style={{ background: 'rgba(120,169,255,0.15)', border: '1px solid rgba(120,169,255,0.4)' }}
+              style={{
+                background: 'rgba(120,169,255,0.15)',
+                border: '1px solid rgba(120,169,255,0.4)',
+              }}
             >
               <div
                 className="rounded-full"
-                style={{ width: 7, height: 7, background: '#78a9ff', animation: 'authPulse 2s ease-in-out infinite' }}
+                style={{
+                  width: 7,
+                  height: 7,
+                  background: '#78a9ff',
+                  animation: 'authPulse 2s ease-in-out infinite',
+                }}
               />
-              <span className="font-mono font-semibold" style={{ fontSize: '11px', color: '#78a9ff', letterSpacing: '0.1em' }}>
+              <span
+                className="font-mono font-semibold"
+                style={{ fontSize: '11px', color: '#78a9ff', letterSpacing: '0.1em' }}
+              >
                 LIVE POPULATION FILTER
               </span>
             </div>
@@ -197,18 +249,24 @@ export default function PortfolioScaleScreen() {
             <div className="flex flex-col items-end gap-0.5">
               <span
                 className="font-mono font-bold"
-                style={{ fontSize: '28px', color: '#78a9ff', lineHeight: 1, letterSpacing: '-0.02em' }}
+                style={{
+                  fontSize: '28px',
+                  color: '#78a9ff',
+                  lineHeight: 1,
+                  letterSpacing: '-0.02em',
+                }}
               >
                 {counterValue.toLocaleString()}
               </span>
-              <span style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.06em' }}>CITIZENS LIKE MARIA — RIGHT NOW</span>
+              <span style={{ fontSize: '10px', color: '#6f6f6f', letterSpacing: '0.06em' }}>
+                CITIZENS LIKE MARIA — RIGHT NOW
+              </span>
             </div>
           </div>
         </div>
 
         {/* Main content — three columns */}
         <div className="flex-1 flex gap-0 min-h-0 overflow-hidden">
-
           {/* Col 1: Member grid */}
           <div
             className="flex flex-col overflow-hidden"
@@ -218,23 +276,35 @@ export default function PortfolioScaleScreen() {
               className="flex-shrink-0 px-4 py-3 flex items-center justify-between"
               style={{ borderBottom: '1px solid rgba(57,57,57,0.5)' }}
             >
-              <span className="font-mono uppercase tracking-wider" style={{ fontSize: '9px', color: '#6f6f6f', letterSpacing: '0.12em' }}>
+              <span
+                className="font-mono uppercase tracking-wider"
+                style={{ fontSize: '9px', color: '#6f6f6f', letterSpacing: '0.12em' }}
+              >
                 COMPLEX MULTI-CONDITION MEMBERS
               </span>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <div className="rounded-full" style={{ width: 7, height: 7, background: '#fa4d56' }} />
+                  <div
+                    className="rounded-full"
+                    style={{ width: 7, height: 7, background: '#fa4d56' }}
+                  />
                   <span style={{ fontSize: '10px', color: '#8d8d8d' }}>HIGH</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <div className="rounded-full" style={{ width: 7, height: 7, background: '#f1c21b' }} />
+                  <div
+                    className="rounded-full"
+                    style={{ width: 7, height: 7, background: '#f1c21b' }}
+                  />
                   <span style={{ fontSize: '10px', color: '#8d8d8d' }}>MED</span>
                 </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
-              <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}
+              >
                 {/* Maria card */}
                 <div
                   className="rounded p-2.5 flex flex-col gap-1.5 transition-all duration-500"
@@ -247,15 +317,35 @@ export default function PortfolioScaleScreen() {
                   <div className="flex items-center justify-between">
                     <div
                       className="rounded-full flex items-center justify-center"
-                      style={{ width: 24, height: 24, background: 'rgba(66,190,101,0.15)', border: '1px solid #42be65' }}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        background: 'rgba(66,190,101,0.15)',
+                        border: '1px solid #42be65',
+                      }}
                     >
-                      <span className="font-semibold text-white" style={{ fontSize: '9px' }}>MR</span>
+                      <span className="font-semibold text-white" style={{ fontSize: '9px' }}>
+                        MR
+                      </span>
                     </div>
-                    <div className="rounded px-1 py-0.5" style={{ background: 'rgba(66,190,101,0.15)', border: '1px solid rgba(66,190,101,0.4)' }}>
-                      <span className="font-mono" style={{ fontSize: '7px', color: '#42be65', letterSpacing: '0.08em' }}>RESOLVED</span>
+                    <div
+                      className="rounded px-1 py-0.5"
+                      style={{
+                        background: 'rgba(66,190,101,0.15)',
+                        border: '1px solid rgba(66,190,101,0.4)',
+                      }}
+                    >
+                      <span
+                        className="font-mono"
+                        style={{ fontSize: '7px', color: '#42be65', letterSpacing: '0.08em' }}
+                      >
+                        RESOLVED
+                      </span>
                     </div>
                   </div>
-                  <span className="font-semibold text-white" style={{ fontSize: '10px' }}>Maria Redhawk</span>
+                  <span className="font-semibold text-white" style={{ fontSize: '10px' }}>
+                    Maria Redhawk
+                  </span>
                   <span style={{ fontSize: '9px', color: '#8d8d8d' }}>Postpartum Health</span>
                   <span style={{ fontSize: '9px', color: '#42be65' }}>✓ Orchestrated</span>
                 </div>
@@ -264,21 +354,44 @@ export default function PortfolioScaleScreen() {
                   <div
                     key={member.id}
                     className="rounded p-2.5 flex flex-col gap-1.5"
-                    style={{ background: `${member.color}08`, border: `1px solid ${member.color}30` }}
+                    style={{
+                      background: `${member.color}08`,
+                      border: `1px solid ${member.color}30`,
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div
                         className="rounded-full flex items-center justify-center"
-                        style={{ width: 24, height: 24, background: `${member.color}15`, border: `1px solid ${member.color}` }}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          background: `${member.color}15`,
+                          border: `1px solid ${member.color}`,
+                        }}
                       >
-                        <span className="font-semibold text-white" style={{ fontSize: '9px' }}>{member.initials}</span>
+                        <span className="font-semibold text-white" style={{ fontSize: '9px' }}>
+                          {member.initials}
+                        </span>
                       </div>
-                      <div className="rounded px-1 py-0.5" style={{ background: `${member.color}15`, border: `1px solid ${member.color}40` }}>
-                        <span className="font-mono" style={{ fontSize: '7px', color: member.color, letterSpacing: '0.08em' }}>{member.risk}</span>
+                      <div
+                        className="rounded px-1 py-0.5"
+                        style={{
+                          background: `${member.color}15`,
+                          border: `1px solid ${member.color}40`,
+                        }}
+                      >
+                        <span
+                          className="font-mono"
+                          style={{ fontSize: '7px', color: member.color, letterSpacing: '0.08em' }}
+                        >
+                          {member.risk}
+                        </span>
                       </div>
                     </div>
                     <span style={{ fontSize: '9px', color: '#8d8d8d' }}>{member.conditions}</span>
-                    <span style={{ fontSize: '9px', color: member.color }}>{member.openIssues} open gaps</span>
+                    <span style={{ fontSize: '9px', color: member.color }}>
+                      {member.openIssues} open gaps
+                    </span>
                   </div>
                 ))}
               </div>
@@ -288,30 +401,53 @@ export default function PortfolioScaleScreen() {
           {/* Col 2: SD Medicaid Payer View */}
           <div
             className="flex flex-col overflow-hidden"
-            style={{ width: '30%', borderRight: '1px solid rgba(57,57,57,0.5)', background: '#1a1a1a' }}
+            style={{
+              width: '30%',
+              borderRight: '1px solid rgba(57,57,57,0.5)',
+              background: '#1a1a1a',
+            }}
           >
             {/* Column header */}
             <div
               className="flex-shrink-0 px-4 py-3 flex items-center gap-2"
-              style={{ borderBottom: '1px solid rgba(57,57,57,0.5)', background: 'rgba(120,169,255,0.06)' }}
+              style={{
+                borderBottom: '1px solid rgba(57,57,57,0.5)',
+                background: 'rgba(120,169,255,0.06)',
+              }}
             >
-              <div className="rounded-full" style={{ width: 7, height: 7, background: '#78a9ff' }} />
-              <span className="font-mono uppercase tracking-wider" style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.12em' }}>
+              <div
+                className="rounded-full"
+                style={{ width: 7, height: 7, background: '#78a9ff' }}
+              />
+              <span
+                className="font-mono uppercase tracking-wider"
+                style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.12em' }}
+              >
                 SD Medicaid PAYER VIEW — WHAT YOUR CFO SEES
               </span>
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0 flex flex-col gap-4">
-
               {showStats && (
                 <div className="flex flex-col gap-3 fade-in">
                   <div
                     className="rounded p-4"
-                    style={{ background: 'rgba(120,169,255,0.06)', border: '1px solid rgba(120,169,255,0.2)', borderLeft: '3px solid #78a9ff' }}
+                    style={{
+                      background: 'rgba(120,169,255,0.06)',
+                      border: '1px solid rgba(120,169,255,0.2)',
+                      borderLeft: '3px solid #78a9ff',
+                    }}
                   >
                     <div className="flex flex-col gap-1 mb-3">
-                      <span className="font-mono font-bold" style={{ fontSize: '32px', color: '#78a9ff', lineHeight: 1 }}>$47,000</span>
-                      <span style={{ fontSize: '11px', color: '#8d8d8d' }}>per failed episode — payer cost avoided</span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '32px', color: '#78a9ff', lineHeight: 1 }}
+                      >
+                        $47,000
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#8d8d8d' }}>
+                        per failed episode — payer cost avoided
+                      </span>
                     </div>
                     <div className="flex flex-col gap-1.5">
                       {[
@@ -321,7 +457,12 @@ export default function PortfolioScaleScreen() {
                       ].map((row) => (
                         <div key={row.label} className="flex items-center justify-between">
                           <span style={{ fontSize: '11px', color: '#8d8d8d' }}>{row.label}</span>
-                          <span className="font-mono font-semibold" style={{ fontSize: '12px', color: row.color }}>{row.value}</span>
+                          <span
+                            className="font-mono font-semibold"
+                            style={{ fontSize: '12px', color: row.color }}
+                          >
+                            {row.value}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -329,20 +470,56 @@ export default function PortfolioScaleScreen() {
 
                   <div className="flex flex-col gap-2">
                     {[
-                      { id: 's1', label: 'Multi-condition, HIGH risk', value: '4,847', color: '#fa4d56', pct: 33 },
-                      { id: 's2', label: 'Auth + care gap overlap', value: '6,291', color: '#f59e0b', pct: 42 },
-                      { id: 's3', label: 'Provider eligibility', value: '2,109', color: '#f1c21b', pct: 14 },
-                      { id: 's4', label: 'Appeal window open', value: '1,600', color: '#8b5cf6', pct: 11 },
+                      {
+                        id: 's1',
+                        label: 'Multi-condition, HIGH risk',
+                        value: '4,847',
+                        color: '#fa4d56',
+                        pct: 33,
+                      },
+                      {
+                        id: 's2',
+                        label: 'Auth + care gap overlap',
+                        value: '6,291',
+                        color: '#f59e0b',
+                        pct: 42,
+                      },
+                      {
+                        id: 's3',
+                        label: 'Provider eligibility',
+                        value: '2,109',
+                        color: '#f1c21b',
+                        pct: 14,
+                      },
+                      {
+                        id: 's4',
+                        label: 'Appeal window open',
+                        value: '1,600',
+                        color: '#8b5cf6',
+                        pct: 11,
+                      },
                     ].map((stat) => (
                       <div key={stat.id} className="flex flex-col gap-1">
                         <div className="flex items-center justify-between">
                           <span style={{ fontSize: '11px', color: '#c6c6c6' }}>{stat.label}</span>
-                          <span className="font-mono font-semibold" style={{ fontSize: '13px', color: stat.color }}>{stat.value}</span>
+                          <span
+                            className="font-mono font-semibold"
+                            style={{ fontSize: '13px', color: stat.color }}
+                          >
+                            {stat.value}
+                          </span>
                         </div>
-                        <div className="w-full rounded-full overflow-hidden" style={{ height: 4, background: 'rgba(57,57,57,0.6)' }}>
+                        <div
+                          className="w-full rounded-full overflow-hidden"
+                          style={{ height: 4, background: 'rgba(57,57,57,0.6)' }}
+                        >
                           <div
                             className="h-full rounded-full"
-                            style={{ width: `${stat.pct}%`, background: stat.color, transition: 'width 1s cubic-bezier(0.4,0,0.2,1)' }}
+                            style={{
+                              width: `${stat.pct}%`,
+                              background: stat.color,
+                              transition: 'width 1s cubic-bezier(0.4,0,0.2,1)',
+                            }}
                           />
                         </div>
                       </div>
@@ -352,29 +529,69 @@ export default function PortfolioScaleScreen() {
                   {/* Payer-only exposure */}
                   <div
                     className="rounded p-3"
-                    style={{ background: 'rgba(250,77,86,0.06)', border: '1px solid rgba(250,77,86,0.2)', borderLeft: '3px solid #fa4d56' }}
+                    style={{
+                      background: 'rgba(250,77,86,0.06)',
+                      border: '1px solid rgba(250,77,86,0.2)',
+                      borderLeft: '3px solid #fa4d56',
+                    }}
                   >
                     <div className="flex flex-col gap-1">
-                      <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#fa4d56', letterSpacing: '0.1em' }}>PAYER EXPOSURE</span>
-                      <span className="font-mono font-bold" style={{ fontSize: '22px', color: '#fa4d56', lineHeight: 1 }}>$697M</span>
-                      <span style={{ fontSize: '11px', color: '#8d8d8d' }}>14,847 × $47K unmanaged cost</span>
+                      <span
+                        className="font-mono uppercase"
+                        style={{ fontSize: '9px', color: '#fa4d56', letterSpacing: '0.1em' }}
+                      >
+                        PAYER EXPOSURE
+                      </span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '22px', color: '#fa4d56', lineHeight: 1 }}
+                      >
+                        $697M
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#8d8d8d' }}>
+                        14,847 × $47K unmanaged cost
+                      </span>
                     </div>
                   </div>
 
                   {/* Household multiplier */}
                   <div
                     className="rounded p-3"
-                    style={{ background: 'rgba(255,126,182,0.06)', border: '1px solid rgba(255,126,182,0.2)', borderLeft: '3px solid #ff7eb6' }}
+                    style={{
+                      background: 'rgba(255,126,182,0.06)',
+                      border: '1px solid rgba(255,126,182,0.2)',
+                      borderLeft: '3px solid #ff7eb6',
+                    }}
                   >
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#ff7eb6', letterSpacing: '0.1em' }}>HOUSEHOLD MULTIPLIER</span>
+                      <span
+                        className="font-mono uppercase"
+                        style={{ fontSize: '9px', color: '#ff7eb6', letterSpacing: '0.1em' }}
+                      >
+                        HOUSEHOLD MULTIPLIER
+                      </span>
                     </div>
                     <div className="flex items-baseline gap-1.5 flex-wrap">
-                      <span className="font-mono font-bold" style={{ fontSize: '16px', color: '#ff7eb6' }}>14,847</span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '16px', color: '#ff7eb6' }}
+                      >
+                        14,847
+                      </span>
                       <span style={{ fontSize: '11px', color: '#6f6f6f' }}>×</span>
-                      <span className="font-mono font-bold" style={{ fontSize: '14px', color: '#c084fc' }}>2.3</span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '14px', color: '#c084fc' }}
+                      >
+                        2.3
+                      </span>
                       <span style={{ fontSize: '11px', color: '#6f6f6f' }}>=</span>
-                      <span className="font-mono font-bold" style={{ fontSize: '16px', color: '#f97316' }}>34,148</span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '16px', color: '#f97316' }}
+                      >
+                        34,148
+                      </span>
                       <span style={{ fontSize: '11px', color: '#8d8d8d' }}>people affected</span>
                     </div>
                   </div>
@@ -382,22 +599,67 @@ export default function PortfolioScaleScreen() {
                   {/* Questions */}
                   <div
                     className="rounded p-3 flex flex-col gap-2"
-                    style={{ background: 'rgba(38,38,38,0.7)', border: '1px solid rgba(57,57,57,0.7)', borderTop: '2px solid rgba(120,169,255,0.4)' }}
+                    style={{
+                      background: 'rgba(38,38,38,0.7)',
+                      border: '1px solid rgba(57,57,57,0.7)',
+                      borderTop: '2px solid rgba(120,169,255,0.4)',
+                    }}
                   >
-                    <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.1em' }}>QUESTIONS FOR THE ROOM</span>
+                    <span
+                      className="font-mono uppercase"
+                      style={{ fontSize: '9px', color: '#78a9ff', letterSpacing: '0.1em' }}
+                    >
+                      QUESTIONS FOR THE ROOM
+                    </span>
                     {[
-                      { id: 'q1', q: 'How many Marias haven\'t your coordinators found yet?', color: '#fa4d56' },
-                      { id: 'q2', q: 'What does a missed 72-hour SD Medicaid appeal window cost per quarter?', color: '#f59e0b' },
-                      { id: 'q3', q: 'What happens to Star Rating if you close 71% more care gaps?', color: '#42be65' },
+                      {
+                        id: 'q1',
+                        q: "How many Marias haven't your coordinators found yet?",
+                        color: '#fa4d56',
+                      },
+                      {
+                        id: 'q2',
+                        q: 'What does a missed 72-hour SD Medicaid appeal window cost per quarter?',
+                        color: '#f59e0b',
+                      },
+                      {
+                        id: 'q3',
+                        q: 'What happens to Star Rating if you close 71% more care gaps?',
+                        color: '#42be65',
+                      },
                     ].map((item, i) => (
-                      <div key={item.id} className="flex items-start gap-2 rounded px-2.5 py-2" style={{ background: `${item.color}06`, border: `1px solid ${item.color}20` }}>
+                      <div
+                        key={item.id}
+                        className="flex items-start gap-2 rounded px-2.5 py-2"
+                        style={{
+                          background: `${item.color}06`,
+                          border: `1px solid ${item.color}20`,
+                        }}
+                      >
                         <div
                           className="rounded-full flex items-center justify-center flex-shrink-0 font-mono font-bold"
-                          style={{ width: 16, height: 16, background: `${item.color}15`, border: `1px solid ${item.color}50`, fontSize: '9px', color: item.color, marginTop: 1 }}
+                          style={{
+                            width: 16,
+                            height: 16,
+                            background: `${item.color}15`,
+                            border: `1px solid ${item.color}50`,
+                            fontSize: '9px',
+                            color: item.color,
+                            marginTop: 1,
+                          }}
                         >
                           {i + 1}
                         </div>
-                        <p style={{ fontSize: '11px', color: '#c6c6c6', lineHeight: 1.5, fontStyle: 'italic' }}>"{item.q}"</p>
+                        <p
+                          style={{
+                            fontSize: '11px',
+                            color: '#c6c6c6',
+                            lineHeight: 1.5,
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          "{item.q}"
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -414,11 +676,20 @@ export default function PortfolioScaleScreen() {
             {/* Column header */}
             <div
               className="flex-shrink-0 px-4 py-3 flex items-center justify-between"
-              style={{ borderBottom: '1px solid rgba(57,57,57,0.5)', background: 'rgba(66,190,101,0.06)' }}
+              style={{
+                borderBottom: '1px solid rgba(57,57,57,0.5)',
+                background: 'rgba(66,190,101,0.06)',
+              }}
             >
               <div className="flex items-center gap-2">
-                <div className="rounded-full" style={{ width: 7, height: 7, background: '#42be65' }} />
-                <span className="font-mono uppercase tracking-wider" style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.12em' }}>
+                <div
+                  className="rounded-full"
+                  style={{ width: 7, height: 7, background: '#42be65' }}
+                />
+                <span
+                  className="font-mono uppercase tracking-wider"
+                  style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.12em' }}
+                >
                   ENTERPRISE VIEW — ONE RESOLUTION · FIVE P&amp;L LINES
                 </span>
               </div>
@@ -427,7 +698,6 @@ export default function PortfolioScaleScreen() {
             <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0 flex flex-col gap-3">
               {showEnterprise && (
                 <div className="flex flex-col gap-3 fade-in">
-
                   {/* Per-entity rows */}
                   {ENTITY_ROWS.map((entity) => (
                     <div
@@ -438,33 +708,61 @@ export default function PortfolioScaleScreen() {
                       {/* Entity header */}
                       <div
                         className="flex items-center justify-between px-3 py-2"
-                        style={{ background: `${entity.color}10`, borderBottom: `1px solid ${entity.color}20` }}
+                        style={{
+                          background: `${entity.color}10`,
+                          borderBottom: `1px solid ${entity.color}20`,
+                        }}
                       >
                         <div className="flex items-center gap-2">
-                          <div className="rounded-full" style={{ width: 6, height: 6, background: entity.color }} />
-                          <span className="font-mono font-semibold" style={{ fontSize: '11px', color: entity.color, letterSpacing: '0.04em' }}>
+                          <div
+                            className="rounded-full"
+                            style={{ width: 6, height: 6, background: entity.color }}
+                          />
+                          <span
+                            className="font-mono font-semibold"
+                            style={{
+                              fontSize: '11px',
+                              color: entity.color,
+                              letterSpacing: '0.04em',
+                            }}
+                          >
                             {entity.entity}
                           </span>
                         </div>
-                        <span className="font-mono font-bold" style={{ fontSize: '13px', color: entity.color }}>
+                        <span
+                          className="font-mono font-bold"
+                          style={{ fontSize: '13px', color: entity.color }}
+                        >
                           {entity.subtotal}
                         </span>
                       </div>
                       {/* Value lines */}
-                      <div className="flex flex-col divide-y" style={{ borderColor: `${entity.color}10` }}>
+                      <div
+                        className="flex flex-col divide-y"
+                        style={{ borderColor: `${entity.color}10` }}
+                      >
                         {entity.lines.map((line, li) => (
                           <div
                             key={li}
                             className="flex items-center justify-between px-3 py-1.5"
-                            style={{ background: li % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}
+                            style={{
+                              background: li % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent',
+                            }}
                           >
                             <div className="flex flex-col gap-0.5">
-                              <span style={{ fontSize: '11px', color: '#c6c6c6' }}>{line.label}</span>
-                              <span style={{ fontSize: '10px', color: '#6f6f6f' }}>{line.note}</span>
+                              <span style={{ fontSize: '11px', color: '#c6c6c6' }}>
+                                {line.label}
+                              </span>
+                              <span style={{ fontSize: '10px', color: '#6f6f6f' }}>
+                                {line.note}
+                              </span>
                             </div>
                             <span
                               className="font-mono font-semibold flex-shrink-0 ml-3"
-                              style={{ fontSize: '12px', color: line.value.startsWith('+') ? entity.color : '#6f6f6f' }}
+                              style={{
+                                fontSize: '12px',
+                                color: line.value.startsWith('+') ? entity.color : '#6f6f6f',
+                              }}
                             >
                               {line.value}
                             </span>
@@ -484,20 +782,41 @@ export default function PortfolioScaleScreen() {
                     }}
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="rounded-full" style={{ width: 6, height: 6, background: '#42be65' }} />
-                      <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.12em' }}>
+                      <div
+                        className="rounded-full"
+                        style={{ width: 6, height: 6, background: '#42be65' }}
+                      />
+                      <span
+                        className="font-mono uppercase"
+                        style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.12em' }}
+                      >
                         TOTAL ENTERPRISE VALUE — SINGLE MARIA RESOLUTION
                       </span>
                     </div>
                     <div className="flex items-end justify-between gap-4 mb-3">
                       <div className="flex flex-col gap-0.5">
-                        <span className="font-mono font-bold" style={{ fontSize: '36px', color: '#42be65', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                        <span
+                          className="font-mono font-bold"
+                          style={{
+                            fontSize: '36px',
+                            color: '#42be65',
+                            lineHeight: 1,
+                            letterSpacing: '-0.02em',
+                          }}
+                        >
                           $96,420
                         </span>
-                        <span style={{ fontSize: '11px', color: '#8d8d8d' }}>enterprise value per resolution</span>
+                        <span style={{ fontSize: '11px', color: '#8d8d8d' }}>
+                          enterprise value per resolution
+                        </span>
                       </div>
                       <div className="flex flex-col items-end gap-0.5">
-                        <span className="font-mono font-bold" style={{ fontSize: '20px', color: '#fa4d56', lineHeight: 1 }}>$47,000</span>
+                        <span
+                          className="font-mono font-bold"
+                          style={{ fontSize: '20px', color: '#fa4d56', lineHeight: 1 }}
+                        >
+                          $47,000
+                        </span>
                         <span style={{ fontSize: '10px', color: '#6f6f6f' }}>payer-only view</span>
                       </div>
                     </div>
@@ -505,28 +824,42 @@ export default function PortfolioScaleScreen() {
                     {/* Delta callout */}
                     <div
                       className="rounded px-3 py-2.5 flex items-center justify-between"
-                      style={{ background: 'rgba(66,190,101,0.12)', border: '1px solid rgba(66,190,101,0.3)' }}
+                      style={{
+                        background: 'rgba(66,190,101,0.12)',
+                        border: '1px solid rgba(66,190,101,0.3)',
+                      }}
                     >
                       <span style={{ fontSize: '12px', color: '#c6c6c6' }}>
                         Value invisible to TCOC story
                       </span>
-                      <span className="font-mono font-bold" style={{ fontSize: '16px', color: '#42be65' }}>+$49,420</span>
+                      <span
+                        className="font-mono font-bold"
+                        style={{ fontSize: '16px', color: '#42be65' }}
+                      >
+                        +$49,420
+                      </span>
                     </div>
                   </div>
 
                   <div
                     className="rounded px-3 py-2"
-                    style={{ background: 'rgba(57,57,57,0.4)', border: '1px solid rgba(57,57,57,0.6)' }}
+                    style={{
+                      background: 'rgba(57,57,57,0.4)',
+                      border: '1px solid rgba(57,57,57,0.6)',
+                    }}
                   >
-                    <span className="font-mono" style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.06em' }}>
-                      Population filter: risk score ≥ 6.0 · 2+ active conditions · 1+ open coordination gap · 124,847 total members
+                    <span
+                      className="font-mono"
+                      style={{ fontSize: '10px', color: '#4b5563', letterSpacing: '0.06em' }}
+                    >
+                      Population filter: risk score ≥ 6.0 · 2+ active conditions · 1+ open
+                      coordination gap · 124,847 total members
                     </span>
                   </div>
                 </div>
               )}
             </div>
           </div>
-
         </div>
 
         {/* PORTFOLIO DELTA — Full-width breakout */}
@@ -541,43 +874,119 @@ export default function PortfolioScaleScreen() {
           {/* Header bar */}
           <div
             className="px-5 py-2.5 flex items-center gap-3"
-            style={{ background: 'rgba(66,190,101,0.12)', borderBottom: '1px solid rgba(66,190,101,0.3)' }}
+            style={{
+              background: 'rgba(66,190,101,0.12)',
+              borderBottom: '1px solid rgba(66,190,101,0.3)',
+            }}
           >
-            <div className="w-2 h-2 rounded-full" style={{ background: '#42be65', boxShadow: '0 0 6px #42be65' }} />
-            <span className="font-mono font-bold uppercase tracking-widest" style={{ fontSize: '11px', color: '#42be65', letterSpacing: '0.18em' }}>
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ background: '#42be65', boxShadow: '0 0 6px #42be65' }}
+            />
+            <span
+              className="font-mono font-bold uppercase tracking-widest"
+              style={{ fontSize: '11px', color: '#42be65', letterSpacing: '0.18em' }}
+            >
               PORTFOLIO DELTA — 14,847 MEMBERS
             </span>
             <div className="flex-1 h-px" style={{ background: 'rgba(66,190,101,0.2)' }} />
-            <span className="font-mono" style={{ fontSize: '10px', color: 'rgba(66,190,101,0.5)' }}>BOARD-LEVEL SUMMARY</span>
+            <span className="font-mono" style={{ fontSize: '10px', color: 'rgba(66,190,101,0.5)' }}>
+              BOARD-LEVEL SUMMARY
+            </span>
           </div>
 
           {/* Three-column value story */}
-          <div className="grid grid-cols-3 divide-x" style={{ borderColor: 'rgba(66,190,101,0.15)' }}>
+          <div
+            className="grid grid-cols-3 divide-x"
+            style={{ borderColor: 'rgba(66,190,101,0.15)' }}
+          >
             {/* Payer story */}
             <div className="px-5 py-4 flex flex-col gap-1.5">
-              <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#fa4d56', letterSpacing: '0.14em' }}>PAYER STORY · CFO SEES</span>
-              <span className="font-mono font-bold" style={{ fontSize: '28px', color: '#fa4d56', lineHeight: 1, textShadow: '0 0 20px rgba(250,77,86,0.4)' }}>$697M</span>
-              <span style={{ fontSize: '11px', color: '#6f6f6f' }}>Unmanaged cost exposure · SD Medicaid TCOC impact</span>
+              <span
+                className="font-mono uppercase"
+                style={{ fontSize: '9px', color: '#fa4d56', letterSpacing: '0.14em' }}
+              >
+                PAYER STORY · CFO SEES
+              </span>
+              <span
+                className="font-mono font-bold"
+                style={{
+                  fontSize: '28px',
+                  color: '#fa4d56',
+                  lineHeight: 1,
+                  textShadow: '0 0 20px rgba(250,77,86,0.4)',
+                }}
+              >
+                $697M
+              </span>
+              <span style={{ fontSize: '11px', color: '#6f6f6f' }}>
+                Unmanaged cost exposure · SD Medicaid TCOC impact
+              </span>
             </div>
 
             {/* Enterprise story */}
-            <div className="px-5 py-4 flex flex-col gap-1.5" style={{ borderLeft: '1px solid rgba(66,190,101,0.15)' }}>
-              <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.14em' }}>ENTERPRISE STORY · BOARD PRESENTATION</span>
-              <span className="font-mono font-bold" style={{ fontSize: '28px', color: '#42be65', lineHeight: 1, textShadow: '0 0 20px rgba(66,190,101,0.4)' }}>$1.16B</span>
-              <span style={{ fontSize: '11px', color: '#6f6f6f' }}>SD Medicaid + Bennett County Health + Martin Pharmacy + RHTP + Provider combined</span>
+            <div
+              className="px-5 py-4 flex flex-col gap-1.5"
+              style={{ borderLeft: '1px solid rgba(66,190,101,0.15)' }}
+            >
+              <span
+                className="font-mono uppercase"
+                style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.14em' }}
+              >
+                ENTERPRISE STORY · BOARD PRESENTATION
+              </span>
+              <span
+                className="font-mono font-bold"
+                style={{
+                  fontSize: '28px',
+                  color: '#42be65',
+                  lineHeight: 1,
+                  textShadow: '0 0 20px rgba(66,190,101,0.4)',
+                }}
+              >
+                $1.16B
+              </span>
+              <span style={{ fontSize: '11px', color: '#6f6f6f' }}>
+                SD Medicaid + Bennett County Health + Martin Pharmacy + RHTP + Provider combined
+              </span>
             </div>
 
             {/* Invisible delta */}
             <div
               className="px-5 py-4 flex flex-col gap-1.5"
-              style={{ borderLeft: '1px solid rgba(66,190,101,0.15)', background: 'rgba(66,190,101,0.06)' }}
+              style={{
+                borderLeft: '1px solid rgba(66,190,101,0.15)',
+                background: 'rgba(66,190,101,0.06)',
+              }}
             >
-              <span className="font-mono uppercase" style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.14em' }}>INVISIBLE TO TCOC STORY</span>
+              <span
+                className="font-mono uppercase"
+                style={{ fontSize: '9px', color: '#42be65', letterSpacing: '0.14em' }}
+              >
+                INVISIBLE TO TCOC STORY
+              </span>
               <div className="flex items-baseline gap-2">
-                <span className="font-mono font-bold" style={{ fontSize: '28px', color: '#42be65', lineHeight: 1, textShadow: '0 0 20px rgba(66,190,101,0.5)' }}>+$460M</span>
-                <span className="font-mono" style={{ fontSize: '12px', color: 'rgba(66,190,101,0.6)' }}>delta</span>
+                <span
+                  className="font-mono font-bold"
+                  style={{
+                    fontSize: '28px',
+                    color: '#42be65',
+                    lineHeight: 1,
+                    textShadow: '0 0 20px rgba(66,190,101,0.5)',
+                  }}
+                >
+                  +$460M
+                </span>
+                <span
+                  className="font-mono"
+                  style={{ fontSize: '12px', color: 'rgba(66,190,101,0.6)' }}
+                >
+                  delta
+                </span>
               </div>
-              <span style={{ fontSize: '11px', color: '#a8f0c6' }}>Value that belongs in your board presentation</span>
+              <span style={{ fontSize: '11px', color: '#a8f0c6' }}>
+                Value that belongs in your board presentation
+              </span>
             </div>
           </div>
         </div>

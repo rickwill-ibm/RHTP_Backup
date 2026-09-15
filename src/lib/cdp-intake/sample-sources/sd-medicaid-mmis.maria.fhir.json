@@ -2,23 +2,110 @@
   "resourceType": "Bundle",
   "type": "collection",
   "entry": [
-    { "resource": { "resourceType": "Patient", "id": "pat-maria-001",
-        "identifier": [ { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-88213" }, { "system": "urn:bennett-county-ehr:mrn", "value": "MARIA_SD_001" } ],
-        "name": [{ "family": "Redhawk", "given": ["Maria"] }], "gender": "female", "birthDate": "1992-06-15" } },
-    { "resource": { "resourceType": "Coverage", "id": "cov-maria-001", "status": "active",
-        "beneficiary": { "reference": "Patient/pat-maria-001" }, "payor": [{ "display": "SD Medicaid" }], "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }] } },
-    { "resource": { "resourceType": "Condition", "id": "cond-transport-001",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "Z59.82", "display": "Transportation insecurity" }] },
-        "subject": { "reference": "Patient/pat-maria-001" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-food-001",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "Z59.41", "display": "Food insecurity" }] },
-        "subject": { "reference": "Patient/pat-maria-001" } } },
-    { "resource": { "resourceType": "Observation", "id": "obs-a1c-001", "status": "final",
-        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory" }] }],
-        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }] },
-        "subject": { "reference": "Patient/pat-maria-001" }, "effectiveDateTime": "2026-02-10",
-        "valueQuantity": { "value": 6.2, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" } } }
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-maria-001",
+        "identifier": [
+          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-88213" },
+          { "system": "urn:bennett-county-ehr:mrn", "value": "MARIA_SD_001" }
+        ],
+        "name": [{ "family": "Redhawk", "given": ["Maria"] }],
+        "gender": "female",
+        "birthDate": "1992-06-15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-maria-001",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-maria-001" },
+        "payor": [{ "display": "SD Medicaid" }],
+        "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-transport-001",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z59.82",
+              "display": "Transportation insecurity"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-maria-001" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-food-001",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "Z59.41",
+              "display": "Food insecurity"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-maria-001" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-001",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-maria-001" },
+        "effectiveDateTime": "2026-02-10",
+        "valueQuantity": {
+          "value": 6.2,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        }
+      }
+    }
   ]
 }

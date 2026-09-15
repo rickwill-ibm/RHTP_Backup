@@ -18,12 +18,54 @@ export interface CoalitionAgent {
 
 // The dispatchable domain agents (these become the controller's agent panels).
 export const DOMAIN_COALITION: CoalitionAgent[] = [
-  { id: 'agent-care',      libId: 'care-mgmt',       name: 'Clinical Care Agent',          role: 'PRIMARY',    color: '#0C55B8', trigger: 'CARE_GAP' },
-  { id: 'agent-provider',  libId: 'sdoh-intel',      name: 'Social / SDOH Agent',          role: 'CONCURRENT', color: '#8b5cf6', trigger: 'SDOH' },
-  { id: 'agent-util',      libId: 'util-mgmt',       name: 'Eligibility Agent',            role: 'SUPPORTING', color: '#f59e0b', trigger: 'AUTH_EXPIRY' },
-  { id: 'agent-appeals',   libId: 'appeals',         name: 'Behavioral Health Agent',      role: 'COMPLIANCE', color: '#ef4444', trigger: 'BH' },
-  { id: 'agent-caregiver', libId: 'caregiver-intel', name: 'Caregiver Intelligence Agent', role: 'SPECIALIST', color: '#c084fc', trigger: 'CAREGIVER' },
-  { id: 'agent-financial', libId: 'financial-intel', name: 'Financial Intelligence Agent', role: 'SPECIALIST', color: '#10b981', trigger: 'COST' },
+  {
+    id: 'agent-care',
+    libId: 'care-mgmt',
+    name: 'Clinical Care Agent',
+    role: 'PRIMARY',
+    color: '#0C55B8',
+    trigger: 'CARE_GAP',
+  },
+  {
+    id: 'agent-provider',
+    libId: 'sdoh-intel',
+    name: 'Social / SDOH Agent',
+    role: 'CONCURRENT',
+    color: '#8b5cf6',
+    trigger: 'SDOH',
+  },
+  {
+    id: 'agent-util',
+    libId: 'util-mgmt',
+    name: 'Eligibility Agent',
+    role: 'SUPPORTING',
+    color: '#f59e0b',
+    trigger: 'AUTH_EXPIRY',
+  },
+  {
+    id: 'agent-appeals',
+    libId: 'appeals',
+    name: 'Behavioral Health Agent',
+    role: 'COMPLIANCE',
+    color: '#ef4444',
+    trigger: 'BH',
+  },
+  {
+    id: 'agent-caregiver',
+    libId: 'caregiver-intel',
+    name: 'Caregiver Intelligence Agent',
+    role: 'SPECIALIST',
+    color: '#c084fc',
+    trigger: 'CAREGIVER',
+  },
+  {
+    id: 'agent-financial',
+    libId: 'financial-intel',
+    name: 'Financial Intelligence Agent',
+    role: 'SPECIALIST',
+    color: '#10b981',
+    trigger: 'COST',
+  },
 ];
 
 const ALWAYS_ON_LIB_IDS = ['graph-intel', 'identity', 'consent', 'person-state'];
@@ -33,7 +75,7 @@ export function activeTriggers(p: RegistryPatient): Set<TriggerCode> {
   const t = new Set<TriggerCode>(['CARE_GAP', 'AUTH_EXPIRY', 'COST']);
   const sdoh =
     /barrier|mile|insecur|waitlist|instab|assistance|not enrolled|expired|lapsed/i.test(
-      `${p.transportStatus || ''} ${p.foodSecurity || ''} ${p.housingStatus || ''} ${p.snapStatus || ''}`,
+      `${p.transportStatus || ''} ${p.foodSecurity || ''} ${p.housingStatus || ''} ${p.snapStatus || ''}`
     ) ||
     /low income|rural/i.test(p.disparityFlag || '') ||
     (p.careGaps || []).some((g) => g.domain === 'Social' && g.status !== 'Closed');

@@ -14,7 +14,10 @@ const EVENT_TYPE_RE = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/;
 const EVENT_VERSION_RE = /^\d+\.\d+$/;
 
 export class EnvelopeValidationError extends Error {
-  constructor(public readonly field: string, detail: string) {
+  constructor(
+    public readonly field: string,
+    detail: string
+  ) {
     super(`C2 envelope invalid at "${field}": ${detail}`);
     this.name = 'EnvelopeValidationError';
   }
@@ -39,7 +42,7 @@ export function uuidV4(rng: () => number): string {
 export function buildEnvelope(
   row: OutboxIntentRow,
   sequence: number,
-  deps: { now: () => number; rng: () => number },
+  deps: { now: () => number; rng: () => number }
 ): C2Event {
   const input = row.envelope;
   const recordedAt = new Date(deps.now()).toISOString();
@@ -100,7 +103,7 @@ export function validateEnvelope(e: C2Event): void {
 export function intentRowFrom(
   input: OutboxIntentInput,
   id: string,
-  nowMs: number,
+  nowMs: number
 ): OutboxIntentRow {
   return {
     id,

@@ -66,7 +66,7 @@ function EvidenceDrawer({
     dateOfService: '',
     renderingProvider: gap.assignedTo,
     hedisResult: '',
-    fhirResourceId: '',   // populated from canonical obs ID at submit time
+    fhirResourceId: '', // populated from canonical obs ID at submit time
     notes: '',
   });
 
@@ -96,7 +96,8 @@ function EvidenceDrawer({
   });
 
   const canProceed = () => {
-    if (gap.domain === 'Clinical') return clinical.procedureCode.length > 0 && clinical.dateOfService.length > 0;
+    if (gap.domain === 'Clinical')
+      return clinical.procedureCode.length > 0 && clinical.dateOfService.length > 0;
     if (gap.domain === 'BH') return bh.score.length > 0 && bh.sessionDate.length > 0;
     if (gap.domain === 'Social') return social.programEnrolled.length > 0;
     return true;
@@ -112,7 +113,8 @@ function EvidenceDrawer({
     return `Program: ${social.programEnrolled} | Benefit ID: ${social.benefitId} | CBO: ${social.cboWorker} | Enrolled: ${social.enrollmentDate} | SDOH Domain: ${social.sdohDomain}`;
   };
 
-  const inputCls = 'w-full px-3 py-2 text-sm bg-white border border-carbon-gray-30 focus:outline-none focus:border-[#0f62fe]';
+  const inputCls =
+    'w-full px-3 py-2 text-sm bg-white border border-carbon-gray-30 focus:outline-none focus:border-[#0f62fe]';
   const labelCls = 'block text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-1';
 
   return (
@@ -148,16 +150,26 @@ function EvidenceDrawer({
                 <div className="flex items-center gap-1.5">
                   <div
                     className={`w-5 h-5 flex items-center justify-center text-2xs font-bold border ${
-                      done ? 'bg-[#24a148] border-[#24a148] text-white' : active ? 'bg-[#0f62fe] border-[#0f62fe] text-white' : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
+                      done
+                        ? 'bg-[#24a148] border-[#24a148] text-white'
+                        : active
+                          ? 'bg-[#0f62fe] border-[#0f62fe] text-white'
+                          : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
                     }`}
                   >
                     {done ? <Icon name="CheckIcon" size={10} /> : i + 1}
                   </div>
-                  <span className={`text-2xs font-medium ${active ? 'text-[#0f62fe]' : done ? 'text-[#24a148]' : 'text-carbon-gray-50'}`}>
+                  <span
+                    className={`text-2xs font-medium ${active ? 'text-[#0f62fe]' : done ? 'text-[#24a148]' : 'text-carbon-gray-50'}`}
+                  >
                     {labels[i]}
                   </span>
                 </div>
-                {i < 2 && <div className={`flex-1 h-0.5 mx-2 ${done ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />}
+                {i < 2 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 ${done ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                  />
+                )}
               </React.Fragment>
             );
           })}
@@ -207,7 +219,9 @@ function EvidenceDrawer({
                     <input
                       type="text"
                       value={clinical.renderingProvider}
-                      onChange={(e) => setClinical({ ...clinical, renderingProvider: e.target.value })}
+                      onChange={(e) =>
+                        setClinical({ ...clinical, renderingProvider: e.target.value })
+                      }
                       className={inputCls}
                     />
                   </div>
@@ -412,15 +426,21 @@ function EvidenceDrawer({
         {step === 'confirm' && (
           <div className="px-5 pb-5 space-y-4">
             <div className="bg-[#f4f4f4] border border-carbon-gray-20 p-4 space-y-2">
-              <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">Evidence Summary</p>
-              <p className="text-xs text-carbon-gray-100 leading-relaxed">{buildEvidenceSummary()}</p>
+              <p className="text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide mb-2">
+                Evidence Summary
+              </p>
+              <p className="text-xs text-carbon-gray-100 leading-relaxed">
+                {buildEvidenceSummary()}
+              </p>
             </div>
 
             {/* Gain-share calculation */}
             <div className="bg-[#defbe6] border border-[#24a148] p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Icon name="CurrencyDollarIcon" size={14} className="text-[#0e6027]" />
-                <p className="text-2xs font-semibold text-[#0e6027] uppercase tracking-wide">Gain-Share Attribution</p>
+                <p className="text-2xs font-semibold text-[#0e6027] uppercase tracking-wide">
+                  Gain-Share Attribution
+                </p>
               </div>
               <p className="text-xs text-[#0e6027]">
                 Closing <strong>{gainShareCalc.measure}</strong> contributes an estimated{' '}
@@ -433,12 +453,19 @@ function EvidenceDrawer({
             <div className="bg-[#edf5ff] border border-[#97c1ff] p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Icon name="ServerIcon" size={14} className="text-[#0043ce]" />
-                <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">FHIR Resource Update</p>
+                <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">
+                  FHIR Resource Update
+                </p>
               </div>
               <p className="text-xs text-[#0043ce] font-mono">
-                PATCH /Observation/{gap.domain === 'Clinical' ? clinical.fhirResourceId : `FHIR-${gap.id.toUpperCase()}`}
+                PATCH /Observation/
+                {gap.domain === 'Clinical'
+                  ? clinical.fhirResourceId
+                  : `FHIR-${gap.id.toUpperCase()}`}
               </p>
-              <p className="text-2xs text-[#0043ce] mt-0.5">status: final · effectiveDateTime: {new Date().toISOString().slice(0, 10)}</p>
+              <p className="text-2xs text-[#0043ce] mt-0.5">
+                status: final · effectiveDateTime: {new Date().toISOString().slice(0, 10)}
+              </p>
             </div>
 
             <div className="flex gap-2 justify-end pt-2">
@@ -463,23 +490,62 @@ function EvidenceDrawer({
         {/* ── Step 3: Confirmation Chain ── */}
         {step === 'chain' && (
           <div className="px-5 pb-5 space-y-3">
-            <p className="text-xs text-carbon-gray-70 pt-1">Gap closure confirmed. The following systems have been updated:</p>
+            <p className="text-xs text-carbon-gray-70 pt-1">
+              Gap closure confirmed. The following systems have been updated:
+            </p>
 
             {[
-              { icon: 'CheckCircleIcon', color: '#24a148', bg: '#defbe6', border: '#24a148', label: 'Gap Closed', detail: `${gap.name} marked closed · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` },
-              { icon: 'ChartBarIcon', color: '#0043ce', bg: '#d0e2ff', border: '#97c1ff', label: 'Quality Measure Updated', detail: `HEDIS / Quality measure compliance recorded for ${gap.domain} domain` },
-              { icon: 'CurrencyDollarIcon', color: '#0e6027', bg: '#defbe6', border: '#24a148', label: 'Gain Share Attributed', detail: `$${gainShareCalc.amount} credited · Medicaid RHTP Track 3 · Pending EDW sync` },
-              { icon: 'ServerIcon', color: '#6929c4', bg: '#f6f2ff', border: '#d4bbff', label: 'EDW Notified', detail: `Enterprise Data Warehouse submission queued · Batch ID: EDW-${Date.now().toString().slice(-6)}` },
+              {
+                icon: 'CheckCircleIcon',
+                color: '#24a148',
+                bg: '#defbe6',
+                border: '#24a148',
+                label: 'Gap Closed',
+                detail: `${gap.name} marked closed · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+              },
+              {
+                icon: 'ChartBarIcon',
+                color: '#0043ce',
+                bg: '#d0e2ff',
+                border: '#97c1ff',
+                label: 'Quality Measure Updated',
+                detail: `HEDIS / Quality measure compliance recorded for ${gap.domain} domain`,
+              },
+              {
+                icon: 'CurrencyDollarIcon',
+                color: '#0e6027',
+                bg: '#defbe6',
+                border: '#24a148',
+                label: 'Gain Share Attributed',
+                detail: `$${gainShareCalc.amount} credited · Medicaid RHTP Track 3 · Pending EDW sync`,
+              },
+              {
+                icon: 'ServerIcon',
+                color: '#6929c4',
+                bg: '#f6f2ff',
+                border: '#d4bbff',
+                label: 'EDW Notified',
+                detail: `Enterprise Data Warehouse submission queued · Batch ID: EDW-${Date.now().toString().slice(-6)}`,
+              },
             ].map((item, i) => (
               <div
                 key={i}
                 className="flex items-start gap-3 p-3 border"
                 style={{ background: item.bg, borderColor: item.border }}
               >
-                <Icon name={item.icon as any} size={16} style={{ color: item.color }} className="flex-shrink-0 mt-0.5" />
+                <Icon
+                  name={item.icon as any}
+                  size={16}
+                  style={{ color: item.color }}
+                  className="flex-shrink-0 mt-0.5"
+                />
                 <div>
-                  <p className="text-xs font-semibold" style={{ color: item.color }}>{item.label}</p>
-                  <p className="text-2xs mt-0.5" style={{ color: item.color, opacity: 0.85 }}>{item.detail}</p>
+                  <p className="text-xs font-semibold" style={{ color: item.color }}>
+                    {item.label}
+                  </p>
+                  <p className="text-2xs mt-0.5" style={{ color: item.color, opacity: 0.85 }}>
+                    {item.detail}
+                  </p>
                 </div>
               </div>
             ))}
@@ -494,13 +560,17 @@ function EvidenceDrawer({
                     status: 'CLOSED',
                     closedFrom: 'PATIENT_DETAIL',
                     dateOfService:
-                      gap.domain === 'Clinical' ? clinical.dateOfService :
-                      gap.domain === 'BH'       ? bh.sessionDate :
-                                                  social.enrollmentDate,
+                      gap.domain === 'Clinical'
+                        ? clinical.dateOfService
+                        : gap.domain === 'BH'
+                          ? bh.sessionDate
+                          : social.enrollmentDate,
                     performingProvider:
-                      gap.domain === 'Clinical' ? clinical.renderingProvider :
-                      gap.domain === 'BH'       ? bh.bhCounselor :
-                                                  social.cboWorker,
+                      gap.domain === 'Clinical'
+                        ? clinical.renderingProvider
+                        : gap.domain === 'BH'
+                          ? bh.bhCounselor
+                          : social.cboWorker,
                     procedureCode: gap.domain === 'Clinical' ? clinical.procedureCode : undefined,
                     resultValue: gap.domain === 'BH' && bh.score ? parseFloat(bh.score) : undefined,
                     resultUnit: gap.domain === 'BH' ? 'score' : undefined,
@@ -529,7 +599,8 @@ function UnifiedGapPanel() {
   const [filterDomain, setFilterDomain] = useState<GapDomain | 'All'>('All');
 
   const openGaps = patient.careGaps.filter((g) => g.status !== 'Closed' && g.status !== 'Waived');
-  const filtered = filterDomain === 'All' ? openGaps : openGaps.filter((g) => g.domain === filterDomain);
+  const filtered =
+    filterDomain === 'All' ? openGaps : openGaps.filter((g) => g.domain === filterDomain);
 
   const clinicalCount = openGaps.filter((g) => g.domain === 'Clinical').length;
   const bhCount = openGaps.filter((g) => g.domain === 'BH').length;
@@ -538,7 +609,7 @@ function UnifiedGapPanel() {
   const toggleSelect = (id: string) => {
     setSelectedGaps((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (!next.delete(id)) next.add(id);
       return next;
     });
   };
@@ -654,11 +725,14 @@ function UnifiedGapPanel() {
           onClose={() => setDrawerGap(null)}
           onSubmit={(fhirEvidence) => {
             // Update local patient state (UI)
-            const evidenceStr = [
-              fhirEvidence.procedureCode && `CPT: ${fhirEvidence.procedureCode}`,
-              fhirEvidence.dateOfService && `DOS: ${fhirEvidence.dateOfService}`,
-              fhirEvidence.performingProvider && `By: ${fhirEvidence.performingProvider}`,
-            ].filter(Boolean).join(' | ') || 'Closed by care manager';
+            const evidenceStr =
+              [
+                fhirEvidence.procedureCode && `CPT: ${fhirEvidence.procedureCode}`,
+                fhirEvidence.dateOfService && `DOS: ${fhirEvidence.dateOfService}`,
+                fhirEvidence.performingProvider && `By: ${fhirEvidence.performingProvider}`,
+              ]
+                .filter(Boolean)
+                .join(' | ') || 'Closed by care manager';
             closeGap(drawerGap.id, evidenceStr);
             // Write / update the Observation on the FHIR server with full evidence
             submitClosure(fhirEvidence);
@@ -684,13 +758,18 @@ function AICopilotPanel() {
     <div id="ai-copilot-panel" className="bg-[#001d3d] border border-[#003a75] mt-4">
       <div className="px-5 py-3 border-b border-[#003a75] flex items-center gap-2">
         <Icon name="SparklesIcon" size={14} className="text-[#78a9ff]" />
-        <span className="text-xs font-bold text-[#78a9ff] uppercase tracking-wider">AI Copilot (NEW)</span>
+        <span className="text-xs font-bold text-[#78a9ff] uppercase tracking-wider">
+          AI Copilot (NEW)
+        </span>
       </div>
       <div className="px-5 py-3">
         <p className="text-sm text-[#c6e2ff] leading-relaxed">
-          Lead with transport barrier — resolving it unblocks {transportGaps > 0 ? '3' : '2'} of {openGapCount} gaps.{' '}
-          PHQ-9 of {patient.phq9Score} warrants BH check-in before clinical discussion. Best call time: Tue 10am (80%
-          answer rate). {patient.cohortFlag.includes('Ag worker') ? 'Ag worker — avoid scheduling labs May–Jun (planting season).' : ''}
+          Lead with transport barrier — resolving it unblocks {transportGaps > 0 ? '3' : '2'} of{' '}
+          {openGapCount} gaps. PHQ-9 of {patient.phq9Score} warrants BH check-in before clinical
+          discussion. Best call time: Tue 10am (80% answer rate).{' '}
+          {patient.cohortFlag.includes('Ag worker')
+            ? 'Ag worker — avoid scheduling labs May–Jun (planting season).'
+            : ''}
         </p>
       </div>
       <div className="px-5 pb-3">
@@ -704,8 +783,10 @@ function AICopilotPanel() {
         {talkTrackOpen && (
           <div className="mt-2 border-l-2 border-[#42be65] pl-3">
             <p className="text-sm text-[#a8c8e8] italic leading-relaxed">
-              "The AI copilot at the bottom reads all three columns together and tells the care manager what to do
-              first. 'Lead with transport — it unblocks three gaps.' No care manager has to synthesize this themselves. That's the whole-person difference."
+              &quot;The AI copilot at the bottom reads all three columns together and tells the care
+              manager what to do first. &apos;Lead with transport — it unblocks three gaps.&apos; No
+              care manager has to synthesize this themselves. That&apos;s the whole-person
+              difference.&quot;
             </p>
           </div>
         )}
@@ -719,34 +800,113 @@ function ThreeColumnPanel() {
   const { patient } = usePatientContext();
 
   const clinicalRows = [
-    { label: 'RAF Score', value: `${patient.rafScore.toFixed(2)} (+${patient.rafDelta.toFixed(2)} YTD)`, highlight: false },
+    {
+      label: 'RAF Score',
+      value: `${patient.rafScore.toFixed(2)} (+${patient.rafDelta.toFixed(2)} YTD)`,
+      highlight: false,
+    },
     { label: 'Risk Tier', value: patient.riskTier, highlight: true, color: '#da1e28' },
-    { label: 'HCC Suspects', value: `${patient.hccSuspects} open · $${(patient.hccValue / 1000).toFixed(1)}K value`, highlight: false },
-    { label: 'Open Care Gaps', value: `${patient.careGaps.filter((g) => g.status !== 'Closed').length} open · ${patient.careGaps.filter((g) => g.status === 'In Progress').length} in progress`, highlight: false },
-    { label: 'Episode', value: `${patient.episodeType} · ${patient.episodeStatus}`, highlight: false },
-    { label: 'PMPM', value: `$${patient.pmpm.toLocaleString()} · Target: $${patient.pmpmTarget}`, highlight: false },
+    {
+      label: 'HCC Suspects',
+      value: `${patient.hccSuspects} open · $${(patient.hccValue / 1000).toFixed(1)}K value`,
+      highlight: false,
+    },
+    {
+      label: 'Open Care Gaps',
+      value: `${patient.careGaps.filter((g) => g.status !== 'Closed').length} open · ${patient.careGaps.filter((g) => g.status === 'In Progress').length} in progress`,
+      highlight: false,
+    },
+    {
+      label: 'Episode',
+      value: `${patient.episodeType} · ${patient.episodeStatus}`,
+      highlight: false,
+    },
+    {
+      label: 'PMPM',
+      value: `$${patient.pmpm.toLocaleString()} · Target: $${patient.pmpmTarget}`,
+      highlight: false,
+    },
     { label: 'Last Contact', value: patient.lastContact, highlight: false },
     { label: 'Attribution', value: patient.attributionDetail, highlight: false },
   ];
 
   const bhRows = [
-    { label: 'PHQ-9', value: patient.bhScoreLabel || (patient.phq9Score ? `${patient.phq9Score} — ${patient.bhRisk}` : '—'), highlight: true, color: '#8a3ffc' },
-    { label: 'PHQ-9 trend', value: (patient as any).phq9Trend || patient.bhRisk || '—', highlight: true, color: '#8a3ffc' },
-    { label: 'AUDIT-C', value: patient.auditC != null ? `${patient.auditC} — ${patient.auditC >= 4 ? 'Moderate risk' : 'Low risk'}` : '—', highlight: false },
-    { label: 'Trauma flag', value: patient.traumaFlag ? 'Screened positive' : 'Not screened — rec. ACE', highlight: patient.traumaFlag, color: '#8a3ffc' },
-    { label: 'BH referral', value: [patient.bhReferralStatus, patient.bhReferralDate].filter(Boolean).join(' · ') || '—', highlight: !!patient.bhReferralStatus, color: '#8a3ffc' },
+    {
+      label: 'PHQ-9',
+      value:
+        patient.bhScoreLabel ||
+        (patient.phq9Score ? `${patient.phq9Score} — ${patient.bhRisk}` : '—'),
+      highlight: true,
+      color: '#8a3ffc',
+    },
+    {
+      label: 'PHQ-9 trend',
+      value: (patient as any).phq9Trend || patient.bhRisk || '—',
+      highlight: true,
+      color: '#8a3ffc',
+    },
+    {
+      label: 'AUDIT-C',
+      value:
+        patient.auditC != null
+          ? `${patient.auditC} — ${patient.auditC >= 4 ? 'Moderate risk' : 'Low risk'}`
+          : '—',
+      highlight: false,
+    },
+    {
+      label: 'Trauma flag',
+      value: patient.traumaFlag ? 'Screened positive' : 'Not screened — rec. ACE',
+      highlight: patient.traumaFlag,
+      color: '#8a3ffc',
+    },
+    {
+      label: 'BH referral',
+      value: [patient.bhReferralStatus, patient.bhReferralDate].filter(Boolean).join(' · ') || '—',
+      highlight: !!patient.bhReferralStatus,
+      color: '#8a3ffc',
+    },
     { label: 'BH provider', value: patient.bhProvider || '—', highlight: false },
-    { label: 'PAM score', value: patient.pamScore ? `${patient.pamScore} — ${patient.pamLabel}` : '—', highlight: true, color: '#8a3ffc' },
+    {
+      label: 'PAM score',
+      value: patient.pamScore ? `${patient.pamScore} — ${patient.pamLabel}` : '—',
+      highlight: true,
+      color: '#8a3ffc',
+    },
     { label: 'Patient goal', value: patient.patientGoal || '—', highlight: false },
   ];
 
   const socialRows = [
-    { label: 'Transport', value: [patient.transportStatus, patient.transportReferralId].filter(Boolean).join(' · ') || '—', highlight: !!patient.transportStatus, color: '#007d79' },
-    { label: 'Referral status', value: patient.referralStatus ? `${patient.referralStatus}${patient.referralDaysOpen ? ` · ${patient.referralDaysOpen} days open` : ''}` : 'Active · 0 days open', highlight: true, color: '#007d79' },
+    {
+      label: 'Transport',
+      value:
+        [patient.transportStatus, patient.transportReferralId].filter(Boolean).join(' · ') || '—',
+      highlight: !!patient.transportStatus,
+      color: '#007d79',
+    },
+    {
+      label: 'Referral status',
+      value: patient.referralStatus
+        ? `${patient.referralStatus}${patient.referralDaysOpen ? ` · ${patient.referralDaysOpen} days open` : ''}`
+        : 'Active · 0 days open',
+      highlight: true,
+      color: '#007d79',
+    },
     { label: 'Food security', value: patient.foodSecurity || '—', highlight: false },
     { label: 'Housing', value: patient.housingStatus || '—', highlight: false },
-    { label: 'Language', value: [patient.language, patient.literacy ? `Literacy: ${patient.literacy}` : ''].filter(Boolean).join(' · ') || '—', highlight: false },
-    { label: 'Cohort', value: patient.cohortFlag || '—', highlight: !!patient.cohortFlag, color: '#007d79' },
+    {
+      label: 'Language',
+      value:
+        [patient.language, patient.literacy ? `Literacy: ${patient.literacy}` : '']
+          .filter(Boolean)
+          .join(' · ') || '—',
+      highlight: false,
+    },
+    {
+      label: 'Cohort',
+      value: patient.cohortFlag || '—',
+      highlight: !!patient.cohortFlag,
+      color: '#007d79',
+    },
     { label: 'Rural distance', value: patient.ruralDistance || '—', highlight: false },
     { label: 'Disparity flag', value: patient.disparityFlag || '—', highlight: false },
   ];
@@ -814,9 +974,15 @@ function PathwayStrip() {
                     : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
                 }`}
               >
-                {step.completed ? <Icon name="CheckIcon" size={14} /> : <span className="text-xs">{idx + 1}</span>}
+                {step.completed ? (
+                  <Icon name="CheckIcon" size={14} />
+                ) : (
+                  <span className="text-xs">{idx + 1}</span>
+                )}
               </div>
-              <span className="text-2xs text-carbon-gray-70 text-center mt-1 leading-tight">{step.label}</span>
+              <span className="text-2xs text-carbon-gray-70 text-center mt-1 leading-tight">
+                {step.label}
+              </span>
               {step.metric && (
                 <span
                   className={`text-2xs font-semibold mt-0.5 ${step.completed ? 'text-[#24a148]' : 'text-carbon-gray-50'}`}
@@ -848,13 +1014,13 @@ export default function WholePersonSummary({ patientId: _patientId }: { patientI
       {/* Whole Person Record Header */}
       <div className="bg-[#001141] px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold text-white">
-            {patient.name} — Whole Person Record
-          </h2>
+          <h2 className="text-xl font-bold text-white">{patient.name} — Whole Person Record</h2>
           <div className="flex items-center gap-3 mt-1 text-xs text-[#a8c8e8] flex-wrap">
             <span className="font-mono">{patient.mrn}</span>
             <span>·</span>
-            <span>{patient.age}y {patient.gender}</span>
+            <span>
+              {patient.age}y {patient.gender}
+            </span>
             <span>·</span>
             <span>{patient.pcp}</span>
             <span>·</span>

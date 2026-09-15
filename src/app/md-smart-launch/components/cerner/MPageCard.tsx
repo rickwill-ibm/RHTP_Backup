@@ -47,7 +47,10 @@ export default function MPageCard({
         {actions}
         {fetchedAt && (
           <span className="text-[10px] text-white/70 hidden sm:inline" title="Data fetched">
-            {new Date(fetchedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(fetchedAt).toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </span>
         )}
         {onRefresh && (

@@ -10,25 +10,28 @@ templates**.
 
 ## Layout
 
-| File | Role |
-|------|------|
-| `types.ts` | Every shared shape for the domain (one place). Adds `GuidelineCitation`, `PlanCitationIndex`, `SdohSummary` (additive plan fields). |
-| `analysis.ts` | `ComprehensivePlanInput` → `PatientAnalysis` (priority, SDOH needs, specialties, urgent actions). |
-| `builder.ts` | Goals, interventions, goal assignment, sharing (consent-checked), impact, and `generateComprehensiveCarePlan`. |
-| `templates.ts` | Content layer: gap-category matching, intervention templates, modality rules, plan text assembly, financial constants. |
-| `citations.ts` | Attaches reference-level citations from `data/guidelineSources.json` to every goal/intervention. |
-| `validator.ts` | DP-4 invariants as pure checks (P1 goal-has-intervention, P3 citations, P4 SDOH disposition) + honest data-limitation flags. |
-| `careTeam.ts` / `referrals.ts` | Care-team assembly; auto-referral creation for open gaps. |
-| `holistic.ts` | Holistic path (context engine → root cause → tiered interventions) converted to the standard plan shape. |
-| `fhirMappers.ts` | `GeneratedCarePlan` → FHIR `CarePlan`/`Goal` structural R4 shapes (draft status; never throws). |
-| `data/guidelineSources.json` | Guideline source registry — reference-level, `smeReviewed: false`, sign-off pending (GB-3). |
+| File                           | Role                                                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `types.ts`                     | Every shared shape for the domain (one place). Adds `GuidelineCitation`, `PlanCitationIndex`, `SdohSummary` (additive plan fields). |
+| `analysis.ts`                  | `ComprehensivePlanInput` → `PatientAnalysis` (priority, SDOH needs, specialties, urgent actions).                                   |
+| `builder.ts`                   | Goals, interventions, goal assignment, sharing (consent-checked), impact, and `generateComprehensiveCarePlan`.                      |
+| `templates.ts`                 | Content layer: gap-category matching, intervention templates, modality rules, plan text assembly, financial constants.              |
+| `citations.ts`                 | Attaches reference-level citations from `data/guidelineSources.json` to every goal/intervention.                                    |
+| `validator.ts`                 | DP-4 invariants as pure checks (P1 goal-has-intervention, P3 citations, P4 SDOH disposition) + honest data-limitation flags.        |
+| `careTeam.ts` / `referrals.ts` | Care-team assembly; auto-referral creation for open gaps.                                                                           |
+| `holistic.ts`                  | Holistic path (context engine → root cause → tiered interventions) converted to the standard plan shape.                            |
+| `fhirMappers.ts`               | `GeneratedCarePlan` → FHIR `CarePlan`/`Goal` structural R4 shapes (draft status; never throws).                                     |
+| `data/guidelineSources.json`   | Guideline source registry — reference-level, `smeReviewed: false`, sign-off pending (GB-3).                                         |
 
 ## Public surface
 
 ```ts
 import {
-  generateComprehensiveCarePlan, generateHolisticCarePlan,
-  validateGeneratedPlan, toFhirCarePlan, type GeneratedCarePlan,
+  generateComprehensiveCarePlan,
+  generateHolisticCarePlan,
+  validateGeneratedPlan,
+  toFhirCarePlan,
+  type GeneratedCarePlan,
 } from '@/lib/carePlan';
 ```
 

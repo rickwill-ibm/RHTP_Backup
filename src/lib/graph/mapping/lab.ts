@@ -40,7 +40,8 @@ export const labSpec = {
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
     const p = event.payload;
     const observationRef = str(p.observationRef, `Observation/${event.memberId}`);
-    const start = str(p.effectiveDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
+    const start =
+      str(p.effectiveDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
     const out: Mutation[] = [memberNode(event)];
     out.push(
       ...resourceNode(event, OBSERVATION_KIND, observationRef, {
@@ -48,7 +49,7 @@ export const labSpec = {
         category: str(p.category, 'laboratory'),
         status: str(p.status, 'final'),
         provenance: str(p.provenance),
-      }),
+      })
     );
     out.push({
       op: 'UpsertEdge',

@@ -64,7 +64,7 @@ export interface PgQueryResult<Row = Record<string, unknown>> {
 export interface PgLike {
   query<Row = Record<string, unknown>>(
     text: string,
-    values?: readonly unknown[],
+    values?: readonly unknown[]
   ): Promise<PgQueryResult<Row>>;
 }
 

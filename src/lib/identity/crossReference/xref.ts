@@ -57,7 +57,7 @@ export function survivorOf(merges: ReadonlyMap<string, string>, id: string): str
 export function resolveLookup(
   links: ReadonlyMap<string, ReadonlySet<string>>,
   merges: ReadonlyMap<string, string>,
-  sourceId: string,
+  sourceId: string
 ): XrefLookup {
   const raw = links.get(sourceId);
   if (!raw || raw.size === 0) return { status: 'unlinked' };

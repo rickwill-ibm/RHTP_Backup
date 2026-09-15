@@ -104,7 +104,10 @@ export interface OutboxStore {
    */
   claimForConfirm(id: string, memberId: string, nowMs: number): Promise<number | null>;
   /** Mutate status / sequence / attempts of one intent. */
-  update(id: string, patch: Partial<Pick<OutboxIntentRow, 'status' | 'sequence' | 'attempts' | 'updatedAtMs'>>): Promise<void>;
+  update(
+    id: string,
+    patch: Partial<Pick<OutboxIntentRow, 'status' | 'sequence' | 'attempts' | 'updatedAtMs'>>
+  ): Promise<void>;
   /** Pending intents older than `olderThanMs` (the sweep's orphan candidates). */
   stalePending(olderThanMs: number): Promise<OutboxIntentRow[]>;
   /** Read one row (test + reconciliation support). */

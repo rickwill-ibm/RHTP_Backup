@@ -9,7 +9,13 @@
  *
  * C9.2 yield: ADT -> encounter events T1 (stream).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 interface Hl7Message {
   segments: Record<string, string[]>; // segment id -> fields (first occurrence)
@@ -29,7 +35,10 @@ const CLASS_MAP: Record<string, string> = { I: 'IMP', O: 'AMB', E: 'EMER', P: 'P
 
 function parse(payload: string): RawRecord<Hl7Message>[] {
   const segments: Record<string, string[]> = {};
-  for (const line of payload.split(/[\r\n]+/).map((l) => l.trim()).filter(Boolean)) {
+  for (const line of payload
+    .split(/[\r\n]+/)
+    .map((l) => l.trim())
+    .filter(Boolean)) {
     const fields = line.split('|');
     if (fields[0] && !(fields[0] in segments)) segments[fields[0]] = fields;
   }
@@ -97,7 +106,10 @@ function normalize(raw: RawRecord<Hl7Message>, deps: PipelineDeps): NormalizedRe
   const hospitalService = pv1[10] ?? '';
   // Pass the patient demographics so a real EMPI resolver can match
   // probabilistically; the deterministic (demo) resolver ignores them.
-  const memberId = deps.resolveIdentity(patientSourceId(m), { feed: SOURCE.feed, demographics: demographicsOf(m) });
+  const memberId = deps.resolveIdentity(patientSourceId(m), {
+    feed: SOURCE.feed,
+    demographics: demographicsOf(m),
+  });
   const payload: Record<string, unknown> = {
     encounterRef: `Encounter/enc-${controlId}`,
     encounterClass: CLASS_MAP[patientClass] ?? 'IMP',
@@ -118,7 +130,9 @@ function normalize(raw: RawRecord<Hl7Message>, deps: PipelineDeps): NormalizedRe
     provenance: 'qe-adt-feed',
     consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
-    occurredAt: hl7TimeToIso(m.segments['EVN']?.[2] ?? m.segments['MSH']?.[6]) ?? new Date(deps.now()).toISOString(),
+    occurredAt:
+      hl7TimeToIso(m.segments['EVN']?.[2] ?? m.segments['MSH']?.[6]) ??
+      new Date(deps.now()).toISOString(),
     payload,
   };
 }
@@ -127,7 +141,12 @@ function normalize(raw: RawRecord<Hl7Message>, deps: PipelineDeps): NormalizedRe
 function hl7TimeToIso(ts?: string): string | undefined {
   if (!ts || ts.length < 8) return undefined;
   const [y, mo, d, h = '00', mi = '00', s = '00'] = [
-    ts.slice(0, 4), ts.slice(4, 6), ts.slice(6, 8), ts.slice(8, 10), ts.slice(10, 12), ts.slice(12, 14),
+    ts.slice(0, 4),
+    ts.slice(4, 6),
+    ts.slice(6, 8),
+    ts.slice(8, 10),
+    ts.slice(10, 12),
+    ts.slice(12, 14),
   ];
   return `${y}-${mo}-${d}T${h}:${mi}:${s}Z`;
 }

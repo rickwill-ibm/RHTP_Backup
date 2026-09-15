@@ -41,7 +41,7 @@ export interface LedgerLike {
 /** True when a record's latest snapshot is a lifecycle tombstone. */
 export function isTombstoned(record: EvidenceRecord): boolean {
   return record.entries.some(
-    (e) => e.type === 'note' && typeof e.text === 'string' && e.text.startsWith(TOMBSTONE_MARKER),
+    (e) => e.type === 'note' && typeof e.text === 'string' && e.text.startsWith(TOMBSTONE_MARKER)
   );
 }
 
@@ -49,7 +49,7 @@ export function isTombstoned(record: EvidenceRecord): boolean {
 function tombstoneNote(
   req: RightToDeleteRequest,
   ts: string,
-  erasedEntryCount: number,
+  erasedEntryCount: number
 ): EvidenceEntry {
   return {
     id: `tombstone-${req.recordId}`,
@@ -85,7 +85,7 @@ async function priorVersions(ledger: LedgerLike, id: string): Promise<number> {
 export async function executeRightToDelete(
   ledger: LedgerLike,
   registry: LegalHoldRegistry,
-  req: RightToDeleteRequest,
+  req: RightToDeleteRequest
 ): Promise<RightToDeleteResult> {
   const record = await ledger.get(req.recordId);
   const ts = clock.nowIso();

@@ -56,7 +56,7 @@ export function validateAgainstAssetVersion(
   assetId: string,
   system: TerminologySystem | string,
   code: string,
-  asOf?: Date,
+  asOf?: Date
 ): CurrencyCheckedValidation {
   const validation = service.validateCode(system, code);
   const currency = registry.checkCurrency(assetId, asOf);

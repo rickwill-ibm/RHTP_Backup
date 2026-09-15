@@ -59,7 +59,7 @@ export interface FhirAnnotation {
 
 // ─── CDS Hooks ────────────────────────────────────────────────────────────────
 export type CdsHookType =
-  | 'patient-view' |'encounter-start' |'order-select' |'order-sign' |'care-gap-closure';
+  'patient-view' | 'encounter-start' | 'order-select' | 'order-sign' | 'care-gap-closure';
 
 export type CdsCardType = 'info' | 'warning' | 'critical' | 'suggestion' | 'smart-link';
 
@@ -142,7 +142,11 @@ export interface CareTeamAssignment {
 
 // ─── Patient Journey ──────────────────────────────────────────────────────────
 export type JourneyPhase =
-  | 'stable-management' |'deteriorating' |'high-risk-transition' |'post-acute-recovery' |'gap-in-care';
+  | 'stable-management'
+  | 'deteriorating'
+  | 'high-risk-transition'
+  | 'post-acute-recovery'
+  | 'gap-in-care';
 
 export interface PatientJourneyPosition {
   phase: JourneyPhase;

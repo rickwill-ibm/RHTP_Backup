@@ -55,7 +55,7 @@ export class ChecksumMismatchError extends Error {
     super(
       `schema_migrations: checksum mismatch for '${store}/${name}'. Recorded ${recorded}, ` +
         `current ${current}. A shipped migration is immutable — never edit an applied ` +
-        `migration in place; add a new one. Refusing to proceed (fail loud).`,
+        `migration in place; add a new one. Refusing to proceed (fail loud).`
     );
     this.name = 'ChecksumMismatchError';
     this.store = store;
@@ -91,7 +91,7 @@ export async function discoverMigrations(opts: RunMigrationsOptions = {}): Promi
  */
 export async function runMigrations(
   pg: PgLike,
-  opts: RunMigrationsOptions = {},
+  opts: RunMigrationsOptions = {}
 ): Promise<RunMigrationsResult> {
   await pg.query(SCHEMA_MIGRATIONS_DDL);
   const migrations = await discoverMigrations(opts);
@@ -102,7 +102,7 @@ export async function runMigrations(
     const checksum = checksumOf(m.sql);
     const existing = await pg.query<{ checksum: string }>(
       `SELECT checksum FROM schema_migrations WHERE store = $1 AND name = $2`,
-      [m.store, m.name],
+      [m.store, m.name]
     );
     if (existing.rows.length > 0) {
       const recorded = String(existing.rows[0].checksum);
@@ -116,7 +116,7 @@ export async function runMigrations(
     await pg.query(
       `INSERT INTO schema_migrations (store, name, checksum, applied_at)
          VALUES ($1, $2, $3, $4)`,
-      [m.store, m.name, checksum, clock.nowIso()],
+      [m.store, m.name, checksum, clock.nowIso()]
     );
     applied.push({ store: m.store, name: m.name });
   }
@@ -127,7 +127,7 @@ export async function runMigrations(
 /** Read the recorded ledger (oldest first by store, name) for diagnostics/tests. */
 export async function readMigrationLedger(pg: PgLike): Promise<MigrationRef[]> {
   const res = await pg.query<{ store: string; name: string }>(
-    `SELECT store, name FROM schema_migrations ORDER BY store ASC, name ASC`,
+    `SELECT store, name FROM schema_migrations ORDER BY store ASC, name ASC`
   );
   return res.rows.map((r) => ({ store: r.store, name: r.name }));
 }

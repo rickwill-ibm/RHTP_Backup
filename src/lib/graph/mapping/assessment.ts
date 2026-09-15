@@ -50,7 +50,7 @@ export const assessmentSpec = {
         authored: str(p.authored),
         patientReported: bool(p.patientReported),
         provenance,
-      }),
+      })
     );
     // The member was ASSESSED_BY this questionnaire response — a factual record
     // link (associative), dated from the authored date. Provenance (patient-reported
@@ -60,7 +60,11 @@ export const assessmentSpec = {
       type: ASSESSED_BY,
       from: { kind: MEMBER_KIND, key: event.memberId },
       to: { kind: QUESTIONNAIRE_RESPONSE_KIND, key: qrRef },
-      properties: { questionnaireRef: str(p.questionnaireRef), patientReported: bool(p.patientReported), provenance },
+      properties: {
+        questionnaireRef: str(p.questionnaireRef),
+        patientReported: bool(p.patientReported),
+        provenance,
+      },
       validity: { start, end: null },
       semantics: associative,
     });

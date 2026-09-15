@@ -10,7 +10,13 @@
  *
  * C9.2 yield: allergies feed -> allergies T1 (clinician-asserted).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR AllergyIntolerance pulled from the bundle. */
 interface AllergyResource {
@@ -40,7 +46,11 @@ function str(v: unknown, fallback = ''): string {
 }
 
 /** code.coding[0] as an allergen coding triple (code may be ''). */
-function allergenCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function allergenCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -86,8 +96,10 @@ function parse(payload: string): RawRecord<AllergyResource>[] {
 function validate(raw: RawRecord<AllergyResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!patientSourceId(resource)) issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
-  if (!allergenCode(resource).code) issues.push({ reasonCode: 'missing-allergen-code', fieldPath: 'code.coding' });
+  if (!patientSourceId(resource))
+    issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
+  if (!allergenCode(resource).code)
+    issues.push({ reasonCode: 'missing-allergen-code', fieldPath: 'code.coding' });
   return { ok: issues.length === 0, issues };
 }
 

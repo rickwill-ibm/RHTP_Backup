@@ -30,10 +30,10 @@ raises on `UPDATE`/`DELETE` (defense in depth).
 
 `getEvidenceStore()` reads `getDataMode('evidence')`:
 
-| mode | store |
-|------|-------|
+| mode              | store                                                          |
+| ----------------- | -------------------------------------------------------------- |
 | `mock` / `seeded` | the existing in-memory `defaultEvidenceStore()` (demo default) |
-| `production` | the pg ledger, via `setProductionEvidenceStoreFactory(...)` |
+| `production`      | the pg ledger, via `setProductionEvidenceStoreFactory(...)`    |
 
 Production without a registered factory throws `EvidenceStoreNotConfiguredError`
 (fail loud, never a silent missing backend). Callers still use

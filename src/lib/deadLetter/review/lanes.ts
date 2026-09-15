@@ -21,7 +21,7 @@ const lanes: Map<DeadLetterKind, (record: DeadLetterRecord) => Promise<RetryOutc
 /** Register (or clear, with null) the retry lane for one kind. */
 export function setDeadLetterRetryLane(
   kind: DeadLetterKind,
-  lane: ((record: DeadLetterRecord) => Promise<RetryOutcome>) | null,
+  lane: ((record: DeadLetterRecord) => Promise<RetryOutcome>) | null
 ): void {
   if (lane === null) lanes.delete(kind);
   else lanes.set(kind, lane);

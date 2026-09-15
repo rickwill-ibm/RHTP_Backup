@@ -78,7 +78,7 @@ function goal(event: C2Event, deps: ProjectorDeps): Mutation[] {
       met: isGoalMet(lifecycleStatus, achievementStatus),
       startDate: str(p.startDate),
       dueDate: str(p.dueDate),
-    }),
+    })
   );
   out.push({
     op: 'UpsertEdge',
@@ -104,11 +104,13 @@ function task(event: C2Event, deps: ProjectorDeps): Mutation[] {
       code: str(p.code),
       status: str(p.status, 'requested'),
       authoredOn: str(p.authoredOn),
-    }),
+    })
   );
   // The task advances a Goal when the source referenced one; otherwise it hangs
   // off the member directly. Either way the edge is HAS_TASK, associative, dated.
-  const from = goalRef ? { kind: GOAL_KIND, key: goalRef } : { kind: MEMBER_KIND, key: event.memberId };
+  const from = goalRef
+    ? { kind: GOAL_KIND, key: goalRef }
+    : { kind: MEMBER_KIND, key: event.memberId };
   out.push({
     op: 'UpsertEdge',
     type: HAS_TASK,

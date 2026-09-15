@@ -16,7 +16,7 @@ import type { TenantContext, TenantScope, TenantAccessDecision } from './types';
 /** Is the member's tenant within the actor's authorized tenant scope? */
 export function assertTenantScope(
   actorScope: TenantScope,
-  memberTenant: TenantContext,
+  memberTenant: TenantContext
 ): TenantAccessDecision {
   // The permissive demo disposition: a single demo tenant, everything inside it.
   if (actorScope.kind === 'demo') {
@@ -45,7 +45,7 @@ export function assertTenantScope(
 export function canAccessMemberTenantAware(
   principal: Principal,
   session: PrincipalSession | null | undefined,
-  memberId: string | null | undefined,
+  memberId: string | null | undefined
 ): AccessDecision {
   const actorScope = resolveActorTenantScope(principal, session);
   const memberTenant = resolveMemberTenant(memberId);

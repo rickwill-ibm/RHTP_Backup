@@ -4,7 +4,12 @@ import Icon from '@/components/ui/AppIcon';
 
 // ─── Error Types ──────────────────────────────────────────────────────────────
 export type SmartErrorCode =
-  | 'SMART_LAUNCH_FAILED' |'FHIR_TIMEOUT' |'MISSING_PATIENT_DATA' |'TOKEN_EXPIRED' |'ORDER_VALIDATION_FAILED' |'UNKNOWN_ERROR';
+  | 'SMART_LAUNCH_FAILED'
+  | 'FHIR_TIMEOUT'
+  | 'MISSING_PATIENT_DATA'
+  | 'TOKEN_EXPIRED'
+  | 'ORDER_VALIDATION_FAILED'
+  | 'UNKNOWN_ERROR';
 
 export interface SmartError {
   code: SmartErrorCode;
@@ -144,7 +149,9 @@ export function SmartErrorFallback({
           <Icon name="BoltIcon" size={16} className="text-white" />
         </div>
         <div>
-          <p className="text-xs font-semibold text-carbon-gray-100">TCOC Clinical — SMART on FHIR</p>
+          <p className="text-xs font-semibold text-carbon-gray-100">
+            TCOC Clinical — SMART on FHIR
+          </p>
           <p className="text-2xs text-carbon-gray-50">Cerner PowerChart</p>
         </div>
       </div>
@@ -157,7 +164,9 @@ export function SmartErrorFallback({
         <div className="p-8">
           {/* Icon + title */}
           <div className="flex items-start gap-4 mb-5">
-            <div className={`w-12 h-12 ${cfg.bgColor} border ${cfg.borderColor} flex items-center justify-center flex-shrink-0`}>
+            <div
+              className={`w-12 h-12 ${cfg.bgColor} border ${cfg.borderColor} flex items-center justify-center flex-shrink-0`}
+            >
               <Icon name={cfg.icon as any} size={24} className={cfg.color} />
             </div>
             <div>
@@ -180,7 +189,11 @@ export function SmartErrorFallback({
 
           {/* Fallback guidance */}
           <div className="flex items-start gap-2 mb-6 p-3 bg-carbon-gray-10 border border-carbon-gray-20">
-            <Icon name="InformationCircleIcon" size={14} className="text-carbon-gray-50 flex-shrink-0 mt-0.5" />
+            <Icon
+              name="InformationCircleIcon"
+              size={14}
+              className="text-carbon-gray-50 flex-shrink-0 mt-0.5"
+            />
             <p className="text-xs text-carbon-gray-70">{cfg.fallbackAction}</p>
           </div>
 
@@ -234,7 +247,12 @@ interface SmartInlineAlertProps {
   className?: string;
 }
 
-export function SmartInlineAlert({ error, onDismiss, onRetry, className = '' }: SmartInlineAlertProps) {
+export function SmartInlineAlert({
+  error,
+  onDismiss,
+  onRetry,
+  className = '',
+}: SmartInlineAlertProps) {
   const cfg = SMART_ERROR_CONFIG[error.code] ?? SMART_ERROR_CONFIG.UNKNOWN_ERROR;
 
   return (
@@ -315,8 +333,8 @@ export function TokenExpiryBanner({ tokenExpiry, onReauth }: TokenExpiryBannerPr
         isExpired
           ? 'bg-[#da1e28] text-white'
           : isCritical
-          ? 'bg-[#ff832b] text-white'
-          : 'bg-[#f1c21b] text-[#7d4e00]'
+            ? 'bg-[#ff832b] text-white'
+            : 'bg-[#f1c21b] text-[#7d4e00]'
       }`}
     >
       <Icon name="LockClosedIcon" size={15} />
@@ -328,7 +346,9 @@ export function TokenExpiryBanner({ tokenExpiry, onReauth }: TokenExpiryBannerPr
       <button
         onClick={onReauth}
         className={`text-xs font-bold px-3 py-1 border ${
-          isExpired || isCritical ? 'border-white/50 hover:bg-white/20' : 'border-[#7d4e00]/40 hover:bg-[#7d4e00]/10'
+          isExpired || isCritical
+            ? 'border-white/50 hover:bg-white/20'
+            : 'border-[#7d4e00]/40 hover:bg-[#7d4e00]/10'
         } transition-colors`}
       >
         Re-authenticate
@@ -351,7 +371,10 @@ interface SmartErrorBoundaryState {
   error: Error | null;
 }
 
-export class SmartErrorBoundary extends Component<SmartErrorBoundaryProps, SmartErrorBoundaryState> {
+export class SmartErrorBoundary extends Component<
+  SmartErrorBoundaryProps,
+  SmartErrorBoundaryState
+> {
   constructor(props: SmartErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };

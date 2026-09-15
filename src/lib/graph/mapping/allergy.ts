@@ -50,7 +50,7 @@ export const allergySpec = {
         criticality: str(p.criticality, 'low'),
         clinicalStatus: str(p.clinicalStatus, 'active'),
         category: str(p.category),
-      }),
+      })
     );
     // The member IS allergic to the allergen — an asserted clinical claim, so a
     // CAUSAL edge carrying who asserted it + the allergen code @ allergy ref.

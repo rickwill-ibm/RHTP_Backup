@@ -69,7 +69,7 @@ async function collect(
     restrictedTargetsOnly?: boolean;
     /** Include the member node in the result (default true). */
     includeMember?: boolean;
-  } = {},
+  } = {}
 ): Promise<Collected> {
   const typeSet = opts.edgeTypes ? new Set(opts.edgeTypes) : null;
   const allEdges = await store.listEdges({ fromKey: memberId });
@@ -110,7 +110,7 @@ function result(lens: LensName, memberId: string, c: Collected): LensResult {
 export async function wholePersonLens(
   store: GraphStore,
   memberId: string,
-  scope: ConsentScope = NO_CONSENT,
+  scope: ConsentScope = NO_CONSENT
 ): Promise<LensResult> {
   return result('whole-person', memberId, await collect(store, memberId, scope));
 }
@@ -119,7 +119,7 @@ export async function wholePersonLens(
 export async function careGapLens(
   store: GraphStore,
   memberId: string,
-  scope: ConsentScope = NO_CONSENT,
+  scope: ConsentScope = NO_CONSENT
 ): Promise<LensResult> {
   const c = await collect(store, memberId, scope, {
     edgeTypes: ['HAD_ENCOUNTER', 'HAS_UNMET_NEED'],
@@ -132,7 +132,7 @@ export async function careGapLens(
 export async function sdohBarrierLens(
   store: GraphStore,
   memberId: string,
-  scope: ConsentScope = NO_CONSENT,
+  scope: ConsentScope = NO_CONSENT
 ): Promise<LensResult> {
   const c = await collect(store, memberId, scope, {
     edgeTypes: ['SCREENED_FOR', 'HAS_UNMET_NEED'],
@@ -144,7 +144,7 @@ export async function sdohBarrierLens(
 export async function careTeamLens(
   store: GraphStore,
   memberId: string,
-  scope: ConsentScope = NO_CONSENT,
+  scope: ConsentScope = NO_CONSENT
 ): Promise<LensResult> {
   const c = await collect(store, memberId, scope, { edgeTypes: ['HAS_CARE_TEAM'] });
   return result('care-team', memberId, c);
@@ -159,7 +159,7 @@ export async function careTeamLens(
 export async function part2RestrictedLens(
   store: GraphStore,
   memberId: string,
-  scope: ConsentScope = NO_CONSENT,
+  scope: ConsentScope = NO_CONSENT
 ): Promise<LensResult> {
   const c = await collect(store, memberId, scope, {
     restrictedTargetsOnly: true,

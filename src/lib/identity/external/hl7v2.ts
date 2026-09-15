@@ -108,7 +108,11 @@ export function buildPixQuery(query: PixQuery, config: PixPdqConfig, controlId: 
   if (targets.length > 0) {
     qpdParts.push(targets.map((oid) => `${COMP}${COMP}${COMP}${SUB}${oid}${SUB}ISO`).join(REP));
   }
-  const segmentsOut = [msh(config, 'QBP^Q23^QBP_Q21', controlId), qpdParts.join(FIELD), `RCP${FIELD}I`];
+  const segmentsOut = [
+    msh(config, 'QBP^Q23^QBP_Q21', controlId),
+    qpdParts.join(FIELD),
+    `RCP${FIELD}I`,
+  ];
   return segmentsOut.join(SEG);
 }
 
@@ -148,7 +152,8 @@ export function parsePixResponse(raw: string, enterpriseOid: string): PixRespons
 
   if (status !== 'resolved' || enterpriseMatches.length === 0) {
     return {
-      status: enterpriseMatches.length > 1 ? 'ambiguous' : status === 'resolved' ? 'not-found' : status,
+      status:
+        enterpriseMatches.length > 1 ? 'ambiguous' : status === 'resolved' ? 'not-found' : status,
       enterpriseId: '',
       enterpriseAssigningAuthority: enterpriseOid,
       crossReferences: peers,
@@ -186,7 +191,9 @@ export function buildPdqQuery(query: PdqQuery, config: PixPdqConfig, controlId: 
     params.push(`@PID.3.1${COMP}${id.value}`);
   }
   const qpd = ['QPD', 'IHE PDQ Query^^HL7', queryTag, params.join(REP)].join(FIELD);
-  const rcp = query.maxResults ? `RCP${FIELD}I${FIELD}${query.maxResults}${COMP}RD` : `RCP${FIELD}I`;
+  const rcp = query.maxResults
+    ? `RCP${FIELD}I${FIELD}${query.maxResults}${COMP}RD`
+    : `RCP${FIELD}I`;
   return [msh(config, 'QBP^Q22^QBP_Q21', controlId), qpd, rcp].join(SEG);
 }
 

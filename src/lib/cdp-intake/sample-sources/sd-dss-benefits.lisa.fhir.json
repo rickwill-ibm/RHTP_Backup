@@ -2,18 +2,76 @@
   "resourceType": "Bundle",
   "type": "collection",
   "entry": [
-    { "resource": { "resourceType": "Patient", "id": "pat-lisa-156",
-        "identifier": [ { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00156" }, { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0156" } ],
-        "name": [{ "family": "Thompson", "given": ["Lisa"] }], "gender": "female", "birthDate": "1985-05-19" } },
-    { "resource": { "resourceType": "Coverage", "id": "cov-lisa-156", "status": "active",
-        "beneficiary": { "reference": "Patient/pat-lisa-156" }, "payor": [{ "display": "SD Medicaid" }], "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }] } },
-    { "resource": { "resourceType": "Condition", "id": "cond-asthma-156",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J45.50", "display": "Severe persistent asthma, uncomplicated" }] },
-        "subject": { "reference": "Patient/pat-lisa-156" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-obesity-156",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E66.9", "display": "Obesity, unspecified" }] },
-        "subject": { "reference": "Patient/pat-lisa-156" } } }
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-lisa-156",
+        "identifier": [
+          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00156" },
+          { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0156" }
+        ],
+        "name": [{ "family": "Thompson", "given": ["Lisa"] }],
+        "gender": "female",
+        "birthDate": "1985-05-19"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-lisa-156",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-lisa-156" },
+        "payor": [{ "display": "SD Medicaid" }],
+        "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-asthma-156",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "J45.50",
+              "display": "Severe persistent asthma, uncomplicated"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-lisa-156" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-obesity-156",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E66.9",
+              "display": "Obesity, unspecified"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-lisa-156" }
+      }
+    }
   ]
 }

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RHTP Golden Thread: Healthcare Payer Transformation</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+    <style>
+        :root {
+            /* Color Tokens */
+            --primary-dark: #003C70;
+            --primary-light: #1565C0;
+            --accent-teal: #00B7C3;
+            --accent-orange: #FF8C00;
+            --accent-green: #107C41;
+            --accent-purple: #6B4EFF;
+            --neutral-dark: #1F2937;
+            --neutral-medium: #5C5C5C;
+            --neutral-light: #9CA3AF;
+            --neutral-bg: #F8F9FA;
+            --surface-bg: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --success: #107C41;
+            --warning: #FF8C00;
+            --critical: #DC2626;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --primary-dark: #60A5FA;
+                --primary-light: #93C5FD;
+                --accent-teal: #22D3EE;
+                --accent-orange: #FB923C;
+                --neutral-dark: #F3F4F6;
+                --neutral-medium: #D1D5DB;
+                --neutral-light: #9CA3AF;
+                --neutral-bg: #111827;
+                --surface-bg: #1F2937;
+                --text-primary: #F3F4F6;
+                --text-secondary: #D1D5DB;
+                --border-color: #374151;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --primary-dark: #60A5FA;
+            --primary-light: #93C5FD;
+            --accent-teal: #22D3EE;
+            --accent-orange: #FB923C;
+            --neutral-dark: #F3F4F6;
+            --neutral-medium: #D1D5DB;
+            --neutral-light: #9CA3AF;
+            --neutral-bg: #111827;
+            --surface-bg: #1F2937;
+            --text-primary: #F3F4F6;
+            --text-secondary: #D1D5DB;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--neutral-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            background: var(--surface-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 60px 60px;
+            gap: 40px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 24px;
+                gap: 30px;
+            }
+        }
+
+        /* Slide Header */
+        .slide-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border-bottom: 3px solid var(--primary-dark);
+            padding-bottom: 24px;
+        }
+
+        .slide-number {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--accent-teal);
+            text-transform: uppercase;
+        }
+
+        .slide-title {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--primary-dark);
+            text-wrap: balance;
+        }
+
+        .slide-subtitle {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            max-width: 800px;
+        }
+
+        /* Content Sections */
+        .slide-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            flex: 1;
+        }
+
+        .content-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-label {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--neutral-medium);
+        }
+
+        /* Process Flow */
+        .process-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .swim-lane {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .swim-lane-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .flow-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            color: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .flow-step.pain {
+            background: linear-gradient(135deg, var(--critical) 0%, #EF4444 100%);
+        }
+
+        .flow-step.future {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #22C55E 100%);
+        }
+
+        .flow-arrow {
+            color: var(--neutral-light);
+            font-size: 20px;
+            flex: 0 0 auto;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Comparison Box */
+        .comparison-box {
+            background: var(--neutral-bg);
+            border-left: 4px solid;
+            padding: 24px;
+            border-radius: 4px;
+        }
+
+        .comparison-box.current {
+            border-left-color: var(--critical);
+        }
+
+        .comparison-box.future {
+            border-left-color: var(--accent-green);
+        }
+
+        .comparison-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            color: var(--neutral-medium);
+        }
+
+        .comparison-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .comparison-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .comparison-icon {
+            flex: 0 0 auto;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        /* Workbench Grid */
+        .workbench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .workbench-card {
+            background: var(--neutral-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .workbench-card.claims {
+            border-top: 4px solid #6B4EFF;
+        }
+
+        .workbench-card.prior-auth {
+            border-top: 4px solid var(--accent-orange);
+        }
+
+        .workbench-card.appeals {
+            border-top: 4px solid var(--accent-teal);
+        }
+
+        .workbench-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .workbench-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .feature-check {
+            color: var(--accent-green);
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        /* Financial Impact */
+        .impact-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .metric-card {
+            background: var(--neutral-bg);
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--neutral-medium);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .metric-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Callout */
+        .callout {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 32px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .callout-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .callout-text {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .callout-highlight {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+            margin-top: 8px;
+        }
+
+        /* Slide Footer */
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--neutral-light);
+        }
+
+        .rhtp-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        /* Last slide special styling */
+        .slide:last-child {
+            border-bottom: none;
+        }
+
+        /* Navigation hint */
+        .scroll-hint {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            font-size: 12px;
+            color: var(--neutral-light);
+            text-align: right;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-hint {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- SLIDE 1: PROCESS FLOW & OPERATIONAL VIEW -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Slide 1</div>
+                <h1 class="slide-title">Process Flow & Operational View</h1>
+                <p class="slide-subtitle">Healthcare payer operations are strangled by manual processes and distributed systems. RHTP unifies the entire member journey into one intelligent flow.</p>
+            </div>
+
+            <div class="slide-content">
+                <div class="content-section">
+                    <div class="section-label">Current State: Manual Bottlenecks</div>
+                    <div class="process-flow">
+                        <div class="swim-lane">
+                            <div class="swim-lane-title">Member Lifecycle</div>
+                            <div class="flow-row">
+                                <div class="flow-step pain">Enrollment<br/>(5-7 days)</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Eligibility<br/>(manual)</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Care Gaps<br/>(blind spots)</div>
+                            </div>
+                        </div>
+
+                        <div class="swim-lane">
+                            <div class="swim-lane-title">Prior Authorization</div>
+                            <div class="flow-row">
+                                <div class="flow-step pain">Request<br/>(manual review)</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Policy Search<br/>(4-8 hours)</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Decision<br/>(72h delay)</div>
+                            </div>
+                        </div>
+
+                        <div class="swim-lane">
+                            <div class="swim-lane-title">Claims Processing</div>
+                            <div class="flow-row">
+                                <div class="flow-step pain">[X]% Require<br/>Manual Touch</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Rework Loop<br/>($[Y]M annual)</div>
+                                <div class="flow-arrow">→</div>
+                                <div class="flow-step pain">Audit Lag<br/>(60+ days)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-label">RHTP Future State: Intelligent Integration</div>
+                    <div class="two-column">
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Member Experience</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>CMS-0057-F native enrollment integration</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Real-time program eligibility via WPC</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>AI-driven care gap detection & recommendations</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Unified care plan (Clinical + BH + Social)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Operational Efficiency</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Policy Engine enforces consistent decisions</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Prior auth: 72h → 4h via gold carding + automation</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Claims: [X]% auto-approved (no human touch)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div>Real-time audit trail (not month-end reconciliation)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">NY State Impact</div>
+                    <div class="callout-text">Processing [X]M claims daily for [Y]M RHTP members. Manual intervention on [Z]% of claims costs $[A]M annually. Prior auth delays impact [B]% of urgent cases, delaying rural patient access to care.</div>
+                    <div class="callout-highlight">RHTP Recovery: $[C]M operational efficiency</div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>RHTP Demo Reference: Dorothy Simmons lifecycle (Enrollment → Care Plan → Outcomes)</span>
+                <div class="rhtp-badge">RHTP Platform</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: RECONCILIATION & SURVEILLANCE -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Slide 2</div>
+                <h1 class="slide-title">Reconciliation & Surveillance</h1>
+                <p class="slide-subtitle">Payment integrity and compliance are reactive dead zones in traditional payers. RHTP enables real-time surveillance and intelligent detection across every claim and authorization decision.</p>
+            </div>
+
+            <div class="slide-content">
+                <div class="content-section">
+                    <div class="section-label">The Integrity Gap</div>
+                    <div class="impact-metrics">
+                        <div class="metric-card">
+                            <div class="metric-label">Month-End Detection</div>
+                            <div class="metric-value">60+</div>
+                            <div class="metric-detail">Days to identify overpayments after payment</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Undetected Patterns</div>
+                            <div class="metric-value">[X]%</div>
+                            <div class="metric-detail">Of fraud/waste/abuse patterns go undetected</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Compliance Risk</div>
+                            <div class="metric-value">$[Y]M</div>
+                            <div class="metric-detail">Annual cost from audit findings & denials</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-label">RHTP Real-Time Surveillance</div>
+                    <div class="two-column">
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Claims Evaluation</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Policy Engine:</strong> Every claim evaluated against parsed medical policy (Aetna CPBs, UHC PA-lists)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Coverage Records:</strong> Immutable audit trail with evidence chain (references + codes, never PHI)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Network Adequacy:</strong> Automatic contract violation detection</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Detection & Prevention</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Fraud Patterns:</strong> AI agents detect anomalies in real-time (not post-hoc)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Denial Propensity:</strong> Scores likelihood of appeal/overturning BEFORE send</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">⚡</div>
+                                    <div><strong>Risk Adjustment:</strong> WPC context ensures accurate HCC coding with full provenance</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">Financial Waterfall</div>
+                    <div class="callout-text">NY State processes $[X]B annually. Current month-end reconciliation recovers overpayments [60+ days] late. RHTP real-time detection recovers same-day + identifies additional [Y]% fraud patterns.</div>
+                    <div class="callout-highlight">Additional Annual Recovery: $[Z]M (detection acceleration + prevention)</div>
+                </div>
+
+                <div class="comparison-box future">
+                    <div class="comparison-label">Compliance Audit-Ready</div>
+                    <div class="comparison-content">
+                        <div class="comparison-item">
+                            <div class="comparison-icon">✓</div>
+                            <div><strong>STARS/HEDIS/MIPS:</strong> Automated from unified source-of-truth (FHIR-native, WPC holistic context)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <div class="comparison-icon">✓</div>
+                            <div><strong>Regulatory Reporting:</strong> Evidence Record documents decision chain (who, when, rule, evidence, decision, outcome)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <div class="comparison-icon">✓</div>
+                            <div><strong>CMS-0057-F Compliance:</strong> All four provisions (Patient Access, Provider Access, Payer-to-Payer, Prior Auth) demonstrable & auditable</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>RHTP Demo Reference: /admin-console audit section, /evidence/:id Coverage Determination Record viewer</span>
+                <div class="rhtp-badge">RHTP Platform</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: WORKBENCH & GAIN-SHARE -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Slide 3</div>
+                <h1 class="slide-title">Workbench & Gain-Share</h1>
+                <p class="slide-subtitle">AI-assisted operational workbenches transform claims adjudication, prior authorization, and appeals into shared-savings engines. Transparent financial collaboration replaces payer-provider adversarial relationships.</p>
+            </div>
+
+            <div class="slide-content">
+                <div class="content-section">
+                    <div class="section-label">Three Operational Workbenches with AI Decision Support</div>
+                    <div class="workbench-grid">
+                        <div class="workbench-card claims">
+                            <div class="workbench-title">Claims Adjudication</div>
+                            <div class="workbench-features">
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>AI claim scoring (risk, contract, bundling)</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Network adequacy validation</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Appeal prediction before send</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>High-confidence auto-approve</div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                                    <strong>Impact:</strong> [X] claims/hour (vs. [Y] manual)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="workbench-card prior-auth">
+                            <div class="workbench-title">Prior Authorization</div>
+                            <div class="workbench-features">
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Policy Engine grounds every decision</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Evidence-based recommendations</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Gold carding (auto-approve known cases)</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Care pathway alternatives suggested</div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                                    <strong>Impact:</strong> 72h → 4h turnaround, [Z]% auto-approved
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="workbench-card appeals">
+                            <div class="workbench-title">Appeals & Reconciliation</div>
+                            <div class="workbench-features">
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>AI appeal triage & routing</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Settlement recommendation engine</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Precedent analysis & transparency</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-check">✓</div>
+                                    <div>Outcome tracking (feedback loop)</div>
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color);">
+                                    <strong>Impact:</strong> Faster resolution + higher satisfaction
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-label">Shared Savings: Transparent Financial Collaboration</div>
+                    <div class="two-column">
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Gap Closure Example: Dorothy Simmons</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📊</div>
+                                    <div><strong>Clinical Outcome:</strong> A1C 9.2% → 7.1% (improved care coordination)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">💰</div>
+                                    <div><strong>Avoided Cost:</strong> $4,200 (lower inpatient, ER, complications)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📈</div>
+                                    <div><strong>ROI Proof:</strong> $3.40 return per $1 invested in social/BH care</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✓</div>
+                                    <div><strong>Distributed:</strong> Payer 60% | Provider 30% | Member 10%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Scale Impact (NY State RHTP)</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📍</div>
+                                    <div><strong>Members at Risk:</strong> [X]M attributed to shared savings model</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📊</div>
+                                    <div><strong>Documented Gaps:</strong> [Y]% of population (care coordination targets)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">💳</div>
+                                    <div><strong>Annual Shared Savings:</strong> $[Z]M (gap closure attribution)</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📱</div>
+                                    <div><strong>Provider Engagement:</strong> [%] in active care coordination (vs. [%] baseline)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">Why Transparency Transforms Outcomes</div>
+                    <div class="callout-text">Provider Dashboard: "Your patients' gap closure generated $[X] in shared savings this month." Member Dashboard: "Your improved health earned you $[Y] in incentives." <strong>Result:</strong> Care coordination engagement ↑ [%], provider satisfaction ↑ [%], member activation ↑ [%].</div>
+                    <div class="callout-highlight">Annual Operational Impact: $[TOTAL]M savings + engagement gains</div>
+                </div>
+
+                <div class="comparison-box future">
+                    <div class="comparison-label">Real-Time KPIs (Workbench Dashboards)</div>
+                    <div class="comparison-content">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Claims Efficiency</div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--accent-green); margin-top: 4px;">[X] claims/hour</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Prior Auth Speed</div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--accent-green); margin-top: 4px;">4h turnaround</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Gap Closure Rate</div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--accent-green); margin-top: 4px;">[Y]% members</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Shared Savings</div>
+                                <div style="font-size: 16px; font-weight: 700; color: var(--accent-green); margin-top: 4px;">$[Z]M YTD</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>RHTP Demo Reference: /care-manager, /md-smart-launch, /outcomes-linkage, Dorothy Simmons outcome scenario</span>
+                <div class="rhtp-badge">RHTP Platform</div>
+            </div>
+        </div>
+
+        <!-- BONUS: SLIDE 4 (Optional) - STRATEGIC TRANSFORMATION -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-number">Slide 4 (Optional)</div>
+                <h1 class="slide-title">Strategic Transformation & Modernization</h1>
+                <p class="slide-subtitle">How RHTP's architecture enables low-risk, high-confidence deployment of healthcare payer transformation.</p>
+            </div>
+
+            <div class="slide-content">
+                <div class="content-section">
+                    <div class="section-label">Unique Strategic Advantages</div>
+                    <div class="two-column">
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Technical De-Risking</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">🔄</div>
+                                    <div><strong>Mock ↔ Production Seam:</strong> No code change to cutover. Start with mock data, flip config to production FHIR graph.</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">🏗️</div>
+                                    <div><strong>FHIR-Native:</strong> All data flows through FHIR R4. No proprietary formats, full interoperability.</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📋</div>
+                                    <div><strong>CMS-0057-F Native:</strong> All four provisions built-in (Patient Access, Provider Access, Payer-to-Payer, Prior Auth).</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">🔐</div>
+                                    <div><strong>Audit-Ready by Design:</strong> Immutable coverage determination records with full provenance chain.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-box future">
+                            <div class="comparison-label">Financial Business Case</div>
+                            <div class="comparison-content">
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">💵</div>
+                                    <div><strong>Operational Efficiency:</strong> $[A]M annually from automation + process reduction</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">📈</div>
+                                    <div><strong>Payment Integrity:</strong> $[B]M annually from real-time detection + prevention</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">🤝</div>
+                                    <div><strong>Shared Savings:</strong> $[C]M annually from provider/member engagement</div>
+                                </div>
+                                <div class="comparison-item">
+                                    <div class="comparison-icon">✨</div>
+                                    <div><strong>Total ROI:</strong> $[TOTAL]M Year 1 | Payback: [X] months</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">Competitive Positioning</div>
+                    <div class="callout-text">RHTP is purpose-built for Rural Health Transformation programs and State Medicaid agencies. Unlike enterprise payers' legacy systems, RHTP achieves <strong>whole-person care coordination</strong> (Clinical + BH + Social) integrated with <strong>financial operations</strong> and <strong>real-time payment integrity</strong> in <strong>one unified FHIR-native platform</strong>.</div>
+                    <div class="callout-highlight">Board-Ready Narrative: "Transform rural health outcomes + stabilize financial operations + prove ROI through shared savings — all demonstrable in 90 days."</div>
+                </div>
+
+                <div class="content-section">
+                    <div class="section-label">Implementation Roadmap Summary</div>
+                    <div class="comparison-box future">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: var(--neutral-medium); text-transform: uppercase; margin-bottom: 12px;">Phase 1 (Months 1-3)</div>
+                                <div style="font-size: 13px; line-height: 1.6;">Deploy care manager workbenches + outcomes linkage. Demonstrate gap closure ROI with 1,000 pilot members.</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: var(--neutral-medium); text-transform: uppercase; margin-bottom: 12px;">Phase 2 (Months 4-6)</div>
+                                <div style="font-size: 13px; line-height: 1.6;">Add prior authorization workflow + Policy Engine. Reduce authorization cycle time, improve urgent case SLA.</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: var(--neutral-medium); text-transform: uppercase; margin-bottom: 12px;">Phase 3 (Months 7-12)</div>
+                                <div style="font-size: 13px; line-height: 1.6;">Integrate claims workbench + real-time surveillance. Scale to full member population. Full financial lifecycle management.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slide-footer">
+                <span>RHTP Demo Reference: /demo-deck full 31-step guided experience (all 8 personas, all workflows)</span>
+                <div class="rhtp-badge">RHTP Platform</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-hint">
+        ↓ Scroll to view all slides ↓
+    </div>
+
+    <script>
+        // Smooth scroll behavior is handled by CSS
+        // Add any interactive features here if needed
+        console.log('RHTP Golden Thread slides loaded');
+    </script>
+</body>
+</html>

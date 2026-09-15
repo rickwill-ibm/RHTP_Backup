@@ -406,7 +406,12 @@
     }
   ],
   "bindings": [
-    { "domain": "risk-adjustment", "purpose": "medicare-advantage", "assetId": "cms-hcc-v28", "note": "MA risk scores bind to the active CMS-HCC model version." },
+    {
+      "domain": "risk-adjustment",
+      "purpose": "medicare-advantage",
+      "assetId": "cms-hcc-v28",
+      "note": "MA risk scores bind to the active CMS-HCC model version."
+    },
     { "domain": "risk-adjustment", "purpose": "part-d", "assetId": "rxhcc-v08" },
     { "domain": "risk-adjustment", "purpose": "commercial-aca", "assetId": "hhs-hcc-2026" },
     { "domain": "risk-adjustment", "purpose": "medicaid", "assetId": "cdps-6.5" },

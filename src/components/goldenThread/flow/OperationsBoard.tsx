@@ -558,9 +558,9 @@ function ForensicLedger({ s, op }: { s: SimState; op: OperatingSim }): React.Rea
       <p className="px-3 pb-2 text-[8px] italic text-[#6f93b3]">
         Append-only, hash-chained: the seal indicator re-derives the whole retained chain on every
         render — any edit to a sealed field breaks it.{' '}
-        <strong className="text-[#9fc2e0]">Re-verify seal</strong> re-derives that one entry&apos;s hash
-        from its stored fields and checks its chain link — a local integrity re-check, not a re-run
-        of the underlying analysis. Agent rows are capped to the{' '}
+        <strong className="text-[#9fc2e0]">Re-verify seal</strong> re-derives that one entry&apos;s
+        hash from its stored fields and checks its chain link — a local integrity re-check, not a
+        re-run of the underlying analysis. Agent rows are capped to the{' '}
         <strong className="text-[#9fc2e0]">earned</strong> ceiling — the ticket shows the
         action-class capability, the ledger shows the authority actually exercised.{' '}
         {HONEST_NIST_NOTE}

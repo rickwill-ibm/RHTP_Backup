@@ -51,7 +51,10 @@ export default function ValueSetGovernanceConsole({ principal, replay }: Console
     <div data-testid="vsg-console" data-mode={mode}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <p className="text-sm text-carbon-gray-70">
-          Asset: <span className="font-semibold text-carbon-gray-100">{versions[0]?.assetName ?? '—'}</span>
+          Asset:{' '}
+          <span className="font-semibold text-carbon-gray-100">
+            {versions[0]?.assetName ?? '—'}
+          </span>
         </p>
         <StatusBadge
           label={mode === 'admin' ? 'Admin mode — full controls' : 'Viewer mode — read + replay'}
@@ -78,17 +81,26 @@ export default function ValueSetGovernanceConsole({ principal, replay }: Console
       {tab === 'versions' && (
         <div className="space-y-4">
           <VersionList versions={versions} selectedId={selectedId} onSelect={setSelectedId} />
-          {mode === 'admin' && selected && <WorkflowGates version={selected} principal={principal} />}
+          {mode === 'admin' && selected && (
+            <WorkflowGates version={selected} principal={principal} />
+          )}
           {mode === 'viewer' && (
             <p className="text-xs text-carbon-gray-50 italic">
-              Viewer mode: approval controls are hidden. Use History and Replay to review governance.
+              Viewer mode: approval controls are hidden. Use History and Replay to review
+              governance.
             </p>
           )}
         </div>
       )}
 
       {tab === 'diff' && (
-        <DiffView versions={versions} fromId={fromId} toId={toId} onFromChange={setFromId} onToChange={setToId} />
+        <DiffView
+          versions={versions}
+          fromId={fromId}
+          toId={toId}
+          onFromChange={setFromId}
+          onToChange={setToId}
+        />
       )}
 
       {tab === 'history' && <HistoryTimeline events={history} />}

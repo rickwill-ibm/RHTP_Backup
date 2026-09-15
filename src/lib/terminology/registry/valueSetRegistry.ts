@@ -41,7 +41,7 @@ export class TerminologyRefreshNotConfiguredError extends Error {
         `Live refresh/fetch of value-set content from external authorities (VSAC SVS+FHIR, ` +
         `CMS HCC crosswalk, Gravity package, NLM RxNorm/LOINC feeds) is a later roadmap ` +
         `iteration. The registry manages currency/versioning metadata now; wire the ` +
-        `authority client to replace this stub.`,
+        `authority client to replace this stub.`
     );
     this.name = 'TerminologyRefreshNotConfiguredError';
     this.authority = authority;
@@ -181,11 +181,14 @@ export function createValueSetRegistry(opts: RegistryOptions = {}): ValueSetRegi
         };
       }
       const windowed = inWindow(asset, at);
-      const stale = pastCadence(asset, at) || (asset.expirationDate !== undefined && at > toDate(asset.expirationDate));
+      const stale =
+        pastCadence(asset, at) ||
+        (asset.expirationDate !== undefined && at > toDate(asset.expirationDate));
       const current = asset.status === 'active' && windowed;
       let reason: string | undefined;
       if (asset.status !== 'active') reason = `version status is '${asset.status}'`;
-      else if (!windowed) reason = at < toDate(asset.effectiveDate) ? 'not yet effective' : 'past expiration date';
+      else if (!windowed)
+        reason = at < toDate(asset.effectiveDate) ? 'not yet effective' : 'past expiration date';
       else if (stale) reason = `past ${asset.refreshCadence} refresh cadence`;
       return {
         assetId,

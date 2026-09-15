@@ -118,9 +118,7 @@ export default function HomePage() {
               <Icon name="squares-2x2" className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                TCOC Platform
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900">TCOC Platform</h1>
               <p className="text-sm text-gray-600 mt-1">
                 Total Cost of Care Clinical Platform — Demo Navigator
               </p>
@@ -150,18 +148,13 @@ export default function HomePage() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-blue-50 rounded flex items-center justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
-                      <Icon
-                        name={route.icon as any}
-                        className="w-6 h-6 text-blue-600"
-                      />
+                      <Icon name={route.icon as any} className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                         {route.title}
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {route.description}
-                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">{route.description}</p>
                     </div>
                   </div>
                 </button>
@@ -177,13 +170,13 @@ export default function HomePage() {
           <div className="flex items-start gap-3">
             <Icon name="light-bulb" className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-blue-900 mb-2">
-                Getting Started
-              </h3>
+              <h3 className="font-semibold text-blue-900 mb-2">Getting Started</h3>
               <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Start with <strong>Demo Deck Navigator</strong> for a guided presentation flow</li>
+                <li>
+                  • Start with <strong>Demo Deck Navigator</strong> for a guided presentation flow
+                </li>
                 <li>• Or explore individual screens directly from the categories above</li>
-                <li>• All screens use mock data and don't require backend services</li>
+                <li>• All screens use mock data and don&apos;t require backend services</li>
               </ul>
             </div>
           </div>

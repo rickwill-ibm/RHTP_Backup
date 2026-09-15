@@ -30,7 +30,8 @@ function authHeaders(config: PixmPdqmConfig): Record<string, string> {
   if (auth.kind === 'bearer') headers.Authorization = `Bearer ${auth.token}`;
   else if (auth.kind === 'basic') {
     const raw = `${auth.username}:${auth.password}`;
-    const encoded = typeof btoa === 'function' ? btoa(raw) : Buffer.from(raw, 'utf8').toString('base64');
+    const encoded =
+      typeof btoa === 'function' ? btoa(raw) : Buffer.from(raw, 'utf8').toString('base64');
     headers.Authorization = `Basic ${encoded}`;
   }
   // smart-backend token acquisition is a transport concern (CI-pending); the
@@ -48,7 +49,8 @@ function base(config: PixmPdqmConfig): string {
 export function buildPixmRequest(query: PixQuery, config: PixmPdqmConfig): FhirTransportRequest {
   const params = new URLSearchParams();
   params.set('sourceIdentifier', `${query.sourceAssigningAuthority}|${query.sourcePatientId}`);
-  for (const target of query.targetAssigningAuthorities ?? []) params.append('targetSystem', target);
+  for (const target of query.targetAssigningAuthorities ?? [])
+    params.append('targetSystem', target);
   return {
     method: 'GET',
     url: `${base(config)}/Patient/$ihe-pix?${params.toString()}`,
@@ -58,7 +60,11 @@ export function buildPixmRequest(query: PixQuery, config: PixmPdqmConfig): FhirT
 
 interface FhirParameters {
   resourceType?: string;
-  parameter?: Array<{ name?: string; valueIdentifier?: { system?: string; value?: string }; valueReference?: { reference?: string } }>;
+  parameter?: Array<{
+    name?: string;
+    valueIdentifier?: { system?: string; value?: string };
+    valueReference?: { reference?: string };
+  }>;
 }
 
 interface FhirOperationOutcome {
@@ -72,7 +78,11 @@ interface FhirOperationOutcome {
  * enterprise system. An OperationOutcome (error) or >1 enterprise id is ambiguous;
  * an empty result is not-found.
  */
-export function parsePixmResponse(status: number, body: unknown, enterpriseSystem: string): PixResponse {
+export function parsePixmResponse(
+  status: number,
+  body: unknown,
+  enterpriseSystem: string
+): PixResponse {
   const empty: PixResponse = {
     status: 'not-found',
     enterpriseId: '',
@@ -88,7 +98,10 @@ export function parsePixmResponse(status: number, body: unknown, enterpriseSyste
   const ids: ExternalPatientIdentifier[] = [];
   for (const p of params) {
     if (p.name === 'targetIdentifier' && p.valueIdentifier?.value) {
-      ids.push({ assigningAuthority: p.valueIdentifier.system ?? '', value: p.valueIdentifier.value });
+      ids.push({
+        assigningAuthority: p.valueIdentifier.system ?? '',
+        value: p.valueIdentifier.value,
+      });
     }
   }
   const enterprise = ids.filter((id) => id.assigningAuthority === enterpriseSystem);
@@ -145,7 +158,11 @@ interface FhirPatient {
  * the 0-100 confidence; the enterprise id is the Patient.identifier whose system
  * matches the enterprise system (falls back to the first identifier).
  */
-export function parsePdqmResponse(status: number, body: unknown, enterpriseSystem: string): PdqResponse {
+export function parsePdqmResponse(
+  status: number,
+  body: unknown,
+  enterpriseSystem: string
+): PdqResponse {
   if (status >= 400 || !body || typeof body !== 'object') return { candidates: [] };
   const bundle = body as FhirBundle;
   if (bundle.resourceType !== 'Bundle') return { candidates: [] };
@@ -172,7 +189,8 @@ export function parsePdqmResponse(status: number, body: unknown, enterpriseSyste
         gender: normalizeGender(patient.gender),
         identifiers: ids,
       },
-      confidence: typeof score === 'number' ? Math.max(0, Math.min(100, Math.round(score * 100))) : 0,
+      confidence:
+        typeof score === 'number' ? Math.max(0, Math.min(100, Math.round(score * 100))) : 0,
     });
   }
   return { candidates };

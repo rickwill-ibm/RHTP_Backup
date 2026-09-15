@@ -37,7 +37,10 @@ export default function WorkflowGates({ version, principal }: WorkflowGatesProps
       setOutcome({ kind: 'blocked', message: 'Submit is not available for this version / role.' });
       return;
     }
-    setOutcome({ kind: 'submitted', message: `Submitted ${version.version} for approval (routes to governance engine).` });
+    setOutcome({
+      kind: 'submitted',
+      message: `Submitted ${version.version} for approval (routes to governance engine).`,
+    });
   }
 
   function handleApprove() {
@@ -47,7 +50,10 @@ export default function WorkflowGates({ version, principal }: WorkflowGatesProps
       setOutcome({ kind: 'blocked', message: g.reason });
       return;
     }
-    setOutcome({ kind: 'approved', message: `Approved ${version.version} (routes to governance engine).` });
+    setOutcome({
+      kind: 'approved',
+      message: `Approved ${version.version} (routes to governance engine).`,
+    });
   }
 
   function handleReject() {
@@ -56,13 +62,18 @@ export default function WorkflowGates({ version, principal }: WorkflowGatesProps
       setOutcome({ kind: 'blocked', message: g.reason });
       return;
     }
-    setOutcome({ kind: 'rejected', message: `Rejected ${version.version} (routes to governance engine).` });
+    setOutcome({
+      kind: 'rejected',
+      message: `Rejected ${version.version} (routes to governance engine).`,
+    });
   }
 
   return (
     <div className="bg-white border border-carbon-gray-20 p-5" aria-label="Approval workflow gates">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-carbon-gray-100">Approval Workflow — {version.version}</h3>
+        <h3 className="text-sm font-semibold text-carbon-gray-100">
+          Approval Workflow — {version.version}
+        </h3>
         <span className="text-xs text-carbon-gray-50">acting as {principal.name}</span>
       </div>
 
@@ -102,8 +113,15 @@ export default function WorkflowGates({ version, principal }: WorkflowGatesProps
       </div>
 
       {/* Gate explanation — always rendered so the reason a control is disabled is visible (E9 + a11y). */}
-      <p id="approve-gate-reason" className="text-xs text-carbon-gray-70 mt-3 flex items-start gap-1.5">
-        <Icon name={gate.enabled ? 'CheckCircleIcon' : 'LockClosedIcon'} size={14} className={gate.enabled ? 'text-[#24a148] mt-0.5' : 'text-carbon-gray-50 mt-0.5'} />
+      <p
+        id="approve-gate-reason"
+        className="text-xs text-carbon-gray-70 mt-3 flex items-start gap-1.5"
+      >
+        <Icon
+          name={gate.enabled ? 'CheckCircleIcon' : 'LockClosedIcon'}
+          size={14}
+          className={gate.enabled ? 'text-[#24a148] mt-0.5' : 'text-carbon-gray-50 mt-0.5'}
+        />
         <span>{gate.reason}</span>
       </p>
 

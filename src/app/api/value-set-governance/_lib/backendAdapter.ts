@@ -45,7 +45,7 @@ export class GovernanceBackendNotConfiguredError extends Error {
       'DATA_MODE valueSetGovernanceStore=production: no real value-set governance ' +
         'backend is registered. Call registerGovernanceBackend(<Wave-A facade>) at ' +
         'the composition root (SEAM: valueSetGovernanceStore) or set ' +
-        'DATA_MODE_VALUE_SET_GOVERNANCE_STORE=mock.',
+        'DATA_MODE_VALUE_SET_GOVERNANCE_STORE=mock.'
     );
     this.name = 'GovernanceBackendNotConfiguredError';
   }
@@ -83,7 +83,7 @@ function transition(
   version: string | undefined,
   actor: string,
   action: GovernanceHistoryEntry['action'],
-  toState: GovernanceState,
+  toState: GovernanceState
 ): GovernanceRecord {
   const existing = store.get(valueSetId);
   const fromState = existing?.record.state ?? null;
@@ -91,8 +91,7 @@ function transition(
     valueSetId,
     version: version ?? existing?.record.version ?? '0',
     state: toState,
-    submittedBy:
-      action === 'submit' ? actor : existing?.record.submittedBy,
+    submittedBy: action === 'submit' ? actor : existing?.record.submittedBy,
     approvedBy: action === 'approve' ? actor : existing?.record.approvedBy,
     updatedAt: now(),
   };

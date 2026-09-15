@@ -74,13 +74,13 @@ export function coveredStandardIds(): ClaimedStandardId[] {
 /** Every capability across the matrix, flattened. */
 export function allCapabilities(): Array<{ entry: StandardEntry; capability: Capability }> {
   return CONFORMANCE_MATRIX.flatMap((entry) =>
-    entry.capabilities.map((capability) => ({ entry, capability })),
+    entry.capabilities.map((capability) => ({ entry, capability }))
   );
 }
 
 /** Every capability carrying a given status. */
 export function capabilitiesWithStatus(
-  status: EvidenceStatus,
+  status: EvidenceStatus
 ): Array<{ entry: StandardEntry; capability: Capability }> {
   return allCapabilities().filter(({ capability }) => capability.evidence.status === status);
 }

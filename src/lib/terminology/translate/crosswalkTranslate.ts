@@ -64,7 +64,9 @@ function provenanceOf(cw: SeedCrosswalk): CrosswalkProvenance {
 }
 
 /** Build a crosswalk translator over a crosswalk set (defaults to the in-repo seed). */
-export function makeCrosswalkTranslator(crosswalks: SeedCrosswalk[] = DATA.crosswalks): CrosswalkTranslator {
+export function makeCrosswalkTranslator(
+  crosswalks: SeedCrosswalk[] = DATA.crosswalks
+): CrosswalkTranslator {
   const index = indexBySystemPair(crosswalks);
   return {
     id: 'seed-crosswalk-translator',
@@ -73,17 +75,48 @@ export function makeCrosswalkTranslator(crosswalks: SeedCrosswalk[] = DATA.cross
       const cw = index.get(pairKey(sourceSystem, targetSystem));
       if (!cw) {
         // No crosswalk covers this system pair at all: no-map, no fabricated target.
-        return { sourceSystem, sourceCode, targetSystem, targets: [], matched: false, noMap: true, crosswalk: null, stub: true };
+        return {
+          sourceSystem,
+          sourceCode,
+          targetSystem,
+          targets: [],
+          matched: false,
+          noMap: true,
+          crosswalk: null,
+          stub: true,
+        };
       }
       const provenance = provenanceOf(cw);
       const targets = cw.map[sourceCode];
       if (!targets || targets.length === 0) {
         // Crosswalk exists but this source code is unmapped: NO-MAP, never a guess.
-        return { sourceSystem, sourceCode, targetSystem, targets: [], matched: false, noMap: true, crosswalk: provenance, stub: true };
+        return {
+          sourceSystem,
+          sourceCode,
+          targetSystem,
+          targets: [],
+          matched: false,
+          noMap: true,
+          crosswalk: provenance,
+          stub: true,
+        };
       }
       // Stamp the declared target system on every returned coding.
-      const stamped: CrosswalkTarget[] = targets.map((t) => ({ system: targetSystem, code: t.code, display: t.display }));
-      return { sourceSystem, sourceCode, targetSystem, targets: stamped, matched: true, noMap: false, crosswalk: provenance, stub: true };
+      const stamped: CrosswalkTarget[] = targets.map((t) => ({
+        system: targetSystem,
+        code: t.code,
+        display: t.display,
+      }));
+      return {
+        sourceSystem,
+        sourceCode,
+        targetSystem,
+        targets: stamped,
+        matched: true,
+        noMap: false,
+        crosswalk: provenance,
+        stub: true,
+      };
     },
 
     listCrosswalks(): CrosswalkProvenance[] {

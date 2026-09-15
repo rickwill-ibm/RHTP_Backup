@@ -19,7 +19,8 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
   return (
     <div className="flex items-start gap-0 overflow-x-auto pb-1">
       {steps.map((s, idx) => {
-        const isCompleted = status === 'completed' || (status !== 'rejected' && s.step < currentStep);
+        const isCompleted =
+          status === 'completed' || (status !== 'rejected' && s.step < currentStep);
         const isActive = s.step === currentStep && status !== 'completed' && status !== 'rejected';
         const isRejected = status === 'rejected' && s.step === currentStep;
         const isPending = s.step > currentStep && status !== 'completed';
@@ -28,25 +29,43 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
           <div key={s.step} className="flex items-start flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1 min-w-0">
               {/* Step circle */}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
-                ${isCompleted ? 'bg-[#24a148] border-[#24a148] text-white' :
-                  isActive ? 'bg-[#0f62fe] border-[#0f62fe] text-white': isRejected ?'bg-[#da1e28] border-[#da1e28] text-white': 'bg-white border-carbon-gray-30 text-carbon-gray-50'}`}
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
+                ${
+                  isCompleted
+                    ? 'bg-[#24a148] border-[#24a148] text-white'
+                    : isActive
+                      ? 'bg-[#0f62fe] border-[#0f62fe] text-white'
+                      : isRejected
+                        ? 'bg-[#da1e28] border-[#da1e28] text-white'
+                        : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
+                }`}
               >
-                {isCompleted ? <Icon name="CheckIcon" size={12} /> :
-                 isRejected ? <Icon name="XMarkIcon" size={12} /> :
-                 s.step}
+                {isCompleted ? (
+                  <Icon name="CheckIcon" size={12} />
+                ) : isRejected ? (
+                  <Icon name="XMarkIcon" size={12} />
+                ) : (
+                  s.step
+                )}
               </div>
               {/* Step label */}
               <div className="mt-1.5 text-center px-1">
-                <p className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#0f62fe]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}>
+                <p
+                  className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#0f62fe]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}
+                >
                   {s.label}
                 </p>
-                <p className="text-2xs text-carbon-gray-30 mt-0.5 hidden sm:block leading-tight">{s.requiredRole === 'care_manager' ? 'Care Mgr' : 'Physician'}</p>
+                <p className="text-2xs text-carbon-gray-30 mt-0.5 hidden sm:block leading-tight">
+                  {s.requiredRole === 'care_manager' ? 'Care Mgr' : 'Physician'}
+                </p>
               </div>
             </div>
             {/* Connector line */}
             {idx < steps.length - 1 && (
-              <div className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+              <div
+                className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+              />
             )}
           </div>
         );
@@ -58,14 +77,19 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
 // ─── Evidence Source Row ──────────────────────────────────────────────────────
 function EvidenceSourceRow({ source, index }: { source: string; index: number }) {
   const icons: Record<string, string> = {
-    'EMR': 'ComputerDesktopIcon',
-    'Claims': 'DocumentTextIcon',
-    'HIE': 'ArrowPathIcon',
-    'LPR': 'MagnifyingGlassCircleIcon',
+    EMR: 'ComputerDesktopIcon',
+    Claims: 'DocumentTextIcon',
+    HIE: 'ArrowPathIcon',
+    LPR: 'MagnifyingGlassCircleIcon',
   };
-  const sourceType = source.includes('EMR') || source.includes('echocardiogram') || source.includes('encounter') ? 'EMR' :
-    source.includes('Claim') || source.includes('claim') ? 'Claims' :
-    source.includes('HIE') ? 'HIE' : 'LPR';
+  const sourceType =
+    source.includes('EMR') || source.includes('echocardiogram') || source.includes('encounter')
+      ? 'EMR'
+      : source.includes('Claim') || source.includes('claim')
+        ? 'Claims'
+        : source.includes('HIE')
+          ? 'HIE'
+          : 'LPR';
 
   return (
     <div className="flex items-start gap-3 p-3 bg-carbon-gray-10 border border-carbon-gray-20 hover:bg-white transition-colors">
@@ -74,7 +98,9 @@ function EvidenceSourceRow({ source, index }: { source: string; index: number })
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-carbon-gray-100">{source}</p>
-        <span className="text-2xs font-mono text-carbon-gray-50 bg-carbon-gray-20 px-1.5 py-0.5 mt-1 inline-block">{sourceType}</span>
+        <span className="text-2xs font-mono text-carbon-gray-50 bg-carbon-gray-20 px-1.5 py-0.5 mt-1 inline-block">
+          {sourceType}
+        </span>
       </div>
       <Icon name="CheckCircleIcon" size={14} className="text-[#24a148] flex-shrink-0 mt-0.5" />
     </div>
@@ -102,15 +128,23 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="font-mono text-xs font-bold text-[#0043ce]">{suspect.hccCode}</span>
-              <span className="text-sm font-semibold text-carbon-gray-100">{suspect.hccDescription}</span>
+              <span className="text-sm font-semibold text-carbon-gray-100">
+                {suspect.hccDescription}
+              </span>
             </div>
-            <p className="text-xs text-carbon-gray-70 font-mono">{suspect.icdCode} — {suspect.icdDescription}</p>
+            <p className="text-xs text-carbon-gray-70 font-mono">
+              {suspect.icdCode} — {suspect.icdDescription}
+            </p>
           </div>
           <div className="text-right flex-shrink-0">
             <p className="text-2xs text-carbon-gray-50">Est. RAF Delta</p>
-            <p className="font-mono text-base font-bold text-[#b45309]">+{suspect.estimatedRafDelta.toFixed(3)}</p>
+            <p className="font-mono text-base font-bold text-[#b45309]">
+              +{suspect.estimatedRafDelta.toFixed(3)}
+            </p>
             <p className="text-2xs text-carbon-gray-50 mt-0.5">Revenue Impact</p>
-            <p className="font-mono text-sm font-bold text-[#da1e28]">${suspect.estimatedRevenueDelta.toLocaleString()}</p>
+            <p className="font-mono text-sm font-bold text-[#da1e28]">
+              ${suspect.estimatedRevenueDelta.toLocaleString()}
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3 text-xs">
@@ -118,9 +152,14 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
             <p className="text-2xs text-carbon-gray-50 mb-0.5">Confidence Score</p>
             <div className="flex items-center gap-2">
               <div className="w-16 h-1.5 bg-white border border-carbon-gray-20">
-                <div className="h-full bg-[#24a148]" style={{ width: `${Math.round(suspect.suspectConfidence * 100)}%` }} />
+                <div
+                  className="h-full bg-[#24a148]"
+                  style={{ width: `${Math.round(suspect.suspectConfidence * 100)}%` }}
+                />
               </div>
-              <span className="font-mono font-semibold text-[#24a148]">{Math.round(suspect.suspectConfidence * 100)}%</span>
+              <span className="font-mono font-semibold text-[#24a148]">
+                {Math.round(suspect.suspectConfidence * 100)}%
+              </span>
             </div>
           </div>
           <div>
@@ -174,7 +213,9 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
             <p className="text-sm font-semibold text-[#0e6027]">Confirm HCC Diagnosis</p>
           </div>
           <div>
-            <label className="carbon-label mb-1.5 block">Clinical Documentation Notes <span className="text-[#da1e28]">*</span></label>
+            <label className="carbon-label mb-1.5 block">
+              Clinical Documentation Notes <span className="text-[#da1e28]">*</span>
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -192,7 +233,10 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
               <Icon name="CheckIcon" size={14} />
               Submit Confirmation
             </button>
-            <button onClick={() => setMode(null)} className="px-4 py-2 text-xs text-carbon-gray-70 hover:text-carbon-gray-100 border border-carbon-gray-20 hover:bg-carbon-gray-10 transition-colors">
+            <button
+              onClick={() => setMode(null)}
+              className="px-4 py-2 text-xs text-carbon-gray-70 hover:text-carbon-gray-100 border border-carbon-gray-20 hover:bg-carbon-gray-10 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -207,7 +251,9 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
             <p className="text-sm font-semibold text-[#da1e28]">Reject HCC Suspect</p>
           </div>
           <div>
-            <label className="carbon-label mb-1.5 block">Rejection Reason <span className="text-[#da1e28]">*</span></label>
+            <label className="carbon-label mb-1.5 block">
+              Rejection Reason <span className="text-[#da1e28]">*</span>
+            </label>
             <select
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
@@ -215,11 +261,19 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
             >
               <option value="">Select reason...</option>
               <option value="Insufficient clinical evidence">Insufficient clinical evidence</option>
-              <option value="Condition not present during encounter">Condition not present during encounter</option>
-              <option value="Duplicate — already documented under different code">Duplicate — already documented under different code</option>
+              <option value="Condition not present during encounter">
+                Condition not present during encounter
+              </option>
+              <option value="Duplicate — already documented under different code">
+                Duplicate — already documented under different code
+              </option>
               <option value="Patient declined documentation">Patient declined documentation</option>
-              <option value="Condition resolved — no longer active">Condition resolved — no longer active</option>
-              <option value="Coding error — incorrect HCC mapping">Coding error — incorrect HCC mapping</option>
+              <option value="Condition resolved — no longer active">
+                Condition resolved — no longer active
+              </option>
+              <option value="Coding error — incorrect HCC mapping">
+                Coding error — incorrect HCC mapping
+              </option>
             </select>
           </div>
           <div className="flex items-center gap-2">
@@ -231,7 +285,10 @@ function PhysicianConfirmPanel({ suspect, onConfirm, onReject }: PhysicianConfir
               <Icon name="XMarkIcon" size={14} />
               Submit Rejection
             </button>
-            <button onClick={() => setMode(null)} className="px-4 py-2 text-xs text-carbon-gray-70 hover:text-carbon-gray-100 border border-carbon-gray-20 hover:bg-carbon-gray-10 transition-colors">
+            <button
+              onClick={() => setMode(null)}
+              className="px-4 py-2 text-xs text-carbon-gray-70 hover:text-carbon-gray-100 border border-carbon-gray-20 hover:bg-carbon-gray-10 transition-colors"
+            >
               Cancel
             </button>
           </div>
@@ -292,10 +349,16 @@ function EvidenceSubmissionPanel({ suspect, onSubmit }: EvidenceSubmissionPanelP
         {additionalSources.length > 0 && (
           <div className="mt-2 space-y-1.5">
             {additionalSources.map((src, i) => (
-              <div key={`add-${i}`} className="flex items-center gap-2 p-2 bg-[#defbe6] border border-[#24a148]">
+              <div
+                key={`add-${i}`}
+                className="flex items-center gap-2 p-2 bg-[#defbe6] border border-[#24a148]"
+              >
                 <Icon name="PlusCircleIcon" size={12} className="text-[#24a148]" />
                 <span className="text-xs text-carbon-gray-100 flex-1">{src}</span>
-                <button onClick={() => setAdditionalSources((prev) => prev.filter((_, idx) => idx !== i))} className="text-carbon-gray-30 hover:text-[#da1e28]">
+                <button
+                  onClick={() => setAdditionalSources((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="text-carbon-gray-30 hover:text-[#da1e28]"
+                >
                   <Icon name="XMarkIcon" size={12} />
                 </button>
               </div>
@@ -342,7 +405,9 @@ function SubmissionPanel({ suspect, onSubmit }: SubmissionPanelProps) {
       <div className="bg-[#defbe6] border border-[#24a148] p-4">
         <div className="flex items-center gap-2 mb-2">
           <Icon name="CheckCircleIcon" size={16} className="text-[#24a148]" />
-          <p className="text-sm font-semibold text-[#0e6027]">HCC Confirmed — Ready for Payer Submission</p>
+          <p className="text-sm font-semibold text-[#0e6027]">
+            HCC Confirmed — Ready for Payer Submission
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div>
@@ -351,11 +416,15 @@ function SubmissionPanel({ suspect, onSubmit }: SubmissionPanelProps) {
           </div>
           <div>
             <p className="text-2xs text-carbon-gray-50">RAF Delta</p>
-            <p className="font-mono font-semibold text-[#b45309]">+{suspect.estimatedRafDelta.toFixed(3)}</p>
+            <p className="font-mono font-semibold text-[#b45309]">
+              +{suspect.estimatedRafDelta.toFixed(3)}
+            </p>
           </div>
           <div>
             <p className="text-2xs text-carbon-gray-50">Revenue Captured</p>
-            <p className="font-mono font-semibold text-[#24a148]">${suspect.estimatedRevenueDelta.toLocaleString()}</p>
+            <p className="font-mono font-semibold text-[#24a148]">
+              ${suspect.estimatedRevenueDelta.toLocaleString()}
+            </p>
           </div>
           <div>
             <p className="text-2xs text-carbon-gray-50">Submission Deadline</p>
@@ -438,7 +507,13 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
   };
 
   const handleEscalateToPhysician = () => {
-    advanceStep('hcc-confirmation', suspect.id, user.name, user.role, `Escalated to ${suspect.assignedPhysician} for clinical review`);
+    advanceStep(
+      'hcc-confirmation',
+      suspect.id,
+      user.name,
+      user.role,
+      `Escalated to ${suspect.assignedPhysician} for clinical review`
+    );
   };
 
   const handlePhysicianConfirm = (notes: string) => {
@@ -465,7 +540,9 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
           <div className="w-12 h-12 bg-[#d0e2ff] flex items-center justify-center mx-auto mb-3">
             <Icon name="PlayCircleIcon" size={24} className="text-[#0043ce]" />
           </div>
-          <p className="text-sm font-semibold text-carbon-gray-100 mb-1">Start HCC Confirmation Workflow</p>
+          <p className="text-sm font-semibold text-carbon-gray-100 mb-1">
+            Start HCC Confirmation Workflow
+          </p>
           <p className="text-xs text-carbon-gray-50 mb-4 max-w-xs mx-auto">
             This will initiate the 5-step confirmation journey for{' '}
             <span className="font-semibold text-carbon-gray-70">{suspect.hccDescription}</span>
@@ -489,10 +566,18 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
           </div>
           <p className="text-sm font-semibold text-[#0e6027] mb-1">HCC Confirmed & Submitted</p>
           <p className="text-xs text-carbon-gray-50 mb-1">
-            RAF delta <span className="font-mono font-semibold text-[#b45309]">+{suspect.estimatedRafDelta.toFixed(3)}</span> captured
+            RAF delta{' '}
+            <span className="font-mono font-semibold text-[#b45309]">
+              +{suspect.estimatedRafDelta.toFixed(3)}
+            </span>{' '}
+            captured
           </p>
           <p className="text-xs text-carbon-gray-50 mb-4">
-            Revenue impact <span className="font-mono font-semibold text-[#24a148]">${suspect.estimatedRevenueDelta.toLocaleString()}</span> submitted to payer
+            Revenue impact{' '}
+            <span className="font-mono font-semibold text-[#24a148]">
+              ${suspect.estimatedRevenueDelta.toLocaleString()}
+            </span>{' '}
+            submitted to payer
           </p>
           <button
             onClick={handleReset}
@@ -517,7 +602,9 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
               Reason: <span className="font-medium">{rejectionNote}</span>
             </p>
           )}
-          <p className="text-xs text-carbon-gray-50 mb-4">Rejected by {wf.stepHistory[wf.stepHistory.length - 1]?.completedBy}</p>
+          <p className="text-xs text-carbon-gray-50 mb-4">
+            Rejected by {wf.stepHistory[wf.stepHistory.length - 1]?.completedBy}
+          </p>
           <button
             onClick={handleReset}
             className="flex items-center gap-2 px-4 py-2 bg-carbon-gray-10 border border-carbon-gray-30 text-xs text-carbon-gray-70 hover:bg-carbon-gray-20 transition-colors mx-auto"
@@ -538,7 +625,10 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
         <div className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-[#d0e2ff] border border-[#97c1ff]">
             <Icon name="InformationCircleIcon" size={14} className="text-[#0043ce]" />
-            <p className="text-xs text-[#0043ce]">Suspect surfaced from {suspect.dataSource} data. Review and proceed to evidence collection.</p>
+            <p className="text-xs text-[#0043ce]">
+              Suspect surfaced from {suspect.dataSource} data. Review and proceed to evidence
+              collection.
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="p-3 bg-carbon-gray-10 border border-carbon-gray-20">
@@ -547,11 +637,15 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
             </div>
             <div className="p-3 bg-carbon-gray-10 border border-carbon-gray-20">
               <p className="text-2xs text-carbon-gray-50 mb-0.5">Confidence</p>
-              <p className="font-semibold text-[#24a148]">{Math.round(suspect.suspectConfidence * 100)}%</p>
+              <p className="font-semibold text-[#24a148]">
+                {Math.round(suspect.suspectConfidence * 100)}%
+              </p>
             </div>
             <div className="p-3 bg-carbon-gray-10 border border-carbon-gray-20">
               <p className="text-2xs text-carbon-gray-50 mb-0.5">Evidence Sources</p>
-              <p className="font-semibold text-carbon-gray-100">{suspect.evidenceSources.length} sources</p>
+              <p className="font-semibold text-carbon-gray-100">
+                {suspect.evidenceSources.length} sources
+              </p>
             </div>
             <div className="p-3 bg-carbon-gray-10 border border-carbon-gray-20">
               <p className="text-2xs text-carbon-gray-50 mb-0.5">Freshness</p>
@@ -559,7 +653,15 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
             </div>
           </div>
           <button
-            onClick={() => advanceStep('hcc-confirmation', suspect.id, user.name, user.role, 'Suspect reviewed and confirmed for evidence collection')}
+            onClick={() =>
+              advanceStep(
+                'hcc-confirmation',
+                suspect.id,
+                user.name,
+                user.role,
+                'Suspect reviewed and confirmed for evidence collection'
+              )
+            }
             className="flex items-center gap-2 px-4 py-2 bg-[#0f62fe] text-white text-xs font-semibold hover:bg-[#0353e9] transition-colors"
           >
             <Icon name="ArrowRightIcon" size={14} />
@@ -580,16 +682,25 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
         <div className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-[#fdf6dd] border border-[#f1c21b]">
             <Icon name="ArrowUpCircleIcon" size={14} className="text-[#b45309]" />
-            <p className="text-xs text-[#b45309]">Evidence reviewed. Route to <strong>{suspect.assignedPhysician}</strong> for clinical confirmation.</p>
+            <p className="text-xs text-[#b45309]">
+              Evidence reviewed. Route to <strong>{suspect.assignedPhysician}</strong> for clinical
+              confirmation.
+            </p>
           </div>
           <div className="p-4 bg-carbon-gray-10 border border-carbon-gray-20">
             <p className="carbon-label mb-2">Assigned Physician</p>
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-[#0f62fe] flex items-center justify-center text-white text-xs font-bold">
-                {suspect.assignedPhysician.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                {suspect.assignedPhysician
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)}
               </div>
               <div>
-                <p className="text-sm font-semibold text-carbon-gray-100">{suspect.assignedPhysician}</p>
+                <p className="text-sm font-semibold text-carbon-gray-100">
+                  {suspect.assignedPhysician}
+                </p>
                 <p className="text-2xs text-carbon-gray-50">Primary Care Physician</p>
               </div>
             </div>
@@ -621,7 +732,9 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
           <Icon name="ClockIcon" size={16} className="text-[#b45309]" />
           <div>
             <p className="text-sm font-semibold text-[#b45309]">Awaiting Physician Review</p>
-            <p className="text-xs text-carbon-gray-70 mt-0.5">Pending confirmation from <strong>{suspect.assignedPhysician}</strong></p>
+            <p className="text-xs text-carbon-gray-70 mt-0.5">
+              Pending confirmation from <strong>{suspect.assignedPhysician}</strong>
+            </p>
           </div>
         </div>
       );
@@ -637,7 +750,9 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
           <Icon name="ClockIcon" size={16} className="text-[#0043ce]" />
           <div>
             <p className="text-sm font-semibold text-[#0043ce]">Awaiting Payer Submission</p>
-            <p className="text-xs text-carbon-gray-70 mt-0.5">Physician confirmed — pending final submission by {suspect.assignedPhysician}</p>
+            <p className="text-xs text-carbon-gray-70 mt-0.5">
+              Physician confirmed — pending final submission by {suspect.assignedPhysician}
+            </p>
           </div>
         </div>
       );
@@ -648,8 +763,13 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
       <div className="flex items-center gap-3 p-4 bg-carbon-gray-10 border border-carbon-gray-20">
         <Icon name="LockClosedIcon" size={16} className="text-carbon-gray-50" />
         <div>
-          <p className="text-sm font-semibold text-carbon-gray-70">Step requires {currentStepDef?.requiredRole === 'physician' ? 'Physician' : 'Care Manager'} role</p>
-          <p className="text-xs text-carbon-gray-50 mt-0.5">Switch role context to proceed with this step</p>
+          <p className="text-sm font-semibold text-carbon-gray-70">
+            Step requires{' '}
+            {currentStepDef?.requiredRole === 'physician' ? 'Physician' : 'Care Manager'} role
+          </p>
+          <p className="text-xs text-carbon-gray-50 mt-0.5">
+            Switch role context to proceed with this step
+          </p>
         </div>
       </div>
     );
@@ -665,24 +785,55 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
           </div>
           <div>
             <p className="text-sm font-semibold text-carbon-gray-100">HCC Confirmation Journey</p>
-            <p className="text-2xs text-carbon-gray-50 font-mono">{suspect.hccCode} — {suspect.hccDescription}</p>
+            <p className="text-2xs text-carbon-gray-50 font-mono">
+              {suspect.hccCode} — {suspect.hccDescription}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {status !== 'idle' && (
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold border
-              ${status === 'completed' ? 'bg-[#defbe6] text-[#0e6027] border-[#24a148]' :
-                status === 'rejected' ? 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]' :
-                status === 'awaiting-review' ? 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]' :
-                'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]'}`}
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold border
+              ${
+                status === 'completed'
+                  ? 'bg-[#defbe6] text-[#0e6027] border-[#24a148]'
+                  : status === 'rejected'
+                    ? 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]'
+                    : status === 'awaiting-review'
+                      ? 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]'
+                      : 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]'
+              }`}
             >
-              {status === 'in-progress' && <><Icon name="PlayIcon" size={10} />Step {current}/{total}</>}
-              {status === 'awaiting-review' && <><Icon name="ClockIcon" size={10} />Awaiting Review</>}
-              {status === 'completed' && <><Icon name="CheckCircleIcon" size={10} />Completed</>}
-              {status === 'rejected' && <><Icon name="XCircleIcon" size={10} />Rejected</>}
+              {status === 'in-progress' && (
+                <>
+                  <Icon name="PlayIcon" size={10} />
+                  Step {current}/{total}
+                </>
+              )}
+              {status === 'awaiting-review' && (
+                <>
+                  <Icon name="ClockIcon" size={10} />
+                  Awaiting Review
+                </>
+              )}
+              {status === 'completed' && (
+                <>
+                  <Icon name="CheckCircleIcon" size={10} />
+                  Completed
+                </>
+              )}
+              {status === 'rejected' && (
+                <>
+                  <Icon name="XCircleIcon" size={10} />
+                  Rejected
+                </>
+              )}
             </div>
           )}
-          <button onClick={onClose} className="p-1 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-20 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-1 text-carbon-gray-50 hover:text-carbon-gray-100 hover:bg-carbon-gray-20 transition-colors"
+          >
             <Icon name="XMarkIcon" size={16} />
           </button>
         </div>
@@ -691,11 +842,7 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
       {/* Step progress */}
       {status !== 'idle' && (
         <div className="px-5 py-4 border-b border-carbon-gray-20 bg-white">
-          <StepIndicator
-            steps={wfDef.steps}
-            currentStep={wf?.currentStep ?? 1}
-            status={status}
-          />
+          <StepIndicator steps={wfDef.steps} currentStep={wf?.currentStep ?? 1} status={status} />
         </div>
       )}
 
@@ -709,9 +856,13 @@ export default function HCCConfirmationJourney({ suspect, onClose }: HCCConfirma
                 <div className="w-4 h-4 bg-[#24a148] flex items-center justify-center flex-shrink-0">
                   <Icon name="CheckIcon" size={9} className="text-white" />
                 </div>
-                <span className="font-semibold text-carbon-gray-70 w-28 flex-shrink-0">{record.label}</span>
+                <span className="font-semibold text-carbon-gray-70 w-28 flex-shrink-0">
+                  {record.label}
+                </span>
                 <span className="text-carbon-gray-50">{record.completedBy}</span>
-                <span className="text-carbon-gray-30 font-mono ml-auto">{new Date(record.completedAt).toLocaleString()}</span>
+                <span className="text-carbon-gray-30 font-mono ml-auto">
+                  {new Date(record.completedAt).toLocaleString()}
+                </span>
               </div>
             ))}
           </div>

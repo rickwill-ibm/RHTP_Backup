@@ -61,7 +61,7 @@ export function defaultOutreachDeps(): OutreachDeps {
  * no send. The runtime emits proposed/approved/executed (or rejected) around this.
  */
 export function createOutreachWorkflow(
-  deps: OutreachDeps = defaultOutreachDeps(),
+  deps: OutreachDeps = defaultOutreachDeps()
 ): WorkflowDefinition<OutreachTask, OutreachResult> {
   return {
     name: 'outreach-journey',
@@ -92,7 +92,7 @@ export function createOutreachWorkflow(
       if (deps.idempotency) {
         const { firstProcessed } = await deps.idempotency.markProcessed(
           IDEMPOTENCY_CONSUMERS.outreachAgent,
-          touchpointId,
+          touchpointId
         );
         if (!firstProcessed) {
           return { outcome: 'deduped', touchpointId, decidedBy: decision.decidedBy };

@@ -72,7 +72,7 @@ export function createMemoryOutboxStore(id = 'mock-outbox'): OutboxStore {
           (a, b) =>
             a.memberId.localeCompare(b.memberId) ||
             (a.sequence ?? Number.MAX_SAFE_INTEGER) - (b.sequence ?? Number.MAX_SAFE_INTEGER) ||
-            a.createdAtMs - b.createdAtMs,
+            a.createdAtMs - b.createdAtMs
         )
         .map(clone);
     },

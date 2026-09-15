@@ -20,23 +20,38 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
   return (
     <div className="flex items-start gap-0 overflow-x-auto pb-1">
       {steps.map((s, idx) => {
-        const isCompleted = status === 'completed' || (status !== 'rejected' && s.step < currentStep);
+        const isCompleted =
+          status === 'completed' || (status !== 'rejected' && s.step < currentStep);
         const isActive = s.step === currentStep && status !== 'completed' && status !== 'rejected';
         const isRejected = status === 'rejected' && s.step === currentStep;
 
         return (
           <div key={s.step} className="flex items-start flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1 min-w-0">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
-                ${isCompleted ? 'bg-[#24a148] border-[#24a148] text-white' :
-                  isActive ? 'bg-[#0043ce] border-[#0043ce] text-white': isRejected ?'bg-[#da1e28] border-[#da1e28] text-white': 'bg-white border-carbon-gray-30 text-carbon-gray-50'}`}
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
+                ${
+                  isCompleted
+                    ? 'bg-[#24a148] border-[#24a148] text-white'
+                    : isActive
+                      ? 'bg-[#0043ce] border-[#0043ce] text-white'
+                      : isRejected
+                        ? 'bg-[#da1e28] border-[#da1e28] text-white'
+                        : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
+                }`}
               >
-                {isCompleted ? <Icon name="CheckIcon" size={12} /> :
-                 isRejected ? <Icon name="XMarkIcon" size={12} /> :
-                 s.step}
+                {isCompleted ? (
+                  <Icon name="CheckIcon" size={12} />
+                ) : isRejected ? (
+                  <Icon name="XMarkIcon" size={12} />
+                ) : (
+                  s.step
+                )}
               </div>
               <div className="mt-1.5 text-center px-1">
-                <p className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#0043ce]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}>
+                <p
+                  className={`text-2xs font-semibold leading-tight ${isActive ? 'text-[#0043ce]' : isCompleted ? 'text-[#24a148]' : isRejected ? 'text-[#da1e28]' : 'text-carbon-gray-50'}`}
+                >
                   {s.label}
                 </p>
                 <p className="text-2xs text-carbon-gray-30 mt-0.5 hidden sm:block leading-tight">
@@ -45,7 +60,9 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
               </div>
             </div>
             {idx < steps.length - 1 && (
-              <div className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+              <div
+                className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+              />
             )}
           </div>
         );
@@ -66,7 +83,9 @@ function GapSummaryCard({ gap }: { gap: CareGap }) {
       <div className="flex items-start justify-between gap-4 mb-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className={`text-2xs font-semibold px-2 py-0.5 ${programColors[gap.program] ?? 'bg-carbon-gray-10 text-carbon-gray-70'}`}>
+            <span
+              className={`text-2xs font-semibold px-2 py-0.5 ${programColors[gap.program] ?? 'bg-carbon-gray-10 text-carbon-gray-70'}`}
+            >
               {gap.program}
             </span>
             <span className="font-mono text-xs font-bold text-carbon-gray-70">{gap.measureId}</span>
@@ -76,7 +95,9 @@ function GapSummaryCard({ gap }: { gap: CareGap }) {
         </div>
         <div className="text-right flex-shrink-0">
           <p className="text-2xs text-carbon-gray-50">Days Open</p>
-          <p className={`font-mono text-base font-bold ${gap.daysOpen > 120 ? 'text-[#da1e28]' : gap.daysOpen > 60 ? 'text-[#b45309]' : 'text-carbon-gray-70'}`}>
+          <p
+            className={`font-mono text-base font-bold ${gap.daysOpen > 120 ? 'text-[#da1e28]' : gap.daysOpen > 60 ? 'text-[#b45309]' : 'text-carbon-gray-70'}`}
+          >
             {gap.daysOpen}d
           </p>
           <p className="text-2xs text-carbon-gray-50 mt-0.5">Due Date</p>
@@ -85,7 +106,11 @@ function GapSummaryCard({ gap }: { gap: CareGap }) {
       </div>
       {gap.notes && (
         <div className="flex items-start gap-2 mt-2 pt-2 border-t border-[#97c1ff]/50">
-          <Icon name="ChatBubbleLeftEllipsisIcon" size={12} className="text-[#0043ce] mt-0.5 flex-shrink-0" />
+          <Icon
+            name="ChatBubbleLeftEllipsisIcon"
+            size={12}
+            className="text-[#0043ce] mt-0.5 flex-shrink-0"
+          />
           <p className="text-xs text-carbon-gray-70 italic">{gap.notes}</p>
         </div>
       )}
@@ -101,7 +126,12 @@ interface BeforeAfterGraphicProps {
   performingProvider: string;
 }
 
-function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, performingProvider }: BeforeAfterGraphicProps) {
+function BeforeAfterGraphic({
+  resultValue,
+  hedisCompliance,
+  dateOfService,
+  performingProvider,
+}: BeforeAfterGraphicProps) {
   const [animating, setAnimating] = useState(false);
   const [showAfter, setShowAfter] = useState(false);
 
@@ -109,7 +139,10 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
     // Trigger animation sequence on mount
     const t1 = setTimeout(() => setAnimating(true), 200);
     const t2 = setTimeout(() => setShowAfter(true), 800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   const beforeData = {
@@ -141,7 +174,9 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
       </div>
       <div className="grid grid-cols-2 divide-x divide-[#a7f0ba]">
         {/* BEFORE */}
-        <div className={`p-4 transition-all duration-700 ${showAfter ? 'opacity-60' : 'opacity-100'}`}>
+        <div
+          className={`p-4 transition-all duration-700 ${showAfter ? 'opacity-60' : 'opacity-100'}`}
+        >
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 rounded-full bg-[#da1e28]" />
             <p className="text-xs font-bold text-[#da1e28] uppercase tracking-wide">Before</p>
@@ -149,10 +184,18 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
           <div className="space-y-2">
             {[
               { label: 'Open Gaps', value: String(beforeData.openGaps), color: 'text-[#da1e28]' },
-              { label: 'Clinical Open', value: String(beforeData.clinicalOpen), color: 'text-[#da1e28]' },
+              {
+                label: 'Clinical Open',
+                value: String(beforeData.clinicalOpen),
+                color: 'text-[#da1e28]',
+              },
               { label: 'HEDIS CDC', value: beforeData.hedisStatus, color: 'text-[#da1e28]' },
               { label: 'Gainshare', value: beforeData.gainshare, color: 'text-carbon-gray-50' },
-              { label: 'Quality Score', value: `${beforeData.qualityScore}/100`, color: 'text-carbon-gray-70' },
+              {
+                label: 'Quality Score',
+                value: `${beforeData.qualityScore}/100`,
+                color: 'text-carbon-gray-70',
+              },
               { label: 'HbA1c Status', value: beforeData.hbA1cStatus, color: 'text-[#da1e28]' },
               { label: 'A1C Result', value: beforeData.hbA1cResult, color: 'text-carbon-gray-50' },
             ].map((row) => (
@@ -165,26 +208,67 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
         </div>
 
         {/* AFTER */}
-        <div className={`p-4 transition-all duration-700 ${showAfter ? 'opacity-100 bg-[#defbe6]/20' : 'opacity-0'}`}>
+        <div
+          className={`p-4 transition-all duration-700 ${showAfter ? 'opacity-100 bg-[#defbe6]/20' : 'opacity-0'}`}
+        >
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 rounded-full bg-[#24a148]" />
             <p className="text-xs font-bold text-[#24a148] uppercase tracking-wide">After</p>
           </div>
           <div className="space-y-2">
             {[
-              { label: 'Open Gaps', value: String(afterData.openGaps), color: 'text-[#24a148]', delta: '↓1' },
-              { label: 'Clinical Open', value: String(afterData.clinicalOpen), color: 'text-[#24a148]', delta: '↓1' },
-              { label: 'HEDIS CDC', value: afterData.hedisStatus, color: hedisCompliance === 'MET' ? 'text-[#24a148]' : 'text-[#da1e28]', delta: '' },
-              { label: 'Gainshare', value: afterData.gainshare, color: 'text-[#24a148]', delta: '↑' },
-              { label: 'Quality Score', value: `${afterData.qualityScore}/100`, color: 'text-[#24a148]', delta: '↑7' },
-              { label: 'HbA1c Status', value: afterData.hbA1cStatus, color: 'text-[#24a148]', delta: '' },
-              { label: 'A1C Result', value: afterData.hbA1cResult, color: 'text-[#0043ce]', delta: '' },
+              {
+                label: 'Open Gaps',
+                value: String(afterData.openGaps),
+                color: 'text-[#24a148]',
+                delta: '↓1',
+              },
+              {
+                label: 'Clinical Open',
+                value: String(afterData.clinicalOpen),
+                color: 'text-[#24a148]',
+                delta: '↓1',
+              },
+              {
+                label: 'HEDIS CDC',
+                value: afterData.hedisStatus,
+                color: hedisCompliance === 'MET' ? 'text-[#24a148]' : 'text-[#da1e28]',
+                delta: '',
+              },
+              {
+                label: 'Gainshare',
+                value: afterData.gainshare,
+                color: 'text-[#24a148]',
+                delta: '↑',
+              },
+              {
+                label: 'Quality Score',
+                value: `${afterData.qualityScore}/100`,
+                color: 'text-[#24a148]',
+                delta: '↑7',
+              },
+              {
+                label: 'HbA1c Status',
+                value: afterData.hbA1cStatus,
+                color: 'text-[#24a148]',
+                delta: '',
+              },
+              {
+                label: 'A1C Result',
+                value: afterData.hbA1cResult,
+                color: 'text-[#0043ce]',
+                delta: '',
+              },
             ].map((row) => (
               <div key={row.label} className="flex items-center justify-between gap-2">
                 <span className="text-2xs text-carbon-gray-50">{row.label}</span>
                 <div className="flex items-center gap-1">
-                  {row.delta && <span className="text-2xs font-bold text-[#24a148]">{row.delta}</span>}
-                  <span className={`text-2xs font-semibold font-mono ${row.color}`}>{row.value}</span>
+                  {row.delta && (
+                    <span className="text-2xs font-bold text-[#24a148]">{row.delta}</span>
+                  )}
+                  <span className={`text-2xs font-semibold font-mono ${row.color}`}>
+                    {row.value}
+                  </span>
                 </div>
               </div>
             ))}
@@ -193,7 +277,9 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
       </div>
 
       {/* Evidence summary strip */}
-      <div className={`px-4 py-3 bg-[#defbe6] border-t border-[#a7f0ba] transition-all duration-500 ${showAfter ? 'opacity-100' : 'opacity-0'}`}>
+      <div
+        className={`px-4 py-3 bg-[#defbe6] border-t border-[#a7f0ba] transition-all duration-500 ${showAfter ? 'opacity-100' : 'opacity-0'}`}
+      >
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xs text-[#0e6027]">Date of Service</p>
@@ -205,7 +291,9 @@ function BeforeAfterGraphic({ resultValue, hedisCompliance, dateOfService, perfo
           </div>
           <div>
             <p className="text-2xs text-[#0e6027]">Provider</p>
-            <p className="text-xs font-semibold text-[#0e6027] truncate">{performingProvider || 'Bennett County Health PCP'}</p>
+            <p className="text-xs font-semibold text-[#0e6027] truncate">
+              {performingProvider || 'Bennett County Health PCP'}
+            </p>
           </div>
         </div>
       </div>
@@ -241,11 +329,14 @@ function AssignCoordinatorPanel({ gap, onAssign }: AssignCoordinatorPanelProps) 
         <p className="text-sm font-semibold text-carbon-gray-100">Assign Care Coordinator</p>
       </div>
       <p className="text-xs text-carbon-gray-50">
-        Assign this care gap to a coordinator responsible for patient outreach and closure documentation.
+        Assign this care gap to a coordinator responsible for patient outreach and closure
+        documentation.
       </p>
 
       <div>
-        <label className="carbon-label mb-1.5 block">Assign To <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1.5 block">
+          Assign To <span className="text-[#da1e28]">*</span>
+        </label>
         <select
           value={coordinator}
           onChange={(e) => setCoordinator(e.target.value)}
@@ -253,7 +344,9 @@ function AssignCoordinatorPanel({ gap, onAssign }: AssignCoordinatorPanelProps) 
         >
           <option value="">Select coordinator...</option>
           {coordinators.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c} value={c}>
+              {c}
+            </option>
           ))}
         </select>
       </div>
@@ -315,7 +408,9 @@ function InitiateOutreachPanel({ gap, onOutreach }: InitiateOutreachPanelProps) 
       </p>
 
       <div>
-        <label className="carbon-label mb-1.5 block">Outreach Method <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1.5 block">
+          Outreach Method <span className="text-[#da1e28]">*</span>
+        </label>
         <select
           value={method}
           onChange={(e) => setMethod(e.target.value)}
@@ -323,7 +418,9 @@ function InitiateOutreachPanel({ gap, onOutreach }: InitiateOutreachPanelProps) 
         >
           <option value="">Select method...</option>
           {outreachMethods.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>
+              {m}
+            </option>
           ))}
         </select>
       </div>
@@ -339,7 +436,9 @@ function InitiateOutreachPanel({ gap, onOutreach }: InitiateOutreachPanelProps) 
       </div>
 
       <div>
-        <label className="carbon-label mb-1.5 block">Outreach Notes <span className="text-[#da1e28]">*</span></label>
+        <label className="carbon-label mb-1.5 block">
+          Outreach Notes <span className="text-[#da1e28]">*</span>
+        </label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -350,7 +449,14 @@ function InitiateOutreachPanel({ gap, onOutreach }: InitiateOutreachPanelProps) 
       </div>
 
       <button
-        onClick={() => method && notes.trim() && onOutreach(method, `${method}${scheduledDate ? ` | Scheduled: ${scheduledDate}` : ''} | ${notes}`)}
+        onClick={() =>
+          method &&
+          notes.trim() &&
+          onOutreach(
+            method,
+            `${method}${scheduledDate ? ` | Scheduled: ${scheduledDate}` : ''} | ${notes}`
+          )
+        }
         disabled={!method || !notes.trim()}
         className="flex items-center gap-2 px-4 py-2.5 bg-[#0043ce] text-white text-xs font-semibold hover:bg-[#002d9c] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
@@ -364,25 +470,37 @@ function InitiateOutreachPanel({ gap, onOutreach }: InitiateOutreachPanelProps) 
 // ─── Evidence Source Row ──────────────────────────────────────────────────────
 function EvidenceSourceRow({ source, index }: { source: string; index: number }) {
   const sourceTypes: Record<string, string> = {
-    'Lab': 'DocumentChartBarIcon',
-    'Encounter': 'ComputerDesktopIcon',
-    'Claim': 'DocumentTextIcon',
-    'Referral': 'ArrowTopRightOnSquareIcon',
-    'Order': 'ClipboardDocumentListIcon',
+    Lab: 'DocumentChartBarIcon',
+    Encounter: 'ComputerDesktopIcon',
+    Claim: 'DocumentTextIcon',
+    Referral: 'ArrowTopRightOnSquareIcon',
+    Order: 'ClipboardDocumentListIcon',
   };
-  const sourceType = source.toLowerCase().includes('lab') || source.toLowerCase().includes('result') ? 'Lab' :
-    source.toLowerCase().includes('encounter') || source.toLowerCase().includes('visit') ? 'Encounter' :
-    source.toLowerCase().includes('claim') ? 'Claim' :
-    source.toLowerCase().includes('referral') ? 'Referral' : 'Order';
+  const sourceType =
+    source.toLowerCase().includes('lab') || source.toLowerCase().includes('result')
+      ? 'Lab'
+      : source.toLowerCase().includes('encounter') || source.toLowerCase().includes('visit')
+        ? 'Encounter'
+        : source.toLowerCase().includes('claim')
+          ? 'Claim'
+          : source.toLowerCase().includes('referral')
+            ? 'Referral'
+            : 'Order';
 
   return (
     <div className="flex items-start gap-3 p-3 bg-carbon-gray-10 border border-carbon-gray-20 hover:bg-white transition-colors">
       <div className="w-6 h-6 flex items-center justify-center bg-[#d0e2ff] flex-shrink-0 mt-0.5">
-        <Icon name={(sourceTypes[sourceType] ?? 'DocumentTextIcon') as any} size={12} className="text-[#0043ce]" />
+        <Icon
+          name={(sourceTypes[sourceType] ?? 'DocumentTextIcon') as any}
+          size={12}
+          className="text-[#0043ce]"
+        />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-carbon-gray-100">{source}</p>
-        <span className="text-2xs font-mono text-carbon-gray-50 bg-carbon-gray-20 px-1.5 py-0.5 mt-1 inline-block">{sourceType}</span>
+        <span className="text-2xs font-mono text-carbon-gray-50 bg-carbon-gray-20 px-1.5 py-0.5 mt-1 inline-block">
+          {sourceType}
+        </span>
       </div>
       <Icon name="CheckCircleIcon" size={14} className="text-[#24a148] flex-shrink-0 mt-0.5" />
     </div>
@@ -392,12 +510,17 @@ function EvidenceSourceRow({ source, index }: { source: string; index: number })
 // ─── HbA1c Enhanced Closure Panel ────────────────────────────────────────────
 interface HbA1cClosurePanelProps {
   gap: CareGap;
-  onClose: (attestation: string, evidenceSources: string[], notes: string, hbA1cData: {
-    dateOfService: string;
-    performingProvider: string;
-    placeOfService: string;
-    resultValue: number;
-  }) => void;
+  onClose: (
+    attestation: string,
+    evidenceSources: string[],
+    notes: string,
+    hbA1cData: {
+      dateOfService: string;
+      performingProvider: string;
+      placeOfService: string;
+      resultValue: number;
+    }
+  ) => void;
   onDefer: (reason: string) => void;
 }
 
@@ -415,7 +538,10 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
 
   const hedisCompliance = resultValue ? (parseFloat(resultValue) < 8.0 ? 'MET' : 'NOT_MET') : null;
 
-  const isHbA1cGap = gap.measureId?.includes('CDC') || gap.measureName?.toLowerCase().includes('hba1c') || gap.measureName?.toLowerCase().includes('a1c');
+  const isHbA1cGap =
+    gap.measureId?.includes('CDC') ||
+    gap.measureName?.toLowerCase().includes('hba1c') ||
+    gap.measureName?.toLowerCase().includes('a1c');
 
   const deferReasons = [
     'Patient declined — documented refusal on file',
@@ -448,7 +574,11 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
 
       {/* Closure requirement reminder */}
       <div className="flex items-start gap-2 p-3 bg-[#defbe6]/40 border border-[#24a148]/30">
-        <Icon name="InformationCircleIcon" size={14} className="text-[#24a148] flex-shrink-0 mt-0.5" />
+        <Icon
+          name="InformationCircleIcon"
+          size={14}
+          className="text-[#24a148] flex-shrink-0 mt-0.5"
+        />
         <div>
           <p className="text-2xs font-semibold text-[#0e6027] mb-0.5">Closure Requirement</p>
           <p className="text-xs text-carbon-gray-70">{gap.closureRequirement}</p>
@@ -487,12 +617,16 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
             <div className="space-y-3 p-3 bg-[#f0f4ff] border border-[#97c1ff]">
               <div className="flex items-center gap-2 mb-1">
                 <Icon name="BeakerIcon" size={13} className="text-[#0043ce]" />
-                <p className="text-xs font-semibold text-[#0043ce]">HbA1c Lab Evidence — HEDIS CDC Required Fields</p>
+                <p className="text-xs font-semibold text-[#0043ce]">
+                  HbA1c Lab Evidence — HEDIS CDC Required Fields
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="carbon-label mb-1 block">Date of Service <span className="text-[#da1e28]">*</span></label>
+                  <label className="carbon-label mb-1 block">
+                    Date of Service <span className="text-[#da1e28]">*</span>
+                  </label>
                   <input
                     type="date"
                     value={dateOfService}
@@ -501,7 +635,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
                   />
                 </div>
                 <div>
-                  <label className="carbon-label mb-1 block">Place of Service <span className="text-[#da1e28]">*</span></label>
+                  <label className="carbon-label mb-1 block">
+                    Place of Service <span className="text-[#da1e28]">*</span>
+                  </label>
                   <select
                     value={placeOfService}
                     onChange={(e) => setPlaceOfService(e.target.value)}
@@ -516,7 +652,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
               </div>
 
               <div>
-                <label className="carbon-label mb-1 block">Performing Provider <span className="text-[#da1e28]">*</span></label>
+                <label className="carbon-label mb-1 block">
+                  Performing Provider <span className="text-[#da1e28]">*</span>
+                </label>
                 <input
                   type="text"
                   value={performingProvider}
@@ -537,7 +675,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
                   />
                 </div>
                 <div>
-                  <label className="carbon-label mb-1 block">Result Value (%) <span className="text-[#da1e28]">*</span></label>
+                  <label className="carbon-label mb-1 block">
+                    Result Value (%) <span className="text-[#da1e28]">*</span>
+                  </label>
                   <div className="flex items-center gap-1">
                     <input
                       type="number"
@@ -556,14 +696,18 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
 
               {/* HEDIS auto-calc */}
               {resultValue && (
-                <div className={`flex items-center gap-3 p-3 border ${hedisCompliance === 'MET' ? 'bg-[#defbe6] border-[#a7f0ba]' : 'bg-[#fff1f1] border-[#ffb3b8]'}`}>
+                <div
+                  className={`flex items-center gap-3 p-3 border ${hedisCompliance === 'MET' ? 'bg-[#defbe6] border-[#a7f0ba]' : 'bg-[#fff1f1] border-[#ffb3b8]'}`}
+                >
                   <Icon
                     name={hedisCompliance === 'MET' ? 'CheckBadgeIcon' : 'ExclamationCircleIcon'}
                     size={16}
                     className={hedisCompliance === 'MET' ? 'text-[#24a148]' : 'text-[#da1e28]'}
                   />
                   <div>
-                    <p className={`text-xs font-bold ${hedisCompliance === 'MET' ? 'text-[#0e6027]' : 'text-[#da1e28]'}`}>
+                    <p
+                      className={`text-xs font-bold ${hedisCompliance === 'MET' ? 'text-[#0e6027]' : 'text-[#da1e28]'}`}
+                    >
                       HEDIS CDC — {hedisCompliance === 'MET' ? 'COMPLIANT (MET)' : 'NOT MET'}
                     </p>
                     <p className="text-2xs text-carbon-gray-50">
@@ -611,7 +755,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
           </div>
 
           <div>
-            <label className="carbon-label mb-1.5 block">Clinical Documentation Notes <span className="text-[#da1e28]">*</span></label>
+            <label className="carbon-label mb-1.5 block">
+              Clinical Documentation Notes <span className="text-[#da1e28]">*</span>
+            </label>
             <textarea
               value={closureNotes}
               onChange={(e) => setClosureNotes(e.target.value)}
@@ -657,7 +803,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
           </div>
 
           <div>
-            <label className="carbon-label mb-1.5 block">Deferral Reason <span className="text-[#da1e28]">*</span></label>
+            <label className="carbon-label mb-1.5 block">
+              Deferral Reason <span className="text-[#da1e28]">*</span>
+            </label>
             <select
               value={deferReason}
               onChange={(e) => setDeferReason(e.target.value)}
@@ -665,7 +813,9 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
             >
               <option value="">Select reason...</option>
               {deferReasons.map((r) => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r} value={r}>
+                  {r}
+                </option>
               ))}
             </select>
           </div>
@@ -693,7 +843,13 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
 }
 
 // ─── Completed State ──────────────────────────────────────────────────────────
-function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory: { label: string; completedBy: string; completedAt: string; notes?: string }[] }) {
+function ClosureCompletedPanel({
+  gap,
+  stepHistory,
+}: {
+  gap: CareGap;
+  stepHistory: { label: string; completedBy: string; completedAt: string; notes?: string }[];
+}) {
   const { getGapClosure } = useGapClosureStore();
   const closure = getGapClosure(gap.id);
 
@@ -731,7 +887,10 @@ function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: 'Measure', value: 'HbA1c Control (CDC)' },
-              { label: 'Compliance', value: closure.hedisCompliance === 'MET' ? 'MET ✓' : 'NOT MET' },
+              {
+                label: 'Compliance',
+                value: closure.hedisCompliance === 'MET' ? 'MET ✓' : 'NOT MET',
+              },
               { label: 'Result', value: `${closure.resultValue}%` },
               { label: 'Gainshare', value: '$8,100 Attributed' },
               { label: 'Track', value: 'Medicaid RHTP Track 3' },
@@ -739,7 +898,9 @@ function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory
             ].map((item) => (
               <div key={item.label}>
                 <p className="text-2xs text-carbon-gray-50">{item.label}</p>
-                <p className={`text-xs font-semibold ${item.label === 'Compliance' && closure.hedisCompliance === 'MET' ? 'text-[#24a148]' : 'text-carbon-gray-100'}`}>
+                <p
+                  className={`text-xs font-semibold ${item.label === 'Compliance' && closure.hedisCompliance === 'MET' ? 'text-[#24a148]' : 'text-carbon-gray-100'}`}
+                >
                   {item.value}
                 </p>
               </div>
@@ -752,7 +913,10 @@ function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory
         <p className="carbon-label mb-2">Closure Audit Trail</p>
         <div className="space-y-2">
           {stepHistory.map((record, i) => (
-            <div key={`closed-step-${i}`} className="flex items-start gap-3 p-3 bg-carbon-gray-10 border border-carbon-gray-20">
+            <div
+              key={`closed-step-${i}`}
+              className="flex items-start gap-3 p-3 bg-carbon-gray-10 border border-carbon-gray-20"
+            >
               <div className="w-5 h-5 bg-[#24a148] flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Icon name="CheckIcon" size={9} className="text-white" />
               </div>
@@ -760,11 +924,18 @@ function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-carbon-gray-100">{record.label}</p>
                   <span className="text-2xs font-mono text-carbon-gray-50 whitespace-nowrap">
-                    {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(record.completedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
                 <p className="text-2xs text-carbon-gray-50 mt-0.5">by {record.completedBy}</p>
-                {record.notes && <p className="text-xs text-carbon-gray-70 mt-1 italic">{record.notes}</p>}
+                {record.notes && (
+                  <p className="text-xs text-carbon-gray-70 mt-1 italic">{record.notes}</p>
+                )}
               </div>
             </div>
           ))}
@@ -775,7 +946,15 @@ function ClosureCompletedPanel({ gap, stepHistory }: { gap: CareGap; stepHistory
 }
 
 // ─── Rejected / Deferred State ────────────────────────────────────────────────
-function DeferredPanel({ gap, reason, onReset }: { gap: CareGap; reason?: string; onReset: () => void }) {
+function DeferredPanel({
+  gap,
+  reason,
+  onReset,
+}: {
+  gap: CareGap;
+  reason?: string;
+  onReset: () => void;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 p-4 bg-[#fdf6dd] border border-[#f1c21b]">
@@ -830,11 +1009,13 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
   const userName = user?.name ?? 'Care Manager';
   const userRole = user?.role ?? 'care_manager';
 
-  const isHbA1cGap = gap.measureId?.includes('CDC') || gap.measureName?.toLowerCase().includes('hba1c') || gap.measureName?.toLowerCase().includes('a1c');
+  const isHbA1cGap =
+    gap.measureId?.includes('CDC') ||
+    gap.measureName?.toLowerCase().includes('hba1c') ||
+    gap.measureName?.toLowerCase().includes('a1c');
 
   // Canonical FHIR Observation ID for this gap — matches migrate-patients.mjs pattern
-  const patientFhirId =
-    PLATFORM_TO_FHIR_ID_MAP[patient.patientId] ?? patient.patientId;
+  const patientFhirId = PLATFORM_TO_FHIR_ID_MAP[patient.patientId] ?? patient.patientId;
   const canonicalObsId = `patient-${patientFhirId}-gap-${gap.id}`;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -845,7 +1026,13 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
 
   const handleAssign = (coordinator: string, notes: string) => {
     if (!wf) return;
-    advanceStep('care-gap-closure', gap.id, userName, userRole, `Assigned to: ${coordinator}${notes ? ` | ${notes}` : ''}`);
+    advanceStep(
+      'care-gap-closure',
+      gap.id,
+      userName,
+      userRole,
+      `Assigned to: ${coordinator}${notes ? ` | ${notes}` : ''}`
+    );
 
     // ── FHIR Task POST → requested (fire-and-forget) ─────────────────────────
     if (!getFhirMockMode()) {
@@ -856,7 +1043,10 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
           id: taskId,
           status: 'requested',
           intent: 'order',
-          code: { coding: [{ system: 'http://loinc.org', code: '18776-5', display: 'Plan of care note' }], text: 'Care Gap Assignment' },
+          code: {
+            coding: [{ system: 'http://loinc.org', code: '18776-5', display: 'Plan of care note' }],
+            text: 'Care Gap Assignment',
+          },
           description: `Care gap assignment: ${gap.measureName}`,
           for: { reference: `Patient/${patientFhirId}` },
           authoredOn: new Date().toISOString(),
@@ -864,7 +1054,12 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
           requester: { display: userName },
           owner: { display: coordinator },
           note: notes ? [{ text: notes }] : undefined,
-          extension: [{ url: 'http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id', valueString: gap.id }],
+          extension: [
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id',
+              valueString: gap.id,
+            },
+          ],
         })
         .then((res: unknown) => {
           const createdId = (res as { id?: string })?.id ?? taskId;
@@ -885,13 +1080,28 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
         .create({
           resourceType: 'Communication',
           status: 'in-progress',
-          category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/communication-category', code: 'notification', display: 'Notification' }] }],
+          category: [
+            {
+              coding: [
+                {
+                  system: 'http://terminology.hl7.org/CodeSystem/communication-category',
+                  code: 'notification',
+                  display: 'Notification',
+                },
+              ],
+            },
+          ],
           subject: { reference: `Patient/${patientFhirId}` },
           recipient: [{ reference: `Patient/${patientFhirId}` }],
           sender: { display: userName },
           sent: new Date().toISOString(),
           payload: [{ contentString: `${method}${notes ? ' — ' + notes : ''}` }],
-          extension: [{ url: 'http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id', valueString: gap.id }],
+          extension: [
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/tcoc-gap-id',
+              valueString: gap.id,
+            },
+          ],
         })
         .then(() => console.info(`[Communication] Outreach record posted for gap ${gap.id}`))
         .catch((err) => console.warn('[Communication] Journey outreach POST failed:', err));
@@ -918,11 +1128,23 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
     attestation: string,
     evidenceSources: string[],
     notes: string,
-    hbA1cData?: { dateOfService: string; performingProvider: string; placeOfService: string; resultValue: number }
+    hbA1cData?: {
+      dateOfService: string;
+      performingProvider: string;
+      placeOfService: string;
+      resultValue: number;
+    }
   ) => {
     if (!wf) return;
-    const evidenceStr = evidenceSources.length > 0 ? ` | Evidence: ${evidenceSources.join('; ')}` : '';
-    completeWorkflow('care-gap-closure', gap.id, userName, userRole, `${attestation}${evidenceStr} | ${notes}`);
+    const evidenceStr =
+      evidenceSources.length > 0 ? ` | Evidence: ${evidenceSources.join('; ')}` : '';
+    completeWorkflow(
+      'care-gap-closure',
+      gap.id,
+      userName,
+      userRole,
+      `${attestation}${evidenceStr} | ${notes}`
+    );
 
     // Write to FHIR gap closure store — use actual gap.id and canonical Observation ID
     // so submitClosure issues PUT against the pre-migrated Observation on HAPI FHIR.
@@ -962,11 +1184,20 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
 
   // ── Status badge config ────────────────────────────────────────────────────
   const statusCfg = {
-    'idle': { cls: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20', label: 'Not Started' },
-    'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `Step ${current}/${total}` },
-    'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Review' },
-    'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Closed' },
-    'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
+    idle: {
+      cls: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20',
+      label: 'Not Started',
+    },
+    'in-progress': {
+      cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+      label: `Step ${current}/${total}`,
+    },
+    'awaiting-review': {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Awaiting Review',
+    },
+    completed: { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Closed' },
+    rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
   } as const;
   const sc = statusCfg[status] ?? statusCfg['idle'];
 
@@ -980,7 +1211,9 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
           </div>
           <div>
             <p className="text-sm font-semibold text-carbon-gray-100">Care Gap Closure Journey</p>
-            <p className="text-2xs text-carbon-gray-50 font-mono">{gap.measureId} — {gap.measureName}</p>
+            <p className="text-2xs text-carbon-gray-50 font-mono">
+              {gap.measureId} — {gap.measureName}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -998,11 +1231,7 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
       {/* Step Indicator */}
       {status !== 'idle' && (
         <div className="px-4 py-3 border-b border-carbon-gray-20 bg-white">
-          <StepIndicator
-            steps={wfDef.steps}
-            currentStep={currentStep}
-            status={status}
-          />
+          <StepIndicator steps={wfDef.steps} currentStep={currentStep} status={status} />
         </div>
       )}
 
@@ -1015,7 +1244,8 @@ export default function CareGapClosureJourney({ gap, onClose }: CareGapClosureJo
         {status === 'idle' && (
           <div className="space-y-3">
             <p className="text-xs text-carbon-gray-50">
-              This care gap has not been assigned to a closure workflow. Start the journey to assign a coordinator, document outreach, and close the gap with evidence.
+              This care gap has not been assigned to a closure workflow. Start the journey to assign
+              a coordinator, document outreach, and close the gap with evidence.
             </p>
             <button
               onClick={handleStart}

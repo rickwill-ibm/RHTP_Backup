@@ -19,7 +19,7 @@ import type {
 export function composeTouchpoints(
   dispositions: Disposition[],
   signalsById: Map<string, Signal>,
-  memberId: string,
+  memberId: string
 ): Touchpoint[] {
   const byTp = new Map<string, Array<ActDisposition | BundleDisposition>>();
   for (const d of dispositions) {

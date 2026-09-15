@@ -1,9 +1,6 @@
 ﻿{
   "version": "1.0",
-  "states": [
-    "GA",
-    "SD"
-  ],
+  "states": ["GA", "SD"],
   "generator": "gen_network_adequacy_seed.py",
   "geo": [
     {
@@ -197,11 +194,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -212,11 +205,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -227,10 +216,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -241,10 +227,7 @@
       "county": "Fulton",
       "lat": 33.826,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -255,9 +238,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.458,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -268,9 +249,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.458,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -281,11 +260,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -296,11 +271,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -311,11 +282,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -326,11 +293,7 @@
       "county": "Fulton",
       "lat": 33.826,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -341,10 +304,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.458,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -355,9 +315,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.458,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -368,9 +326,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.458,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -381,9 +337,7 @@
       "county": "Fulton",
       "lat": 33.826,
       "lng": -84.458,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -394,11 +348,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -409,10 +359,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -423,9 +370,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.47,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -436,9 +381,7 @@
       "county": "Fulton",
       "lat": 33.826,
       "lng": -84.47,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -449,11 +392,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -464,11 +403,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -479,9 +414,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.47,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -492,11 +425,7 @@
       "county": "Fulton",
       "lat": 33.79,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -507,11 +436,7 @@
       "county": "Fulton",
       "lat": 33.802,
       "lng": -84.47,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -522,9 +447,7 @@
       "county": "Fulton",
       "lat": 33.814,
       "lng": -84.47,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -535,9 +458,7 @@
       "county": "Fulton",
       "lat": 33.826,
       "lng": -84.47,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -548,11 +469,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -563,11 +480,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -578,10 +491,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -592,10 +502,7 @@
       "county": "DeKalb",
       "lat": 33.806,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -606,9 +513,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.218,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -619,9 +524,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.218,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -632,11 +535,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -647,11 +546,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -662,11 +557,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -677,11 +568,7 @@
       "county": "DeKalb",
       "lat": 33.806,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -692,10 +579,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.218,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -706,9 +590,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.218,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -719,9 +601,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.218,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -732,9 +612,7 @@
       "county": "DeKalb",
       "lat": 33.806,
       "lng": -84.218,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -745,11 +623,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -760,10 +634,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -774,9 +645,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.23,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -787,9 +656,7 @@
       "county": "DeKalb",
       "lat": 33.806,
       "lng": -84.23,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -800,11 +667,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -815,11 +678,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -830,9 +689,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.23,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -843,11 +700,7 @@
       "county": "DeKalb",
       "lat": 33.77,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -858,11 +711,7 @@
       "county": "DeKalb",
       "lat": 33.782,
       "lng": -84.23,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -873,9 +722,7 @@
       "county": "DeKalb",
       "lat": 33.794,
       "lng": -84.23,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -886,9 +733,7 @@
       "county": "DeKalb",
       "lat": 33.806,
       "lng": -84.23,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -899,11 +744,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -914,11 +755,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -929,10 +766,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -943,10 +777,7 @@
       "county": "Gwinnett",
       "lat": 33.996,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -957,9 +788,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.008,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -970,9 +799,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.008,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -983,11 +810,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -998,11 +821,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1013,11 +832,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1028,11 +843,7 @@
       "county": "Gwinnett",
       "lat": 33.996,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1043,10 +854,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.008,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1057,9 +865,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.008,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1070,9 +876,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.008,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1083,9 +887,7 @@
       "county": "Gwinnett",
       "lat": 33.996,
       "lng": -84.008,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1096,11 +898,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1111,10 +909,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1125,9 +920,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.02,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1138,9 +931,7 @@
       "county": "Gwinnett",
       "lat": 33.996,
       "lng": -84.02,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1151,11 +942,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1166,11 +953,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1181,9 +964,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.02,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1194,11 +975,7 @@
       "county": "Gwinnett",
       "lat": 33.96,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1209,11 +986,7 @@
       "county": "Gwinnett",
       "lat": 33.972,
       "lng": -84.02,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1224,9 +997,7 @@
       "county": "Gwinnett",
       "lat": 33.984,
       "lng": -84.02,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1237,9 +1008,7 @@
       "county": "Gwinnett",
       "lat": 33.996,
       "lng": -84.02,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1250,11 +1019,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1265,11 +1030,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1280,10 +1041,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1294,10 +1052,7 @@
       "county": "Cobb",
       "lat": 33.976,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1308,9 +1063,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.568,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1321,9 +1074,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.568,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1334,11 +1085,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1349,11 +1096,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1364,11 +1107,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1379,11 +1118,7 @@
       "county": "Cobb",
       "lat": 33.976,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1394,10 +1129,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.568,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1408,9 +1140,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.568,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1421,9 +1151,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.568,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1434,9 +1162,7 @@
       "county": "Cobb",
       "lat": 33.976,
       "lng": -84.568,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1447,11 +1173,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1462,10 +1184,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1476,9 +1195,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.58,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1489,9 +1206,7 @@
       "county": "Cobb",
       "lat": 33.976,
       "lng": -84.58,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1502,11 +1217,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1517,11 +1228,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1532,9 +1239,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.58,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1545,11 +1250,7 @@
       "county": "Cobb",
       "lat": 33.94,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1560,11 +1261,7 @@
       "county": "Cobb",
       "lat": 33.952,
       "lng": -84.58,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1575,9 +1272,7 @@
       "county": "Cobb",
       "lat": 33.964,
       "lng": -84.58,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1588,9 +1283,7 @@
       "county": "Cobb",
       "lat": 33.976,
       "lng": -84.58,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1601,10 +1294,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1615,9 +1305,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1628,10 +1316,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1642,9 +1327,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1655,10 +1338,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1669,10 +1349,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1683,10 +1360,7 @@
       "county": "Clay",
       "lat": 31.98,
       "lng": -84.93,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1697,11 +1371,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1712,11 +1382,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1727,10 +1393,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1741,10 +1404,7 @@
       "county": "Minnehaha",
       "lat": 43.706,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1755,9 +1415,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.778,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1768,9 +1426,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.778,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1781,11 +1437,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1796,11 +1448,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1811,11 +1459,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1826,11 +1470,7 @@
       "county": "Minnehaha",
       "lat": 43.706,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1841,10 +1481,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.778,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1855,9 +1492,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.778,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1868,9 +1503,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.778,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1881,9 +1514,7 @@
       "county": "Minnehaha",
       "lat": 43.706,
       "lng": -96.778,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1894,11 +1525,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1909,10 +1536,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1923,9 +1547,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.79,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1936,9 +1558,7 @@
       "county": "Minnehaha",
       "lat": 43.706,
       "lng": -96.79,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1949,11 +1569,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -1964,11 +1580,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1979,9 +1591,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.79,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -1992,11 +1602,7 @@
       "county": "Minnehaha",
       "lat": 43.67,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2007,11 +1613,7 @@
       "county": "Minnehaha",
       "lat": 43.682,
       "lng": -96.79,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2022,9 +1624,7 @@
       "county": "Minnehaha",
       "lat": 43.694,
       "lng": -96.79,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2035,9 +1635,7 @@
       "county": "Minnehaha",
       "lat": 43.706,
       "lng": -96.79,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2048,11 +1646,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2063,11 +1657,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2078,10 +1668,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2092,10 +1679,7 @@
       "county": "Pennington",
       "lat": 44.036,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2106,9 +1690,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.808,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2119,9 +1701,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.808,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2132,11 +1712,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2147,11 +1723,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2162,11 +1734,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2177,11 +1745,7 @@
       "county": "Pennington",
       "lat": 44.036,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2192,10 +1756,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.808,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2206,9 +1767,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.808,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2219,9 +1778,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.808,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2232,9 +1789,7 @@
       "county": "Pennington",
       "lat": 44.036,
       "lng": -102.808,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2245,11 +1800,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2260,10 +1811,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2274,9 +1822,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.82,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2287,9 +1833,7 @@
       "county": "Pennington",
       "lat": 44.036,
       "lng": -102.82,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2300,11 +1844,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2315,11 +1855,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2330,9 +1866,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.82,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2343,11 +1877,7 @@
       "county": "Pennington",
       "lat": 44.0,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2358,11 +1888,7 @@
       "county": "Pennington",
       "lat": 44.012,
       "lng": -102.82,
-      "lobs": [
-        "Commercial",
-        "Medicare",
-        "Medicaid"
-      ],
+      "lobs": ["Commercial", "Medicare", "Medicaid"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2373,9 +1899,7 @@
       "county": "Pennington",
       "lat": 44.024,
       "lng": -102.82,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2386,9 +1910,7 @@
       "county": "Pennington",
       "lat": 44.036,
       "lng": -102.82,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2399,10 +1921,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2413,9 +1932,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2426,10 +1943,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2440,9 +1954,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial"
-      ],
+      "lobs": ["Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     },
@@ -2453,10 +1965,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2467,10 +1976,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2481,10 +1987,7 @@
       "county": "Brown",
       "lat": 45.95,
       "lng": -98.3,
-      "lobs": [
-        "Commercial",
-        "Medicare"
-      ],
+      "lobs": ["Commercial", "Medicare"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2495,11 +1998,7 @@
       "county": "Oglala Lakota",
       "lat": 43.35,
       "lng": -102.53,
-      "lobs": [
-        "Medicaid",
-        "Medicare",
-        "Commercial"
-      ],
+      "lobs": ["Medicaid", "Medicare", "Commercial"],
       "acceptingNewPatients": true,
       "status": "active"
     },
@@ -2510,11 +2009,7 @@
       "county": "Todd",
       "lat": 43.21,
       "lng": -100.7,
-      "lobs": [
-        "Medicaid",
-        "Medicare",
-        "Commercial"
-      ],
+      "lobs": ["Medicaid", "Medicare", "Commercial"],
       "acceptingNewPatients": true,
       "status": "credentialing"
     }

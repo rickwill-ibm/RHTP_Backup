@@ -32,7 +32,13 @@ export interface PaTask {
 
 /** The terminal outcome of a PA documentation workflow run (PHI-safe). */
 export type PaResult =
-  | { outcome: 'executed'; threadRef: string; state: PaState; decidedBy: string; transitionError?: string }
+  | {
+      outcome: 'executed';
+      threadRef: string;
+      state: PaState;
+      decidedBy: string;
+      transitionError?: string;
+    }
   | { outcome: 'rejected'; threadRef: string; state: PaState; decidedBy: string };
 
 /** Injected effects for the PA workflow (deterministic; mockable). */
@@ -52,7 +58,7 @@ export class AgentAuthorityError extends Error {
   constructor(public readonly eventType: string) {
     super(
       `pa-documentation-agent may not apply the authoritative PA event "${eventType}"; ` +
-        `only a payer ClaimResponse (claim-response), applied by the paMachine, sets Approved/Denied`,
+        `only a payer ClaimResponse (claim-response), applied by the paMachine, sets Approved/Denied`
     );
     this.name = 'AgentAuthorityError';
   }

@@ -37,7 +37,10 @@ export function indexTaxonomy(tax: SignalTaxonomy): {
 }
 
 /** Fill a dedupe-key template with the available params; unknown tokens -> "na". */
-export function fillDedupeKey(template: string, params: Record<string, string | undefined>): string {
+export function fillDedupeKey(
+  template: string,
+  params: Record<string, string | undefined>
+): string {
   return template.replace(/\{(\w+)\}/g, (_m, key: string) => {
     const v = params[key];
     return v === undefined || v === '' ? 'na' : v;

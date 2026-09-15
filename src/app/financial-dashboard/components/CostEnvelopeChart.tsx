@@ -1,8 +1,14 @@
 'use client';
 import React from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import { mockCostByCategory } from '@/lib/mockData';
 
@@ -45,14 +51,26 @@ export default function CostEnvelopeChart() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold text-carbon-gray-100">Cost Envelope by Category</h3>
-          <p className="text-xs text-carbon-gray-50 mt-0.5">Monthly spend breakdown — Oct 2025 to Mar 2026</p>
+          <p className="text-xs text-carbon-gray-50 mt-0.5">
+            Monthly spend breakdown — Oct 2025 to Mar 2026
+          </p>
         </div>
       </div>
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={mockCostByCategory} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-          <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#525252' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: '#525252' }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
+          <XAxis
+            dataKey="month"
+            tick={{ fontSize: 11, fill: '#525252' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: '#525252' }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`}
+          />
           <Tooltip content={<CustomTooltip />} />
           <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
           <Bar dataKey="inpatient" name="Inpatient" stackId="a" fill={COLORS.inpatient} />

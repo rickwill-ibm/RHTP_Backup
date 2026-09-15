@@ -1,12 +1,7 @@
 // careTeam/attribution.ts — Deterministic, explainable case-manager attribution.
 // Same input always yields the same output (no Math.random at assignment time).
 
-import {
-  CARE_TEAM_MEMBERS,
-  cohortOwnerPool,
-  type CareTeamMember,
-  type Specialty,
-} from './members';
+import { CARE_TEAM_MEMBERS, cohortOwnerPool, type CareTeamMember, type Specialty } from './members';
 
 // Re-export Specialty so identity.ts / population.ts can import it from here
 export type { Specialty };
@@ -244,8 +239,61 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-const FIRST_NAMES = ['James', 'Mary', 'Robert', 'Linda', 'Michael', 'Patricia', 'David', 'Barbara', 'Joseph', 'Susan', 'Charles', 'Margaret', 'Thomas', 'Dorothy', 'Daniel', 'Helen', 'Walter', 'Grace', 'Frank', 'Ruth', 'Raymond', 'Wilma', 'Leonard', 'Pearl', 'Eugene', 'Agnes'];
-const LAST_NAMES = ['Whitehorse', 'Brave Bird', 'Looking Cloud', 'Two Bulls', 'Red Cloud', 'Iron Shell', 'Spotted Eagle', 'Walking Bull', 'High Hawk', 'Bordeaux', 'Janis', 'Provost', 'Eagleman', 'Black Elk', 'Yellow Hawk', 'Brings Plenty', 'Swift Bird', 'Means', 'Comes Flying', 'Bear Runner', 'Anderson', 'Nelson', 'Larson', 'Hanson', 'Olson'];
+const FIRST_NAMES = [
+  'James',
+  'Mary',
+  'Robert',
+  'Linda',
+  'Michael',
+  'Patricia',
+  'David',
+  'Barbara',
+  'Joseph',
+  'Susan',
+  'Charles',
+  'Margaret',
+  'Thomas',
+  'Dorothy',
+  'Daniel',
+  'Helen',
+  'Walter',
+  'Grace',
+  'Frank',
+  'Ruth',
+  'Raymond',
+  'Wilma',
+  'Leonard',
+  'Pearl',
+  'Eugene',
+  'Agnes',
+];
+const LAST_NAMES = [
+  'Whitehorse',
+  'Brave Bird',
+  'Looking Cloud',
+  'Two Bulls',
+  'Red Cloud',
+  'Iron Shell',
+  'Spotted Eagle',
+  'Walking Bull',
+  'High Hawk',
+  'Bordeaux',
+  'Janis',
+  'Provost',
+  'Eagleman',
+  'Black Elk',
+  'Yellow Hawk',
+  'Brings Plenty',
+  'Swift Bird',
+  'Means',
+  'Comes Flying',
+  'Bear Runner',
+  'Anderson',
+  'Nelson',
+  'Larson',
+  'Hanson',
+  'Olson',
+];
 const REGIONS = ['Bennett County', 'Pine Ridge', 'Rural SD', 'Rapid City', 'Winner', 'Martin'];
 
 const RISK_DISTRIBUTION: { tier: RiskTier; cum: number }[] = [

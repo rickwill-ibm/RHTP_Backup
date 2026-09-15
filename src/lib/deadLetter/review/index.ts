@@ -69,7 +69,7 @@ export interface ReviewActionResult {
 /** Open items (default) or items filtered by kind/status. */
 export async function listOpenItems(
   store: DeadLetterStore,
-  filter: DeadLetterFilter = {},
+  filter: DeadLetterFilter = {}
 ): Promise<DeadLetterRecord[]> {
   return store.list({ status: 'open', ...filter });
 }
@@ -77,7 +77,7 @@ export async function listOpenItems(
 /** One item by id, or null. */
 export async function inspectItem(
   store: DeadLetterStore,
-  id: string,
+  id: string
 ): Promise<DeadLetterRecord | null> {
   return store.get(id);
 }
@@ -87,9 +87,15 @@ function auditFor(
   action: ResolutionAction,
   id: string,
   outcome: 'success' | 'failure',
-  detail: string,
+  detail: string
 ): ReviewAuditEntry {
-  return { actor, action: `dead-letter.${action}`, resourceRef: `DeadLetter/${id}`, outcome, detail };
+  return {
+    actor,
+    action: `dead-letter.${action}`,
+    resourceRef: `DeadLetter/${id}`,
+    outcome,
+    detail,
+  };
 }
 
 /**
@@ -108,7 +114,7 @@ export async function reviewAction(
   store: DeadLetterStore,
   req: ReviewActionRequest,
   router: RetryLaneRouter = {},
-  idempotency?: IdempotencyStore,
+  idempotency?: IdempotencyStore
 ): Promise<ReviewActionResult> {
   const { id, action, actor } = req;
   if (!isResolutionAction(action)) {
@@ -140,7 +146,13 @@ export async function reviewAction(
       ok: true,
       record: current,
       reason: 'deduped',
-      audit: auditFor(actor, action, id, 'success', `deduped terminal replay; kind=${current.kind}`),
+      audit: auditFor(
+        actor,
+        action,
+        id,
+        'success',
+        `deduped terminal replay; kind=${current.kind}`
+      ),
     };
   }
 
@@ -150,7 +162,7 @@ export async function reviewAction(
   if (idempotency) {
     const { firstProcessed } = await idempotency.markProcessed(
       IDEMPOTENCY_CONSUMERS.deadLetterReview,
-      `${id}:${action}`,
+      `${id}:${action}`
     );
     if (!firstProcessed) {
       return {
@@ -194,12 +206,14 @@ export async function reviewAction(
   return {
     ok: true,
     record: updated,
-    audit: auditFor(actor, action, id, 'success', `kind=${current.kind}; reason=${current.reasonCode}`),
+    audit: auditFor(
+      actor,
+      action,
+      id,
+      'success',
+      `kind=${current.kind}; reason=${current.reasonCode}`
+    ),
   };
 }
 
-export {
-  setDeadLetterRetryLane,
-  getRetryLaneRouter,
-  clearDeadLetterRetryLanes,
-} from './lanes';
+export { setDeadLetterRetryLane, getRetryLaneRouter, clearDeadLetterRetryLanes } from './lanes';

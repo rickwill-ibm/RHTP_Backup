@@ -14,26 +14,24 @@ payer's format.
 
 ## Layout
 
-| File | Role |
-|------|------|
-| `types.ts` | `NormalizedPolicy` model + evaluation types (`MemberContext`, `OrderContext`, `CoverageDetermination`). |
-| `ingest/` | `PolicyIngestionAdapter` interface + registry; reference adapters for Aetna CPBs and UHC PA lists. |
-| `policyLibrary.ts` | Loader + `byCode` / `byNumber` indices. Mock mode loads the bundled seed through the adapters. |
-| `policyEngine.ts` | Pure `evaluate(member, order, library) → CoverageDetermination`. |
-| `fromFhir.ts` | Project FHIR `Condition` / `ServiceRequest` → engine inputs. |
-| `data/policy-library.seed.json` | 17 real policies (15 Aetna Cardiac CPBs + 2 UHC PA lists), produced by `tools/seed/parse_policies.py`. |
+| File                            | Role                                                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `types.ts`                      | `NormalizedPolicy` model + evaluation types (`MemberContext`, `OrderContext`, `CoverageDetermination`). |
+| `ingest/`                       | `PolicyIngestionAdapter` interface + registry; reference adapters for Aetna CPBs and UHC PA lists.      |
+| `policyLibrary.ts`              | Loader + `byCode` / `byNumber` indices. Mock mode loads the bundled seed through the adapters.          |
+| `policyEngine.ts`               | Pure `evaluate(member, order, library) → CoverageDetermination`.                                        |
+| `fromFhir.ts`                   | Project FHIR `Condition` / `ServiceRequest` → engine inputs.                                            |
+| `data/policy-library.seed.json` | 17 real policies (15 Aetna Cardiac CPBs + 2 UHC PA lists), produced by `tools/seed/parse_policies.py`.  |
 
 ## Use it
 
 ```ts
-import {
-  loadMockLibrary, evaluate, toMemberContext, serviceRequestToOrder,
-} from '@/lib/policy';
+import { loadMockLibrary, evaluate, toMemberContext, serviceRequestToOrder } from '@/lib/policy';
 
-const library = loadMockLibrary();                       // real parsed corpus
-const member  = toMemberContext(patientId, conditions);  // from FHIR
-const order   = serviceRequestToOrder(serviceRequest);   // e.g. CPT 72148
-const det     = evaluate(member, order, library);
+const library = loadMockLibrary(); // real parsed corpus
+const member = toMemberContext(patientId, conditions); // from FHIR
+const order = serviceRequestToOrder(serviceRequest); // e.g. CPT 72148
+const det = evaluate(member, order, library);
 // det.requiresPA · det.outcome · det.criteriaMet · det.deficiencies · det.propensityToDeny
 ```
 
@@ -44,8 +42,8 @@ that normalizes them:
 
 ```ts
 import { registerAdapter, ingestLibrary } from '@/lib/policy';
-registerAdapter(myStateMedicaidAdapter);          // one file; engine unchanged
-const { library } = ingestLibrary(myRawRecords);  // live library
+registerAdapter(myStateMedicaidAdapter); // one file; engine unchanged
+const { library } = ingestLibrary(myRawRecords); // live library
 ```
 
 ## Guardrails

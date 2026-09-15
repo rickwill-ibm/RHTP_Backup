@@ -7,11 +7,7 @@
  * count. Deliberately tolerant of the population codes DEQM uses.
  */
 
-import type {
-  FhirMeasureReport,
-  MeasureGap,
-  MeasureProgram,
-} from './types';
+import type { FhirMeasureReport, MeasureGap, MeasureProgram } from './types';
 
 /** Standard DEQM/CQF population codes. */
 const NUMERATOR = new Set(['numerator']);

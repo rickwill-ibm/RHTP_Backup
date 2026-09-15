@@ -8,14 +8,14 @@ raw + `deferred-I8A` performer refs from earlier iterations now resolve.
 
 ## What is here
 
-| File | Responsibility |
-| --- | --- |
-| `npi.ts` | NPI validation — the NPPES `80840`-prefixed Luhn check digit. `isValidNpi`, `assertValidNpi`, `extractNpi`, `InvalidNpiError`. Pure, offline, deterministic. |
-| `types.ts` | `ProviderIdentity` (NPI-anchored), `ProviderResolveInput`, `NppesNotConfiguredError`. |
-| `seedDirectory.ts` | The seeded synthetic provider directory **data file** (mock/seeded backing). Every NPI is check-digit valid; the providers are fabricated demo entities (no PHI). |
-| `directory.ts` | The `providerIdentity` **seam**: `getProviderDirectory()` returns the seed in mock/seeded and the registered live NPPES client in production, throwing `NppesNotConfiguredError` when none is wired (**fail closed**). |
-| `resolver.ts` | `resolveProvider` (async, seam-backed enrichment) and `anchorProviderRef` (sync, registry-free anchor for the graph mapping). |
-| `node.ts` | The `ProviderIdentity` graph node namespace: `PROVIDER_IDENTITY_KIND`, `providerNodeKey`, `providerNodeProps`. Imports nothing from the graph layer. |
+| File               | Responsibility                                                                                                                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npi.ts`           | NPI validation — the NPPES `80840`-prefixed Luhn check digit. `isValidNpi`, `assertValidNpi`, `extractNpi`, `InvalidNpiError`. Pure, offline, deterministic.                                                           |
+| `types.ts`         | `ProviderIdentity` (NPI-anchored), `ProviderResolveInput`, `NppesNotConfiguredError`.                                                                                                                                  |
+| `seedDirectory.ts` | The seeded synthetic provider directory **data file** (mock/seeded backing). Every NPI is check-digit valid; the providers are fabricated demo entities (no PHI).                                                      |
+| `directory.ts`     | The `providerIdentity` **seam**: `getProviderDirectory()` returns the seed in mock/seeded and the registered live NPPES client in production, throwing `NppesNotConfiguredError` when none is wired (**fail closed**). |
+| `resolver.ts`      | `resolveProvider` (async, seam-backed enrichment) and `anchorProviderRef` (sync, registry-free anchor for the graph mapping).                                                                                          |
+| `node.ts`          | The `ProviderIdentity` graph node namespace: `PROVIDER_IDENTITY_KIND`, `providerNodeKey`, `providerNodeProps`. Imports nothing from the graph layer.                                                                   |
 
 ## The NPI check (npi.ts)
 

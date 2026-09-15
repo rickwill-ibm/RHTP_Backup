@@ -32,17 +32,23 @@ export default function ValueSetGovernancePage() {
   return (
     <AppLayout
       pageTitle="Value-Set Governance"
-      breadcrumbs={[{ label: 'Admin Console', href: '/admin-console/home' }, { label: 'Value-Set Governance' }]}
+      breadcrumbs={[
+        { label: 'Admin Console', href: '/admin-console/home' },
+        { label: 'Value-Set Governance' },
+      ]}
     >
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl font-semibold text-carbon-gray-100">Value-Set Governance</h1>
           <p className="text-sm text-carbon-gray-70 mt-0.5">
-            Review, diff, approve, and replay governed value-set versions with maker-checker workflow gates
+            Review, diff, approve, and replay governed value-set versions with maker-checker
+            workflow gates
           </p>
         </div>
         <label className="flex items-center gap-2">
-          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">Acting as</span>
+          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">
+            Acting as
+          </span>
           <select
             value={principalKey}
             onChange={(e) => setPrincipalKey(e.target.value as keyof typeof DEMO_PRINCIPALS)}

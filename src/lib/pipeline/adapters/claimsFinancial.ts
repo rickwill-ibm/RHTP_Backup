@@ -19,7 +19,13 @@
  *
  * C9.2 yield: claims-financial feed -> claims-financial T1 (Claim + ClaimResponse + EOB).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 type ClaimKind = 'Claim' | 'ClaimResponse' | 'ExplanationOfBenefit';
 
@@ -110,8 +116,10 @@ function adjustmentCodes(resource: Record<string, unknown>): AdjustmentCode[] {
       const system = str(obj(c).system);
       const code = str(obj(c).code);
       if (!code) continue;
-      if (system.includes('claim-adjustment-reason')) out.push({ category: 'CARC', system, code, display: str(obj(c).display) });
-      else if (system.includes('remittance-advice-remark')) out.push({ category: 'RARC', system, code, display: str(obj(c).display) });
+      if (system.includes('claim-adjustment-reason'))
+        out.push({ category: 'CARC', system, code, display: str(obj(c).display) });
+      else if (system.includes('remittance-advice-remark'))
+        out.push({ category: 'RARC', system, code, display: str(obj(c).display) });
     }
   };
   for (const item of arr(resource.item)) {
@@ -142,7 +150,8 @@ function parse(payload: string): RawRecord<ClaimResource>[] {
 function validate(raw: RawRecord<ClaimResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { kind, resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
   if (kind === 'ClaimResponse' && !str(obj(resource.request).reference)) {
     issues.push({ reasonCode: 'missing-claim-reference', fieldPath: 'request.reference' });
   }
@@ -152,10 +161,17 @@ function validate(raw: RawRecord<ClaimResource>): ValidationResult {
   return { ok: issues.length === 0, issues };
 }
 
-function base(resource: Record<string, unknown>, deps: PipelineDeps): { memberId: string; created: string; occurredAt: string } {
+function base(
+  resource: Record<string, unknown>,
+  deps: PipelineDeps
+): { memberId: string; created: string; occurredAt: string } {
   const memberId = deps.resolveIdentity(subjectSourceId(resource), { feed: SOURCE.feed });
   const created = str(resource.created);
-  return { memberId, created, occurredAt: created ? `${created}T00:00:00Z` : new Date(deps.now()).toISOString() };
+  return {
+    memberId,
+    created,
+    occurredAt: created ? `${created}T00:00:00Z` : new Date(deps.now()).toISOString(),
+  };
 }
 
 function normalizeClaim(resource: Record<string, unknown>, deps: PipelineDeps): NormalizedRecord {
@@ -174,14 +190,25 @@ function normalizeClaim(resource: Record<string, unknown>, deps: PipelineDeps): 
     provenance: 'provider-submitted',
   };
   return {
-    domain: 'claims-financial', memberId, resourceType: 'Claim', fhirResourceId: claimRef,
-    eventType: 'claim.submitted', tier: 'T1', idempotencyKey: `claim:${id}`,
-    provenance: 'provider-submitted', consent: { part2Restricted: false, segmentLabels: [] },
-    source: SOURCE, occurredAt, payload: payload as unknown as Record<string, unknown>,
+    domain: 'claims-financial',
+    memberId,
+    resourceType: 'Claim',
+    fhirResourceId: claimRef,
+    eventType: 'claim.submitted',
+    tier: 'T1',
+    idempotencyKey: `claim:${id}`,
+    provenance: 'provider-submitted',
+    consent: { part2Restricted: false, segmentLabels: [] },
+    source: SOURCE,
+    occurredAt,
+    payload: payload as unknown as Record<string, unknown>,
   };
 }
 
-function normalizeResponse(resource: Record<string, unknown>, deps: PipelineDeps): NormalizedRecord {
+function normalizeResponse(
+  resource: Record<string, unknown>,
+  deps: PipelineDeps
+): NormalizedRecord {
   const id = str(resource.id);
   const { memberId, created, occurredAt } = base(resource, deps);
   const responseRef = `ClaimResponse/${id}`;
@@ -198,10 +225,18 @@ function normalizeResponse(resource: Record<string, unknown>, deps: PipelineDeps
     provenance: 'payer-adjudication',
   };
   return {
-    domain: 'claims-financial', memberId, resourceType: 'ClaimResponse', fhirResourceId: responseRef,
-    eventType: 'claim.adjudicated', tier: 'T1', idempotencyKey: `claim-response:${id}`,
-    provenance: 'payer-adjudication', consent: { part2Restricted: false, segmentLabels: [] },
-    source: SOURCE, occurredAt, payload: payload as unknown as Record<string, unknown>,
+    domain: 'claims-financial',
+    memberId,
+    resourceType: 'ClaimResponse',
+    fhirResourceId: responseRef,
+    eventType: 'claim.adjudicated',
+    tier: 'T1',
+    idempotencyKey: `claim-response:${id}`,
+    provenance: 'payer-adjudication',
+    consent: { part2Restricted: false, segmentLabels: [] },
+    source: SOURCE,
+    occurredAt,
+    payload: payload as unknown as Record<string, unknown>,
   };
 }
 
@@ -219,10 +254,18 @@ function normalizeEob(resource: Record<string, unknown>, deps: PipelineDeps): No
     provenance: 'payer-eob',
   };
   return {
-    domain: 'claims-financial', memberId, resourceType: 'ExplanationOfBenefit', fhirResourceId: eobRef,
-    eventType: 'claim.explained', tier: 'T1', idempotencyKey: `claim-eob:${id}`,
-    provenance: 'payer-eob', consent: { part2Restricted: false, segmentLabels: [] },
-    source: SOURCE, occurredAt, payload: payload as unknown as Record<string, unknown>,
+    domain: 'claims-financial',
+    memberId,
+    resourceType: 'ExplanationOfBenefit',
+    fhirResourceId: eobRef,
+    eventType: 'claim.explained',
+    tier: 'T1',
+    idempotencyKey: `claim-eob:${id}`,
+    provenance: 'payer-eob',
+    consent: { part2Restricted: false, segmentLabels: [] },
+    source: SOURCE,
+    occurredAt,
+    payload: payload as unknown as Record<string, unknown>,
   };
 }
 

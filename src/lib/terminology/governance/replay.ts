@@ -21,11 +21,7 @@ export interface ReplayInput {
   version: string;
 }
 
-export type ReplayStatus =
-  | 'valid'
-  | 'unknown-code'
-  | 'unsupported-system'
-  | 'version-not-modeled';
+export type ReplayStatus = 'valid' | 'unknown-code' | 'unsupported-system' | 'version-not-modeled';
 
 export interface ReplayResult {
   system: TerminologySystem | string;

@@ -11,7 +11,7 @@ call sites so nothing vanishes.
 | kind            | producer                                              | reason it lands here                         |
 | --------------- | ----------------------------------------------------- | -------------------------------------------- |
 | `quarantine`    | pipeline stage 2 (structural) + stage 4 (profile/sem) | record failed validation, never loaded       |
-| `held-identity` | pipeline stage 3 identity seam (EMPI 60-90 band)      | possible-match, held from auto-linking        |
+| `held-identity` | pipeline stage 3 identity seam (EMPI 60-90 band)      | possible-match, held from auto-linking       |
 | `failed-outbox` | outbox `failIntent` (retry budget exhausted)          | intent could not propagate; needs a decision |
 
 Every record is **PHI-safe**: ids, codes, and references only. `memberRef` is an

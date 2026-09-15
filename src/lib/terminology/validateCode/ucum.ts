@@ -49,7 +49,15 @@ export function validateUcumForLoinc(loinc: string, unit: string): UcumValidatio
     return { loinc, unit, applicable: false, valid: true, stub: true };
   }
   if (!isValidUcumUnit(unit)) {
-    return { loinc, unit, applicable: true, valid: false, finding: 'ucum-invalid-unit', allowed, stub: true };
+    return {
+      loinc,
+      unit,
+      applicable: true,
+      valid: false,
+      finding: 'ucum-invalid-unit',
+      allowed,
+      stub: true,
+    };
   }
   if (!allowed.includes(unit)) {
     return {

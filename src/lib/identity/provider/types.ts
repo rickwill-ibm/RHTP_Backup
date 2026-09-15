@@ -74,7 +74,7 @@ export class NppesNotConfiguredError extends Error {
     super(
       'DATA_MODE providerIdentity=production: no live NPPES registry client is wired yet. ' +
         'Register one with setProductionProviderDirectory(realNppesClient) (SEAM: providerIdentity) ' +
-        'or set DATA_MODE_PROVIDER_IDENTITY=mock|seeded to resolve against the seeded provider directory.',
+        'or set DATA_MODE_PROVIDER_IDENTITY=mock|seeded to resolve against the seeded provider directory.'
     );
     this.name = 'NppesNotConfiguredError';
   }

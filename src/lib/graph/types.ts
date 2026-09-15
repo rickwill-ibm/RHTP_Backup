@@ -40,8 +40,7 @@ export interface EdgeValidity {
  * asserted it (`asserter`) and on what basis (`basis`, a PHI-safe code/ref).
  */
 export type EdgeSemantics =
-  | { kind: 'associative' }
-  | { kind: 'causal'; asserter: string; basis: string };
+  { kind: 'associative' } | { kind: 'causal'; asserter: string; basis: string };
 
 export interface UpsertNode {
   op: 'UpsertNode';

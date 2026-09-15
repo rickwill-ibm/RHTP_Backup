@@ -28,7 +28,13 @@ export interface OutreachTask {
 
 /** The terminal outcome of an outreach workflow run (PHI-safe). */
 export type OutreachResult =
-  | { outcome: 'executed'; touchpointId: string; channel: string; sendRef: string; decidedBy: string }
+  | {
+      outcome: 'executed';
+      touchpointId: string;
+      channel: string;
+      sendRef: string;
+      decidedBy: string;
+    }
   | { outcome: 'rejected'; touchpointId: string; decidedBy: string }
   | { outcome: 'suppressed'; touchpointId: string; reason: 'consent-absent' }
   | OutreachDedupedResult;

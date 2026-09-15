@@ -6,7 +6,11 @@
  * both lanes, no persona hardcoded.
  */
 import type { PumpResult } from '@/lib/outbox';
-import { getDeadLetterStore, persistPipelineDeadLetters, type DeadLetterStore } from '@/lib/deadLetter';
+import {
+  getDeadLetterStore,
+  persistPipelineDeadLetters,
+  type DeadLetterStore,
+} from '@/lib/deadLetter';
 import { conformAndLoad, projectAndPropagate, type LoadDeps } from './load';
 import { landStage, type LandInput } from './stages';
 import { batchStep } from './transform';
@@ -43,7 +47,7 @@ export async function runPipeline<Raw>(
   input: LandInput,
   deps: PipelineDeps,
   loadDeps: Omit<LoadDeps, 'arrivalMode'>,
-  deadLetterStore?: DeadLetterStore | null,
+  deadLetterStore?: DeadLetterStore | null
 ): Promise<PipelineRunResult> {
   const landed = landStage.run(input, deps);
   const staged = batchStep(adapter)(landed, deps);

@@ -41,16 +41,14 @@ export interface FhirQueryState<T> {
 }
 
 function entries<T extends FhirResource>(bundle: FhirBundle | undefined | null): T[] {
-  return (bundle?.entry ?? [])
-    .map((e) => e.resource)
-    .filter((r): r is T => !!r);
+  return (bundle?.entry ?? []).map((e) => e.resource).filter((r): r is T => !!r);
 }
 
 /** Generic search hook. */
 export function useFhirSearch<T extends FhirResource>(
   resourceType: string,
   params: Record<string, string | number | boolean>,
-  enabled = true,
+  enabled = true
 ): FhirQueryState<T[]> {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(enabled);
@@ -92,7 +90,7 @@ export function useFhirSearch<T extends FhirResource>(
 /** Generic single-resource read hook. */
 export function useFhirRead<T extends FhirResource>(
   resourceType: string,
-  id: string | undefined,
+  id: string | undefined
 ): FhirQueryState<T | null> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(!!id);
@@ -142,7 +140,7 @@ export function useEncounterHistory(patientId?: string) {
   return useFhirSearch<FhirEncounter>(
     'Encounter',
     { patient: patientId ?? '', _sort: '-date', _count: 20 },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -150,7 +148,7 @@ export function useProblemList(patientId?: string) {
   return useFhirSearch<FhirCondition>(
     'Condition',
     { patient: patientId ?? '', category: 'problem-list-item', 'clinical-status': 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -158,7 +156,7 @@ export function useEncounterDiagnoses(patientId?: string, encounterId?: string) 
   return useFhirSearch<FhirCondition>(
     'Condition',
     { patient: patientId ?? '', category: 'encounter-diagnosis', encounter: encounterId ?? '' },
-    !!patientId && !!encounterId,
+    !!patientId && !!encounterId
   );
 }
 
@@ -166,7 +164,7 @@ export function useVitals(patientId?: string) {
   return useFhirSearch<FhirObservation>(
     'Observation',
     { patient: patientId ?? '', category: 'vital-signs', _sort: '-date', _count: 50 },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -174,7 +172,7 @@ export function useLabs(patientId?: string) {
   return useFhirSearch<FhirObservation>(
     'Observation',
     { patient: patientId ?? '', category: 'laboratory', _sort: '-date', _count: 100 },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -182,7 +180,7 @@ export function useObservationTrend(patientId?: string, loincCode?: string) {
   return useFhirSearch<FhirObservation>(
     'Observation',
     { patient: patientId ?? '', code: loincCode ?? '', _sort: '-date' },
-    !!patientId && !!loincCode,
+    !!patientId && !!loincCode
   );
 }
 
@@ -190,7 +188,7 @@ export function useSdohObservations(patientId?: string) {
   return useFhirSearch<FhirObservation>(
     'Observation',
     { patient: patientId ?? '', category: 'social-history', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -198,7 +196,7 @@ export function useActiveMedications(patientId?: string) {
   return useFhirSearch<FhirMedicationRequest>(
     'MedicationRequest',
     { patient: patientId ?? '', status: 'active', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -206,7 +204,7 @@ export function useAllergies(patientId?: string) {
   return useFhirSearch<FhirAllergyIntolerance>(
     'AllergyIntolerance',
     { patient: patientId ?? '', 'clinical-status': 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -214,7 +212,7 @@ export function useImmunizations(patientId?: string) {
   return useFhirSearch<FhirImmunization>(
     'Immunization',
     { patient: patientId ?? '', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -222,7 +220,7 @@ export function useFlags(patientId?: string) {
   return useFhirSearch<FhirFlag>(
     'Flag',
     { patient: patientId ?? '', status: 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -230,7 +228,7 @@ export function useCoverage(patientId?: string) {
   return useFhirSearch<FhirCoverage>(
     'Coverage',
     { patient: patientId ?? '', status: 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -238,7 +236,7 @@ export function useCareTeamFhir(patientId?: string) {
   return useFhirSearch<FhirCareTeam>(
     'CareTeam',
     { patient: patientId ?? '', status: 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -246,7 +244,7 @@ export function useCarePlans(patientId?: string) {
   return useFhirSearch<FhirCarePlan>(
     'CarePlan',
     { patient: patientId ?? '', status: 'active' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -258,7 +256,7 @@ export function useServiceRequests(patientId?: string) {
   return useFhirSearch<FhirServiceRequestR4>(
     'ServiceRequest',
     { patient: patientId ?? '', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -266,7 +264,7 @@ export function useDiagnosticReports(patientId?: string) {
   return useFhirSearch<FhirDiagnosticReport>(
     'DiagnosticReport',
     { patient: patientId ?? '', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -274,7 +272,7 @@ export function useDocuments(patientId?: string) {
   return useFhirSearch<FhirDocumentReference>(
     'DocumentReference',
     { patient: patientId ?? '', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -282,7 +280,7 @@ export function useFamilyHistory(patientId?: string) {
   return useFhirSearch<FhirFamilyMemberHistory>(
     'FamilyMemberHistory',
     { patient: patientId ?? '' },
-    !!patientId,
+    !!patientId
   );
 }
 
@@ -290,6 +288,6 @@ export function useProcedures(patientId?: string) {
   return useFhirSearch<FhirProcedure>(
     'Procedure',
     { patient: patientId ?? '', _sort: '-date' },
-    !!patientId,
+    !!patientId
   );
 }

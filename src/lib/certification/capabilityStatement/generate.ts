@@ -32,8 +32,7 @@ const META = {
   fhirVersion: '4.0.1',
 } as const;
 
-const SECURITY_SERVICE_SYSTEM =
-  'http://terminology.hl7.org/CodeSystem/restful-security-service';
+const SECURITY_SERVICE_SYSTEM = 'http://terminology.hl7.org/CodeSystem/restful-security-service';
 
 function byString<T>(key: (t: T) => string) {
   return (a: T, b: T) => key(a).localeCompare(key(b));
@@ -47,7 +46,9 @@ function buildSecurity(surface: ImplementedSurface): RestSecurity {
     cors: s.cors,
     service: [
       {
-        coding: [{ system: SECURITY_SERVICE_SYSTEM, code: 'SMART-on-FHIR', display: 'SMART-on-FHIR' }],
+        coding: [
+          { system: SECURITY_SERVICE_SYSTEM, code: 'SMART-on-FHIR', display: 'SMART-on-FHIR' },
+        ],
         text: 'SMART-on-FHIR (OAuth2 authorization-code + PKCE; server-held token)',
       },
     ],
@@ -56,20 +57,18 @@ function buildSecurity(surface: ImplementedSurface): RestSecurity {
 }
 
 function buildResources(surface: ImplementedSurface): CapabilityResource[] {
-  return [...surface.resources]
-    .sort(byString((r) => r.type))
-    .map((r) => {
-      const resource: CapabilityResource = {
-        type: r.type,
-        interaction: [...r.interactions].sort().map((code) => ({ code })),
-      };
-      // Only attach supportedProfile when the validator actually enforces one.
-      if (surface.enforcedProfiles.length > 0) {
-        resource.supportedProfile = [...surface.enforcedProfiles].sort();
-      }
-      if (r.documentation) resource.documentation = r.documentation;
-      return resource;
-    });
+  return [...surface.resources].sort(byString((r) => r.type)).map((r) => {
+    const resource: CapabilityResource = {
+      type: r.type,
+      interaction: [...r.interactions].sort().map((code) => ({ code })),
+    };
+    // Only attach supportedProfile when the validator actually enforces one.
+    if (surface.enforcedProfiles.length > 0) {
+      resource.supportedProfile = [...surface.enforcedProfiles].sort();
+    }
+    if (r.documentation) resource.documentation = r.documentation;
+    return resource;
+  });
 }
 
 function toOperation(name: string, definition: string, documentation: string): CapabilityOperation {

@@ -36,8 +36,6 @@ import {
   FHIR_ID_MAP,
   PLATFORM_TO_FHIR_ID_MAP,
 } from '@/lib/patientRegistry';
-
-// CG-SURG-83 code set from the registry row directly (bariatricCriteria compat shim removed — E14).
 import { policyById } from '@/lib/policy/dtr/evaluate/policyRegistry';
 const BARIATRIC_CPT_CODES: ReadonlySet<string> = new Set(policyById('CG-SURG-83').cptCodes);
 
@@ -66,12 +64,12 @@ describe('§1 Patient Access — registry data used by FHIR passthrough', () => 
   });
 
   it('all 5 patients have distinct names', () => {
-    const names = ALL_PIDS.map(pid => getPatientById(pid)!.name);
+    const names = ALL_PIDS.map((pid) => getPatientById(pid)!.name);
     expect(new Set(names).size).toBe(5);
   });
 
   it('all 5 patients have distinct DOBs', () => {
-    const dobs = ALL_PIDS.map(pid => getPatientById(pid)!.dob);
+    const dobs = ALL_PIDS.map((pid) => getPatientById(pid)!.dob);
     expect(new Set(dobs).size).toBe(5);
   });
 
@@ -84,12 +82,14 @@ describe('§1 Patient Access — registry data used by FHIR passthrough', () => 
   });
 
   it('Dorothy Simmons conditions do NOT contain Maria Redhawk ICD codes', () => {
-    const maria   = getPatientById('MARIA_SD_001')!;
+    const maria = getPatientById('MARIA_SD_001')!;
     const dorothy = getPatientById('PAT-0042')!;
-    const mariaCodes   = new Set(maria.conditions!.map(c => c.key));
-    const dorothyCodes = dorothy.conditions!.map(c => c.key);
+    const mariaCodes = new Set(maria.conditions!.map((c) => c.key));
+    const dorothyCodes = dorothy.conditions!.map((c) => c.key);
     for (const key of dorothyCodes) {
-      expect(mariaCodes.has(key), `Dorothy condition key "${key}" must not duplicate Maria's`).toBe(false);
+      expect(mariaCodes.has(key), `Dorothy condition key "${key}" must not duplicate Maria's`).toBe(
+        false
+      );
     }
   });
 
@@ -102,10 +102,10 @@ describe('§1 Patient Access — registry data used by FHIR passthrough', () => 
   });
 
   it('each patient has a unique contract/plan name', () => {
-    const contracts = ALL_PIDS.map(pid => getPatientById(pid)!.contract);
+    const contracts = ALL_PIDS.map((pid) => getPatientById(pid)!.contract);
     // Not all 5 need to be unique (some may share Medicaid RHTP Track 3) but at
     // least Maria and Dorothy must differ — SD Medicaid vs MSSP Trk 3
-    const maria   = getPatientById('MARIA_SD_001')!.contract;
+    const maria = getPatientById('MARIA_SD_001')!.contract;
     const dorothy = getPatientById('PAT-0042')!.contract;
     expect(maria).not.toBe(dorothy);
   });
@@ -119,23 +119,23 @@ describe('§1 Patient Access — registry data used by FHIR passthrough', () => 
   });
 
   it('ClaimResponse: Maria and Dorothy have different PA service names', () => {
-    const mariaHistory   = devBulkStatus('MARIA_SD_001').paHistory.map(h => h.service);
-    const dorothyHistory = devBulkStatus('PAT-0042').paHistory.map(h => h.service);
+    const mariaHistory = devBulkStatus('MARIA_SD_001').paHistory.map((h) => h.service);
+    const dorothyHistory = devBulkStatus('PAT-0042').paHistory.map((h) => h.service);
     // The sets must not be identical
     expect(mariaHistory).not.toEqual(dorothyHistory);
     // Dorothy must have Cardiac MRI; Maria must NOT
-    expect(dorothyHistory.some(s => s.toLowerCase().includes('cardiac'))).toBe(true);
-    expect(mariaHistory.some(s => s.toLowerCase().includes('cardiac'))).toBe(false);
+    expect(dorothyHistory.some((s) => s.toLowerCase().includes('cardiac'))).toBe(true);
+    expect(mariaHistory.some((s) => s.toLowerCase().includes('cardiac'))).toBe(false);
     // Maria must have Lumbar MRI; Dorothy must NOT
-    expect(mariaHistory.some(s => s.toLowerCase().includes('lumbar'))).toBe(true);
-    expect(dorothyHistory.some(s => s.toLowerCase().includes('lumbar'))).toBe(false);
+    expect(mariaHistory.some((s) => s.toLowerCase().includes('lumbar'))).toBe(true);
+    expect(dorothyHistory.some((s) => s.toLowerCase().includes('lumbar'))).toBe(false);
   });
 
   it('ClaimResponse: each patient has at least one denial with a reason', () => {
     // CMS §1 requires denial reasons — every patient must have at least one
     for (const pid of ALL_PIDS) {
       const history = devBulkStatus(pid).paHistory;
-      const denials = history.filter(h => h.decision === 'denied');
+      const denials = history.filter((h) => h.decision === 'denied');
       expect(denials.length, `${pid} must have at least 1 denial in PA history`).toBeGreaterThan(0);
       for (const d of denials) {
         expect(d.denialReason, `${pid} denial must have a reason`).toBeTruthy();
@@ -150,7 +150,7 @@ describe('§1 Patient Access — registry data used by FHIR passthrough', () => 
 
 describe('§2 Provider Access — $member-match cross-patient identity', () => {
   it('all 5 patients return unique family names from devMemberMatch', () => {
-    const families = ALL_PIDS.map(pid => {
+    const families = ALL_PIDS.map((pid) => {
       const result = devMemberMatch(pid) as {
         parameter: { resource: { name: { family: string }[] } }[];
       };
@@ -167,12 +167,14 @@ describe('§2 Provider Access — $member-match cross-patient identity', () => {
         parameter: { resource: { name: { family: string; given: string[] }[] } }[];
       };
       const matchedFamily = result.parameter[0].resource.name[0].family;
-      const matchedGiven  = result.parameter[0].resource.name[0].given[0];
+      const matchedGiven = result.parameter[0].resource.name[0].given[0];
 
-      expect(matchedFamily, `${pid}: family must be ${expectedFamily}, got ${matchedFamily}`)
-        .toBe(expectedFamily);
-      expect(matchedGiven,  `${pid}: given must be ${registry.name.split(' ')[0]}`)
-        .toBe(registry.name.split(' ')[0]);
+      expect(matchedFamily, `${pid}: family must be ${expectedFamily}, got ${matchedFamily}`).toBe(
+        expectedFamily
+      );
+      expect(matchedGiven, `${pid}: given must be ${registry.name.split(' ')[0]}`).toBe(
+        registry.name.split(' ')[0]
+      );
     }
   });
 
@@ -186,12 +188,12 @@ describe('§2 Provider Access — $member-match cross-patient identity', () => {
   });
 
   it('all 5 patients have unique prior member IDs (no shared identity)', () => {
-    const memberIds = ALL_PIDS.map(pid => devBulkStatus(pid).memberMatchedId);
+    const memberIds = ALL_PIDS.map((pid) => devBulkStatus(pid).memberMatchedId);
     expect(new Set(memberIds).size).toBe(5);
   });
 
   it('all 5 patients have unique prior payers (not all Aetna)', () => {
-    const payers = ALL_PIDS.map(pid => devBulkStatus(pid).priorPayer);
+    const payers = ALL_PIDS.map((pid) => devBulkStatus(pid).priorPayer);
     expect(new Set(payers).size).toBe(5);
     // Verify Aetna is ONLY Maria
     for (const pid of ALL_PIDS) {
@@ -213,7 +215,7 @@ describe('§3 Payer-to-Payer — bulk export patient-specific data', () => {
   });
 
   it('devBulkStatus EOB counts differ across patients (not same data returned for all)', () => {
-    const counts = ALL_PIDS.map(pid => devBulkStatus(pid).resourceCounts.ExplanationOfBenefit);
+    const counts = ALL_PIDS.map((pid) => devBulkStatus(pid).resourceCounts.ExplanationOfBenefit);
     // At least 3 distinct values
     expect(new Set(counts).size).toBeGreaterThanOrEqual(3);
   });
@@ -225,13 +227,13 @@ describe('§3 Payer-to-Payer — bulk export patient-specific data', () => {
   });
 
   it('devBulkStatus coveragePeriod.end differs across patients', () => {
-    const ends = ALL_PIDS.map(pid => devBulkStatus(pid).coveragePeriod.end);
+    const ends = ALL_PIDS.map((pid) => devBulkStatus(pid).coveragePeriod.end);
     expect(new Set(ends).size).toBeGreaterThanOrEqual(3);
   });
 
   it('Dorothy bulk status has significantly more EOBs than Lisa (severity-appropriate)', () => {
     const dorothy = devBulkStatus('PAT-0042').resourceCounts.ExplanationOfBenefit;
-    const lisa    = devBulkStatus('PAT-0156').resourceCounts.ExplanationOfBenefit;
+    const lisa = devBulkStatus('PAT-0156').resourceCounts.ExplanationOfBenefit;
     // Dorothy is Critical risk (COPD+CHF+T2DM), Lisa is Moderate — Dorothy's utilisation must be higher
     expect(dorothy).toBeGreaterThan(lisa);
   });
@@ -240,8 +242,8 @@ describe('§3 Payer-to-Payer — bulk export patient-specific data', () => {
     for (const pid of ALL_PIDS) {
       for (const h of devBulkStatus(pid).paHistory) {
         expect(h.service, `${pid} paHistory entry missing service`).toBeTruthy();
-        expect(h.cpt,     `${pid} paHistory entry missing CPT`).toBeTruthy();
-        expect(h.date,    `${pid} paHistory entry missing date`).toBeTruthy();
+        expect(h.cpt, `${pid} paHistory entry missing CPT`).toBeTruthy();
+        expect(h.date, `${pid} paHistory entry missing date`).toBeTruthy();
         expect(['approved', 'denied']).toContain(h.decision);
       }
     }
@@ -256,35 +258,41 @@ describe('§4A Prior Auth — CRD patient-specific cards', () => {
   it('all 5 patients return a critical CRD card mentioning their own CPT code', () => {
     const scenarios: Record<string, string> = {
       MARIA_SD_001: '72148',
-      'PAT-0042':   '75561',
-      'PAT-0087':   '93306',
-      'PAT-0103':   '99243',
-      'PAT-0156':   '99244',
+      'PAT-0042': '75561',
+      'PAT-0087': '93306',
+      'PAT-0103': '99243',
+      'PAT-0156': '99244',
     };
     for (const pid of ALL_PIDS) {
       const cards = devCrdCards(pid) as { summary: string; indicator: string }[];
-      const crit  = cards.find(c => c.indicator === 'critical');
+      const crit = cards.find((c) => c.indicator === 'critical');
       expect(crit, `${pid} must have a critical CRD card`).toBeDefined();
-      expect(crit!.summary, `${pid} card must mention CPT ${scenarios[pid]}`)
-        .toContain(scenarios[pid]);
+      expect(crit!.summary, `${pid} card must mention CPT ${scenarios[pid]}`).toContain(
+        scenarios[pid]
+      );
     }
   });
 
-  it('no patient receives another patient\'s CPT code in their CRD card', () => {
+  it("no patient receives another patient's CPT code in their CRD card", () => {
     const scenarios: Record<string, string> = {
-      MARIA_SD_001: '72148', 'PAT-0042': '75561', 'PAT-0087': '93306',
-      'PAT-0103': '99243',   'PAT-0156': '99244',
+      MARIA_SD_001: '72148',
+      'PAT-0042': '75561',
+      'PAT-0087': '93306',
+      'PAT-0103': '99243',
+      'PAT-0156': '99244',
     };
     for (const pid of ALL_PIDS) {
-      const cards  = devCrdCards(pid) as { summary: string; indicator: string }[];
-      const crit   = cards.find(c => c.indicator === 'critical')!;
-      const myCpt  = scenarios[pid];
+      const cards = devCrdCards(pid) as { summary: string; indicator: string }[];
+      const crit = cards.find((c) => c.indicator === 'critical')!;
+      const myCpt = scenarios[pid];
       for (const otherPid of ALL_PIDS) {
         if (otherPid === pid) continue;
         const theirCpt = scenarios[otherPid];
         if (theirCpt === myCpt) continue; // skip if same code
-        expect(crit.summary, `${pid} card must not contain ${otherPid}'s CPT ${theirCpt}`)
-          .not.toContain(theirCpt);
+        expect(
+          crit.summary,
+          `${pid} card must not contain ${otherPid}'s CPT ${theirCpt}`
+        ).not.toContain(theirCpt);
       }
     }
   });
@@ -292,42 +300,57 @@ describe('§4A Prior Auth — CRD patient-specific cards', () => {
 
 describe('§4B Prior Auth — DTR policy evaluation', () => {
   const cptMap: Record<string, string> = {
-    MARIA_SD_001: '72148', 'PAT-0042': '75561', 'PAT-0087': '93306',
-    'PAT-0103':   '99243', 'PAT-0156': '99244',
+    MARIA_SD_001: '72148',
+    'PAT-0042': '75561',
+    'PAT-0087': '93306',
+    'PAT-0103': '99243',
+    'PAT-0156': '99244',
   };
 
   it('DTR policyTitle contains the correct CPT for every patient', async () => {
     for (const pid of ALL_PIDS) {
-      const cpt    = cptMap[pid];
-      const result = await devDtrEvaluation(pid, cpt) as { policyTitle: string; cptCode: string; groups: unknown[] };
-      expect(result.policyTitle, `${pid} policyTitle must include CPT ${cpt}`)
-        .toContain(cpt);
+      const cpt = cptMap[pid];
+      const result = (await devDtrEvaluation(pid, cpt)) as {
+        policyTitle: string;
+        cptCode: string;
+        groups: unknown[];
+      };
+      expect(result.policyTitle, `${pid} policyTitle must include CPT ${cpt}`).toContain(cpt);
     }
   });
 
   it('DTR for Dorothy (PAT-0042) is DIFFERENT from Maria and contains a gap', async () => {
-    const maria   = await devDtrEvaluation('MARIA_SD_001', '72148') as { policyTitle: string; groups: { status: string }[] };
-    const dorothy = await devDtrEvaluation('PAT-0042',     '75561') as { policyTitle: string; groups: { status: string }[] };
+    const maria = (await devDtrEvaluation('MARIA_SD_001', '72148')) as {
+      policyTitle: string;
+      groups: { status: string }[];
+    };
+    const dorothy = (await devDtrEvaluation('PAT-0042', '75561')) as {
+      policyTitle: string;
+      groups: { status: string }[];
+    };
     expect(maria.policyTitle).not.toBe(dorothy.policyTitle);
-    expect(dorothy.groups.some(g => g.status === 'gap')).toBe(true);
+    expect(dorothy.groups.some((g) => g.status === 'gap')).toBe(true);
     expect(dorothy.policyTitle).not.toContain('Lumbar'); // Dorothy must not get Maria's lumbar policy
   });
 
   it('DTR for James Wilson (PAT-0087) has allMet=true (no gaps)', async () => {
-    const result = await devDtrEvaluation('PAT-0087', '93306') as { allMet: boolean; groups: { status: string }[] };
+    const result = (await devDtrEvaluation('PAT-0087', '93306')) as {
+      allMet: boolean;
+      groups: { status: string }[];
+    };
     expect(result.allMet).toBe(true);
-    expect(result.groups.every(g => g.status === 'met')).toBe(true);
+    expect(result.groups.every((g) => g.status === 'met')).toBe(true);
   });
 
-  it('DTR for Robert Chen (PAT-0103) has correct policy — NOT Maria\'s lumbar MRI', async () => {
-    const result = await devDtrEvaluation('PAT-0103', '99243') as { policyTitle: string };
+  it("DTR for Robert Chen (PAT-0103) has correct policy — NOT Maria's lumbar MRI", async () => {
+    const result = (await devDtrEvaluation('PAT-0103', '99243')) as { policyTitle: string };
     expect(result.policyTitle).toContain('99243');
     expect(result.policyTitle).not.toContain('Lumbar');
     expect(result.policyTitle).not.toContain('72148');
   });
 
-  it('DTR for Lisa Thompson (PAT-0156) has correct policy — NOT Maria\'s lumbar MRI', async () => {
-    const result = await devDtrEvaluation('PAT-0156', '99244') as { policyTitle: string };
+  it("DTR for Lisa Thompson (PAT-0156) has correct policy — NOT Maria's lumbar MRI", async () => {
+    const result = (await devDtrEvaluation('PAT-0156', '99244')) as { policyTitle: string };
     expect(result.policyTitle).toContain('99244');
     expect(result.policyTitle).not.toContain('Lumbar');
     expect(result.policyTitle).not.toContain('72148');
@@ -335,8 +358,8 @@ describe('§4B Prior Auth — DTR policy evaluation', () => {
 
   it('DTR groups array is non-empty for every patient', async () => {
     for (const pid of ALL_PIDS) {
-      const cpt    = cptMap[pid];
-      const result = await devDtrEvaluation(pid, cpt) as { groups: unknown[] };
+      const cpt = cptMap[pid];
+      const result = (await devDtrEvaluation(pid, cpt)) as { groups: unknown[] };
       expect(result.groups.length, `${pid} must have at least 1 DTR group`).toBeGreaterThan(0);
     }
   });
@@ -349,15 +372,23 @@ describe('§4B Prior Auth — DTR policy evaluation', () => {
   it('every one of the 27 real CG-SURG-83 codes routes to the live bariatric policy, not the lumbar-MRI default', async () => {
     expect(BARIATRIC_CPT_CODES.size).toBe(27);
     for (const cpt of BARIATRIC_CPT_CODES) {
-      const result = await devDtrEvaluation('MARIA_SD_001', cpt) as { policyTitle: string; cptCode: string };
-      expect(result.policyTitle, `${cpt} must route to the bariatric policy`).toContain('Bariatric');
-      expect(result.policyTitle, `${cpt} must not fall through to Maria's lumbar MRI`).not.toContain('Lumbar');
+      const result = (await devDtrEvaluation('MARIA_SD_001', cpt)) as {
+        policyTitle: string;
+        cptCode: string;
+      };
+      expect(result.policyTitle, `${cpt} must route to the bariatric policy`).toContain(
+        'Bariatric'
+      );
+      expect(
+        result.policyTitle,
+        `${cpt} must not fall through to Maria's lumbar MRI`
+      ).not.toContain('Lumbar');
       expect(result.cptCode).toBe(cpt);
     }
   });
 
   it('previously-unmapped bariatric codes (e.g. 43848, C9785) now reflect the full real policy, not a truncated literal', async () => {
-    const result = await devDtrEvaluation('MARIA_SD_001', '43848') as {
+    const result = (await devDtrEvaluation('MARIA_SD_001', '43848')) as {
       groups: { title: string; required: boolean }[];
     };
     // The old hand-typed fixture had exactly 3 documentation criteria (6 groups total: age, BMI,
@@ -379,7 +410,7 @@ describe('§4C Prior Auth — PAS approved ClaimResponse', () => {
     }
   });
 
-  it('Dorothy\'s approved ClaimResponse has CPT 75561, NOT 72148 (Maria\'s)', () => {
+  it("Dorothy's approved ClaimResponse has CPT 75561, NOT 72148 (Maria's)", () => {
     const cr = devClaimResponseApproved('Dr. Test MD', 'PAT-0042') as {
       addItem: { productOrService: { coding: { code: string }[] } }[];
     };
@@ -389,7 +420,7 @@ describe('§4C Prior Auth — PAS approved ClaimResponse', () => {
   });
 
   it('all 5 approved ClaimResponses have distinct CPT codes', () => {
-    const cpts = ALL_PIDS.map(pid => {
+    const cpts = ALL_PIDS.map((pid) => {
       const cr = devClaimResponseApproved('Dr. Test', pid) as {
         addItem: { productOrService: { coding: { code: string }[] } }[];
       };
@@ -408,26 +439,29 @@ describe('§4C Prior Auth — PAS approved ClaimResponse', () => {
 
 describe('§4D Prior Auth — Work queue seed', () => {
   it('work queue contains items for at least 3 distinct members', () => {
-    const items   = devWorkQueueItems();
-    const members = new Set(items.map(i => i.memberId));
+    const items = devWorkQueueItems();
+    const members = new Set(items.map((i) => i.memberId));
     expect(members.size).toBeGreaterThanOrEqual(3);
   });
 
-  it('Maria\'s work queue item is in high-risk-review with CPT 72148', () => {
-    const item = devWorkQueueItems().find(i => i.memberId === 'MARIA_SD_001');
+  it("Maria's work queue item is in high-risk-review with CPT 72148", () => {
+    const item = devWorkQueueItems().find((i) => i.memberId === 'MARIA_SD_001');
     expect(item).toBeDefined();
     expect(item!.code).toBe('72148');
     expect(item!.queue).toBe('high-risk-review');
   });
 
   it('at least one work queue item has slaBreached=true', () => {
-    const breached = devWorkQueueItems().filter(i => i.slaBreached);
+    const breached = devWorkQueueItems().filter((i) => i.slaBreached);
     expect(breached.length).toBeGreaterThanOrEqual(1);
   });
 
   it('all work queue items have valid CPT codes', () => {
     for (const item of devWorkQueueItems()) {
-      expect(validateOrderCode(item.code).ok, `work queue CPT ${item.code} must pass validation`).toBe(true);
+      expect(
+        validateOrderCode(item.code).ok,
+        `work queue CPT ${item.code} must pass validation`
+      ).toBe(true);
     }
   });
 });
@@ -436,17 +470,17 @@ describe('§4E Prior Auth — Evidence record ID validation', () => {
   it('validateEvidenceId accepts hyphens — required for PAT-xxxx IDs', () => {
     // This is the exact ID the API Explorer builds for Dorothy
     const id = 'ev-PAT-0042-75561-1730154783';
-    const v  = validateEvidenceId(id);
+    const v = validateEvidenceId(id);
     expect(v.ok, `Evidence ID "${id}" must be valid. Error: ${v.error}`).toBe(true);
   });
 
   it('validateEvidenceId accepts all 5 patient evidence IDs', () => {
     const ids: Record<string, string> = {
       MARIA_SD_001: 'ev-MARIA_SD_001-72148-1730154783',
-      'PAT-0042':   'ev-PAT-0042-75561-1730154783',
-      'PAT-0087':   'ev-PAT-0087-93306-1730154783',
-      'PAT-0103':   'ev-PAT-0103-99243-1730154783',
-      'PAT-0156':   'ev-PAT-0156-99244-1730154783',
+      'PAT-0042': 'ev-PAT-0042-75561-1730154783',
+      'PAT-0087': 'ev-PAT-0087-93306-1730154783',
+      'PAT-0103': 'ev-PAT-0103-99243-1730154783',
+      'PAT-0156': 'ev-PAT-0156-99244-1730154783',
     };
     for (const [pid, id] of Object.entries(ids)) {
       const v = validateEvidenceId(id);
@@ -476,7 +510,7 @@ describe('Infrastructure — patient registry completeness', () => {
 
   it('PLATFORM_TO_FHIR_ID_MAP is the inverse of FHIR_ID_MAP for all 5 patients', () => {
     for (const pid of ALL_PIDS) {
-      const fhirId   = PLATFORM_TO_FHIR_ID_MAP[pid];
+      const fhirId = PLATFORM_TO_FHIR_ID_MAP[pid];
       const resolved = FHIR_ID_MAP[fhirId];
       expect(resolved, `PLATFORM_TO_FHIR round-trip failed for ${pid}`).toBe(pid);
     }
@@ -487,14 +521,14 @@ describe('Infrastructure — patient registry completeness', () => {
   });
 
   it('no two registry patients share a platformId', () => {
-    const ids = getAllPatients().map(p => p.platformId);
+    const ids = getAllPatients().map((p) => p.platformId);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('all registry patients have a name, dob, and gender', () => {
     for (const p of getAllPatients()) {
-      expect(p.name,   `${p.platformId} missing name`).toBeTruthy();
-      expect(p.dob,    `${p.platformId} missing dob`).toBeTruthy();
+      expect(p.name, `${p.platformId} missing name`).toBeTruthy();
+      expect(p.dob, `${p.platformId} missing dob`).toBeTruthy();
       expect(p.gender, `${p.platformId} missing gender`).toBeTruthy();
     }
   });

@@ -86,7 +86,11 @@ function directUnit(obj: Record<string, unknown>): string | undefined {
  * Collect (LOINC code, UCUM unit) pairs from a payload: an enclosing object that
  * carries BOTH a LOINC coding and a unit is one quantitative result. PHI-safe.
  */
-export function extractLoincQuantities(value: unknown, path = 'payload', depth = 0): LoincQuantity[] {
+export function extractLoincQuantities(
+  value: unknown,
+  path = 'payload',
+  depth = 0
+): LoincQuantity[] {
   if (depth > MAX_DEPTH || value === null || typeof value !== 'object') return [];
   if (Array.isArray(value)) {
     return value.flatMap((v, i) => extractLoincQuantities(v, `${path}[${i}]`, depth + 1));
@@ -97,13 +101,18 @@ export function extractLoincQuantities(value: unknown, path = 'payload', depth =
   const unit = directUnit(obj);
   if (code && unit) out.push({ code, unit, fieldPath: path });
   for (const [k, v] of Object.entries(obj)) {
-    if (v && typeof v === 'object') out.push(...extractLoincQuantities(v, `${path}.${k}`, depth + 1));
+    if (v && typeof v === 'object')
+      out.push(...extractLoincQuantities(v, `${path}.${k}`, depth + 1));
   }
   return out;
 }
 
 /** Recursively collect governed { system, code } codings from a payload value. */
-export function extractGovernedCodings(value: unknown, path = 'payload', depth = 0): GovernedCoding[] {
+export function extractGovernedCodings(
+  value: unknown,
+  path = 'payload',
+  depth = 0
+): GovernedCoding[] {
   if (depth > MAX_DEPTH || value === null || typeof value !== 'object') return [];
   if (Array.isArray(value)) {
     return value.flatMap((v, i) => extractGovernedCodings(v, `${path}[${i}]`, depth + 1));
@@ -117,7 +126,8 @@ export function extractGovernedCodings(value: unknown, path = 'payload', depth =
     if (governed) out.push({ system: governed, code, fieldPath: path });
   }
   for (const [k, v] of Object.entries(obj)) {
-    if (v && typeof v === 'object') out.push(...extractGovernedCodings(v, `${path}.${k}`, depth + 1));
+    if (v && typeof v === 'object')
+      out.push(...extractGovernedCodings(v, `${path}.${k}`, depth + 1));
   }
   return out;
 }
@@ -169,7 +179,9 @@ export function makeSemanticValidator(service: TerminologyService): SemanticVali
           if (u.applicable && !u.valid) {
             issues.push({
               reasonCode:
-                u.finding === 'ucum-invalid-unit' ? 'semantic-ucum-invalid-unit' : 'semantic-ucum-unit-not-allowed',
+                u.finding === 'ucum-invalid-unit'
+                  ? 'semantic-ucum-invalid-unit'
+                  : 'semantic-ucum-unit-not-allowed',
               fieldPath: q.fieldPath,
             });
           }

@@ -20,9 +20,11 @@ const FHIR_STATUS_MAP: Record<string, Enrollment['status']> = {
 };
 
 function ext(resource: any, key: string): string {
-  return resource.extension?.find((e: any) =>
-    e.url === `http://tcoc.example.org/fhir/StructureDefinition/${key}`
-  )?.valueString ?? '';
+  return (
+    resource.extension?.find(
+      (e: any) => e.url === `http://tcoc.example.org/fhir/StructureDefinition/${key}`
+    )?.valueString ?? ''
+  );
 }
 
 function mapFhirCoverage(resource: any): Enrollment {
@@ -92,38 +94,68 @@ export default function BenefitEnrollmentPage() {
           setFhirSource(true);
         }
       })
-      .catch(() => { /* non-fatal — keep mock data */ });
+      .catch(() => {
+        /* non-fatal — keep mock data */
+      });
   }, []);
 
   // Act Now / Renew — POST a ServiceRequest to FHIR (fire-and-forget)
   function handleEnrollmentAction(enrollment: Enrollment, action: 'enroll' | 'renew') {
     if (!getFhirMockMode()) {
-      getFhirClient().create({
-        resourceType: 'ServiceRequest',
-        status: 'active',
-        intent: 'order',
-        category: [{ coding: [{ system: 'http://tcoc.example.org/fhir/CodeSystem/service-category', code: 'enrollment', display: 'Benefit Enrollment' }] }],
-        code: { text: `${action === 'renew' ? 'Renewal' : 'Enrollment'}: ${enrollment.program}` },
-        subject: { display: enrollment.patient },
-        requester: { display: 'Care Manager' },
-        note: [{ text: `${action === 'renew' ? 'Renewal' : 'Enrollment'} action initiated from Benefit Enrollment Tracker. Program: ${enrollment.program}, Funding: ${enrollment.fundingSource}` }],
-        extension: [
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-patient-id', valueString: enrollment.patientId },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-program', valueString: enrollment.program },
-          { url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-action', valueString: action },
-        ],
-      }).catch(() => { /* non-fatal */ });
+      getFhirClient()
+        .create({
+          resourceType: 'ServiceRequest',
+          status: 'active',
+          intent: 'order',
+          category: [
+            {
+              coding: [
+                {
+                  system: 'http://tcoc.example.org/fhir/CodeSystem/service-category',
+                  code: 'enrollment',
+                  display: 'Benefit Enrollment',
+                },
+              ],
+            },
+          ],
+          code: { text: `${action === 'renew' ? 'Renewal' : 'Enrollment'}: ${enrollment.program}` },
+          subject: { display: enrollment.patient },
+          requester: { display: 'Care Manager' },
+          note: [
+            {
+              text: `${action === 'renew' ? 'Renewal' : 'Enrollment'} action initiated from Benefit Enrollment Tracker. Program: ${enrollment.program}, Funding: ${enrollment.fundingSource}`,
+            },
+          ],
+          extension: [
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-patient-id',
+              valueString: enrollment.patientId,
+            },
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-program',
+              valueString: enrollment.program,
+            },
+            {
+              url: 'http://tcoc.example.org/fhir/StructureDefinition/enrollment-action',
+              valueString: action,
+            },
+          ],
+        })
+        .catch(() => {
+          /* non-fatal */
+        });
     }
   }
 
-  const patients = ['All', ...Array.from(new Set(enrollments.map(e => e.patient)))];
-  const filtered = enrollments.filter(e =>
-    (patientFilter === 'All' || e.patient === patientFilter) &&
-    (statusFilter === 'All' || e.status === statusFilter)
+  const patients = ['All', ...Array.from(new Set(enrollments.map((e) => e.patient)))];
+  const filtered = enrollments.filter(
+    (e) =>
+      (patientFilter === 'All' || e.patient === patientFilter) &&
+      (statusFilter === 'All' || e.status === statusFilter)
   );
 
-  const gaps = enrollments.filter(e => e.coverageGap);
-  const expiringSoon = enrollments.filter(e => e.daysToRenewal > 0 && e.daysToRenewal <= 60);
+  const gaps = enrollments.filter((e) => e.coverageGap);
+  const expiringSoon = enrollments.filter((e) => e.daysToRenewal > 0 && e.daysToRenewal <= 60);
 
   return (
     <AppLayout
@@ -136,25 +168,58 @@ export default function BenefitEnrollmentPage() {
       {/* FHIR badge */}
       {fhirSource && (
         <div className="flex items-center gap-2 mb-3 px-1">
-          <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">FHIR R4</span>
-          <span className="text-xs text-[#0e6027]">{enrollments.length} Coverage resources loaded from HAPI FHIR</span>
+          <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
+            FHIR R4
+          </span>
+          <span className="text-xs text-[#0e6027]">
+            {enrollments.length} Coverage resources loaded from HAPI FHIR
+          </span>
         </div>
       )}
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         {[
-          { label: 'Active Enrollments', value: String(enrollments.filter(e => e.status === 'active').length), sub: 'Across all patients', color: '#0e6027', icon: 'CheckBadgeIcon' },
-          { label: 'Coverage Gaps', value: String(gaps.length), sub: 'Needs immediate action', color: '#da1e28', icon: 'ExclamationTriangleIcon' },
-          { label: 'Expiring in 60 Days', value: String(expiringSoon.length), sub: 'Renewal action required', color: '#b45309', icon: 'ClockIcon' },
-          { label: 'Pending Enrollments', value: String(enrollments.filter(e => e.status === 'pending').length), sub: 'Awaiting approval', color: '#0043ce', icon: 'ArrowPathIcon' },
-        ].map(kpi => (
-          <div key={kpi.label} className="bg-white border border-carbon-gray-20 p-4 flex items-start gap-3">
+          {
+            label: 'Active Enrollments',
+            value: String(enrollments.filter((e) => e.status === 'active').length),
+            sub: 'Across all patients',
+            color: '#0e6027',
+            icon: 'CheckBadgeIcon',
+          },
+          {
+            label: 'Coverage Gaps',
+            value: String(gaps.length),
+            sub: 'Needs immediate action',
+            color: '#da1e28',
+            icon: 'ExclamationTriangleIcon',
+          },
+          {
+            label: 'Expiring in 60 Days',
+            value: String(expiringSoon.length),
+            sub: 'Renewal action required',
+            color: '#b45309',
+            icon: 'ClockIcon',
+          },
+          {
+            label: 'Pending Enrollments',
+            value: String(enrollments.filter((e) => e.status === 'pending').length),
+            sub: 'Awaiting approval',
+            color: '#0043ce',
+            icon: 'ArrowPathIcon',
+          },
+        ].map((kpi) => (
+          <div
+            key={kpi.label}
+            className="bg-white border border-carbon-gray-20 p-4 flex items-start gap-3"
+          >
             <div className="w-8 h-8 flex items-center justify-center bg-carbon-gray-10 flex-shrink-0">
               <Icon name={kpi.icon as any} size={16} style={{ color: kpi.color }} />
             </div>
             <div>
-              <p className="font-mono text-xl font-bold leading-tight" style={{ color: kpi.color }}>{kpi.value}</p>
+              <p className="font-mono text-xl font-bold leading-tight" style={{ color: kpi.color }}>
+                {kpi.value}
+              </p>
               <p className="text-xs font-semibold text-carbon-gray-100">{kpi.label}</p>
               <p className="text-2xs text-carbon-gray-50">{kpi.sub}</p>
             </div>
@@ -169,7 +234,7 @@ export default function BenefitEnrollmentPage() {
             <Icon name="ExclamationTriangleIcon" size={16} style={{ color: '#da1e28' }} />
             <p className="text-xs font-semibold text-[#da1e28]">Coverage Gaps Requiring Action</p>
           </div>
-          {gaps.map(e => (
+          {gaps.map((e) => (
             <div key={e.id} className="flex items-start gap-3 text-xs">
               <div className="flex-shrink-0 w-44">
                 <span className="font-semibold text-carbon-gray-100">{e.patient}</span>
@@ -190,22 +255,32 @@ export default function BenefitEnrollmentPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">Patient:</p>
+          <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">
+            Patient:
+          </p>
           <div className="flex gap-1 flex-wrap">
-            {patients.map(p => (
-              <button key={p} onClick={() => setPatientFilter(p)}
-                className={`px-3 py-1.5 text-xs font-semibold border transition-colors ${patientFilter === p ? 'bg-[#0043ce] text-white border-[#0043ce]' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'}`}>
+            {patients.map((p) => (
+              <button
+                key={p}
+                onClick={() => setPatientFilter(p)}
+                className={`px-3 py-1.5 text-xs font-semibold border transition-colors ${patientFilter === p ? 'bg-[#0043ce] text-white border-[#0043ce]' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'}`}
+              >
                 {p === 'All' ? 'All' : p.split(' ')[0]}
               </button>
             ))}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">Status:</p>
+          <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide">
+            Status:
+          </p>
           <div className="flex gap-1">
-            {['All', 'active', 'pending', 'expired'].map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-3 py-1.5 text-xs font-semibold border transition-colors ${statusFilter === s ? 'bg-[#0043ce] text-white border-[#0043ce]' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'}`}>
+            {['All', 'active', 'pending', 'expired'].map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 text-xs font-semibold border transition-colors ${statusFilter === s ? 'bg-[#0043ce] text-white border-[#0043ce]' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'}`}
+              >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
@@ -213,7 +288,9 @@ export default function BenefitEnrollmentPage() {
         </div>
         {fhirSource && (
           <div className="ml-auto flex items-center">
-            <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">FHIR R4</span>
+            <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
+              FHIR R4
+            </span>
           </div>
         )}
       </div>
@@ -231,28 +308,45 @@ export default function BenefitEnrollmentPage() {
               <th className="text-left px-4 py-2.5 font-semibold text-carbon-gray-70">Start</th>
               <th className="text-left px-4 py-2.5 font-semibold text-carbon-gray-70">End</th>
               <th className="text-left px-4 py-2.5 font-semibold text-carbon-gray-70">Renewal</th>
-              <th className="text-right px-4 py-2.5 font-semibold text-carbon-gray-70">Benefit Value</th>
+              <th className="text-right px-4 py-2.5 font-semibold text-carbon-gray-70">
+                Benefit Value
+              </th>
               <th className="px-4 py-2.5" />
             </tr>
           </thead>
           <tbody>
-            {filtered.map(e => {
+            {filtered.map((e) => {
               const cfg = ENROLLMENT_STATUS_CONFIG[e.status];
               const domainColor = PROGRAM_DOMAIN_COLORS[e.domain] ?? '#6f6f6f';
               const urgentRenewal = e.daysToRenewal > 0 && e.daysToRenewal <= 60;
               return (
-                <tr key={e.id} className={`border-b border-carbon-gray-10 hover:bg-carbon-gray-10 transition-colors ${e.coverageGap ? 'bg-[#fff8f8]' : ''}`}>
+                <tr
+                  key={e.id}
+                  className={`border-b border-carbon-gray-10 hover:bg-carbon-gray-10 transition-colors ${e.coverageGap ? 'bg-[#fff8f8]' : ''}`}
+                >
                   <td className="px-4 py-3">
                     <p className="font-medium text-carbon-gray-100">{e.patient}</p>
-                    <p className="font-mono text-2xs text-carbon-gray-50">{e.patientId} · {e.mrn}</p>
+                    <p className="font-mono text-2xs text-carbon-gray-50">
+                      {e.patientId} · {e.mrn}
+                    </p>
                   </td>
                   <td className="px-4 py-3 font-medium text-carbon-gray-100">{e.program}</td>
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 text-2xs font-bold text-white" style={{ backgroundColor: domainColor }}>{e.domain}</span>
+                    <span
+                      className="px-2 py-0.5 text-2xs font-bold text-white"
+                      style={{ backgroundColor: domainColor }}
+                    >
+                      {e.domain}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-carbon-gray-50 font-mono text-2xs">{e.fundingSource}</td>
+                  <td className="px-4 py-3 text-carbon-gray-50 font-mono text-2xs">
+                    {e.fundingSource}
+                  </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="px-2 py-0.5 text-2xs font-bold inline-flex items-center gap-1" style={{ backgroundColor: cfg.bg, color: cfg.text }}>
+                    <span
+                      className="px-2 py-0.5 text-2xs font-bold inline-flex items-center gap-1"
+                      style={{ backgroundColor: cfg.bg, color: cfg.text }}
+                    >
                       <Icon name={cfg.icon as any} size={10} />
                       {cfg.label}
                     </span>
@@ -261,13 +355,21 @@ export default function BenefitEnrollmentPage() {
                   <td className="px-4 py-3 font-mono text-carbon-gray-70">{e.endDate}</td>
                   <td className="px-4 py-3">
                     {e.renewalDeadline !== '—' ? (
-                      <span className={`font-mono ${urgentRenewal ? 'text-[#b45309] font-bold' : 'text-carbon-gray-70'}`}>
+                      <span
+                        className={`font-mono ${urgentRenewal ? 'text-[#b45309] font-bold' : 'text-carbon-gray-70'}`}
+                      >
                         {e.renewalDeadline}
-                        {urgentRenewal && <span className="ml-1 text-2xs">({e.daysToRenewal}d)</span>}
+                        {urgentRenewal && (
+                          <span className="ml-1 text-2xs">({e.daysToRenewal}d)</span>
+                        )}
                       </span>
-                    ) : <span className="text-carbon-gray-30">—</span>}
+                    ) : (
+                      <span className="text-carbon-gray-30">—</span>
+                    )}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono font-bold text-carbon-gray-100">{e.benefitValue}</td>
+                  <td className="px-4 py-3 text-right font-mono font-bold text-carbon-gray-100">
+                    {e.benefitValue}
+                  </td>
                   <td className="px-4 py-3">
                     {(e.status === 'expired' || urgentRenewal) && (
                       <button

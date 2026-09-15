@@ -136,7 +136,8 @@ export function loadDemoBatch(): DemoBatch {
 }
 
 function dedupeKeyFor(s: Record<string, unknown>, memberId: string): string {
-  const measure = (s.measure as string) ?? (s.refs as Record<string, string> | undefined)?.instrument ?? 'na';
+  const measure =
+    (s.measure as string) ?? (s.refs as Record<string, string> | undefined)?.instrument ?? 'na';
   const channel = (s.channel as string) ?? 'na';
   const kind = s.kind as string;
   if (kind.startsWith('care-gap')) return `care-gap:${memberId}:${measure}`;
@@ -152,7 +153,7 @@ function dedupeKeyFor(s: Record<string, unknown>, memberId: string): string {
 export function runMemberDispositions(
   signals: Signal[],
   ctx: MemberContext,
-  opts: { nowMs: number; pack?: PolicyPack; deps?: Partial<EngineDeps> } ,
+  opts: { nowMs: number; pack?: PolicyPack; deps?: Partial<EngineDeps> }
 ): DispositionBatch {
   const pack = opts.pack ?? getPolicyPack();
   const deps: EngineDeps = {
@@ -170,7 +171,11 @@ export function runMemberDispositions(
  * summary (the hardcoded page stays green). production: run the real engine over
  * the seeded batch and return its emergent summary.
  */
-export function getSdeDemoDisposition(): { summary: DispositionSummary; batch?: DispositionBatch; mode: string } {
+export function getSdeDemoDisposition(): {
+  summary: DispositionSummary;
+  batch?: DispositionBatch;
+  mode: string;
+} {
   const mode = getDataMode('signalDisposition');
   const demo = loadDemoBatch();
   if (mode === 'production') {

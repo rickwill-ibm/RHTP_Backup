@@ -2,28 +2,144 @@
   "resourceType": "Bundle",
   "type": "collection",
   "entry": [
-    { "resource": { "resourceType": "Patient", "id": "pat-james-087",
-        "identifier": [ { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00087" }, { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0087" } ],
-        "name": [{ "family": "Wilson", "given": ["James"] }], "gender": "male", "birthDate": "1968-07-14" } },
-    { "resource": { "resourceType": "Coverage", "id": "cov-james-087", "status": "active",
-        "beneficiary": { "reference": "Patient/pat-james-087" }, "payor": [{ "display": "SD Medicaid" }], "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }] } },
-    { "resource": { "resourceType": "Condition", "id": "cond-dm-087",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [ { "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.9", "display": "Type 2 diabetes mellitus without complications" }, { "system": "http://snomed.info/sct", "code": "44054006", "display": "Type 2 diabetes mellitus" } ] },
-        "hcc": { "system": "urn:cms:risk-adjustment:hcc", "code": "HCC38", "display": "Diabetes with glycemic, unspecified, or no complications" },
-        "subject": { "reference": "Patient/pat-james-087" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-chf-087",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I50.32", "display": "Chronic diastolic (congestive) heart failure" }] },
-        "subject": { "reference": "Patient/pat-james-087" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-htn-087",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential (primary) hypertension" }] },
-        "subject": { "reference": "Patient/pat-james-087" } } },
-    { "resource": { "resourceType": "Observation", "id": "obs-a1c-087", "status": "final",
-        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory" }] }],
-        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }] },
-        "subject": { "reference": "Patient/pat-james-087" }, "effectiveDateTime": "2026-03-02",
-        "valueQuantity": { "value": 7.9, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" } } }
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-james-087",
+        "identifier": [
+          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00087" },
+          { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0087" }
+        ],
+        "name": [{ "family": "Wilson", "given": ["James"] }],
+        "gender": "male",
+        "birthDate": "1968-07-14"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-james-087",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-james-087" },
+        "payor": [{ "display": "SD Medicaid" }],
+        "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-dm-087",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.9",
+              "display": "Type 2 diabetes mellitus without complications"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ]
+        },
+        "hcc": {
+          "system": "urn:cms:risk-adjustment:hcc",
+          "code": "HCC38",
+          "display": "Diabetes with glycemic, unspecified, or no complications"
+        },
+        "subject": { "reference": "Patient/pat-james-087" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-chf-087",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I50.32",
+              "display": "Chronic diastolic (congestive) heart failure"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-james-087" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-htn-087",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-james-087" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-087",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-james-087" },
+        "effectiveDateTime": "2026-03-02",
+        "valueQuantity": {
+          "value": 7.9,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        }
+      }
+    }
   ]
 }

@@ -17,17 +17,43 @@ interface DocumentColumnProps {
   encounterId?: string;
   launchContext: SmartLaunchContext;
   sessionActions: string[];
-  onWriteComplete: (kind: 'note' | 'order' | 'referral', display: string, resourceId: string) => void;
+  onWriteComplete: (
+    kind: 'note' | 'order' | 'referral',
+    display: string,
+    resourceId: string
+  ) => void;
   onOpenResource: (resourceType: string, resourceId: string, label: string) => void;
   onSignAndReturn: () => void;
 }
 
 const QUICK_ORDERS = [
   { code: '4548-4', system: 'http://loinc.org', display: 'HbA1c', label: 'HbA1c (repeat)' },
-  { code: '24323-8', system: 'http://loinc.org', display: 'Comprehensive metabolic panel', label: 'BMP/CMP — recheck K+' },
-  { code: '9318-7', system: 'http://loinc.org', display: 'Albumin/Creatinine ratio urine', label: 'Urine microalbumin' },
-  { code: '306285006', system: 'http://snomed.info/sct', display: 'Referral to nephrology service', label: 'Nephrology referral', referral: true },
-  { code: '183524004', system: 'http://snomed.info/sct', display: 'Referral to endocrinology service', label: 'Endocrinology referral', referral: true },
+  {
+    code: '24323-8',
+    system: 'http://loinc.org',
+    display: 'Comprehensive metabolic panel',
+    label: 'BMP/CMP — recheck K+',
+  },
+  {
+    code: '9318-7',
+    system: 'http://loinc.org',
+    display: 'Albumin/Creatinine ratio urine',
+    label: 'Urine microalbumin',
+  },
+  {
+    code: '306285006',
+    system: 'http://snomed.info/sct',
+    display: 'Referral to nephrology service',
+    label: 'Nephrology referral',
+    referral: true,
+  },
+  {
+    code: '183524004',
+    system: 'http://snomed.info/sct',
+    display: 'Referral to endocrinology service',
+    label: 'Endocrinology referral',
+    referral: true,
+  },
 ];
 
 export default function ProviderViewDocument({
@@ -47,10 +73,10 @@ export default function ProviderViewDocument({
   const [writeError, setWriteError] = useState<string | null>(null);
 
   const referrals = serviceRequests.data.filter((sr) =>
-    sr.category?.some((c) => ccText(c).toLowerCase().includes('referral')),
+    sr.category?.some((c) => ccText(c).toLowerCase().includes('referral'))
   );
   const orders = serviceRequests.data.filter(
-    (sr) => !sr.category?.some((c) => ccText(c).toLowerCase().includes('referral')),
+    (sr) => !sr.category?.some((c) => ccText(c).toLowerCase().includes('referral'))
   );
 
   async function signNote() {
@@ -73,12 +99,17 @@ export default function ProviderViewDocument({
           {
             attachment: {
               contentType: 'text/plain',
-              data: typeof window !== 'undefined' ? window.btoa(unescape(encodeURIComponent(noteText))) : '',
+              data:
+                typeof window !== 'undefined'
+                  ? window.btoa(unescape(encodeURIComponent(noteText)))
+                  : '',
               title: `Progress Note ${new Date().toISOString().slice(0, 10)}`,
             },
           },
         ],
-        context: encounterId ? { encounter: [{ reference: `Encounter/${encounterId}` }] } : undefined,
+        context: encounterId
+          ? { encounter: [{ reference: `Encounter/${encounterId}` }] }
+          : undefined,
       });
       onWriteComplete('note', 'Progress note signed', created.id ?? 'unknown');
       setNoteText('');
@@ -101,8 +132,30 @@ export default function ProviderViewDocument({
         intent: 'order',
         priority: 'routine',
         category: q.referral
-          ? [{ coding: [{ system: 'http://snomed.info/sct', code: '3457005', display: 'Patient referral' }], text: 'referral' }]
-          : [{ coding: [{ system: 'http://snomed.info/sct', code: '15220000', display: 'Laboratory test' }], text: 'laboratory' }],
+          ? [
+              {
+                coding: [
+                  {
+                    system: 'http://snomed.info/sct',
+                    code: '3457005',
+                    display: 'Patient referral',
+                  },
+                ],
+                text: 'referral',
+              },
+            ]
+          : [
+              {
+                coding: [
+                  {
+                    system: 'http://snomed.info/sct',
+                    code: '15220000',
+                    display: 'Laboratory test',
+                  },
+                ],
+                text: 'laboratory',
+              },
+            ],
         code: { coding: [{ system: q.system, code: q.code, display: q.display }], text: q.label },
         subject: { reference: `Patient/${patientId}` },
         encounter: encounterId ? { reference: `Encounter/${encounterId}` } : undefined,
@@ -172,7 +225,9 @@ export default function ProviderViewDocument({
                 <td className="px-3 py-1">
                   <button
                     className="text-[#00539b] hover:underline text-left"
-                    onClick={() => d.id && onOpenResource('DocumentReference', d.id, ccText(d.type))}
+                    onClick={() =>
+                      d.id && onOpenResource('DocumentReference', d.id, ccText(d.type))
+                    }
                   >
                     {ccText(d.type)}
                   </button>
@@ -214,7 +269,9 @@ export default function ProviderViewDocument({
                   <td className="px-3 py-1">
                     <button
                       className={`hover:underline text-left ${statusTextCls(sr.status)}`}
-                      onClick={() => sr.id && onOpenResource('ServiceRequest', sr.id, ccText(sr.code))}
+                      onClick={() =>
+                        sr.id && onOpenResource('ServiceRequest', sr.id, ccText(sr.code))
+                      }
                     >
                       {ccText(sr.code)}
                     </button>
@@ -248,7 +305,9 @@ export default function ProviderViewDocument({
                   <td className="px-3 py-1">
                     <button
                       className="text-[#00539b] hover:underline text-left"
-                      onClick={() => sr.id && onOpenResource('ServiceRequest', sr.id, ccText(sr.code))}
+                      onClick={() =>
+                        sr.id && onOpenResource('ServiceRequest', sr.id, ccText(sr.code))
+                      }
                     >
                       {ccText(sr.code)}
                     </button>

@@ -54,7 +54,10 @@ export function isCodeCarryingDomain(domain: WpcDomain): boolean {
  * binding can override it per call (deterministic tests inject the posture).
  */
 export function currencyPostureFromConfig(): CurrencyPosture {
-  const env = typeof process !== 'undefined' && process.env ? process.env.TERMINOLOGY_CURRENCY_POSTURE : undefined;
+  const env =
+    typeof process !== 'undefined' && process.env
+      ? process.env.TERMINOLOGY_CURRENCY_POSTURE
+      : undefined;
   if (env === 'enforce' || env === 'flag') return env;
   return getDataMode('terminology') === 'production' ? 'enforce' : 'flag';
 }
@@ -80,7 +83,10 @@ export interface SemanticBindingOptions {
  * The semantic verdict comes entirely from the injected/selected SemanticValidator
  * (no duplicated validateCode logic); currency reuses the registry's own math.
  */
-export function bindSemantics(record: NormalizedRecord, opts: SemanticBindingOptions = {}): ValidationResult {
+export function bindSemantics(
+  record: NormalizedRecord,
+  opts: SemanticBindingOptions = {}
+): ValidationResult {
   const validator = opts.validator ?? selectSemanticValidator();
   const issues: ValidationIssue[] = [...validator.validate(record).issues];
 

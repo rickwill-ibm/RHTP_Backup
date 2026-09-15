@@ -56,13 +56,15 @@ export function asRecord(v: unknown, ctx: string): Record<string, unknown> {
 
 export function reqString(o: Record<string, unknown>, key: string, ctx: string): string {
   const v = o[key];
-  if (typeof v !== 'string' || v.length === 0) throw new Error(`${ctx}: '${key}' must be a non-empty string`);
+  if (typeof v !== 'string' || v.length === 0)
+    throw new Error(`${ctx}: '${key}' must be a non-empty string`);
   return v;
 }
 
 export function reqNumber(o: Record<string, unknown>, key: string, ctx: string): number {
   const v = o[key];
-  if (typeof v !== 'number' || Number.isNaN(v)) throw new Error(`${ctx}: '${key}' must be a number`);
+  if (typeof v !== 'number' || Number.isNaN(v))
+    throw new Error(`${ctx}: '${key}' must be a number`);
   return v;
 }
 

@@ -54,7 +54,8 @@ function parseProvider(v: unknown, i: number): NormalizedDirectoryProvider {
   const o = asRecord(v, `providerDirectory.providers[${i}]`);
   const ctx = `providerDirectory.providers[${i}]`;
   const lobs = reqArray(o.lobs ?? [], `${ctx}.lobs`).map((l, j) => {
-    if (typeof l !== 'string' || l.length === 0) throw new Error(`${ctx}.lobs[${j}]: must be a non-empty string`);
+    if (typeof l !== 'string' || l.length === 0)
+      throw new Error(`${ctx}.lobs[${j}]: must be a non-empty string`);
     return l;
   });
   return {

@@ -21,10 +21,45 @@ interface WorkflowMachineState {
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
 type WorkflowAction =
-  | { type: 'START_WORKFLOW'; payload: { workflowType: WorkflowType; entityId: string; startedBy: string; startedByRole: UserRole } }
-  | { type: 'ADVANCE_STEP'; payload: { workflowType: WorkflowType; entityId: string; completedBy: string; completedByRole: UserRole; notes?: string } }
-  | { type: 'COMPLETE_WORKFLOW'; payload: { workflowType: WorkflowType; entityId: string; completedBy: string; completedByRole: UserRole; notes?: string } }
-  | { type: 'REJECT_WORKFLOW'; payload: { workflowType: WorkflowType; entityId: string; rejectedBy: string; rejectedByRole: UserRole; notes?: string } }
+  | {
+      type: 'START_WORKFLOW';
+      payload: {
+        workflowType: WorkflowType;
+        entityId: string;
+        startedBy: string;
+        startedByRole: UserRole;
+      };
+    }
+  | {
+      type: 'ADVANCE_STEP';
+      payload: {
+        workflowType: WorkflowType;
+        entityId: string;
+        completedBy: string;
+        completedByRole: UserRole;
+        notes?: string;
+      };
+    }
+  | {
+      type: 'COMPLETE_WORKFLOW';
+      payload: {
+        workflowType: WorkflowType;
+        entityId: string;
+        completedBy: string;
+        completedByRole: UserRole;
+        notes?: string;
+      };
+    }
+  | {
+      type: 'REJECT_WORKFLOW';
+      payload: {
+        workflowType: WorkflowType;
+        entityId: string;
+        rejectedBy: string;
+        rejectedByRole: UserRole;
+        notes?: string;
+      };
+    }
   | { type: 'RESET_WORKFLOW'; payload: { workflowType: WorkflowType; entityId: string } };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -32,7 +67,10 @@ function workflowKey(workflowType: WorkflowType, entityId: string): string {
   return `${workflowType}:${entityId}`;
 }
 
-function workflowReducer(state: WorkflowMachineState, action: WorkflowAction): WorkflowMachineState {
+function workflowReducer(
+  state: WorkflowMachineState,
+  action: WorkflowAction
+): WorkflowMachineState {
   switch (action.type) {
     case 'START_WORKFLOW': {
       const { workflowType, entityId, startedBy, startedByRole } = action.payload;
@@ -168,11 +206,37 @@ interface WorkflowMachineContextValue {
   workflows: Record<string, WorkflowState>;
   getWorkflow: (workflowType: WorkflowType, entityId: string) => WorkflowState | undefined;
   getWorkflowStatus: (workflowType: WorkflowType, entityId: string) => WorkflowStatus | 'idle';
-  getWorkflowProgress: (workflowType: WorkflowType, entityId: string) => { current: number; total: number; pct: number };
-  startWorkflow: (workflowType: WorkflowType, entityId: string, startedBy: string, startedByRole: UserRole) => void;
-  advanceStep: (workflowType: WorkflowType, entityId: string, completedBy: string, completedByRole: UserRole, notes?: string) => void;
-  completeWorkflow: (workflowType: WorkflowType, entityId: string, completedBy: string, completedByRole: UserRole, notes?: string) => void;
-  rejectWorkflow: (workflowType: WorkflowType, entityId: string, rejectedBy: string, rejectedByRole: UserRole, notes?: string) => void;
+  getWorkflowProgress: (
+    workflowType: WorkflowType,
+    entityId: string
+  ) => { current: number; total: number; pct: number };
+  startWorkflow: (
+    workflowType: WorkflowType,
+    entityId: string,
+    startedBy: string,
+    startedByRole: UserRole
+  ) => void;
+  advanceStep: (
+    workflowType: WorkflowType,
+    entityId: string,
+    completedBy: string,
+    completedByRole: UserRole,
+    notes?: string
+  ) => void;
+  completeWorkflow: (
+    workflowType: WorkflowType,
+    entityId: string,
+    completedBy: string,
+    completedByRole: UserRole,
+    notes?: string
+  ) => void;
+  rejectWorkflow: (
+    workflowType: WorkflowType,
+    entityId: string,
+    rejectedBy: string,
+    rejectedByRole: UserRole,
+    notes?: string
+  ) => void;
   resetWorkflow: (workflowType: WorkflowType, entityId: string) => void;
 }
 
@@ -206,25 +270,55 @@ export function WorkflowMachineProvider({ children }: { children: React.ReactNod
 
   const startWorkflow = useCallback(
     (workflowType: WorkflowType, entityId: string, startedBy: string, startedByRole: UserRole) =>
-      dispatch({ type: 'START_WORKFLOW', payload: { workflowType, entityId, startedBy, startedByRole } }),
+      dispatch({
+        type: 'START_WORKFLOW',
+        payload: { workflowType, entityId, startedBy, startedByRole },
+      }),
     []
   );
 
   const advanceStep = useCallback(
-    (workflowType: WorkflowType, entityId: string, completedBy: string, completedByRole: UserRole, notes?: string) =>
-      dispatch({ type: 'ADVANCE_STEP', payload: { workflowType, entityId, completedBy, completedByRole, notes } }),
+    (
+      workflowType: WorkflowType,
+      entityId: string,
+      completedBy: string,
+      completedByRole: UserRole,
+      notes?: string
+    ) =>
+      dispatch({
+        type: 'ADVANCE_STEP',
+        payload: { workflowType, entityId, completedBy, completedByRole, notes },
+      }),
     []
   );
 
   const completeWorkflow = useCallback(
-    (workflowType: WorkflowType, entityId: string, completedBy: string, completedByRole: UserRole, notes?: string) =>
-      dispatch({ type: 'COMPLETE_WORKFLOW', payload: { workflowType, entityId, completedBy, completedByRole, notes } }),
+    (
+      workflowType: WorkflowType,
+      entityId: string,
+      completedBy: string,
+      completedByRole: UserRole,
+      notes?: string
+    ) =>
+      dispatch({
+        type: 'COMPLETE_WORKFLOW',
+        payload: { workflowType, entityId, completedBy, completedByRole, notes },
+      }),
     []
   );
 
   const rejectWorkflow = useCallback(
-    (workflowType: WorkflowType, entityId: string, rejectedBy: string, rejectedByRole: UserRole, notes?: string) =>
-      dispatch({ type: 'REJECT_WORKFLOW', payload: { workflowType, entityId, rejectedBy, rejectedByRole, notes } }),
+    (
+      workflowType: WorkflowType,
+      entityId: string,
+      rejectedBy: string,
+      rejectedByRole: UserRole,
+      notes?: string
+    ) =>
+      dispatch({
+        type: 'REJECT_WORKFLOW',
+        payload: { workflowType, entityId, rejectedBy, rejectedByRole, notes },
+      }),
     []
   );
 

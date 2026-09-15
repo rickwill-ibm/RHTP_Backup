@@ -183,7 +183,7 @@ export class ExternalEmpiNotConfiguredError extends Error {
   constructor(protocol: ExternalIdentityProtocol, capability: string, needs: string) {
     super(
       `External EMPI not configured for ${protocol} "${capability}". ` +
-        `Real integration is a later roadmap iteration. Needs: ${needs}`,
+        `Real integration is a later roadmap iteration. Needs: ${needs}`
     );
     this.name = 'ExternalEmpiNotConfiguredError';
     this.protocol = protocol;

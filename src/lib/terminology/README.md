@@ -10,14 +10,14 @@ real terminology server is wired.
 
 ## Governed code systems
 
-| System      | Meaning                                    | Demo use              |
-| ----------- | ------------------------------------------ | --------------------- |
-| `RxNorm`    | Medications                                | MedicationRequest/Dispense |
-| `LOINC`     | Labs / vitals                              | Observation           |
-| `SNOMED-CT` | Clinical findings, allergens               | AllergyIntolerance    |
-| `ICD-10-CM` | Diagnoses, Z-codes (SDOH)                  | SDOH z-codes          |
-| `CPT-HCPCS` | Procedures / services                      | (reserved)            |
-| `HCC`       | CMS risk-adjustment groups                 | classify() target     |
+| System      | Meaning                      | Demo use                   |
+| ----------- | ---------------------------- | -------------------------- |
+| `RxNorm`    | Medications                  | MedicationRequest/Dispense |
+| `LOINC`     | Labs / vitals                | Observation                |
+| `SNOMED-CT` | Clinical findings, allergens | AllergyIntolerance         |
+| `ICD-10-CM` | Diagnoses, Z-codes (SDOH)    | SDOH z-codes               |
+| `CPT-HCPCS` | Procedures / services        | (reserved)                 |
+| `HCC`       | CMS risk-adjustment groups   | classify() target          |
 
 ## The three operations
 

@@ -60,10 +60,15 @@ function isValidDos(dos: string): boolean {
  */
 export function assessRadvDefensibility(capture: HccCapture): RadvDefensibility {
   const deficiencies: string[] = [];
-  if (!hasAnyMeat(capture.meat)) deficiencies.push('no MEAT evidence (monitored/evaluated/assessed/treated)');
-  if (!capture.sourceDocumentRef || !capture.sourceDocumentRef.trim()) deficiencies.push('no source-document linkage');
-  if (!isValidDos(capture.dateOfService)) deficiencies.push('missing or invalid face-to-face date of service');
-  if (!capture.providerNpi || !/^\d{10}$/.test(capture.providerNpi)) deficiencies.push('missing or invalid rendering-provider NPI');
-  if (!capture.icdCode || !capture.icdCode.trim()) deficiencies.push('no supporting ICD-10-CM code');
+  if (!hasAnyMeat(capture.meat))
+    deficiencies.push('no MEAT evidence (monitored/evaluated/assessed/treated)');
+  if (!capture.sourceDocumentRef || !capture.sourceDocumentRef.trim())
+    deficiencies.push('no source-document linkage');
+  if (!isValidDos(capture.dateOfService))
+    deficiencies.push('missing or invalid face-to-face date of service');
+  if (!capture.providerNpi || !/^\d{10}$/.test(capture.providerNpi))
+    deficiencies.push('missing or invalid rendering-provider NPI');
+  if (!capture.icdCode || !capture.icdCode.trim())
+    deficiencies.push('no supporting ICD-10-CM code');
   return { defensible: deficiencies.length === 0, deficiencies };
 }

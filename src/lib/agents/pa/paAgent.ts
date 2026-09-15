@@ -59,7 +59,7 @@ export function defaultPaDeps(): PaDeps {
  * but NEVER Approved/Denied (only a payer claim-response does, via the machine).
  */
 export function createPaWorkflow(
-  deps: PaDeps = defaultPaDeps(),
+  deps: PaDeps = defaultPaDeps()
 ): WorkflowDefinition<PaTask, PaResult> {
   return {
     name: 'pa-documentation-journey',
@@ -74,7 +74,12 @@ export function createPaWorkflow(
       const action = buildPaAction(task);
       const decision = await ctx.proposeAndWait(action);
       if (decision.decision === 'rejected') {
-        return { outcome: 'rejected', threadRef: task.threadRef, state: task.currentState, decidedBy: decision.decidedBy };
+        return {
+          outcome: 'rejected',
+          threadRef: task.threadRef,
+          state: task.currentState,
+          decidedBy: decision.decidedBy,
+        };
       }
 
       // Approved: append evidence, then apply the non-authoritative advancement.

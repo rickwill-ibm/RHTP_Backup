@@ -41,7 +41,7 @@ export async function getAgentDemoActions(): Promise<{ actions: AgentDemoAction[
 /** Approve every pending proposal until all workflows settle (demo driver). */
 async function driveAutoApprove(
   engine: ReturnType<typeof createRuntime>['engine'],
-  handles: WorkflowHandle[],
+  handles: WorkflowHandle[]
 ): Promise<void> {
   for (let i = 0; i < 1000; i++) {
     let acted = false;
@@ -68,18 +68,31 @@ async function driveAutoApprove(
 /** Project a settled task result into the PHI-safe demo-action shape. */
 function projectResult(task: DispatchedTask, result: unknown): AgentDemoAction {
   const r = result as { outcome?: string };
-  const outcome = (r.outcome === 'executed' || r.outcome === 'rejected' || r.outcome === 'suppressed'
-    ? r.outcome
-    : 'executed') as AgentDemoAction['outcome'];
+  const outcome = (
+    r.outcome === 'executed' || r.outcome === 'rejected' || r.outcome === 'suppressed'
+      ? r.outcome
+      : 'executed'
+  ) as AgentDemoAction['outcome'];
   const actionType =
-    task.taskKind === 'outreach' ? 'send-outreach' : task.taskKind === 'referral' ? 'referral-followup' : 'advance-pa-documentation';
+    task.taskKind === 'outreach'
+      ? 'send-outreach'
+      : task.taskKind === 'referral'
+        ? 'referral-followup'
+        : 'advance-pa-documentation';
   const refs: Record<string, string> =
     task.taskKind === 'outreach'
       ? { touchpoint: task.task.touchpoint.touchpointId, channel: task.task.touchpoint.channel }
       : task.taskKind === 'referral'
         ? { referral: task.task.referralRef }
         : { thread: task.task.threadRef, event: task.task.advanceEvent.type };
-  return { agentId: task.agentId, taskKind: task.taskKind, actionType, memberId: task.memberId, outcome, refs };
+  return {
+    agentId: task.agentId,
+    taskKind: task.taskKind,
+    actionType,
+    memberId: task.memberId,
+    outcome,
+    refs,
+  };
 }
 
 /** Run the real agents over the seeded SDE demo batch and return the emergent actions. */

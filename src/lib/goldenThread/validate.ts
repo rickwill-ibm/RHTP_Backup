@@ -65,7 +65,7 @@ export function validateClearanceRequest(body: {
  * memberId may contain hyphens (e.g. PAT-0042) so hyphens must be allowed.
  */
 export function validateEvidenceId(id: unknown): ValidationResult {
-  if (typeof id !== 'string' || !/^[A-Za-z0-9._:\-]{1,128}$/.test(id)) {
+  if (typeof id !== 'string' || !/^[A-Za-z0-9._:-]{1,128}$/.test(id)) {
     return { ok: false, error: 'invalid evidence id' };
   }
   return { ok: true };

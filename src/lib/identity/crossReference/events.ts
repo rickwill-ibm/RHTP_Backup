@@ -21,7 +21,7 @@ function envelope(
   eventType: string,
   memberId: string,
   payload: Record<string, unknown>,
-  deps: XrefEventDeps,
+  deps: XrefEventDeps
 ): C2Event {
   const recordedAt = new Date(deps.now()).toISOString();
   const event: C2Event = {
@@ -49,17 +49,13 @@ export function linkedEvent(
   sourceId: string,
   memberId: string,
   feed: string | undefined,
-  deps: XrefEventDeps,
+  deps: XrefEventDeps
 ): C2Event {
   return envelope(XREF_LINKED_EVENT, memberId, { sourceId, memberId, feed: feed ?? null }, deps);
 }
 
 /** identity.xref-unlinked, partitioned by the (formerly) linked member id. */
-export function unlinkedEvent(
-  sourceId: string,
-  memberId: string,
-  deps: XrefEventDeps,
-): C2Event {
+export function unlinkedEvent(sourceId: string, memberId: string, deps: XrefEventDeps): C2Event {
   return envelope(XREF_UNLINKED_EVENT, memberId, { sourceId, memberId }, deps);
 }
 
@@ -67,26 +63,16 @@ export function unlinkedEvent(
 export function mergedEvent(
   survivingMemberId: string,
   mergedMemberId: string,
-  deps: XrefEventDeps,
+  deps: XrefEventDeps
 ): C2Event {
-  return envelope(
-    MERGE_EVENT,
-    survivingMemberId,
-    { survivingMemberId, mergedMemberId },
-    deps,
-  );
+  return envelope(MERGE_EVENT, survivingMemberId, { survivingMemberId, mergedMemberId }, deps);
 }
 
 /** member.unmerged (DP-7), partitioned by the surviving member id. */
 export function unmergedEvent(
   survivingMemberId: string,
   mergedMemberId: string,
-  deps: XrefEventDeps,
+  deps: XrefEventDeps
 ): C2Event {
-  return envelope(
-    UNMERGE_EVENT,
-    survivingMemberId,
-    { survivingMemberId, mergedMemberId },
-    deps,
-  );
+  return envelope(UNMERGE_EVENT, survivingMemberId, { survivingMemberId, mergedMemberId }, deps);
 }

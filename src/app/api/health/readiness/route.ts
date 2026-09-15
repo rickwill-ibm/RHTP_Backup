@@ -43,7 +43,7 @@ export async function GET(): Promise<NextResponse> {
         ],
         checks: { envKeysChecked: 0, seamsChecked: 0, productionSeamsChecked: 0 },
       },
-      { status: 503 },
+      { status: 503 }
     );
   }
 }

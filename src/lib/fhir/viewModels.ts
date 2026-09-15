@@ -34,7 +34,7 @@ export function toCoverageVM(r: {
   period?: { start?: string; end?: string };
 }): CoverageVM {
   const start = r.period?.start?.slice(0, 10) ?? '';
-  const end   = r.period?.end?.slice(0, 10)   ?? '';
+  const end = r.period?.end?.slice(0, 10) ?? '';
   return {
     id: r.id ?? '',
     status: r.status ?? 'unknown',

@@ -13,9 +13,5 @@ export {
   type TenantScope,
   type TenantAccessDecision,
 } from './types';
-export {
-  resolveMemberTenant,
-  resolveActorTenantScope,
-  lobFromPayer,
-} from './resolve';
+export { resolveMemberTenant, resolveActorTenantScope, lobFromPayer } from './resolve';
 export { assertTenantScope, canAccessMemberTenantAware } from './authz';

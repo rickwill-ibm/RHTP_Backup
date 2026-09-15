@@ -72,7 +72,10 @@ function phases(v: unknown): Phase[] {
   return v.map((h, i) => ({
     status: str((h as Record<string, unknown>)?.status),
     at: str((h as Record<string, unknown>)?.at),
-    seq: typeof (h as Record<string, unknown>)?.seq === 'number' ? ((h as Record<string, unknown>).seq as number) : i,
+    seq:
+      typeof (h as Record<string, unknown>)?.seq === 'number'
+        ? ((h as Record<string, unknown>).seq as number)
+        : i,
   }));
 }
 /** The node kind for a raw ref: its resource-type prefix (reuses existing kinds). */
@@ -89,7 +92,8 @@ export const priorAuthLifecycleSpec = {
     const p = event.payload;
     const paRef = str(p.paRef, `PriorAuthRequest/${event.memberId}`);
     const history = phases(p.statusHistory);
-    const submittedAt = str(p.submittedAt) || event.occurredAt || new Date(deps.now()).toISOString();
+    const submittedAt =
+      str(p.submittedAt) || event.occurredAt || new Date(deps.now()).toISOString();
     const decisionAt = str(p.decisionAt);
     const currentStatus = str(p.currentStatus, history[history.length - 1]?.status ?? '');
     const out: Mutation[] = [memberNode(event)];
@@ -105,10 +109,11 @@ export const priorAuthLifecycleSpec = {
         submittedAt: str(p.submittedAt),
         decisionAt,
         provenance: str(p.provenance),
-      }),
+      })
     );
     out.push({
-      op: 'UpsertEdge', type: HAS_PA_REQUEST,
+      op: 'UpsertEdge',
+      type: HAS_PA_REQUEST,
       from: { kind: MEMBER_KIND, key: event.memberId },
       to: { kind: PRIOR_AUTH_REQUEST_KIND, key: paRef },
       properties: { currentStatus, machineState: referencedState(currentStatus) },
@@ -129,11 +134,12 @@ export const priorAuthLifecycleSpec = {
           seq: phase.seq,
           enteredAt: phase.at,
           authoritative: false,
-        }),
+        })
       );
       const next = history.find((h) => h.seq === phase.seq + 1);
       out.push({
-        op: 'UpsertEdge', type: HAS_PA_STATUS,
+        op: 'UpsertEdge',
+        type: HAS_PA_STATUS,
         from: { kind: PRIOR_AUTH_REQUEST_KIND, key: paRef },
         to: { kind: PA_STATUS_KIND, key: nodeKey },
         properties: { status: phase.status, machineState: referencedState(phase.status) },
@@ -148,9 +154,15 @@ export const priorAuthLifecycleSpec = {
     const serviceRequestRef = str(p.serviceRequestRef);
     if (serviceRequestRef) {
       const kind = refKind(serviceRequestRef, 'ServiceRequest');
-      out.push(...resourceNode(event, kind, serviceRequestRef, { rawRef: serviceRequestRef, linkage: 'pa-lifecycle-capture' }));
+      out.push(
+        ...resourceNode(event, kind, serviceRequestRef, {
+          rawRef: serviceRequestRef,
+          linkage: 'pa-lifecycle-capture',
+        })
+      );
       out.push({
-        op: 'UpsertEdge', type: PA_FOR_SERVICE,
+        op: 'UpsertEdge',
+        type: PA_FOR_SERVICE,
         from: { kind: PRIOR_AUTH_REQUEST_KIND, key: paRef },
         to: { kind, key: serviceRequestRef },
         properties: {},
@@ -161,9 +173,15 @@ export const priorAuthLifecycleSpec = {
     const claimRef = str(p.claimRef);
     if (claimRef) {
       const kind = refKind(claimRef, 'Claim');
-      out.push(...resourceNode(event, kind, claimRef, { rawRef: claimRef, linkage: 'pa-lifecycle-capture' }));
+      out.push(
+        ...resourceNode(event, kind, claimRef, {
+          rawRef: claimRef,
+          linkage: 'pa-lifecycle-capture',
+        })
+      );
       out.push({
-        op: 'UpsertEdge', type: PA_FOR_CLAIM,
+        op: 'UpsertEdge',
+        type: PA_FOR_CLAIM,
         from: { kind: PRIOR_AUTH_REQUEST_KIND, key: paRef },
         to: { kind, key: claimRef },
         properties: {},

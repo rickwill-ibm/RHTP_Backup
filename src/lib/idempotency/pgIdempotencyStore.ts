@@ -48,7 +48,7 @@ export interface PgIdempotencyOptions {
 export function createPgIdempotencyStore(
   db: PgQueryable,
   id = 'pg-idempotency',
-  opts: PgIdempotencyOptions = {},
+  opts: PgIdempotencyOptions = {}
 ): IdempotencyStore {
   const now = opts.now ?? (() => Date.now());
   return {
@@ -58,7 +58,7 @@ export function createPgIdempotencyStore(
         await db.query(
           `INSERT INTO idempotency_marker (consumer, event_id, processed_at_ms)
            VALUES ($1, $2, $3)`,
-          [consumer, eventId, now()],
+          [consumer, eventId, now()]
         );
         return { firstProcessed: true };
       } catch (err) {
@@ -69,7 +69,7 @@ export function createPgIdempotencyStore(
     async isProcessed(consumer, eventId): Promise<boolean> {
       const r = await db.query(
         `SELECT 1 FROM idempotency_marker WHERE consumer = $1 AND event_id = $2`,
-        [consumer, eventId],
+        [consumer, eventId]
       );
       return r.rows.length > 0;
     },

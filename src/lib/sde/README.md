@@ -27,16 +27,16 @@ and it drops Part 2-restricted events by envelope inspection unless cleared.
 Pure fold: `(signals, pack, memberContext, deps{now, audit, consentGranted})`.
 Signals are folded in sequence order; each becomes exactly one decision:
 
-| decision | when |
-|---|---|
-| `suppress(internal-only)` | signal is internal-only (no contact) |
-| `suppress(duplicate-collapse)` | a later signal shares an earlier one's dedupe key |
-| `suppress(consent-absent)` | the required consent scope is not granted (or member opted out) |
-| `suppress(superseded-on-closure)` | outreach for a measure already closed |
-| `suppress(expired-ttl)` | signal passed its actionable TTL |
-| `delay(quiet-hours-window)` | sms outreach outside the contact window (parks to next window) |
-| `suppress(frequency-cap)` | channel contact cap reached |
-| `act` / `bundle` | otherwise — the highest-priority approval opens the touchpoint (`act`), the rest `bundle` into it |
+| decision                          | when                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `suppress(internal-only)`         | signal is internal-only (no contact)                                                              |
+| `suppress(duplicate-collapse)`    | a later signal shares an earlier one's dedupe key                                                 |
+| `suppress(consent-absent)`        | the required consent scope is not granted (or member opted out)                                   |
+| `suppress(superseded-on-closure)` | outreach for a measure already closed                                                             |
+| `suppress(expired-ttl)`           | signal passed its actionable TTL                                                                  |
+| `delay(quiet-hours-window)`       | sms outreach outside the contact window (parks to next window)                                    |
+| `suppress(frequency-cap)`         | channel contact cap reached                                                                       |
+| `act` / `bundle`                  | otherwise — the highest-priority approval opens the touchpoint (`act`), the rest `bundle` into it |
 
 Approved decisions compose into a single coordinated touchpoint (per
 `bundling.maxIntentsPerTouchpoint`); delayed decisions parked to the same window

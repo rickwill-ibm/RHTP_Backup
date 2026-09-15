@@ -5,7 +5,7 @@ recovery-appeal **DRAFT** through the HITL gate. Governed by the
 `revenue-cycle-agent` manifest.
 
 ```ts
-const wf = createRecoveryWorkflow(deps);            // deps.recordDraft appends the draft to the evidence spine
+const wf = createRecoveryWorkflow(deps); // deps.recordDraft appends the draft to the evidence spine
 engine.start(wf, { memberId, input: recoveryTask });
 // reconciliation.read (allowlisted) -> interlock -> evidence.append (draft) -> proposeAndWait (suspends)
 ```
@@ -15,13 +15,13 @@ Flow (`revenueCycleAgent.ts`):
 1. `reconciliation.read` (allowlisted tool) reads the recovery context
    (references-only — claim/remittance/auth ids + delta, no member payload).
 2. **Twin-ladder interlock** — `evaluateInterlock({ manifestTier, evidenceTier,
-   action, isSubmission: true })`. The result is CONSUMED: `permittedRung` (the
+action, isSubmission: true })`. The result is CONSUMED: `permittedRung` (the
    weakest link of autonomy × evidence) and `requiresHuman` (a payer-facing
    submission is human-gated regardless of rung — the workflow throws if the
    invariant is ever violated).
 3. **FIX-1 — the agent is the single writer of the draft.** `evidence.append`
    (allowlisted tool) writes the recovery DRAFT via `deps.recordDraft(task,
-   permittedRung)` at propose-time, BEFORE suspension, under `assertToolAllowed`.
+permittedRung)` at propose-time, BEFORE suspension, under `assertToolAllowed`.
    `orderToCash` never writes the draft directly.
 4. `proposeAndWait('draft-appeal')` — suspends at the `agent-proposal` work queue
    for the human SUBMISSION decision.

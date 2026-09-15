@@ -31,13 +31,41 @@ export interface SeamParityEntry {
  * member) so the shape — not the volume — is what is pinned.
  */
 export const SEAM_PARITY: SeamParityEntry[] = [
-  { seam: 'graph', sample: () => graphNodes[0], note: 'mock authored node vs projected-store node (HW1/HW4)' },
-  { seam: 'graph.edge', sample: () => graphEdges[0], note: 'mock authored edge vs projected-store edge (HW1/HW4)' },
-  { seam: 'graph.signal', sample: () => activeSignals[0], note: 'authored active signal vs derived signal (HW4)' },
-  { seam: 'fhirStore', sample: () => mockCdsCards[0], note: 'mock CDS card vs live CDS Hooks card (HW4)' },
-  { seam: 'wpcRecord', sample: () => mockPatients[0], note: 'mock member vs resolved 20-domain record (HW3/HW4)' },
-  { seam: 'providerDirectory', sample: () => mockProviders[0], note: 'mock provider vs NPPES-resolved provider (HW3)' },
-  { seam: 'measures', sample: () => mockHEDISMeasures[0], note: 'authored HEDIS gap vs external DEQM MeasureReport-derived gap (HW4)' },
+  {
+    seam: 'graph',
+    sample: () => graphNodes[0],
+    note: 'mock authored node vs projected-store node (HW1/HW4)',
+  },
+  {
+    seam: 'graph.edge',
+    sample: () => graphEdges[0],
+    note: 'mock authored edge vs projected-store edge (HW1/HW4)',
+  },
+  {
+    seam: 'graph.signal',
+    sample: () => activeSignals[0],
+    note: 'authored active signal vs derived signal (HW4)',
+  },
+  {
+    seam: 'fhirStore',
+    sample: () => mockCdsCards[0],
+    note: 'mock CDS card vs live CDS Hooks card (HW4)',
+  },
+  {
+    seam: 'wpcRecord',
+    sample: () => mockPatients[0],
+    note: 'mock member vs resolved 20-domain record (HW3/HW4)',
+  },
+  {
+    seam: 'providerDirectory',
+    sample: () => mockProviders[0],
+    note: 'mock provider vs NPPES-resolved provider (HW3)',
+  },
+  {
+    seam: 'measures',
+    sample: () => mockHEDISMeasures[0],
+    note: 'authored HEDIS gap vs external DEQM MeasureReport-derived gap (HW4)',
+  },
 ];
 
 export interface SeamShapeRecord {

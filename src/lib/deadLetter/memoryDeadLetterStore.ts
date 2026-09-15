@@ -76,14 +76,16 @@ export function createMemoryDeadLetterStore(): MemoryDeadLetterStore {
       }
       // Newest first, deterministic tiebreak by id.
       return out.sort((a, b) =>
-        a.createdAt === b.createdAt ? a.id.localeCompare(b.id) : b.createdAt.localeCompare(a.createdAt),
+        a.createdAt === b.createdAt
+          ? a.id.localeCompare(b.id)
+          : b.createdAt.localeCompare(a.createdAt)
       );
     },
 
     async resolve(
       id: string,
       action: ResolutionAction,
-      actor: string,
+      actor: string
     ): Promise<DeadLetterRecord | null> {
       const current = latest(id);
       if (!current) return null;

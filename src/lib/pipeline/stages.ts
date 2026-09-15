@@ -80,7 +80,8 @@ export const landStage: StageContract<LandInput, LandedBatch> = {
   stage: 'land',
   declaredInput: 'LandInput (source, format, raw payload)',
   declaredOutput: 'LandedBatch (batchId, checksum, receivedAt, verbatim payload)',
-  idempotencyKeyOf: (i) => `land:${i.source.system}:${i.source.feed}:${i.batchId ?? hash(i.payload)}`,
+  idempotencyKeyOf: (i) =>
+    `land:${i.source.system}:${i.source.feed}:${i.batchId ?? hash(i.payload)}`,
   run(input, deps) {
     const checksum = hash(input.payload);
     const batchId = input.batchId ?? `batch-${input.source.feed}-${checksum}`;
@@ -106,7 +107,7 @@ export interface StageValidateOutput<Raw = Record<string, unknown>> {
  * PHI-safe records, never silently dropped.
  */
 export function stageValidate<Raw>(
-  adapter: DomainAdapter<Raw>,
+  adapter: DomainAdapter<Raw>
 ): StageContract<LandedBatch, StageValidateOutput<Raw>> {
   return {
     stage: 'stage-validate',
@@ -133,7 +134,7 @@ export function stageValidate<Raw>(
  * cannot diverge.
  */
 export function transformEnrich<Raw>(
-  adapter: DomainAdapter<Raw>,
+  adapter: DomainAdapter<Raw>
 ): StageContract<RawRecord<Raw>, TransformOutcome> {
   return {
     stage: 'transform-enrich',

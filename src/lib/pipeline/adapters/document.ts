@@ -19,7 +19,13 @@
  *
  * C9.2 yield: documents feed -> documents T2 (document-level, NOT computable T1).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR DocumentReference pulled from the bundle. */
 interface DocumentReferenceResource {
@@ -66,7 +72,11 @@ function subjectSourceId(resource: Record<string, unknown>): string {
   return str(obj(resource.subject).reference).split('/').pop() ?? '';
 }
 /** type.coding[0] as a LOINC document-type coding triple (code may be ''). */
-function docType(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function docType(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.type).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -107,12 +117,17 @@ function parse(payload: string): RawRecord<DocumentReferenceResource>[] {
 function validate(raw: RawRecord<DocumentReferenceResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!contentPointer(resource).url) issues.push({ reasonCode: 'missing-content-pointer', fieldPath: 'content.attachment.url' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!contentPointer(resource).url)
+    issues.push({ reasonCode: 'missing-content-pointer', fieldPath: 'content.attachment.url' });
   return { ok: issues.length === 0, issues };
 }
 
-function normalize(raw: RawRecord<DocumentReferenceResource>, deps: PipelineDeps): NormalizedRecord {
+function normalize(
+  raw: RawRecord<DocumentReferenceResource>,
+  deps: PipelineDeps
+): NormalizedRecord {
   const resource = raw.data.resource;
   const docId = str(resource.id);
   const memberId = deps.resolveIdentity(subjectSourceId(resource), { feed: SOURCE.feed });

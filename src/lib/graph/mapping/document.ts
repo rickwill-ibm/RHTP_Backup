@@ -61,7 +61,7 @@ export const documentSpec = {
         contentType: contentType(p),
         computable: false,
         provenance: str(p.provenance),
-      }),
+      })
     );
     // The member is DOCUMENTED_BY this document reference — a factual attachment
     // link (associative), dated from the document date. Not a causal assertion.

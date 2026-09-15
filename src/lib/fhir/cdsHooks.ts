@@ -10,8 +10,7 @@ import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
 
 const CDS_ENDPOINT =
   process.env.NEXT_PUBLIC_CDS_HOOKS_ENDPOINT ?? 'http://localhost:8080/cds-services';
-const CDS_ENABLED =
-  (process.env.NEXT_PUBLIC_ENABLE_CDS_HOOKS ?? 'true').toLowerCase() === 'true';
+const CDS_ENABLED = (process.env.NEXT_PUBLIC_ENABLE_CDS_HOOKS ?? 'true').toLowerCase() === 'true';
 const CDS_TIMEOUT = Number(process.env.NEXT_PUBLIC_CDS_HOOKS_TIMEOUT ?? 10_000);
 
 interface RawCdsCard {
@@ -29,7 +28,8 @@ function toAppCard(raw: RawCdsCard, i: number): CdsCard {
   return {
     id: raw.uuid ?? `cds-live-${i}`,
     hookType: 'patient-view',
-    cardType: raw.indicator === 'critical' ? 'critical' : raw.indicator === 'warning' ? 'warning' : 'info',
+    cardType:
+      raw.indicator === 'critical' ? 'critical' : raw.indicator === 'warning' ? 'warning' : 'info',
     summary: raw.summary,
     detail: raw.detail,
     source: raw.source?.label ?? 'CDS Service',
@@ -39,7 +39,11 @@ function toAppCard(raw: RawCdsCard, i: number): CdsCard {
       label: s.label,
       actions: [],
     })),
-    links: raw.links?.map((l) => ({ label: l.label, url: l.url, type: l.type as 'smart' | 'absolute' })),
+    links: raw.links?.map((l) => ({
+      label: l.label,
+      url: l.url,
+      type: l.type as 'smart' | 'absolute',
+    })),
     overrideReasons: raw.overrideReasons?.map((o) => o.display ?? ''),
     timestamp: clock.nowIso(),
   };
@@ -53,7 +57,7 @@ export async function invokePatientViewHook(
   patientId: string,
   encounterId: string,
   practitionerId: string,
-  fhirBaseUrl: string,
+  fhirBaseUrl: string
 ): Promise<CdsCard[] | null> {
   if (!CDS_ENABLED || getFhirMockMode()) return null;
 
@@ -76,8 +80,12 @@ export async function invokePatientViewHook(
     const client = getFhirClient();
     const [patient, conditions, meds] = await Promise.all([
       client.read('Patient', patientId).catch(() => undefined),
-      client.search('Condition', { patient: patientId, 'clinical-status': 'active' }).catch(() => undefined),
-      client.search('MedicationRequest', { patient: patientId, status: 'active' }).catch(() => undefined),
+      client
+        .search('Condition', { patient: patientId, 'clinical-status': 'active' })
+        .catch(() => undefined),
+      client
+        .search('MedicationRequest', { patient: patientId, status: 'active' })
+        .catch(() => undefined),
     ]);
 
     const request = {

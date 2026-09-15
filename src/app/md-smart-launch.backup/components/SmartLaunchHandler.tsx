@@ -24,8 +24,18 @@ export default function SmartLaunchHandler({ onLaunchReady }: SmartLaunchHandler
 
     const steps: Array<{ step: LaunchStep; label: string; duration: number; progress: number }> = [
       { step: 'validating', label: 'Validating Cerner launch token…', duration: 600, progress: 25 },
-      { step: 'exchanging-token', label: 'Exchanging authorization token…', duration: 700, progress: 55 },
-      { step: 'loading-patient', label: 'Loading patient context from FHIR R4…', duration: 800, progress: 85 },
+      {
+        step: 'exchanging-token',
+        label: 'Exchanging authorization token…',
+        duration: 700,
+        progress: 55,
+      },
+      {
+        step: 'loading-patient',
+        label: 'Loading patient context from FHIR R4…',
+        duration: 800,
+        progress: 85,
+      },
       { step: 'ready', label: 'Launch complete', duration: 400, progress: 100 },
     ];
 
@@ -121,7 +131,11 @@ export default function SmartLaunchHandler({ onLaunchReady }: SmartLaunchHandler
             <div key={s} className="flex items-center gap-3 mb-2">
               <div
                 className={`w-5 h-5 flex items-center justify-center flex-shrink-0 ${
-                  isDone ? 'bg-[#24a148]' : isActive ? 'bg-[#6929c4]/30 border border-[#6929c4]' : 'bg-[#2a3550]'
+                  isDone
+                    ? 'bg-[#24a148]'
+                    : isActive
+                      ? 'bg-[#6929c4]/30 border border-[#6929c4]'
+                      : 'bg-[#2a3550]'
                 }`}
               >
                 {isDone ? (
@@ -137,14 +151,23 @@ export default function SmartLaunchHandler({ onLaunchReady }: SmartLaunchHandler
                   isDone ? 'text-[#42be65]' : isActive ? 'text-white' : 'text-carbon-gray-60'
                 }`}
               >
-                {['Validate launch token', 'Exchange auth token', 'Load FHIR patient context', 'Launch complete'][i]}
+                {
+                  [
+                    'Validate launch token',
+                    'Exchange auth token',
+                    'Load FHIR patient context',
+                    'Launch complete',
+                  ][i]
+                }
               </p>
             </div>
           );
         })}
 
         {retryCount > 0 && (
-          <p className="text-2xs text-carbon-gray-50 mt-4 text-center">Retry attempt {retryCount}</p>
+          <p className="text-2xs text-carbon-gray-50 mt-4 text-center">
+            Retry attempt {retryCount}
+          </p>
         )}
       </div>
 

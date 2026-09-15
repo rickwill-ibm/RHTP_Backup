@@ -18,7 +18,13 @@ export type {
   PgQueryable,
 } from './types';
 
-export { buildEnvelope, validateEnvelope, intentRowFrom, uuidV4, EnvelopeValidationError } from './envelope';
+export {
+  buildEnvelope,
+  validateEnvelope,
+  intentRowFrom,
+  uuidV4,
+  EnvelopeValidationError,
+} from './envelope';
 export { OutboxWriter, type PumpResult } from './writer';
 export { OutboxSweeper, DEFAULT_SWEEP_THRESHOLD_MS, type SweepResult } from './sweep';
 export { confirmAndPublish, failIntent } from './sequencing';

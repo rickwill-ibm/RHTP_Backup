@@ -37,7 +37,12 @@ export function renderMutation(m: Mutation): CypherStatement[] {
         text:
           `MERGE (n:${tick(m.kind, 'label')} {key:$key}) ` +
           `SET n.kind=$kind, n.restricted = coalesce(n.restricted,false) OR $restricted, n += $props`,
-        params: { key: m.key, kind: m.kind, restricted: Boolean(m.restricted), props: m.properties },
+        params: {
+          key: m.key,
+          kind: m.kind,
+          restricted: Boolean(m.restricted),
+          props: m.properties,
+        },
       },
     ];
   }
@@ -59,9 +64,16 @@ export function renderMutation(m: Mutation): CypherStatement[] {
           `MERGE (a)-[r:${tick(m.type, 'type')}]->(b) ` +
           `SET r += $props, r.v_start=$vStart, r.v_end=$vEnd, r.causal=$causal, r.asserter=$asserter, r.basis=$basis`,
         params: {
-          fromKey: m.from.key, fromKind: m.from.kind, toKey: m.to.key, toKind: m.to.kind,
-          props: m.properties ?? {}, vStart: m.validity.start, vEnd: m.validity.end ?? null,
-          causal: t.causal, asserter: t.asserter, basis: t.basis,
+          fromKey: m.from.key,
+          fromKind: m.from.kind,
+          toKey: m.to.key,
+          toKind: m.to.kind,
+          props: m.properties ?? {},
+          vStart: m.validity.start,
+          vEnd: m.validity.end ?? null,
+          causal: t.causal,
+          asserter: t.asserter,
+          basis: t.basis,
         },
       },
     ];
@@ -74,8 +86,12 @@ export function renderMutation(m: Mutation): CypherStatement[] {
         `MERGE (b:${tick(m.to.kind, 'label')} {key:$toKey}) SET b.kind=$toKind ` +
         `MERGE (a)-[r:${tick(m.type, 'type')}]->(b) SET r.v_start=$vStart, r.v_end=$vEnd`,
       params: {
-        fromKey: m.from.key, fromKind: m.from.kind, toKey: m.to.key, toKind: m.to.kind,
-        vStart: m.validity.start, vEnd: m.validity.end ?? null,
+        fromKey: m.from.key,
+        fromKind: m.from.kind,
+        toKey: m.to.key,
+        toKind: m.to.kind,
+        vStart: m.validity.start,
+        vEnd: m.validity.end ?? null,
       },
     },
   ];
@@ -92,7 +108,8 @@ export function nodeMatch(kind: string, key: string): CypherStatement {
 /** Read nodes with an optional kind/restricted filter. */
 export function nodesMatch(filter: NodeFilter = {}): CypherStatement {
   const label = filter.kind ? `:${tick(filter.kind, 'label')}` : '';
-  const where = filter.restricted !== undefined ? `WHERE coalesce(n.restricted,false)=$restricted` : '';
+  const where =
+    filter.restricted !== undefined ? `WHERE coalesce(n.restricted,false)=$restricted` : '';
   return {
     text: `MATCH (n${label}) ${where} RETURN properties(n) AS props, labels(n) AS labels ORDER BY n.kind, n.key`,
     params: filter.restricted !== undefined ? { restricted: filter.restricted } : {},
@@ -104,8 +121,14 @@ export function edgesMatch(filter: EdgeFilter = {}): CypherStatement {
   const rel = filter.type ? `:${tick(filter.type, 'type')}` : '';
   const conds: string[] = [];
   const params: Record<string, unknown> = {};
-  if (filter.fromKey !== undefined) { conds.push('a.key=$fromKey'); params.fromKey = filter.fromKey; }
-  if (filter.toKey !== undefined) { conds.push('b.key=$toKey'); params.toKey = filter.toKey; }
+  if (filter.fromKey !== undefined) {
+    conds.push('a.key=$fromKey');
+    params.fromKey = filter.fromKey;
+  }
+  if (filter.toKey !== undefined) {
+    conds.push('b.key=$toKey');
+    params.toKey = filter.toKey;
+  }
   const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
   return {
     text:

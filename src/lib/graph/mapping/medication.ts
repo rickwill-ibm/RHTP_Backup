@@ -67,7 +67,7 @@ function prescribed(event: C2Event, deps: ProjectorDeps): Mutation[] {
       rxNorm: rxCode(p),
       status: str(p.status, 'active'),
       authoredOn: str(p.authoredOn),
-    }),
+    })
   );
   out.push({
     op: 'UpsertEdge',
@@ -90,8 +90,8 @@ function prescribed(event: C2Event, deps: ProjectorDeps): Mutation[] {
         npi: str(p.prescriberNpi) || undefined,
         name: str(p.prescriberName) || undefined,
       },
-      start,
-    ),
+      start
+    )
   );
   return out;
 }
@@ -109,7 +109,7 @@ function dispensed(event: C2Event, deps: ProjectorDeps): Mutation[] {
       rxNorm: rxCode(p),
       status: str(p.status, 'completed'),
       whenHandedOver: str(p.whenHandedOver),
-    }),
+    })
   );
   // The fill is dispensed UNDER the prescription. Causal (asserted attribution),
   // so it carries provenance: who dispensed it + the RxNorm code @ prescription ref.
@@ -134,8 +134,8 @@ function dispensed(event: C2Event, deps: ProjectorDeps): Mutation[] {
         npi: str(p.performerNpi) || undefined,
         organization: str(p.performerOrganization) || undefined,
       },
-      start,
-    ),
+      start
+    )
   );
   return out;
 }

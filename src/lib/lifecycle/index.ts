@@ -31,19 +31,9 @@ export {
   EmptyRetentionPolicyError,
 } from './policy';
 
-export {
-  createLegalHoldRegistry,
-  type LegalHoldRegistry,
-  type PlaceHoldInput,
-} from './legalHold';
+export { createLegalHoldRegistry, type LegalHoldRegistry, type PlaceHoldInput } from './legalHold';
 
-export {
-  planPurge,
-  executePurge,
-  runPurge,
-  holdPredicate,
-  type HoldPredicate,
-} from './purge';
+export { planPurge, executePurge, runPurge, holdPredicate, type HoldPredicate } from './purge';
 
 export {
   executeRightToDelete,
@@ -52,10 +42,7 @@ export {
   type LedgerLike,
 } from './rightToDelete';
 
-export {
-  createFhirPurgeSource,
-  type FhirPurgeSourceConfig,
-} from './adapters/fhirPurgeSource';
+export { createFhirPurgeSource, type FhirPurgeSourceConfig } from './adapters/fhirPurgeSource';
 
 export {
   auditPurged,

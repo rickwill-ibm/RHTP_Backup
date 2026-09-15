@@ -24,7 +24,7 @@ export class CrossReferenceStoreNotConfiguredError extends Error {
       'DATA_MODE crossReference=production: no production cross-reference store is ' +
         'wired yet. Register one with ' +
         'setProductionCrossReferenceStoreFactory(() => createPgCrossReferenceStore(pool)) ' +
-        '(SEAM: crossReference) or set DATA_MODE_CROSS_REFERENCE=mock.',
+        '(SEAM: crossReference) or set DATA_MODE_CROSS_REFERENCE=mock.'
     );
     this.name = 'CrossReferenceStoreNotConfiguredError';
   }
@@ -34,7 +34,7 @@ let productionFactory: (() => CrossReferenceStore) | null = null;
 
 /** Register (or clear, with null) the production store factory (composition root / tests). */
 export function setProductionCrossReferenceStoreFactory(
-  factory: (() => CrossReferenceStore) | null,
+  factory: (() => CrossReferenceStore) | null
 ): void {
   productionFactory = factory;
 }
@@ -49,13 +49,7 @@ export function getCrossReferenceStore(): CrossReferenceStore {
   return defaultCrossReferenceStore();
 }
 
-export type {
-  XrefLink,
-  XrefLookup,
-  CrossReferenceStore,
-  PgLike,
-  XrefEventDeps,
-} from './types';
+export type { XrefLink, XrefLookup, CrossReferenceStore, PgLike, XrefEventDeps } from './types';
 export {
   createXrefIndex,
   resolveLookup,

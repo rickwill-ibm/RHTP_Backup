@@ -180,45 +180,127 @@
 }
 
 /* ===================== UHG Orchestrate — scoped theme (.screen-slide) ===================== */
-.screen-slide{
-  --background:#161616;--foreground:#f4f4f4;--primary:#002677;--primary-foreground:#fff;
-  --interactive:#0C55B8;--interactive-foreground:#fff;--accent:#FF6310;--accent-foreground:#fff;
-  --secondary:#262626;--secondary-foreground:#c6c6c6;--muted:#393939;--muted-foreground:#8d8d8d;
-  --card:#1e1e1e;--card-foreground:#f4f4f4;--border:#393939;--input:#262626;--ring:#0C55B8;--radius:4px;
-  --uhg-navy:#002677;--uhg-blue:#0C55B8;--uhg-orange:#FF6310;
-  --gov-purple:rgba(139,92,246,0.3);--gov-purple-border:rgba(139,92,246,0.6);
-  --gov-amber:rgba(217,119,6,0.4);--gov-amber-border:rgba(217,119,6,0.7);
-  --signal-high:#ff4d4d;--signal-medium:#f59e0b;--signal-low:#6ee7b7;--signal-routine:#6b7280;
-  --node-high:#ef4444;--node-medium:#f59e0b;--node-low:#22c55e;--node-provider:#0C55B8;
-  --node-auth:#f59e0b;--node-gap:#ef4444;--node-consent:#22c55e;
-  font-family:'IBM Plex Sans',sans-serif;
+.screen-slide {
+  --background: #161616;
+  --foreground: #f4f4f4;
+  --primary: #002677;
+  --primary-foreground: #fff;
+  --interactive: #0c55b8;
+  --interactive-foreground: #fff;
+  --accent: #ff6310;
+  --accent-foreground: #fff;
+  --secondary: #262626;
+  --secondary-foreground: #c6c6c6;
+  --muted: #393939;
+  --muted-foreground: #8d8d8d;
+  --card: #1e1e1e;
+  --card-foreground: #f4f4f4;
+  --border: #393939;
+  --input: #262626;
+  --ring: #0c55b8;
+  --radius: 4px;
+  --uhg-navy: #002677;
+  --uhg-blue: #0c55b8;
+  --uhg-orange: #ff6310;
+  --gov-purple: rgba(139, 92, 246, 0.3);
+  --gov-purple-border: rgba(139, 92, 246, 0.6);
+  --gov-amber: rgba(217, 119, 6, 0.4);
+  --gov-amber-border: rgba(217, 119, 6, 0.7);
+  --signal-high: #ff4d4d;
+  --signal-medium: #f59e0b;
+  --signal-low: #6ee7b7;
+  --signal-routine: #6b7280;
+  --node-high: #ef4444;
+  --node-medium: #f59e0b;
+  --node-low: #22c55e;
+  --node-provider: #0c55b8;
+  --node-auth: #f59e0b;
+  --node-gap: #ef4444;
+  --node-consent: #22c55e;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
-.screen-slide h1,.screen-slide h2,.screen-slide h3,.screen-slide h4,.screen-slide h5,.screen-slide h6,.screen-slide p{margin:0;}
-.screen-slide .bg-background{background-color:var(--background);}
-.screen-slide .bg-card{background-color:var(--card);}
-.screen-slide .bg-primary{background-color:var(--primary);}
-.screen-slide .bg-secondary{background-color:var(--secondary);}
-.screen-slide .bg-muted{background-color:var(--muted);}
-.screen-slide .bg-accent{background-color:var(--accent);}
-.screen-slide .bg-interactive{background-color:var(--interactive);}
-.screen-slide .bg-uhg-navy{background-color:var(--uhg-navy);}
-.screen-slide .bg-uhg-blue{background-color:var(--uhg-blue);}
-.screen-slide .text-foreground{color:var(--foreground);}
-.screen-slide .text-primary{color:var(--primary);}
-.screen-slide .text-accent{color:var(--accent);}
-.screen-slide .text-uhg-orange{color:var(--uhg-orange);}
-.screen-slide .text-muted-foreground{color:var(--muted-foreground);}
-.screen-slide .border-border{border-color:var(--border);}
+.screen-slide h1,
+.screen-slide h2,
+.screen-slide h3,
+.screen-slide h4,
+.screen-slide h5,
+.screen-slide h6,
+.screen-slide p {
+  margin: 0;
+}
+.screen-slide .bg-background {
+  background-color: var(--background);
+}
+.screen-slide .bg-card {
+  background-color: var(--card);
+}
+.screen-slide .bg-primary {
+  background-color: var(--primary);
+}
+.screen-slide .bg-secondary {
+  background-color: var(--secondary);
+}
+.screen-slide .bg-muted {
+  background-color: var(--muted);
+}
+.screen-slide .bg-accent {
+  background-color: var(--accent);
+}
+.screen-slide .bg-interactive {
+  background-color: var(--interactive);
+}
+.screen-slide .bg-uhg-navy {
+  background-color: var(--uhg-navy);
+}
+.screen-slide .bg-uhg-blue {
+  background-color: var(--uhg-blue);
+}
+.screen-slide .text-foreground {
+  color: var(--foreground);
+}
+.screen-slide .text-primary {
+  color: var(--primary);
+}
+.screen-slide .text-accent {
+  color: var(--accent);
+}
+.screen-slide .text-uhg-orange {
+  color: var(--uhg-orange);
+}
+.screen-slide .text-muted-foreground {
+  color: var(--muted-foreground);
+}
+.screen-slide .border-border {
+  border-color: var(--border);
+}
 /* scoped animation utilities (keyframes below) */
-.screen-slide .animate-conflict-pulse{animation:conflictPulse 1.2s ease-in-out infinite;}
-.screen-slide .animate-node-pulse{animation:nodePulse 2s ease-in-out infinite;}
-.screen-slide .animate-auth-pulse{animation:authPulse 1.5s ease-in-out infinite;}
-.screen-slide .animate-fade-in{animation:uhgFadeIn 1s ease forwards;}
-.screen-slide .animate-fade-in-up{animation:fadeInUp 0.8s ease forwards;}
-.screen-slide .animate-slide-up{animation:uhgSlideUp 0.5s ease forwards;}
-.screen-slide .animate-glow-pulse{animation:glowPulse 2s ease-in-out infinite;}
-.screen-slide .animate-signal-scroll{animation:signalScroll 8s linear infinite;}
-.screen-slide .animate-intercept{animation:interceptTakeover 1.5s ease forwards;}
+.screen-slide .animate-conflict-pulse {
+  animation: conflictPulse 1.2s ease-in-out infinite;
+}
+.screen-slide .animate-node-pulse {
+  animation: nodePulse 2s ease-in-out infinite;
+}
+.screen-slide .animate-auth-pulse {
+  animation: authPulse 1.5s ease-in-out infinite;
+}
+.screen-slide .animate-fade-in {
+  animation: uhgFadeIn 1s ease forwards;
+}
+.screen-slide .animate-fade-in-up {
+  animation: fadeInUp 0.8s ease forwards;
+}
+.screen-slide .animate-slide-up {
+  animation: uhgSlideUp 0.5s ease forwards;
+}
+.screen-slide .animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+.screen-slide .animate-signal-scroll {
+  animation: signalScroll 8s linear infinite;
+}
+.screen-slide .animate-intercept {
+  animation: interceptTakeover 1.5s ease forwards;
+}
 
 @layer utilities {
   .font-mono {
@@ -239,12 +321,16 @@
 
   .governance-border-purple {
     border: 1px solid var(--gov-purple-border);
-    box-shadow: 0 0 12px var(--gov-purple), inset 0 0 8px var(--gov-purple);
+    box-shadow:
+      0 0 12px var(--gov-purple),
+      inset 0 0 8px var(--gov-purple);
   }
 
   .governance-border-amber {
     border: 1px solid var(--gov-amber-border);
-    box-shadow: 0 0 12px var(--gov-amber), inset 0 0 8px var(--gov-amber);
+    box-shadow:
+      0 0 12px var(--gov-amber),
+      inset 0 0 8px var(--gov-amber);
   }
 
   .screen-slide {
@@ -372,78 +458,159 @@
 }
 
 @keyframes conflictPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
 }
 
 @keyframes signalScroll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes nodePulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
 }
 
 @keyframes authPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes uhgFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes uhgSlideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes barFill {
-  from { width: 0; }
-  to { width: var(--bar-width); }
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--bar-width);
+  }
 }
 
 @keyframes finallyKnown {
-  0% { opacity: 0; letter-spacing: 0.3em; }
-  100% { opacity: 1; letter-spacing: 0.15em; }
+  0% {
+    opacity: 0;
+    letter-spacing: 0.3em;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.15em;
+  }
 }
 
 @keyframes ripple {
-  0% { transform: scale(0); opacity: 0.8; }
-  100% { transform: scale(2.5); opacity: 0; }
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
 
 @keyframes progressFill {
-  from { width: 0%; }
-  to { width: 100%; }
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(12, 85, 184, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(12, 85, 184, 0.8); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(12, 85, 184, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(12, 85, 184, 0.8);
+  }
 }
 
 @keyframes interceptTakeover {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes edgeAnimate {
-  0% { stroke-dashoffset: 100; opacity: 0; }
-  100% { stroke-dashoffset: 0; opacity: 1; }
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
 }
 
 .animate-ripple {

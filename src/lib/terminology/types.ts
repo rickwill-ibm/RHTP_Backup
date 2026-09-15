@@ -103,7 +103,11 @@ export interface ClassificationResult {
 export interface TerminologyService {
   readonly id: string;
   validateCode(system: TerminologySystem | string, code: string): CodeValidation;
-  translate(code: string, sourceSystem: TerminologySystem, targetSystem: TerminologySystem): TranslationResult;
+  translate(
+    code: string,
+    sourceSystem: TerminologySystem,
+    targetSystem: TerminologySystem
+  ): TranslationResult;
   classify(code: string, scheme: ClassificationScheme, valueSetId?: string): ClassificationResult;
 }
 
@@ -118,7 +122,7 @@ export class TerminologyServiceNotConfiguredError extends Error {
       `Terminology server not configured for "${capability}". Real integration is a later ` +
         `roadmap iteration. Needs a FHIR terminology server (TERMINOLOGY_SERVER_BASE_URL) ` +
         `exposing CodeSystem $validate-code, ConceptMap $translate, and ValueSet $expand, ` +
-        `or set DATA_MODE_TERMINOLOGY=seeded to use the in-repo allowlist.`,
+        `or set DATA_MODE_TERMINOLOGY=seeded to use the in-repo allowlist.`
     );
     this.name = 'TerminologyServiceNotConfiguredError';
     this.capability = capability;

@@ -19,12 +19,12 @@ grouping made against a superseded model version is visible (`binding.current`).
 CMS-HCC is **one of several** risk-adjustment families. This file enumerates them
 as data so no code hard-codes "HCC = the only model":
 
-| family | program | active asset |
-| --- | --- | --- |
-| CMS-HCC | Medicare Advantage (Part C) | `cms-hcc-v28` |
-| RxHCC | Medicare Part D | `rxhcc-v08` |
+| family  | program                      | active asset   |
+| ------- | ---------------------------- | -------------- |
+| CMS-HCC | Medicare Advantage (Part C)  | `cms-hcc-v28`  |
+| RxHCC   | Medicare Part D              | `rxhcc-v08`    |
 | HHS-HCC | Commercial ACA (Marketplace) | `hhs-hcc-2026` |
-| CDPS | Medicaid | `cdps-6.5` |
+| CDPS    | Medicaid                     | `cdps-6.5`     |
 
 Version + currency metadata for each `activeAssetId` lives in
 `registry/data/terminology-assets.json` (the registry is the single source of

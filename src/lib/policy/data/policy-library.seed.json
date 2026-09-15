@@ -19,15 +19,7 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "0501T",
-          "0504T",
-          "75571",
-          "75572",
-          "75573",
-          "75574",
-          "75580"
-        ],
+        "cptCovered": ["0501T", "0504T", "75571", "75572", "75573", "75574", "75580"],
         "cptNotCovered": [
           "0721T",
           "0722T",
@@ -40,16 +32,7 @@
           "0712T",
           "0713T"
         ],
-        "cptOther": [
-          "33250",
-          "33266",
-          "33361",
-          "33369",
-          "93015",
-          "93024",
-          "93650",
-          "93657"
-        ],
+        "cptOther": ["33250", "33266", "33361", "33369", "93015", "93024", "93650", "93657"],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
         "hcpcsOther": [],
@@ -122,19 +105,11 @@
           "93656",
           "93657"
         ],
-        "cptNotCovered": [
-          "0745T",
-          "0746T",
-          "0747T",
-          "93583"
-        ],
+        "cptNotCovered": ["0745T", "0746T", "0747T", "93583"],
         "cptOther": [],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
-        "hcpcsOther": [
-          "C1732",
-          "C1886"
-        ],
+        "hcpcsOther": ["C1732", "C1886"],
         "icd10Covered": [
           "I44.30",
           "I44.7",
@@ -215,18 +190,10 @@
       "determinationBasis": "experimental-investigational-not-covered",
       "codes": {
         "cptCovered": [],
-        "cptNotCovered": [
-          "0408T",
-          "0409T",
-          "0410T",
-          "0411T"
-        ],
+        "cptNotCovered": ["0408T", "0409T", "0410T", "0411T"],
         "cptOther": [],
         "hcpcsCovered": [],
-        "hcpcsNotCovered": [
-          "C1824",
-          "K1030"
-        ],
+        "hcpcsNotCovered": ["C1824", "K1030"],
         "hcpcsOther": [],
         "icd10Covered": [],
         "icd10NotCovered": []
@@ -251,29 +218,13 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "33267",
-          "33268",
-          "33269",
-          "33340"
-        ],
+        "cptCovered": ["33267", "33268", "33269", "33340"],
         "cptNotCovered": [],
-        "cptOther": [
-          "93318"
-        ],
+        "cptOther": ["93318"],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
-        "hcpcsOther": [
-          "C1760",
-          "C1817",
-          "C2628"
-        ],
-        "icd10Covered": [
-          "I48.19",
-          "I48.20",
-          "I48.21",
-          "I48.91"
-        ],
+        "hcpcsOther": ["C1760", "C1817", "C2628"],
+        "icd10Covered": ["I48.19", "I48.20", "I48.21", "I48.91"],
         "icd10NotCovered": []
       },
       "indications": [
@@ -344,16 +295,9 @@
           "93247",
           "93248"
         ],
-        "cptNotCovered": [
-          "0497T",
-          "0498T",
-          "93040"
-        ],
+        "cptNotCovered": ["0497T", "0498T", "93040"],
         "cptOther": [],
-        "hcpcsCovered": [
-          "C1764",
-          "E0616"
-        ],
+        "hcpcsCovered": ["C1764", "E0616"],
         "hcpcsNotCovered": [],
         "hcpcsOther": [],
         "icd10Covered": [
@@ -416,32 +360,12 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "93798"
-        ],
-        "cptNotCovered": [
-          "92997",
-          "92998",
-          "93797"
-        ],
-        "cptOther": [
-          "33030",
-          "33031"
-        ],
-        "hcpcsCovered": [
-          "G0422",
-          "G0423",
-          "S9472"
-        ],
+        "cptCovered": ["93798"],
+        "cptNotCovered": ["92997", "92998", "93797"],
+        "cptOther": ["33030", "33031"],
+        "hcpcsCovered": ["G0422", "G0423", "S9472"],
         "hcpcsNotCovered": [],
-        "hcpcsOther": [
-          "S9449",
-          "S9451",
-          "S9452",
-          "S9453",
-          "S9454",
-          "S9470"
-        ],
+        "hcpcsOther": ["S9449", "S9451", "S9452", "S9453", "S9454", "S9470"],
         "icd10Covered": [
           "D15.1",
           "I02.0",
@@ -605,9 +529,7 @@
           "0684T",
           "0685T"
         ],
-        "cptOther": [
-          "83520"
-        ],
+        "cptOther": ["83520"],
         "hcpcsCovered": [
           "C1779",
           "C1785",
@@ -641,13 +563,7 @@
           "I48.0",
           "Z86.74"
         ],
-        "icd10NotCovered": [
-          "I35.0",
-          "I42.0",
-          "I48.0",
-          "I50.1",
-          "I50.9"
-        ]
+        "icd10NotCovered": ["I35.0", "I42.0", "I48.0", "I50.1", "I50.9"]
       },
       "indications": [
         {
@@ -706,14 +622,9 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "94621"
-        ],
+        "cptCovered": ["94621"],
         "cptNotCovered": [],
-        "cptOther": [
-          "33615",
-          "33617"
-        ],
+        "cptOther": ["33615", "33617"],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
         "hcpcsOther": [],
@@ -964,14 +875,7 @@
           "93970",
           "93971"
         ],
-        "cptOther": [
-          "93454",
-          "93461",
-          "93563",
-          "93000",
-          "93005",
-          "93010"
-        ],
+        "cptOther": ["93454", "93461", "93563", "93000", "93005", "93010"],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
         "hcpcsOther": [],
@@ -1739,30 +1643,10 @@
           "93296",
           "93297"
         ],
-        "cptNotCovered": [
-          "0525T",
-          "0532T",
-          "33289",
-          "93264",
-          "93050",
-          "0607T",
-          "0608T"
-        ],
-        "cptOther": [
-          "90935",
-          "90937"
-        ],
-        "hcpcsCovered": [
-          "E0610",
-          "E0615",
-          "A4660",
-          "A4663",
-          "A4670"
-        ],
-        "hcpcsNotCovered": [
-          "C1833",
-          "C2624"
-        ],
+        "cptNotCovered": ["0525T", "0532T", "33289", "93264", "93050", "0607T", "0608T"],
+        "cptOther": ["90935", "90937"],
+        "hcpcsCovered": ["E0610", "E0615", "A4660", "A4663", "A4670"],
+        "hcpcsNotCovered": ["C1833", "C2624"],
         "hcpcsOther": [],
         "icd10Covered": [
           "I46.2",
@@ -1882,14 +1766,8 @@
           "93644",
           "93745"
         ],
-        "cptNotCovered": [
-          "83880"
-        ],
-        "cptOther": [
-          "93640",
-          "93641",
-          "93642"
-        ],
+        "cptNotCovered": ["83880"],
+        "cptOther": ["93640", "93641", "93642"],
         "hcpcsCovered": [
           "C1721",
           "C1722",
@@ -1943,12 +1821,7 @@
           "Z45.02",
           "Z76.82"
         ],
-        "icd10NotCovered": [
-          "I47.0",
-          "I47.9",
-          "R00.1",
-          "Z95.811"
-        ]
+        "icd10NotCovered": ["I47.0", "I47.9", "R00.1", "Z95.811"]
       },
       "indications": [
         {
@@ -1975,9 +1848,7 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "93325"
-        ],
+        "cptCovered": ["93325"],
         "cptNotCovered": [],
         "cptOther": [
           "33615",
@@ -2005,9 +1876,7 @@
         ],
         "hcpcsCovered": [],
         "hcpcsNotCovered": [],
-        "hcpcsOther": [
-          "C1886"
-        ],
+        "hcpcsOther": ["C1886"],
         "icd10Covered": [
           "A41.01",
           "A41.02",
@@ -2304,13 +2173,7 @@
       "experimental": false,
       "determinationBasis": "medical-necessity-criteria",
       "codes": {
-        "cptCovered": [
-          "75557",
-          "75559",
-          "75561",
-          "75563",
-          "75565"
-        ],
+        "cptCovered": ["75557", "75559", "75561", "75563", "75565"],
         "cptNotCovered": [],
         "cptOther": [
           "71250",
@@ -2325,23 +2188,9 @@
           "93303",
           "93355"
         ],
-        "hcpcsCovered": [
-          "A9576",
-          "A9577",
-          "A9578",
-          "A9579",
-          "C9762",
-          "C9763"
-        ],
-        "hcpcsNotCovered": [
-          "Q0138",
-          "Q0139"
-        ],
-        "hcpcsOther": [
-          "J0151",
-          "Q2049",
-          "Q2050"
-        ],
+        "hcpcsCovered": ["A9576", "A9577", "A9578", "A9579", "C9762", "C9763"],
+        "hcpcsNotCovered": ["Q0138", "Q0139"],
+        "hcpcsOther": ["J0151", "Q2049", "Q2050"],
         "icd10Covered": [
           "A18.89",
           "A36.81",
@@ -2427,15 +2276,7 @@
           "T82.818S",
           "Z98.61"
         ],
-        "icd10NotCovered": [
-          "I74.3",
-          "I75.021",
-          "I75.029",
-          "T86.20",
-          "T86.23",
-          "Z13.6",
-          "Z94.1"
-        ]
+        "icd10NotCovered": ["I74.3", "I75.021", "I75.029", "T86.20", "T86.23", "Z13.6", "Z94.1"]
       },
       "indications": [
         {
@@ -2925,23 +2766,11 @@
           "78454",
           "78469"
         ],
-        "cptNotCovered": [
-          "0331T",
-          "0332T"
-        ],
-        "cptOther": [
-          "78608",
-          "78609",
-          "33140",
-          "33141"
-        ],
-        "hcpcsCovered": [
-          "A9584"
-        ],
+        "cptNotCovered": ["0331T", "0332T"],
+        "cptOther": ["78608", "78609", "33140", "33141"],
+        "hcpcsCovered": ["A9584"],
         "hcpcsNotCovered": [],
-        "hcpcsOther": [
-          "A9500"
-        ],
+        "hcpcsOther": ["A9500"],
         "icd10Covered": [
           "C73",
           "C74.00",
@@ -4280,12 +4109,7 @@
         },
         {
           "category": "Bariatric surgery",
-          "codes": [
-            "43644",
-            "43645",
-            "43659",
-            "43770"
-          ],
+          "codes": ["43644", "43645", "43659", "43770"],
           "effectiveDate": null
         },
         {
@@ -4312,25 +4136,12 @@
         },
         {
           "category": "Bone growth",
-          "codes": [
-            "20974",
-            "20975",
-            "20979"
-          ],
+          "codes": ["20974", "20975", "20979"],
           "effectiveDate": null
         },
         {
           "category": "Breast reconstruction",
-          "codes": [
-            "15771",
-            "19300",
-            "19316",
-            "19318",
-            "19325",
-            "19328",
-            "19330",
-            "19340"
-          ],
+          "codes": ["15771", "19300", "19316", "19318", "19325", "19328", "19330", "19340"],
           "effectiveDate": null
         },
         {
@@ -4422,16 +4233,7 @@
         },
         {
           "category": "Cartilage implants",
-          "codes": [
-            "27412",
-            "27415",
-            "27416",
-            "29866",
-            "29867",
-            "29868",
-            "J7330",
-            "S2112"
-          ],
+          "codes": ["27412", "27415", "27416", "29866", "29867", "29868", "J7330", "S2112"],
           "effectiveDate": null
         },
         {
@@ -4454,40 +4256,17 @@
         },
         {
           "category": "Chemotherapy",
-          "codes": [
-            "J9000",
-            "J9999",
-            "J0640",
-            "J0641",
-            "J0642",
-            "J1950",
-            "J1952",
-            "J1932"
-          ],
+          "codes": ["J9000", "J9999", "J0640", "J0641", "J0642", "J1950", "J1952", "J1932"],
           "effectiveDate": null
         },
         {
           "category": "Clinical trials",
-          "codes": [
-            "S9988",
-            "S9990",
-            "S9991",
-            "01315"
-          ],
+          "codes": ["S9988", "S9990", "S9991", "01315"],
           "effectiveDate": null
         },
         {
           "category": "Cochlear and other",
-          "codes": [
-            "69710",
-            "69714",
-            "69930",
-            "L8614",
-            "L8619",
-            "L8690",
-            "L8691",
-            "L8692"
-          ],
+          "codes": ["69710", "69714", "69930", "L8614", "L8619", "L8690", "L8691", "L8692"],
           "effectiveDate": null
         },
         {
@@ -4617,23 +4396,12 @@
         },
         {
           "category": "Continuous Glucose",
-          "codes": [
-            "A4226",
-            "A4238",
-            "A4239",
-            "A9276"
-          ],
+          "codes": ["A4226", "A4238", "A4239", "A9276"],
           "effectiveDate": null
         },
         {
           "category": "Monitor",
-          "codes": [
-            "A9277",
-            "A9278",
-            "E0787",
-            "E2102",
-            "E2103"
-          ],
+          "codes": ["A9277", "A9278", "E0787", "E2102", "E2103"],
           "effectiveDate": null
         },
         {
@@ -5166,21 +4934,12 @@
         },
         {
           "category": "Abdominal and",
-          "codes": [
-            "58571",
-            "58572",
-            "58573"
-          ],
+          "codes": ["58571", "58572", "58573"],
           "effectiveDate": null
         },
         {
           "category": "Infertility",
-          "codes": [
-            "55870",
-            "58321",
-            "58322",
-            "58323"
-          ],
+          "codes": ["55870", "58321", "58322", "58323"],
           "effectiveDate": null
         },
         {
@@ -5383,33 +5142,17 @@
         },
         {
           "category": "MR-guided focused",
-          "codes": [
-            "0071T",
-            "0072T",
-            "01315"
-          ],
+          "codes": ["0071T", "0072T", "01315"],
           "effectiveDate": null
         },
         {
           "category": "Non-emergency air",
-          "codes": [
-            "A0430",
-            "A0431",
-            "A0435",
-            "A0436",
-            "S9960",
-            "S9961"
-          ],
+          "codes": ["A0430", "A0431", "A0435", "A0436", "S9960", "S9961"],
           "effectiveDate": null
         },
         {
           "category": "Orthognathic surgery",
-          "codes": [
-            "21050",
-            "21060",
-            "21121",
-            "21123"
-          ],
+          "codes": ["21050", "21060", "21121", "21123"],
           "effectiveDate": null
         },
         {
@@ -5538,18 +5281,12 @@
         },
         {
           "category": "Pregnancy",
-          "codes": [
-            "01315"
-          ],
+          "codes": ["01315"],
           "effectiveDate": null
         },
         {
           "category": "Prostate procedures",
-          "codes": [
-            "52441",
-            "52442",
-            "53850"
-          ],
+          "codes": ["52441", "52442", "53850"],
           "effectiveDate": null
         },
         {
@@ -5735,23 +5472,12 @@
         },
         {
           "category": "Rhinoplasty",
-          "codes": [
-            "30400",
-            "30410",
-            "30420",
-            "30430"
-          ],
+          "codes": ["30400", "30410", "30420", "30430"],
           "effectiveDate": null
         },
         {
           "category": "Treatment of nasal",
-          "codes": [
-            "30435",
-            "30450",
-            "30460",
-            "30462",
-            "30465"
-          ],
+          "codes": ["30435", "30450", "30460", "30462", "30465"],
           "effectiveDate": null
         },
         {
@@ -5789,45 +5515,27 @@
         },
         {
           "category": "Sleep apnea",
-          "codes": [
-            "21685",
-            "41599"
-          ],
+          "codes": ["21685", "41599"],
           "effectiveDate": null
         },
         {
           "category": "Maxillomandibular",
-          "codes": [
-            "42145"
-          ],
+          "codes": ["42145"],
           "effectiveDate": null
         },
         {
           "category": "Sleep studies",
-          "codes": [
-            "95805",
-            "95807",
-            "95808",
-            "95810",
-            "01315"
-          ],
+          "codes": ["95805", "95807", "95808", "95810", "01315"],
           "effectiveDate": null
         },
         {
           "category": "Laboratory-assisted and",
-          "codes": [
-            "95811"
-          ],
+          "codes": ["95811"],
           "effectiveDate": null
         },
         {
           "category": "Spinal cord",
-          "codes": [
-            "63650",
-            "63655",
-            "63662",
-            "63664"
-          ],
+          "codes": ["63650", "63655", "63662", "63664"],
           "effectiveDate": null
         },
         {
@@ -6033,24 +5741,12 @@
         },
         {
           "category": "Therapeutic",
-          "codes": [
-            "A9513",
-            "A9590",
-            "A9606",
-            "A9607",
-            "A9615",
-            "A9699"
-          ],
+          "codes": ["A9513", "A9590", "A9606", "A9607", "A9615", "A9699"],
           "effectiveDate": null
         },
         {
           "category": "Vein procedures",
-          "codes": [
-            "36465",
-            "36466",
-            "36470",
-            "36471"
-          ],
+          "codes": ["36465", "36466", "36470", "36471"],
           "effectiveDate": null
         },
         {
@@ -8693,10 +8389,7 @@
       "paItems": [
         {
           "category": "Bariatric Surgery",
-          "codes": [
-            "43644",
-            "43645"
-          ],
+          "codes": ["43644", "43645"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
@@ -8716,28 +8409,17 @@
         },
         {
           "category": "Bone Growth",
-          "codes": [
-            "20975",
-            "20979"
-          ],
+          "codes": ["20975", "20979"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Reconstruction",
-          "codes": [
-            "11971",
-            "02692",
-            "19316",
-            "19318"
-          ],
+          "codes": ["11971", "02692", "19316", "19318"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Mastectomy)",
-          "codes": [
-            "19325",
-            "19328"
-          ],
+          "codes": ["19325", "19328"],
           "effectiveDate": null
         },
         {
@@ -8762,9 +8444,7 @@
         },
         {
           "category": "Cancer",
-          "codes": [
-            "J1449"
-          ],
+          "codes": ["J1449"],
           "effectiveDate": "Oct. 1, 2023"
         },
         {
@@ -8849,25 +8529,17 @@
         },
         {
           "category": "Cerebral Seizure",
-          "codes": [
-            "95726"
-          ],
+          "codes": ["95726"],
           "effectiveDate": "March 1, 2020"
         },
         {
           "category": "Inpatient Video",
-          "codes": [
-            "95720",
-            "95718"
-          ],
+          "codes": ["95720", "95718"],
           "effectiveDate": "Jan. 1, 2020"
         },
         {
           "category": "EEG",
-          "codes": [
-            "95724",
-            "95722"
-          ],
+          "codes": ["95724", "95722"],
           "effectiveDate": null
         },
         {
@@ -9062,47 +8734,27 @@
         },
         {
           "category": "Circumcision",
-          "codes": [
-            "54150",
-            "54160",
-            "54161",
-            "54162"
-          ],
+          "codes": ["54150", "54160", "54161", "54162"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Cochlear",
-          "codes": [
-            "69729",
-            "69730"
-          ],
+          "codes": ["69729", "69730"],
           "effectiveDate": "Mar. 1, 2023"
         },
         {
           "category": "Other Auditory",
-          "codes": [
-            "69714",
-            "69930"
-          ],
+          "codes": ["69714", "69930"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Implants",
-          "codes": [
-            "L8614",
-            "L8619",
-            "L8690",
-            "L8691",
-            "L8692"
-          ],
+          "codes": ["L8614", "L8619", "L8690", "L8691", "L8692"],
           "effectiveDate": null
         },
         {
           "category": "Cosmetic &",
-          "codes": [
-            "14020",
-            "14021"
-          ],
+          "codes": ["14020", "14021"],
           "effectiveDate": "July 1, 2021"
         },
         {
@@ -9178,38 +8830,22 @@
         },
         {
           "category": "Continuous",
-          "codes": [
-            "E2102",
-            "E2103"
-          ],
+          "codes": ["E2102", "E2103"],
           "effectiveDate": "Feb. 1, 2023"
         },
         {
           "category": "Glucose Monitor",
-          "codes": [
-            "A4238",
-            "A4239",
-            "A9276",
-            "A9277",
-            "A9278"
-          ],
+          "codes": ["A4238", "A4239", "A9276", "A9277", "A9278"],
           "effectiveDate": "Oct. 1, 2021"
         },
         {
           "category": "Dental",
-          "codes": [
-            "00170",
-            "41899"
-          ],
+          "codes": ["00170", "41899"],
           "effectiveDate": "July 1, 2017"
         },
         {
           "category": "Durable Medical",
-          "codes": [
-            "E2298",
-            "E1002",
-            "E0784"
-          ],
+          "codes": ["E2298", "E1002", "E0784"],
           "effectiveDate": "May 1, 2024"
         },
         {
@@ -9329,10 +8965,7 @@
         },
         {
           "category": "Enteral Services",
-          "codes": [
-            "B4034",
-            "B4035"
-          ],
+          "codes": ["B4034", "B4035"],
           "effectiveDate": "May 1, 2019"
         },
         {
@@ -9357,44 +8990,27 @@
         },
         {
           "category": "Experimental &",
-          "codes": [
-            "33477"
-          ],
+          "codes": ["33477"],
           "effectiveDate": "May 2, 2016"
         },
         {
           "category": "Investigational",
-          "codes": [
-            "36514",
-            "66180",
-            "64722",
-            "E1831"
-          ],
+          "codes": ["36514", "66180", "64722", "E1831"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Services)",
-          "codes": [
-            "A9274",
-            "02692"
-          ],
+          "codes": ["A9274", "02692"],
           "effectiveDate": null
         },
         {
           "category": "Femoroacetabula",
-          "codes": [
-            "29914",
-            "29915",
-            "29916"
-          ],
+          "codes": ["29914", "29915", "29916"],
           "effectiveDate": null
         },
         {
           "category": "Functional",
-          "codes": [
-            "31253",
-            "31257"
-          ],
+          "codes": ["31253", "31257"],
           "effectiveDate": "July 1, 2018"
         },
         {
@@ -9414,53 +9030,32 @@
         },
         {
           "category": "Gender",
-          "codes": [
-            "55970",
-            "55980"
-          ],
+          "codes": ["55970", "55980"],
           "effectiveDate": "July 1, 2018"
         },
         {
           "category": "Treatment",
-          "codes": [
-            "56805",
-            "57335"
-          ],
+          "codes": ["56805", "57335"],
           "effectiveDate": null
         },
         {
           "category": "Genetic and",
-          "codes": [
-            "81432",
-            "0277U",
-            "0292U",
-            "0278U",
-            "0293U"
-          ],
+          "codes": ["81432", "0277U", "0292U", "0278U", "0293U"],
           "effectiveDate": "July 1, 2025"
         },
         {
           "category": "Molecular",
-          "codes": [
-            "81450",
-            "81455"
-          ],
+          "codes": ["81450", "81455"],
           "effectiveDate": null
         },
         {
           "category": "Testing to",
-          "codes": [
-            "81457",
-            "81458"
-          ],
+          "codes": ["81457", "81458"],
           "effectiveDate": null
         },
         {
           "category": "Include BRCA",
-          "codes": [
-            "81459",
-            "81462"
-          ],
+          "codes": ["81459", "81462"],
           "effectiveDate": null
         },
         {
@@ -9534,30 +9129,17 @@
         },
         {
           "category": "Molecular Testing",
-          "codes": [
-            "0282U",
-            "0294U",
-            "0285U"
-          ],
+          "codes": ["0282U", "0294U", "0285U"],
           "effectiveDate": null
         },
         {
           "category": "To Include BRCA",
-          "codes": [
-            "0286U",
-            "0289U"
-          ],
+          "codes": ["0286U", "0289U"],
           "effectiveDate": null
         },
         {
           "category": "Home Health",
-          "codes": [
-            "G0162",
-            "G0299",
-            "G0300",
-            "99503",
-            "S9474"
-          ],
+          "codes": ["G0162", "G0299", "G0300", "99503", "S9474"],
           "effectiveDate": "Jan. 1, 2018"
         },
         {
@@ -9768,18 +9350,12 @@
         },
         {
           "category": "Joint",
-          "codes": [
-            "23470",
-            "23472"
-          ],
+          "codes": ["23470", "23472"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Replacement",
-          "codes": [
-            "23473",
-            "23474"
-          ],
+          "codes": ["23473", "23474"],
           "effectiveDate": null
         },
         {
@@ -9811,54 +9387,32 @@
         },
         {
           "category": "Non-Emergent",
-          "codes": [
-            "A0430",
-            "A0431",
-            "A0382",
-            "A0398"
-          ],
+          "codes": ["A0430", "A0431", "A0382", "A0398"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Air Ambulance",
-          "codes": [
-            "A0435",
-            "A0436"
-          ],
+          "codes": ["A0435", "A0436"],
           "effectiveDate": null
         },
         {
           "category": "Ground",
-          "codes": [
-            "A0420",
-            "A0422"
-          ],
+          "codes": ["A0420", "A0422"],
           "effectiveDate": null
         },
         {
           "category": "Ambulance TX",
-          "codes": [
-            "A0424",
-            "A0425"
-          ],
+          "codes": ["A0424", "A0425"],
           "effectiveDate": null
         },
         {
           "category": "MANDATE",
-          "codes": [
-            "A0426",
-            "A0428",
-            "A0433",
-            "A0434"
-          ],
+          "codes": ["A0426", "A0428", "A0433", "A0434"],
           "effectiveDate": null
         },
         {
           "category": "Orthognathic",
-          "codes": [
-            "21121",
-            "21123"
-          ],
+          "codes": ["21121", "21123"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
@@ -9904,12 +9458,7 @@
         },
         {
           "category": "Orthotics and",
-          "codes": [
-            "L1832",
-            "02692",
-            "L4010",
-            "L4020"
-          ],
+          "codes": ["L1832", "02692", "L4010", "L4020"],
           "effectiveDate": "May 1, 2019"
         },
         {
@@ -10412,80 +9961,52 @@
         },
         {
           "category": "Potentially",
-          "codes": [
-            "33289",
-            "C2624"
-          ],
+          "codes": ["33289", "C2624"],
           "effectiveDate": "April 1, 2023"
         },
         {
           "category": "Prescribed",
-          "codes": [
-            "T1025",
-            "T1026"
-          ],
+          "codes": ["T1025", "T1026"],
           "effectiveDate": "Oct. 1, 2018"
         },
         {
           "category": "Pediatric",
-          "codes": [
-            "T2002"
-          ],
+          "codes": ["T2002"],
           "effectiveDate": null
         },
         {
           "category": "Private Duty",
-          "codes": [
-            "T1000",
-            "T1002"
-          ],
+          "codes": ["T1000", "T1002"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Nursing",
-          "codes": [
-            "T1003"
-          ],
+          "codes": ["T1003"],
           "effectiveDate": null
         },
         {
           "category": "Prostate",
-          "codes": [
-            "37243",
-            "53850"
-          ],
+          "codes": ["37243", "53850"],
           "effectiveDate": "April 1, 2022"
         },
         {
           "category": "Procedures",
-          "codes": [
-            "55874",
-            "02692"
-          ],
+          "codes": ["55874", "02692"],
           "effectiveDate": null
         },
         {
           "category": "Proton Beam",
-          "codes": [
-            "77520",
-            "77522"
-          ],
+          "codes": ["77520", "77522"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Psychological",
-          "codes": [
-            "96136",
-            "96131"
-          ],
+          "codes": ["96136", "96131"],
           "effectiveDate": "Oct. 1, 2019"
         },
         {
           "category": "Testing",
-          "codes": [
-            "96133",
-            "96137"
-          ],
+          "codes": ["96133", "96137"],
           "effectiveDate": "March 1, 2022"
         },
         {
@@ -10711,53 +10232,27 @@
         },
         {
           "category": "Rhinoplasty and",
-          "codes": [
-            "30400",
-            "30410"
-          ],
+          "codes": ["30400", "30410"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Septoplasty",
-          "codes": [
-            "30420",
-            "30430"
-          ],
+          "codes": ["30420", "30430"],
           "effectiveDate": null
         },
         {
           "category": "Treatment of nasal",
-          "codes": [
-            "30435",
-            "30450",
-            "30460",
-            "30462",
-            "30465"
-          ],
+          "codes": ["30435", "30450", "30460", "30462", "30465"],
           "effectiveDate": null
         },
         {
           "category": "Sinuplasty",
-          "codes": [
-            "31298",
-            "31295",
-            "31296",
-            "31297"
-          ],
+          "codes": ["31298", "31295", "31296", "31297"],
           "effectiveDate": "July 1, 2018"
         },
         {
           "category": "Site of Service",
-          "codes": [
-            "69205",
-            "36590",
-            "36832",
-            "02692",
-            "38500",
-            "38510",
-            "38525",
-            "29893"
-          ],
+          "codes": ["69205", "36590", "36832", "02692", "38500", "38510", "38525", "29893"],
           "effectiveDate": "July 1, 2020"
         },
         {
@@ -10857,17 +10352,12 @@
         },
         {
           "category": "Sleep Apnea",
-          "codes": [
-            "21685",
-            "41599"
-          ],
+          "codes": ["21685", "41599"],
           "effectiveDate": "Jan. 1, 2015"
         },
         {
           "category": "Procedures &",
-          "codes": [
-            "42145"
-          ],
+          "codes": ["42145"],
           "effectiveDate": null
         },
         {
@@ -11086,32 +10576,17 @@
         },
         {
           "category": "Vein Procedures",
-          "codes": [
-            "37765",
-            "37766"
-          ],
+          "codes": ["37765", "37766"],
           "effectiveDate": "July 1, 2021"
         },
         {
           "category": "Removal and",
-          "codes": [
-            "36473",
-            "36475",
-            "36478",
-            "37700",
-            "37718",
-            "37722",
-            "37780",
-            "02692"
-          ],
+          "codes": ["36473", "36475", "36478", "37700", "37718", "37722", "37780", "02692"],
           "effectiveDate": "April 1, 2017"
         },
         {
           "category": "Ventricular",
-          "codes": [
-            "33927",
-            "33928"
-          ],
+          "codes": ["33927", "33928"],
           "effectiveDate": "Jan. 1, 2018"
         },
         {
@@ -11132,10 +10607,7 @@
         },
         {
           "category": "Wound Vac",
-          "codes": [
-            "E2402",
-            "02692"
-          ],
+          "codes": ["E2402", "02692"],
           "effectiveDate": "Jan. 1, 2015"
         }
       ],

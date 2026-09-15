@@ -41,7 +41,7 @@ export const coverageSpec = {
         periodStart,
         periodEnd: periodEnd ?? '',
         maintenanceTypeCode: str(p.maintenanceTypeCode),
-      }),
+      })
     );
     out.push({
       op: 'UpsertEdge',

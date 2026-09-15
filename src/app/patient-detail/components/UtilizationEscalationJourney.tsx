@@ -18,25 +18,46 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
   return (
     <div className="flex items-start gap-0 overflow-x-auto pb-1">
       {steps.map((s, idx) => {
-        const isCompleted = status === 'completed' || (status !== 'rejected' && s.step < currentStep);
+        const isCompleted =
+          status === 'completed' || (status !== 'rejected' && s.step < currentStep);
         const isActive = s.step === currentStep && status !== 'completed' && status !== 'rejected';
         const isRejected = status === 'rejected' && s.step === currentStep;
 
         return (
           <div key={s.step} className="flex items-start flex-1 min-w-0">
             <div className="flex flex-col items-center flex-1 min-w-0">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
-                ${isCompleted ? 'bg-[#24a148] border-[#24a148] text-white' :
-                  isActive ? 'bg-[#da1e28] border-[#da1e28] text-white': isRejected ?'bg-[#b45309] border-[#b45309] text-white': 'bg-white border-carbon-gray-30 text-carbon-gray-50'}`}
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 transition-all
+                ${
+                  isCompleted
+                    ? 'bg-[#24a148] border-[#24a148] text-white'
+                    : isActive
+                      ? 'bg-[#da1e28] border-[#da1e28] text-white'
+                      : isRejected
+                        ? 'bg-[#b45309] border-[#b45309] text-white'
+                        : 'bg-white border-carbon-gray-30 text-carbon-gray-50'
+                }`}
               >
-                {isCompleted ? <Icon name="CheckIcon" size={12} /> :
-                 isRejected ? <Icon name="XMarkIcon" size={12} /> :
-                 s.step}
+                {isCompleted ? (
+                  <Icon name="CheckIcon" size={12} />
+                ) : isRejected ? (
+                  <Icon name="XMarkIcon" size={12} />
+                ) : (
+                  s.step
+                )}
               </div>
               <div className="mt-1.5 text-center px-1">
-                <p className={`text-2xs font-semibold leading-tight ${
-                  isActive ? 'text-[#da1e28]' :
-                  isCompleted ? 'text-[#24a148]': isRejected ?'text-[#b45309]': 'text-carbon-gray-50'}`}>
+                <p
+                  className={`text-2xs font-semibold leading-tight ${
+                    isActive
+                      ? 'text-[#da1e28]'
+                      : isCompleted
+                        ? 'text-[#24a148]'
+                        : isRejected
+                          ? 'text-[#b45309]'
+                          : 'text-carbon-gray-50'
+                  }`}
+                >
                   {s.label}
                 </p>
                 <p className="text-2xs text-carbon-gray-30 mt-0.5 hidden sm:block leading-tight">
@@ -45,7 +66,9 @@ function StepIndicator({ steps, currentStep, status }: StepIndicatorProps) {
               </div>
             </div>
             {idx < steps.length - 1 && (
-              <div className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+              <div
+                className={`h-0.5 flex-1 mt-3.5 mx-1 transition-all ${isCompleted ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+              />
             )}
           </div>
         );
@@ -78,19 +101,40 @@ function AlertSummaryCard({ alert }: { alert: UtilizationAlert }) {
         <div className="text-right flex-shrink-0 space-y-1">
           <div>
             <p className="text-2xs text-carbon-gray-50">Risk Score</p>
-            <p className={`font-mono text-base font-bold ${riskPct >= 70 ? 'text-[#da1e28]' : riskPct >= 40 ? 'text-[#b45309]' : 'text-[#24a148]'}`}>
+            <p
+              className={`font-mono text-base font-bold ${riskPct >= 70 ? 'text-[#da1e28]' : riskPct >= 40 ? 'text-[#b45309]' : 'text-[#24a148]'}`}
+            >
               {riskPct > 0 ? `${riskPct}%` : '—'}
             </p>
           </div>
           <div>
             <p className="text-2xs text-carbon-gray-50">Est. Cost</p>
-            <p className="font-mono text-sm font-bold text-[#da1e28]">${alert.estimatedCost.toLocaleString()}</p>
+            <p className="font-mono text-sm font-bold text-[#da1e28]">
+              ${alert.estimatedCost.toLocaleString()}
+            </p>
           </div>
         </div>
       </div>
       <div className="flex items-center gap-4 text-2xs text-carbon-gray-50">
-        <span>Created: <span className="font-mono text-carbon-gray-70">{alert.createdDate}</span></span>
-        <span>Status: <StatusBadge label={alert.status} variant={alert.status === 'Active' ? 'danger' : alert.status === 'Escalated' ? 'warning' : alert.status === 'Resolved' ? 'success' : 'info'} size="sm" /></span>
+        <span>
+          Created: <span className="font-mono text-carbon-gray-70">{alert.createdDate}</span>
+        </span>
+        <span>
+          Status:{' '}
+          <StatusBadge
+            label={alert.status}
+            variant={
+              alert.status === 'Active'
+                ? 'danger'
+                : alert.status === 'Escalated'
+                  ? 'warning'
+                  : alert.status === 'Resolved'
+                    ? 'success'
+                    : 'info'
+            }
+            size="sm"
+          />
+        </span>
       </div>
     </div>
   );
@@ -98,21 +142,69 @@ function AlertSummaryCard({ alert }: { alert: UtilizationAlert }) {
 
 // ─── Intervention Options ─────────────────────────────────────────────────────
 const INTERVENTION_PROTOCOLS = [
-  { id: 'int-home-health', label: 'Home Health Authorization', description: 'Authorize post-discharge home health visits to prevent readmission' },
-  { id: 'int-care-mgr-call', label: 'Care Manager Outreach Call', description: 'Schedule urgent care manager call within 24 hours' },
-  { id: 'int-med-reconcile', label: 'Medication Reconciliation', description: 'Pharmacist-led medication review and reconciliation' },
-  { id: 'int-pcp-visit', label: 'Urgent PCP Visit', description: 'Schedule urgent primary care visit within 48–72 hours' },
-  { id: 'int-er-diversion', label: 'ER Diversion Protocol', description: 'Activate ER diversion — direct patient to urgent care or telehealth' },
-  { id: 'int-snf-coord', label: 'SNF Coordination', description: 'Coordinate skilled nursing facility placement to avoid acute admission' },
+  {
+    id: 'int-home-health',
+    label: 'Home Health Authorization',
+    description: 'Authorize post-discharge home health visits to prevent readmission',
+  },
+  {
+    id: 'int-care-mgr-call',
+    label: 'Care Manager Outreach Call',
+    description: 'Schedule urgent care manager call within 24 hours',
+  },
+  {
+    id: 'int-med-reconcile',
+    label: 'Medication Reconciliation',
+    description: 'Pharmacist-led medication review and reconciliation',
+  },
+  {
+    id: 'int-pcp-visit',
+    label: 'Urgent PCP Visit',
+    description: 'Schedule urgent primary care visit within 48–72 hours',
+  },
+  {
+    id: 'int-er-diversion',
+    label: 'ER Diversion Protocol',
+    description: 'Activate ER diversion — direct patient to urgent care or telehealth',
+  },
+  {
+    id: 'int-snf-coord',
+    label: 'SNF Coordination',
+    description: 'Coordinate skilled nursing facility placement to avoid acute admission',
+  },
 ];
 
 const OUTCOME_OPTIONS = [
-  { id: 'out-resolved', label: 'Risk Resolved', description: 'Intervention successful — risk mitigated, no ER/admission occurred' },
-  { id: 'out-partial', label: 'Partially Resolved', description: 'Risk reduced but ongoing monitoring required' },
-  { id: 'out-escalated', label: 'Escalated to Physician', description: 'Clinical complexity requires physician review and order' },
-  { id: 'out-admitted', label: 'Patient Admitted', description: 'Patient was admitted — document for readmission review' },
-  { id: 'out-er-visit', label: 'ER Visit Occurred', description: 'ER visit occurred — document for avoidable admission analysis' },
-  { id: 'out-refused', label: 'Patient Declined', description: 'Patient declined intervention — document refusal and reason' },
+  {
+    id: 'out-resolved',
+    label: 'Risk Resolved',
+    description: 'Intervention successful — risk mitigated, no ER/admission occurred',
+  },
+  {
+    id: 'out-partial',
+    label: 'Partially Resolved',
+    description: 'Risk reduced but ongoing monitoring required',
+  },
+  {
+    id: 'out-escalated',
+    label: 'Escalated to Physician',
+    description: 'Clinical complexity requires physician review and order',
+  },
+  {
+    id: 'out-admitted',
+    label: 'Patient Admitted',
+    description: 'Patient was admitted — document for readmission review',
+  },
+  {
+    id: 'out-er-visit',
+    label: 'ER Visit Occurred',
+    description: 'ER visit occurred — document for avoidable admission analysis',
+  },
+  {
+    id: 'out-refused',
+    label: 'Patient Declined',
+    description: 'Patient declined intervention — document refusal and reason',
+  },
 ];
 
 // ─── Step 1: Surface Risk ─────────────────────────────────────────────────────
@@ -131,7 +223,8 @@ function Step1SurfaceRisk({ alert, onAcknowledge }: Step1Props) {
     alert.tier === 'Critical' && 'Critical alert tier — immediate action required',
     alert.type === 'Avoidable Admission' && 'Active admission — readmission risk elevated',
     alert.type === 'Predicted ER Risk' && 'Predictive model flagged within 30-day window',
-    alert.estimatedCost > 5000 && `High estimated cost impact: $${alert.estimatedCost.toLocaleString()}`,
+    alert.estimatedCost > 5000 &&
+      `High estimated cost impact: $${alert.estimatedCost.toLocaleString()}`,
   ].filter(Boolean) as string[];
 
   return (
@@ -142,9 +235,12 @@ function Step1SurfaceRisk({ alert, onAcknowledge }: Step1Props) {
             <Icon name="BellAlertIcon" size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-carbon-gray-100">Risk Surfaced — Action Required</p>
+            <p className="text-sm font-semibold text-carbon-gray-100">
+              Risk Surfaced — Action Required
+            </p>
             <p className="text-xs text-carbon-gray-70 mt-0.5">
-              This alert has been surfaced to the care management queue. Acknowledge to begin the escalation workflow.
+              This alert has been surfaced to the care management queue. Acknowledge to begin the
+              escalation workflow.
             </p>
           </div>
         </div>
@@ -156,7 +252,11 @@ function Step1SurfaceRisk({ alert, onAcknowledge }: Step1Props) {
           <ul className="space-y-1.5">
             {riskFactors.map((factor, i) => (
               <li key={`rf-${i}`} className="flex items-start gap-2 text-xs text-carbon-gray-70">
-                <Icon name="ExclamationTriangleIcon" size={12} className="text-[#da1e28] mt-0.5 flex-shrink-0" />
+                <Icon
+                  name="ExclamationTriangleIcon"
+                  size={12}
+                  className="text-[#da1e28] mt-0.5 flex-shrink-0"
+                />
                 {factor}
               </li>
             ))}
@@ -167,11 +267,25 @@ function Step1SurfaceRisk({ alert, onAcknowledge }: Step1Props) {
       <div>
         <p className="carbon-label mb-2">Response Priority</p>
         <div className="flex gap-2">
-          {([
-            { id: 'immediate', label: 'Immediate (< 4h)', color: 'border-[#da1e28] bg-[#fff1f1] text-[#da1e28]' },
-            { id: '24h', label: 'Urgent (24h)', color: 'border-[#f1c21b] bg-[#fdf6dd] text-[#b45309]' },
-            { id: '48h', label: 'Routine (48h)', color: 'border-carbon-gray-30 bg-white text-carbon-gray-70' },
-          ] as const).map((opt) => (
+          {(
+            [
+              {
+                id: 'immediate',
+                label: 'Immediate (< 4h)',
+                color: 'border-[#da1e28] bg-[#fff1f1] text-[#da1e28]',
+              },
+              {
+                id: '24h',
+                label: 'Urgent (24h)',
+                color: 'border-[#f1c21b] bg-[#fdf6dd] text-[#b45309]',
+              },
+              {
+                id: '48h',
+                label: 'Routine (48h)',
+                color: 'border-carbon-gray-30 bg-white text-carbon-gray-70',
+              },
+            ] as const
+          ).map((opt) => (
             <button
               key={opt.id}
               onClick={() => setPriority(opt.id)}
@@ -196,7 +310,11 @@ function Step1SurfaceRisk({ alert, onAcknowledge }: Step1Props) {
       </div>
 
       <button
-        onClick={() => onAcknowledge(`Priority: ${priority === 'immediate' ? 'Immediate (<4h)' : priority === '24h' ? 'Urgent (24h)' : 'Routine (48h)'}. ${notes}`)}
+        onClick={() =>
+          onAcknowledge(
+            `Priority: ${priority === 'immediate' ? 'Immediate (<4h)' : priority === '24h' ? 'Urgent (24h)' : 'Routine (48h)'}. ${notes}`
+          )
+        }
         className="carbon-btn-primary w-full justify-center py-2.5 text-sm"
       >
         <Icon name="CheckCircleIcon" size={16} />
@@ -229,14 +347,20 @@ function Step2AssignIntervention({ onAssign }: Step2Props) {
               key={protocol.id}
               onClick={() => setSelectedProtocol(protocol.id)}
               className={`w-full text-left p-3 border transition-colors
-                ${selectedProtocol === protocol.id
-                  ? 'border-[#0f62fe] bg-[#edf5ff]'
-                  : 'border-carbon-gray-20 bg-white hover:border-carbon-gray-30 hover:bg-carbon-gray-10'}`}
+                ${
+                  selectedProtocol === protocol.id
+                    ? 'border-[#0f62fe] bg-[#edf5ff]'
+                    : 'border-carbon-gray-20 bg-white hover:border-carbon-gray-30 hover:bg-carbon-gray-10'
+                }`}
             >
               <div className="flex items-start gap-3">
-                <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center
-                  ${selectedProtocol === protocol.id ? 'border-[#0f62fe] bg-[#0f62fe]' : 'border-carbon-gray-30'}`}>
-                  {selectedProtocol === protocol.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center
+                  ${selectedProtocol === protocol.id ? 'border-[#0f62fe] bg-[#0f62fe]' : 'border-carbon-gray-30'}`}
+                >
+                  {selectedProtocol === protocol.id && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-carbon-gray-100">{protocol.label}</p>
@@ -283,7 +407,9 @@ function Step2AssignIntervention({ onAssign }: Step2Props) {
       <button
         onClick={() => {
           const protocol = INTERVENTION_PROTOCOLS.find((p) => p.id === selectedProtocol);
-          onAssign(`Protocol: ${protocol?.label ?? selectedProtocol}. Assigned to: ${assignedTo}. Due: ${dueDate}. ${notes}`);
+          onAssign(
+            `Protocol: ${protocol?.label ?? selectedProtocol}. Assigned to: ${assignedTo}. Due: ${dueDate}. ${notes}`
+          );
         }}
         disabled={!canProceed}
         className="carbon-btn-primary w-full justify-center py-2.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
@@ -303,7 +429,9 @@ interface Step3Props {
 function Step3DocumentOutcome({ onDocument }: Step3Props) {
   const [selectedOutcome, setSelectedOutcome] = useState<string>('');
   const [contactDate, setContactDate] = useState('2026-04-16');
-  const [contactMethod, setContactMethod] = useState<'phone' | 'in-person' | 'telehealth' | 'portal'>('phone');
+  const [contactMethod, setContactMethod] = useState<
+    'phone' | 'in-person' | 'telehealth' | 'portal'
+  >('phone');
   const [patientResponse, setPatientResponse] = useState('');
   const [clinicalNotes, setClinicalNotes] = useState('');
 
@@ -319,18 +447,26 @@ function Step3DocumentOutcome({ onDocument }: Step3Props) {
               key={outcome.id}
               onClick={() => setSelectedOutcome(outcome.id)}
               className={`text-left p-3 border transition-colors
-                ${selectedOutcome === outcome.id
-                  ? 'border-[#0f62fe] bg-[#edf5ff]'
-                  : 'border-carbon-gray-20 bg-white hover:border-carbon-gray-30 hover:bg-carbon-gray-10'}`}
+                ${
+                  selectedOutcome === outcome.id
+                    ? 'border-[#0f62fe] bg-[#edf5ff]'
+                    : 'border-carbon-gray-20 bg-white hover:border-carbon-gray-30 hover:bg-carbon-gray-10'
+                }`}
             >
               <div className="flex items-start gap-2">
-                <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center
-                  ${selectedOutcome === outcome.id ? 'border-[#0f62fe] bg-[#0f62fe]' : 'border-carbon-gray-30'}`}>
-                  {selectedOutcome === outcome.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center
+                  ${selectedOutcome === outcome.id ? 'border-[#0f62fe] bg-[#0f62fe]' : 'border-carbon-gray-30'}`}
+                >
+                  {selectedOutcome === outcome.id && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  )}
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-carbon-gray-100">{outcome.label}</p>
-                  <p className="text-2xs text-carbon-gray-50 mt-0.5 leading-tight">{outcome.description}</p>
+                  <p className="text-2xs text-carbon-gray-50 mt-0.5 leading-tight">
+                    {outcome.description}
+                  </p>
                 </div>
               </div>
             </button>
@@ -388,7 +524,9 @@ function Step3DocumentOutcome({ onDocument }: Step3Props) {
       <button
         onClick={() => {
           const outcome = OUTCOME_OPTIONS.find((o) => o.id === selectedOutcome);
-          onDocument(`Outcome: ${outcome?.label ?? selectedOutcome}. Contact: ${contactMethod} on ${contactDate}. Patient response: ${patientResponse}. ${clinicalNotes}`);
+          onDocument(
+            `Outcome: ${outcome?.label ?? selectedOutcome}. Contact: ${contactMethod} on ${contactDate}. Patient response: ${patientResponse}. ${clinicalNotes}`
+          );
         }}
         disabled={!canProceed}
         className="carbon-btn-primary w-full justify-center py-2.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
@@ -403,7 +541,14 @@ function Step3DocumentOutcome({ onDocument }: Step3Props) {
 // ─── Step 4: Audit Trail & Close ──────────────────────────────────────────────
 interface Step4Props {
   alert: UtilizationAlert;
-  stepHistory: { step: number; label: string; completedAt: string; completedBy: string; completedByRole: string; notes?: string }[];
+  stepHistory: {
+    step: number;
+    label: string;
+    completedAt: string;
+    completedBy: string;
+    completedByRole: string;
+    notes?: string;
+  }[];
   onClose: (notes: string) => void;
 }
 
@@ -422,7 +567,8 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
           <div>
             <p className="text-sm font-semibold text-carbon-gray-100">Audit Trail Review</p>
             <p className="text-xs text-carbon-gray-70 mt-0.5">
-              Review the complete escalation workflow record before closing. All steps are immutably logged.
+              Review the complete escalation workflow record before closing. All steps are immutably
+              logged.
             </p>
           </div>
         </div>
@@ -432,13 +578,20 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
       <div className="border border-carbon-gray-20 overflow-hidden">
         <div className="px-4 py-2.5 bg-carbon-gray-10 border-b border-carbon-gray-20 flex items-center gap-2">
           <Icon name="ShieldCheckIcon" size={14} className="text-[#24a148]" />
-          <p className="text-xs font-semibold text-carbon-gray-100">Escalation Audit Record — {alert.type}</p>
+          <p className="text-xs font-semibold text-carbon-gray-100">
+            Escalation Audit Record — {alert.type}
+          </p>
         </div>
         <table className="w-full text-xs">
           <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
             <tr>
               {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                <th key={`ah-${h}`} className="px-3 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                <th
+                  key={`ah-${h}`}
+                  className="px-3 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                >
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -450,13 +603,21 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
                   <Icon name="BoltIcon" size={9} className="text-white" />
                 </div>
               </td>
-              <td className="px-3 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">Alert Generated</td>
+              <td className="px-3 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                Alert Generated
+              </td>
               <td className="px-3 py-2.5 text-carbon-gray-70">System ({alert.source})</td>
               <td className="px-3 py-2.5">
-                <span className="text-2xs px-1.5 py-0.5 font-medium bg-carbon-gray-10 text-carbon-gray-50">Automated</span>
+                <span className="text-2xs px-1.5 py-0.5 font-medium bg-carbon-gray-10 text-carbon-gray-50">
+                  Automated
+                </span>
               </td>
-              <td className="px-3 py-2.5 text-carbon-gray-50 max-w-xs truncate">{alert.description.substring(0, 60)}...</td>
-              <td className="px-3 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">{alert.createdDate}</td>
+              <td className="px-3 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                {alert.description.substring(0, 60)}...
+              </td>
+              <td className="px-3 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
+                {alert.createdDate}
+              </td>
             </tr>
             {stepHistory.map((record, i) => (
               <tr key={`audit-step-${i}`} className="hover:bg-carbon-gray-10">
@@ -465,16 +626,27 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
                     <Icon name="CheckIcon" size={9} className="text-white" />
                   </div>
                 </td>
-                <td className="px-3 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                <td className="px-3 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                  {record.label}
+                </td>
                 <td className="px-3 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                 <td className="px-3 py-2.5">
-                  <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                  <span
+                    className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                  >
                     {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                   </span>
                 </td>
-                <td className="px-3 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                <td className="px-3 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                  {record.notes ?? '—'}
+                </td>
                 <td className="px-3 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                  {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(record.completedAt).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </td>
               </tr>
             ))}
@@ -515,7 +687,11 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
       </div>
 
       <button
-        onClick={() => onClose(`Escalation closed. ${followUpRequired ? `Follow-up scheduled: ${followUpDate}. ` : ''}${closureNotes}`)}
+        onClick={() =>
+          onClose(
+            `Escalation closed. ${followUpRequired ? `Follow-up scheduled: ${followUpDate}. ` : ''}${closureNotes}`
+          )
+        }
         className="carbon-btn-primary w-full justify-center py-2.5 text-sm bg-[#24a148] hover:bg-[#1a7a38] border-[#24a148] hover:border-[#1a7a38]"
       >
         <Icon name="ShieldCheckIcon" size={16} />
@@ -526,7 +702,20 @@ function Step4AuditClose({ alert, stepHistory, onClose }: Step4Props) {
 }
 
 // ─── Completed View ───────────────────────────────────────────────────────────
-function CompletedView({ alert, stepHistory }: { alert: UtilizationAlert; stepHistory: { step: number; label: string; completedAt: string; completedBy: string; completedByRole: string; notes?: string }[] }) {
+function CompletedView({
+  alert,
+  stepHistory,
+}: {
+  alert: UtilizationAlert;
+  stepHistory: {
+    step: number;
+    label: string;
+    completedAt: string;
+    completedBy: string;
+    completedByRole: string;
+    notes?: string;
+  }[];
+}) {
   return (
     <div className="space-y-4">
       <div className="bg-[#defbe6] border border-[#24a148] p-4 flex items-start gap-3">
@@ -545,7 +734,12 @@ function CompletedView({ alert, stepHistory }: { alert: UtilizationAlert; stepHi
           <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
             <tr>
               {['Step', 'Action', 'Completed By', 'Notes', 'Timestamp'].map((h) => (
-                <th key={`ch-${h}`} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                <th
+                  key={`ch-${h}`}
+                  className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                >
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -557,11 +751,20 @@ function CompletedView({ alert, stepHistory }: { alert: UtilizationAlert; stepHi
                     <Icon name="CheckIcon" size={9} className="text-white" />
                   </div>
                 </td>
-                <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                  {record.label}
+                </td>
                 <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
-                <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                  {record.notes ?? '—'}
+                </td>
                 <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                  {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(record.completedAt).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </td>
               </tr>
             ))}
@@ -578,15 +781,13 @@ interface UtilizationEscalationJourneyProps {
   onClose: () => void;
 }
 
-export default function UtilizationEscalationJourney({ alert, onClose }: UtilizationEscalationJourneyProps) {
+export default function UtilizationEscalationJourney({
+  alert,
+  onClose,
+}: UtilizationEscalationJourneyProps) {
   const { user } = useAppContext();
-  const {
-    getWorkflow,
-    getWorkflowStatus,
-    startWorkflow,
-    advanceStep,
-    completeWorkflow,
-  } = useWorkflowMachine();
+  const { getWorkflow, getWorkflowStatus, startWorkflow, advanceStep, completeWorkflow } =
+    useWorkflowMachine();
 
   const wfDef = workflowDefinitions['utilization-escalation'];
   const wf = getWorkflow('utilization-escalation', alert.id);
@@ -614,11 +815,20 @@ export default function UtilizationEscalationJourney({ alert, onClose }: Utiliza
   };
 
   const statusCfg = {
-    'idle': { cls: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20', label: 'Not Started' },
-    'in-progress': { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/30', label: `In Progress — Step ${currentStep}/${wfDef.steps.length}` },
-    'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Documentation' },
-    'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Escalation Closed' },
-    'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed' },
+    idle: {
+      cls: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20',
+      label: 'Not Started',
+    },
+    'in-progress': {
+      cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/30',
+      label: `In Progress — Step ${currentStep}/${wfDef.steps.length}`,
+    },
+    'awaiting-review': {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Awaiting Documentation',
+    },
+    completed: { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Escalation Closed' },
+    rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed' },
   } as const;
 
   const sc = statusCfg[status] ?? statusCfg['idle'];
@@ -635,9 +845,7 @@ export default function UtilizationEscalationJourney({ alert, onClose }: Utiliza
             <p className="text-sm font-semibold text-carbon-gray-100">
               Utilization Escalation — {alert.type}
             </p>
-            <p className="text-2xs text-carbon-gray-50 font-mono">
-              {wfDef.description}
-            </p>
+            <p className="text-2xs text-carbon-gray-50 font-mono">{wfDef.description}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -674,14 +882,16 @@ export default function UtilizationEscalationJourney({ alert, onClose }: Utiliza
               {/* Step header */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 bg-[#da1e28] flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xs font-bold text-white">{status === 'idle' ? 1 : currentStep}</span>
+                  <span className="text-2xs font-bold text-white">
+                    {status === 'idle' ? 1 : currentStep}
+                  </span>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-carbon-gray-100">
-                    {wfDef.steps[(status === 'idle' ? 0 : currentStep - 1)]?.label}
+                    {wfDef.steps[status === 'idle' ? 0 : currentStep - 1]?.label}
                   </p>
                   <p className="text-xs text-carbon-gray-50">
-                    {wfDef.steps[(status === 'idle' ? 0 : currentStep - 1)]?.description}
+                    {wfDef.steps[status === 'idle' ? 0 : currentStep - 1]?.description}
                   </p>
                 </div>
               </div>

@@ -4,11 +4,11 @@ Real data-source loaders behind their seams. Generic and persona-free: no
 hardcoded Maria journey, no persona-specific values baked into code. Three seams,
 one shape each.
 
-| Seam id | Normalized output | Seeded from | Production |
-|---------|-------------------|-------------|------------|
-| `goldCardRoster` | `GoldCardRoster` (cards + PA histories) | `data/gold-card-roster.seed.json` | stub throws until wired |
-| `denialRateFeed` | `DenialRateFeed` (rates by code/plan) | `data/denial-rates.seed.json` | stub throws until wired |
-| `providerDirectory` | `ProviderDirectory` (providers) | `data/provider-directory.seed.json` | stub throws until wired |
+| Seam id             | Normalized output                       | Seeded from                         | Production              |
+| ------------------- | --------------------------------------- | ----------------------------------- | ----------------------- |
+| `goldCardRoster`    | `GoldCardRoster` (cards + PA histories) | `data/gold-card-roster.seed.json`   | stub throws until wired |
+| `denialRateFeed`    | `DenialRateFeed` (rates by code/plan)   | `data/denial-rates.seed.json`       | stub throws until wired |
+| `providerDirectory` | `ProviderDirectory` (providers)         | `data/provider-directory.seed.json` | stub throws until wired |
 
 ## The shape
 

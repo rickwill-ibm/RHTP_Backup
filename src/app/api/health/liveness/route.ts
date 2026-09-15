@@ -23,6 +23,6 @@ export async function GET(): Promise<NextResponse> {
       pid: process.pid,
       ts: new Date().toISOString(),
     },
-    { status: 200 },
+    { status: 200 }
   );
 }

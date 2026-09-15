@@ -6,8 +6,14 @@
 // Data  → fhirCareTeamData.data.ts
 
 export type {
-  CareTeamRoleCategory, TaskProgramType, TaskStatus, TaskPriority,
-  FHIRCareTeamParticipant, FHIRCareTeam, FHIRTask, CareTeamInboxTask,
+  CareTeamRoleCategory,
+  TaskProgramType,
+  TaskStatus,
+  TaskPriority,
+  FHIRCareTeamParticipant,
+  FHIRCareTeam,
+  FHIRTask,
+  CareTeamInboxTask,
 } from './fhirCareTeamData.types';
 
 export {

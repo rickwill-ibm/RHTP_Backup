@@ -20,12 +20,7 @@
  */
 
 /** Lifecycle state of a governed value-set version. Mirrors Wave A's model. */
-export type GovernanceState =
-  | 'draft'
-  | 'pending-approval'
-  | 'approved'
-  | 'rejected'
-  | 'retired';
+export type GovernanceState = 'draft' | 'pending-approval' | 'approved' | 'rejected' | 'retired';
 
 /** A PHI-free governance record for one value-set logical id. */
 export interface GovernanceRecord {

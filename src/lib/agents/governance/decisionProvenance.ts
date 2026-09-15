@@ -61,5 +61,7 @@ export function buildDecisionProvenance(input: BuildProvenanceInput): DecisionPr
  */
 export function isAdverseProvenanceComplete(p: DecisionProvenance): boolean {
   if (p.decision !== 'rejected') return true;
-  return Boolean(p.memberFacingReason && p.memberFacingReason.trim() && p.appealRef && p.appealRef.trim());
+  return Boolean(
+    p.memberFacingReason && p.memberFacingReason.trim() && p.appealRef && p.appealRef.trim()
+  );
 }

@@ -26,10 +26,7 @@ const RETRY_CONFIG = {
   backoffMultiplier: 2,
 };
 
-async function retryWithBackoff<T>(
-  operation: () => Promise<T>,
-  context: string
-): Promise<T> {
+async function retryWithBackoff<T>(operation: () => Promise<T>, context: string): Promise<T> {
   let lastError: Error | null = null;
   let delay = RETRY_CONFIG.initialDelay;
 
@@ -40,31 +37,46 @@ async function retryWithBackoff<T>(
       lastError = error as Error;
 
       if (attempt < RETRY_CONFIG.maxRetries) {
-        console.warn(`${context} failed (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1}):`, error);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        console.warn(
+          `${context} failed (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1}):`,
+          error
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
         delay = Math.min(delay * RETRY_CONFIG.backoffMultiplier, RETRY_CONFIG.maxDelay);
       }
     }
   }
 
-  throw new Error(`${context} failed after ${RETRY_CONFIG.maxRetries + 1} attempts: ${lastError?.message}`);
+  throw new Error(
+    `${context} failed after ${RETRY_CONFIG.maxRetries + 1} attempts: ${lastError?.message}`
+  );
 }
 
 // ─── FHIR Resource Creation Functions ─────────────────────────────────────────
 
 /** Create a ServiceRequest for a referral */
-export async function createReferralServiceRequest(
-  request: ReferralRequest
-): Promise<any> {
+export async function createReferralServiceRequest(request: ReferralRequest): Promise<any> {
   return retryWithBackoff(async () => {
     const serviceRequest = {
       resourceType: 'ServiceRequest',
       status: 'active',
       intent: 'order',
       priority: request.priority || 'routine',
-      category: [{ coding: [{ system: 'http://snomed.info/sct', code: '3457005', display: 'Patient referral' }] }],
+      category: [
+        {
+          coding: [
+            { system: 'http://snomed.info/sct', code: '3457005', display: 'Patient referral' },
+          ],
+        },
+      ],
       code: {
-        coding: [{ system: 'http://loinc.org', code: request.serviceCode, display: request.serviceDisplay }],
+        coding: [
+          {
+            system: 'http://loinc.org',
+            code: request.serviceCode,
+            display: request.serviceDisplay,
+          },
+        ],
         text: request.serviceDisplay,
       },
       subject: { reference: `Patient/${request.patientId}` },
@@ -72,14 +84,47 @@ export async function createReferralServiceRequest(
       requester: { reference: `Practitioner/${request.requesterId}` },
       performer: [{ reference: `Practitioner/${request.performerId}` }],
       ...(request.reasonCode && {
-        reasonCode: [{ coding: [{ system: 'http://hl7.org/fhir/sid/icd-10', code: request.reasonCode, display: request.reasonDisplay }] }],
+        reasonCode: [
+          {
+            coding: [
+              {
+                system: 'http://hl7.org/fhir/sid/icd-10',
+                code: request.reasonCode,
+                display: request.reasonDisplay,
+              },
+            ],
+          },
+        ],
       }),
-      ...(request.conditionId && { reasonReference: [{ reference: `Condition/${request.conditionId}` }] }),
+      ...(request.conditionId && {
+        reasonReference: [{ reference: `Condition/${request.conditionId}` }],
+      }),
       ...(request.notes && { note: [{ text: request.notes }] }),
       extension: [
-        ...(request.careGapId ? [{ url: 'http://tcoc.org/fhir/StructureDefinition/care-gap-reference', valueReference: { reference: `MeasureReport/${request.careGapId}` } }] : []),
-        ...(request.gainshareEligible ? [{ url: 'http://tcoc.org/fhir/StructureDefinition/gainshare-eligible', valueBoolean: true }] : []),
-        ...(request.gainshareAmount ? [{ url: 'http://tcoc.org/fhir/StructureDefinition/gainshare-amount', valueMoney: { value: request.gainshareAmount, currency: 'USD' } }] : []),
+        ...(request.careGapId
+          ? [
+              {
+                url: 'http://tcoc.org/fhir/StructureDefinition/care-gap-reference',
+                valueReference: { reference: `MeasureReport/${request.careGapId}` },
+              },
+            ]
+          : []),
+        ...(request.gainshareEligible
+          ? [
+              {
+                url: 'http://tcoc.org/fhir/StructureDefinition/gainshare-eligible',
+                valueBoolean: true,
+              },
+            ]
+          : []),
+        ...(request.gainshareAmount
+          ? [
+              {
+                url: 'http://tcoc.org/fhir/StructureDefinition/gainshare-amount',
+                valueMoney: { value: request.gainshareAmount, currency: 'USD' },
+              },
+            ]
+          : []),
       ],
     };
 
@@ -107,12 +152,27 @@ export async function createReferralTask(
       description: serviceDisplay
         ? `${serviceDisplay} — referral from ${requesterId === 'practitioner-rick' ? 'Dr. Rick Williams' : requesterId}`
         : `Referral from Practitioner/${requesterId} → Practitioner/${performerId}`,
-      code: { coding: [{ system: 'http://hl7.org/fhir/CodeSystem/task-code', code: 'fulfill', display: 'Fulfill the focal request' }], text: 'Specialist Referral' },
+      code: {
+        coding: [
+          {
+            system: 'http://hl7.org/fhir/CodeSystem/task-code',
+            code: 'fulfill',
+            display: 'Fulfill the focal request',
+          },
+        ],
+        text: 'Specialist Referral',
+      },
       focus: { reference: `ServiceRequest/${serviceRequestId}` },
       for: { reference: `Patient/${patientId}` },
       authoredOn: clock.nowIso(),
-      requester: { reference: `Practitioner/${requesterId}`, display: requesterId === 'practitioner-rick' ? 'Dr. Rick Williams' : requesterId },
-      owner: { reference: `Practitioner/${performerId}`, display: performerId === 'practitioner-jon' ? 'Dr. Jon Noyes' : performerId },
+      requester: {
+        reference: `Practitioner/${requesterId}`,
+        display: requesterId === 'practitioner-rick' ? 'Dr. Rick Williams' : requesterId,
+      },
+      owner: {
+        reference: `Practitioner/${performerId}`,
+        display: performerId === 'practitioner-jon' ? 'Dr. Jon Noyes' : performerId,
+      },
       businessStatus: { text: 'Referral sent, awaiting appointment' },
     };
 
@@ -159,7 +219,15 @@ export async function createProcedure(request: ServiceCompletionRequest): Promis
     const procedure: any = {
       resourceType: 'Procedure',
       status: 'completed',
-      code: { coding: [{ system: 'http://www.ama-assn.org/go/cpt', code: request.procedureCode, display: request.procedureDisplay }] },
+      code: {
+        coding: [
+          {
+            system: 'http://www.ama-assn.org/go/cpt',
+            code: request.procedureCode,
+            display: request.procedureDisplay,
+          },
+        ],
+      },
       subject: { reference: `Patient/${request.patientId}` },
       performedDateTime: request.performedDate,
       performer: [{ actor: { reference: `Practitioner/${request.performerId}` } }],
@@ -194,7 +262,16 @@ export async function createObservations(
       const resource: any = {
         resourceType: 'Observation',
         status: 'final',
-        category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/observation-category', code: 'laboratory' }] }],
+        category: [
+          {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/observation-category',
+                code: 'laboratory',
+              },
+            ],
+          },
+        ],
         code: { coding: [{ system: obs.codeSystem, code: obs.code, display: obs.display }] },
         subject: { reference: `Patient/${patientId}` },
         effectiveDateTime: clock.nowIso(),
@@ -210,9 +287,20 @@ export async function createObservations(
         }),
         ...(obs.valueString && { valueString: obs.valueString }),
         ...(obs.interpretation && {
-          interpretation: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation', code: obs.interpretation }] }],
+          interpretation: [
+            {
+              coding: [
+                {
+                  system: 'http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation',
+                  code: obs.interpretation,
+                },
+              ],
+            },
+          ],
         }),
-        ...(hasRealServiceRequest && { basedOn: [{ reference: `ServiceRequest/${serviceRequestId}` }] }),
+        ...(hasRealServiceRequest && {
+          basedOn: [{ reference: `ServiceRequest/${serviceRequestId}` }],
+        }),
       };
 
       const response = await fhirClient.create<{ id: string }>(resource);
@@ -238,7 +326,10 @@ export async function updateMeasureReportForGapClosure(update: MeasureReportUpda
       extension: [
         { url: 'closed', valueBoolean: update.gapClosed },
         { url: 'closureDate', valueDateTime: update.closureDate },
-        { url: 'evidence', valueReference: update.evidenceReferences.map(ref => ({ reference: ref })) },
+        {
+          url: 'evidence',
+          valueReference: update.evidenceReferences.map((ref) => ({ reference: ref })),
+        },
       ],
     });
 
@@ -261,12 +352,37 @@ export async function createProvenanceRecord(
       resourceType: 'Provenance',
       target: [{ reference: `${targetResourceType}/${targetResourceId}` }],
       recorded: clock.nowIso(),
-      agent: [{
-        type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/provenance-participant-type', code: 'author' }] },
-        who: { reference: `Practitioner/${actorId}` },
-      }],
-      activity: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v3-DataOperation', code: activity }] },
-      ...(reason && { reason: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v3-ActReason', code: 'TREAT', display: reason }] }] }),
+      agent: [
+        {
+          type: {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/provenance-participant-type',
+                code: 'author',
+              },
+            ],
+          },
+          who: { reference: `Practitioner/${actorId}` },
+        },
+      ],
+      activity: {
+        coding: [
+          { system: 'http://terminology.hl7.org/CodeSystem/v3-DataOperation', code: activity },
+        ],
+      },
+      ...(reason && {
+        reason: [
+          {
+            coding: [
+              {
+                system: 'http://terminology.hl7.org/CodeSystem/v3-ActReason',
+                code: 'TREAT',
+                display: reason,
+              },
+            ],
+          },
+        ],
+      }),
     };
 
     const response = await fhirClient.create<{ id: string }>(provenance);
@@ -286,11 +402,18 @@ export async function initiateReferral(request: ReferralRequest): Promise<{
   try {
     const serviceRequest = await createReferralServiceRequest(request);
     const task = await createReferralTask(
-      serviceRequest.id, request.patientId, request.performerId,
-      request.requesterId, request.serviceDisplay, request.priority
+      serviceRequest.id,
+      request.patientId,
+      request.performerId,
+      request.requesterId,
+      request.serviceDisplay,
+      request.priority
     );
     const provenance = await createProvenanceRecord(
-      'ServiceRequest', serviceRequest.id, request.requesterId, 'CREATE',
+      'ServiceRequest',
+      serviceRequest.id,
+      request.requesterId,
+      'CREATE',
       'Referral initiated for care gap closure'
     );
     return { serviceRequest, task, provenance };
@@ -304,19 +427,41 @@ export async function initiateReferral(request: ReferralRequest): Promise<{
 export async function completeServiceAndCloseGap(
   request: ServiceCompletionRequest,
   measureReportId?: string
-): Promise<{ task: any; procedure: any; observations: any[]; measureReport?: any; provenance: any }> {
+): Promise<{
+  task: any;
+  procedure: any;
+  observations: any[];
+  measureReport?: any;
+  provenance: any;
+}> {
   try {
     const procedure = await createProcedure(request);
     const observations = request.observations
-      ? await createObservations(request.patientId, request.performerId, request.serviceRequestId, request.observations)
+      ? await createObservations(
+          request.patientId,
+          request.performerId,
+          request.serviceRequestId,
+          request.observations
+        )
       : [];
 
     const taskOutput = [
-      { type: { text: 'Procedure performed' }, valueReference: { reference: `Procedure/${procedure.id}` } },
-      ...observations.map(obs => ({ type: { text: 'Lab result' }, valueReference: { reference: `Observation/${obs.id}` } })),
+      {
+        type: { text: 'Procedure performed' },
+        valueReference: { reference: `Procedure/${procedure.id}` },
+      },
+      ...observations.map((obs) => ({
+        type: { text: 'Lab result' },
+        valueReference: { reference: `Observation/${obs.id}` },
+      })),
     ];
 
-    const task = await updateTaskStatus(request.taskId, 'completed', 'Service completed, results available', taskOutput);
+    const task = await updateTaskStatus(
+      request.taskId,
+      'completed',
+      'Service completed, results available',
+      taskOutput
+    );
 
     let measureReport;
     if (measureReportId) {
@@ -325,13 +470,20 @@ export async function completeServiceAndCloseGap(
         patientId: request.patientId,
         measureCode: request.procedureCode,
         gapClosed: true,
-        evidenceReferences: [`Procedure/${procedure.id}`, ...observations.map(obs => `Observation/${obs.id}`)],
+        evidenceReferences: [
+          `Procedure/${procedure.id}`,
+          ...observations.map((obs) => `Observation/${obs.id}`),
+        ],
         closureDate: request.performedDate,
       });
     }
 
     const provenance = await createProvenanceRecord(
-      'Task', request.taskId, request.performerId, 'UPDATE', 'Service completed and documented'
+      'Task',
+      request.taskId,
+      request.performerId,
+      'UPDATE',
+      'Service completed and documented'
     );
 
     return { task, procedure, observations, measureReport, provenance };
@@ -342,7 +494,10 @@ export async function completeServiceAndCloseGap(
 }
 
 /** Validation helper */
-export function validateReferralRequest(request: ReferralRequest): { valid: boolean; errors: string[] } {
+export function validateReferralRequest(request: ReferralRequest): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (!request.patientId) errors.push('Patient ID is required');

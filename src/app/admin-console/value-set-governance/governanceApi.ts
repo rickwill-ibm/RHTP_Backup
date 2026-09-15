@@ -39,7 +39,10 @@ export type GovernanceState = VersionLifecycleState;
 
 /** Human labels + badge variants for each ENGINE lifecycle state. */
 export const STATE_META: Readonly<
-  Record<GovernanceState, { label: string; variant: 'success' | 'warning' | 'info' | 'neutral' | 'purple' | 'danger' }>
+  Record<
+    GovernanceState,
+    { label: string; variant: 'success' | 'warning' | 'info' | 'neutral' | 'purple' | 'danger' }
+  >
 > = Object.freeze({
   draft: { label: 'Draft', variant: 'neutral' },
   'in-review': { label: 'In Review', variant: 'warning' },
@@ -165,23 +168,43 @@ function buildSeededService() {
   const svc = createValueSetGovernanceService({ now });
 
   // FY2025: draft → in-review → approved, later superseded by FY2026 (one-active).
-  svc.createDraft({ valueSetId: ASSET_ID, version: 'FY2025', system: SYSTEM, createdBy: STEWARD.userId });
+  svc.createDraft({
+    valueSetId: ASSET_ID,
+    version: 'FY2025',
+    system: SYSTEM,
+    createdBy: STEWARD.userId,
+  });
   svc.submitForReview(ASSET_ID, 'FY2025', STEWARD, 'Initial ICD-10-CM governed set (FY2025).');
   svc.approve(ASSET_ID, 'FY2025', REVIEWER, 'FY2025 approved by reviewer.');
 
   // FY2026: draft → in-review → approved (active); approving supersedes FY2025.
-  svc.createDraft({ valueSetId: ASSET_ID, version: 'FY2026', system: SYSTEM, createdBy: STEWARD.userId });
+  svc.createDraft({
+    valueSetId: ASSET_ID,
+    version: 'FY2026',
+    system: SYSTEM,
+    createdBy: STEWARD.userId,
+  });
   svc.submitForReview(ASSET_ID, 'FY2026', STEWARD, 'FY2026 annual update; R51 removed.');
   svc.approve(ASSET_ID, 'FY2026', REVIEWER, 'FY2026 approved; supersedes FY2025.');
 
   // FY2027: in-review, submitted by the STEWARD — a reviewer other than the maker MAY approve.
-  svc.createDraft({ valueSetId: ASSET_ID, version: 'FY2027', system: SYSTEM, createdBy: STEWARD.userId });
+  svc.createDraft({
+    valueSetId: ASSET_ID,
+    version: 'FY2027',
+    system: SYSTEM,
+    createdBy: STEWARD.userId,
+  });
   svc.submitForReview(ASSET_ID, 'FY2027', STEWARD, 'FY2027 candidate awaiting review.');
 
   // FY2028: in-review, submitted by the REVIEWER — separation-of-duties means the
   // reviewer may NOT approve their own submission (self-approval), and the steward
   // may not approve at all (not-a-reviewer). The maker-checker demo case.
-  svc.createDraft({ valueSetId: ASSET_ID, version: 'FY2028', system: SYSTEM, createdBy: REVIEWER.userId });
+  svc.createDraft({
+    valueSetId: ASSET_ID,
+    version: 'FY2028',
+    system: SYSTEM,
+    createdBy: REVIEWER.userId,
+  });
   svc.submitForReview(ASSET_ID, 'FY2028', REVIEWER, 'FY2028 candidate submitted by a reviewer.');
 
   return svc;
@@ -307,7 +330,7 @@ export function canSubmit(principal: GovernancePrincipal): boolean {
  */
 export function evaluateApprovalGate(
   version: ValueSetVersion,
-  principal: GovernancePrincipal,
+  principal: GovernancePrincipal
 ): { enabled: boolean; reason: string } {
   if (version.state !== 'in-review') {
     return {

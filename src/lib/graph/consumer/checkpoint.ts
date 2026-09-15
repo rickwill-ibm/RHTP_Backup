@@ -25,7 +25,9 @@ export interface ProjectionCheckpointStore {
 }
 
 /** Process-local in-memory checkpoint — the demo/mock default (no backend). */
-export function createMemoryCheckpointStore(id = 'mock-projection-checkpoint'): ProjectionCheckpointStore {
+export function createMemoryCheckpointStore(
+  id = 'mock-projection-checkpoint'
+): ProjectionCheckpointStore {
   const marks = new Map<string, number>();
   return {
     id,
@@ -44,7 +46,9 @@ export function createMemoryCheckpointStore(id = 'mock-projection-checkpoint'): 
 
 export class ProjectionCheckpointNotConfiguredError extends Error {
   constructor() {
-    super('projectionCheckpoint=production but no durable checkpoint factory is registered (fail-closed)');
+    super(
+      'projectionCheckpoint=production but no durable checkpoint factory is registered (fail-closed)'
+    );
     this.name = 'ProjectionCheckpointNotConfiguredError';
   }
 }
@@ -52,7 +56,9 @@ export class ProjectionCheckpointNotConfiguredError extends Error {
 let productionFactory: (() => ProjectionCheckpointStore) | null = null;
 
 /** Register (or clear with null) the durable production checkpoint factory. */
-export function setProductionCheckpointFactory(factory: (() => ProjectionCheckpointStore) | null): void {
+export function setProductionCheckpointFactory(
+  factory: (() => ProjectionCheckpointStore) | null
+): void {
   productionFactory = factory;
 }
 

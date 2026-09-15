@@ -8,7 +8,10 @@ interface GapClosureMetricsPanelProps {
   patientName: string;
 }
 
-export default function GapClosureMetricsPanel({ patientId, patientName }: GapClosureMetricsPanelProps) {
+export default function GapClosureMetricsPanel({
+  patientId,
+  patientName,
+}: GapClosureMetricsPanelProps) {
   const [gainshareRecords, setGainshareRecords] = useState<GainshareRecord[]>([]);
   const [qualityMetrics, setQualityMetrics] = useState<QualityMetrics[]>([]);
   const [closedReferrals, setClosedReferrals] = useState<any[]>([]);
@@ -28,7 +31,7 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
   const loadMetrics = () => {
     // Get all gainshare records for this patient
     const allGainshare = referralStore.getGainshareRecords();
-    const patientGainshare = allGainshare.filter(g => g.patientId === patientId);
+    const patientGainshare = allGainshare.filter((g) => g.patientId === patientId);
     setGainshareRecords(patientGainshare);
 
     // Get quality metrics
@@ -37,8 +40,8 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
 
     // Get closed referrals for this patient
     const allReferrals = referralStore.getAllReferrals();
-    const closed = allReferrals.filter(r => 
-      r.patientId === patientId && r.status === 'completed'
+    const closed = allReferrals.filter(
+      (r) => r.patientId === patientId && r.status === 'completed'
     );
     setClosedReferrals(closed);
   };
@@ -59,9 +62,7 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <Icon name="CheckCircleIcon" size={20} className="text-green-700" />
-          <h3 className="text-base font-bold text-gray-900">
-            Gap Closure Success - {patientName}
-          </h3>
+          <h3 className="text-base font-bold text-gray-900">Gap Closure Success - {patientName}</h3>
         </div>
         <span className="bg-green-700 text-white text-xs font-bold px-3 py-1 rounded-full">
           {gapsClosed} Gap{gapsClosed !== 1 ? 's' : ''} Closed
@@ -108,7 +109,10 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
         </p>
         <div className="space-y-2">
           {closedReferrals.map((referral, idx) => (
-            <div key={idx} className="flex items-center justify-between text-xs bg-green-50 p-2 rounded">
+            <div
+              key={idx}
+              className="flex items-center justify-between text-xs bg-green-50 p-2 rounded"
+            >
               <div className="flex-1">
                 <p className="font-semibold text-gray-900">{referral.careGap?.description}</p>
                 <p className="text-gray-600">{referral.careGap?.measure}</p>
@@ -134,9 +138,9 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
               <p className="font-semibold text-gray-700">{metric.measureName}</p>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex-1 bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full ${metric.rate >= metric.target ? 'bg-green-600' : 'bg-blue-600'}`}
-                    style={{ width: `${(metric.rate * 100)}%` }}
+                    style={{ width: `${metric.rate * 100}%` }}
                   />
                 </div>
                 <span className="font-mono font-bold text-gray-900">
@@ -157,7 +161,10 @@ export default function GapClosureMetricsPanel({ patientId, patientName }: GapCl
           <p className="text-xs font-bold text-gray-700 mb-2">Gainshare Distribution Details</p>
           <div className="space-y-1">
             {gainshareRecords.map((record, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs bg-blue-50 p-2 rounded">
+              <div
+                key={idx}
+                className="flex items-center justify-between text-xs bg-blue-50 p-2 rounded"
+              >
                 <div>
                   <p className="font-semibold text-gray-900">{record.measureName}</p>
                   <p className="text-gray-600">Closed: {record.closureDate}</p>

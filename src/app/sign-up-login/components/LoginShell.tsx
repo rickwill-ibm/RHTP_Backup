@@ -16,8 +16,20 @@ interface LoginForm {
 const DEMO_PASSWORD = 'Demo@2026';
 
 const demoCredentials = [
-  { role: 'care_manager' as UserRole, label: 'Care Manager', email: 'angela.torres@tcoc-health.org', password: DEMO_PASSWORD, color: 'bg-[#d0e2ff] text-[#0043ce]' },
-  { role: 'physician' as UserRole, label: 'Physician', email: 'james.whitfield@tcoc-health.org', password: DEMO_PASSWORD, color: 'bg-[#defbe6] text-[#0e6027]' },
+  {
+    role: 'care_manager' as UserRole,
+    label: 'Care Manager',
+    email: 'angela.torres@tcoc-health.org',
+    password: DEMO_PASSWORD,
+    color: 'bg-[#d0e2ff] text-[#0043ce]',
+  },
+  {
+    role: 'physician' as UserRole,
+    label: 'Physician',
+    email: 'james.whitfield@tcoc-health.org',
+    password: DEMO_PASSWORD,
+    color: 'bg-[#defbe6] text-[#0e6027]',
+  },
 ];
 
 export default function LoginShell() {
@@ -27,7 +39,12 @@ export default function LoginShell() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginForm>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<LoginForm>({
     defaultValues: { email: '', password: '', remember: false },
   });
 
@@ -52,7 +69,7 @@ export default function LoginShell() {
     router.push('/contract-program-selection');
   };
 
-  const autofill = (cred: typeof demoCredentials[0]) => {
+  const autofill = (cred: (typeof demoCredentials)[0]) => {
     setValue('email', cred.email);
     setValue('password', cred.password);
     setSelectedRole(cred.role);
@@ -89,17 +106,34 @@ export default function LoginShell() {
           </div>
           <div className="flex-1 flex flex-col justify-center">
             <h1 className="text-4xl font-bold text-white leading-tight mb-4">
-              Population Health.<br />
+              Population Health.
+              <br />
               <span className="text-[#0f62fe]">Value-Based Care.</span>
             </h1>
             <p className="text-carbon-gray-30 text-base leading-relaxed mb-10">
-              Enterprise clinical platform for care managers and physicians managing risk-stratified patient panels under VBC contracts.
+              Enterprise clinical platform for care managers and physicians managing risk-stratified
+              patient panels under VBC contracts.
             </p>
             <div className="space-y-4">
               {[
-                { key: 'feat-hcc', icon: 'DocumentMagnifyingGlassIcon', title: 'HCC Capture & RAF Scoring', desc: 'Surface, review, and confirm HCC suspects with evidence-backed workflows' },
-                { key: 'feat-gap', icon: 'ClipboardDocumentCheckIcon', title: 'Care Gap Management', desc: 'HEDIS, STARS, and MIPS gap closure tracking with intervention workflows' },
-                { key: 'feat-cost', icon: 'CurrencyDollarIcon', title: 'Total Cost of Care Analytics', desc: 'PMPM trend, cost envelope, and avoidable utilization monitoring' },
+                {
+                  key: 'feat-hcc',
+                  icon: 'DocumentMagnifyingGlassIcon',
+                  title: 'HCC Capture & RAF Scoring',
+                  desc: 'Surface, review, and confirm HCC suspects with evidence-backed workflows',
+                },
+                {
+                  key: 'feat-gap',
+                  icon: 'ClipboardDocumentCheckIcon',
+                  title: 'Care Gap Management',
+                  desc: 'HEDIS, STARS, and MIPS gap closure tracking with intervention workflows',
+                },
+                {
+                  key: 'feat-cost',
+                  icon: 'CurrencyDollarIcon',
+                  title: 'Total Cost of Care Analytics',
+                  desc: 'PMPM trend, cost envelope, and avoidable utilization monitoring',
+                },
               ].map((f) => (
                 <div key={f.key} className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-[#0f62fe] flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -129,15 +163,27 @@ export default function LoginShell() {
           </div>
 
           <h2 className="text-2xl font-semibold text-carbon-gray-100 mb-1">Sign in to TCOC</h2>
-          <p className="text-sm text-carbon-gray-50 mb-6">Access your attributed patient panels and VBC contracts</p>
+          <p className="text-sm text-carbon-gray-50 mb-6">
+            Access your attributed patient panels and VBC contracts
+          </p>
 
           {/* Role selector */}
           <div className="mb-6">
             <p className="carbon-label mb-2">Sign in as</p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { role: 'care_manager' as UserRole, label: 'Care Manager', icon: 'UserGroupIcon', desc: 'Panel management & care coordination' },
-                { role: 'physician' as UserRole, label: 'Physician', icon: 'UserIcon', desc: 'Clinical review & HCC confirmation' },
+                {
+                  role: 'care_manager' as UserRole,
+                  label: 'Care Manager',
+                  icon: 'UserGroupIcon',
+                  desc: 'Panel management & care coordination',
+                },
+                {
+                  role: 'physician' as UserRole,
+                  label: 'Physician',
+                  icon: 'UserIcon',
+                  desc: 'Clinical review & HCC confirmation',
+                },
               ].map((r) => (
                 <button
                   key={`role-${r.role}`}
@@ -145,8 +191,16 @@ export default function LoginShell() {
                   className={`flex flex-col items-start p-3 border-2 text-left transition-colors ${selectedRole === r.role ? 'border-[#0f62fe] bg-[#edf5ff]' : 'border-carbon-gray-20 bg-white hover:border-carbon-gray-30'}`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Icon name={r.icon as any} size={16} className={selectedRole === r.role ? 'text-[#0f62fe]' : 'text-carbon-gray-50'} />
-                    <span className={`text-sm font-semibold ${selectedRole === r.role ? 'text-[#0f62fe]' : 'text-carbon-gray-100'}`}>{r.label}</span>
+                    <Icon
+                      name={r.icon as any}
+                      size={16}
+                      className={selectedRole === r.role ? 'text-[#0f62fe]' : 'text-carbon-gray-50'}
+                    />
+                    <span
+                      className={`text-sm font-semibold ${selectedRole === r.role ? 'text-[#0f62fe]' : 'text-carbon-gray-100'}`}
+                    >
+                      {r.label}
+                    </span>
                   </div>
                   <p className="text-2xs text-carbon-gray-50">{r.desc}</p>
                 </button>
@@ -165,17 +219,24 @@ export default function LoginShell() {
                 placeholder="you@organization.org"
                 {...register('email', {
                   required: 'Email is required',
-                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' },
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Enter a valid email address',
+                  },
                 })}
               />
-              {errors.email && <p className="text-xs text-[#da1e28] mt-1">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-xs text-[#da1e28] mt-1">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="carbon-label mb-0">Password</label>
-                <button type="button" className="text-xs text-carbon-blue hover:underline">Forgot password?</button>
+                <button type="button" className="text-xs text-carbon-blue hover:underline">
+                  Forgot password?
+                </button>
               </div>
               <div className="relative">
                 <input
@@ -196,19 +257,32 @@ export default function LoginShell() {
                   <Icon name={showPassword ? 'EyeSlashIcon' : 'EyeIcon'} size={16} />
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-[#da1e28] mt-1">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-xs text-[#da1e28] mt-1">{errors.password.message}</p>
+              )}
             </div>
 
             {/* Remember me */}
             <div className="flex items-center gap-2">
-              <input type="checkbox" id="remember" className="accent-carbon-blue" {...register('remember')} />
-              <label htmlFor="remember" className="text-sm text-carbon-gray-70 cursor-pointer">Remember this device for 30 days</label>
+              <input
+                type="checkbox"
+                id="remember"
+                className="accent-carbon-blue"
+                {...register('remember')}
+              />
+              <label htmlFor="remember" className="text-sm text-carbon-gray-70 cursor-pointer">
+                Remember this device for 30 days
+              </label>
             </div>
 
             {/* Error */}
             {loginError && (
               <div className="bg-[#fff1f1] border border-[#ffb3b8] px-4 py-3 flex items-start gap-2">
-                <Icon name="ExclamationCircleIcon" size={16} className="text-[#da1e28] flex-shrink-0 mt-0.5" />
+                <Icon
+                  name="ExclamationCircleIcon"
+                  size={16}
+                  className="text-[#da1e28] flex-shrink-0 mt-0.5"
+                />
                 <p className="text-xs text-[#da1e28]">{loginError}</p>
               </div>
             )}
@@ -249,14 +323,23 @@ export default function LoginShell() {
           <div className="mt-6 border border-carbon-gray-20 bg-carbon-gray-10">
             <div className="px-4 py-3 border-b border-carbon-gray-20 flex items-center gap-2">
               <Icon name="InformationCircleIcon" size={14} className="text-carbon-gray-50" />
-              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">Demo Credentials</p>
+              <p className="text-xs font-semibold text-carbon-gray-70 uppercase tracking-wide">
+                Demo Credentials
+              </p>
             </div>
             <div className="p-3 space-y-2">
               {demoCredentials.map((cred) => (
-                <div key={`cred-${cred.role}`} className="flex items-center justify-between gap-3 bg-white border border-carbon-gray-20 px-3 py-2">
+                <div
+                  key={`cred-${cred.role}`}
+                  className="flex items-center justify-between gap-3 bg-white border border-carbon-gray-20 px-3 py-2"
+                >
                   <div className="flex-1 min-w-0">
-                    <span className={`text-2xs font-semibold px-1.5 py-0.5 mr-2 ${cred.color}`}>{cred.label}</span>
-                    <span className="text-xs font-mono text-carbon-gray-70 truncate">{cred.email}</span>
+                    <span className={`text-2xs font-semibold px-1.5 py-0.5 mr-2 ${cred.color}`}>
+                      {cred.label}
+                    </span>
+                    <span className="text-xs font-mono text-carbon-gray-70 truncate">
+                      {cred.email}
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -273,7 +356,8 @@ export default function LoginShell() {
 
           {/* HIPAA notice */}
           <p className="text-2xs text-carbon-gray-50 mt-4 text-center leading-relaxed">
-            This system contains Protected Health Information (PHI). Access is restricted to authorized personnel only. All activity is monitored and logged per HIPAA requirements.
+            This system contains Protected Health Information (PHI). Access is restricted to
+            authorized personnel only. All activity is monitored and logged per HIPAA requirements.
           </p>
         </div>
       </div>

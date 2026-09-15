@@ -1,6 +1,6 @@
 /**
  * Gap Closure Service
- * 
+ *
  * Handles the complete closed-loop workflow for care gap closure:
  * 1. Specialist completes service
  * 2. Updates referral status to "completed"
@@ -8,7 +8,7 @@
  * 4. Updates quality metrics (increments numerator)
  * 5. Calculates and attributes gainshare (60/40 split)
  * 6. Notifies all listeners for real-time UI updates
- * 
+ *
  * Author: Richard Hennessy — TCOC Total Cost of Care Clinical Platform
  */
 
@@ -44,12 +44,10 @@ export interface GapClosureResult {
  * Complete the gap closure workflow
  * This is called when a specialist marks a referral as complete
  */
-export async function completeGapClosure(
-  request: GapClosureRequest
-): Promise<GapClosureResult> {
+export async function completeGapClosure(request: GapClosureRequest): Promise<GapClosureResult> {
   try {
     const referral = referralStore.getReferralById(request.referralId);
-    
+
     if (!referral) {
       return {
         success: false,
@@ -79,11 +77,7 @@ export async function completeGapClosure(
     }
 
     // Execute the complete workflow
-    referralStore.closeGap(
-      request.referralId,
-      request.specialistId,
-      request.specialistName
-    );
+    referralStore.closeGap(request.referralId, request.specialistId, request.specialistName);
 
     // Calculate gainshare amounts
     const totalGainshare = referral.careGap.gainshareAmount;
@@ -126,7 +120,7 @@ export async function completeGapClosure(
 export function getClosedGapsForPatient(patientId: string): Referral[] {
   return referralStore
     .getAllReferrals()
-    .filter(r => r.patientId === patientId && r.status === 'completed');
+    .filter((r) => r.patientId === patientId && r.status === 'completed');
 }
 
 /**
@@ -134,14 +128,14 @@ export function getClosedGapsForPatient(patientId: string): Referral[] {
  */
 export function getQualityMetricsSummary() {
   const metrics = referralStore.getQualityMetrics();
-  
+
   return {
     totalMeasures: metrics.length,
     averageRate: metrics.reduce((sum, m) => sum + m.rate, 0) / metrics.length,
     totalGapsClosed: metrics.reduce((sum, m) => sum + m.gapsClosed, 0),
     totalGapsOpen: metrics.reduce((sum, m) => sum + m.gapsOpen, 0),
-    measuresAboveTarget: metrics.filter(m => m.rate >= m.target).length,
-    measuresBelowTarget: metrics.filter(m => m.rate < m.target).length,
+    measuresAboveTarget: metrics.filter((m) => m.rate >= m.target).length,
+    measuresBelowTarget: metrics.filter((m) => m.rate < m.target).length,
     metrics,
   };
 }
@@ -151,15 +145,21 @@ export function getQualityMetricsSummary() {
  */
 export function getProviderGainshareSummary(providerId: string) {
   const records = referralStore.getGainshareRecords();
-  const providerRecords = records.filter(r => r.providerId === providerId);
-  
+  const providerRecords = records.filter((r) => r.providerId === providerId);
+
   return {
     totalEarned: providerRecords.reduce((sum, r) => sum + r.providerShare, 0),
     gapsClosed: providerRecords.length,
     byProgram: {
-      HEDIS: providerRecords.filter(r => r.measureId.startsWith('HEDIS')).reduce((sum, r) => sum + r.providerShare, 0),
-      STARS: providerRecords.filter(r => r.measureId.startsWith('STARS')).reduce((sum, r) => sum + r.providerShare, 0),
-      MIPS: providerRecords.filter(r => r.measureId.startsWith('MIPS')).reduce((sum, r) => sum + r.providerShare, 0),
+      HEDIS: providerRecords
+        .filter((r) => r.measureId.startsWith('HEDIS'))
+        .reduce((sum, r) => sum + r.providerShare, 0),
+      STARS: providerRecords
+        .filter((r) => r.measureId.startsWith('STARS'))
+        .reduce((sum, r) => sum + r.providerShare, 0),
+      MIPS: providerRecords
+        .filter((r) => r.measureId.startsWith('MIPS'))
+        .reduce((sum, r) => sum + r.providerShare, 0),
     },
     records: providerRecords,
   };
@@ -170,15 +170,21 @@ export function getProviderGainshareSummary(providerId: string) {
  */
 export function getSpecialistGainshareSummary(specialistId: string) {
   const records = referralStore.getGainshareRecords();
-  const specialistRecords = records.filter(r => r.specialistId === specialistId);
-  
+  const specialistRecords = records.filter((r) => r.specialistId === specialistId);
+
   return {
     totalEarned: specialistRecords.reduce((sum, r) => sum + r.specialistShare, 0),
     gapsClosed: specialistRecords.length,
     byProgram: {
-      HEDIS: specialistRecords.filter(r => r.measureId.startsWith('HEDIS')).reduce((sum, r) => sum + r.specialistShare, 0),
-      STARS: specialistRecords.filter(r => r.measureId.startsWith('STARS')).reduce((sum, r) => sum + r.specialistShare, 0),
-      MIPS: specialistRecords.filter(r => r.measureId.startsWith('MIPS')).reduce((sum, r) => sum + r.specialistShare, 0),
+      HEDIS: specialistRecords
+        .filter((r) => r.measureId.startsWith('HEDIS'))
+        .reduce((sum, r) => sum + r.specialistShare, 0),
+      STARS: specialistRecords
+        .filter((r) => r.measureId.startsWith('STARS'))
+        .reduce((sum, r) => sum + r.specialistShare, 0),
+      MIPS: specialistRecords
+        .filter((r) => r.measureId.startsWith('MIPS'))
+        .reduce((sum, r) => sum + r.specialistShare, 0),
     },
     records: specialistRecords,
   };

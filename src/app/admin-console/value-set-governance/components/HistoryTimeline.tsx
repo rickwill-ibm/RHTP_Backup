@@ -18,17 +18,25 @@ const ACTION_DOT: Record<GovernanceEvent['action'], string> = {
 export default function HistoryTimeline({ events }: HistoryTimelineProps) {
   return (
     <div className="bg-white border border-carbon-gray-20 p-5">
-      <h3 className="text-sm font-semibold text-carbon-gray-100 mb-4">Version History &amp; Audit Timeline</h3>
+      <h3 className="text-sm font-semibold text-carbon-gray-100 mb-4">
+        Version History &amp; Audit Timeline
+      </h3>
       <ol className="relative border-l border-carbon-gray-20 ml-2">
         {events.map((e) => (
           <li key={e.id} className="mb-5 ml-4">
-            <span className={`absolute -left-1.5 w-3 h-3 rounded-full ${ACTION_DOT[e.action]}`} aria-hidden />
+            <span
+              className={`absolute -left-1.5 w-3 h-3 rounded-full ${ACTION_DOT[e.action]}`}
+              aria-hidden
+            />
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-mono text-carbon-gray-50">{e.at}</span>
-              <span className="text-xs font-semibold text-carbon-gray-100 uppercase">{e.action}</span>
+              <span className="text-xs font-semibold text-carbon-gray-100 uppercase">
+                {e.action}
+              </span>
               <span className="text-xs font-mono text-carbon-gray-70">{e.version}</span>
               <span className="text-xs text-carbon-gray-50">
-                {e.fromState ? `${STATE_META[e.fromState].label} → ` : ''}{STATE_META[e.toState].label}
+                {e.fromState ? `${STATE_META[e.fromState].label} → ` : ''}
+                {STATE_META[e.toState].label}
               </span>
             </div>
             <p className="text-xs text-carbon-gray-70 mt-0.5">{e.note}</p>

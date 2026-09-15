@@ -72,7 +72,7 @@ export function createPgDeadLetterStore(pg: PgLike): DeadLetterStore {
   async function latestRow(id: string): Promise<DlRow | null> {
     const res = await pg.query<DlRow>(
       `SELECT ${SELECT_COLS} FROM dead_letter WHERE record_id = $1 ORDER BY seq DESC LIMIT 1`,
-      [id],
+      [id]
     );
     return res.rows[0] ?? null;
   }
@@ -91,7 +91,16 @@ export function createPgDeadLetterStore(pg: PgLike): DeadLetterStore {
            $1,
            (SELECT COALESCE(MAX(record_version), 0) + 1 FROM dead_letter WHERE record_id = $1),
            $2, 'open', $3, $4, $5, $6, $7, NULL, NULL, NULL, $8)`,
-        [id, input.kind, input.memberRef, input.reasonCode, input.sourceRef, input.payloadRef, createdAt, appendedAt],
+        [
+          id,
+          input.kind,
+          input.memberRef,
+          input.reasonCode,
+          input.sourceRef,
+          input.payloadRef,
+          createdAt,
+          appendedAt,
+        ]
       );
       return {
         id,
@@ -116,7 +125,7 @@ export function createPgDeadLetterStore(pg: PgLike): DeadLetterStore {
     async list(filter?: DeadLetterFilter): Promise<DeadLetterRecord[]> {
       // Fetch all versions oldest-first, reduce to the latest per record_id.
       const res = await pg.query<DlRow & { seq: unknown }>(
-        `SELECT ${SELECT_COLS}, seq FROM dead_letter ORDER BY seq ASC`,
+        `SELECT ${SELECT_COLS}, seq FROM dead_letter ORDER BY seq ASC`
       );
       const latest = new Map<string, DlRow>();
       for (const row of res.rows) latest.set(row.record_id, row);
@@ -128,14 +137,16 @@ export function createPgDeadLetterStore(pg: PgLike): DeadLetterStore {
         out.push(rec);
       }
       return out.sort((a, b) =>
-        a.createdAt === b.createdAt ? a.id.localeCompare(b.id) : b.createdAt.localeCompare(a.createdAt),
+        a.createdAt === b.createdAt
+          ? a.id.localeCompare(b.id)
+          : b.createdAt.localeCompare(a.createdAt)
       );
     },
 
     async resolve(
       id: string,
       action: ResolutionAction,
-      actor: string,
+      actor: string
     ): Promise<DeadLetterRecord | null> {
       const current = await latestRow(id);
       if (!current) return null;
@@ -162,7 +173,7 @@ export function createPgDeadLetterStore(pg: PgLike): DeadLetterStore {
           resolvedAt,
           actor,
           action,
-        ],
+        ]
       );
       return {
         ...rowToRecord(current),

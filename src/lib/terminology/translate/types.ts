@@ -58,7 +58,7 @@ export interface CrosswalkTranslator {
   translate(
     sourceSystem: TerminologySystem,
     sourceCode: string,
-    targetSystem: TerminologySystem,
+    targetSystem: TerminologySystem
   ): CrosswalkTranslation;
   /** The provenance of every seeded crosswalk (for an ops/registry view). */
   listCrosswalks(): CrosswalkProvenance[];

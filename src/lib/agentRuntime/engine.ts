@@ -131,22 +131,22 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     def: WorkflowDefinition<I, O>,
     memberId: string,
     workflowId: string,
-    correlationId: string,
+    correlationId: string
   ): WorkflowContext {
-    const self = this;
     return {
       workflowId,
       memberId,
       agentId: def.agentId,
       correlationId,
-      now: () => self.deps.clock.now(),
-      proposeAndWait: (action) => self.proposeAndWait(def.agentId, memberId, workflowId, correlationId, action),
+      now: () => this.deps.clock.now(),
+      proposeAndWait: (action) =>
+        this.proposeAndWait(def.agentId, memberId, workflowId, correlationId, action),
       useTool: async (tool, fn) => {
-        self.deps.registry.assertToolAllowed(def.agentId, tool); // least privilege (§10.3)
+        this.deps.registry.assertToolAllowed(def.agentId, tool); // least privilege (§10.3)
         return fn();
       },
-      setTimer: (spec) => self.setTimer(workflowId, spec),
-      autonomyTier: () => self.deps.registry.get(def.agentId).autonomyTier,
+      setTimer: (spec) => this.setTimer(workflowId, spec),
+      autonomyTier: () => this.deps.registry.get(def.agentId).autonomyTier,
     };
   }
 
@@ -155,21 +155,34 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     memberId: string,
     workflowId: string,
     correlationId: string,
-    action: ProposedAction,
+    action: ProposedAction
   ): Promise<HumanDecision> {
     const manifest = this.deps.registry.get(agentId);
     const proposalId = `${workflowId}::p${this.proposalCounter++}`;
     const now = this.deps.clock.now();
-    const tier = getEscalationTier(this.deps.escalationPolicies, manifest.escalationPolicyRef, action.priority);
+    const tier = getEscalationTier(
+      this.deps.escalationPolicies,
+      manifest.escalationPolicyRef,
+      action.priority
+    );
     const item = buildProposalWorkItem({ proposalId, memberId, action, submittedAtMs: now });
 
-    await this.emit(agentId, 'agent.task.proposed', memberId, workflowId, correlationId, now, proposalId, {
-      actionType: action.actionType,
-      priority: action.priority,
-      refs: action.refs ?? {},
-      autonomyTier: manifest.autonomyTier,
-      escalationPolicyRef: manifest.escalationPolicyRef,
-    });
+    await this.emit(
+      agentId,
+      'agent.task.proposed',
+      memberId,
+      workflowId,
+      correlationId,
+      now,
+      proposalId,
+      {
+        actionType: action.actionType,
+        priority: action.priority,
+        refs: action.refs ?? {},
+        autonomyTier: manifest.autonomyTier,
+        escalationPolicyRef: manifest.escalationPolicyRef,
+      }
+    );
 
     const decided = defer<HumanDecision>();
     const rec: PendingRecord = {
@@ -186,7 +199,14 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       resolve: decided.resolve,
     };
     this.pending.set(proposalId, rec);
-    await this.deps.inbox.enqueue({ proposalId, workflowId, memberId, agentId, item, status: 'pending' });
+    await this.deps.inbox.enqueue({
+      proposalId,
+      workflowId,
+      memberId,
+      agentId,
+      item,
+      status: 'pending',
+    });
     this.setStatus(workflowId, 'waiting-decision', proposalId);
 
     // Autonomy tier -> decision behavior via DATA lookup (never a branch on agentId).
@@ -200,7 +220,9 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       : 'human-required';
     if (behavior === 'immediate') {
       void Promise.resolve().then(() =>
-        this.runOnMember(memberId, () => this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`)),
+        this.runOnMember(memberId, () =>
+          this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`)
+        )
       );
     } else if (behavior === 'after-sla') {
       rec.timerId = this.scheduleTimer(memberId, tier.slaHours * 3600_000, async () => {
@@ -215,16 +237,29 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     return decided.promise;
   }
 
-  private async decide(rec: PendingRecord, decision: 'approved' | 'rejected', decidedBy: string): Promise<void> {
+  private async decide(
+    rec: PendingRecord,
+    decision: 'approved' | 'rejected',
+    decidedBy: string
+  ): Promise<void> {
     if (!this.pending.has(rec.proposalId)) return;
     this.pending.delete(rec.proposalId);
     if (rec.timerId) this.cancelTimer(rec.timerId);
     const now = this.deps.clock.now();
     const eventType = decision === 'approved' ? 'agent.task.approved' : 'agent.task.rejected';
-    await this.emit(rec.agentId, eventType, rec.memberId, rec.workflowId, rec.correlationId, now, rec.proposalId, {
-      decidedBy,
-      actionType: rec.action.actionType,
-    });
+    await this.emit(
+      rec.agentId,
+      eventType,
+      rec.memberId,
+      rec.workflowId,
+      rec.correlationId,
+      now,
+      rec.proposalId,
+      {
+        decidedBy,
+        actionType: rec.action.actionType,
+      }
+    );
     if (decision === 'approved') {
       await this.emit(
         rec.agentId,
@@ -234,7 +269,7 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
         rec.correlationId,
         now,
         rec.proposalId,
-        { actionType: rec.action.actionType, decidedBy },
+        { actionType: rec.action.actionType, decidedBy }
       );
     }
     await this.deps.inbox.resolve(rec.proposalId, decision, decidedBy);
@@ -268,7 +303,7 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
           rec.correlationId,
           now,
           rec.proposalId,
-          { hop: 'escalate', level: step.level, target: step.target, priority: rec.action.priority },
+          { hop: 'escalate', level: step.level, target: step.target, priority: rec.action.priority }
         );
         this.scheduleEscalation(rec); // next hop after another SLA window
       } else {
@@ -281,7 +316,12 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
           rec.correlationId,
           now,
           rec.proposalId,
-          { hop: 'park', parked: true, auditedHops: step.auditedHops, priority: rec.action.priority },
+          {
+            hop: 'park',
+            parked: true,
+            auditedHops: step.auditedHops,
+            priority: rec.action.priority,
+          }
         );
       }
     });
@@ -312,7 +352,7 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     const next = prev.then(fn, fn);
     this.memberChains.set(
       memberId,
-      next.catch(() => undefined),
+      next.catch(() => undefined)
     );
     return next;
   }
@@ -325,14 +365,27 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     correlationId: string,
     occurredAtMs: number,
     proposalId: string,
-    payload: Record<string, unknown>,
+    payload: Record<string, unknown>
   ): Promise<void> {
     return this.deps.eventSink.emit(
-      buildAgentEvent({ eventType, memberId, workflowId, agentId, occurredAtMs, correlationId, proposalId, payload }),
+      buildAgentEvent({
+        eventType,
+        memberId,
+        workflowId,
+        agentId,
+        occurredAtMs,
+        correlationId,
+        proposalId,
+        payload,
+      })
     );
   }
 
-  private setStatus(workflowId: string, status: WorkflowSnapshot['status'], awaitingProposalId?: string): void {
+  private setStatus(
+    workflowId: string,
+    status: WorkflowSnapshot['status'],
+    awaitingProposalId?: string
+  ): void {
     const inst = this.instances.get(workflowId);
     if (!inst) return;
     inst.snapshot.status = status;

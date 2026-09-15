@@ -81,9 +81,7 @@ function BannerContent({ screenContext }: { screenContext: string }) {
         )}
 
         {/* Gap count */}
-        <span className="text-2xs text-[#a8c8e8] ml-auto">
-          {openGaps.length} open gaps
-        </span>
+        <span className="text-2xs text-[#a8c8e8] ml-auto">{openGaps.length} open gaps</span>
 
         {/* Pathway progress */}
         <span className="text-2xs text-[#42be65] font-medium">
@@ -130,7 +128,9 @@ function BannerContent({ screenContext }: { screenContext: string }) {
           {/* BH Risk */}
           <div>
             <p className="text-2xs text-[#a8c8e8] uppercase tracking-wide mb-1">BH Risk</p>
-            <p className="text-xs font-semibold text-white">PHQ-9: {patient.phq9Score} · {patient.phq9Trend}</p>
+            <p className="text-xs font-semibold text-white">
+              PHQ-9: {patient.phq9Score} · {patient.phq9Trend}
+            </p>
             <p className="text-2xs text-[#a8c8e8]">Provider: {patient.bhProvider}</p>
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {(['Low', 'Moderate', 'High', 'Crisis'] as BHRiskLevel[]).map((r) => {
@@ -158,10 +158,18 @@ function BannerContent({ screenContext }: { screenContext: string }) {
           <div>
             <p className="text-2xs text-[#a8c8e8] uppercase tracking-wide mb-1">Social Needs</p>
             <div className="space-y-0.5">
-              <p className="text-xs text-white">Transport: <span className="text-[#42be65]">{patient.transportStatus}</span></p>
-              <p className="text-xs text-white">SNAP: <span className="text-[#42be65]">{patient.snapStatus}</span></p>
-              <p className="text-xs text-white">Housing: <span className="text-[#c6e2ff]">{patient.housingStatus}</span></p>
-              <p className="text-xs text-white">Food: <span className="text-[#c6e2ff]">{patient.foodSecurity}</span></p>
+              <p className="text-xs text-white">
+                Transport: <span className="text-[#42be65]">{patient.transportStatus}</span>
+              </p>
+              <p className="text-xs text-white">
+                SNAP: <span className="text-[#42be65]">{patient.snapStatus}</span>
+              </p>
+              <p className="text-xs text-white">
+                Housing: <span className="text-[#c6e2ff]">{patient.housingStatus}</span>
+              </p>
+              <p className="text-xs text-white">
+                Food: <span className="text-[#c6e2ff]">{patient.foodSecurity}</span>
+              </p>
             </div>
           </div>
 
@@ -185,14 +193,18 @@ function BannerContent({ screenContext }: { screenContext: string }) {
                 <div
                   key={step.id}
                   className={`w-4 h-4 flex items-center justify-center border ${
-                    step.completed ? 'bg-[#24a148] border-[#24a148]' : 'bg-transparent border-[#525252]'
+                    step.completed
+                      ? 'bg-[#24a148] border-[#24a148]'
+                      : 'bg-transparent border-[#525252]'
                   }`}
                   title={step.label}
                 >
                   {step.completed && <Icon name="CheckIcon" size={10} className="text-white" />}
                 </div>
               ))}
-              <span className="text-2xs text-[#a8c8e8] ml-1">{completedSteps}/{totalSteps} complete</span>
+              <span className="text-2xs text-[#a8c8e8] ml-1">
+                {completedSteps}/{totalSteps} complete
+              </span>
             </div>
           </div>
         </div>

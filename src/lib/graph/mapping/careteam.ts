@@ -65,17 +65,19 @@ interface Participant {
 
 function participantsOf(p: Record<string, unknown>): Participant[] {
   const raw = Array.isArray(p.participants) ? p.participants : [];
-  return raw.map((v) => {
-    const o = (v ?? {}) as Record<string, unknown>;
-    const kind = str(o.kind, CARE_TEAM_MEMBER_KIND);
-    return {
-      participantRef: str(o.participantRef),
-      kind: kind === PRACTITIONER_KIND ? PRACTITIONER_KIND : CARE_TEAM_MEMBER_KIND,
-      role: str(o.role, 'care-team-member'),
-      npi: str(o.npi) || str(o.participantNpi),
-      name: str(o.name),
-    };
-  }).filter((x) => x.participantRef !== '');
+  return raw
+    .map((v) => {
+      const o = (v ?? {}) as Record<string, unknown>;
+      const kind = str(o.kind, CARE_TEAM_MEMBER_KIND);
+      return {
+        participantRef: str(o.participantRef),
+        kind: kind === PRACTITIONER_KIND ? PRACTITIONER_KIND : CARE_TEAM_MEMBER_KIND,
+        role: str(o.role, 'care-team-member'),
+        npi: str(o.npi) || str(o.participantNpi),
+        name: str(o.name),
+      };
+    })
+    .filter((x) => x.participantRef !== '');
 }
 
 /**
@@ -107,9 +109,7 @@ export const careteamSpec = {
     return eventType.startsWith('care-team.') || eventType.startsWith('careteam.');
   },
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
-    return event.eventType.startsWith('care-team.')
-      ? formed(event, deps)
-      : assigned(event, deps);
+    return event.eventType.startsWith('care-team.') ? formed(event, deps) : assigned(event, deps);
   },
 };
 
@@ -125,7 +125,9 @@ function formed(event: C2Event, deps: ProjectorDeps): Mutation[] {
   const start = str(p.periodStart) || event.occurredAt || new Date(deps.now()).toISOString();
   const status = str(p.status, 'active');
   const out: Mutation[] = [memberNode(event)];
-  out.push(...resourceNode(event, CARE_TEAM_KIND, careTeamRef, { status, category: str(p.category) }));
+  out.push(
+    ...resourceNode(event, CARE_TEAM_KIND, careTeamRef, { status, category: str(p.category) })
+  );
   // The team is FOR the member (associative, dated).
   out.push({
     op: 'UpsertEdge',
@@ -179,7 +181,7 @@ function assigned(event: C2Event, deps: ProjectorDeps): Mutation[] {
       name: str(p.name),
       npi: str(p.npi),
       organization: str(p.organization),
-    }),
+    })
   );
   out.push({
     op: 'UpsertEdge',

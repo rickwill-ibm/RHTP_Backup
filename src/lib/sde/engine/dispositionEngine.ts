@@ -50,7 +50,7 @@ export function disposeBatch(
   signals: Signal[],
   pack: PolicyPack,
   ctx: MemberContext,
-  deps: EngineDeps,
+  deps: EngineDeps
 ): DispositionBatch {
   const now = deps.now();
   const ordered = sortByOrder(signals);
@@ -132,7 +132,10 @@ export function disposeBatch(
   const maxIntents = pack.bundling.maxIntentsPerTouchpoint;
   candidates.forEach((c, i) => {
     const chunk = Math.floor(i / maxIntents);
-    const touchpointId = chunk === 0 ? `tp:${memberId}:${foldWindowId}` : `tp:${memberId}:${foldWindowId}:${chunk + 1}`;
+    const touchpointId =
+      chunk === 0
+        ? `tp:${memberId}:${foldWindowId}`
+        : `tp:${memberId}:${foldWindowId}:${chunk + 1}`;
     const first = i % maxIntents === 0;
     decisions.push({
       signalId: c.signal.signalId,
@@ -157,7 +160,15 @@ export function disposeBatch(
   };
 
   emitAudit(decisions, summary, memberId, now, foldWindowId, deps);
-  return { memberId, foldWindowId, decidedAtMs: now, dispositions: decisions, touchpoints, delayBundles, summary };
+  return {
+    memberId,
+    foldWindowId,
+    decidedAtMs: now,
+    dispositions: decisions,
+    touchpoints,
+    delayBundles,
+    summary,
+  };
 }
 
 function orderKey(s: Signal): number {
@@ -174,7 +185,7 @@ function mkSuppress(
     | 'frequency-cap'
     | 'expired-ttl'
     | 'internal-only',
-  policyId: string,
+  policyId: string
 ): Disposition {
   return {
     signalId: s.signalId,
@@ -193,15 +204,26 @@ function emitAudit(
   memberId: string,
   now: number,
   foldWindowId: string,
-  deps: EngineDeps,
+  deps: EngineDeps
 ): void {
   const actor = deps.actor ?? 'sde-engine';
   for (const d of decisions) {
-    const detail: SdeAuditEntry['detail'] = { signalId: d.signalId, action: d.action, policyIds: d.policyIds };
+    const detail: SdeAuditEntry['detail'] = {
+      signalId: d.signalId,
+      action: d.action,
+      policyIds: d.policyIds,
+    };
     if (d.action === 'suppress') detail.reasonCode = d.reasonCode;
     if (d.action === 'delay') detail.untilWindowId = d.untilWindowId;
     if (d.action === 'act' || d.action === 'bundle') detail.touchpointId = d.touchpointId;
-    deps.audit.record({ kind: 'disposition', memberId, actor, atMs: now, correlationId: deps.correlationId, detail });
+    deps.audit.record({
+      kind: 'disposition',
+      memberId,
+      actor,
+      atMs: now,
+      correlationId: deps.correlationId,
+      detail,
+    });
   }
   deps.audit.record({
     kind: 'fold',

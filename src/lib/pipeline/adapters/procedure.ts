@@ -13,7 +13,13 @@
  *
  * C9.2 yield: procedures feed -> procedures T1 (provider-performed).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR Procedure pulled from the bundle. */
 interface ProcedureResource {
@@ -43,7 +49,11 @@ function str(v: unknown, fallback = ''): string {
 }
 
 /** code.coding[0] as a CPT/SNOMED coding triple (code may be ''). */
-function procedureCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function procedureCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -88,8 +98,10 @@ function parse(payload: string): RawRecord<ProcedureResource>[] {
 function validate(raw: RawRecord<ProcedureResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!procedureCode(resource).code) issues.push({ reasonCode: 'missing-procedure-code', fieldPath: 'code.coding' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!procedureCode(resource).code)
+    issues.push({ reasonCode: 'missing-procedure-code', fieldPath: 'code.coding' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -118,7 +130,9 @@ function normalize(raw: RawRecord<ProcedureResource>, deps: PipelineDeps): Norma
     provenance: 'provider-performed',
     consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
-    occurredAt: performedDateTime ? `${performedDateTime}T00:00:00Z` : new Date(deps.now()).toISOString(),
+    occurredAt: performedDateTime
+      ? `${performedDateTime}T00:00:00Z`
+      : new Date(deps.now()).toISOString(),
     payload: payload as unknown as Record<string, unknown>,
   };
 }

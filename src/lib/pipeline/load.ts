@@ -54,7 +54,11 @@ function laneClass(mode: ArrivalMode): 'stream' | 'batch' {
 }
 
 /** Map a normalized record to the outbox intent input (the C2 payload seed). */
-export function toIntentInput(record: NormalizedRecord, mode: ArrivalMode, actor: string): OutboxIntentInput {
+export function toIntentInput(
+  record: NormalizedRecord,
+  mode: ArrivalMode,
+  actor: string
+): OutboxIntentInput {
   const batchId = record.source.batchId;
   return {
     memberId: record.memberId,
@@ -80,14 +84,16 @@ export async function conformAndLoad(
   batchId: string,
   records: NormalizedRecord[],
   deps: PipelineDeps,
-  loadDeps: LoadDeps,
+  loadDeps: LoadDeps
 ): Promise<ConformLoadResult> {
   // undefined -> mode-selected profile gate (production fails closed); an explicit
   // validator still overrides for a caller/test.
   const validator = loadDeps.profileValidator ?? selectProfileValidator();
   // undefined -> default semantic gate; explicit null -> disabled for this caller.
   const semantic =
-    loadDeps.semanticValidator === undefined ? selectSemanticValidator() : loadDeps.semanticValidator;
+    loadDeps.semanticValidator === undefined
+      ? selectSemanticValidator()
+      : loadDeps.semanticValidator;
   const actor = loadDeps.actor ?? `pipeline-loader`;
   const intents: string[] = [];
   const affected = new Set<string>();
@@ -106,11 +112,15 @@ export async function conformAndLoad(
       const semanticResult = semantic.validate(record);
       if (!semanticResult.ok) {
         const raw: RawRecord = { sourceRef: record.idempotencyKey, data: {} };
-        quarantined.push(buildQuarantineRecord(raw, semanticResult.issues, batchId, record.source, deps));
+        quarantined.push(
+          buildQuarantineRecord(raw, semanticResult.issues, batchId, record.source, deps)
+        );
         continue;
       }
     }
-    const { intentId } = await loadDeps.writer.enqueue(toIntentInput(record, loadDeps.arrivalMode, actor));
+    const { intentId } = await loadDeps.writer.enqueue(
+      toIntentInput(record, loadDeps.arrivalMode, actor)
+    );
     intents.push(intentId);
     affected.add(record.memberId);
   }
@@ -127,7 +137,7 @@ export async function conformAndLoad(
  */
 export async function projectAndPropagate(
   affectedMembers: string[],
-  loadDeps: LoadDeps,
+  loadDeps: LoadDeps
 ): Promise<PumpResult[]> {
   const results: PumpResult[] = [];
   for (const memberId of affectedMembers) {

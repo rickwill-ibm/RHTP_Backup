@@ -15,12 +15,12 @@ top of the wave-A surface without changing the projector core or the adapters.
 **1. Neutral mutation instruction set** (`types.ts`). A graph change described
 with zero store knowledge — no SQL, no Cypher:
 
-| Op | Meaning |
-|---|---|
-| `UpsertNode` | create/merge a node by `(kind, key)`; `restricted` marks Part 2 / segmented |
-| `SetLabel` | attach an extra label (segmentation labels, `Restricted`) |
-| `UpsertEdge` | create/merge a **dated** edge; associative (default) or causal (with provenance) |
-| `SetValidity` | revise an edge's validity interval (e.g. close it) |
+| Op            | Meaning                                                                          |
+| ------------- | -------------------------------------------------------------------------------- |
+| `UpsertNode`  | create/merge a node by `(kind, key)`; `restricted` marks Part 2 / segmented      |
+| `SetLabel`    | attach an extra label (segmentation labels, `Restricted`)                        |
+| `UpsertEdge`  | create/merge a **dated** edge; associative (default) or causal (with provenance) |
+| `SetValidity` | revise an edge's validity interval (e.g. close it)                               |
 
 **2. `GraphStore`** — `apply(mutations)`, `getNode`, `listNodes`, `listEdges`.
 One interface, two implementations, identical read-back records.
@@ -45,19 +45,19 @@ spec owns an event. Invariants every spec obeys (shared helpers in `mapping/spec
 - **every edge is dated** (validity interval) for asOf queries;
 - **causal edges carry provenance** (`asserter` + `basis`); associative is default.
 
-| Domain | Event | Node(s) | Edge(s) |
-|---|---|---|---|
-| coverage | `coverage.*` | Coverage | `HAS_COVERAGE` (associative, dated) |
-| encounter | `encounter.*` | Encounter (restricted if Part 2) | `HAD_ENCOUNTER` (associative, dated; discharge closes it) |
-| sdoh | `sdoh.*` | SdohScreening, SocialNeed | `SCREENED_FOR` (associative); a positive screen adds `HAS_UNMET_NEED` (**causal**, asserter + Z-code basis) |
-| careteam | `careteam.*` | CareTeamMember | `HAS_CARE_TEAM` (associative, dated; unassign closes it) |
+| Domain    | Event         | Node(s)                          | Edge(s)                                                                                                     |
+| --------- | ------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| coverage  | `coverage.*`  | Coverage                         | `HAS_COVERAGE` (associative, dated)                                                                         |
+| encounter | `encounter.*` | Encounter (restricted if Part 2) | `HAD_ENCOUNTER` (associative, dated; discharge closes it)                                                   |
+| sdoh      | `sdoh.*`      | SdohScreening, SocialNeed        | `SCREENED_FOR` (associative); a positive screen adds `HAS_UNMET_NEED` (**causal**, asserter + Z-code basis) |
+| careteam  | `careteam.*`  | CareTeamMember                   | `HAS_CARE_TEAM` (associative, dated; unassign closes it)                                                    |
 
 ## The two backends (`adapters/`)
 
-| Backend | Rendering | Verified by |
-|---|---|---|
-| `postgres/` | mutations → relational upserts (`graph_node`, `graph_edge`); the **reference** projection | pg-mem (unit) + real Postgres (Docker-guarded) |
-| `neo4j/` | mutations → Cypher via neo4j-driver | in-memory **fake** (unit) + real bolt (Docker-guarded) |
+| Backend     | Rendering                                                                                 | Verified by                                            |
+| ----------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `postgres/` | mutations → relational upserts (`graph_node`, `graph_edge`); the **reference** projection | pg-mem (unit) + real Postgres (Docker-guarded)         |
+| `neo4j/`    | mutations → Cypher via neo4j-driver                                                       | in-memory **fake** (unit) + real bolt (Docker-guarded) |
 
 Read-back for both flows through the shared `adapters/records.ts` helpers, so their
 records are identical by construction. `assertIdentifier` validates every

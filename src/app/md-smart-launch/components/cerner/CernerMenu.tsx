@@ -76,7 +76,9 @@ export default function CernerMenu({
     >
       <div className="flex items-center justify-between px-2 py-1.5 border-b border-[#b7c1ca] bg-[#e3e8ec]">
         {!collapsed && (
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5b6770]">Menu</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5b6770]">
+            Menu
+          </span>
         )}
         <button
           className="text-[#5b6770] text-[12px] hover:text-[#1a1a1a]"

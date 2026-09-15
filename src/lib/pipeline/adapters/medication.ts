@@ -13,7 +13,13 @@
  *
  * C9.2 yield: medications feed -> medications T1 (prescribed + dispensed).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR resource pulled from the bundle (request or dispense lane). */
 interface RxResource {
@@ -58,7 +64,11 @@ function num(v: unknown, fallback = 0): number {
 }
 
 /** medicationCodeableConcept.coding[0] as an RxNorm coding triple (code may be ''). */
-function rxNorm(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function rxNorm(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.medicationCodeableConcept).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -89,8 +99,10 @@ function parse(payload: string): RawRecord<RxResource>[] {
     const resource = obj(obj(entry).resource);
     const type = str(resource.resourceType);
     const id = str(resource.id) || `rx-${out.length + 1}`;
-    if (type === 'MedicationRequest') out.push({ sourceRef: id, data: { kind: 'request', resource } });
-    else if (type === 'MedicationDispense') out.push({ sourceRef: id, data: { kind: 'dispense', resource } });
+    if (type === 'MedicationRequest')
+      out.push({ sourceRef: id, data: { kind: 'request', resource } });
+    else if (type === 'MedicationDispense')
+      out.push({ sourceRef: id, data: { kind: 'dispense', resource } });
   }
   return out;
 }
@@ -98,12 +110,21 @@ function parse(payload: string): RawRecord<RxResource>[] {
 function validate(raw: RawRecord<RxResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { kind, resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!rxNorm(resource).code) issues.push({ reasonCode: 'missing-medication-code', fieldPath: 'medicationCodeableConcept.coding' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!rxNorm(resource).code)
+    issues.push({
+      reasonCode: 'missing-medication-code',
+      fieldPath: 'medicationCodeableConcept.coding',
+    });
   if (kind === 'dispense') {
     const auth = resource.authorizingPrescription;
     const ref = Array.isArray(auth) ? str(obj(auth[0]).reference) : '';
-    if (!ref) issues.push({ reasonCode: 'missing-authorizing-prescription', fieldPath: 'authorizingPrescription' });
+    if (!ref)
+      issues.push({
+        reasonCode: 'missing-authorizing-prescription',
+        fieldPath: 'authorizingPrescription',
+      });
   }
   return { ok: issues.length === 0, issues };
 }
@@ -138,7 +159,10 @@ function normalizeRequest(resource: Record<string, unknown>, deps: PipelineDeps)
   };
 }
 
-function normalizeDispense(resource: Record<string, unknown>, deps: PipelineDeps): NormalizedRecord {
+function normalizeDispense(
+  resource: Record<string, unknown>,
+  deps: PipelineDeps
+): NormalizedRecord {
   const dispenseId = str(resource.id);
   const memberId = deps.resolveIdentity(subjectSourceId(resource), { feed: SOURCE.feed });
   const dispenseRef = `MedicationDispense/${dispenseId}`;

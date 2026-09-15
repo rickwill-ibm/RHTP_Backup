@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 export interface DataSource {
   name: string;
   lastSync: string; // ISO date string or 'today'
-  daysAgo: number;  // 0 = today
+  daysAgo: number; // 0 = today
 }
 
 export interface DataSourceGroup {
@@ -23,16 +23,21 @@ function getStatus(daysAgo: number): FreshnessStatus {
 
 function getStatusLabel(status: FreshnessStatus): string {
   switch (status) {
-    case 'live': return 'Live';
-    case 'fresh': return 'Fresh';
-    case 'stale': return 'Stale';
-    case 'outdated': return 'Outdated';
+    case 'live':
+      return 'Live';
+    case 'fresh':
+      return 'Fresh';
+    case 'stale':
+      return 'Stale';
+    case 'outdated':
+      return 'Outdated';
   }
 }
 
 function getStatusDot(status: FreshnessStatus): string {
   switch (status) {
-    case 'live': case'fresh':
+    case 'live':
+    case 'fresh':
       return 'bg-[#24a148]';
     case 'stale':
       return 'bg-[#f1c21b]';
@@ -43,7 +48,8 @@ function getStatusDot(status: FreshnessStatus): string {
 
 function getStatusText(status: FreshnessStatus): string {
   switch (status) {
-    case 'live': case'fresh':
+    case 'live':
+    case 'fresh':
       return 'text-[#24a148]';
     case 'stale':
       return 'text-[#b45309]';
@@ -63,7 +69,8 @@ function getRollupStatus(sources: DataSource[]): FreshnessStatus {
 
 function getBadgeBg(status: FreshnessStatus): string {
   switch (status) {
-    case 'live': case'fresh':
+    case 'live':
+    case 'fresh':
       return 'bg-[#defbe6] text-[#0e6027] border-[#24a148]';
     case 'stale':
       return 'bg-[#fef3c7] text-[#92400e] border-[#f1c21b]';
@@ -111,7 +118,9 @@ export default function DataSourceBadge({ group }: Props) {
       >
         <span>{group.type}</span>
         {!isSingle && (
-          <span className="bg-white bg-opacity-60 rounded px-1 font-mono">{group.sources.length}</span>
+          <span className="bg-white bg-opacity-60 rounded px-1 font-mono">
+            {group.sources.length}
+          </span>
         )}
         <span className="opacity-70">{syncLabel}</span>
         <svg
@@ -144,11 +153,18 @@ export default function DataSourceBadge({ group }: Props) {
               {group.sources.map((src) => {
                 const status = getStatus(src.daysAgo);
                 return (
-                  <tr key={src.name} className="border-b border-carbon-gray-10 last:border-0 hover:bg-carbon-gray-10">
+                  <tr
+                    key={src.name}
+                    className="border-b border-carbon-gray-10 last:border-0 hover:bg-carbon-gray-10"
+                  >
                     <td className="px-3 py-2 font-medium text-carbon-gray-100">{src.name}</td>
-                    <td className="px-3 py-2 text-carbon-gray-70 font-mono">{formatSyncLabel(src.daysAgo)}</td>
+                    <td className="px-3 py-2 text-carbon-gray-70 font-mono">
+                      {formatSyncLabel(src.daysAgo)}
+                    </td>
                     <td className="px-3 py-2">
-                      <span className={`inline-flex items-center gap-1 font-semibold ${getStatusText(status)}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 font-semibold ${getStatusText(status)}`}
+                      >
                         <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(status)}`} />
                         {getStatusLabel(status)}
                       </span>

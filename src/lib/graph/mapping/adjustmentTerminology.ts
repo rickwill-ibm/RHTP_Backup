@@ -51,16 +51,26 @@ function statusFor(valid: boolean, rawStatus: string): AdjustmentCodeStatus {
 export function routeAdjustmentCodes(
   carcCodes: readonly string[],
   rarcCodes: readonly string[],
-  service: TerminologyService = selectTerminologyService(),
+  service: TerminologyService = selectTerminologyService()
 ): AdjustmentCodeFinding[] {
   const out: AdjustmentCodeFinding[] = [];
   for (const code of carcCodes) {
     const r = service.validateCode(CARC_SYSTEM_URI, code);
-    out.push({ category: 'CARC', system: CARC_SYSTEM_URI, code, status: statusFor(r.valid, r.status) });
+    out.push({
+      category: 'CARC',
+      system: CARC_SYSTEM_URI,
+      code,
+      status: statusFor(r.valid, r.status),
+    });
   }
   for (const code of rarcCodes) {
     const r = service.validateCode(RARC_SYSTEM_URI, code);
-    out.push({ category: 'RARC', system: RARC_SYSTEM_URI, code, status: statusFor(r.valid, r.status) });
+    out.push({
+      category: 'RARC',
+      system: RARC_SYSTEM_URI,
+      code,
+      status: statusFor(r.valid, r.status),
+    });
   }
   return out;
 }

@@ -29,22 +29,32 @@ export default function ReplayPanel({ versions, replay = replayBinding }: Replay
   return (
     <div className="bg-white border border-carbon-gray-20 p-5">
       <h3 className="text-sm font-semibold text-carbon-gray-100 mb-1">Version Replay</h3>
-      <p className="text-xs text-carbon-gray-70 mb-4">Reproduce a code&apos;s binding result as-of a chosen historical version.</p>
+      <p className="text-xs text-carbon-gray-70 mb-4">
+        Reproduce a code&apos;s binding result as-of a chosen historical version.
+      </p>
 
       <form onSubmit={handleReplay} className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">Version</span>
+          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">
+            Version
+          </span>
           <select
             className="text-xs border border-carbon-gray-20 bg-white px-2 py-1.5 focus:outline-none focus:border-carbon-blue"
             value={versionId}
             onChange={(e) => setVersionId(e.target.value)}
             aria-label="Replay version"
           >
-            {versions.map((v) => <option key={v.versionId} value={v.versionId}>{v.version} ({v.state})</option>)}
+            {versions.map((v) => (
+              <option key={v.versionId} value={v.versionId}>
+                {v.version} ({v.state})
+              </option>
+            ))}
           </select>
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">Sample code</span>
+          <span className="text-xs text-carbon-gray-50 uppercase tracking-wide font-semibold">
+            Sample code
+          </span>
           <input
             className="text-xs font-mono border border-carbon-gray-20 bg-white px-2 py-1.5 focus:outline-none focus:border-carbon-blue"
             value={code}
@@ -63,12 +73,22 @@ export default function ReplayPanel({ versions, replay = replayBinding }: Replay
       </form>
 
       {result && (
-        <div role="status" className="mt-4 p-3 bg-carbon-gray-10 border border-carbon-gray-20 flex items-center gap-3">
-          <Icon name={result.member ? 'CheckCircleIcon' : 'XCircleIcon'} size={20} className={result.member ? 'text-[#24a148]' : 'text-[#da1e28]'} />
+        <div
+          role="status"
+          className="mt-4 p-3 bg-carbon-gray-10 border border-carbon-gray-20 flex items-center gap-3"
+        >
+          <Icon
+            name={result.member ? 'CheckCircleIcon' : 'XCircleIcon'}
+            size={20}
+            className={result.member ? 'text-[#24a148]' : 'text-[#da1e28]'}
+          />
           <div className="text-xs text-carbon-gray-70">
             <p>
-              Code <span className="font-mono font-semibold text-carbon-gray-100">{result.code}</span> against{' '}
-              <span className="font-mono font-semibold text-carbon-gray-100">{result.version}</span>:
+              Code{' '}
+              <span className="font-mono font-semibold text-carbon-gray-100">{result.code}</span>{' '}
+              against{' '}
+              <span className="font-mono font-semibold text-carbon-gray-100">{result.version}</span>
+              :
             </p>
             <p className="mt-1 flex items-center gap-2">
               <StatusBadge

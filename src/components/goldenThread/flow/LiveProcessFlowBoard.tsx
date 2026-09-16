@@ -44,6 +44,7 @@ import {
   type NistFn,
 } from '@/lib/goldenThread/flowSim';
 import { NIST_COLOR } from '@/lib/goldenThread/nistMap';
+import { slaRemaining, slaColor } from '@/lib/goldenThread/surveillanceMap';
 import { getGlobalTick, type OperatingSim } from '@/components/goldenThread/flow/useOperatingSim';
 import StatusBadge from '@/components/ui/StatusBadge';
 
@@ -1304,18 +1305,9 @@ function LedgerStrip({ s }: { s: SimState }): React.ReactElement {
   );
 }
 
-function slaRemaining(
-  s: SimState,
-  bornTick: number,
-  slaHours: number
-): { pct: number; label: string } {
-  const SPAN = 120;
-  const pct = Math.max(0, 1 - (s.tick - bornTick) / SPAN);
-  const remH = Math.max(0, slaHours * pct);
-  const hh = Math.floor(remH);
-  const mm = Math.floor((remH - hh) * 60);
-  return { pct, label: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` };
-}
+// slaRemaining + slaColor are single-sourced in surveillanceMap (imported above) so this flow board,
+// the Reconciliation board, Surveillance, and Operations all read the identical time-left projection
+// (slaHours × TICKS_PER_HOUR, with a real PAST DUE) — not a fixed 120-tick span decoupled from hours.
 const SEV_VARIANT: Record<
   string,
   'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'purple'
@@ -1344,8 +1336,7 @@ function LiveTicketQueue({
           </p>
         )}
         {s.tickets.map((t) => {
-          const sla = slaRemaining(s, t.bornTick, t.slaHours);
-          const slaColor = sla.pct > 0.5 ? '#24a148' : sla.pct > 0.2 ? '#b45309' : '#da1e28';
+          const sla = slaRemaining(s.tick, t.bornTick, t.slaHours);
           return (
             <div key={t.key} className="rounded border border-carbon-gray-20 p-1.5">
               <div className="flex items-center justify-between gap-1">
@@ -1364,7 +1355,7 @@ function LiveTicketQueue({
                   {t.operator} · ${t.exposureUsd.toLocaleString()} · aging {s.tick - t.bornTick}t
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="mono text-[10px] font-bold" style={{ color: slaColor }}>
+                  <span className="mono text-[10px] font-bold" style={{ color: slaColor(sla.pct) }}>
                     SLA {sla.label}
                   </span>
                   {t.status === 'New' ? (

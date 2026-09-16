@@ -28,7 +28,7 @@ import {
   type SimState,
   type LedgerEntry,
 } from '@/lib/goldenThread/flowSim';
-import { TICKS_PER_HOUR } from '@/lib/goldenThread/workflow';
+import { slaRemaining } from '@/lib/goldenThread/surveillanceMap';
 import {
   NIST_COLOR,
   nistForAlgorithm,
@@ -159,7 +159,7 @@ export function OperationsBoard({ op, onOpenTicket }: OperationsBoardProps): Rea
                           {q.map((t) => {
                             const seed = seedByRef(t.ref);
                             const closed = t.status === 'Closed';
-                            const sla = slaRemaining(s, t.bornTick, t.slaHours);
+                            const sla = slaRemaining(s.tick, t.bornTick, t.slaHours);
                             return (
                               <button
                                 key={t.key}
@@ -569,18 +569,5 @@ function ForensicLedger({ s, op }: { s: SimState; op: OperatingSim }): React.Rea
   );
 }
 
-function slaRemaining(
-  s: SimState,
-  bornTick: number,
-  slaHours: number
-): { pct: number; label: string } {
-  // Single-sourced with the workflow SLA: the window is slaHours × TICKS_PER_HOUR ticks (integer-tick,
-  // deterministic) — not a fixed 120-tick span decoupled from the stated hours.
-  const span = Math.max(1, slaHours * TICKS_PER_HOUR);
-  const pct = Math.max(0, 1 - (s.tick - bornTick) / span);
-  if (pct <= 0) return { pct: 0, label: 'PAST DUE' };
-  const remH = slaHours * pct;
-  const hh = Math.floor(remH);
-  const mm = Math.floor((remH - hh) * 60);
-  return { pct, label: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` };
-}
+// slaRemaining is single-sourced in surveillanceMap (imported above) — this board, the Reconciliation
+// board, Surveillance, and the Live Process Flow board all read the identical time-left projection.

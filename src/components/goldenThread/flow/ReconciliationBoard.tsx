@@ -16,7 +16,13 @@
  * CLIENT-SAFE: shared sim + pure reconcile domain + presentational helpers only. No node/barrel.
  */
 import { useMemo, useState } from 'react';
-import { reconIntact, type SimState, type ReconRecord } from '@/lib/goldenThread/flowSim';
+import {
+  reconIntact,
+  type SimState,
+  type ReconRecord,
+  type LiveTicket,
+} from '@/lib/goldenThread/flowSim';
+import { LifecycleChip } from '@/components/goldenThread/flow/opsShared';
 import {
   reconInsights,
   RECON_CLASS_SPEC,
@@ -211,7 +217,7 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
                 key={`${p.provider}-${p.routeRole}-${p.carc}`}
                 p={p}
                 op={op}
-                routed={s.tickets.some(
+                ticket={s.tickets.find(
                   (t) =>
                     t.ref ===
                     `RPAT-${p.routeRole}-${p.carc}-${p.provider.slice(0, 10)}`.replace(
@@ -219,6 +225,7 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
                       ''
                     )
                 )}
+                nowTick={s.tick}
               />
             ))}
           </div>
@@ -291,6 +298,15 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
                   rep={reproduced[r.seq]}
                   onVerify={() => setReproduced((m) => ({ ...m, [r.seq]: op.verifyRecon(r.seq) }))}
                   routed={r.routed || s.tickets.some((t) => t.reconRecordSeq === r.seq)}
+                  ticket={
+                    // Appeal (underpayment) rows render via the appeal-workflow branch, and a denied
+                    // appeal mints a separate arbiter ticket that shares reconRecordSeq — so only look
+                    // up the governed handoff ticket for NON-appeal rows to keep the match unambiguous.
+                    r.reconClass === 'underpayment'
+                      ? undefined
+                      : s.tickets.find((t) => t.reconRecordSeq === r.seq)
+                  }
+                  nowTick={s.tick}
                   wfState={appeals.find((w) => w.reconSeq === r.seq)?.state}
                   onOpenWf={() => setOpenWfSeq(r.seq)}
                   onStartAppeal={() => {
@@ -318,11 +334,13 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
 function PatternRow({
   p,
   op,
-  routed,
+  ticket,
+  nowTick,
 }: {
   p: SystematicPattern;
   op: OperatingSim;
-  routed: boolean;
+  ticket: LiveTicket | undefined;
+  nowTick: number;
 }): React.ReactElement {
   const role = p.routeRole as OpsRole;
   return (
@@ -339,8 +357,10 @@ function PatternRow({
       <span className="mono text-[10px] text-carbon-gray-60">{usd(p.amountUsd)}</span>
       <span className="text-[10px] text-carbon-gray-60">→ {ROLE_LABEL[role]}</span>
       <div className="ml-auto">
-        {routed ? (
-          <span className="mono text-[10px] font-bold text-[#24a148]">✓ routed (advisory)</span>
+        {ticket ? (
+          // Routed → now shows the REAL lifecycle (New → Assigned → Under review → terminal) + SLA,
+          // not a static "✓ routed" caption.
+          <LifecycleChip t={ticket} nowTick={nowTick} />
         ) : (
           <button
             type="button"
@@ -361,6 +381,8 @@ function ReconRow({
   rep,
   onVerify,
   routed,
+  ticket,
+  nowTick,
   wfState,
   onOpenWf,
   onStartAppeal,
@@ -370,6 +392,8 @@ function ReconRow({
   rep: boolean | undefined;
   onVerify: () => void;
   routed: boolean;
+  ticket: LiveTicket | undefined;
+  nowTick: number;
   wfState?: string;
   onOpenWf: () => void;
   onStartAppeal: () => void;
@@ -453,7 +477,13 @@ function ReconRow({
             </button>
           )
         ) : canRoute ? (
-          routed ? (
+          ticket ? (
+            // A governed ticket exists → show its real lifecycle + SLA, not a static "✓ routed".
+            <div className="flex flex-col items-start gap-0.5">
+              <LifecycleChip t={ticket} nowTick={nowTick} />
+              <span className="text-[9px] text-carbon-gray-40">→ {r.handoffRole}</span>
+            </div>
+          ) : routed ? (
             <span className="mono text-[10px] font-bold text-[#24a148]">
               ✓ routed → {r.handoffRole}
             </span>

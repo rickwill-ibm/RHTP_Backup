@@ -7,7 +7,7 @@
     "src/lib/episodes/mockEpisodes.ts": 637,
     "src/lib/fhirCareTeamData.data.ts": 678,
     "src/lib/goldenThread/e2eFlow.ts": 802,
-    "src/lib/goldenThread/flowSim.ts": 2543,
+    "src/lib/goldenThread/flowSim.ts": 2548,
     "src/lib/goldenThread/orderToCash.ts": 408,
     "src/lib/goldenThread/reconcile.ts": 474,
     "src/lib/mockData.data.providers.ts": 656,
@@ -129,13 +129,13 @@
     "src/components/goldenThread/flow/LiveProcessFlowBoard.tsx": 1391,
     "src/components/goldenThread/flow/OperationsBoard.tsx": 586,
     "src/components/goldenThread/flow/PartyWorkbench.tsx": 1221,
-    "src/components/goldenThread/flow/ReconciliationBoard.tsx": 486,
+    "src/components/goldenThread/flow/ReconciliationBoard.tsx": 516,
     "src/components/goldenThread/flow/SurveillanceConsole.tsx": 581,
     "src/components/PostmanSuiteTab.tsx": 752,
     "src/components/wpc/SignalGraph.tsx": 553,
     "src/uhg/components/shared/PresenterControls.tsx": 444,
     "src/lib/goldenThread/e2eFlow.ts": 802,
-    "src/lib/goldenThread/flowSim.ts": 2543,
+    "src/lib/goldenThread/flowSim.ts": 2548,
     "src/lib/goldenThread/orderToCash.ts": 408,
     "src/lib/goldenThread/reconcile.ts": 474,
     "src/lib/policy/dtr/evaluate/patientEvaluation.ts": 403,
@@ -144,7 +144,7 @@
     "src/components/goldenThread/flow/LiveProcessFlowBoard.tsx": 1391,
     "src/components/goldenThread/flow/OperationsBoard.tsx": 586,
     "src/components/goldenThread/flow/PartyWorkbench.tsx": 1221,
-    "src/components/goldenThread/flow/ReconciliationBoard.tsx": 486,
+    "src/components/goldenThread/flow/ReconciliationBoard.tsx": 516,
     "src/components/goldenThread/flow/SurveillanceConsole.tsx": 581
   }
 }

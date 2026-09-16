@@ -6,6 +6,8 @@
  *
  * CLIENT-SAFE: pure data + pure functions.
  */
+import { TICKS_PER_HOUR } from '@/lib/goldenThread/workflow';
+import type { TicketStatus, TicketDisposition } from '@/lib/goldenThread/flowSim';
 
 /** Seed-ticket algorithm → the library id it corresponds to. These are the WIRED narratives. */
 export const WIRED_LIBRARY_ID: Record<string, string> = {
@@ -91,6 +93,63 @@ export const DISPOSITION_LABEL: Record<Disposition, string> = {
   'action-proposed': 'Action proposed — pending human release',
   cleared: 'Cleared — not FWA (human)',
 };
+
+/**
+ * The ticket LIFECYCLE — projected from real engine state (status + disposition), the SINGLE source
+ * of truth for how a governed ticket reads on every surface (Reconciliation board, Operations,
+ * Surveillance). Answers the operator question the raw "routed / not-routed" flag could not: New →
+ * Assigned (in progress) → Under review (action proposed) → Resolved / Escalated / Cleared. There is
+ * NO parallel status machine — a workflow-backed ticket's `status`/`disposition` are already projected
+ * from its workflow by `syncTicketStatus`, so reading them here stays single-sourced.
+ *
+ * Escalated is surfaced as its OWN state, not folded into "closed": a DENIED appeal is `Closed` +
+ * disposition `escalated` (still an open matter with the arbiter), and reading it as "Resolved" would
+ * misrepresent it. This projection keeps it visible as `Escalated → arbiter`.
+ */
+export type LifecycleTone = 'new' | 'progress' | 'review' | 'resolved' | 'escalated' | 'cleared';
+export interface Lifecycle {
+  key: 'new' | 'assigned' | 'proposed' | 'resolved' | 'escalated' | 'cleared';
+  label: string;
+  tone: LifecycleTone;
+}
+export function lifecycleOf(status: TicketStatus, disposition?: TicketDisposition): Lifecycle {
+  switch (status) {
+    case 'New':
+      return { key: 'new', label: 'New — detected', tone: 'new' };
+    case 'Assigned':
+      return { key: 'assigned', label: 'Assigned — in progress', tone: 'progress' };
+    case 'Proposed':
+      return { key: 'proposed', label: 'Under review — action proposed', tone: 'review' };
+    case 'Closed':
+      if (disposition === 'escalated')
+        return { key: 'escalated', label: 'Escalated → arbiter', tone: 'escalated' };
+      if (disposition === 'cleared')
+        return { key: 'cleared', label: 'Cleared — not FWA', tone: 'cleared' };
+      // 'resolved' or an action-proposed close both read as a resolved disposition.
+      return { key: 'resolved', label: 'Resolved', tone: 'resolved' };
+  }
+}
+
+/**
+ * SLA remaining for a ticket — single-sourced with the workflow/Operations window
+ * (slaHours × TICKS_PER_HOUR ticks). Pure and READ-ONLY: it never mutates state or advances a clock;
+ * it projects "time left" from the current tick so the same badge reads identically on every board.
+ */
+export interface SlaRemaining {
+  pct: number;
+  label: string;
+}
+export function slaRemaining(nowTick: number, bornTick: number, slaHours: number): SlaRemaining {
+  const span = Math.max(1, slaHours * TICKS_PER_HOUR);
+  const pct = Math.max(0, 1 - (nowTick - bornTick) / span);
+  if (pct <= 0) return { pct: 0, label: 'PAST DUE' };
+  const remH = slaHours * pct;
+  const hh = Math.floor(remH);
+  const mm = Math.floor((remH - hh) * 60);
+  return { pct, label: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` };
+}
+export const slaColor = (pct: number): string =>
+  pct > 0.5 ? '#24a148' : pct > 0.2 ? '#b45309' : '#da1e28';
 
 /** What this console is explicitly NOT claiming (shown in the UI, per the honesty gate). Count-free
  * on purpose — the summary tiles carry the live catalog / scripted numbers so nothing can drift. */

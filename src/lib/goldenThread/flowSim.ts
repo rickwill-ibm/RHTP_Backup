@@ -2513,8 +2513,13 @@ export function pendRate(s: SimState): number {
   return total === 0 ? 0 : Math.round((s.counters.pended / (total + s.counters.pended)) * 100);
 }
 export function slaAtRisk(s: SimState): number {
-  const SPAN = 120;
-  return s.tickets.filter((t) => 1 - (s.tick - t.bornTick) / SPAN < 0.2).length;
+  // At-risk = under 20% of the ticket's OWN SLA window remaining, where the window is
+  // slaHours × TICKS_PER_HOUR — the same window the per-ticket SLA badge uses (surveillanceMap
+  // .slaRemaining). Previously a fixed 120-tick SPAN that ignored slaHours, so this headline count
+  // disagreed with the badges. Pure read-only projection (no mutation / seal / RNG) → determinism-neutral.
+  return s.tickets.filter(
+    (t) => 1 - (s.tick - t.bornTick) / Math.max(1, t.slaHours * TICKS_PER_HOUR) < 0.2
+  ).length;
 }
 /** Re-derive the hash-chain over the retained window; true iff every link matches (tamper-evident). */
 export function ledgerIntact(s: SimState): boolean {

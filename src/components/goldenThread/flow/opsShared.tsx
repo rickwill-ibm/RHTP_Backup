@@ -15,6 +15,13 @@ import {
   type NistFn,
   type Oversight,
 } from '@/lib/goldenThread/nistMap';
+import {
+  lifecycleOf,
+  slaRemaining,
+  slaColor,
+  type LifecycleTone,
+} from '@/lib/goldenThread/surveillanceMap';
+import type { LiveTicket } from '@/lib/goldenThread/flowSim';
 
 /**
  * D-tier → A-rung code chips + plain English, with the human-gate flag. `rung` is the action-class
@@ -148,6 +155,77 @@ export function ExecLegendMini(): React.ReactElement {
         ))}
       </span>
     </div>
+  );
+}
+
+/** Tone → chip color for the lifecycle pill. Open work is blue/amber; escalated is red (an open
+ *  matter with the arbiter, NOT green); resolved is green; cleared/new are neutral gray. */
+const LIFECYCLE_COLOR: Record<LifecycleTone, string> = {
+  new: '#8d8d8d',
+  progress: '#24427e',
+  review: '#b45309',
+  resolved: '#24a148',
+  escalated: '#da1e28',
+  cleared: '#8d8d8d',
+};
+
+/**
+ * LifecycleChip — the single, shared way a governed ticket's STATUS reads on every board. Replaces the
+ * old binary "routed / not-routed" caption with the real operator lifecycle (New → Assigned → Under
+ * review → Resolved / Escalated / Cleared), a READ-ONLY SLA badge (time-left, never a mutation), and
+ * an honest actor tag (detection is agentic A1 advisory; the action is a human determination). Every
+ * field is PROJECTED from the ticket's own engine state — this component asserts nothing the ledger
+ * does not already hold.
+ */
+export function LifecycleChip({
+  t,
+  nowTick,
+  showSla = true,
+}: {
+  t: LiveTicket;
+  nowTick: number;
+  showSla?: boolean;
+}): React.ReactElement {
+  const lc = lifecycleOf(t.status, t.disposition);
+  const open = t.status !== 'Closed';
+  const sla = open ? slaRemaining(nowTick, t.bornTick, t.slaHours) : undefined;
+  // Actor tag is deliberately understated so it can never over-claim: a `Proposed` action may have
+  // been human-released OR (once the fleet earns A2) autonomously executed — the ledger row carries
+  // that distinction, so the chip says only "action proposed" rather than asserting a human gate that
+  // may be false. A `New` ticket has been agent-detected but not yet actioned by anyone.
+  const actorTag =
+    t.status === 'New'
+      ? 'agent-detected · awaiting action'
+      : t.status === 'Assigned'
+        ? 'claimed · human-owned'
+        : t.status === 'Proposed'
+          ? 'action proposed'
+          : 'human-dispositioned';
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1 align-middle">
+      <span
+        className="mono rounded px-1.5 py-0.5 text-[10px] font-bold text-white"
+        style={{ background: LIFECYCLE_COLOR[lc.tone] }}
+        title={`Lifecycle: ${lc.label}`}
+      >
+        {lc.label}
+      </span>
+      {showSla && sla && (
+        <span
+          className="mono rounded bg-white px-1 py-0.5 text-[9px] font-semibold"
+          style={{ border: `1px solid ${slaColor(sla.pct)}`, color: slaColor(sla.pct) }}
+          title="SLA remaining (read-only projection)"
+        >
+          {sla.label === 'PAST DUE' ? '⏱ PAST DUE' : `⏱ ${sla.label}`}
+        </span>
+      )}
+      <span
+        className="rounded border border-carbon-gray-30 px-1 py-0.5 text-[9px] font-semibold text-carbon-gray-50"
+        title="Detection is agentic (A1 advisory); any action is a human determination"
+      >
+        {actorTag}
+      </span>
+    </span>
   );
 }
 

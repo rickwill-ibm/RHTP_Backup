@@ -27,7 +27,6 @@ import {
   type OpsRole,
 } from '@/lib/goldenThread/e2eFlow';
 import { displayAuthority, type SimState, type LiveTicket } from '@/lib/goldenThread/flowSim';
-import { TICKS_PER_HOUR } from '@/lib/goldenThread/workflow';
 import { nistForAlgorithm } from '@/lib/goldenThread/nistMap';
 import {
   libraryIdForAlgorithm,
@@ -35,6 +34,8 @@ import {
   detectionRoute,
   DISPOSITION_LABEL,
   NOT_CLAIMING,
+  slaRemaining,
+  slaColor,
   type Disposition,
   type Routing,
 } from '@/lib/goldenThread/surveillanceMap';
@@ -80,22 +81,8 @@ function dispositionOf(t: LiveTicket): Disposition {
   return 'detected';
 }
 
-/** SLA remaining, single-sourced with the workflow/Operations window (slaHours × TICKS_PER_HOUR ticks). */
-function slaRemaining(
-  s: SimState,
-  bornTick: number,
-  slaHours: number
-): { pct: number; label: string } {
-  const span = Math.max(1, slaHours * TICKS_PER_HOUR);
-  const pct = Math.max(0, 1 - (s.tick - bornTick) / span);
-  if (pct <= 0) return { pct: 0, label: 'PAST DUE' };
-  const remH = slaHours * pct;
-  const hh = Math.floor(remH);
-  const mm = Math.floor((remH - hh) * 60);
-  return { pct, label: `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}` };
-}
-const slaColor = (pct: number): string =>
-  pct > 0.5 ? '#24a148' : pct > 0.2 ? '#b45309' : '#da1e28';
+// SLA remaining + color are single-sourced in surveillanceMap (imported above) so this console, the
+// Reconciliation board, and Operations all read the identical time-left projection.
 
 export function SurveillanceConsole({
   op,
@@ -124,7 +111,7 @@ export function SurveillanceConsole({
     (t) => t.status === 'Closed' && t.disposition === 'cleared'
   ).length;
   const referredOut = detections.filter((d) => d.t.referSeal !== undefined).length;
-  const slas = detections.map((d) => slaRemaining(s, d.t.bornTick, d.t.slaHours).pct);
+  const slas = detections.map((d) => slaRemaining(s.tick, d.t.bornTick, d.t.slaHours).pct);
   const pastSla = slas.filter((p) => p <= 0).length;
   const aging = slas.filter((p) => p > 0 && p < 0.5).length;
 
@@ -376,7 +363,7 @@ function DetectionCard({
   const da = displayAuthority(seed.verdict.permittedRung, seed.verdict.requiresHuman, s);
   const role = seed.role as OpsRole;
   const owner = t.assignedTo ?? OPERATORS[role] ?? route.seat;
-  const sla = slaRemaining(s, t.bornTick, t.slaHours);
+  const sla = slaRemaining(s.tick, t.bornTick, t.slaHours);
   const isSiu = !!route.terminal;
 
   return (

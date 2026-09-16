@@ -102,3 +102,5 @@ _ship/
 
 tools/cowork-plugin/*/dist/
 tools/cowork-plugin/*.plugin
+
+/Claude outputs/

@@ -14,7 +14,7 @@ describe('Diane MA scenario — Step 1 foundation', () => {
     expect(wa.scenario).toBe('wa-medicaid');
     expect(wa.chainHead).toBe(2487355187); // re-pinned with the advisory-clamp fix (see determinismPin.test.ts)
     expect(wa.ledgerSeq).toBe(250);
-    expect(wa.tickets.length).toBe(9); // Medicaid seed tickets present on the default
+    expect(wa.tickets.length).toBe(4); // Medicaid seed tickets, one row per ref (TKT-4472 dedup collapsed the dups)
   });
 
   it('seeds Diane as the spotlighted hero with an administrative cert gap, no fabricated denial', () => {
@@ -64,12 +64,16 @@ describe('Diane MA scenario — Step 1 foundation', () => {
   });
 
   it('advancing under diane-ma stays deterministic', () => {
-    const run = (): number => { const s = createSim(20260914, undefined, 'diane-ma'); for (let i = 0; i < 300; i += 1) advance(s); return s.chainHead; };
+    const run = (): number => {
+      const s = createSim(20260914, undefined, 'diane-ma');
+      for (let i = 0; i < 300; i += 1) advance(s);
+      return s.chainHead;
+    };
     expect(run()).toBe(run());
   });
 
   // Step 2 — clock-jeopardy detector + Diane's UM ticket (these need advance(); seed-time can't see them)
-  it('the clock-jeopardy detector mints Diane\'s UM ticket ONCE, then auto-closes it on the Path-A save', () => {
+  it("the clock-jeopardy detector mints Diane's UM ticket ONCE, then auto-closes it on the Path-A save", () => {
     const s = createSim(20260914, undefined, 'diane-ma');
     let mints = 0;
     let sawOpen = false;
@@ -79,7 +83,10 @@ describe('Diane MA scenario — Step 1 foundation', () => {
       advance(s);
       const t = s.tickets.find((x) => x.ref === 'TKT-DIANE-CLK');
       const count = s.ledger.filter((e) => /CLOCK-JEOPARDY — /.test(e.decision)).length;
-      if (count > lastCount) { mints += count - lastCount; lastCount = count; }
+      if (count > lastCount) {
+        mints += count - lastCount;
+        lastCount = count;
+      }
       if (t && t.status !== 'Closed') sawOpen = true;
       if (t && t.status === 'Closed') sawClosed = true;
     }
@@ -88,7 +95,7 @@ describe('Diane MA scenario — Step 1 foundation', () => {
     expect(sawClosed).toBe(true); // and closes on the Path-A save — no stale alarm
   });
 
-  it('Diane\'s ticket resolves its seed and routes to UM operations (timeliness), not the Medical Director', () => {
+  it("Diane's ticket resolves its seed and routes to UM operations (timeliness), not the Medical Director", () => {
     const seed = seedTicketByRef('TKT-DIANE-CLK');
     expect(seed).toBeTruthy();
     expect(seed!.role).toBe('payer-um'); // UM ops, not payer-md
@@ -101,7 +108,9 @@ describe('Diane MA scenario — Step 1 foundation', () => {
   it('the clock-jeopardy detection seals at A1 · advise — never clamped to A0/watch (badge ↔ provenance agree)', () => {
     const s = createSim(20260914, undefined, 'diane-ma');
     for (let i = 0; i < 600; i += 1) advance(s);
-    const det = s.ledger.find((e) => e.fired === 'clock-jeopardy' && /CLOCK-JEOPARDY — /.test(e.decision));
+    const det = s.ledger.find(
+      (e) => e.fired === 'clock-jeopardy' && /CLOCK-JEOPARDY — /.test(e.decision)
+    );
     expect(det).toBeTruthy();
     expect(det!.rung).toBe('A1'); // advisory: an agent may ALWAYS detect + advise — not earned-capped to A0
     expect(det!.oversight).not.toBe('watch'); // 'watch' (A0) would contradict the ticket's A1 badge
@@ -123,7 +132,11 @@ describe('Diane MA scenario — Step 1 foundation', () => {
       if (h && h.goldCarded) heroEverGoldCarded = true;
       // track across the run — the closed advisory ticket can be evicted from the 12-slot live array under
       // heavy autonomous churn, so assert it FIRED, not that it survives to the end.
-      if (s.tickets.some((t) => t.ref === 'TKT-DIANE-CLK') || s.ledger.some((e) => /CLOCK-JEOPARDY — /.test(e.decision))) clockJeopardyEverFired = true;
+      if (
+        s.tickets.some((t) => t.ref === 'TKT-DIANE-CLK') ||
+        s.ledger.some((e) => /CLOCK-JEOPARDY — /.test(e.decision))
+      )
+        clockJeopardyEverFired = true;
     }
     expect(heroEverExpress).toBe(false); // an admin cert gap MUST traverse the human UM path (rfi substep)
     expect(heroEverGoldCarded).toBe(false); // …and can't be PA-waived — its provider attestation isn't on file

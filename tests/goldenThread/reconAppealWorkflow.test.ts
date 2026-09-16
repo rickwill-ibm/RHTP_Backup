@@ -7,7 +7,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
-  createSim, advance, startAppealWorkflow, reviewAppeal, releaseAppeal, dismissNotification,
+  createSim,
+  advance,
+  startAppealWorkflow,
+  reviewAppeal,
+  releaseAppeal,
+  dismissNotification,
 } from '@/lib/goldenThread/flowSim';
 import { appealOutcome, APPEAL_REVIEWER_SEAT } from '@/lib/goldenThread/workflow';
 
@@ -18,14 +23,18 @@ describe('appeal workflow — determinism isolation', () => {
   it('no workflow/notification exists at warm start; the pin is byte-identical', () => {
     const s = createSim(20260914);
     expect(s.workflows.length).toBe(0);
-    expect(s.notifications.length).toBe(0);
+    expect(s.notifications.length).toBe(0); // notify() lives only in UI-only verbs → none fire in warm-up
     expect(s.chainHead).toBe(2487355187);
     expect(s.ledgerSeq).toBe(250);
     expect(s.tick).toBe(684);
-    expect(s.tickets.length).toBe(9);
+    expect(s.tickets.length).toBe(4); // mintTicket ref-dedup collapses the duplicated seed refs to one row each (was 9 with dups)
   });
   it('the response/SLA sweep is a no-op with no workflows — advancing stays deterministic', () => {
-    const run = (): number => { const s = createSim(20260914); for (let i = 0; i < 300; i += 1) advance(s); return s.chainHead; };
+    const run = (): number => {
+      const s = createSim(20260914);
+      for (let i = 0; i < 300; i += 1) advance(s);
+      return s.chainHead;
+    };
     expect(run()).toBe(run());
   });
   it('advancing WITH a live workflow is fully deterministic (the modelled response draws no RNG)', () => {
@@ -39,7 +48,8 @@ describe('appeal workflow — determinism isolation', () => {
       for (let i = 0; i < 20; i += 1) advance(s); // through the modelled response
       return { head: s.chainHead, state: wf.state, rng: s.rngState };
     };
-    const a = run(); const b = run();
+    const a = run();
+    const b = run();
     expect(a).toEqual(b); // identical chainHead, resolved state, AND rngState — the workflow path is RNG-free
     expect(['accepted', 'denied']).toContain(a.state);
   });
@@ -81,7 +91,8 @@ describe('appeal workflow — governance honesty', () => {
   });
   it('the release is a SUBMISSION — sealed human-gated even after the fleet has EARNED A3', () => {
     const s = createSim(20260914);
-    s.earnedCeiling = 3; s.maturity = 1.0; // full autonomy earned
+    s.earnedCeiling = 3;
+    s.maturity = 1.0; // full autonomy earned
     const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
     reviewAppeal(s, wf.id, 'M.Cho', true);
     releaseAppeal(s, wf.id, 'provider-authorizer');
@@ -97,7 +108,10 @@ describe('appeal workflow — governance honesty', () => {
     for (const r of s.reconLedger.filter((x) => x.reconClass === 'underpayment' && !x.routed)) {
       startAppealWorkflow(s, r.seq);
       const w = s.workflows[s.workflows.length - 1];
-      if (appealOutcome(w.id) === 'accepted') { wf = w; break; }
+      if (appealOutcome(w.id) === 'accepted') {
+        wf = w;
+        break;
+      }
     }
     expect(wf).toBeTruthy();
     reviewAppeal(s, wf!.id, 'M.Cho', true);
@@ -114,7 +128,10 @@ describe('appeal workflow — governance honesty', () => {
     for (const r of s.reconLedger.filter((x) => x.reconClass === 'underpayment' && !x.routed)) {
       startAppealWorkflow(s, r.seq);
       const w = s.workflows[s.workflows.length - 1];
-      if (appealOutcome(w.id) === 'denied') { wf = w; break; }
+      if (appealOutcome(w.id) === 'denied') {
+        wf = w;
+        break;
+      }
     }
     expect(wf).toBeTruthy();
     reviewAppeal(s, wf!.id, 'M.Cho', true);
@@ -141,10 +158,15 @@ describe('appeal workflow — KPI honesty + eviction + SLA', () => {
     const s = createSim(20260914);
     let wf = null as ReturnType<typeof createSim>['workflows'][number] | null;
     for (const r of s.reconLedger.filter((x) => x.reconClass === 'underpayment' && !x.routed)) {
-      startAppealWorkflow(s, r.seq); const w = s.workflows[s.workflows.length - 1];
-      if (appealOutcome(w.id) === 'accepted') { wf = w; break; }
+      startAppealWorkflow(s, r.seq);
+      const w = s.workflows[s.workflows.length - 1];
+      if (appealOutcome(w.id) === 'accepted') {
+        wf = w;
+        break;
+      }
     }
-    reviewAppeal(s, wf!.id, 'M.Cho', true); releaseAppeal(s, wf!.id, 'auth');
+    reviewAppeal(s, wf!.id, 'M.Cho', true);
+    releaseAppeal(s, wf!.id, 'auth');
     const before = reconInsights(s.reconLedger.map((r) => r)).totalRealizedUsd;
     for (let i = 0; i < 12; i += 1) advance(s);
     const ins = reconInsights(s.reconLedger.map((r) => r));
@@ -166,10 +188,15 @@ describe('appeal workflow — KPI honesty + eviction + SLA', () => {
     const s = createSim(20260914);
     let wf = null as ReturnType<typeof createSim>['workflows'][number] | null;
     for (const r of s.reconLedger.filter((x) => x.reconClass === 'underpayment' && !x.routed)) {
-      startAppealWorkflow(s, r.seq); const w = s.workflows[s.workflows.length - 1];
-      if (appealOutcome(w.id) === 'denied') { wf = w; break; }
+      startAppealWorkflow(s, r.seq);
+      const w = s.workflows[s.workflows.length - 1];
+      if (appealOutcome(w.id) === 'denied') {
+        wf = w;
+        break;
+      }
     }
-    reviewAppeal(s, wf!.id, 'M.Cho', true); releaseAppeal(s, wf!.id, 'auth');
+    reviewAppeal(s, wf!.id, 'M.Cho', true);
+    releaseAppeal(s, wf!.id, 'auth');
     for (let i = 0; i < 12; i += 1) advance(s);
     expect(s.tickets.find((t) => t.key === wf!.ticketKey)!.disposition).toBe('escalated');
   });

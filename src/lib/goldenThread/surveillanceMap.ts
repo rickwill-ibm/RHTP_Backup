@@ -151,6 +151,82 @@ export function slaRemaining(nowTick: number, bornTick: number, slaHours: number
 export const slaColor = (pct: number): string =>
   pct > 0.5 ? '#24a148' : pct > 0.2 ? '#b45309' : '#da1e28';
 
+/**
+ * ticketActions — the SINGLE source of truth for "what can an operator do to this ticket right now",
+ * rendered identically by the shared <TicketActionBar> on the Process-flow, Operations and Surveillance
+ * surfaces. It is a PROJECTION, not a second transition authority:
+ *   • grab/route are the only INLINE verbs — both are non-adverse (a claim, and an agent-orchestrated
+ *     routing that seals at advise-level A1). They can never execute an adverse or payer↔provider action.
+ *   • every DISPOSITION (propose / resolve / clear / draft-appeal) is DEFERRED to the Party Workbench
+ *     via `open`, because the workbench is where the engine's own human-gate (actionRequiresHuman +
+ *     the earned-ceiling clamp in proposeOutbound) and the reviewer≠releaser SoD (workflow.ts) live.
+ *     This map therefore NEVER computes a gate and NEVER decides a workflow-owned transition.
+ *   • a workflow-backed ticket defers WHOLESALE: its next legal move belongs to the WfState machine,
+ *     so the coarse queue only ever offers `open` for it.
+ * Surveillance is a MONITORING lens: it may route/grab a *New* detection, but it defers every
+ * disposition — so an Assigned/Proposed item there shows only `open` (no cross-queue mutation).
+ * "Assigned" and "Proposed" are never dead-ends: `open` is always present until the ticket is Closed.
+ */
+export type TicketActionVerb = 'grab' | 'route' | 'open';
+export type ActionSurface = 'flow' | 'operations' | 'surveillance' | 'workbench';
+export interface TicketActionCtx {
+  surface: ActionSurface;
+  routed: boolean; // t.routedSeal !== undefined — a New detection already sealed a routing event
+  hasWorkflow: boolean; // s.workflows carries one for this ticket → the WfState machine owns transitions
+}
+export interface TicketAction {
+  verb: TicketActionVerb;
+  label: string; // a standard healthcare-operations label
+  inline: boolean; // true → execute on this surface (grab/route); false → open the workbench to act
+  primary?: boolean;
+  title?: string; // hover explanation
+}
+export function ticketActions(status: TicketStatus, ctx: TicketActionCtx): TicketAction[] {
+  if (status === 'Closed') return []; // terminal — the disposition is sealed; nothing to do
+  const open = (label: string, title: string): TicketAction => ({
+    verb: 'open',
+    label,
+    inline: false,
+    primary: true,
+    title,
+  });
+  // A workflow-backed ticket's next move (review / release / respond, reviewer≠releaser) is the
+  // WfState machine's — defer wholesale rather than adjudicate it from the coarse status.
+  if (ctx.hasWorkflow)
+    return [open('Open in workbench →', 'Governed workflow in progress — act in the workbench')];
+  if (status === 'New') {
+    const acts: TicketAction[] = [];
+    if (!ctx.routed)
+      acts.push({
+        verb: 'route',
+        label: 'Route to seat',
+        inline: true,
+        title:
+          'Seal a governed routing event and place this detection in the accountable seat’s queue',
+      });
+    acts.push({
+      verb: 'grab',
+      label: 'Grab',
+      inline: true,
+      primary: true,
+      title: 'Claim this detection (New → Assigned) and start its SLA clock',
+    });
+    acts.push(open('Open in workbench →', 'Open the analyst workbench for this detection'));
+    return acts;
+  }
+  // Surveillance defers all disposition — once claimed/proposed, the only affordance is to open it.
+  if (ctx.surface === 'surveillance')
+    return [open('Open in workbench →', 'Disposition is made in the analyst workbench')];
+  if (status === 'Assigned')
+    return [
+      open('Work in workbench →', 'Propose the governed action (human-gated) in the workbench'),
+    ];
+  // Proposed — under review; release/resolve/clear are human determinations made in the workbench.
+  return [
+    open('Review / release →', 'Release, resolve or clear this proposed action in the workbench'),
+  ];
+}
+
 /** What this console is explicitly NOT claiming (shown in the UI, per the honesty gate). Count-free
  * on purpose — the summary tiles carry the live catalog / scripted numbers so nothing can drift. */
 export const NOT_CLAIMING = [

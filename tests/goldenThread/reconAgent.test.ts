@@ -8,26 +8,44 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
-  createSim, advance, routeReconHandoff, routeReconPattern,
-  reconIntact, verifyReconEntry, ledgerIntact, earnedEligibility,
+  createSim,
+  advance,
+  routeReconHandoff,
+  routeReconPattern,
+  reconIntact,
+  verifyReconEntry,
+  ledgerIntact,
+  earnedEligibility,
 } from '@/lib/goldenThread/flowSim';
-import { reconInsights, RECON_CLASS_SPEC, classifyRecon, type ReconClass } from '@/lib/goldenThread/reconcile';
+import {
+  reconInsights,
+  RECON_CLASS_SPEC,
+  classifyRecon,
+  type ReconClass,
+} from '@/lib/goldenThread/reconcile';
 import { ROLE_SIDE, actionRequiresHuman } from '@/lib/goldenThread/e2eFlow';
 
 describe('recon-agent — determinism isolation', () => {
   it('the recon sub-ledger does NOT perturb the default wa-medicaid pin', () => {
     const s = createSim(20260914);
     // The recon audit trail is RNG-free (id-hash derived) and adds no main-ledger seal / no ticket in
-    // advance(), so the pinned warm-start values must be byte-identical to before the increment.
+    // advance(). The seal hash covers ONLY ledger fields (never ticket data), so the mintTicket
+    // ref-dedup — which collapsed the duplicated seed refs to one row each (9 → 4) — leaves the chain
+    // pin byte-identical and only shrinks the seed ticket count.
     expect(s.chainHead).toBe(2487355187);
     expect(s.ledgerSeq).toBe(250);
     expect(s.tick).toBe(684);
-    expect(s.tickets.length).toBe(9);
+    expect(s.tickets.length).toBe(4);
   });
   it('advancing stays deterministic and the recon chain stays intact', () => {
-    const run = (): number => { const s = createSim(20260914); for (let i = 0; i < 300; i += 1) advance(s); return s.chainHead; };
+    const run = (): number => {
+      const s = createSim(20260914);
+      for (let i = 0; i < 300; i += 1) advance(s);
+      return s.chainHead;
+    };
     expect(run()).toBe(run());
-    const s = createSim(20260914); for (let i = 0; i < 300; i += 1) advance(s);
+    const s = createSim(20260914);
+    for (let i = 0; i < 300; i += 1) advance(s);
     expect(reconIntact(s)).toBe(true);
   });
   it('the recon chain itself is pinned (a non-deterministic classification would fail even if the main ledger held)', () => {
@@ -69,7 +87,8 @@ describe('recon-agent — classification coherence (no contradictory tuples)', (
       const spec = RECON_CLASS_SPEC[cls];
       if (spec.group === 'PR') expect(spec.memberLiability).toBe('member-responsibility');
       if (spec.group === 'CO') expect(spec.memberLiability).toBe('not-member-responsibility');
-      if (spec.memberLiability === 'member-responsibility') expect(cls).toBe('member-liability-review');
+      if (spec.memberLiability === 'member-responsibility')
+        expect(cls).toBe('member-liability-review');
     }
     for (let i = 0; i < 200; i += 1) {
       const r = classifyRecon({ id: `t-${i}`, tick: 0, disputed: false, scenario: 'wa-medicaid' });
@@ -128,7 +147,8 @@ describe('recon-agent — governed handoffs (two-sided seats, human-gated submis
   });
   it('a payer-facing SUBMISSION (overpayment report-and-return) stays human PROPOSED even after EARNED A2', () => {
     const s = createSim(20260914);
-    s.earnedCeiling = 2; s.maturity = 0.8; // fleet has earned autonomous A2 — non-submissions could auto-execute
+    s.earnedCeiling = 2;
+    s.maturity = 0.8; // fleet has earned autonomous A2 — non-submissions could auto-execute
     const rec = s.reconLedger.find((r) => r.reconClass === 'overpayment')!; // a submission handoff NOT delegated to a workflow
     routeReconHandoff(s, rec.seq);
     const last = s.ledger[s.ledger.length - 1];
@@ -167,7 +187,7 @@ describe('recon-agent — governed handoffs (two-sided seats, human-gated submis
     expect(seal!.human).toBe(false);
     expect(seal!.decision).toMatch(/human/i);
   });
-  it('a LIVE-disputed underpayment mints exactly ONE linked ticket — the board never offers a second appeal', () => {
+  it('a ROUTED underpayment carries exactly ONE linked ticket — re-routing that record is a no-op (no double-mint)', () => {
     const s = createSim(20260914);
     for (let i = 0; i < 200; i += 1) advance(s);
     const pendRouted = s.reconLedger.filter((r) => r.reconClass === 'underpayment' && r.routed);
@@ -187,7 +207,8 @@ describe('recon-agent — governed handoffs (two-sided seats, human-gated submis
     const s = createSim(20260914);
     const rec = s.reconLedger.find((r) => r.reconClass === 'underpayment' && !r.routed)!;
     routeReconHandoff(s, rec.seq);
-    const n1 = s.tickets.length; const l1 = s.ledger.length;
+    const n1 = s.tickets.length;
+    const l1 = s.ledger.length;
     routeReconHandoff(s, rec.seq);
     expect(s.tickets.length).toBe(n1);
     expect(s.ledger.length).toBe(l1);
@@ -201,7 +222,8 @@ describe('recon-agent — sub-ledger tamper-evidence is GOVERNED (fail-closed)',
     const clean = earnedEligibility(s).gates.find((g) => /integrity/i.test(g.label))!;
     expect(clean.met).toBe(true);
     const r = s.reconLedger[10];
-    const orig = r.paidUsd; r.paidUsd = orig + 1;
+    const orig = r.paidUsd;
+    r.paidUsd = orig + 1;
     expect(reconIntact(s)).toBe(false);
     expect(verifyReconEntry(s, r.seq)).toBe(false);
     const tampered = earnedEligibility(s).gates.find((g) => /integrity/i.test(g.label))!;

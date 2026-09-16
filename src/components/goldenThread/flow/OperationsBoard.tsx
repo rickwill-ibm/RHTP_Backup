@@ -28,7 +28,11 @@ import {
   type SimState,
   type LedgerEntry,
 } from '@/lib/goldenThread/flowSim';
-import { slaRemaining } from '@/lib/goldenThread/surveillanceMap';
+import {
+  slaRemaining,
+  detectionRoute,
+  type TicketActionVerb,
+} from '@/lib/goldenThread/surveillanceMap';
 import {
   NIST_COLOR,
   nistForAlgorithm,
@@ -42,6 +46,7 @@ import {
   NistChips,
   ExecLegendMini,
   HONEST_NIST_NOTE,
+  TicketActionBar,
 } from '@/components/goldenThread/flow/opsShared';
 import { WorkflowPanel } from '@/components/goldenThread/flow/WorkflowPanel';
 import { NotificationStrip } from '@/components/goldenThread/flow/NotificationStrip';
@@ -234,9 +239,14 @@ export function OperationsBoard({ op, onOpenTicket }: OperationsBoardProps): Rea
             live={selectedLive}
             seed={selectedSeed}
             s={s}
-            onOpen={() =>
-              onOpenTicket?.(selectedSeed.id, ROLE_SIDE[selectedSeed.role], selectedLive.key)
-            }
+            onAct={(verb) => {
+              if (verb === 'grab') op.grab(selectedLive.key, selectedSeed.operator);
+              else if (verb === 'route') {
+                const r = detectionRoute(selectedSeed.role, 'adverse', selectedSeed.algorithm);
+                op.route(selectedLive.key, r.seat, r.authority, r.terminal);
+              } else
+                onOpenTicket?.(selectedSeed.id, ROLE_SIDE[selectedSeed.role], selectedLive.key);
+            }}
           />
         ) : (
           <div className="ed-card flex items-center justify-center p-6 text-center text-[11px] italic text-carbon-gray-40">
@@ -286,12 +296,12 @@ function TicketDetail({
   live,
   seed,
   s,
-  onOpen,
+  onAct,
 }: {
   live: SimState['tickets'][number];
   seed: OpsTicket;
   s: SimState;
-  onOpen: () => void;
+  onAct: (verb: TicketActionVerb) => void;
 }): React.ReactElement {
   const v = seed.verdict;
   const da = displayAuthority(v.permittedRung, v.requiresHuman, s);
@@ -372,13 +382,20 @@ function TicketDetail({
 
       {s.scenario === 'wa-medicaid' ? (
         <>
-          <button
-            type="button"
-            onClick={onOpen}
-            className="mt-3 rounded bg-carbon-blue px-3 py-1.5 text-xs font-semibold text-white hover:bg-carbon-blue-hover"
-          >
-            Open in {ROLE_SIDE[seed.role]} workbench →
-          </button>
+          {/* Shared governed action row — single-sourced with the Process-flow + Surveillance boards.
+              This TicketDetail is only shown for a NON-workflow ticket (workflow-backed ones render in
+              WorkflowPanel), so hasWorkflow is false here; disposition still defers to the workbench. */}
+          <div className="mt-3">
+            <TicketActionBar
+              status={live.status}
+              ctx={{
+                surface: 'operations',
+                routed: live.routedSeal !== undefined,
+                hasWorkflow: false,
+              }}
+              onAct={onAct}
+            />
+          </div>
           <p className="mt-1 text-[10px] italic text-carbon-gray-40">
             Adverse determinations (455.23 suspension, deemed-adverse NABD, gold-card revocation,
             recoupment) are human decisions — never one-click agent actions.

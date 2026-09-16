@@ -38,9 +38,14 @@ import {
   slaColor,
   type Disposition,
   type Routing,
+  type TicketActionVerb,
 } from '@/lib/goldenThread/surveillanceMap';
 import type { OperatingSim } from '@/components/goldenThread/flow/useOperatingSim';
-import { TwinLadderCodes, NistChips } from '@/components/goldenThread/flow/opsShared';
+import {
+  TwinLadderCodes,
+  NistChips,
+  TicketActionBar,
+} from '@/components/goldenThread/flow/opsShared';
 import StatusBadge from '@/components/ui/StatusBadge';
 
 type Side = 'payer' | 'provider' | 'neutral';
@@ -475,45 +480,22 @@ function DetectionCard({
           />
           {DISPOSITION_LABEL[disp]}
         </span>
-        <div className="flex items-center gap-1">
-          {disp === 'detected' && (
-            <button
-              type="button"
-              onClick={() => op.route(t.key, route.seat, route.authority, route.terminal)}
-              className="rounded bg-[#24427e] px-2 py-0.5 text-[9px] font-semibold text-white hover:opacity-90"
-              title="Seal a governed routing event and place this detection in the seat's queue"
-            >
-              Route to queue →
-            </button>
-          )}
-          {disp === 'routed' && (
-            <>
-              <button
-                type="button"
-                onClick={() => op.grab(t.key, owner)}
-                className="rounded bg-[#b45309] px-2 py-0.5 text-[9px] font-semibold text-white hover:opacity-90"
-                title={`Claim into ${owner}'s work (New → Assigned)`}
-              >
-                Claim →
-              </button>
-              <span
-                className="rounded border border-carbon-gray-20 px-1.5 py-0.5 text-[9px] text-carbon-gray-40"
-                title="Open is enabled once the item is claimed"
-              >
-                Open
-              </span>
-            </>
-          )}
-          {(disp === 'assigned' || disp === 'action-proposed') && (
-            <button
-              type="button"
-              onClick={() => onOpenTicket?.(seed.id, ROLE_SIDE[role], t.key)}
-              className="rounded bg-carbon-blue px-2 py-0.5 text-[9px] font-semibold text-white hover:bg-carbon-blue-hover"
-            >
-              Open in workbench →
-            </button>
-          )}
-        </div>
+        {/* Shared governed action row (single-sourced with the Process-flow + Operations boards). As a
+            MONITORING lens, Surveillance may route/grab a New detection; every disposition defers to the
+            workbench (ticketActions enforces this for surface='surveillance'). */}
+        <TicketActionBar
+          status={t.status}
+          ctx={{
+            surface: 'surveillance',
+            routed: t.routedSeal !== undefined,
+            hasWorkflow: s.workflows.some((w) => w.ticketKey === t.key),
+          }}
+          onAct={(verb: TicketActionVerb) => {
+            if (verb === 'grab') op.grab(t.key, owner);
+            else if (verb === 'route') op.route(t.key, route.seat, route.authority, route.terminal);
+            else onOpenTicket?.(seed.id, ROLE_SIDE[role], t.key);
+          }}
+        />
       </div>
     </div>
   );

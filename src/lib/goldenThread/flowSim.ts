@@ -808,17 +808,24 @@ function resolveGate(s: SimState, node: PathNode): Gate {
 
 const ticketByAlgo = (algo: string): OpsTicket | undefined =>
   TICKETS.find((x) => x.algorithm === algo);
-function mintTicket(s: SimState, reason: string, algo?: string): void {
+function mintTicket(s: SimState, reason: string, algo?: string): LiveTicket | undefined {
   // The seeded TICKETS catalogue is WA-Medicaid content. A scenario that does not seed them (diane-ma)
   // keeps its Operations/Surveillance queue clean rather than showing Medicaid tickets under an MA header
   // — those tabs are re-grounded in a later step when the scenario's own tickets are built.
-  if (!scenarioOf(s).seedMedicaidTickets) return;
+  if (!scenarioOf(s).seedMedicaidTickets) return undefined;
   // F3: when a specific finding fires, mint the ticket that MATCHES it (right algorithm → right
   // persona → right RCA), so the minted ticket is not decoupled from what actually fired. Generic
   // surveillance completions round-robin the integrity catalogue.
   const t = (algo ? ticketByAlgo(algo) : undefined) ?? TICKETS[s.ticketSeq % TICKETS.length];
+  // The round-robin cursor advances FIRST so a deduped slot never starves the next completion.
   s.ticketSeq += 1;
-  s.tickets.unshift({
+  // REF-IDEMPOTENCY (matches mintScenarioTicket / routeReconPattern): a catalogue ref that already has
+  // an OPEN ticket is not minted a second time. Both the underpayment algo-mint (UNDERPAY-CONTRACT) and
+  // the surveillance round-robin can otherwise land on the same catalogue id in one warm-up — the
+  // TKT-4472-appears-twice defect. Return the existing open ticket so callers still get a back-link target.
+  const existing = s.tickets.find((x) => x.ref === t.id && x.status !== 'Closed');
+  if (existing) return existing;
+  const minted: LiveTicket = {
     key: `LT-${String(s.ticketSeq).padStart(4, '0')}`,
     ref: t.id,
     algorithm: t.algorithm,
@@ -831,13 +838,15 @@ function mintTicket(s: SimState, reason: string, algo?: string): void {
     bornTick: s.tick,
     status: 'New',
     sealSeq: s.ledgerSeq, // link the ticket to the sealed detection record that just fired
-  });
+  };
+  s.tickets.unshift(minted);
   capTickets(s);
   pushEvent(s, {
     tick: s.tick,
     kind: 'ticket',
     text: `${t.id} minted → ${t.operator} (${reason})`,
   });
+  return minted;
 }
 
 // ── Clock-jeopardy detector + scenario ticket (Diane MA · Beat 8) ─────────────────
@@ -1863,6 +1872,15 @@ export function proposeOutbound(
     kind: gated ? 'pend' : 'info',
     text: `${t.ref} · ${label} ${gated ? 'proposed → pending human release' : 'recorded (non-adverse)'}`,
   });
+  // A gated proposal needs a human release → notify the owning seat; a non-gated (earned-autonomous)
+  // record just informs. UI-only verb → pin-safe (notify draws no RNG, seals nothing).
+  notify(
+    s,
+    t.operator,
+    gated ? 'approval-needed' : 'released',
+    t.ref,
+    `${t.ref} · ${label} ${gated ? '— awaiting human release' : '— recorded (non-adverse)'}`
+  );
   return s;
 }
 /**
@@ -1904,6 +1922,8 @@ export function closeCase(
     kind: 'info',
     text: `${t.ref} · case closed — ${disposition} (${by})`,
   });
+  // UI-only verb → pin-safe (notify draws no RNG, seals nothing).
+  notify(s, t.operator, 'resolved', t.ref, `${t.ref} · case closed — ${disposition} (${by})`);
   return s;
 }
 export function grabTicket(s: SimState, key: string, by: string): SimState {
@@ -1912,6 +1932,8 @@ export function grabTicket(s: SimState, key: string, by: string): SimState {
     t.status = 'Assigned';
     t.assignedTo = by;
     pushEvent(s, { tick: s.tick, kind: 'info', text: `${t.ref} grabbed → assigned to ${by}` });
+    // UI-only verb (never in warm-up) → the notify is pin-safe (notify draws no RNG, seals nothing).
+    notify(s, t.operator, 'assigned', t.ref, `${t.ref} claimed by ${by} — SLA clock running`);
   }
   return s;
 }
@@ -1963,6 +1985,9 @@ export function routeDetection(
     kind: 'info',
     text: `${t.ref} routed → ${seat}${referOut ? ' · referred out (455.23)' : ''}`,
   });
+  // Notify the RECEIVING seat that a governed detection has landed in its queue (decision #5:
+  // routing seat is the recipient). UI-only verb → pin-safe (notify draws no RNG, seals nothing).
+  notify(s, seat, 'assigned', t.ref, `${t.ref} routed to your queue — ${authority}`);
   return s;
 }
 /**
@@ -2429,16 +2454,24 @@ export function advance(s: SimState): SimState {
           txn.disputed = true; // F4: an underpayment delta → this claim routes through the dispute (recovery) lane
           recordReconciliation(s, txn, true); // recon sub-ledger: the underpayment audit row (RNG-free)
           const rec = s.reconLedger[s.reconLedger.length - 1];
-          mintTicket(s, 'underpayment', 'UNDERPAY-CONTRACT');
-          // SINGLE LOOP (adversarial-after HIGH): the auto-minted Operations ticket IS this recon record's
-          // handoff — stamp the back-link and mark the record routed so the recon board shows it resolved
-          // (one ticket, one appeal), never offering a second "Draft appeal" that would double-mint.
+          const minted = mintTicket(s, 'underpayment', 'UNDERPAY-CONTRACT');
+          // SINGLE LOOP (adversarial-after HIGH): the minted-or-existing Operations ticket IS this recon
+          // record's handoff — stamp the back-link on the ticket mintTicket returned (never a fragile
+          // s.tickets[0]/bornTick probe, which the ref-dedup could now make point at the wrong row) and
+          // mark the record routed so the recon board shows it resolved (one ticket, one appeal).
+          // CLAIM-ONCE (honest scope): the QUEUE never shows a duplicate TKT-4472 (ref-dedup). Only the
+          // FIRST disputed claim to reach an open UNDERPAY-CONTRACT ticket owns that auto-appeal's
+          // back-link + routes its recon record. A later disputed claim stays an unrouted recon record
+          // that remains individually recoverable from the Reconciliation board (as its OWN distinct
+          // RCLM appeal — never a second TKT-4472 row); it does NOT silently fold, and it does not orphan
+          // the earlier routed record.
           if (
             rec &&
-            s.tickets[0]?.algorithm === 'UNDERPAY-CONTRACT' &&
-            s.tickets[0]?.bornTick === s.tick
+            minted &&
+            minted.algorithm === 'UNDERPAY-CONTRACT' &&
+            minted.reconRecordSeq === undefined
           ) {
-            s.tickets[0].reconRecordSeq = rec.seq;
+            minted.reconRecordSeq = rec.seq;
             rec.routed = true;
           }
         }

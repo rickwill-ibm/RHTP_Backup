@@ -167,7 +167,7 @@ export function FlowBoards({
           {op.scenario === 'wa-medicaid' && flowMode === 'inspect' ? (
             <ProcessFlowBoard stages={stages} onOpenParty={openParty} />
           ) : (
-            <LiveProcessFlowBoard op={op} />
+            <LiveProcessFlowBoard op={op} onOpenTicket={openWorkbenchForTicket} />
           )}
         </div>
       )}

@@ -19,9 +19,12 @@ import {
   lifecycleOf,
   slaRemaining,
   slaColor,
+  ticketActions,
   type LifecycleTone,
+  type TicketActionCtx,
+  type TicketActionVerb,
 } from '@/lib/goldenThread/surveillanceMap';
-import type { LiveTicket } from '@/lib/goldenThread/flowSim';
+import type { LiveTicket, TicketStatus } from '@/lib/goldenThread/flowSim';
 
 /**
  * D-tier → A-rung code chips + plain English, with the human-gate flag. `rung` is the action-class
@@ -226,6 +229,59 @@ export function LifecycleChip({
         {actorTag}
       </span>
     </span>
+  );
+}
+
+/**
+ * TicketActionBar — the ONE governed action row for a ticket, shown identically on the Process-flow,
+ * Operations and Surveillance surfaces. It renders whatever `ticketActions` (surveillanceMap) permits
+ * for the ticket's status + context and calls back with the chosen verb; it holds NO policy itself. The
+ * only INLINE verbs are grab/route (non-adverse); every disposition is `open` (→ the workbench, where
+ * the engine's human-gate and reviewer≠releaser SoD live). A Closed ticket shows a sealed tag, not a
+ * dead end. This replaces the three surfaces' parallel action slices with a single source.
+ */
+export function TicketActionBar({
+  status,
+  ctx,
+  onAct,
+}: {
+  status: TicketStatus;
+  ctx: TicketActionCtx;
+  onAct: (verb: TicketActionVerb) => void;
+}): React.ReactElement {
+  const acts = ticketActions(status, ctx);
+  if (acts.length === 0)
+    return (
+      <span
+        className="rounded border border-carbon-gray-20 px-1.5 py-0.5 text-[9px] font-semibold text-carbon-gray-40"
+        title="Terminal — the disposition is sealed on the ledger"
+      >
+        ✓ sealed
+      </span>
+    );
+  return (
+    <div className="inline-flex flex-wrap items-center gap-1">
+      {acts.map((a) => {
+        const cls = a.inline
+          ? a.verb === 'route'
+            ? 'bg-[#24427e] text-white hover:opacity-90'
+            : 'bg-[#b45309] text-white hover:opacity-90'
+          : a.primary
+            ? 'bg-carbon-blue text-white hover:bg-carbon-blue-hover'
+            : 'border border-carbon-gray-30 text-carbon-gray-70 hover:bg-carbon-gray-10';
+        return (
+          <button
+            key={a.verb + a.label}
+            type="button"
+            onClick={() => onAct(a.verb)}
+            title={a.title}
+            className={`rounded px-2 py-0.5 text-[9px] font-semibold ${cls}`}
+          >
+            {a.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

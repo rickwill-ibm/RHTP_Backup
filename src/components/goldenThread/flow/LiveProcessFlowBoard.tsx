@@ -15,7 +15,7 @@
  * CLIENT-SAFE: imports only the barrel-free spine + engine + StatusBadge. No `@/lib/evidence`.
  */
 import { useEffect, useRef } from 'react';
-import { LANE_LABEL } from '@/lib/goldenThread/e2eFlow';
+import { LANE_LABEL, ROLE_SIDE, type OpsRole } from '@/lib/goldenThread/e2eFlow';
 import {
   PATH,
   SIM_LANES,
@@ -44,9 +44,20 @@ import {
   type NistFn,
 } from '@/lib/goldenThread/flowSim';
 import { NIST_COLOR } from '@/lib/goldenThread/nistMap';
-import { slaRemaining, slaColor } from '@/lib/goldenThread/surveillanceMap';
+import {
+  slaRemaining,
+  slaColor,
+  detectionRoute,
+  type TicketActionVerb,
+} from '@/lib/goldenThread/surveillanceMap';
 import { getGlobalTick, type OperatingSim } from '@/components/goldenThread/flow/useOperatingSim';
-import StatusBadge from '@/components/ui/StatusBadge';
+import { LifecycleChip, TicketActionBar } from '@/components/goldenThread/flow/opsShared';
+
+type OpenTicket = (
+  seedTicketId: string,
+  side: 'payer' | 'provider' | 'neutral',
+  liveKey?: string
+) => void;
 
 // ── Geometry ──────────────────────────────────────────────────────────────────────
 const LABEL_W = 128;
@@ -660,11 +671,13 @@ function kbXY(t: Txn): { x: number; y: number } {
 export interface LiveProcessFlowBoardProps {
   op: OperatingSim;
   operatorName?: string;
+  onOpenTicket?: OpenTicket;
 }
 
 export function LiveProcessFlowBoard({
   op,
   operatorName = 'you',
+  onOpenTicket,
 }: LiveProcessFlowBoardProps): React.ReactElement {
   const s = op.sim;
   const inCapture = op.inCapture;
@@ -840,8 +853,13 @@ export function LiveProcessFlowBoard({
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
         <LiveTicketQueue
           s={s}
-          operatorName={operatorName}
-          onGrab={(k) => op.grab(k, operatorName)}
+          onAct={(verb, t) => {
+            if (verb === 'grab') op.grab(t.key, operatorName);
+            else if (verb === 'route') {
+              const r = detectionRoute(t.role, 'adverse', t.algorithm);
+              op.route(t.key, r.seat, r.authority, r.terminal);
+            } else onOpenTicket?.(t.ref, ROLE_SIDE[t.role as OpsRole] ?? 'payer', t.key);
+          }}
         />
         <EventTicker s={s} />
       </div>
@@ -1308,18 +1326,12 @@ function LedgerStrip({ s }: { s: SimState }): React.ReactElement {
 // slaRemaining + slaColor are single-sourced in surveillanceMap (imported above) so this flow board,
 // the Reconciliation board, Surveillance, and Operations all read the identical time-left projection
 // (slaHours × TICKS_PER_HOUR, with a real PAST DUE) — not a fixed 120-tick span decoupled from hours.
-const SEV_VARIANT: Record<
-  string,
-  'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'purple'
-> = { critical: 'danger', warning: 'warning', action: 'info', info: 'neutral' };
 function LiveTicketQueue({
   s,
-  operatorName,
-  onGrab,
+  onAct,
 }: {
   s: SimState;
-  operatorName: string;
-  onGrab: (key: string) => void;
+  onAct: (verb: TicketActionVerb, t: SimState['tickets'][number]) => void;
 }): React.ReactElement {
   return (
     <div className="ed-card p-3">
@@ -1343,11 +1355,9 @@ function LiveTicketQueue({
                 <span className="mono text-[10px] font-semibold text-carbon-gray-80">
                   {t.ref} · {t.algorithm}
                 </span>
-                <StatusBadge
-                  label={t.severity}
-                  variant={SEV_VARIANT[t.severity] ?? 'neutral'}
-                  size="sm"
-                />
+                {/* Standard healthcare lifecycle label — replaces the raw `severity` (which rendered
+                    'action' as a phantom CTA); the real state reads New → Assigned → Under review → … */}
+                <LifecycleChip t={t} nowTick={s.tick} showSla={false} />
               </div>
               <p className="truncate text-[10px] text-carbon-gray-70">{t.title}</p>
               <div className="mt-0.5 flex items-center justify-between gap-2">
@@ -1358,19 +1368,17 @@ function LiveTicketQueue({
                   <span className="mono text-[10px] font-bold" style={{ color: slaColor(sla.pct) }}>
                     SLA {sla.label}
                   </span>
-                  {t.status === 'New' ? (
-                    <button
-                      type="button"
-                      onClick={() => onGrab(t.key)}
-                      className="rounded bg-carbon-blue px-1.5 py-0.5 text-[9px] font-semibold text-white hover:bg-carbon-blue-hover"
-                    >
-                      Grab
-                    </button>
-                  ) : (
-                    <span className="rounded bg-carbon-green-light px-1.5 py-0.5 text-[9px] font-semibold text-carbon-green">
-                      Assigned · {t.assignedTo === operatorName ? 'you' : t.assignedTo}
-                    </span>
-                  )}
+                  {/* The governed action row — grab/route inline, everything else opens the workbench.
+                      No more dead-end "Grab → Assigned" span: an Assigned/Proposed ticket now routes on. */}
+                  <TicketActionBar
+                    status={t.status}
+                    ctx={{
+                      surface: 'flow',
+                      routed: t.routedSeal !== undefined,
+                      hasWorkflow: s.workflows.some((w) => w.ticketKey === t.key),
+                    }}
+                    onAct={(verb) => onAct(verb, t)}
+                  />
                 </div>
               </div>
             </div>

@@ -21,6 +21,8 @@ import {
 } from '@/lib/goldenThread/e2eFlow';
 import { TwinLadderBadge } from '@/components/goldenThread/TwinLadderBadge';
 import { TwinLadderInterlock } from '@/components/goldenThread/TwinLadderInterlock';
+import { PathAWhatIf } from '@/components/goldenThread/flow/PathAWhatIf';
+import { ChannelMixChip } from '@/components/goldenThread/flow/ChannelMixChip';
 import StatusBadge from '@/components/ui/StatusBadge';
 
 const SWIMLANES: Lane[] = ['emr', 'provider-agent', 'payer', 'payer-agent', 'surveillance'];
@@ -261,6 +263,11 @@ function StepDetail({ stage, accent }: { stage: FlowStage; accent: string }): Re
           />
         </div>
       </div>
+
+      {/* Honest intake-channel mix (intake stages only) + an interactive Twin-Ladder what-if that
+          recomputes through the real interlock without touching the governed run. */}
+      <ChannelMixChip stage={stage} />
+      <PathAWhatIf stage={stage} />
     </div>
   );
 }

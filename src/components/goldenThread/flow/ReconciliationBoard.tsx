@@ -23,6 +23,7 @@ import {
   type LiveTicket,
 } from '@/lib/goldenThread/flowSim';
 import { LifecycleChip } from '@/components/goldenThread/flow/opsShared';
+import { ReconReportPanels } from '@/components/goldenThread/flow/ReconReportPanels';
 import {
   reconInsights,
   RECON_CLASS_SPEC,
@@ -115,13 +116,13 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
         {[
           { label: 'Claims reconciled', value: String(insights.total), color: '#161616' },
           {
-            label:
-              insights.totalRealizedUsd > 0
-                ? 'Recoverable open (of ident.)'
-                : 'Recoverable (underpaid)',
+            // Honest framing: this is identified underpayment BEFORE any appeal — not expected
+            // collections. The recovery lifecycle (in-dispute → expected-if-pursued → realized) is
+            // in the reporting panel below, where the modelled accept rate is applied to pursued $ only.
+            label: 'Identified underpayment (pre-appeal)',
             value:
               insights.totalRealizedUsd > 0
-                ? `${usd(insights.totalRecoverableUsd - insights.totalRealizedUsd)} · ${usd(insights.totalRealizedUsd)} realized`
+                ? `${usd(insights.totalRecoverableUsd)} · ${usd(insights.totalRealizedUsd)} realized`
                 : usd(insights.totalRecoverableUsd),
             color: '#5b3fa3',
           },
@@ -154,6 +155,9 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
       </div>
 
       <NotificationStrip op={op} />
+
+      {/* Reporting layer: roll-ups, recovery waterfall, systemic-pattern → affected-claims drill, export */}
+      <ReconReportPanels records={records} appeals={appeals} />
 
       {/* Appeals in flight — the governed workflow made visible (artifact + timeline + controls) */}
       {appeals.length > 0 && openWf && (

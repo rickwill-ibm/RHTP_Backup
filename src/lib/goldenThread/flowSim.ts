@@ -434,6 +434,8 @@ export interface LiveTicket {
   assignedTo?: string;
   disposition?: TicketDisposition; // set as the analyst works it
   sealSeq: number; // the ledger seq of the sealed detection that minted this ticket (provenance link)
+  assignedTick?: number; // tick a human claimed it (grab) — first-touch SLA clock; UI-only write, pin-safe
+  proposedTick?: number; // tick a governed action was proposed — time-to-proposal; UI-only write, pin-safe
   closedTick?: number;
   proposedLabels?: string[]; // governed outbounds already proposed (idempotency)
   reconRecordSeq?: number; // when a ticket was routed FROM a recon record, its reconLedger seq (back-link)
@@ -1866,6 +1868,7 @@ export function proposeOutbound(
     reproducible: true,
   });
   t.status = 'Proposed';
+  t.proposedTick = s.tick; // time-to-proposal stamp (UI-only path → pin-safe)
   t.disposition = 'action-proposed';
   pushEvent(s, {
     tick: s.tick,
@@ -1931,6 +1934,7 @@ export function grabTicket(s: SimState, key: string, by: string): SimState {
   if (t && t.status === 'New') {
     t.status = 'Assigned';
     t.assignedTo = by;
+    t.assignedTick = s.tick; // first-touch SLA stamp (UI-only path → pin-safe)
     pushEvent(s, { tick: s.tick, kind: 'info', text: `${t.ref} grabbed → assigned to ${by}` });
     // UI-only verb (never in warm-up) → the notify is pin-safe (notify draws no RNG, seals nothing).
     notify(s, t.operator, 'assigned', t.ref, `${t.ref} claimed by ${by} — SLA clock running`);
@@ -2551,7 +2555,9 @@ export function slaAtRisk(s: SimState): number {
   // .slaRemaining). Previously a fixed 120-tick SPAN that ignored slaHours, so this headline count
   // disagreed with the badges. Pure read-only projection (no mutation / seal / RNG) → determinism-neutral.
   return s.tickets.filter(
-    (t) => 1 - (s.tick - t.bornTick) / Math.max(1, t.slaHours * TICKS_PER_HOUR) < 0.2
+    (t) =>
+      t.status !== 'Closed' && // a resolved matter is not "at risk" — only open work counts
+      1 - (s.tick - t.bornTick) / Math.max(1, t.slaHours * TICKS_PER_HOUR) < 0.2
   ).length;
 }
 /** Re-derive the hash-chain over the retained window; true iff every link matches (tamper-evident). */

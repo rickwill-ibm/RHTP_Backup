@@ -50,6 +50,9 @@ import {
 } from '@/components/goldenThread/flow/opsShared';
 import { WorkflowPanel } from '@/components/goldenThread/flow/WorkflowPanel';
 import { NotificationStrip } from '@/components/goldenThread/flow/NotificationStrip';
+import { OpsSlaScorecard } from '@/components/goldenThread/flow/OpsSlaScorecard';
+import { TicketExposureEvidence } from '@/components/goldenThread/flow/TicketExposureEvidence';
+import { slaBook } from '@/lib/goldenThread/slaBook';
 import StatusBadge from '@/components/ui/StatusBadge';
 
 type Side = 'payer' | 'provider' | 'neutral';
@@ -129,6 +132,7 @@ export function OperationsBoard({ op, onOpenTicket }: OperationsBoardProps): Rea
 
       <NotificationStrip op={op} />
       <OpsCounters s={s} />
+      <OpsSlaScorecard s={s} />
       <ExecLegendMini />
 
       <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
@@ -248,6 +252,40 @@ export function OperationsBoard({ op, onOpenTicket }: OperationsBoardProps): Rea
                 onOpenTicket?.(selectedSeed.id, ROLE_SIDE[selectedSeed.role], selectedLive.key);
             }}
           />
+        ) : selectedLive ? (
+          // Recon-routed ticket (RCLM/RPAT) with no catalogue seed and no workflow — render purely from
+          // its own sealed reconciliation record so the recon-driven path never dead-ends or crashes.
+          <div className="ed-card p-4">
+            <p className="mono text-[10px] uppercase tracking-wide text-carbon-gray-50">
+              {selectedLive.key} · {selectedLive.algorithm} · queued to{' '}
+              {ROLE_LABEL[selectedLive.role as OpsRole] ?? selectedLive.role} (
+              {selectedLive.operator})
+            </p>
+            <h3 className="text-base">{selectedLive.title}</h3>
+            <TicketExposureEvidence live={selectedLive} s={s} />
+            <div className="mt-3">
+              <TicketActionBar
+                status={selectedLive.status}
+                ctx={{
+                  surface: 'operations',
+                  routed: selectedLive.routedSeal !== undefined,
+                  hasWorkflow: false,
+                }}
+                onAct={(verb) => {
+                  if (verb === 'grab') op.grab(selectedLive.key, selectedLive.operator);
+                  else if (verb === 'route') {
+                    const r = detectionRoute(selectedLive.role, 'adverse', selectedLive.algorithm);
+                    op.route(selectedLive.key, r.seat, r.authority, r.terminal);
+                  } else
+                    onOpenTicket?.(
+                      selectedLive.ref,
+                      ROLE_SIDE[selectedLive.role as OpsRole] ?? 'payer',
+                      selectedLive.key
+                    );
+                }}
+              />
+            </div>
+          </div>
         ) : (
           <div className="ed-card flex items-center justify-center p-6 text-center text-[11px] italic text-carbon-gray-40">
             {isDiane
@@ -266,14 +304,16 @@ export function OperationsBoard({ op, onOpenTicket }: OperationsBoardProps): Rea
 function OpsCounters({ s }: { s: SimState }): React.ReactElement {
   const open = s.tickets.filter((t) => t.status !== 'Closed');
   const critical = open.filter((t) => t.severity === 'critical').length;
-  const exposure = open.reduce((a, t) => a + t.exposureUsd, 0);
   const closed = s.tickets.filter((t) => t.status === 'Closed').length;
+  // Money lives on ONE board (Reconciliation, derived from real recon deltas). Operations shows
+  // operational counts only — no parallel "queue exposure" summed from cloned catalogue constants.
+  const oldestHrs = Math.max(0, ...slaBook(s).seats.map((x) => x.oldestOpenHrs), 0);
   const tiles: Array<{ label: string; value: string; color: string }> = [
     { label: 'Open tickets', value: String(open.length), color: '#24427e' },
     { label: 'Critical', value: String(critical), color: '#da1e28' },
     { label: 'SLA at risk', value: String(slaAtRisk(s)), color: '#b45309' },
     { label: 'Closed', value: String(closed), color: '#24a148' },
-    { label: 'Queue exposure', value: `$${(exposure / 1000).toFixed(0)}k`, color: '#161616' },
+    { label: 'Oldest open', value: `${oldestHrs}h`, color: '#161616' },
     { label: 'Sealed records', value: String(s.ledgerSeq), color: '#5b3fa3' },
   ];
   return (
@@ -334,31 +374,10 @@ function TicketDetail({
           variant={resolved ? 'success' : SEV_VARIANT[seed.severity]}
         />
       </div>
-      <div className="mono mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-carbon-gray-60">
-        <span>{seed.provider}</span>
-        <span>{seed.payer}</span>
-        {seed.emr && <span>{seed.emr}</span>}
-        <span>exposure ${seed.exposureUsd.toLocaleString()}</span>
-        <span>{seed.claimRefs}</span>
-      </div>
-
-      <div className="mt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-carbon-gray-50">
-          Root-cause analysis — agent-produced, grounded in the record
-        </p>
-        <ol className="mt-1 list-decimal space-y-1 pl-4 text-xs text-carbon-gray-90">
-          {seed.rca.map((line, i) => (
-            <li key={i}>{line}</li>
-          ))}
-        </ol>
-      </div>
-
-      <div className="mt-3 rounded border border-carbon-gray-20 bg-carbon-gray-10 p-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-carbon-gray-50">
-          Recommendation
-        </p>
-        <p className="mt-0.5 text-xs text-carbon-gray-90">{seed.recommendation}</p>
-      </div>
+      {/* Honest evidence: grounded per-claim figures come ONLY from this ticket's sealed recon record;
+          the catalogue exposure + RCA are shown as a labelled illustrative pattern, never as this
+          claim's record (fixes the "static constant labelled grounded" defect). */}
+      <TicketExposureEvidence live={live} seed={seed} s={s} />
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <TwinLadderCodes

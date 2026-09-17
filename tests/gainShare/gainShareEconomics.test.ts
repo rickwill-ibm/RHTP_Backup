@@ -73,12 +73,20 @@ describe('VBC modeler (modelled, LAN ladder)', () => {
   });
 
   it('rebasing compresses future savings unless protected', () => {
-    const unprotected = computeVbcScenario({ ...defaultModel('cat3a'), rebaseProtected: false, rebasePct: 0.02 });
+    const unprotected = computeVbcScenario({
+      ...defaultModel('cat3a'),
+      rebaseProtected: false,
+      rebasePct: 0.02,
+    });
     const y1 = unprotected.rebasing[0].sharedPoolPmpm;
     const y3 = unprotected.rebasing[2].sharedPoolPmpm;
     expect(y3).toBeLessThan(y1); // benchmark rebases down → pool shrinks
 
-    const protectedS = computeVbcScenario({ ...defaultModel('cat3a'), rebaseProtected: true, rebasePct: 0.02 });
+    const protectedS = computeVbcScenario({
+      ...defaultModel('cat3a'),
+      rebaseProtected: true,
+      rebasePct: 0.02,
+    });
     expect(protectedS.rebasing[2].sharedPoolPmpm).toBe(protectedS.rebasing[0].sharedPoolPmpm); // held
   });
 
@@ -86,5 +94,94 @@ describe('VBC modeler (modelled, LAN ladder)', () => {
     const a = computeVbcScenario(defaultModel('cat4'));
     const b = computeVbcScenario(defaultModel('cat4'));
     expect(a).toEqual(b);
+  });
+});
+
+describe('annual dimensional consistency (the "/mo" 12× overstatement fix)', () => {
+  it('poolTotal / member-months reconstitutes the PMPM (totals are PMPM × annual member-months)', () => {
+    const v = computeVbcScenario(defaultModel('cat3b'));
+    expect(v.model.memberMonths).toBe(120_000);
+    // pool_total / member_months == PMPM (the totals are ANNUAL member-months × a per-month rate)
+    expect(v.poolTotalUsd / v.model.memberMonths).toBeCloseTo(v.sharedPoolPmpm, 1);
+    expect(v.providerTotalUsd / v.model.memberMonths).toBeCloseTo(v.providerPmpm, 1);
+    expect(v.payerTotalUsd / v.model.memberMonths).toBeCloseTo(v.payerPmpm, 1);
+  });
+});
+
+describe('two-sided downside (the biggest domain gap)', () => {
+  it('Cat 4 clamps at the stop-loss cap at the UI-reachable slider max (+90)', () => {
+    // +90 is the LeversRail perf-slider max — the clamp must be demonstrable through the UI, not only
+    // at an out-of-band value (red-team reachability fix). Cat 4: benchmark 535, base actual 480, cap $20.
+    const v = computeVbcScenario({ ...defaultModel('cat4'), actualDeltaPmpm: 90 });
+    expect(v.owes).toBe(true);
+    expect(v.actualPmpm).toBeGreaterThan(v.benchmarkPmpm);
+    expect(v.qualifies).toBe(false);
+    expect(v.sharedPoolPmpm).toBe(0);
+    expect(v.providerLiabilityPmpm).toBe(v.stopLossCapPmpm); // uncapped 21 > cap 20 → clamped
+    expect(v.liabilityClamped).toBe(true);
+    expect(v.gateReason).toMatch(/owes|downside/i);
+  });
+
+  it('SYMMETRIC deadband: an overspend within the ±MSR corridor owes NOTHING', () => {
+    // Cat 3B: benchmark 527, base actual 500, MSR/MLR = 527×2% = $10.54. +30 → actual 530, overspend 3
+    // (< 10.54) → inside the corridor → neither shares nor owes (the symmetric-corridor honesty fix).
+    const v = computeVbcScenario({ ...defaultModel('cat3b'), actualDeltaPmpm: 30 });
+    expect(v.overBenchmark).toBe(true);
+    expect(v.owes).toBe(false);
+    expect(v.providerLiabilityPmpm).toBe(0);
+    expect(v.gateReason).toMatch(/corridor/i);
+  });
+
+  it('beyond the corridor the provider owes, unclamped when share < stop-loss', () => {
+    // +42 → actual 542, overspend 15 (> MLR 10.54) → owes 15×0.6 = $9.0 < $12 cap → unclamped.
+    const v = computeVbcScenario({ ...defaultModel('cat3b'), actualDeltaPmpm: 42 });
+    expect(v.owes).toBe(true);
+    expect(v.providerLiabilityPmpm).toBeGreaterThan(0);
+    expect(v.providerLiabilityPmpm).toBeLessThan(v.stopLossCapPmpm);
+    expect(v.liabilityClamped).toBe(false);
+  });
+
+  it('net dollars carry the downside: provider net −liability, payer net +liability (they reconcile)', () => {
+    const v = computeVbcScenario({ ...defaultModel('cat4'), actualDeltaPmpm: 90 });
+    expect(v.owes).toBe(true);
+    // provider net = share + infra − liability; payer net = share − infra + liability
+    expect(v.providerNetPmpm).toBeCloseTo(
+      v.providerPmpm + v.infraPmpm - v.providerLiabilityPmpm,
+      1
+    );
+    expect(v.payerNetPmpm).toBeCloseTo(v.payerPmpm - v.infraPmpm + v.providerLiabilityPmpm, 1);
+    expect(v.providerNetTotalUsd).toBe(Math.round(v.providerNetPmpm * v.model.memberMonths));
+    // the owed liability is a payer inflow — the two net PMPM figures reconcile to (pool − 0) since
+    // pool is 0 here: provider net + payer net = infra − infra = 0 at a fully-gated downside.
+    expect(v.providerNetPmpm + v.payerNetPmpm).toBeCloseTo(0, 1);
+  });
+
+  it('Cat 3A (upside-only) never goes negative and never owes a downside', () => {
+    const m = { ...defaultModel('cat3a'), actualDeltaPmpm: 120 }; // drive actual far above benchmark
+    const v = computeVbcScenario(m);
+    expect(v.twoSided).toBe(false);
+    expect(v.overBenchmark).toBe(false); // upside-only → never flagged over-benchmark
+    expect(v.grossSavingsPmpm).toBe(0); // floored at 0
+    expect(v.sharedPoolPmpm).toBe(0);
+    expect(v.providerPmpm).toBe(0);
+    expect(v.providerLiabilityPmpm).toBe(0); // no downside, ever
+    expect(v.stopLossCapPmpm).toBe(0);
+  });
+});
+
+describe('infra netting (payer net = share − infra)', () => {
+  it('payer net PMPM subtracts the infra the payer funds', () => {
+    const v = computeVbcScenario(defaultModel('cat3a')); // infra defaults to $2.0 PMPM on Cat 3A
+    expect(v.infraPmpm).toBeGreaterThan(0);
+    expect(v.payerNetPmpm).toBeCloseTo(v.payerPmpm - v.infraPmpm, 1);
+    expect(v.payerNetTotalUsd).toBe(Math.round(v.payerNetPmpm * v.model.memberMonths));
+    expect(v.infraTotalUsd).toBe(Math.round(v.infraPmpm * v.model.memberMonths));
+  });
+
+  it('at a $0 pool the payer still funds infra (surfaced, non-zero)', () => {
+    const v = computeVbcScenario({ ...defaultModel('cat3a'), minSavingsRatePct: 0.9 });
+    expect(v.sharedPoolPmpm).toBe(0);
+    expect(v.infraTotalUsd).toBeGreaterThan(0); // the cost that must be surfaced in the gated-out branch
+    expect(v.payerNetPmpm).toBeCloseTo(-v.infraPmpm, 1); // net negative — payer pays for zero return
   });
 });

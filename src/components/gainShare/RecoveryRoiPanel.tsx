@@ -29,10 +29,11 @@ export function RecoveryRoiPanel({
     <section className="space-y-3 rounded-lg border border-carbon-gray-20 bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold">Payment-integrity ROI · real</h2>
+          <h2 className="text-lg font-semibold">Payment-integrity recovery · real</h2>
           <p className="text-[11px] text-carbon-gray-60">
             Computed live over the reconciliation sub-ledger (hash-chained; PHI-safe synthetic
-            seed). Absolute dollars — not PMPM, not shared savings.
+            seed). Absolute dollars — not PMPM, not shared savings. Identified (recoverable) and
+            realized are shown co-equal — identified is not money in hand.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -59,11 +60,11 @@ export function RecoveryRoiPanel({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        {/* Underpayment correction — pays provider MORE (not savings) */}
+        {/* Underpayment correction — IDENTIFIED vs REALIZED shown co-equal (identified is not money in hand) */}
         <div className="rounded-lg border border-[#a7f0ba] bg-[#f2fbf5] p-3">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-carbon-gray-60">
-              Underpayment identified
+              Underpayment correction
             </p>
             <span
               className="rounded bg-white px-1 text-[8px] font-semibold uppercase text-[#0e6027]"
@@ -72,27 +73,36 @@ export function RecoveryRoiPanel({
               → pays provider
             </span>
           </div>
-          <p className="num mt-1 text-2xl text-[#0e6027]">{fmtUsd(roi.recoverableUsd)}</p>
-          <p className="mt-0.5 text-[10px] text-carbon-gray-60">
-            {roi.underpaymentCount} claims short-paid vs contract. Realizing it pays the provider
-            more — a correctness/quality result,{' '}
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            <div className="rounded bg-white p-1.5">
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-carbon-gray-50">
+                Identified (recoverable)
+              </p>
+              <p className="num text-xl text-[#0e6027]">{fmtUsd(roi.recoverableUsd)}</p>
+              <p className="text-[9px] text-carbon-gray-50">
+                {roi.underpaymentCount} claims short-paid · not money in hand
+              </p>
+            </div>
+            <div className="rounded bg-white p-1.5">
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-carbon-gray-50">
+                Realized (accepted-appeal 835)
+              </p>
+              <p className="num text-xl text-[#0e6027]">{fmtUsd(roi.realizedUsd)}</p>
+              <p className="text-[9px] text-carbon-gray-50">
+                {Math.round(roi.realizedPct * 100)}% of identified
+              </p>
+            </div>
+          </div>
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded bg-carbon-gray-10">
+            <div
+              className="h-full rounded bg-[#24a148]"
+              style={{ width: `${Math.round(roi.realizedPct * 100)}%` }}
+            />
+          </div>
+          <p className="mt-1 text-[10px] text-carbon-gray-60">
+            Realizing it pays the provider more — a correctness/quality result,{' '}
             <span className="font-semibold">not shared savings</span>.
           </p>
-          <div className="mt-1.5 rounded bg-white p-1.5">
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-carbon-gray-60">Realized (accepted-appeal 835)</span>
-              <span className="mono font-semibold text-[#0e6027]">{fmtUsd(roi.realizedUsd)}</span>
-            </div>
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-carbon-gray-10">
-              <div
-                className="h-full rounded bg-[#24a148]"
-                style={{ width: `${Math.round(roi.realizedPct * 100)}%` }}
-              />
-            </div>
-            <p className="mt-0.5 text-right text-[9px] text-carbon-gray-50">
-              {Math.round(roi.realizedPct * 100)}% realized
-            </p>
-          </div>
         </div>
 
         {/* Overpayment return — reduces incurred claims → MLR numerator */}
@@ -124,7 +134,7 @@ export function RecoveryRoiPanel({
           </p>
           <ul className="mt-1 space-y-1 text-[10px] text-carbon-gray-70">
             <li>
-              · {roi.disputeCount} governed disputes across {roi.reconRows} recon rows
+              · {roi.disputeCount} governed handoffs across {roi.reconRows} recon rows
             </li>
             <li>
               · each recovery sealed on the hash-chained sub-ledger (tamper-evident, replayable)

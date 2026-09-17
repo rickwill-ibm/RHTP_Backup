@@ -80,6 +80,10 @@ export interface LanTier {
   /** Illustrative benchmark & actual PMPM for this rung (MODELLED — no sim actuarial data). */
   benchmarkPmpm: number;
   actualPmpm: number;
+  /** Stop-loss PMPM cap on the provider's downside tail. HELD CONSTANT (illustrative). Zero on
+   *  upside-only tiers (no downside). The symmetric deadband is the MSR rate itself (minimum-loss
+   *  rate = minimum-savings rate), computed at run time — not a separate hard-coded band. */
+  stopLossCapPmpm: number;
   note: string;
 }
 export const LAN_TIERS: readonly LanTier[] = [
@@ -90,6 +94,7 @@ export const LAN_TIERS: readonly LanTier[] = [
     twoSided: false,
     benchmarkPmpm: 515,
     actualPmpm: 503,
+    stopLossCapPmpm: 0,
     note: 'Provider shares upside only; no downside. Savings computed on a jointly-replayable, risk-adjusted benchmark.',
   },
   {
@@ -99,7 +104,8 @@ export const LAN_TIERS: readonly LanTier[] = [
     twoSided: true,
     benchmarkPmpm: 527,
     actualPmpm: 500,
-    note: 'Two-sided: provider shares upside and downside within a risk corridor; stop-loss caps the tail.',
+    stopLossCapPmpm: 12,
+    note: 'Two-sided: symmetric MSR/MLR deadband (neither shares nor owes within it); beyond it the provider shares upside and owes downside, with a $12 PMPM stop-loss on the downside tail.',
   },
   {
     id: 'cat4',
@@ -108,7 +114,8 @@ export const LAN_TIERS: readonly LanTier[] = [
     twoSided: true,
     benchmarkPmpm: 535,
     actualPmpm: 480,
-    note: 'Global budget / (sub-)capitation. Per-claim recovery value is near-zero by design; risk sits with capital & reinsurance.',
+    stopLossCapPmpm: 20,
+    note: 'Global budget / (sub-)capitation. Per-claim recovery value is near-zero by design; risk sits with capital & reinsurance. Downside stop-loss caps provider liability at $20 PMPM.',
   },
 ];
 export const lanTier = (id: LanTierId): LanTier =>
@@ -142,26 +149,32 @@ export interface ContractModel {
   tierId: LanTierId;
   memberMonths: number; // HELD CONSTANT (illustrative) — the sim has no attribution denominator
   providerSharePct: number; // 0..1 — provider's share of the qualifying pool
-  pmpmInfra: number; // upfront PMPM infra payment funding the provider build (Cat 3A+)
+  /** Performance-vs-benchmark lever: PMPM added to the rung's base actual. Positive worsens performance;
+   *  on a two-sided tier a large-enough push makes actual > benchmark → the PROVIDER OWES (downside). */
+  actualDeltaPmpm: number;
+  pmpmInfra: number; // upfront PMPM infra payment funding the provider build (Cat 3A+) — a PAYER COST
   qualityGateMet: boolean; // Medicaid shared savings is forfeited if quality misses
   minSavingsRatePct: number; // 0..1 of benchmark — below MSR, nothing is shared
   rebasePct: number; // annual benchmark rebasing (compresses future savings unless protected)
   rebaseProtected: boolean; // rebasing-protection keeps the provider's own earned gains
 }
 
-export const DEFAULT_MEMBER_MONTHS = 120_000; // illustrative: ~10k attributed lives × 12 months
+export const DEFAULT_MEMBER_MONTHS = 120_000; // illustrative: ~10k attributed lives × 12 months (ANNUAL)
 
 export function defaultModel(tierId: LanTierId): ContractModel {
-  const two = lanTier(tierId).twoSided;
   return {
     tierId,
     memberMonths: DEFAULT_MEMBER_MONTHS,
     providerSharePct: tierId === 'cat4' ? 0.6 : 0.5,
+    actualDeltaPmpm: 0,
     pmpmInfra: tierId === 'cat3a' ? 2.0 : 1.0,
     qualityGateMet: true,
     minSavingsRatePct: 0.02,
     rebasePct: 0.015,
-    rebaseProtected: two,
+    // Default OFF, even on two-sided tiers: with protection ON the default multi-year view shows three
+    // identical non-compressing rows, which HIDES the "rebasing compresses future savings" story. Off by
+    // default makes the compression visible; the user turns protection on as an explicit choice.
+    rebaseProtected: false,
   };
 }
 
@@ -172,25 +185,45 @@ export interface RebaseYear {
   sharedPoolPmpm: number;
   providerPmpm: number;
   payerPmpm: number;
+  providerLiabilityPmpm: number; // two-sided downside for this year (0 upside-only / within corridor)
 }
 
 export interface VbcScenario {
   tier: LanTier;
   model: ContractModel;
+  twoSided: boolean;
   benchmarkPmpm: number;
-  actualPmpm: number;
-  grossSavingsPmpm: number; // benchmark − actual (MODELLED)
+  actualPmpm: number; // effective actual (rung base + performance-delta lever)
+  rawGrossPmpm: number; // SIGNED benchmark − actual (negative when actual > benchmark)
+  grossSavingsPmpm: number; // max(0, raw) — the upside floor Cat 3A always uses
+  overBenchmark: boolean; // two-sided AND actual > benchmark → provider owes downside
   msrThresholdPmpm: number; // benchmark × MSR
   qualifies: boolean; // gross ≥ MSR AND quality gate met
   gateReason: string; // why the pool is zero, when it is
   sharedPoolPmpm: number; // qualifying savings (0 if gated out)
   providerPmpm: number;
   payerPmpm: number;
+  // Two-sided DOWNSIDE (only when tier.twoSided AND actual > benchmark). Provider owes its share of the
+  // overspend, CLAMPED by the stop-loss cap. Zero on upside-only tiers — Cat 3A never goes negative.
+  overspendPmpm: number; // max(0, actual − benchmark) on two-sided tiers, else 0
+  providerLiabilityUncappedPmpm: number; // overspend × provider share (pre-stop-loss)
+  providerLiabilityPmpm: number; // ≥ 0, min(uncapped, stop-loss cap) — what the provider OWES
+  liabilityClamped: boolean; // true when the stop-loss cap bit
+  owes: boolean; // two-sided AND overspend beyond the symmetric loss-side deadband → provider owes
+  stopLossCapPmpm: number; // held-constant downside tail cap
+  mlrThresholdPmpm: number; // symmetric loss-side deadband = MSR rate × benchmark (minimum-loss rate)
+  providerLiabilityTotalUsd: number;
   infraPmpm: number; // upfront infra payment to provider (a cost to payer, funds provider build)
-  providerNetPmpm: number; // provider share + infra
-  poolTotalUsd: number; // sharedPool × member-months (illustrative)
+  // NET positions include the two-sided downside: provider net = share + infra − liability; payer net
+  // = share − infra + liability (the provider's owed downside is a payer INFLOW). Coalition/red-team fix.
+  providerNetPmpm: number;
+  providerNetTotalUsd: number;
+  payerNetPmpm: number; // payer share − infra + liability received
+  poolTotalUsd: number; // sharedPool × member-months (ANNUAL — mm is annual)
   providerTotalUsd: number;
   payerTotalUsd: number;
+  payerNetTotalUsd: number;
+  infraTotalUsd: number; // infra × member-months (what the payer funds even at $0 pool)
   rebasing: RebaseYear[];
 }
 
@@ -202,22 +235,45 @@ export interface VbcScenario {
  */
 export function computeVbcScenario(model: ContractModel): VbcScenario {
   const tier = lanTier(model.tierId);
+  const r1 = (n: number): number => Math.round(n * 10) / 10;
   const benchmarkPmpm = tier.benchmarkPmpm;
-  const actualPmpm = tier.actualPmpm;
-  const grossSavingsPmpm = Math.max(0, benchmarkPmpm - actualPmpm);
+  const actualPmpm = r1(Math.max(0, tier.actualPmpm + model.actualDeltaPmpm));
+  const rawGrossPmpm = benchmarkPmpm - actualPmpm; // SIGNED (negative when actual > benchmark)
+  const grossSavingsPmpm = Math.max(0, rawGrossPmpm); // Cat 3A upside floor — never negative
   const msrThresholdPmpm = benchmarkPmpm * model.minSavingsRatePct;
   const meetsMsr = grossSavingsPmpm >= msrThresholdPmpm;
   const qualifies = meetsMsr && model.qualityGateMet;
-  const gateReason = !meetsMsr
-    ? `Below the minimum savings rate (needs ≥ $${msrThresholdPmpm.toFixed(1)} PMPM) — nothing is shared.`
-    : !model.qualityGateMet
-      ? 'Quality gate not met — provider share is forfeited (Medicaid shared-savings gate).'
-      : '';
+  const overBenchmark = tier.twoSided && actualPmpm > benchmarkPmpm;
+
+  // Two-sided DOWNSIDE, SYMMETRIC to the upside: a minimum-LOSS rate (the SAME rate as the MSR) forms
+  // the loss-side deadband, so within ±(MSR × benchmark) the provider neither shares nor owes. Beyond
+  // that deadband on the loss side the provider owes its share of the overspend, clamped by the
+  // stop-loss tail cap. Upside-only (Cat 3A, stopLossCap 0) never charges overspend — cannot go negative.
+  const mlrThresholdPmpm = msrThresholdPmpm; // symmetric: minimum-loss rate = minimum-savings rate
+  const overspendPmpm = tier.twoSided ? Math.max(0, actualPmpm - benchmarkPmpm) : 0;
+  const owes = tier.twoSided && overspendPmpm >= mlrThresholdPmpm;
+  const providerLiabilityUncappedPmpm = r1((owes ? overspendPmpm : 0) * model.providerSharePct);
+  const providerLiabilityPmpm = r1(Math.min(providerLiabilityUncappedPmpm, tier.stopLossCapPmpm));
+  const liabilityClamped = owes && providerLiabilityUncappedPmpm > tier.stopLossCapPmpm;
+
+  const gateReason = owes
+    ? `Actual exceeds benchmark by $${r1(actualPmpm - benchmarkPmpm)} PMPM, past the ±$${msrThresholdPmpm.toFixed(1)} corridor — the provider OWES its downside share (two-sided), capped at the $${tier.stopLossCapPmpm} stop-loss.`
+    : overBenchmark
+      ? `Over benchmark but within the ±$${msrThresholdPmpm.toFixed(1)} risk corridor — neither shared savings nor a downside charge.`
+      : !meetsMsr
+        ? `Below the minimum savings rate (needs ≥ $${msrThresholdPmpm.toFixed(1)} PMPM) — nothing is shared.`
+        : !model.qualityGateMet
+          ? 'Quality gate not met — provider share is forfeited (Medicaid shared-savings gate).'
+          : '';
   const sharedPoolPmpm = qualifies ? grossSavingsPmpm : 0;
-  const providerPmpm = Math.round(sharedPoolPmpm * model.providerSharePct * 10) / 10;
-  const payerPmpm = Math.round((sharedPoolPmpm - providerPmpm) * 10) / 10;
+  const providerPmpm = r1(sharedPoolPmpm * model.providerSharePct);
+  const payerPmpm = r1(sharedPoolPmpm - providerPmpm);
+
   const infraPmpm = model.pmpmInfra;
   const mm = Math.max(1, model.memberMonths);
+  // Net positions carry the downside: the provider's owed liability reduces its net and is a payer INFLOW.
+  const providerNetPmpm = r1(providerPmpm + infraPmpm - providerLiabilityPmpm);
+  const payerNetPmpm = r1(payerPmpm - infraPmpm + providerLiabilityPmpm);
 
   // Multi-year rebasing: the benchmark rebases DOWN toward last period's actual each year, compressing
   // future savings — unless rebasing-protection lets the provider keep its earned gains (benchmark holds).
@@ -228,34 +284,54 @@ export function computeVbcScenario(model: ContractModel): VbcScenario {
     const gross = Math.max(0, bm - actualPmpm);
     const meets = gross >= bm * model.minSavingsRatePct;
     const pool = meets && model.qualityGateMet ? gross : 0;
-    const prov = Math.round(pool * model.providerSharePct * 10) / 10;
+    const prov = r1(pool * model.providerSharePct);
+    // Per-year two-sided downside — same symmetric deadband + stop-loss, so a loss year is not dropped.
+    const yOver = tier.twoSided ? Math.max(0, actualPmpm - bm) : 0;
+    const yOwes = tier.twoSided && yOver >= bm * model.minSavingsRatePct;
+    const yLiab = yOwes ? r1(Math.min(yOver * model.providerSharePct, tier.stopLossCapPmpm)) : 0;
     rebasing.push({
       year: y,
-      benchmarkPmpm: Math.round(bm * 10) / 10,
-      grossSavingsPmpm: Math.round(gross * 10) / 10,
-      sharedPoolPmpm: Math.round(pool * 10) / 10,
+      benchmarkPmpm: r1(bm),
+      grossSavingsPmpm: r1(gross),
+      sharedPoolPmpm: r1(pool),
       providerPmpm: prov,
-      payerPmpm: Math.round((pool - prov) * 10) / 10,
+      payerPmpm: r1(pool - prov),
+      providerLiabilityPmpm: yLiab,
     });
   }
 
   return {
     tier,
     model,
+    twoSided: tier.twoSided,
     benchmarkPmpm,
     actualPmpm,
-    grossSavingsPmpm: Math.round(grossSavingsPmpm * 10) / 10,
-    msrThresholdPmpm: Math.round(msrThresholdPmpm * 10) / 10,
+    rawGrossPmpm: r1(rawGrossPmpm),
+    grossSavingsPmpm: r1(grossSavingsPmpm),
+    overBenchmark,
+    msrThresholdPmpm: r1(msrThresholdPmpm),
     qualifies,
     gateReason,
-    sharedPoolPmpm: Math.round(sharedPoolPmpm * 10) / 10,
+    sharedPoolPmpm: r1(sharedPoolPmpm),
     providerPmpm,
     payerPmpm,
+    overspendPmpm: r1(overspendPmpm),
+    providerLiabilityUncappedPmpm,
+    providerLiabilityPmpm,
+    liabilityClamped,
+    owes,
+    stopLossCapPmpm: tier.stopLossCapPmpm,
+    mlrThresholdPmpm: r1(mlrThresholdPmpm),
+    providerLiabilityTotalUsd: Math.round(providerLiabilityPmpm * mm),
     infraPmpm,
-    providerNetPmpm: Math.round((providerPmpm + infraPmpm) * 10) / 10,
+    providerNetPmpm,
+    providerNetTotalUsd: Math.round(providerNetPmpm * mm),
+    payerNetPmpm,
     poolTotalUsd: Math.round(sharedPoolPmpm * mm),
     providerTotalUsd: Math.round(providerPmpm * mm),
     payerTotalUsd: Math.round(payerPmpm * mm),
+    payerNetTotalUsd: Math.round(payerNetPmpm * mm),
+    infraTotalUsd: Math.round(infraPmpm * mm),
     rebasing,
   };
 }

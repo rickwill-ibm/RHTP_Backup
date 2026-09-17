@@ -17,6 +17,7 @@ import { SurveillanceConsole } from '@/components/goldenThread/flow/Surveillance
 import { PartyWorkbench } from '@/components/goldenThread/flow/PartyWorkbench';
 import { GainShareBoard } from '@/components/gainShare/GainShareBoard';
 import { useOperatingSim } from '@/components/goldenThread/flow/useOperatingSim';
+import { BoardTabs, tabPanelProps } from '@/components/goldenThread/flow/BoardTabs';
 import { SCENARIOS, scenarioList, type ScenarioId } from '@/lib/goldenThread/scenarios';
 
 type View = 'flow' | 'operations' | 'reconciliation' | 'surveillance' | 'workbench' | 'gainshare';
@@ -115,125 +116,112 @@ export function FlowBoards({
           {sc.fictionalOrgBanner}
         </div>
       )}
-      {/* Tab bar */}
-      <div
-        role="tablist"
-        aria-label="Golden Thread views"
-        className="flex flex-wrap gap-1 border-b border-carbon-gray-20"
-      >
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            aria-selected={view === t.key}
-            onClick={() => setView(t.key)}
-            className={`-mb-px border-b-2 px-3 py-2 text-xs font-semibold transition ${
-              view === t.key
-                ? 'border-carbon-blue text-carbon-blue'
-                : 'border-transparent text-carbon-gray-60 hover:text-carbon-gray-90'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab bar — shared BoardTabs primitive (top level) */}
+      <BoardTabs
+        tabs={TABS}
+        active={view}
+        onChange={setView}
+        ariaLabel="Golden Thread views"
+        level="top"
+      />
 
-      {view === 'flow' && (
-        <div className="space-y-3">
-          {/* Inspect mode renders the WA-Medicaid STAGES editorial (438.x/NABD); it is not yet re-grounded
+      <div {...tabPanelProps('Golden Thread views', view)} className="space-y-4">
+        {view === 'flow' && (
+          <div className="space-y-3">
+            {/* Inspect mode renders the WA-Medicaid STAGES editorial (438.x/NABD); it is not yet re-grounded
               per-scenario, so under a non-default scenario the flow is live-only in this step. */}
-          {op.scenario === 'wa-medicaid' && (
-            <div className="flex items-center gap-1">
-              <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-carbon-gray-50">
-                Mode
-              </span>
-              {(['live', 'inspect'] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setFlowMode(m)}
-                  className={`rounded-full border px-3 py-0.5 text-[11px] font-medium capitalize transition ${
-                    flowMode === m
-                      ? 'border-carbon-blue bg-carbon-blue text-white'
-                      : 'border-carbon-gray-30 bg-white text-carbon-gray-70 hover:bg-carbon-gray-10'
-                  }`}
-                >
-                  {m === 'live' ? 'Live run' : 'Inspect (governance detail)'}
-                </button>
-              ))}
-            </div>
-          )}
-          {op.scenario === 'wa-medicaid' && flowMode === 'inspect' ? (
-            <ProcessFlowBoard stages={stages} onOpenParty={openParty} />
-          ) : (
-            <LiveProcessFlowBoard op={op} onOpenTicket={openWorkbenchForTicket} />
-          )}
-        </div>
-      )}
-      {(view === 'surveillance' || view === 'workbench' || view === 'reconciliation') &&
-      op.scenario !== 'wa-medicaid' ? (
-        <div className="ed-card p-6 text-center">
-          <p className="text-sm font-semibold text-carbon-gray-90">
-            This tab is WA-Medicaid reference content.
-          </p>
-          <p className="mx-auto mt-1 max-w-md text-[12px] text-carbon-gray-60">
-            The Reconciliation, Surveillance and Agent-workbench books are seeded with WA-Medicaid
-            claims and analyses. For the <strong>{sc.label}</strong> scenario they are re-grounded
-            in a later step. The
-            <strong> Operations</strong> tab is live: it carries {sc.member?.name ?? 'the member'}’s
-            governed ticket. Switch back to WA Medicaid to see the full reconciliation book.
-          </p>
-        </div>
-      ) : (
-        <>
-          {view === 'operations' && (
-            <OperationsBoard
-              op={op}
-              tickets={tickets}
-              forensic={forensic}
-              onOpenParty={openParty}
-              onOpenTicket={openWorkbenchForTicket}
-            />
-          )}
-          {view === 'reconciliation' && <ReconciliationBoard op={op} />}
-          {view === 'surveillance' && (
-            <SurveillanceConsole op={op} onOpenTicket={openWorkbenchForTicket} />
-          )}
-          {view === 'workbench' && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-1">
-                {(['payer', 'provider', 'neutral'] as Side[]).map((s) => (
+            {op.scenario === 'wa-medicaid' && (
+              <div className="flex items-center gap-1">
+                <span className="mr-1 text-[10px] font-semibold uppercase tracking-wide text-carbon-gray-50">
+                  Mode
+                </span>
+                {(['live', 'inspect'] as const).map((m) => (
                   <button
-                    key={s}
+                    key={m}
                     type="button"
-                    onClick={() => setSide(s)}
+                    onClick={() => setFlowMode(m)}
                     className={`rounded-full border px-3 py-0.5 text-[11px] font-medium capitalize transition ${
-                      side === s
+                      flowMode === m
                         ? 'border-carbon-blue bg-carbon-blue text-white'
                         : 'border-carbon-gray-30 bg-white text-carbon-gray-70 hover:bg-carbon-gray-10'
                     }`}
                   >
-                    {s}
+                    {m === 'live' ? 'Live run' : 'Inspect (governance detail)'}
                   </button>
                 ))}
               </div>
-              <PartyWorkbench
-                side={side}
-                tickets={tickets}
-                recordId={recordId}
-                analyses={analyses}
+            )}
+            {op.scenario === 'wa-medicaid' && flowMode === 'inspect' ? (
+              <ProcessFlowBoard stages={stages} onOpenParty={openParty} />
+            ) : (
+              <LiveProcessFlowBoard op={op} onOpenTicket={openWorkbenchForTicket} />
+            )}
+          </div>
+        )}
+        {(view === 'surveillance' || view === 'workbench' || view === 'reconciliation') &&
+        op.scenario !== 'wa-medicaid' ? (
+          <div className="ed-card p-6 text-center">
+            <p className="text-sm font-semibold text-carbon-gray-90">
+              This tab is WA-Medicaid reference content.
+            </p>
+            <p className="mx-auto mt-1 max-w-md text-[12px] text-carbon-gray-60">
+              The Reconciliation, Surveillance and Agent-workbench books are seeded with WA-Medicaid
+              claims and analyses. For the <strong>{sc.label}</strong> scenario they are re-grounded
+              in a later step. The
+              <strong> Operations</strong> tab is live: it carries {sc.member?.name ?? 'the member'}
+              ’s governed ticket. Switch back to WA Medicaid to see the full reconciliation book.
+            </p>
+          </div>
+        ) : (
+          <>
+            {view === 'operations' && (
+              <OperationsBoard
                 op={op}
-                openTicketId={openTicketId}
-                openTicketKey={openTicketKey}
-                onClearOpenTicket={clearOpenTicket}
+                tickets={tickets}
+                forensic={forensic}
+                onOpenParty={openParty}
                 onOpenTicket={openWorkbenchForTicket}
               />
-            </div>
-          )}
-          {view === 'gainshare' && <GainShareBoard key={op.scenario} op={op} />}
-        </>
-      )}
+            )}
+            {view === 'reconciliation' && <ReconciliationBoard op={op} />}
+            {view === 'surveillance' && (
+              <SurveillanceConsole op={op} onOpenTicket={openWorkbenchForTicket} />
+            )}
+            {view === 'workbench' && (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-1">
+                  {(['payer', 'provider', 'neutral'] as Side[]).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSide(s)}
+                      className={`rounded-full border px-3 py-0.5 text-[11px] font-medium capitalize transition ${
+                        side === s
+                          ? 'border-carbon-blue bg-carbon-blue text-white'
+                          : 'border-carbon-gray-30 bg-white text-carbon-gray-70 hover:bg-carbon-gray-10'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <PartyWorkbench
+                  side={side}
+                  tickets={tickets}
+                  recordId={recordId}
+                  analyses={analyses}
+                  op={op}
+                  openTicketId={openTicketId}
+                  openTicketKey={openTicketKey}
+                  onClearOpenTicket={clearOpenTicket}
+                  onOpenTicket={openWorkbenchForTicket}
+                />
+              </div>
+            )}
+            {view === 'gainshare' && <GainShareBoard key={op.scenario} op={op} />}
+          </>
+        )}
+      </div>
     </div>
   );
 }

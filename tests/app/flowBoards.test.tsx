@@ -20,6 +20,9 @@ vi.mock('@/components/goldenThread/flow/ProcessFlowBoard', () => ({
 vi.mock('@/components/goldenThread/flow/LiveProcessFlowBoard', () => ({
   LiveProcessFlowBoard: () => React.createElement('div', null, 'MOCK LiveProcessFlowBoard'),
 }));
+vi.mock('@/components/goldenThread/flow/IntuitiveFlowBoard', () => ({
+  IntuitiveFlowBoard: () => React.createElement('div', null, 'MOCK IntuitiveFlowBoard'),
+}));
 vi.mock('@/components/goldenThread/flow/OperationsBoard', () => ({
   OperationsBoard: () => React.createElement('div', null, 'MOCK OperationsBoard'),
 }));
@@ -55,5 +58,16 @@ describe('FlowBoards — top-level view router', () => {
     expect(screen.getByText(/MOCK OperationsBoard/)).toBeTruthy();
     fireEvent.click(screen.getByText('Gain-Share'));
     expect(screen.getByText(/MOCK GainShareBoard/)).toBeTruthy();
+  });
+
+  it('exposes the redesigned Process flow (v2) as its own tab, distinct from the original', () => {
+    render(<FlowBoards stages={[]} tickets={[]} forensic={[]} recordId="rec-test" analyses={[]} />);
+    // both tabs exist; the original stays reachable for comparison
+    expect(screen.getByText('Process flow')).toBeTruthy();
+    fireEvent.click(screen.getByText('Process flow (v2)'));
+    expect(screen.getByText(/MOCK IntuitiveFlowBoard/)).toBeTruthy();
+    // the original is one click away and still the untouched live board
+    fireEvent.click(screen.getByText('Process flow'));
+    expect(screen.getByText(/MOCK LiveProcessFlowBoard/)).toBeTruthy();
   });
 });

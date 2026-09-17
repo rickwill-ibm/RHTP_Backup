@@ -11,6 +11,7 @@ import type { FlowStage, OpsTicket, ForensicEntry } from '@/lib/goldenThread/e2e
 import type { WorkbenchAnalysis } from '@/components/goldenThread/AnalystWorkbench';
 import { ProcessFlowBoard } from '@/components/goldenThread/flow/ProcessFlowBoard';
 import { LiveProcessFlowBoard } from '@/components/goldenThread/flow/LiveProcessFlowBoard';
+import { IntuitiveFlowBoard } from '@/components/goldenThread/flow/IntuitiveFlowBoard';
 import { OperationsBoard } from '@/components/goldenThread/flow/OperationsBoard';
 import { ReconciliationBoard } from '@/components/goldenThread/flow/ReconciliationBoard';
 import { SurveillanceConsole } from '@/components/goldenThread/flow/SurveillanceConsole';
@@ -20,7 +21,8 @@ import { useOperatingSim } from '@/components/goldenThread/flow/useOperatingSim'
 import { BoardTabs, tabPanelProps } from '@/components/goldenThread/flow/BoardTabs';
 import { SCENARIOS, scenarioList, type ScenarioId } from '@/lib/goldenThread/scenarios';
 
-type View = 'flow' | 'operations' | 'reconciliation' | 'surveillance' | 'workbench' | 'gainshare';
+type View =
+  'flow' | 'flow2' | 'operations' | 'reconciliation' | 'surveillance' | 'workbench' | 'gainshare';
 type Side = 'payer' | 'provider' | 'neutral';
 
 export interface FlowBoardsProps {
@@ -33,6 +35,7 @@ export interface FlowBoardsProps {
 
 const TABS: Array<{ key: View; label: string }> = [
   { key: 'flow', label: 'Process flow' },
+  { key: 'flow2', label: 'Process flow (v2)' },
   { key: 'operations', label: 'Operations' },
   { key: 'reconciliation', label: 'Reconciliation' },
   { key: 'surveillance', label: 'Surveillance' },
@@ -158,6 +161,9 @@ export function FlowBoards({
             )}
           </div>
         )}
+        {/* Process flow (v2) — the redesigned "Authorization Spine" duplicate; the original 'flow'
+            tab above is retained untouched for side-by-side comparison. Live under any scenario. */}
+        {view === 'flow2' && <IntuitiveFlowBoard op={op} onOpenTicket={openWorkbenchForTicket} />}
         {(view === 'surveillance' || view === 'workbench' || view === 'reconciliation') &&
         op.scenario !== 'wa-medicaid' ? (
           <div className="ed-card p-6 text-center">

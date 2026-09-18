@@ -72,10 +72,7 @@ export interface AccessDecision {
 // authors and submits draft versions (the MAKER); a `value-set-reviewer`
 // approves or rejects a version under review (the CHECKER). Waves B (UI) and C
 // (routes) consume these two roles + GovernancePrincipal.
-export const GOVERNANCE_ROLES = Object.freeze([
-  'value-set-steward',
-  'value-set-reviewer',
-] as const);
+export const GOVERNANCE_ROLES = Object.freeze(['value-set-steward', 'value-set-reviewer'] as const);
 export type GovernanceRole = (typeof GOVERNANCE_ROLES)[number];
 
 /** The acting identity for a value-set governance action (id + governance role). */

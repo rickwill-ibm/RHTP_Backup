@@ -1,0 +1,9 @@
+{
+  "name": "rhtp-delivery-framework",
+  "version": "0.1.0",
+  "description": "Consulting-grade delivery discipline for RHTP and public-sector health work: a default-deny pre-flight gate, the Agentic Build Framework, and coalition seats whose tool grants make going solo impossible.",
+  "author": {
+    "name": "Richard Hennessy"
+  },
+  "keywords": ["delivery", "adherence", "coalition", "red-team", "healthcare", "public-sector"]
+}

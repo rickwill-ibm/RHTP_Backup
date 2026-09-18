@@ -59,7 +59,7 @@ export class SessionSecretNotConfiguredError extends Error {
         'without it — set SESSION_SECRET (server-only, no NEXT_PUBLIC_ prefix). ' +
         'A public default is refused: cookie forgery risk (R5). A labelled dev ' +
         'secret is available ONLY in explicit dev-mock mode (WSO2 unconfigured AND ' +
-        'ALLOW_DEV_MOCK_AUTH=true).',
+        'ALLOW_DEV_MOCK_AUTH=true).'
     );
     this.name = 'SessionSecretNotConfiguredError';
   }

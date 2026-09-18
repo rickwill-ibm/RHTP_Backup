@@ -59,7 +59,12 @@ function specialtyFromEpisode(p: RegistryPatient, domain: PrimaryDomain): Specia
   if (e.includes('copd') || e.includes('asthma') || e.includes('respir')) return 'Respiratory';
   if (e.includes('ckd') || e.includes('renal') || e.includes('nephro')) return 'Renal';
   if (e.includes('diabet') || e.includes('a1c') || e.includes('pre-diab')) return 'Diabetes';
-  if (e.includes('chf') || e.includes('hypertension') || e.includes('blood pressure') || e.includes('cardi'))
+  if (
+    e.includes('chf') ||
+    e.includes('hypertension') ||
+    e.includes('blood pressure') ||
+    e.includes('cardi')
+  )
     return 'Cardiometabolic';
   if (p.age >= 70) return 'Complex/Geriatric';
   return 'Diabetes';
@@ -93,12 +98,15 @@ export function toAttributable(p: RegistryPatient): AttributablePatient {
   const tribal = /lakota|sioux|tribal|pine ridge|bennett/i.test(
     `${p.language} ${p.location} ${p.organization} ${p.cohortFlag}`
   );
-  const region =
-    /bennett|martin/i.test(p.location) ? 'Bennett County'
-    : /pine ridge/i.test(p.location) ? 'Pine Ridge'
-    : /rapid city/i.test(p.location) ? 'Rapid City'
-    : /winner/i.test(p.location) ? 'Winner'
-    : 'Rural SD';
+  const region = /bennett|martin/i.test(p.location)
+    ? 'Bennett County'
+    : /pine ridge/i.test(p.location)
+      ? 'Pine Ridge'
+      : /rapid city/i.test(p.location)
+        ? 'Rapid City'
+        : /winner/i.test(p.location)
+          ? 'Winner'
+          : 'Rural SD';
   return {
     platformId: p.platformId,
     name: p.name,

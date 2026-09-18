@@ -16,7 +16,11 @@ const NETWORK_CONFIG = {
   'Out-of-Network': { bg: 'bg-[#fff1f1]', text: 'text-[#da1e28]', border: 'border-[#ffb3b8]' },
 };
 
-export default function CareTeamAssignmentModule({ patientId, encounterId, onAssignmentConfirmed }: CareTeamAssignmentModuleProps) {
+export default function CareTeamAssignmentModule({
+  patientId,
+  encounterId,
+  onAssignmentConfirmed,
+}: CareTeamAssignmentModuleProps) {
   const [candidates, setCandidates] = useState<CareTeamAssignment[]>(mockCareTeamCandidates);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     mockCareTeamCandidates.filter((c) => c.autoSelected).map((c) => c.id)
@@ -26,7 +30,7 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
   const [confirmedAt, setConfirmedAt] = useState('');
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const selectedCandidates = candidates.filter((c) => selectedIds.includes(c.id));
@@ -53,8 +57,12 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
     return (
       <div className="bg-white border border-carbon-gray-20 p-8 flex flex-col items-center justify-center min-h-[180px]">
         <div className="w-8 h-8 border-2 border-[#6929c4] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-carbon-gray-100">Submitting care team assignments…</p>
-        <p className="text-xs text-carbon-gray-50 mt-1">Writing FHIR ServiceRequest resources to Cerner</p>
+        <p className="text-sm font-medium text-carbon-gray-100">
+          Submitting care team assignments…
+        </p>
+        <p className="text-xs text-carbon-gray-50 mt-1">
+          Writing FHIR ServiceRequest resources to Cerner
+        </p>
       </div>
     );
   }
@@ -66,26 +74,42 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
           <Icon name="CheckCircleIcon" size={20} className="text-[#0e6027]" />
           <div>
             <p className="text-sm font-semibold text-[#0e6027]">Care team assignments confirmed</p>
-            <p className="text-xs text-[#0e6027]/70">FHIR ServiceRequest resources created · {new Date(confirmedAt).toLocaleTimeString()}</p>
+            <p className="text-xs text-[#0e6027]/70">
+              FHIR ServiceRequest resources created · {new Date(confirmedAt).toLocaleTimeString()}
+            </p>
           </div>
         </div>
         <div className="px-5 py-4">
           <p className="text-xs text-carbon-gray-50 mb-3">
-            Confirmation: <span className="font-mono font-semibold text-carbon-gray-100">{confirmId}</span>
+            Confirmation:{' '}
+            <span className="font-mono font-semibold text-carbon-gray-100">{confirmId}</span>
           </p>
           <div className="space-y-2">
             {selectedCandidates.map((c) => {
               const netCfg = NETWORK_CONFIG[c.networkTier];
               return (
-                <div key={c.id} className="flex items-center gap-3 px-3 py-2.5 bg-carbon-gray-10 border border-carbon-gray-20">
+                <div
+                  key={c.id}
+                  className="flex items-center gap-3 px-3 py-2.5 bg-carbon-gray-10 border border-carbon-gray-20"
+                >
                   <div className="w-8 h-8 bg-[#6929c4] flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">{c.providerName.split(' ').map((n) => n[0]).join('').slice(0, 2)}</span>
+                    <span className="text-white text-xs font-bold">
+                      {c.providerName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)}
+                    </span>
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-carbon-gray-100">{c.providerName}</p>
-                    <p className="text-2xs text-carbon-gray-50">{c.specialty} · {c.role}</p>
+                    <p className="text-2xs text-carbon-gray-50">
+                      {c.specialty} · {c.role}
+                    </p>
                   </div>
-                  <span className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}>
+                  <span
+                    className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}
+                  >
                     {c.networkTier}
                   </span>
                   <Icon name="CheckCircleIcon" size={14} className="text-[#24a148]" />
@@ -105,7 +129,9 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
         <div className="flex items-center gap-2">
           <Icon name="UserGroupIcon" size={16} className="text-carbon-gray-70" />
           <span className="text-sm font-semibold text-carbon-gray-100">Care Team Assignment</span>
-          <span className="text-2xs text-carbon-gray-50 bg-carbon-gray-10 px-2 py-0.5">Auto-selected from provider network</span>
+          <span className="text-2xs text-carbon-gray-50 bg-carbon-gray-10 px-2 py-0.5">
+            Auto-selected from provider network
+          </span>
         </div>
         {step === 'select' && selectedIds.length > 0 && (
           <button
@@ -117,7 +143,10 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
           </button>
         )}
         {step === 'confirm' && (
-          <button onClick={() => setStep('select')} className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100">
+          <button
+            onClick={() => setStep('select')}
+            className="text-xs text-carbon-gray-50 hover:text-carbon-gray-100"
+          >
             ← Back
           </button>
         )}
@@ -129,7 +158,8 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
           <div className="bg-[#f6f2ff] border border-[#d4bbff] px-4 py-2.5 mb-4 flex items-start gap-2">
             <Icon name="SparklesIcon" size={14} className="text-[#6929c4] flex-shrink-0 mt-0.5" />
             <p className="text-xs text-[#6929c4]">
-              Auto-selected based on: preferred network tier, quality score, accepting new patients, proximity to patient, and wait time.
+              Auto-selected based on: preferred network tier, quality score, accepting new patients,
+              proximity to patient, and wait time.
             </p>
           </div>
 
@@ -137,7 +167,12 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
             {candidates.map((c) => {
               const isSelected = selectedIds.includes(c.id);
               const netCfg = NETWORK_CONFIG[c.networkTier];
-              const qualColor = c.qualityScore >= 90 ? 'text-[#24a148]' : c.qualityScore >= 80 ? 'text-[#b45309]' : 'text-[#da1e28]';
+              const qualColor =
+                c.qualityScore >= 90
+                  ? 'text-[#24a148]'
+                  : c.qualityScore >= 80
+                    ? 'text-[#b45309]'
+                    : 'text-[#da1e28]';
 
               return (
                 <div
@@ -151,39 +186,53 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
                 >
                   <div className="flex items-start gap-3">
                     {/* Checkbox */}
-                    <div className={`w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      isSelected ? 'border-[#6929c4] bg-[#6929c4]' : 'border-carbon-gray-30'
-                    }`}>
+                    <div
+                      className={`w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        isSelected ? 'border-[#6929c4] bg-[#6929c4]' : 'border-carbon-gray-30'
+                      }`}
+                    >
                       {isSelected && <Icon name="CheckIcon" size={10} className="text-white" />}
                     </div>
 
                     {/* Provider avatar */}
                     <div className="w-9 h-9 bg-carbon-gray-90 flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs font-bold">
-                        {c.providerName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                        {c.providerName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
                       </span>
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <p className="text-sm font-semibold text-carbon-gray-100">{c.providerName}</p>
+                        <p className="text-sm font-semibold text-carbon-gray-100">
+                          {c.providerName}
+                        </p>
                         {c.autoSelected && (
                           <span className="text-2xs font-semibold px-1.5 py-0.5 bg-[#e8daff] text-[#6929c4]">
                             ✦ Auto-selected
                           </span>
                         )}
-                        <span className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}>
+                        <span
+                          className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}
+                        >
                           {c.networkTier}
                         </span>
                       </div>
-                      <p className="text-xs text-carbon-gray-70 mb-2">{c.specialty} · {c.role}</p>
+                      <p className="text-xs text-carbon-gray-70 mb-2">
+                        {c.specialty} · {c.role}
+                      </p>
 
                       {/* Metrics row */}
                       <div className="flex items-center gap-4 flex-wrap">
                         <div className="flex items-center gap-1">
                           <Icon name="StarIcon" size={12} className={qualColor} />
-                          <span className={`text-xs font-mono font-semibold ${qualColor}`}>{c.qualityScore}</span>
+                          <span className={`text-xs font-mono font-semibold ${qualColor}`}>
+                            {c.qualityScore}
+                          </span>
                           <span className="text-2xs text-carbon-gray-50">quality</span>
                         </div>
                         <div className="flex items-center gap-1">
@@ -198,7 +247,9 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
 
                       {/* Selection reason */}
                       {c.autoSelected && (
-                        <p className="text-2xs text-carbon-gray-50 mt-1.5 italic">{c.selectionReason}</p>
+                        <p className="text-2xs text-carbon-gray-50 mt-1.5 italic">
+                          {c.selectionReason}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -212,26 +263,42 @@ export default function CareTeamAssignmentModule({ patientId, encounterId, onAss
       {step === 'confirm' && (
         <div className="p-5">
           <div className="bg-[#fdf6dd] border border-[#f1c21b] px-4 py-3 mb-4 flex items-start gap-2">
-            <Icon name="ExclamationTriangleIcon" size={15} className="text-[#b45309] flex-shrink-0 mt-0.5" />
+            <Icon
+              name="ExclamationTriangleIcon"
+              size={15}
+              className="text-[#b45309] flex-shrink-0 mt-0.5"
+            />
             <p className="text-xs text-[#b45309]">
-              Confirming will write care team assignments to Cerner as FHIR ServiceRequest resources and notify the selected providers.
+              Confirming will write care team assignments to Cerner as FHIR ServiceRequest resources
+              and notify the selected providers.
             </p>
           </div>
           <div className="space-y-2 mb-5">
             {selectedCandidates.map((c) => {
               const netCfg = NETWORK_CONFIG[c.networkTier];
               return (
-                <div key={c.id} className="flex items-center gap-3 px-4 py-3 bg-carbon-gray-10 border border-carbon-gray-20">
+                <div
+                  key={c.id}
+                  className="flex items-center gap-3 px-4 py-3 bg-carbon-gray-10 border border-carbon-gray-20"
+                >
                   <div className="w-8 h-8 bg-[#6929c4] flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-xs font-bold">
-                      {c.providerName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                      {c.providerName
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2)}
                     </span>
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-carbon-gray-100">{c.providerName}</p>
-                    <p className="text-xs text-carbon-gray-50">{c.specialty} · NPI: {c.providerNpi}</p>
+                    <p className="text-xs text-carbon-gray-50">
+                      {c.specialty} · NPI: {c.providerNpi}
+                    </p>
                   </div>
-                  <span className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}>
+                  <span
+                    className={`text-2xs font-semibold px-1.5 py-0.5 border ${netCfg.bg} ${netCfg.text} ${netCfg.border}`}
+                  >
                     {c.networkTier}
                   </span>
                 </div>

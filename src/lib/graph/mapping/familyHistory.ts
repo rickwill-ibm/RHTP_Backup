@@ -53,7 +53,7 @@ export const familyHistorySpec = {
         conditionCodes: codes,
         status: str(p.status, 'completed'),
         provenance: str(p.provenance),
-      }),
+      })
     );
     // The member's chart HAS this family history — factual attachment (associative), dated.
     out.push({

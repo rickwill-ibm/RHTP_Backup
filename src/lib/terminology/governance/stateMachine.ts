@@ -7,11 +7,7 @@
  * is `in-review --approve--> approved`, so a `draft` cannot jump to active and a
  * `rejected` version (terminal) can never become active.
  */
-import {
-  IllegalTransitionError,
-  type GovernanceAction,
-  type VersionLifecycleState,
-} from './types';
+import { IllegalTransitionError, type GovernanceAction, type VersionLifecycleState } from './types';
 
 /**
  * The lifecycle graph. Terminal states (`rejected`, `retired`, `superseded`) have
@@ -45,7 +41,7 @@ export function canTransition(from: VersionLifecycleState, action: GovernanceAct
  */
 export function nextState(
   from: VersionLifecycleState,
-  action: GovernanceAction,
+  action: GovernanceAction
 ): VersionLifecycleState {
   const to = TRANSITIONS[from][action];
   if (to === undefined) throw new IllegalTransitionError(from, action);

@@ -27,8 +27,11 @@ export function generatePDFReport(opts: {
 }) {
   const { reportTitle, subtitle, generatedBy, sections, tableHeaders, tableRows } = opts;
   const now = clock.nowDate().toLocaleString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   const sectionHTML = sections
@@ -106,18 +109,43 @@ export function generatePDFReport(opts: {
 // ─── DemoPatientExportRow (defined here, re-exported from barrel) ─────────────
 
 export interface DemoPatientExportRow {
-  name: string; mrn: string; age: number; gender: string; payer: string;
-  riskTier: string; rafScore: number; rafDelta: number; predictedErRisk: number;
-  openHCCSuspects: number; hccSuspectValue: number; openCareGaps: number;
-  clinicalGaps: number; bhGaps: number; socialGaps: number;
-  pmpmCost: number; pmpmTarget: number; attributionStatus: string;
-  primaryCareProvider: string; lastContactDate: string;
-  phq9Score: number; auditC: number; bhReferralStatus: string;
-  transportStatus: string; foodSecurity: string; housingStatus: string;
-  cohortFlag: string; ruralDistance: string; disparityFlag: string;
-  episodeType: string; episodeStatus: string; carePlanStatus: string;
-  pathwayProgress: string; gainShareEstimate: number;
-  contract: string; exportedBy: string; exportedAt: string;
+  name: string;
+  mrn: string;
+  age: number;
+  gender: string;
+  payer: string;
+  riskTier: string;
+  rafScore: number;
+  rafDelta: number;
+  predictedErRisk: number;
+  openHCCSuspects: number;
+  hccSuspectValue: number;
+  openCareGaps: number;
+  clinicalGaps: number;
+  bhGaps: number;
+  socialGaps: number;
+  pmpmCost: number;
+  pmpmTarget: number;
+  attributionStatus: string;
+  primaryCareProvider: string;
+  lastContactDate: string;
+  phq9Score: number;
+  auditC: number;
+  bhReferralStatus: string;
+  transportStatus: string;
+  foodSecurity: string;
+  housingStatus: string;
+  cohortFlag: string;
+  ruralDistance: string;
+  disparityFlag: string;
+  episodeType: string;
+  episodeStatus: string;
+  carePlanStatus: string;
+  pathwayProgress: string;
+  gainShareEstimate: number;
+  contract: string;
+  exportedBy: string;
+  exportedAt: string;
 }
 
 export function generateDemoTrackPDF(patient: DemoPatientExportRow) {
@@ -143,8 +171,14 @@ export function generateDemoTrackPDF(patient: DemoPatientExportRow) {
         title: 'Clinical Risk Profile',
         rows: [
           { label: 'Risk Tier', value: patient.riskTier },
-          { label: 'RAF Score', value: `${patient.rafScore.toFixed(2)} (Δ +${patient.rafDelta.toFixed(2)} YTD)` },
-          { label: 'Predicted ER Risk (30d)', value: `${Math.round(patient.predictedErRisk * 100)}%` },
+          {
+            label: 'RAF Score',
+            value: `${patient.rafScore.toFixed(2)} (Δ +${patient.rafDelta.toFixed(2)} YTD)`,
+          },
+          {
+            label: 'Predicted ER Risk (30d)',
+            value: `${Math.round(patient.predictedErRisk * 100)}%`,
+          },
           { label: 'Open HCC Suspects', value: String(patient.openHCCSuspects) },
           { label: 'HCC Revenue at Risk', value: `$${patient.hccSuspectValue.toLocaleString()}` },
           { label: 'Episode', value: `${patient.episodeType} · ${patient.episodeStatus}` },
@@ -185,7 +219,10 @@ export function generateDemoTrackPDF(patient: DemoPatientExportRow) {
         rows: [
           { label: 'PMPM Cost', value: `$${patient.pmpmCost.toLocaleString()}` },
           { label: 'PMPM Target', value: `$${patient.pmpmTarget.toLocaleString()}` },
-          { label: 'PMPM Variance', value: `$${(patient.pmpmCost - patient.pmpmTarget).toLocaleString()}` },
+          {
+            label: 'PMPM Variance',
+            value: `$${(patient.pmpmCost - patient.pmpmTarget).toLocaleString()}`,
+          },
           { label: 'Gain Share Estimate', value: `$${patient.gainShareEstimate.toLocaleString()}` },
         ],
       },

@@ -31,9 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <head>
@@ -41,7 +39,7 @@ export default function RootLayout({
         <meta name="author" content="Richard Hennessy" />
         <meta name="application-name" content="TCOC — Total Cost of Care Clinical Platform" />
         <meta name="copyright" content="Richard Hennessy" />
-</head>
+      </head>
       <body>
         <AppContextProvider>
           <FhirModeSyncMount />

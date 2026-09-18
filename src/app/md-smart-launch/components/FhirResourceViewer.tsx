@@ -11,11 +11,33 @@ interface FhirResourceViewerProps {
 }
 
 // Highlighted top-level FHIR fields shown prominently
-const PROMINENT_KEYS = ['resourceType', 'id', 'status', 'code', 'subject', 'effectiveDateTime',
-  'valueQuantity', 'valueString', 'clinicalStatus', 'category', 'onset', 'encounter',
-  'payor', 'beneficiary', 'subscriber', 'subscriberId', 'scope', 'provision'];
+const PROMINENT_KEYS = [
+  'resourceType',
+  'id',
+  'status',
+  'code',
+  'subject',
+  'effectiveDateTime',
+  'valueQuantity',
+  'valueString',
+  'clinicalStatus',
+  'category',
+  'onset',
+  'encounter',
+  'payor',
+  'beneficiary',
+  'subscriber',
+  'subscriberId',
+  'scope',
+  'provision',
+];
 
-export default function FhirResourceViewer({ resourceType, resourceId, label, onClose }: FhirResourceViewerProps) {
+export default function FhirResourceViewer({
+  resourceType,
+  resourceId,
+  label,
+  onClose,
+}: FhirResourceViewerProps) {
   const [resource, setResource] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,14 +48,27 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
     let cancelled = false;
     setLoading(true);
     setError(null);
-    getFhirClient().read<Record<string, unknown>>(resourceType, resourceId)
-      .then(r => { if (!cancelled) { setResource(r); setLoading(false); } })
-      .catch(e => { if (!cancelled) { setError(String(e)); setLoading(false); } });
-    return () => { cancelled = true; };
+    getFhirClient()
+      .read<Record<string, unknown>>(resourceType, resourceId)
+      .then((r) => {
+        if (!cancelled) {
+          setResource(r);
+          setLoading(false);
+        }
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setError(String(e));
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [resourceType, resourceId]);
 
   const prominent = resource
-    ? PROMINENT_KEYS.filter(k => k in resource).map(k => ({ key: k, value: resource[k] }))
+    ? PROMINENT_KEYS.filter((k) => k in resource).map((k) => ({ key: k, value: resource[k] }))
     : [];
   const rest = resource
     ? Object.entries(resource).filter(([k]) => !PROMINENT_KEYS.includes(k))
@@ -42,8 +77,12 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <button type="button" aria-label="Close" onClick={onClose}
-        className="absolute inset-0 bg-black/40" />
+      <button
+        type="button"
+        aria-label="Close"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/40"
+      />
 
       {/* Modal */}
       <div className="relative bg-white border border-[#dddbda] shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col rounded-sm mx-4">
@@ -52,7 +91,8 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
           <div className="flex items-center gap-2 min-w-0">
             <Icon name="ServerIcon" size={14} className="text-[#f0ab00] flex-shrink-0" />
             <span className="text-sm font-semibold text-white truncate">
-              {label ?? resourceType} <span className="font-mono font-normal opacity-70 text-xs">· {resourceId}</span>
+              {label ?? resourceType}{' '}
+              <span className="font-mono font-normal opacity-70 text-xs">· {resourceId}</span>
             </span>
             {isMock && (
               <span className="text-2xs font-bold px-2 py-0.5 bg-[#fce8b2] text-[#7c4c00] border border-[#f0c56c] rounded-sm flex-shrink-0">
@@ -60,7 +100,10 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
               </span>
             )}
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white transition-colors flex-shrink-0 ml-3">
+          <button
+            onClick={onClose}
+            className="text-white/70 hover:text-white transition-colors flex-shrink-0 ml-3"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -85,7 +128,9 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
               {/* Key fields */}
               {prominent.length > 0 && (
                 <div className="bg-[#e8f4fb] border border-[#b3d6f5] rounded-sm p-3">
-                  <p className="text-2xs font-semibold uppercase tracking-wide text-[#16325c] mb-2">Key Fields</p>
+                  <p className="text-2xs font-semibold uppercase tracking-wide text-[#16325c] mb-2">
+                    Key Fields
+                  </p>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
                     {prominent.map(({ key, value }) => (
                       <div key={key}>
@@ -101,7 +146,9 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
 
               {/* Full JSON */}
               <div>
-                <p className="text-2xs font-semibold uppercase tracking-wide text-[#706e6b] mb-1.5">Full Resource (FHIR R4)</p>
+                <p className="text-2xs font-semibold uppercase tracking-wide text-[#706e6b] mb-1.5">
+                  Full Resource (FHIR R4)
+                </p>
                 <pre className="bg-[#f4f6f9] border border-[#dddbda] rounded-sm p-3 text-2xs font-mono text-[#3e3e3c] overflow-x-auto leading-relaxed whitespace-pre-wrap break-all">
                   {JSON.stringify(resource, null, 2)}
                 </pre>
@@ -112,7 +159,9 @@ export default function FhirResourceViewer({ resourceType, resourceId, label, on
 
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-[#dddbda] bg-[#f4f6f9] flex-shrink-0">
-          <span className="text-2xs text-[#706e6b] font-mono truncate">{fhirBase}/{resourceType}/{resourceId}</span>
+          <span className="text-2xs text-[#706e6b] font-mono truncate">
+            {fhirBase}/{resourceType}/{resourceId}
+          </span>
           <a
             href={`${fhirBase}/${resourceType}/${resourceId}`}
             target="_blank"

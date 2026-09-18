@@ -1,0 +1,906 @@
+<title>Golden Thread Recovery</title>
+<meta name="description" content="An executive walkthrough of governed, bidirectional payer-provider order-to-cash: clean-claim prevention and autonomous recovery over one shared, dual-audited Evidence Record, governed by the Twin-Ladder interlock." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+<style>
+  :root {
+    --ground: #f6f8fa; --surface: #ffffff; --surface-2: #eef2f6;
+    --ink: #16212b; --ink-2: #3f5061; --muted: #6b7c8c; --line: #dbe3ea; --line-2: #c7d2dc;
+    --brand: #0f766e; --brand-ink: #0b544e; --brand-wash: #e2f1ef;
+    --ev-0: #c8d3e6; --ev-1: #8ea6cf; --ev-2: #4d6fae; --ev-3: #24427e; --ev-ink: #24427e;
+    --au-0: #ecd9b6; --au-1: #d8b06a; --au-2: #bd8226; --au-3: #8a5a12; --au-ink: #8a5a12;
+    --good: #15803d; --good-wash: #e4f2e9;
+    --warn: #b45309; --warn-wash: #f8ecdd;
+    --crit: #be123c; --crit-wash: #fbe3e8;
+    --prov: #0f766e; --prov-wash: #e2f1ef;
+    --pay: #4d6fae; --pay-wash: #e7edf7;
+    --shadow: 0 1px 2px rgba(16,33,43,.05), 0 8px 28px -14px rgba(16,33,43,.22);
+    --shadow-lift: 0 2px 6px rgba(16,33,43,.08), 0 20px 44px -20px rgba(16,33,43,.30);
+    --radius: 14px; --maxw: 1120px;
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d141b; --surface: #141d26; --surface-2: #1c2833;
+      --ink: #e7eef4; --ink-2: #b4c3d0; --muted: #8397a6; --line: #26343f; --line-2: #35485a;
+      --brand: #3fb5aa; --brand-ink: #7fd3c9; --brand-wash: #12312e;
+      --ev-0: #33445f; --ev-1: #53709e; --ev-2: #7f9cca; --ev-3: #b7cbea; --ev-ink: #b7cbea;
+      --au-0: #4a3c22; --au-1: #8a6a2c; --au-2: #cf9a3f; --au-3: #edc879; --au-ink: #edc879;
+      --good: #4ade80; --good-wash: #12301f; --warn: #eab35a; --warn-wash: #33260f;
+      --crit: #fb7185; --crit-wash: #351019;
+      --prov: #3fb5aa; --prov-wash: #12312e; --pay: #7f9cca; --pay-wash: #1a2740;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.6);
+      --shadow-lift: 0 2px 6px rgba(0,0,0,.5), 0 20px 44px -20px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0d141b; --surface: #141d26; --surface-2: #1c2833;
+    --ink: #e7eef4; --ink-2: #b4c3d0; --muted: #8397a6; --line: #26343f; --line-2: #35485a;
+    --brand: #3fb5aa; --brand-ink: #7fd3c9; --brand-wash: #12312e;
+    --ev-0: #33445f; --ev-1: #53709e; --ev-2: #7f9cca; --ev-3: #b7cbea; --ev-ink: #b7cbea;
+    --au-0: #4a3c22; --au-1: #8a6a2c; --au-2: #cf9a3f; --au-3: #edc879; --au-ink: #edc879;
+    --good: #4ade80; --good-wash: #12301f; --warn: #eab35a; --warn-wash: #33260f;
+    --crit: #fb7185; --crit-wash: #351019;
+    --prov: #3fb5aa; --prov-wash: #12312e; --pay: #7f9cca; --pay-wash: #1a2740;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px -14px rgba(0,0,0,.6);
+    --shadow-lift: 0 2px 6px rgba(0,0,0,.5), 0 20px 44px -20px rgba(0,0,0,.7);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding-inline: 24px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; line-height: 1.12; margin: 0; }
+  p { margin: 0; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-ink); font-weight: 500; }
+  a { color: var(--brand-ink); }
+  button { font-family: var(--body); cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
+
+  .topbar { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; padding-block: 10px; gap: 16px; }
+  .brandmark { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 600; font-size: 16px; white-space: nowrap; }
+  .thread-dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, var(--prov), var(--au-2)); box-shadow: 0 0 0 3px var(--brand-wash); }
+  .navlinks { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+  .navlinks button { font-size: 12.5px; color: var(--muted); background: transparent; border: 0; padding: 6px 10px; border-radius: 8px; font-weight: 500; }
+  .navlinks button:hover { color: var(--ink); background: var(--surface-2); }
+  .navlinks button[aria-current="true"] { color: var(--brand-ink); background: var(--brand-wash); font-weight: 600; }
+  .theme-btn { border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); border-radius: 8px; width: 34px; height: 34px; font-size: 15px; flex: none; }
+  @media (max-width: 900px) { .navlinks { display: none; } }
+
+  .view[hidden] { display: none; }
+  section.view { padding-block: 46px 64px; }
+  .sec-head { max-width: 64ch; margin-bottom: 28px; }
+  .sec-head h2 { font-size: clamp(24px, 3.4vw, 33px); letter-spacing: -.01em; margin-top: 10px; }
+  .sec-head p { margin-top: 12px; color: var(--ink-2); font-size: 16px; }
+
+  /* hero / overview */
+  .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 44px; align-items: center; padding-top: 18px; }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 30px; } }
+  .hero h1 { font-size: clamp(32px, 5vw, 52px); letter-spacing: -.015em; }
+  .hero h1 em { font-style: italic; color: var(--brand-ink); }
+  .hero .lede { margin-top: 20px; font-size: 18px; color: var(--ink-2); max-width: 52ch; }
+  .hero .sub { margin-top: 14px; font-size: 14px; color: var(--muted); max-width: 52ch; }
+  .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .pill { font-size: 12.5px; font-weight: 500; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); }
+  .jump { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { border: 1px solid var(--brand); background: var(--brand); color: #fff; font-weight: 600; font-size: 14px; padding: 10px 18px; border-radius: 10px; }
+  .btn:hover { background: var(--brand-ink); border-color: var(--brand-ink); }
+  .btn.ghost { background: transparent; color: var(--brand-ink); }
+
+  .ladder-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lift); padding: 22px; }
+  .ladder-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .ladder-head h3 { font-size: 15px; }
+  .twin { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; }
+  .rung-col { display: flex; flex-direction: column-reverse; gap: 7px; }
+  .col-cap { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 6px; }
+  .step { display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; background: var(--surface); font-size: 13px; transition: transform .18s, box-shadow .18s, background .18s; }
+  .step .code { font-family: var(--mono); font-weight: 600; }
+  .step .meaning { font-size: 11px; color: var(--muted); text-align: right; }
+  .step.on-ev { background: color-mix(in srgb, var(--ev-2) 16%, var(--surface)); border-color: var(--ev-2); color: var(--ev-ink); transform: translateX(2px); box-shadow: var(--shadow); }
+  .step.on-au { background: color-mix(in srgb, var(--au-2) 18%, var(--surface)); border-color: var(--au-2); color: var(--au-ink); transform: translateX(-2px); box-shadow: var(--shadow); }
+  .step.dim { opacity: .5; }
+  .interlink { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--muted); }
+  .interlink .lock { font-size: 18px; }
+  .interlink .bar { width: 2px; flex: 1; background: linear-gradient(var(--ev-2), var(--au-2)); border-radius: 2px; }
+
+  /* bidirectional flow */
+  .dir-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; font-size: 12.5px; }
+  .dir-legend span { display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); }
+  .swatch { width: 22px; height: 8px; border-radius: 4px; }
+  .flow { display: grid; grid-template-columns: 96px 1fr; gap: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+  .lane-label { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px 8px; font-weight: 600; font-size: 13px; text-align: center; border-right: 1px solid var(--line); }
+  .lane-label.prov { background: var(--prov-wash); color: var(--brand-ink); }
+  .lane-label.pay { background: var(--pay-wash); color: var(--pay); }
+  .lane-label.ledger { background: var(--surface-2); color: var(--ink-2); font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+  .lane-track { display: flex; gap: 10px; padding: 14px; overflow-x: auto; }
+  .lane-mid { border-block: 1px dashed var(--line-2); }
+  .node { flex: none; width: 168px; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 11px; padding: 11px 12px; display: flex; flex-direction: column; gap: 7px; transition: transform .16s, box-shadow .16s, border-color .16s; position: relative; }
+  .node:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .node.active { border-color: var(--brand); box-shadow: var(--shadow-lift); }
+  .node.prevention { border-top: 3px solid var(--prov); }
+  .node.correction { border-top: 3px solid var(--au-2); }
+  .node.adjud { border-top: 3px solid var(--pay); }
+  .node .n { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .node .nm { font-size: 13px; font-weight: 600; line-height: 1.25; }
+  .node .arrow { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: auto; }
+  .ledger-rail { padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .ledger-rail .beam { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--prov), var(--pay)); opacity: .5; }
+  .node-detail { margin-top: 18px; }
+  .detail-title { font-family: var(--display); font-size: 18px; font-weight: 600; }
+  .kv { display: flex; flex-direction: column; gap: 9px; margin-top: 14px; }
+  .kv .row { display: flex; gap: 10px; font-size: 13.5px; }
+  .kv .k { color: var(--muted); min-width: 130px; flex: none; }
+  .grid2 { display: grid; grid-template-columns: 1.25fr 1fr; gap: 20px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .balance { background: var(--surface-2); border-radius: 10px; padding: 14px 16px; }
+  .balance h4 { margin: 0 0 8px; font-size: 12px; font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .ledger-line { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px; padding: 3px 0; }
+  .ledger-line.total { border-top: 1px solid var(--line-2); margin-top: 6px; padding-top: 8px; font-weight: 600; }
+  .balance-chip { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--good); background: var(--good-wash); padding: 5px 10px; border-radius: 999px; }
+  .tag { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+  .tag.ev { background: color-mix(in srgb, var(--ev-2) 20%, var(--surface)); color: var(--ev-ink); }
+  .tag.au { background: color-mix(in srgb, var(--au-2) 24%, var(--surface)); color: var(--au-ink); }
+  .tag.prov { background: var(--prov-wash); color: var(--brand-ink); }
+  .tag.pay { background: var(--pay-wash); color: var(--pay); }
+
+  /* shift-left panel */
+  .shift { margin-top: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); padding: 20px; }
+  .shift-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .toggle { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; padding: 3px; background: var(--surface); gap: 3px; }
+  .toggle button { border: 0; background: transparent; color: var(--ink-2); font-size: 13px; font-weight: 500; padding: 7px 13px; border-radius: 7px; }
+  .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+  .tile { border: 1px solid var(--line); border-radius: 11px; padding: 13px 14px; background: var(--surface); }
+  .tile .lab { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-family: var(--mono); }
+  .tile .val { font-family: var(--display); font-size: 26px; font-weight: 600; margin-top: 4px; letter-spacing: -.01em; }
+  .tile .sub { font-size: 11.5px; margin-top: 2px; }
+  .up { color: var(--good); } .down { color: var(--good); } .muted { color: var(--muted); }
+  .tile.good { background: var(--good-wash); border-color: color-mix(in srgb, var(--good) 30%, transparent); }
+  .tile.warn { background: var(--warn-wash); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .tile.ev { background: color-mix(in srgb, var(--ev-2) 12%, var(--surface)); border-color: color-mix(in srgb, var(--ev-2) 34%, transparent); }
+
+  /* interlock lab */
+  .interlock-lab { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: start; }
+  @media (max-width: 820px) { .interlock-lab { grid-template-columns: 1fr; } }
+  .controls { display: flex; flex-direction: column; gap: 18px; }
+  .control label { display: block; font-size: 12px; font-weight: 600; font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; padding: 3px; background: var(--surface); gap: 3px; flex-wrap: wrap; }
+  .seg button { border: 0; background: transparent; color: var(--ink-2); font-size: 13px; font-weight: 500; padding: 7px 13px; border-radius: 7px; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+  .verdict-strip { margin-top: 22px; padding: 16px 18px; border-radius: 12px; background: var(--brand-wash); border: 1px solid color-mix(in srgb, var(--brand) 30%, transparent); }
+  .verdict-strip .big { font-family: var(--display); font-size: 19px; font-weight: 600; }
+  .verdict-strip .note { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+
+  /* simulator */
+  .sim { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .sim-top { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .sim-body { padding: 20px; }
+  .levers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  @media (max-width: 720px) { .levers { grid-template-columns: 1fr; } }
+  .lever { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; }
+  .lever label { font-size: 11px; font-weight: 600; font-family: var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  select { width: 100%; margin-top: 7px; font-family: var(--body); font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); }
+  .dists { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 20px; }
+  @media (max-width: 720px) { .dists { grid-template-columns: 1fr; } }
+  .dist h4 { font-size: 12px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; margin: 0 0 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; font-size: 12px; }
+  .bar-row .rk { width: 26px; font-family: var(--mono); color: var(--muted); }
+  .track { flex: 1; height: 16px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+  .track > span { display: block; height: 100%; border-radius: 5px; }
+  .bar-row .ct { width: 26px; text-align: right; font-family: var(--mono); }
+  .insight { margin-top: 20px; padding: 16px 18px; border-radius: 12px; background: color-mix(in srgb, var(--ev-2) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--ev-2) 28%, transparent); }
+  .insight h4 { margin: 0 0 6px; font-size: 13px; color: var(--ev-ink); font-family: var(--display); }
+  .insight p { font-size: 13.5px; color: var(--ink-2); }
+  table.claims { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 12.5px; }
+  table.claims th { text-align: left; color: var(--muted); font-weight: 500; font-family: var(--mono); font-size: 11px; letter-spacing: .03em; padding: 6px 10px 6px 0; text-transform: uppercase; }
+  table.claims td { padding: 7px 10px 7px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .scroll-x { overflow-x: auto; }
+
+  /* evidence ledger */
+  .ledger-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 860px) { .ledger-grid { grid-template-columns: 1fr; } }
+  .ledger-list { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+  .ledger-list .lhead { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); gap: 12px; }
+  .seal-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: var(--good); background: var(--good-wash); padding: 4px 10px; border-radius: 999px; }
+  .entry { display: grid; grid-template-columns: 118px 1fr auto; gap: 12px; padding: 11px 16px; border-top: 1px solid var(--line); font-size: 13px; align-items: baseline; }
+  .entry:first-of-type { border-top: 0; }
+  .entry .stg { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .entry .sm { color: var(--ink); }
+  .entry .tchip { font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 5px; }
+  .note-line { padding: 12px 16px; font-size: 12px; color: var(--muted); background: var(--surface-2); border-top: 1px solid var(--line); }
+  .notif-panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); padding: 4px 0; }
+  .notif-panel h4 { font-family: var(--display); font-size: 15px; margin: 0; padding: 14px 16px 6px; }
+  .notif { display: flex; gap: 11px; padding: 12px 16px; border-top: 1px solid var(--line); align-items: flex-start; }
+  .notif .sev { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; }
+  .sev.info { background: var(--pay); } .sev.action { background: var(--au-2); } .sev.warning { background: var(--warn); } .sev.critical { background: var(--crit); }
+  .notif .nm { font-size: 13.5px; font-weight: 600; }
+  .notif .ds { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+  .notif .meta { margin-left: auto; text-align: right; font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+  .gate-badge { font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 5px; background: color-mix(in srgb, var(--au-2) 20%, var(--surface)); color: var(--au-ink); }
+
+  /* verification */
+  .verify-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .verify-grid { grid-template-columns: 1fr; } }
+  .check { display: flex; gap: 12px; align-items: flex-start; padding: 13px 0; border-top: 1px solid var(--line); }
+  .check:first-child { border-top: 0; }
+  .check .icon { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-size: 14px; flex: none; background: var(--surface-2); color: var(--muted); font-family: var(--mono); }
+  .check.pass .icon { background: var(--good-wash); color: var(--good); }
+  .check .nm { font-size: 14px; font-weight: 600; }
+  .check .ds { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .check .res { margin-left: auto; font-family: var(--mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .gauge-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; text-align: center; }
+  .gauge { position: relative; width: 190px; height: 190px; margin: 6px auto 4px; }
+  .gauge .score { position: absolute; inset: 0; display: grid; place-content: center; }
+  .gauge .score .num { font-family: var(--display); font-size: 46px; font-weight: 600; line-height: 1; }
+  .gauge .score .of { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .unlock { margin-top: 14px; font-size: 13.5px; }
+  .rung-badge { font-family: var(--mono); font-weight: 600; padding: 3px 9px; border-radius: 7px; background: color-mix(in srgb, var(--au-2) 22%, var(--surface)); color: var(--au-ink); }
+
+  .honesty { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .honesty { grid-template-columns: 1fr; } }
+  .hcard { border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: var(--surface); }
+  .hcard h4 { font-family: var(--display); font-size: 16px; margin: 0 0 8px; }
+  .hcard.real { border-left: 3px solid var(--good); }
+  .hcard.sim { border-left: 3px solid var(--au-2); }
+  .hcard ul { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; }
+  .hcard li { margin: 5px 0; }
+  .disclaimer { background: var(--surface-2); border-radius: 10px; padding: 14px 16px; font-size: 12.5px; color: var(--muted); margin-top: 22px; }
+  footer { padding-block: 30px 60px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+  /* analyst workbench — notebook / data-app feel */
+  .wb-top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 18px; }
+  .wb-graph { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 14px 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 18px; }
+  .wbnode { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line-2); background: var(--surface); font-size: 12.5px; font-weight: 500; }
+  .wbnode .g { width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; font-size: 11px; font-family: var(--mono); background: var(--surface-2); color: var(--muted); }
+  .wbnode.ok { border-color: color-mix(in srgb, var(--good) 45%, transparent); } .wbnode.ok .g { background: var(--good-wash); color: var(--good); }
+  .wbnode.fail { border-color: color-mix(in srgb, var(--crit) 50%, transparent); background: var(--crit-wash); } .wbnode.fail .g { background: var(--crit); color: #fff; }
+  .wbnode.warn { border-color: color-mix(in srgb, var(--warn) 50%, transparent); } .wbnode.warn .g { background: var(--warn-wash); color: var(--warn); }
+  .wbnode.skip { opacity: .45; }
+  .wbarr { color: var(--muted); font-family: var(--mono); padding: 0 2px; }
+  .wbarr.loop { color: var(--au-2); }
+  .wbpanel { border: 1px solid var(--line); border-left: 3px solid var(--line-2); border-radius: 10px; background: var(--surface); margin-bottom: 12px; overflow: hidden; }
+  .wbpanel.bad { border-left-color: var(--crit); } .wbpanel.okp { border-left-color: var(--good); } .wbpanel.warnp { border-left-color: var(--warn); }
+  .wbp-h { padding: 10px 16px; font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+  .wbp-b { padding: 14px 16px; font-size: 13.5px; color: var(--ink-2); }
+  .wbcode { margin: 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; color: var(--ink); white-space: pre; overflow-x: auto; }
+  .wbanswer { font-size: 15px; line-height: 1.65; color: var(--ink); font-family: var(--display); font-weight: 400; }
+  .ocell { border: 1px solid var(--line); border-left: 3px solid var(--brand); border-radius: 10px; background: var(--surface); margin-bottom: 12px; overflow: hidden; }
+  .ocell-tabs { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+  .ot { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 3px 9px; border-radius: 6px; }
+  .ot.active { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); }
+  .ogrid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; }
+  @media (max-width: 720px) { .ogrid { grid-template-columns: 1fr; } }
+  .otable-wrap { overflow-x: auto; padding: 8px 4px; }
+  .otable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .otable th { text-align: left; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); font-weight: 500; padding: 8px 12px; }
+  .otable td { padding: 8px 12px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .ochart { padding: 14px 16px; border-left: 1px solid var(--line); }
+  .ochart-lab { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 10px; }
+  .obar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11.5px; }
+  .obar-l { width: 82px; color: var(--ink-2); text-align: right; }
+  .obar-t { flex: 1; height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .obar-t > span { display: block; height: 100%; background: var(--brand); border-radius: 4px; }
+  .obar-v { width: 26px; text-align: right; color: var(--muted); }
+  .wbfoot { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  @media (max-width: 720px) { .wbfoot { grid-template-columns: 1fr; } }
+  .wbcard { border: 1px solid var(--line); border-radius: 11px; padding: 14px 16px; background: var(--surface); }
+  .wbcard.action { border-left: 3px solid var(--au-2); }
+  .wbcard.ticket { border-left: 3px solid var(--muted); }
+  .wbcard.ticket.action { border-left-color: var(--au-2); } .wbcard.ticket.warning { border-left-color: var(--warn); } .wbcard.ticket.critical { border-left-color: var(--crit); } .wbcard.ticket.info { border-left-color: var(--pay); }
+  .wbcard.okp { border-left: 3px solid var(--good); }
+  .wbc-h { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+  .wbc-b { font-size: 13.5px; color: var(--ink); }
+  .wbthink { border: 1px solid var(--line); border-left: 3px solid var(--ev-2); border-radius: 10px; background: var(--surface); padding: 14px 16px; margin-bottom: 12px; }
+  .wbthink ol { margin: 8px 0 0; padding-left: 20px; }
+  .wbthink li { font-size: 13px; color: var(--ink-2); margin: 5px 0; }
+  .wbthink li.sel { color: var(--ink); font-weight: 600; }
+  .wbfoot3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 860px) { .wbfoot3 { grid-template-columns: 1fr; } }
+  .wbcard.burden { border-left: 3px solid var(--good); }
+  .tlife { display: flex; align-items: center; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+  .tstep { font-family: var(--mono); font-size: 10.5px; padding: 2px 7px; border-radius: 5px; background: var(--surface-2); color: var(--muted); }
+  .tstep.done { background: var(--good-wash); color: var(--good); }
+  .tsep { color: var(--line-2); font-size: 10px; }
+  .burow { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .burow > span:first-child { width: 108px; color: var(--ink-2); }
+  .butrack { flex: 1; height: 12px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .butrack > span { display: block; height: 100%; border-radius: 4px; }
+  .burow .mono { width: 32px; text-align: right; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brandmark"><span class="thread-dot"></span> Golden Thread Recovery</div>
+    <nav class="navlinks" id="nav">
+      <button data-view="v-overview" aria-current="true">Overview</button>
+      <button data-view="v-flow">Process flow</button>
+      <button data-view="v-interlock">Twin Ladder</button>
+      <button data-view="v-simulate">Simulator</button>
+      <button data-view="v-ledger">Evidence Ledger</button>
+      <button data-view="v-workbench">Analyst Workbench</button>
+      <button data-view="v-honesty">What&rsquo;s real</button>
+    </nav>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle light or dark theme">◐</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+<section class="view hero" id="v-overview">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow">Governed autonomy · bidirectional payer ⇄ provider</span>
+      <h1>Prevent the denial. Recover the underpayment. <em>Prove it</em> to both sides.</h1>
+      <p class="lede">One shared, tamper-evident Evidence Record carries every claim in both directions — the payer&rsquo;s criteria flowing to the provider so claims go in clean, and the recovery flowing back when they don&rsquo;t. Because both parties audit the same record, autonomy is earned, not asserted.</p>
+      <p class="sub">The Twin-Ladder interlock governs it: evidence strength gates what the agent may do, case by case. Move up the ladder only as verification proves the record can be trusted.</p>
+      <div class="pillrow">
+        <span class="pill">Bidirectional: prevention &amp; recovery</span>
+        <span class="pill">One shared, dual-audited ledger</span>
+        <span class="pill">Decision + balance-control at every step</span>
+        <span class="pill">Escalation gates &amp; notifications</span>
+      </div>
+      <div class="jump">
+        <button class="btn" data-go="v-flow">See the process flow →</button>
+        <button class="btn ghost" data-go="v-simulate">Run the simulator</button>
+      </div>
+    </div>
+    <div class="ladder-card">
+      <div class="ladder-head"><h3>The Twin-Ladder interlock</h3><span class="col-cap" style="margin:0">weakest link wins</span></div>
+      <div class="twin" id="heroTwin"></div>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:14px">Permitted authority = the <em>lower</em> of what the agent is configured for and what the evidence can justify.</p>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-flow" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">The spine · bidirectional</span>
+    <h2>The same thread runs both ways — prevention to the provider, correction back to the payer — over one shared ledger.</h2>
+    <p>Select any step to see the decision captured, the audit entry it wrote, the control that must balance, and the escalation gate and notification it raises. Provider and payer act in their own lanes; the Evidence Record is the shared spine every hand-off writes.</p>
+  </div>
+  <div class="dir-legend">
+    <span><span class="swatch" style="background:var(--prov)"></span> Prevention — payer criteria → clean claim (shift-left)</span>
+    <span><span class="swatch" style="background:var(--pay)"></span> Adjudication</span>
+    <span><span class="swatch" style="background:var(--au-2)"></span> Correction — recovery back to the payer</span>
+  </div>
+  <div class="flow">
+    <div class="lane-label prov">Provider</div>
+    <div class="lane-track" id="laneProv"></div>
+    <div class="lane-label ledger">Shared<br>Evidence<br>Record</div>
+    <div class="ledger-rail lane-mid"><span>Every step writes the append-only, dual-audited ledger</span><span class="beam"></span><span class="mono">WORM</span></div>
+    <div class="lane-label pay">Payer</div>
+    <div class="lane-track" id="lanePay"></div>
+  </div>
+  <div class="node-detail ladder-card" id="nodeDetail" style="box-shadow:var(--shadow)"></div>
+
+  <div class="shift">
+    <div class="shift-top">
+      <div>
+        <h3 style="font-size:16px">Shift-left impact — clean claims from delivered criteria</h3>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px">When the payer&rsquo;s criteria reach the provider before submission, defects fall on both sides. Illustrative model.</p>
+      </div>
+      <div class="toggle" id="critToggle" role="group" aria-label="Criteria delivery">
+        <button data-crit="off">Criteria not delivered</button>
+        <button data-crit="on" aria-pressed="true">Criteria delivered</button>
+      </div>
+    </div>
+    <div class="tiles" id="shiftTiles"></div>
+  </div>
+</section>
+
+<section class="view" id="v-interlock" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">Governance · the interlock</span>
+    <h2>Evidence gates authority. Stronger evidence — not a bolder setting — is what unlocks autonomy.</h2>
+    <p>The two ladders move independently. The agent&rsquo;s permitted rung is always the weakest link between them, so weak evidence holds a highly-autonomous agent back, by design.</p>
+  </div>
+  <div class="interlock-lab">
+    <div class="controls">
+      <div class="control"><label>Evidence tier available</label><div class="seg" id="evSel" role="group" aria-label="Evidence tier"></div></div>
+      <div class="control"><label>Agent autonomy tier (configured)</label><div class="seg" id="auSel" role="group" aria-label="Autonomy tier"></div></div>
+      <div class="verdict-strip" id="verdictStrip"></div>
+    </div>
+    <div class="ladder-card">
+      <div class="ladder-head"><h3>Interlock</h3><span class="col-cap" style="margin:0">live</span></div>
+      <div class="twin" id="labTwin"></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-simulate" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">Simulation · batch &amp; real-time</span>
+    <h2>Run a cohort, or a single claim in real time. Every figure comes from the real reconciliation and interlock logic.</h2>
+    <p>Move the policy levers and watch the recoverable dollars, the escalation mix, and the tier/rung distribution respond. The headline finding is the one executives most need to see.</p>
+  </div>
+  <div class="sim">
+    <div class="sim-top">
+      <div class="seg" id="modeSel" role="group" aria-label="Simulation mode">
+        <button aria-pressed="true" data-mode="batch">Batch simulation</button>
+        <button aria-pressed="false" data-mode="realtime">Real-time claim</button>
+      </div>
+      <div id="pickWrap" style="min-width:280px;flex:1;max-width:440px"></div>
+    </div>
+    <div class="sim-body">
+      <div class="levers">
+        <div class="lever"><label for="lvAuto">Agent autonomy tier</label><select id="lvAuto"><option value="HITL">HITL — human in the loop</option><option value="HOTL">HOTL — human on the loop</option><option value="autonomous">Autonomous</option></select></div>
+        <div class="lever"><label for="lvMat">Materiality floor</label><select id="lvMat"><option value="5">$5</option><option value="25" selected>$25</option><option value="50">$50</option><option value="100">$100</option></select></div>
+        <div class="lever"><label for="lvFile">Timely-filing window</label><select id="lvFile"><option value="30">30 days</option><option value="60">60 days</option><option value="120" selected>120 days</option><option value="180">180 days</option></select></div>
+      </div>
+      <div id="simOut"></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-ledger" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">Trust · the shared ledger</span>
+    <h2>One record. Both parties read it, both audit it, and both are notified — that is what builds trust.</h2>
+    <p>The payer and the provider see the <em>same</em> append-only, PHI-safe trail — references, codes and amounts only. Notifications and escalation gates route the right action to the right party at the right moment. Backed by real dual-party projection seams.</p>
+  </div>
+  <div style="margin-bottom:18px" class="toggle" id="lensSel" role="group" aria-label="Audit lens">
+    <button data-lens="payer" aria-pressed="true">Payer audit lens</button>
+    <button data-lens="provider" aria-pressed="false">Provider audit lens</button>
+  </div>
+  <div class="ledger-grid">
+    <div class="ledger-list">
+      <div class="lhead">
+        <div><strong style="font-family:var(--display)">Evidence Record</strong> <span class="mono" style="font-size:11px;color:var(--muted)">· append-only</span></div>
+        <span class="seal-chip">✓ Sealed · integrity intact</span>
+      </div>
+      <div id="ledgerEntries"></div>
+      <div class="note-line" id="lensNote"></div>
+    </div>
+    <div class="notif-panel">
+      <h4>Notifications &amp; escalation gates</h4>
+      <div id="notifList"></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="v-workbench" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">Ledger Intelligence · the analyst workbench</span>
+    <h2>Analysts don&rsquo;t run a fixed checklist — they ask the ledger a question, and a governed codegen pipeline answers it.</h2>
+    <p>Plan → validate → (replan) → generate code → evaluate → plain-language answer. Deterministic by construction (temperature 0, reproducible). A finding proposes an action gated by the Twin Ladder; any gate that fails opens a ticket. This is what earns higher autonomy over time.</p>
+  </div>
+  <div class="wb-top">
+    <div class="toggle" id="wbRole" role="group" aria-label="Analyst party">
+      <button aria-pressed="true" data-role="payer">Payer analyst</button>
+      <button aria-pressed="false" data-role="provider">Provider analyst</button>
+    </div>
+    <div id="wbPickWrap" style="flex:1;min-width:280px;max-width:520px"></div>
+    <button class="btn" id="wbRun">Run analysis ▸</button>
+  </div>
+  <div class="wb-graph" id="wbGraph"></div>
+  <div id="wbOut"></div>
+</section>
+
+<section class="view" id="v-honesty" hidden>
+  <div class="sec-head">
+    <span class="eyebrow">What&rsquo;s real</span>
+    <h2>Straight about the line between the working system and this walkthrough.</h2>
+  </div>
+  <div class="honesty">
+    <div class="hcard real">
+      <h4>Real &amp; running today</h4>
+      <ul>
+        <li>Reconciliation, the Twin-Ladder interlock, and recovery-draft logic are production code — this page runs the same rules.</li>
+        <li>A governed agent drafts the recovery and suspends at a human gate; no payer-facing submission auto-executes at any tier.</li>
+        <li>The Evidence Record is append-only and tamper-evident; the dual-party projection and escalation-signal seams behind the ledger view are real, tested, and gate-green.</li>
+      </ul>
+    </div>
+    <div class="hcard sim">
+      <h4>Illustrative in this walkthrough</h4>
+      <ul>
+        <li>Claims and cohorts are synthetic seed data — figures show mechanism and policy sensitivity, not a real book of business.</li>
+        <li>Appeal submission is a mock receipt, not transmitted end-to-end; real 837/EDI is a fail-closed integration on the roadmap.</li>
+        <li>The shift-left rework figures and the verification score are governance/impact models, not certified control results.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="disclaimer">Decision-support only. In production the payer&rsquo;s ClaimResponse / adjudication is authoritative; a durable ledger, asymmetric signing, and real EDI replace the demo substrate. See the Production Hardening Plan and the Demonstrator Plan.</div>
+</section>
+
+</main>
+<footer class="wrap">Golden Thread Recovery — a governed, bidirectional payer ⇄ provider order-to-cash walkthrough over one shared, dual-audited Evidence Record.</footer>
+
+<script>
+/* ===== governance model (mirrors the production functions) ===== */
+const EV_TIERS=["D0","D1","D2","D3"], AU_TIERS=["HITL","HOTL","autonomous"], RUNGS=["A0","A1","A2","A3"];
+const TIER_MEAN={D0:"Fragmented / raw",D1:"Conformed",D2:"Reconciled / contestable",D3:"Settlement-grade"};
+const RUNG_MEAN={A0:"Assist only",A1:"Human in the loop",A2:"Human on the loop",A3:"Autonomous"};
+const AUTONOMY_RUNG={HITL:"A1",HOTL:"A2",autonomous:"A3"}, TIER_CEIL={D0:"A0",D1:"A1",D2:"A2",D3:"A3"};
+const rIdx=r=>RUNGS.indexOf(r);
+const permittedRung=(au,ev)=> rIdx(AUTONOMY_RUNG[au])<rIdx(TIER_CEIL[ev]) ? AUTONOMY_RUNG[au] : TIER_CEIL[ev];
+function reconcile(s,tol){ const owed=s.contracted-s.pr; const delta=+(owed-s.paid).toFixed(2); const app=s.pas==="approved"||s.pas==="exempt";
+  let v; if(delta>tol) v=app?"underpaid":"not-recoverable"; else if(-delta>tol) v="overpaid"; else v="matched"; return {verdict:v,delta}; }
+const ASOF=Date.parse("2026-09-12"); const days=iso=>Math.floor((ASOF-Date.parse(iso))/86400000);
+const money=n=>"$"+Math.round(n).toLocaleString();
+
+const SCENARIOS=[
+ {id:"strong",label:"Underpaid — reconciled, strong evidence (D2)",cpt:"72148",service:"MRI lumbar spine",contracted:1150,paid:900,pr:150,co:100,pas:"approved",ev:"D2",date:"2026-08-05"},
+ {id:"weak",label:"Underpaid — fragmented evidence (D0, tier-capped)",cpt:"70553",service:"MRI brain w/ & w/o",contracted:1400,paid:1050,pr:200,co:120,pas:"approved",ev:"D0",date:"2026-08-01"},
+ {id:"settle",label:"Underpaid — settlement-grade evidence (D3)",cpt:"74177",service:"CT abdomen/pelvis",contracted:1650,paid:1300,pr:250,co:130,pas:"approved",ev:"D3",date:"2026-08-10"},
+ {id:"denied",label:"Underpayment but PA denied — not recoverable",cpt:"72148",service:"MRI lumbar spine",contracted:1150,paid:800,pr:150,co:100,pas:"denied",ev:"D2",date:"2026-08-05"},
+ {id:"late",label:"Underpaid — past the timely-filing window",cpt:"73721",service:"MRI lower-extremity joint",contracted:1200,paid:950,pr:150,co:100,pas:"approved",ev:"D2",date:"2026-02-01"},
+ {id:"matched",label:"Paid correctly — no recovery",cpt:"72148",service:"MRI lumbar spine",contracted:1000,paid:850,pr:150,co:0,pas:"approved",ev:"D2",date:"2026-08-20"}
+];
+const sById=id=>SCENARIOS.find(s=>s.id===id)||SCENARIOS[0];
+function buildBatch(id,label,spec){const rows=[];let n=0;spec.forEach(([bid,c])=>{const b=sById(bid);for(let i=0;i<c;i++){n++;const bump=(n%5)*20;rows.push({...b,id:`${id}-${n}`,contracted:b.contracted+bump,paid:b.paid+Math.floor(bump/2)});}});return{id,label,rows};}
+const BATCHES=[buildBatch("radq3","Radiology Q3 remittance cohort (24 claims)",[["strong",8],["weak",6],["settle",3],["denied",3],["late",2],["matched",2]]),
+ buildBatch("appeals","Mixed-tier appeals batch (18 claims)",[["weak",7],["strong",5],["late",3],["settle",2],["denied",1]])];
+const bById=id=>BATCHES.find(b=>b.id===id)||BATCHES[0];
+function simScenario(s,pol){const{verdict,delta}=reconcile(s,pol.mat);const rung=permittedRung(pol.auto,s.ev);
+ const tierCapped=rIdx(TIER_CEIL[s.ev])<rIdx(AUTONOMY_RUNG[pol.auto]);const timely=days(s.date)<=pol.file;
+ let cat,recoverable=false; if(verdict==="underpaid"){if(!timely)cat="past-window";else{recoverable=true;cat=rung==="A0"?"manual":"agent-draft";}}
+ else if(verdict==="not-recoverable")cat="pa-denied";else cat="none";
+ return{s,verdict,delta,rung,tierCapped,timely,recoverable,cat};}
+function simCohort(rows,pol){const r=rows.map(x=>simScenario(x,pol));
+ const a={n:r.length,identified:0,recoverable:0,pastWindow:0,underpaid:0,tierCapped:0,cat:{"agent-draft":0,manual:0,"past-window":0,"pa-denied":0,none:0},byTier:{D0:0,D1:0,D2:0,D3:0},byRung:{A0:0,A1:0,A2:0,A3:0},results:r};
+ r.forEach(x=>{a.cat[x.cat]++;a.byTier[x.s.ev]++;a.byRung[x.rung]++;if(x.verdict==="underpaid"){a.underpaid++;a.identified+=x.delta;}if(x.recoverable){a.recoverable+=x.delta;if(x.tierCapped)a.tierCapped++;}if(x.cat==="past-window")a.pastWindow+=x.delta;});
+ a.identified=Math.round(a.identified);a.recoverable=Math.round(a.recoverable);a.pastWindow=Math.round(a.pastWindow);return a;}
+function labelCat(c){return{"agent-draft":"Recoverable — agent drafts (human submits)","manual":"Recoverable — manual (evidence too weak)","past-window":"Past timely-filing window","pa-denied":"Not recoverable — PA not approving","none":"No material underpayment"}[c];}
+
+/* ===== twin ladder render ===== */
+function renderTwin(el,ev,au){const perm=permittedRung(au,ev);
+ const evC=EV_TIERS.map(t=>`<div class="step ${t===ev?'on-ev':(EV_TIERS.indexOf(t)>EV_TIERS.indexOf(ev)?'dim':'')}"><span class="code">${t}</span><span class="meaning">${TIER_MEAN[t]}</span></div>`).join("");
+ const auC=RUNGS.map(r=>`<div class="step ${r===perm?'on-au':(rIdx(r)>rIdx(perm)?'dim':'')}"><span class="code">${r}</span><span class="meaning">${RUNG_MEAN[r]}</span></div>`).join("");
+ el.innerHTML=`<div class="rung-col"><div class="col-cap">Evidence</div>${evC}</div><div class="interlink"><span class="col-cap">&nbsp;</span><div class="bar"></div><span class="lock">⛓</span><div class="bar"></div></div><div class="rung-col"><div class="col-cap">Authority</div>${auC}</div>`;}
+
+/* ===== bidirectional process flow ===== */
+const S=sById("strong"), REC=reconcile(S,25), PERM=permittedRung("HITL",S.ev);
+const NODES=[
+ {id:0,lane:"prov",kind:"prevention",n:"P1",nm:"Policy criteria extracted",arrow:"payer → record",owner:"Payer",notify:"Provider",gate:"assist",
+  decision:"Policy engine extracts coverage, medical-necessity, and PA criteria and publishes them to the shared record.",audit:"policy-criteria · CPT 72148 · PA required, criteria set",ctrl:"Criteria version bound to the policy in force"},
+ {id:1,lane:"prov",kind:"prevention",n:"P2",nm:"Criteria delivered to provider",arrow:"record → provider",owner:"Provider",notify:"Provider",gate:"assist",
+  decision:"Provider receives the requirements at the point of order (CRD / DTR today; advanced EOB over time).",audit:"criteria-delivered · CRD card issued",ctrl:"Delivered criteria match the extracted set"},
+ {id:2,lane:"prov",kind:"prevention",n:"P3",nm:"Clean claim assembled",arrow:"provider → payer",owner:"Provider",notify:"Payer",gate:"assist",
+  decision:"Provider submits a clean claim — criteria met, documentation attached, defects resolved before submission.",audit:"claim-submission · CLM-72148-0001 · clean",ctrl:"Billed lines reconcile to the ordered service"},
+ {id:3,lane:"pay",kind:"adjud",n:"A1",nm:"Claim adjudicated",arrow:"payer",owner:"Payer",notify:"Provider",gate:"assist",
+  decision:"Payer adjudicates against the authorization; a determination is recorded.",audit:"pas-decision · approved",ctrl:"Auth number bound to member + service"},
+ {id:4,lane:"pay",kind:"adjud",n:"A2",nm:"Remittance & EOB (835)",arrow:"payer → record → provider",owner:"Payer",notify:"Provider",gate:"assist",
+  decision:"ERA posted and the EOB explained; adjustments parsed by CARC group and shared to the record.",audit:"remittance · paid $900 · CO/PR",ctrl:"Paid + adjustments = billed (835 balances)"},
+ {id:5,lane:"pay",kind:"correction",n:"C1",nm:"Reconciliation",arrow:"agent reads record",owner:"Agent",notify:"Payer",gate:"assist",
+  decision:"The agent reconciles the 835 against the contracted rate; an underpayment is detected.",audit:"reconciliation · underpaid Δ$100",ctrl:"Only PR reduces payer-owed; delta derivable"},
+ {id:6,lane:"prov",kind:"correction",n:"C2",nm:"Recovery appeal drafted",arrow:"agent → human gate",owner:"Agent",notify:"Payer",gate:"hitl",
+  decision:"The governed agent drafts the appeal through its own tool call and escalates to a human — no auto-submit.",audit:"recovery · draft-appeal · rung "+PERM,ctrl:"Escalation "+PERM+" — submission human-gated"},
+ {id:7,lane:"pay",kind:"correction",n:"C3",nm:"Decision & submission",arrow:"payer/provider → record",owner:"Reviewer",notify:"Provider",gate:"hitl",
+  decision:"A qualified reviewer approves; the governed submission runs (mock, not transmitted). The record is re-sealed.",audit:"recovery-decision · submitted · sealed",ctrl:"Exactly-once; verify-before-reseal"}
+];
+function balanceFor(i){ if(i===4) return [["Billed",S.contracted],["Payer paid",S.paid],["Adjustments (CO+PR)",S.co+S.pr],["Balances to billed",S.contracted,true]];
+ if(i===5){const owed=S.contracted-S.pr;return [["Contracted allowed",S.contracted],["Less patient resp. (PR)",-S.pr],["Payer owed",owed],["Paid",-S.paid],["Recoverable Δ",owed-S.paid,true]];} return null; }
+let activeNode=6;
+function renderFlow(){
+ const cell=(node)=>`<button class="node ${node.kind} ${node.id===activeNode?'active':''}" data-i="${node.id}"><span class="n">${node.n} · ${node.owner}</span><span class="nm">${node.nm}</span><span class="arrow">${node.arrow}</span></button>`;
+ document.getElementById("laneProv").innerHTML=NODES.map(nd=>nd.lane==="prov"?cell(nd):`<div class="node" style="visibility:hidden" aria-hidden="true"></div>`).join("");
+ document.getElementById("lanePay").innerHTML=NODES.map(nd=>nd.lane==="pay"?cell(nd):`<div class="node" style="visibility:hidden" aria-hidden="true"></div>`).join("");
+ renderNodeDetail();
+}
+function renderNodeDetail(){
+ const s=NODES[activeNode]; const bal=balanceFor(activeNode);
+ const gateBadge=s.gate==="hitl"?`<span class="gate-badge">HITL gate</span>`:`<span class="gate-badge" style="background:var(--good-wash);color:var(--good)">Auto-control ✓</span>`;
+ const balHtml=bal?`<div class="balance"><h4>Balance &amp; control</h4>${bal.map(r=>`<div class="ledger-line ${r[2]?'total':''}"><span>${r[0]}</span><span>${typeof r[1]==="number"?money(r[1]):r[1]}</span></div>`).join("")}<div class="balance-chip"><span style="width:7px;height:7px;border-radius:50%;background:var(--good)"></span>Reconciles</div></div>`
+  :`<div class="balance"><h4>Balance &amp; control</h4><div class="ledger-line"><span>${s.ctrl}</span></div><div class="balance-chip"><span style="width:7px;height:7px;border-radius:50%;background:var(--good)"></span>Control passed</div></div>`;
+ document.getElementById("nodeDetail").innerHTML=`<div class="grid2"><div>
+   <div class="detail-title">${s.n} · ${s.nm}</div>
+   <div class="kv">
+     <div class="row"><span class="k">Owner / actor</span><span class="v"><span class="tag ${s.lane==='prov'?'prov':'pay'}">${s.owner}</span></span></div>
+     <div class="row"><span class="k">Decision captured</span><span class="v">${s.decision}</span></div>
+     <div class="row"><span class="k">Audit entry</span><span class="v mono" style="font-size:12.5px">${s.audit}</span></div>
+     <div class="row"><span class="k">Escalation gate</span><span class="v">${gateBadge} &nbsp;notifies <span class="tag ${s.notify==='Provider'?'prov':'pay'}">${s.notify}</span></span></div>
+   </div></div>${balHtml}</div>`;
+}
+const SHIFT={off:{clean:71,denial:18,rework:12,fpp:"—"},on:{clean:93,denial:6,rework:4,fpp:"+22 pts"}};
+let critMode="on";
+function renderShift(){
+ const d=SHIFT[critMode];
+ document.getElementById("shiftTiles").innerHTML=`
+  <div class="tile ${critMode==='on'?'good':''}"><div class="lab">Clean-claim rate</div><div class="val mono">${d.clean}%</div><div class="sub ${critMode==='on'?'up':'muted'}">${critMode==='on'?'▲ vs 71% baseline':'baseline'}</div></div>
+  <div class="tile ${critMode==='on'?'good':'warn'}"><div class="lab">First-pass denials</div><div class="val mono">${d.denial}%</div><div class="sub ${critMode==='on'?'down':'muted'}">${critMode==='on'?'▼ from 18%':'baseline'}</div></div>
+  <div class="tile"><div class="lab">Rework (hrs / 100 claims)</div><div class="val mono">${d.rework}</div><div class="sub ${critMode==='on'?'down':'muted'}">${critMode==='on'?'▼ from 12 hrs':'baseline'}</div></div>
+  <div class="tile ev"><div class="lab">Downstream recovery load</div><div class="val" style="font-size:19px">${critMode==='on'?'Lower':'Higher'}</div><div class="sub muted">fewer defects → fewer appeals</div></div>`;
+}
+
+/* ===== interlock lab ===== */
+let labEv="D1",labAu="autonomous";
+function renderSeg(el,items,active,attr){el.innerHTML=items.map(v=>`<button data-${attr}="${v}" aria-pressed="${v===active}">${v}</button>`).join("");}
+function renderLab(){
+ renderSeg(document.getElementById("evSel"),EV_TIERS,labEv,"ev");
+ renderSeg(document.getElementById("auSel"),AU_TIERS,labAu,"au");
+ renderTwin(document.getElementById("labTwin"),labEv,labAu);
+ const perm=permittedRung(labAu,labEv); const capped=rIdx(TIER_CEIL[labEv])<rIdx(AUTONOMY_RUNG[labAu]);
+ document.getElementById("verdictStrip").innerHTML=`<div class="big">Permitted rung: <span class="tag au" style="font-size:15px">${perm}</span> ${RUNG_MEAN[perm]}</div>
+  <div class="note">Configured for <span class="tag au">${AUTONOMY_RUNG[labAu]}</span> (${labAu}); evidence at <span class="tag ev">${labEv}</span> caps at <span class="tag au">${TIER_CEIL[labEv]}</span>.
+  ${capped?`<strong>Evidence is the binding constraint</strong> — raising autonomy would not help this case; stronger evidence would.`:`Autonomy is the binding constraint — the evidence could support more if the agent were configured higher.`}</div>`;
+}
+
+/* ===== simulator ===== */
+let mode="batch",batchId="radq3",scId="strong";
+const policy=()=>({auto:document.getElementById("lvAuto").value,mat:+document.getElementById("lvMat").value,file:+document.getElementById("lvFile").value});
+function renderPick(){const w=document.getElementById("pickWrap");
+ if(mode==="batch"){w.innerHTML=`<label class="mono" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Batch</label><select id="pickSel">${BATCHES.map(b=>`<option value="${b.id}" ${b.id===batchId?'selected':''}>${b.label}</option>`).join("")}</select>`;document.getElementById("pickSel").onchange=e=>{batchId=e.target.value;renderSim();};}
+ else{w.innerHTML=`<label class="mono" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Scenario</label><select id="pickSel">${SCENARIOS.map(s=>`<option value="${s.id}" ${s.id===scId?'selected':''}>${s.label}</option>`).join("")}</select>`;document.getElementById("pickSel").onchange=e=>{scId=e.target.value;renderSim();};}}
+const barEl=(v,max,col)=>`<div class="track"><span style="width:${max?(v/max*100):0}%;background:${col}"></span></div>`;
+const distEl=(t,data,order,cf)=>{const max=Math.max(1,...order.map(k=>data[k]||0));return `<div class="dist"><h4>${t}</h4>${order.map(k=>`<div class="bar-row"><span class="rk">${k}</span>${barEl(data[k]||0,max,cf(k))}<span class="ct">${data[k]||0}</span></div>`).join("")}</div>`;};
+function renderSim(){renderPick();const pol=policy();const out=document.getElementById("simOut");
+ if(mode==="realtime"){const s=sById(scId),r=simScenario(s,pol);
+  out.innerHTML=`<div class="tiles">
+    <div class="tile"><div class="lab">Contracted</div><div class="val mono">${money(s.contracted)}</div></div>
+    <div class="tile"><div class="lab">Payer paid</div><div class="val mono">${money(s.paid)}</div></div>
+    <div class="tile ${r.verdict==='underpaid'?'warn':''}"><div class="lab">Verdict</div><div class="val" style="font-size:20px">${r.verdict}</div></div>
+    <div class="tile ev"><div class="lab">Permitted rung</div><div class="val mono">${r.rung}</div><div class="sub muted">evidence ${s.ev}</div></div></div>
+   <div class="ladder-card" style="margin-top:18px;box-shadow:none"><div class="ladder-head"><h3>Twin-Ladder interlock</h3><span class="col-cap" style="margin:0">${s.service}</span></div><div class="twin" id="rtTwin"></div></div>
+   <div class="insight" style="margin-top:16px"><h4>${labelCat(r.cat)}</h4><p>${
+     r.verdict==='underpaid'?`Recoverable shortfall <strong>${money(r.delta)}</strong> · agent authority <span class="tag au">${r.rung}</span> · submission is human-gated regardless of rung.${r.tierCapped?` Evidence at ${s.ev} is capping authority — the twin ladder holding a bold setting in check.`:''}`:
+     r.verdict==='not-recoverable'?`A material shortfall exists, but the PA disposition is not approving — no recoverable basis.`:
+     r.cat==='past-window'?`A recoverable shortfall aged past the ${pol.file}-day filing window — the agent refuses an untimely appeal.`:
+     `Paid within materiality — nothing to recover.`}</p></div>`;
+  renderTwin(document.getElementById("rtTwin"),s.ev,pol.auto);
+ } else {
+  const cur=simCohort(bById(batchId).rows,pol),base=simCohort(bById(batchId).rows,{auto:"HITL",mat:25,file:120}),maxA=simCohort(bById(batchId).rows,{...pol,auto:"autonomous"});
+  const dRec=cur.recoverable-base.recoverable;
+  const evCol=k=>({D0:"var(--ev-0)",D1:"var(--ev-1)",D2:"var(--ev-2)",D3:"var(--ev-3)"}[k]),auCol=k=>({A0:"var(--au-0)",A1:"var(--au-1)",A2:"var(--au-2)",A3:"var(--au-3)"}[k]);
+  out.innerHTML=`<div class="tiles">
+    <div class="tile"><div class="lab">Claims in cohort</div><div class="val mono">${cur.n}</div></div>
+    <div class="tile"><div class="lab">Underpayment identified</div><div class="val mono">${money(cur.identified)}</div></div>
+    <div class="tile good"><div class="lab">Recoverable</div><div class="val mono">${money(cur.recoverable)}</div><div class="sub muted">${dRec!==0?(dRec>0?'+':'')+money(dRec)+' vs baseline':'baseline policy'}</div></div>
+    <div class="tile warn"><div class="lab">Past filing window</div><div class="val mono">${money(cur.pastWindow)}</div></div></div>
+   <div class="tiles" style="margin-top:10px">
+    <div class="tile"><div class="lab">Recoverable claims</div><div class="val mono">${cur.cat['agent-draft']+cur.cat.manual}</div></div>
+    <div class="tile"><div class="lab">PA-denied</div><div class="val mono">${cur.cat['pa-denied']}</div></div>
+    <div class="tile"><div class="lab">Past window</div><div class="val mono">${cur.cat['past-window']}</div></div>
+    <div class="tile ev"><div class="lab">Evidence-capped</div><div class="val mono">${cur.tierCapped}</div><div class="sub muted">autonomy blocked by tier</div></div></div>
+   <div class="dists">${distEl("Evidence tier (D0 → D3)",cur.byTier,EV_TIERS,evCol)}${distEl("Authority rung (A0 → A3)",cur.byRung,RUNGS,auCol)}</div>
+   <div class="insight"><h4>Twin-ladder insight — the executive takeaway</h4><p>Setting the agent to maximum autonomy changes this cohort&rsquo;s recoverable dollars by <strong>${money(maxA.recoverable-cur.recoverable)}</strong>. Recovery is human-gated regardless of rung, and <strong>${cur.tierCapped} of ${cur.underpaid}</strong> underpayments are evidence-capped. The lever that unlocks value is <strong>stronger evidence</strong> — a higher tier — not a bolder autonomy setting.</p></div>
+   <div class="scroll-x"><table class="claims"><thead><tr><th>Service</th><th>Contracted</th><th>Paid</th><th>Δ</th><th>Tier</th><th>Rung</th><th>Routing</th></tr></thead><tbody>
+     ${cur.results.slice(0,8).map(r=>`<tr><td>${r.s.service}</td><td>${money(r.s.contracted)}</td><td>${money(r.s.paid)}</td><td>${r.verdict==='underpaid'?money(r.delta):'—'}</td><td class="mono">${r.s.ev}</td><td class="mono">${r.rung}</td><td>${labelCat(r.cat)}</td></tr>`).join("")}
+   </tbody></table>${cur.results.length>8?`<p style="font-size:11.5px;color:var(--muted);margin-top:8px">Showing 8 of ${cur.results.length} claims.</p>`:''}</div>`;
+ }
+}
+
+/* ===== evidence ledger (dual audit) ===== */
+const LEDGER=[
+ {stg:"Eligibility",type:"eligibility",sm:"Active coverage · PA required",tier:"D1"},
+ {stg:"Med. necessity",type:"coverage-determination",sm:"Determination: pa-required-list (readiness 35)",tier:"D1"},
+ {stg:"Prior auth",type:"pas-decision",sm:"Payer decision: approved",tier:"D1"},
+ {stg:"Estimation",type:"note",sm:"GFE: member owes $470 · plan pays $680",tier:"D1"},
+ {stg:"Claim",type:"claim-submission",sm:"CLM-72148-0001 · total 1700 · clean",tier:"D1"},
+ {stg:"Remittance",type:"remittance",sm:"RA-UHC-72148-0001 · paid 900 · CARC [CO,PR]",tier:"D0"},
+ {stg:"Reconciliation",type:"reconciliation",sm:"Underpaid · delta 100 · tolerance 5.75",tier:"D2"},
+ {stg:"Recovery",type:"recovery",sm:"draft-appeal · rung "+PERM+" · awaiting review",tier:"D2"}
+];
+let lens="payer";
+function renderLedger(){
+ const tchip=t=>{const c={D0:"var(--ev-0)",D1:"var(--ev-1)",D2:"var(--ev-2)",D3:"var(--ev-3)"}[t];return `<span class="tchip" style="background:${c};color:#fff">${t}</span>`;};
+ document.getElementById("ledgerEntries").innerHTML=LEDGER.map(e=>`<div class="entry"><span class="stg">${e.stg}</span><span class="sm">${e.sm}</span>${tchip(e.tier)}</div>`).join("");
+ document.getElementById("lensNote").textContent = lens==="payer"
+   ? "Payer lens — the same append-only trail the provider sees. PHI-safe: references, codes and amounts only, never a member identifier or clinical narrative."
+   : "Provider lens — byte-identical events to the payer's. Both parties audit one shared record; that symmetry is what makes independent verification meaningful.";
+ renderNotifs();
+}
+function renderNotifs(){
+ // derived from the record state — mirrors the real deriveEscalationSignals seam
+ const list=[
+  {sev:"action",nm:"Reviewer action required",ds:"Recovery draft is awaiting a qualified-human decision.",to:"Payer",gate:"HITL"},
+  {sev:"info",nm:"Underpayment identified on your claim",ds:"Δ $100 vs contracted; a governed appeal has been drafted.",to:"Provider",gate:"—"},
+  {sev:"warning",nm:"Filing window closing",ds:"Appeal window closes 2026-12-28 — approve before then or the claim ages out.",to:"Payer",gate:"escalate"},
+  {sev:"info",nm:"Clean-claim criteria delivered",ds:"CRD card issued at order — defects reduced before submission.",to:"Provider",gate:"—"}
+ ];
+ const forLens=list.filter(n=> lens==="payer" ? n.to==="Payer" : n.to==="Provider");
+ document.getElementById("notifList").innerHTML=forLens.map(n=>`<div class="notif"><span class="sev ${n.sev}"></span><div><div class="nm">${n.nm}</div><div class="ds">${n.ds}</div></div><div class="meta">to ${n.to}${n.gate!=="—"?`<br>${n.gate}`:''}</div></div>`).join("")
+   || `<div class="notif"><div class="ds" style="color:var(--muted)">No open items for this party.</div></div>`;
+}
+
+/* ===== analyst workbench (Ledger Intelligence) ===== */
+/* Mirrors the LangGraph codegen agent: planner → plan_validator → (replanner loop) →
+   plan_to_code → code_evaluator → analysis_generation. Deterministic (curated). */
+const WB_NODES=["Planner","Plan Validator","Replanner","Plan → Code","Code Evaluator","Analysis"];
+let wbRole="payer", wbId="denial-rca";
+const WB=[
+ {id:"denial-rca",label:"Root-cause the radiology denial spike",role:"both",outcome:"success",
+  plan:"1) Filter remittance entries in scope · 2) tally adjustment $ by CARC group + code · 3) join to the medical-necessity determination gate · 4) rank the front-end defect drivers.",
+  validate:{ok:true,note:"Schema-compliant · reads only projected CARC / determination fields · in payer+provider scope."},
+  code:"rem = ledger[ledger.type=='remittance']\nby_group = rem.explode('adjustments').groupby('group').amount.sum()\ngate = determ.groupby('deficiency_kind').size().sort_values(ascending=False)\ndrivers = gate.head(3) / gate.sum()",
+  score:9.2,rationale:"Deterministic; reproduces byte-identical on re-run; no PHI fields read; correct CARC-group semantics (only PR reduces payer-owed).",
+  answer:"The denial spike is front-end driven. 78% of the incremental denials trace to three gates: eligibility (34%), prior authorization (29%), and missing documentation (15%). Contractual write-offs (CARC CO) dominate; patient-responsibility (PR) is stable. The highest-leverage fix is delivering the payer's criteria for these three gates to the provider at order time — the same shift-left that reduces downstream recovery load.",
+  action:{label:"Draft provider-education notices for the top-3 defect codes",tier:"D2",rung:"A1"},
+  ticket:{sev:"action",to:"Provider",gate:"HITL",title:"RCA action — provider education on top-3 front-end defect codes"}},
+ {id:"recovery-verification",label:"Verify the agent's recovery decisions on D2 claims",role:"payer",outcome:"disagreement",
+  plan:"For each D2 recovery: reconstruct the 835, re-run reconcile(), compare the recomputed verdict + delta to the recorded reconciliation entry; flag disagreements.",
+  validate:{ok:true,note:"In payer scope · re-adjudication over projected amounts only · reuses the production reconcile()."},
+  code:"for r in recoveries[tier=='D2']:\n    v = reconcile(r.remittance, r.contracted, tol)\n    if (v.verdict,v.delta) != (r.recorded.verdict,r.recorded.delta):\n        flag(r, reason='rate-mismatch')",
+  score:9.5,rationale:"Deterministic re-adjudication; reproduces exactly; independent of the agent's own computation.",
+  answer:"Independent re-adjudication AGREES with the agent on 96% of D2 recoveries. The 4% that disagree are not agent errors — they trace to a stale contracted-rate version in the fee schedule. The finding is real and it needs a human: the rate source must be reconciled before those appeals are submitted. This is exactly the kind of discrepancy the shared ledger is meant to surface.",
+  action:{label:"Open HITL review on the 4% rate-mismatch recoveries",tier:"D2",rung:"A1"},
+  ticket:{sev:"warning",to:"Payer",gate:"HITL",title:"Verification disagreement — contracted-rate mismatch on 4% of D2 recoveries"}},
+ {id:"integrity-check",label:"Recompute ledger balance & integrity across the batch",role:"both",outcome:"success",
+  plan:"Per record: recompute the hash-chain and attest the seal; assert billed = paid + adjustments; report any tamper or arithmetic drift.",
+  validate:{ok:true,note:"Integrity attestation over projected fields + seal alg/keyId only · no PHI."},
+  code:"for rec in ledger:\n    assert verify_chain(rec) == rec.seal      # tamper-evidence\n    assert rec.billed == rec.paid + rec.adj.sum()  # balances",
+  score:9.8,rationale:"Deterministic; hash recomputation reproduces; strongest evidence tier.",
+  answer:"Every record in the batch balances (billed = paid + adjustments) and every hash-chain matches its seal — no tamper, no arithmetic drift. Sustained across periods, this clean independent result is the evidence that justifies raising the sampling interval and letting eligible D3 actions run human-on-the-loop rather than human-in-the-loop.",
+  action:{label:"None required — verified. Supports raising autonomy on D3 actions",tier:"D3",rung:"A2"},
+  ticket:null},
+ {id:"underpayment-pattern",label:"Detect systematic underpayment by CARC across the cohort",role:"payer",outcome:"success",
+  plan:"Group reconciled deltas by CARC group + provider; flag CARC groups whose underpayment rate exceeds the cohort baseline by >2σ.",
+  validate:{ok:true,note:"Cohort aggregate over projected amounts + CARC codes only · payer scope."},
+  code:"d = recon[recon.verdict=='underpaid']\nby = d.groupby(['carc_group','provider']).delta.agg(['sum','count'])\noutliers = by[by['sum'] > baseline + 2*sigma]",
+  score:9.0,rationale:"Deterministic aggregate; reproduces; a cohort read (weakest-link tier can't lift authority).",
+  answer:"One CARC pattern stands out: CO-45 (charge exceeds fee schedule) is driving systematic underpayment on a cluster of 6 providers — $9,400 across 14 claims, 2.4σ above baseline. This is not random; it points to a stale contracted-rate load for that provider group. Recommend a targeted network notice plus a rate-source reconciliation before those claims are appealed.",
+  action:{label:"Open payer-ops review + a targeted network rate notice",tier:"D2",rung:"A1"},
+  ticket:{sev:"action",to:"Payer",gate:"HITL",title:"Systematic CO-45 underpayment — 6-provider cluster, $9,400"}},
+ {id:"appealable-denials",label:"Which of my denials are appealable, and by when?",role:"provider",outcome:"success",
+  plan:"Filter denied claims with an approving-eligible disposition; compute the timely-filing deadline per payer; rank by $ and days remaining.",
+  validate:{ok:true,note:"Provider scope · projected verdict/amount/date fields only."},
+  code:"app = denials[denials.recoverable_basis]\napp['deadline'] = app.remit_date + payer_window(app.payer)\napp['days_left'] = (app.deadline - today).days\napp.sort_values(['days_left','delta'])",
+  score:9.4,rationale:"Deterministic; deadline math reuses the production filing-window rule; reproduces.",
+  answer:"9 of your denied claims are appealable, worth $7,100. Three are urgent — the timely-filing window closes within 21 days. The agent has prepared the corrected 837 packets referencing the executed fee schedule and the supporting documentation; filing them needs your approval.",
+  action:{label:"File 837 corrected claims + appeals on the 3 urgent denials",tier:"D2",rung:"A1"},
+  ticket:{sev:"warning",to:"Provider",gate:"HITL",title:"3 appealable denials closing in <21 days — 837 packets prepared"}},
+ {id:"auth-status",label:"Check status on my pending prior-authorization requests",role:"provider",outcome:"success",
+  plan:"For each pending authorization, issue a read-only X12 status inquiry and summarize the returned dispositions.",
+  validate:{ok:true,note:"Read-only status inquiry · projected auth/claim refs only, no PHI."},
+  code:"for a in pending_auths:\n    status[a.id] = inquire_278(a.auth_ref)   # read-only\nsummarize(status)",
+  score:9.1,rationale:"Deterministic over projected auth refs; a read-only inquiry (no money movement).",
+  answer:"Of 12 pending authorizations, 8 are approved, 3 are pending additional documentation, and 1 was denied. The 3 pending-docs cases each need a 275 attachment — the agent has assembled the attachments and can transmit the inquiries and attachments automatically, with you monitoring.",
+  action:{label:"Send 278 status inquiries + 275 attachments on the 3 pending-docs cases",tier:"D3",rung:"A2"},
+  ticket:{sev:"info",to:"Provider",gate:"HOTL",title:"3 auth cases pending documentation — 275 attachments assembled"}},
+ {id:"cohort-phi",label:"Export member-level detail for an external model",role:"payer",outcome:"plan-fail",
+  plan:"Join member identifiers to claim outcomes and export a member-level table for an external modeling tool.",
+  validate:{ok:false,note:"REJECTED — the plan reads member-level PHI (memberId, clinical note) that is NOT in the party projection and exports detail. Minimum-necessary violated."},
+  replan:"Replanner attempts a de-identified aggregate, but the export-of-detail intent is still out of scope. Retries exhausted (3 of 3).",
+  score:null,rationale:null,answer:null,action:null,
+  ticket:{sev:"critical",to:"Payer",gate:"—",title:"Analysis blocked — PHI / minimum-necessary violation (plan-validate failed after 3 replans)"}},
+ {id:"forecast",label:"Forecast next quarter's denials from the live trend",role:"both",outcome:"eval-fail",
+  plan:"Fit a rolling trend on denial counts and extrapolate to next quarter.",
+  validate:{ok:true,note:"Schema-compliant · aggregate counts only."},
+  code:"trend = denials.rolling(window=now()).mean()   # wall-clock window\nforecast = extrapolate(trend, to=next_quarter())",
+  score:3.1,rationale:"REJECTED — the result depends on wall-clock now() and live state; re-run under a perturbed clock yields a different answer. Not reproducible, so not admissible as evidence.",
+  answer:null,action:null,
+  ticket:{sev:"action",to:"Both",gate:"—",title:"Analysis rejected — non-reproducible result (code-evaluate failed)"}}
+];
+const wbById=id=>WB.find(a=>a.id===id)||WB[0];
+const wbForRole=()=>WB.filter(a=>a.role===wbRole||a.role==="both");
+// Configurable action model: what communication/X12 each finding can trigger, the agent's
+// tree-of-thought, the autonomy gate, and the analyst-burden it removes.
+const GATE_OF={A0:"assist",A1:"hitl",A2:"hotl",A3:"autonomous"};
+const EXEC={
+ "denial-rca":{x12:{name:"Provider-education notice — top-3 defect codes",to:"Provider"},
+   thinking:["78% of the spike is front-end: eligibility, prior-auth, missing docs.","Option A — auto-send notices to every provider: rejected, over-broad and it is an outbound communication (human-gated).","Option B — draft targeted notices for the top-3 defect codes and request approval: selected — evidence D2 permits rung A1 (HITL).","Drafted the notices and the ticket update; one approval completes it."],
+   burden:{manual:35,approve:2}},
+ "recovery-verification":{x12:{name:"837 corrected claim + appeal — 4% rate-mismatch",to:"Payer"},
+   thinking:["96% agree; the 4% that disagree trace to a stale contracted-rate version.","Option A — auto-file the appeal: rejected — a payer-facing submission is human-gated at every rung.","Option B — draft the corrected 837 referencing the executed fee schedule and request approval: selected (D2 → A1, HITL).","Assembled the 837 packet + rate-source citation and prepared the ticket update."],
+   burden:{manual:42,approve:3}},
+ "underpayment-pattern":{x12:{name:"Targeted network rate notice + ops review",to:"Payer"},
+   thinking:["CO-45 cluster: 6 providers, 2.4σ over baseline — systematic, not random.","Option A — auto-adjust the rates: rejected — rate changes need payer-ops sign-off.","Option B — open an ops review and draft a targeted network notice: selected (D2 → A1, HITL).","Compiled the cluster evidence and drafted the notice."],
+   burden:{manual:55,approve:4}},
+ "appealable-denials":{x12:{name:"837 corrected claims + appeals — 3 urgent",to:"Payer"},
+   thinking:["9 appealable claims, $7,100; 3 close within 21 days.","Option A — auto-file all 9: rejected — submission is human-gated, and the 6 non-urgent can wait for review.","Option B — prepare all, file the 3 urgent on approval: selected (D2 → A1, HITL).","Built the 837 packets and supporting docs for the 3 urgent claims."],
+   burden:{manual:48,approve:3}},
+ "auth-status":{x12:{name:"278 status inquiries + 275 attachments — 3 cases",to:"Payer"},
+   thinking:["8 approved, 3 pending-docs, 1 denied.","The 3 pending-docs need 275 attachments — a read/inquiry + attachment, not money movement.","Evidence D3 permits rung A2 (HOTL) — the agent may proceed automatically; you monitor and can veto.","Assembled the attachments; ready to transmit."],
+   burden:{manual:28,approve:1}},
+ "integrity-check":{x12:null,
+   thinking:["All records balance; every hash-chain matches its seal; no tamper.","No action is required — this is a clean verification.","Sustained clean results are the evidence that supports raising autonomy on D3 actions.","Surfaced for your awareness."],
+   burden:{manual:20,approve:0}}
+};
+let wbExecuted=false;
+// Hex-style output cells: a result table + a small chart for the successful analyses.
+const WB_OUT={
+ "denial-rca":{cols:["Front-end gate","Denials","Share","$ at risk"],rows:[["Eligibility",34,"34%","$41,200"],["Prior authorization",29,"29%","$35,800"],["Missing documentation",15,"15%","$18,400"],["Coding / other",22,"22%","$26,600"]],
+   chart:[{l:"Eligibility",v:34},{l:"Prior auth",v:29},{l:"Missing docs",v:15},{l:"Coding/other",v:22}],chartLab:"Denials by gate (%)"},
+ "recovery-verification":{cols:["D2 recoveries","Agree","Disagree","Cause"],rows:[["Sampled 100","96","4","stale contracted-rate version"]],
+   chart:[{l:"Agree",v:96},{l:"Disagree",v:4}],chartLab:"Re-adjudication agreement (%)"},
+ "integrity-check":{cols:["Records","Chain intact","Balanced","Tamper"],rows:[["Batch of 24","24","24","0"]],
+   chart:[{l:"Intact",v:24},{l:"Tamper",v:0}],chartLab:"Integrity across the batch"}
+};
+function renderOutputCell(id){
+ const o=WB_OUT[id]; if(!o) return "";
+ const max=Math.max(1,...o.chart.map(c=>c.v));
+ const bars=o.chart.map(c=>`<div class="obar-row"><span class="obar-l">${c.l}</span><div class="obar-t"><span style="width:${c.v/max*100}%"></span></div><span class="obar-v mono">${c.v}</span></div>`).join("");
+ const th=o.cols.map(c=>`<th>${c}</th>`).join("");
+ const tr=o.rows.map(r=>`<tr>${r.map((cell,i)=>`<td${i>0?' class="mono"':''}>${cell}</td>`).join("")}</tr>`).join("");
+ return `<div class="ocell"><div class="ocell-tabs"><span class="ot active">Table</span><span class="ot">Chart</span></div>
+   <div class="ogrid"><div class="otable-wrap"><table class="otable"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></div>
+   <div class="ochart"><div class="ochart-lab">${o.chartLab}</div>${bars}</div></div></div>`;
+}
+function nodeStates(a){ // per-node status for the graph
+ const S={Planner:"ok","Plan Validator":"ok",Replanner:"skip","Plan → Code":"ok","Code Evaluator":"ok",Analysis:"ok"};
+ if(a.outcome==="plan-fail"){S["Plan Validator"]="fail";S.Replanner="fail";S["Plan → Code"]="skip";S["Code Evaluator"]="skip";S.Analysis="skip";}
+ if(a.outcome==="eval-fail"){S["Code Evaluator"]="fail";S.Analysis="skip";}
+ if(a.outcome==="disagreement"){S.Analysis="warn";}
+ return S;
+}
+function renderWbPick(){
+ const w=document.getElementById("wbPickWrap");
+ w.innerHTML=`<label class="mono" style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Analysis question</label><select id="wbSel">${wbForRole().map(a=>`<option value="${a.id}" ${a.id===wbId?'selected':''}>${a.label}</option>`).join("")}</select>`;
+ document.getElementById("wbSel").onchange=e=>{wbId=e.target.value;renderWbGraph(null);document.getElementById("wbOut").innerHTML="";};
+}
+function renderWbGraph(states){
+ document.getElementById("wbGraph").innerHTML=WB_NODES.map((n,i)=>{
+  const st=states?states[n]:"idle";
+  const glyph=st==="ok"?"✓":st==="fail"?"✕":st==="warn"?"!":st==="skip"?"·":(i+1);
+  return `<div class="wbnode ${st}"><span class="g">${glyph}</span><span class="t">${n}</span></div>${i<WB_NODES.length-1?`<span class="wbarr ${n==="Plan Validator"?"loop":""}">${n==="Plan Validator"?"⟲":"→"}</span>`:""}`;
+ }).join("");
+}
+function runWb(){
+ wbExecuted=false;
+ const a=wbById(wbId); const S=nodeStates(a);
+ renderWbGraph(S);
+ const panel=(title,body,tone)=>`<div class="wbpanel ${tone||''}"><div class="wbp-h">${title}</div><div class="wbp-b">${body}</div></div>`;
+ let html="";
+ html+=panel("Planner — analysis plan",a.plan);
+ html+=panel(`Plan Validator — ${a.validate.ok?'<span style="color:var(--good)">valid</span>':'<span style="color:var(--crit)">rejected</span>'}`,a.validate.note,a.validate.ok?'':'bad');
+ if(a.replan) html+=panel("Replanner — retry loop",a.replan,"bad");
+ if(a.code) html+=panel("Plan → Code (generated)",`<pre class="wbcode">${a.code.replace(/</g,'&lt;')}</pre>`);
+ if(a.score!=null) html+=panel(`Code Evaluator — score <span class="mono" style="color:${a.score>=7?'var(--good)':'var(--crit)'}">${a.score}/10</span>`,a.rationale,a.score>=7?'':'bad');
+ if(a.answer) html+=renderOutputCell(a.id);
+ if(a.answer) html+=panel("Analysis — plain-language answer",`<div class="wbanswer">${a.answer}</div>`,a.outcome==="disagreement"?'warnp':'okp');
+ html+=`<div id="wbAction">${renderActionStage(a)}</div>`;
+ html+=`<p class="disclaimer">Deterministic by construction — temperature 0, and the code-evaluate gate refuses any result not reproducible under a perturbed clock. The analyses run on the backend over the PHI-safe party projection, behind real plan-validate and result-evaluate gates; the actions execute through the governed decision path (interlock + qualified-human approval), and X12 transmission is a fail-closed mock (not sent). Real sandboxed codegen execution and live EDI are the named production steps.</p>`;
+ document.getElementById("wbOut").innerHTML=html;
+}
+/* The governed action stage: tree-of-thought → autonomy gate → approve/execute → ticket + burden. */
+function renderActionStage(a){
+ const ex=EXEC[a.id];
+ // Fail paths: no action to approve — the ticket IS the outcome.
+ if(!a.action || !ex){
+  if(!a.ticket) return "";
+  return `<div class="wbfoot"><div class="wbcard ticket ${a.ticket.sev}"><div class="wbc-h"><span class="sev ${a.ticket.sev}"></span>Ticket opened · ${a.ticket.sev}</div><div class="wbc-b">${a.ticket.title}<div style="margin-top:6px" class="mono" style="font-size:11px;color:var(--muted)">routed to ${a.ticket.to}${a.ticket.gate!=="—"?` · ${a.ticket.gate} gate`:""} · the analysis was stopped at the gate — nothing was executed.</div></div></div></div>`;
+ }
+ const gate=GATE_OF[a.action.rung]; const x12=ex.x12; const done=wbExecuted;
+ // thinking / tree-of-thought
+ const think=`<div class="wbthink"><div class="wbc-h">Agent reasoning — tree of thought</div><ol>${ex.thinking.map((t,i)=>`<li class="${i===ex.thinking.length-2?'sel':''}">${t}</li>`).join("")}</ol></div>`;
+ // the recommended action + gate
+ const gateNote={assist:"Assist — surfaced for a human; the agent takes no action.",hitl:"HITL — the agent prepared everything; your approval is the only manual step.",hotl:"HOTL — the agent proceeds automatically; you monitor and may veto.",autonomous:"Autonomous — within verified bounds."}[gate];
+ let control="";
+ if(gate==="assist"){ control=`<div class="wbc-b">${gateNote}</div>`; }
+ else if(!done){ control=`<div class="wbc-b">${gateNote}</div><div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" data-approve="1">${gate==="hotl"?"Proceed":"Approve & execute"}</button>${gate==="hitl"?`<button class="btn ghost" data-approve="0">Hold</button>`:''}<span class="mono" style="font-size:11px;color:var(--muted)">${x12?x12.name:''}</span></div>`; }
+ else { control=`<div class="wbc-b" style="color:var(--good);font-weight:600">✓ Executed — ${x12?x12.name:'action'} (mock X12, not transmitted). Ticket updated → resolved.</div>`; }
+ const actionCard=`<div class="wbcard action"><div class="wbc-h">Recommended action — ${x12?"triggers "+x12.name:"no communication"}</div><div class="wbc-b">${a.action.label}<div style="margin-top:8px">evidence <span class="tag ev">${a.action.tier}</span> → permitted rung <span class="tag au">${a.action.rung}</span> · autonomy <strong>${gate.toUpperCase()}</strong>${x12?` · routes to ${x12.to}`:''}</div></div>${control}</div>`;
+ // ticket lifecycle
+ const tk=a.ticket;
+ const tstate = done ? "resolved" : "open";
+ const ticketCard = tk?`<div class="wbcard ticket ${tk.sev}"><div class="wbc-h"><span class="sev ${tk.sev}"></span>Ticket · ${done?'resolved':tk.sev}</div><div class="wbc-b">${tk.title}<div class="tlife">${["opened","approved","executed","resolved"].map((s,i)=>`<span class="tstep ${done?'done':(i===0?'done':'')}">${s}</span>`).join('<span class="tsep">→</span>')}</div><div class="mono" style="font-size:11px;color:var(--muted);margin-top:6px">routed to ${tk.to}${tk.gate!=="—"?` · ${tk.gate} gate`:''}</div></div></div>`
+   :`<div class="wbcard okp"><div class="wbc-h">No ticket — clean pass</div><div class="wbc-b">Nothing to escalate. Sustained clean, reproduced results are what earn higher autonomy.</div></div>`;
+ // burden
+ const b=ex.burden; const saved=Math.max(0,b.manual-b.approve); const pct=b.manual?Math.round(saved/b.manual*100):0;
+ const burden=`<div class="wbcard burden"><div class="wbc-h">Analyst burden${done?' — after':''}</div><div class="wbc-b"><div class="burow"><span>Manual, unassisted</span><div class="butrack"><span style="width:100%;background:var(--warn)"></span></div><span class="mono">${b.manual}m</span></div><div class="burow"><span>With the agent</span><div class="butrack"><span style="width:${b.manual?Math.max(4,b.approve/b.manual*100):0}%;background:var(--good)"></span></div><span class="mono">${b.approve}m</span></div><div style="margin-top:8px;font-size:12.5px;color:var(--ink-2)">${gate==="assist"?"No action needed — the analyst reviews and moves on.":`The agent did the analysis, drafted the ${x12?x12.name.split(" — ")[0]:'action'}, and prepared the ticket. You ${done?'approved in':'approve in'} ~${b.approve} min — <strong>${pct}% less analyst effort</strong>.`}</div></div></div>`;
+ return `${think}<div class="wbfoot3">${actionCard}${ticketCard}${burden}</div>`;
+}
+
+/* ===== view switching ===== */
+function showView(id){
+ document.querySelectorAll(".view").forEach(v=>{v.hidden=(v.id!==id);});
+ document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current", b.dataset.view===id));
+ window.scrollTo({top:0,behavior:"auto"});
+}
+
+/* ===== init ===== */
+function init(){
+ renderTwin(document.getElementById("heroTwin"),"D2","autonomous");
+ renderFlow(); renderShift(); renderLab(); renderPick(); renderSim(); renderLedger(); renderWbPick(); renderWbGraph(null);
+
+ document.getElementById("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;showView(b.dataset.view);});
+ document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));
+ document.getElementById("laneProv").addEventListener("click",flowClick);
+ document.getElementById("lanePay").addEventListener("click",flowClick);
+ function flowClick(e){const b=e.target.closest(".node[data-i]");if(!b)return;activeNode=+b.dataset.i;renderFlow();}
+ document.getElementById("critToggle").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;critMode=b.dataset.crit;[...document.querySelectorAll("#critToggle button")].forEach(x=>x.setAttribute("aria-pressed",x.dataset.crit===critMode));renderShift();});
+ document.getElementById("evSel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;labEv=b.dataset.ev;renderLab();});
+ document.getElementById("auSel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;labAu=b.dataset.au;renderLab();});
+ document.getElementById("modeSel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;mode=b.dataset.mode;[...document.querySelectorAll("#modeSel button")].forEach(x=>x.setAttribute("aria-pressed",x.dataset.mode===mode));renderSim();});
+ ["lvAuto","lvMat","lvFile"].forEach(id=>document.getElementById(id).addEventListener("change",renderSim));
+ document.getElementById("lensSel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;lens=b.dataset.lens;[...document.querySelectorAll("#lensSel button")].forEach(x=>x.setAttribute("aria-pressed",x.dataset.lens===lens));renderLedger();});
+ document.getElementById("wbRole").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;wbRole=b.dataset.role;[...document.querySelectorAll("#wbRole button")].forEach(x=>x.setAttribute("aria-pressed",x.dataset.role===wbRole));wbId=wbForRole()[0].id;renderWbPick();renderWbGraph(null);document.getElementById("wbOut").innerHTML="";});
+ document.getElementById("wbRun").addEventListener("click",runWb);
+ document.getElementById("wbOut").addEventListener("click",e=>{const b=e.target.closest("[data-approve]");if(!b)return;wbExecuted=(b.dataset.approve==="1");const el=document.getElementById("wbAction");if(el)el.innerHTML=renderActionStage(wbById(wbId));});
+ document.getElementById("themeBtn").addEventListener("click",()=>{const cur=document.documentElement.getAttribute("data-theme");const next=cur==="dark"?"light":cur==="light"?"dark":(matchMedia("(prefers-color-scheme: dark)").matches?"light":"dark");document.documentElement.setAttribute("data-theme",next);});
+}
+init();
+</script>

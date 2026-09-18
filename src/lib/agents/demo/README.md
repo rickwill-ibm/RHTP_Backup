@@ -3,7 +3,7 @@
 The `agentRuntime` dataMode seam for the demo screen (mirrors the SDE demo seam).
 
 ```ts
-const { actions, mode } = await getAgentDemoActions();   // resolves getDataMode('agentRuntime')
+const { actions, mode } = await getAgentDemoActions(); // resolves getDataMode('agentRuntime')
 ```
 
 - `mock` / `seeded` — returns the authored actions

@@ -17,7 +17,13 @@
  *
  * C9.2 yield: care-team feed -> care-team T1 (formed).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR CareTeam pulled from the bundle. */
 interface CareTeamResource {
@@ -111,8 +117,10 @@ function parse(payload: string): RawRecord<CareTeamResource>[] {
 function validate(raw: RawRecord<CareTeamResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (participantsOf(resource).length === 0) issues.push({ reasonCode: 'missing-participant', fieldPath: 'participant' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (participantsOf(resource).length === 0)
+    issues.push({ reasonCode: 'missing-participant', fieldPath: 'participant' });
   return { ok: issues.length === 0, issues };
 }
 

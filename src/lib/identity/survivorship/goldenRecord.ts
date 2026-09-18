@@ -25,7 +25,12 @@
  */
 import * as clock from '@/lib/clock';
 import { DEFAULT_SURVIVORSHIP_RULES, rankingFor } from './rules';
-import type { FieldProvenance, GoldenRecord, SourceAttributedFact, SurvivorshipRules } from './types';
+import type {
+  FieldProvenance,
+  GoldenRecord,
+  SourceAttributedFact,
+  SurvivorshipRules,
+} from './types';
 
 export interface BuildGoldenRecordOptions {
   rules?: SurvivorshipRules;
@@ -50,7 +55,7 @@ function moreRecent(a: SourceAttributedFact, b: SourceAttributedFact): SourceAtt
  */
 function resolveTie(
   facts: SourceAttributedFact[],
-  tiebreak: SurvivorshipRules['tiebreak'],
+  tiebreak: SurvivorshipRules['tiebreak']
 ): SourceAttributedFact {
   if (tiebreak === 'source-order') return facts[0];
   return facts.reduce(moreRecent);
@@ -59,24 +64,41 @@ function resolveTie(
 function winnerForField(
   field: string,
   facts: SourceAttributedFact[],
-  rules: SurvivorshipRules,
+  rules: SurvivorshipRules
 ): FieldProvenance | null {
   if (facts.length === 0) return null;
   const ranking = rankingFor(rules, field);
   const tiebreak = rules.tiebreak;
 
   // Walk ranks top-first; first source with any fact wins, its facts resolved by tiebreak.
-  for (let rank = 0; rank < ranking.length; rank++) { // mut-equiv: <= adds one iteration reading ranking[len]=undefined, which filters to zero facts and continues — identical behavior
+  for (let rank = 0; rank < ranking.length; rank++) {
+    // mut-equiv: <= adds one iteration reading ranking[len]=undefined, which filters to zero facts and continues — identical behavior
     const source = ranking[rank];
     const atSource = facts.filter((f) => f.source === source);
     if (atSource.length === 0) continue;
     const chosen = resolveTie(atSource, tiebreak);
-    return { field, value: chosen.value, source: chosen.source, asOf: chosen.asOf, rank, reason: 'source-ranked', tiebreak };
+    return {
+      field,
+      value: chosen.value,
+      source: chosen.source,
+      asOf: chosen.asOf,
+      rank,
+      reason: 'source-ranked',
+      tiebreak,
+    };
   }
 
   // No ranked source asserted this field: surface a fact anyway, resolved by tiebreak.
   const chosen = resolveTie(facts, tiebreak);
-  return { field, value: chosen.value, source: chosen.source, asOf: chosen.asOf, rank: -1, reason: 'recency-fallback', tiebreak };
+  return {
+    field,
+    value: chosen.value,
+    source: chosen.source,
+    asOf: chosen.asOf,
+    rank: -1,
+    reason: 'recency-fallback',
+    tiebreak,
+  };
 }
 
 /**
@@ -85,7 +107,7 @@ function winnerForField(
  */
 export function buildGoldenRecord(
   facts: readonly SourceAttributedFact[],
-  opts: BuildGoldenRecordOptions = {},
+  opts: BuildGoldenRecordOptions = {}
 ): GoldenRecord {
   const rules = opts.rules ?? DEFAULT_SURVIVORSHIP_RULES;
   const now = opts.now ?? clock.now;

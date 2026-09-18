@@ -23,8 +23,22 @@ import type { DeadLetterRecord, DeadLetterStore } from './types';
 
 /** Keys that commonly carry PHI — a dead-letter record must contain none. */
 const PHI_KEYS = [
-  'name', 'given', 'family', 'birthDate', 'dob', 'ssn', 'ssnLast4', 'telecom',
-  'address', 'phone', 'email', 'gender', 'sex', 'note', 'text', 'valueString',
+  'name',
+  'given',
+  'family',
+  'birthDate',
+  'dob',
+  'ssn',
+  'ssnLast4',
+  'telecom',
+  'address',
+  'phone',
+  'email',
+  'gender',
+  'sex',
+  'note',
+  'text',
+  'valueString',
 ];
 
 /** Throw if a dead-letter record's serialized form carries a PHI-marked key. */
@@ -54,14 +68,15 @@ export interface PipelineDeadLetterInput {
  */
 export async function persistPipelineDeadLetters(
   store: DeadLetterStore,
-  quarantined: QuarantineRecord[],
+  quarantined: QuarantineRecord[]
 ): Promise<DeadLetterRecord[]> {
   const out: DeadLetterRecord[] = [];
   for (const q of quarantined) {
     const held = q.status === 'held-for-review';
-    const payloadRef = held && q.identityHold
-      ? `batch:${q.batchId}#${q.quarantineId};tier=${q.identityHold.matchTier};score=${q.identityHold.confidence}`
-      : `batch:${q.batchId}#${q.quarantineId}`;
+    const payloadRef =
+      held && q.identityHold
+        ? `batch:${q.batchId}#${q.quarantineId};tier=${q.identityHold.matchTier};score=${q.identityHold.confidence}`
+        : `batch:${q.batchId}#${q.quarantineId}`;
     const record = await store.append({
       id: `dl-${q.quarantineId}`,
       kind: held ? 'held-identity' : 'quarantine',

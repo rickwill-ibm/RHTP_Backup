@@ -27,13 +27,26 @@ const PRIORITY_CONFIG: Record<OrderPriority, { label: string; color: string; bg:
   stat: { label: 'STAT', color: 'text-[#da1e28]', bg: 'bg-[#fff1f1]' },
 };
 
-function buildFhirServiceRequest(order: MdOrder, patientId: string, encounterId: string, practitionerId: string): FhirServiceRequest {
+function buildFhirServiceRequest(
+  order: MdOrder,
+  patientId: string,
+  encounterId: string,
+  practitionerId: string
+): FhirServiceRequest {
   return {
     resourceType: 'ServiceRequest',
     status: 'active',
     intent: 'order',
-    category: [{ coding: [{ system: 'http://snomed.info/sct', code: '386053000', display: order.category }], text: order.category }],
-    code: { coding: [{ system: 'http://loinc.org', code: order.code, display: order.display }], text: order.display },
+    category: [
+      {
+        coding: [{ system: 'http://snomed.info/sct', code: '386053000', display: order.category }],
+        text: order.category,
+      },
+    ],
+    code: {
+      coding: [{ system: 'http://loinc.org', code: order.code, display: order.display }],
+      text: order.display,
+    },
     // Persona-free (conventions §1.2): no hardcoded display name; the reference already carries the launch patient.
     subject: { reference: `Patient/${patientId}` },
     encounter: { reference: `Encounter/${encounterId}` },
@@ -44,7 +57,12 @@ function buildFhirServiceRequest(order: MdOrder, patientId: string, encounterId:
   };
 }
 
-export default function OrderEntryModule({ patientId, encounterId, practitionerId, onOrderSigned }: OrderEntryModuleProps) {
+export default function OrderEntryModule({
+  patientId,
+  encounterId,
+  practitionerId,
+  onOrderSigned,
+}: OrderEntryModuleProps) {
   const [activeCategory, setActiveCategory] = useState<OrderCategory | 'all'>('all');
   const [orders, setOrders] = useState<MdOrder[]>([]);
   const [search, setSearch] = useState('');
@@ -75,11 +93,11 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
   const removeOrder = (id: string) => setOrders((prev) => prev.filter((o) => o.id !== id));
 
   const updatePriority = (id: string, priority: OrderPriority) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, priority } : o));
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, priority } : o)));
   };
 
   const updateNote = (id: string, note: string) => {
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, note } : o));
+    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, note } : o)));
   };
 
   const handleSign = () => {
@@ -93,9 +111,7 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
 
     const writeToFhir = async () => {
       if (!getFhirMockMode()) {
-        await Promise.allSettled(
-          serviceRequests.map((sr) => getFhirClient().create(sr as any))
-        );
+        await Promise.allSettled(serviceRequests.map((sr) => getFhirClient().create(sr as any)));
       }
     };
 
@@ -113,8 +129,12 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
     return (
       <div className="bg-white border border-carbon-gray-20 p-8 flex flex-col items-center justify-center min-h-[200px]">
         <div className="w-8 h-8 border-2 border-[#6929c4] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-carbon-gray-100">Signing orders and writing to FHIR…</p>
-        <p className="text-xs text-carbon-gray-50 mt-1">Creating ServiceRequest resources in Cerner</p>
+        <p className="text-sm font-medium text-carbon-gray-100">
+          Signing orders and writing to FHIR…
+        </p>
+        <p className="text-xs text-carbon-gray-50 mt-1">
+          Creating ServiceRequest resources in Cerner
+        </p>
       </div>
     );
   }
@@ -125,24 +145,42 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
         <div className="bg-[#defbe6] px-5 py-4 flex items-center gap-3">
           <Icon name="CheckCircleIcon" size={20} className="text-[#0e6027]" />
           <div>
-            <p className="text-sm font-semibold text-[#0e6027]">Orders signed and submitted to Cerner</p>
-            <p className="text-xs text-[#0e6027]/70">FHIR ServiceRequest resources created · {new Date(signedAt).toLocaleTimeString()}</p>
+            <p className="text-sm font-semibold text-[#0e6027]">
+              Orders signed and submitted to Cerner
+            </p>
+            <p className="text-xs text-[#0e6027]/70">
+              FHIR ServiceRequest resources created · {new Date(signedAt).toLocaleTimeString()}
+            </p>
           </div>
         </div>
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-carbon-gray-50">Confirmation ID: <span className="font-mono font-semibold text-carbon-gray-100">{confirmId}</span></p>
-            <p className="text-xs text-carbon-gray-50">{orders.length} order{orders.length !== 1 ? 's' : ''} signed</p>
+            <p className="text-xs text-carbon-gray-50">
+              Confirmation ID:{' '}
+              <span className="font-mono font-semibold text-carbon-gray-100">{confirmId}</span>
+            </p>
+            <p className="text-xs text-carbon-gray-50">
+              {orders.length} order{orders.length !== 1 ? 's' : ''} signed
+            </p>
           </div>
           <div className="space-y-1.5">
             {orders.map((o) => {
               const catCfg = CATEGORY_CONFIG[o.category];
               const priCfg = PRIORITY_CONFIG[o.priority];
               return (
-                <div key={o.id} className="flex items-center gap-3 px-3 py-2 bg-carbon-gray-10 border border-carbon-gray-20">
+                <div
+                  key={o.id}
+                  className="flex items-center gap-3 px-3 py-2 bg-carbon-gray-10 border border-carbon-gray-20"
+                >
                   <Icon name={catCfg.icon as any} size={14} className={catCfg.color} />
-                  <span className="text-xs font-medium text-carbon-gray-100 flex-1">{o.display}</span>
-                  <span className={`text-2xs font-semibold px-1.5 py-0.5 ${priCfg.bg} ${priCfg.color}`}>{priCfg.label}</span>
+                  <span className="text-xs font-medium text-carbon-gray-100 flex-1">
+                    {o.display}
+                  </span>
+                  <span
+                    className={`text-2xs font-semibold px-1.5 py-0.5 ${priCfg.bg} ${priCfg.color}`}
+                  >
+                    {priCfg.label}
+                  </span>
                   <Icon name="CheckCircleIcon" size={14} className="text-[#24a148]" />
                 </div>
               );
@@ -191,23 +229,29 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
           <div className="flex-1 p-4">
             {/* Category filter */}
             <div className="flex gap-1 mb-3 flex-wrap">
-              {(['all', 'lab', 'medication', 'referral', 'procedure', 'imaging'] as const).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`text-2xs font-semibold px-2 py-1 transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-[#6929c4] text-white'
-                      : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20'
-                  }`}
-                >
-                  {cat === 'all' ? 'All' : CATEGORY_CONFIG[cat].label}
-                </button>
-              ))}
+              {(['all', 'lab', 'medication', 'referral', 'procedure', 'imaging'] as const).map(
+                (cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`text-2xs font-semibold px-2 py-1 transition-colors ${
+                      activeCategory === cat
+                        ? 'bg-[#6929c4] text-white'
+                        : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20'
+                    }`}
+                  >
+                    {cat === 'all' ? 'All' : CATEGORY_CONFIG[cat].label}
+                  </button>
+                )
+              )}
             </div>
             {/* Search */}
             <div className="relative mb-3">
-              <Icon name="MagnifyingGlassIcon" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-50" />
+              <Icon
+                name="MagnifyingGlassIcon"
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-50"
+              />
               <input
                 type="text"
                 placeholder="Search orders…"
@@ -248,10 +292,16 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
 
           {/* Order basket */}
           <div className="w-72 p-4 bg-carbon-gray-10 flex flex-col">
-            <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest mb-3">Order Basket</p>
+            <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest mb-3">
+              Order Basket
+            </p>
             {orders.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <Icon name="ClipboardDocumentListIcon" size={28} className="text-carbon-gray-30 mb-2" />
+                <Icon
+                  name="ClipboardDocumentListIcon"
+                  size={28}
+                  className="text-carbon-gray-30 mb-2"
+                />
                 <p className="text-xs text-carbon-gray-50">Select orders from the catalog</p>
               </div>
             ) : (
@@ -261,9 +311,18 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
                   return (
                     <div key={o.id} className="bg-white border border-carbon-gray-20 p-2.5">
                       <div className="flex items-start gap-2 mb-2">
-                        <Icon name={catCfg.icon as any} size={13} className={`${catCfg.color} mt-0.5`} />
-                        <p className="text-xs font-medium text-carbon-gray-100 flex-1 leading-snug">{o.display}</p>
-                        <button onClick={() => removeOrder(o.id)} className="text-carbon-gray-30 hover:text-[#da1e28]">
+                        <Icon
+                          name={catCfg.icon as any}
+                          size={13}
+                          className={`${catCfg.color} mt-0.5`}
+                        />
+                        <p className="text-xs font-medium text-carbon-gray-100 flex-1 leading-snug">
+                          {o.display}
+                        </p>
+                        <button
+                          onClick={() => removeOrder(o.id)}
+                          className="text-carbon-gray-30 hover:text-[#da1e28]"
+                        >
                           <Icon name="XMarkIcon" size={13} />
                         </button>
                       </div>
@@ -276,7 +335,9 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
                               key={p}
                               onClick={() => updatePriority(o.id, p)}
                               className={`text-2xs font-semibold px-1.5 py-0.5 transition-colors ${
-                                o.priority === p ? `${pc.bg} ${pc.color} border border-current/30` : 'bg-carbon-gray-10 text-carbon-gray-50 hover:bg-carbon-gray-20'
+                                o.priority === p
+                                  ? `${pc.bg} ${pc.color} border border-current/30`
+                                  : 'bg-carbon-gray-10 text-carbon-gray-50 hover:bg-carbon-gray-20'
                               }`}
                             >
                               {pc.label}
@@ -297,9 +358,14 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
       {signStep === 'review' && (
         <div className="p-5">
           <div className="bg-[#fdf6dd] border border-[#f1c21b] px-4 py-3 mb-4 flex items-start gap-2">
-            <Icon name="ExclamationTriangleIcon" size={15} className="text-[#b45309] flex-shrink-0 mt-0.5" />
+            <Icon
+              name="ExclamationTriangleIcon"
+              size={15}
+              className="text-[#b45309] flex-shrink-0 mt-0.5"
+            />
             <p className="text-xs text-[#b45309]">
-              Review all orders before signing. Signed orders will be written to Cerner as FHIR ServiceRequest resources and cannot be undone from this app.
+              Review all orders before signing. Signed orders will be written to Cerner as FHIR
+              ServiceRequest resources and cannot be undone from this app.
             </p>
           </div>
           <div className="space-y-2 mb-5">
@@ -307,13 +373,20 @@ export default function OrderEntryModule({ patientId, encounterId, practitionerI
               const catCfg = CATEGORY_CONFIG[o.category];
               const priCfg = PRIORITY_CONFIG[o.priority];
               return (
-                <div key={o.id} className="flex items-center gap-3 px-4 py-3 bg-carbon-gray-10 border border-carbon-gray-20">
+                <div
+                  key={o.id}
+                  className="flex items-center gap-3 px-4 py-3 bg-carbon-gray-10 border border-carbon-gray-20"
+                >
                   <Icon name={catCfg.icon as any} size={15} className={catCfg.color} />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-carbon-gray-100">{o.display}</p>
-                    <p className="text-2xs text-carbon-gray-50">{catCfg.label} · FHIR ServiceRequest</p>
+                    <p className="text-2xs text-carbon-gray-50">
+                      {catCfg.label} · FHIR ServiceRequest
+                    </p>
                   </div>
-                  <span className={`text-2xs font-bold px-2 py-0.5 ${priCfg.bg} ${priCfg.color}`}>{priCfg.label}</span>
+                  <span className={`text-2xs font-bold px-2 py-0.5 ${priCfg.bg} ${priCfg.color}`}>
+                    {priCfg.label}
+                  </span>
                 </div>
               );
             })}

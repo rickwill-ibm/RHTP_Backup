@@ -4,7 +4,13 @@ import Icon from '@/components/ui/AppIcon';
 import type { ProgramType } from '@/lib/mockData';
 import type { ContractFilters } from '../page';
 
-const programTypes: (ProgramType | 'All')[] = ['All', 'MSSP ACO', 'ACO REACH', 'Commercial VBC', 'Medicaid MCO'];
+const programTypes: (ProgramType | 'All')[] = [
+  'All',
+  'MSSP ACO',
+  'ACO REACH',
+  'Commercial VBC',
+  'Medicaid MCO',
+];
 const performanceFilters = ['All', 'On Track', 'At Risk', 'Below Target'];
 
 interface ContractFilterBarProps {
@@ -18,7 +24,11 @@ export default function ContractFilterBar({ filters, onFiltersChange }: Contract
   return (
     <div className="flex flex-wrap items-center gap-3 mb-5">
       <div className="relative flex-1 min-w-[220px] max-w-xs">
-        <Icon name="MagnifyingGlassIcon" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-carbon-gray-50" />
+        <Icon
+          name="MagnifyingGlassIcon"
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-carbon-gray-50"
+        />
         <input
           type="text"
           placeholder="Search contracts or payers..."

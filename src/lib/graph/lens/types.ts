@@ -14,11 +14,7 @@ import type { GraphEdgeRecord, GraphNodeRecord } from '../types';
 
 /** The five demo lenses, one canonical name each. */
 export type LensName =
-  | 'whole-person'
-  | 'care-gap'
-  | 'sdoh-barrier'
-  | 'care-team'
-  | 'part2-restricted';
+  'whole-person' | 'care-gap' | 'sdoh-barrier' | 'care-team' | 'part2-restricted';
 
 /**
  * The consent scope a lens read runs under (C1 consent enforcement). `part2`

@@ -42,20 +42,20 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
     key: string,
     restricted: boolean,
     labels: string[],
-    props: Props,
+    props: Props
   ): Promise<void> {
     await db.query(
       `INSERT INTO graph_node (kind, key, restricted, labels, props)
          VALUES ($1,$2,$3,$4,$5)
        ON CONFLICT (kind, key)
          DO UPDATE SET restricted=$3, labels=$4, props=$5`,
-      [kind, key, restricted, JSON.stringify(labels), JSON.stringify(props)],
+      [kind, key, restricted, JSON.stringify(labels), JSON.stringify(props)]
     );
   }
   async function ensureStub(kind: string, key: string): Promise<void> {
     await db.query(
       `INSERT INTO graph_node (kind, key) VALUES ($1,$2) ON CONFLICT (kind, key) DO NOTHING`,
-      [kind, key],
+      [kind, key]
     );
   }
   async function loadEdge(m: {
@@ -65,7 +65,7 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
   }): Promise<Row | null> {
     const r = await db.query(
       `SELECT * FROM graph_edge WHERE type=$1 AND from_kind=$2 AND from_key=$3 AND to_kind=$4 AND to_key=$5`,
-      [m.type, m.from.kind, m.from.key, m.to.kind, m.to.key],
+      [m.type, m.from.kind, m.from.key, m.to.kind, m.to.key]
     );
     return r.rows[0] ?? null;
   }
@@ -84,7 +84,7 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
         m.key,
         Boolean(cur?.restricted),
         unionLabels(jArr(cur?.labels), [m.label]),
-        j(cur?.props),
+        j(cur?.props)
       );
     } else if (m.op === 'UpsertEdge') {
       await ensureStub(m.from.kind, m.from.key);
@@ -99,9 +99,18 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
          ON CONFLICT (type, from_kind, from_key, to_kind, to_key)
            DO UPDATE SET props=$6, v_start=$7, v_end=$8, causal=$9, asserter=$10, basis=$11`,
         [
-          m.type, m.from.kind, m.from.key, m.to.kind, m.to.key, JSON.stringify(props),
-          m.validity.start, m.validity.end ?? null, t.causal, t.asserter, t.basis,
-        ],
+          m.type,
+          m.from.kind,
+          m.from.key,
+          m.to.kind,
+          m.to.key,
+          JSON.stringify(props),
+          m.validity.start,
+          m.validity.end ?? null,
+          t.causal,
+          t.asserter,
+          t.basis,
+        ]
       );
     } else {
       // SetValidity: revise an existing edge's interval; create it (associative)
@@ -114,7 +123,15 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
          VALUES ($1,$2,$3,$4,$5,$6,$7)
          ON CONFLICT (type, from_kind, from_key, to_kind, to_key)
            DO UPDATE SET v_start=$6, v_end=$7`,
-        [m.type, m.from.kind, m.from.key, m.to.kind, m.to.key, m.validity.start, m.validity.end ?? null],
+        [
+          m.type,
+          m.from.kind,
+          m.from.key,
+          m.to.kind,
+          m.to.key,
+          m.validity.start,
+          m.validity.end ?? null,
+        ]
       );
     }
   }
@@ -157,8 +174,14 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
       const clauses: string[] = [];
       const vals: unknown[] = [];
       let i = 1;
-      if (filter.kind !== undefined) { clauses.push(`kind=$${i++}`); vals.push(filter.kind); }
-      if (filter.restricted !== undefined) { clauses.push(`restricted=$${i++}`); vals.push(filter.restricted); }
+      if (filter.kind !== undefined) {
+        clauses.push(`kind=$${i++}`);
+        vals.push(filter.kind);
+      }
+      if (filter.restricted !== undefined) {
+        clauses.push(`restricted=$${i++}`);
+        vals.push(filter.restricted);
+      }
       const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
       const r = await db.query(`SELECT * FROM graph_node ${where} ORDER BY kind, key`, vals);
       return r.rows.map(toNode);
@@ -167,13 +190,22 @@ export function createPostgresGraphStore(db: PgQueryable, id = 'pg-graph'): Grap
       const clauses: string[] = [];
       const vals: unknown[] = [];
       let i = 1;
-      if (filter.type !== undefined) { clauses.push(`type=$${i++}`); vals.push(filter.type); }
-      if (filter.fromKey !== undefined) { clauses.push(`from_key=$${i++}`); vals.push(filter.fromKey); }
-      if (filter.toKey !== undefined) { clauses.push(`to_key=$${i++}`); vals.push(filter.toKey); }
+      if (filter.type !== undefined) {
+        clauses.push(`type=$${i++}`);
+        vals.push(filter.type);
+      }
+      if (filter.fromKey !== undefined) {
+        clauses.push(`from_key=$${i++}`);
+        vals.push(filter.fromKey);
+      }
+      if (filter.toKey !== undefined) {
+        clauses.push(`to_key=$${i++}`);
+        vals.push(filter.toKey);
+      }
       const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
       const r = await db.query(
         `SELECT * FROM graph_edge ${where} ORDER BY type, from_key, to_key`,
-        vals,
+        vals
       );
       return r.rows.map(toEdge);
     },

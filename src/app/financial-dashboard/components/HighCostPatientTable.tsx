@@ -10,15 +10,21 @@ import { toast } from 'sonner';
 type SortKey = 'name' | 'pmpm' | 'variance' | 'topDriver' | 'interventionStatus';
 type SortDir = 'asc' | 'desc';
 
-const COLS: { key: SortKey | 'riskTier'; label: string; sortable?: boolean; sortKey?: SortKey }[] = [
-  { key: 'name', label: 'Patient', sortable: true, sortKey: 'name' },
-  { key: 'riskTier', label: 'Risk' },
-  { key: 'pmpm', label: 'PMPM', sortable: true, sortKey: 'pmpm' },
-  { key: 'variance', label: 'Variance', sortable: true, sortKey: 'variance' },
-  { key: 'topDriver', label: 'Top Driver', sortable: true, sortKey: 'topDriver' },
-  { key: 'interventionStatus', label: 'Intervention', sortable: true, sortKey: 'interventionStatus' },
-  { key: 'name', label: '' }, // actions column
-];
+const COLS: { key: SortKey | 'riskTier'; label: string; sortable?: boolean; sortKey?: SortKey }[] =
+  [
+    { key: 'name', label: 'Patient', sortable: true, sortKey: 'name' },
+    { key: 'riskTier', label: 'Risk' },
+    { key: 'pmpm', label: 'PMPM', sortable: true, sortKey: 'pmpm' },
+    { key: 'variance', label: 'Variance', sortable: true, sortKey: 'variance' },
+    { key: 'topDriver', label: 'Top Driver', sortable: true, sortKey: 'topDriver' },
+    {
+      key: 'interventionStatus',
+      label: 'Intervention',
+      sortable: true,
+      sortKey: 'interventionStatus',
+    },
+    { key: 'name', label: '' }, // actions column
+  ];
 
 export default function HighCostPatientTable() {
   const router = useRouter();
@@ -27,7 +33,10 @@ export default function HighCostPatientTable() {
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortKey(key); setSortDir('desc'); }
+    else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
   };
 
   const sorted = useMemo(() => {
@@ -35,12 +44,18 @@ export default function HighCostPatientTable() {
     const dir = sortDir === 'asc' ? 1 : -1;
     data.sort((a, b) => {
       switch (sortKey) {
-        case 'name': return dir * a.name.localeCompare(b.name);
-        case 'pmpm': return dir * (a.pmpm - b.pmpm);
-        case 'variance': return dir * (a.variance - b.variance);
-        case 'topDriver': return dir * a.topDriver.localeCompare(b.topDriver);
-        case 'interventionStatus': return dir * a.interventionStatus.localeCompare(b.interventionStatus);
-        default: return 0;
+        case 'name':
+          return dir * a.name.localeCompare(b.name);
+        case 'pmpm':
+          return dir * (a.pmpm - b.pmpm);
+        case 'variance':
+          return dir * (a.variance - b.variance);
+        case 'topDriver':
+          return dir * a.topDriver.localeCompare(b.topDriver);
+        case 'interventionStatus':
+          return dir * a.interventionStatus.localeCompare(b.interventionStatus);
+        default:
+          return 0;
       }
     });
     return data;
@@ -57,9 +72,14 @@ export default function HighCostPatientTable() {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-carbon-gray-20">
         <div>
           <h3 className="text-sm font-semibold text-carbon-gray-100">Top Cost Drivers</h3>
-          <p className="text-xs text-carbon-gray-50 mt-0.5">Patients with highest PMPM vs contract target</p>
+          <p className="text-xs text-carbon-gray-50 mt-0.5">
+            Patients with highest PMPM vs contract target
+          </p>
         </div>
-        <button className="carbon-btn-secondary text-xs py-1.5" onClick={() => toast.info('Export started')}>
+        <button
+          className="carbon-btn-secondary text-xs py-1.5"
+          onClick={() => toast.info('Export started')}
+        >
           <Icon name="ArrowDownTrayIcon" size={14} />
           Export
         </button>
@@ -84,39 +104,66 @@ export default function HighCostPatientTable() {
           </thead>
           <tbody className="divide-y divide-carbon-gray-20">
             {sorted?.map((p) => (
-              <tr key={p?.id} className="hover:bg-[#edf5ff] group cursor-pointer" onClick={() => router?.push('/patient-detail')}>
+              <tr
+                key={p?.id}
+                className="hover:bg-[#edf5ff] group cursor-pointer"
+                onClick={() => router?.push('/patient-detail')}
+              >
                 <td className="px-4 py-2.5">
-                  <span className="font-medium text-carbon-gray-100 group-hover:text-carbon-blue">{p?.name}</span>
+                  <span className="font-medium text-carbon-gray-100 group-hover:text-carbon-blue">
+                    {p?.name}
+                  </span>
                 </td>
                 <td className="px-4 py-2.5">
                   <RiskBadge tier={p?.riskTier} size="sm" />
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className="font-mono font-semibold text-[#da1e28]">${p?.pmpm?.toLocaleString()}</span>
+                  <span className="font-mono font-semibold text-[#da1e28]">
+                    ${p?.pmpm?.toLocaleString()}
+                  </span>
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className="font-mono text-[#da1e28]">+${p?.variance?.toLocaleString()}</span>
+                  <span className="font-mono text-[#da1e28]">
+                    +${p?.variance?.toLocaleString()}
+                  </span>
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={`text-2xs font-semibold px-2 py-0.5 ${
-                    p?.topDriver === 'Inpatient' ? 'bg-[#fff1f1] text-[#da1e28]' :
-                    p?.topDriver === 'ER' ? 'bg-[#fdf6dd] text-[#b45309]' :
-                    p?.topDriver === 'Specialty' ? 'bg-[#d0e2ff] text-[#0043ce]' :
-                    p?.topDriver === 'Pharmacy' ? 'bg-[#f6f2ff] text-[#6929c4]' :
-                    'bg-carbon-gray-10 text-carbon-gray-70'
-                  }`}>
+                  <span
+                    className={`text-2xs font-semibold px-2 py-0.5 ${
+                      p?.topDriver === 'Inpatient'
+                        ? 'bg-[#fff1f1] text-[#da1e28]'
+                        : p?.topDriver === 'ER'
+                          ? 'bg-[#fdf6dd] text-[#b45309]'
+                          : p?.topDriver === 'Specialty'
+                            ? 'bg-[#d0e2ff] text-[#0043ce]'
+                            : p?.topDriver === 'Pharmacy'
+                              ? 'bg-[#f6f2ff] text-[#6929c4]'
+                              : 'bg-carbon-gray-10 text-carbon-gray-70'
+                    }`}
+                  >
                     {p?.topDriver}
                   </span>
                 </td>
                 <td className="px-4 py-2.5">
                   <StatusBadge
                     label={p?.interventionStatus}
-                    variant={p?.interventionStatus === 'Active' ? 'success' : p?.interventionStatus === 'In Progress' ? 'info' : p?.interventionStatus === 'Pending' ? 'warning' : 'neutral'}
+                    variant={
+                      p?.interventionStatus === 'Active'
+                        ? 'success'
+                        : p?.interventionStatus === 'In Progress'
+                          ? 'info'
+                          : p?.interventionStatus === 'Pending'
+                            ? 'warning'
+                            : 'neutral'
+                    }
                     size="sm"
                   />
                 </td>
                 <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       title="Assign task"
                       className="p-1 text-carbon-gray-50 hover:text-carbon-blue hover:bg-[#d0e2ff] transition-colors"

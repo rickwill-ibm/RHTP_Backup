@@ -2,18 +2,76 @@
   "resourceType": "Bundle",
   "type": "collection",
   "entry": [
-    { "resource": { "resourceType": "Patient", "id": "pat-robert-103",
-        "identifier": [ { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00103" }, { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0103" } ],
-        "name": [{ "family": "Chen", "given": ["Robert"] }], "gender": "male", "birthDate": "1964-11-03" } },
-    { "resource": { "resourceType": "Coverage", "id": "cov-robert-103", "status": "active",
-        "beneficiary": { "reference": "Patient/pat-robert-103" }, "payor": [{ "display": "SD Medicaid" }], "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }] } },
-    { "resource": { "resourceType": "Condition", "id": "cond-htn-103",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential (primary) hypertension" }] },
-        "subject": { "reference": "Patient/pat-robert-103" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-ckd-103",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.3", "display": "Chronic kidney disease, stage 3 (moderate)" }] },
-        "subject": { "reference": "Patient/pat-robert-103" } } }
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-robert-103",
+        "identifier": [
+          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00103" },
+          { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0103" }
+        ],
+        "name": [{ "family": "Chen", "given": ["Robert"] }],
+        "gender": "male",
+        "birthDate": "1964-11-03"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-robert-103",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-robert-103" },
+        "payor": [{ "display": "SD Medicaid" }],
+        "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-htn-103",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I10",
+              "display": "Essential (primary) hypertension"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-robert-103" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-ckd-103",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "N18.3",
+              "display": "Chronic kidney disease, stage 3 (moderate)"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-robert-103" }
+      }
+    }
   ]
 }

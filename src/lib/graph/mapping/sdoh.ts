@@ -43,7 +43,7 @@ export const sdohSpec = {
         domain,
         zCode,
         positive,
-      }),
+      })
     );
     out.push({
       op: 'UpsertEdge',
@@ -56,9 +56,7 @@ export const sdohSpec = {
     });
     if (positive) {
       const needKey = `${event.memberId}:${domain}`;
-      out.push(
-        ...resourceNode(event, NEED_KIND, needKey, { domain, zCode }),
-      );
+      out.push(...resourceNode(event, NEED_KIND, needKey, { domain, zCode }));
       out.push({
         op: 'UpsertEdge',
         type: 'HAS_UNMET_NEED',

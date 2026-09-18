@@ -19,7 +19,7 @@ its ordering guarantees.
 3. **Confirm + sequence + publish** — on a confirmed FHIR commit, the intent is
    claimed and sequenced in ONE atomic data-layer compare-and-set
    (`OutboxStore.claimForConfirm`): a single `UPDATE ... WHERE status='pending'
-   RETURNING` flips exactly one row `pending -> confirmed` and stamps its next
+RETURNING` flips exactly one row `pending -> confirmed` and stamps its next
    **per-member sequence** server-side. Whoever loses the race (the live writer vs
    the sweep, or a second instance) gets `null` and publishes **nothing**. The C2
    event is then published to the backbone (`EventPublisher`) and marked
@@ -27,12 +27,13 @@ its ordering guarantees.
    = publish order per member.
 
    **Exactly-once (multi-writer hardening).** The `MemberLock` is a partition-affine
-   single writer *within one process*; it cannot serialize two instances or the
+   single writer _within one process_; it cannot serialize two instances or the
    writer racing the sweep. Two data-layer guarantees close that gap:
    `claimForConfirm`'s CAS (only one worker can move a row off `pending`), and a
    `UNIQUE (member_id, sequence)` constraint that rejects any duplicate per-member
    sequence slot as a backstop (the claim retries on collision, re-reading MAX).
    Sequence is assigned **server-side inside the claim**, never app-side `MAX+1`.
+
 4. **Per-member FIFO** — a later intent never enters step 2 before every earlier
    intent for that member is confirmed or terminally failed. A transient failure
    halts that member's drain (other members proceed); this makes the S4 inversion
@@ -44,11 +45,11 @@ its ordering guarantees.
 
 ## Seams
 
-| Seam | Interface | Mock | Real |
-|---|---|---|---|
-| intent table | `OutboxStore` | `createMemoryOutboxStore` | `createPgOutboxStore` (pg / pg-mem) |
-| FHIR write | `FhirApplier` | test fake | REST PUT to HAPI (wired later) |
-| backbone | `EventPublisher` | test fake | Kafka-API relay (`SEAM: event-backbone`) |
+| Seam         | Interface        | Mock                      | Real                                     |
+| ------------ | ---------------- | ------------------------- | ---------------------------------------- |
+| intent table | `OutboxStore`    | `createMemoryOutboxStore` | `createPgOutboxStore` (pg / pg-mem)      |
+| FHIR write   | `FhirApplier`    | test fake                 | REST PUT to HAPI (wired later)           |
+| backbone     | `EventPublisher` | test fake                 | Kafka-API relay (`SEAM: event-backbone`) |
 
 `SEAM: cdc-relay` — a Debezium-class reader over the same `outbox_intent` table
 could replace the writer/relay without touching producers or consumers.

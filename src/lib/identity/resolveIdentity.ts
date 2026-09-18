@@ -81,7 +81,12 @@ export function resolveIdentity(
 ): ResolvedIdentity {
   const sourcesSearched = ALL_SOURCE_SYSTEMS.filter((s) => s !== originSystem);
   const matchedSources: SourceSystem[] = [];
-  let best: IdentityMatchResult = { tier: 'no-match', confidence: 0, candidate: null, ruleHits: [] };
+  let best: IdentityMatchResult = {
+    tier: 'no-match',
+    confidence: 0,
+    candidate: null,
+    ruleHits: [],
+  };
 
   for (const sourceSystem of sourcesSearched) {
     const candidates = source.recordsFor(sourceSystem);

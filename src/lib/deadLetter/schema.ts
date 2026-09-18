@@ -37,7 +37,7 @@ export async function readMigration(name: string): Promise<string> {
  */
 export async function applyMigrations(
   pg: PgLike,
-  opts: ApplyMigrationsOptions = {},
+  opts: ApplyMigrationsOptions = {}
 ): Promise<string[]> {
   const realPostgres = opts.realPostgres ?? true;
   const files = await migrationFiles();

@@ -16,7 +16,10 @@ import type {
 } from './types';
 
 export class SdeConfigError extends Error {
-  constructor(public readonly field: string, detail: string) {
+  constructor(
+    public readonly field: string,
+    detail: string
+  ) {
     super(`SDE config invalid at "${field}": ${detail}`);
     this.name = 'SdeConfigError';
   }
@@ -28,11 +31,13 @@ const FOLDS: FoldBehavior[] = ['immediate', 'windowed'];
 const CHANNELS: Channel[] = ['sms', 'email', 'portal', 'mail', 'task'];
 
 function str(v: unknown, field: string): string {
-  if (typeof v !== 'string' || v === '') throw new SdeConfigError(field, 'non-empty string required');
+  if (typeof v !== 'string' || v === '')
+    throw new SdeConfigError(field, 'non-empty string required');
   return v;
 }
 function num(v: unknown, field: string): number {
-  if (typeof v !== 'number' || !Number.isFinite(v)) throw new SdeConfigError(field, 'number required');
+  if (typeof v !== 'number' || !Number.isFinite(v))
+    throw new SdeConfigError(field, 'number required');
   return v;
 }
 function oneOf<T extends string>(v: unknown, allowed: T[], field: string): T {
@@ -52,7 +57,7 @@ function parseEntry(raw: unknown, i: number): TaxonomyEntry {
   const entry: TaxonomyEntry = {
     signalType: str(o.signalType, `${at}.signalType`),
     sourceEventTypes: arr(o.sourceEventTypes, `${at}.sourceEventTypes`).map((s, j) =>
-      str(s, `${at}.sourceEventTypes[${j}]`),
+      str(s, `${at}.sourceEventTypes[${j}]`)
     ),
     defaultPriority: oneOf(o.defaultPriority, PRIORITIES, `${at}.defaultPriority`),
     actionability: oneOf(o.actionability, ACTIONABILITIES, `${at}.actionability`),
@@ -74,7 +79,8 @@ export function parseTaxonomy(raw: unknown): SignalTaxonomy {
   if (entries.length === 0) throw new SdeConfigError('entries', 'at least one entry required');
   const seen = new Set<string>();
   for (const e of entries) {
-    if (seen.has(e.signalType)) throw new SdeConfigError('entries', `duplicate signalType ${e.signalType}`);
+    if (seen.has(e.signalType))
+      throw new SdeConfigError('entries', `duplicate signalType ${e.signalType}`);
     seen.add(e.signalType);
   }
   return { version: str(o.version, 'version'), entries };
@@ -109,14 +115,17 @@ export function parsePolicyPack(raw: unknown): PolicyPack {
     recentEdBoost: num(o.recentEdBoost, 'recentEdBoost'),
     frequencyCaps: caps,
     channelDefaultOrder: arr(o.channelDefaultOrder, 'channelDefaultOrder').map((c, i) =>
-      oneOf(c, CHANNELS, `channelDefaultOrder[${i}]`),
+      oneOf(c, CHANNELS, `channelDefaultOrder[${i}]`)
     ),
     smsWindow: {
       startHour: num(sw.startHour, 'smsWindow.startHour'),
       endHour: num(sw.endHour, 'smsWindow.endHour'),
     },
     bundling: {
-      coordinationWindowCadenceHours: num(bd.coordinationWindowCadenceHours, 'bundling.coordinationWindowCadenceHours'),
+      coordinationWindowCadenceHours: num(
+        bd.coordinationWindowCadenceHours,
+        'bundling.coordinationWindowCadenceHours'
+      ),
       maxIntentsPerTouchpoint: num(bd.maxIntentsPerTouchpoint, 'bundling.maxIntentsPerTouchpoint'),
     },
     suppression: {

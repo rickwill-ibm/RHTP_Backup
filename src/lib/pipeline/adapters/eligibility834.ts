@@ -8,7 +8,13 @@
  *
  * C9.2 yield: 834 -> coverage T1 (+ demographics T1, out of this adapter's scope).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 interface X12Member {
   segments: string[][]; // parsed INS-loop segments
@@ -59,12 +65,25 @@ function subscriberId(segs: string[][]): string | undefined {
  * codes quarantine today instead of being mis-processed.
  */
 const MAINTENANCE: Readonly<
-  Record<string, { status: 'active' | 'terminated'; event: string; disenrolled: boolean; terminating: boolean }>
+  Record<
+    string,
+    { status: 'active' | 'terminated'; event: string; disenrolled: boolean; terminating: boolean }
+  >
 > = Object.freeze({
   '021': { status: 'active', event: 'coverage.enrolled', disenrolled: false, terminating: false }, // add
   '001': { status: 'active', event: 'coverage.changed', disenrolled: false, terminating: false }, // change
-  '024': { status: 'terminated', event: 'coverage.terminated', disenrolled: true, terminating: true }, // termination
-  '030': { status: 'terminated', event: 'coverage.cancelled', disenrolled: true, terminating: true }, // cancellation/equivalent
+  '024': {
+    status: 'terminated',
+    event: 'coverage.terminated',
+    disenrolled: true,
+    terminating: true,
+  }, // termination
+  '030': {
+    status: 'terminated',
+    event: 'coverage.cancelled',
+    disenrolled: true,
+    terminating: true,
+  }, // cancellation/equivalent
 });
 
 function maintenanceOf(m: X12Member): (typeof MAINTENANCE)[string] | undefined {
@@ -107,7 +126,8 @@ function validate(raw: RawRecord<X12Member>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const m = raw.data;
   if (!seg(m, 'INS')) issues.push({ reasonCode: 'missing-ins-segment', fieldPath: 'INS' });
-  if (!subscriberId(m.segments)) issues.push({ reasonCode: 'missing-subscriber-id', fieldPath: 'REF*0F' });
+  if (!subscriberId(m.segments))
+    issues.push({ reasonCode: 'missing-subscriber-id', fieldPath: 'REF*0F' });
   if (!seg(m, 'HD')) issues.push({ reasonCode: 'missing-coverage', fieldPath: 'HD' });
   // INS-3 maintenance type must be a code we can process; an unknown code is
   // fail-closed (never silently treated as an active enrollment).
@@ -120,7 +140,8 @@ function validate(raw: RawRecord<X12Member>): ValidationResult {
   if (maint?.terminating) {
     if (!coverageEnd(m)) issues.push({ reasonCode: 'missing-coverage-end', fieldPath: 'DTP*349' });
   } else if (maint) {
-    if (!coverageBegin(m)) issues.push({ reasonCode: 'missing-coverage-begin', fieldPath: 'DTP*348' });
+    if (!coverageBegin(m))
+      issues.push({ reasonCode: 'missing-coverage-begin', fieldPath: 'DTP*348' });
   }
   return { ok: issues.length === 0, issues };
 }
@@ -136,7 +157,10 @@ function normalize(raw: RawRecord<X12Member>, deps: PipelineDeps): NormalizedRec
   const subId = subscriberId(m.segments)!;
   // Pass the subscriber demographics so a real EMPI resolver can match
   // probabilistically; the deterministic (demo) resolver ignores them.
-  const memberId = deps.resolveIdentity(subId, { feed: SOURCE.feed, demographics: demographicsOf(m) });
+  const memberId = deps.resolveIdentity(subId, {
+    feed: SOURCE.feed,
+    demographics: demographicsOf(m),
+  });
   const hd = seg(m, 'HD');
   const ins = seg(m, 'INS');
   const planCode = hd?.[3] ?? 'UNK';
@@ -147,7 +171,9 @@ function normalize(raw: RawRecord<X12Member>, deps: PipelineDeps): NormalizedRec
   // never be mis-processed as an add. (transform.ts rethrows non-held errors.)
   const maint = MAINTENANCE[maintenanceType];
   if (!maint) {
-    throw new Error(`834 normalize invariant: unhandled INS-3 maintenance type "${maintenanceType}"`);
+    throw new Error(
+      `834 normalize invariant: unhandled INS-3 maintenance type "${maintenanceType}"`
+    );
   }
   const periodStart = coverageBegin(m);
   const periodEnd = coverageEnd(m);

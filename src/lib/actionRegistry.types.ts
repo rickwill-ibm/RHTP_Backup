@@ -7,7 +7,12 @@ export type EntryContext = 'cerner-launch' | 'browse';
 
 // ─── Screen Scope ─────────────────────────────────────────────────────────────
 export type ScreenScope =
-  | 'contract-selection' | 'panel-cohort' | 'patient-detail' | 'financial-dashboard' | 'provider-selection' | 'sign-in';
+  | 'contract-selection'
+  | 'panel-cohort'
+  | 'patient-detail'
+  | 'financial-dashboard'
+  | 'provider-selection'
+  | 'sign-in';
 
 // ─── Patient Tab Scope (sub-scope within patient-detail) ──────────────────────
 export type PatientTab = 'risk' | 'clinical' | 'financial' | 'attribution' | 'actions';
@@ -17,7 +22,16 @@ export type ActionVariant = 'primary' | 'secondary' | 'danger' | 'warning' | 'su
 
 // ─── Action Category ──────────────────────────────────────────────────────────
 export type ActionCategory =
-  | 'hcc' | 'care-gap' | 'utilization' | 'task' | 'attribution' | 'financial' | 'clinical' | 'navigation' | 'export' | 'panel';
+  | 'hcc'
+  | 'care-gap'
+  | 'utilization'
+  | 'task'
+  | 'attribution'
+  | 'financial'
+  | 'clinical'
+  | 'navigation'
+  | 'export'
+  | 'panel';
 
 // ─── State Guard ──────────────────────────────────────────────────────────────
 export interface StateGuard {
@@ -56,7 +70,14 @@ export interface ActionDefinition {
 
 // ─── Workflow Types ───────────────────────────────────────────────────────────
 export type WorkflowType =
-  | 'hcc-confirmation' | 'care-gap-closure' | 'utilization-escalation' | 'attribution-dispute' | 'provider-referral' | 'stars-payer-bonus' | 'hedis-measure-doc' | 'mips-payment-adj';
+  | 'hcc-confirmation'
+  | 'care-gap-closure'
+  | 'utilization-escalation'
+  | 'attribution-dispute'
+  | 'provider-referral'
+  | 'stars-payer-bonus'
+  | 'hedis-measure-doc'
+  | 'mips-payment-adj';
 
 // ─── Workflow State ───────────────────────────────────────────────────────────
 export type WorkflowStatus = 'idle' | 'in-progress' | 'awaiting-review' | 'completed' | 'rejected';

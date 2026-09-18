@@ -21,7 +21,7 @@ export class DeadLetterStoreNotConfiguredError extends Error {
     super(
       'DATA_MODE deadLetterStore=production: no production dead-letter store is wired yet. ' +
         'Register one with setProductionDeadLetterStoreFactory(() => createPgDeadLetterStore(pool)) ' +
-        '(SEAM: dead-letter-store) or set DATA_MODE_DEAD_LETTER_STORE=mock.',
+        '(SEAM: dead-letter-store) or set DATA_MODE_DEAD_LETTER_STORE=mock.'
     );
     this.name = 'DeadLetterStoreNotConfiguredError';
   }

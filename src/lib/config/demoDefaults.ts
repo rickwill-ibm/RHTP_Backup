@@ -10,5 +10,4 @@
 // into client bundles too.
 
 /** Platform member id of the default demo patient (configurable). */
-export const DEMO_MEMBER_ID: string =
-  process.env.NEXT_PUBLIC_DEMO_MEMBER_ID ?? 'MARIA_SD_001';
+export const DEMO_MEMBER_ID: string = process.env.NEXT_PUBLIC_DEMO_MEMBER_ID ?? 'MARIA_SD_001';

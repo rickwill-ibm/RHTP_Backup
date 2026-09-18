@@ -12,14 +12,17 @@ import CareGapClosureJourney from './CareGapClosureJourney';
 import UtilizationEscalationJourney from './UtilizationEscalationJourney';
 
 function HCCStatusBadge({ status }: { status: HCCSuspect['status'] }) {
-  const map: Record<HCCSuspect['status'], 'warning' | 'info' | 'purple' | 'success' | 'danger' | 'neutral'> = {
-    'Surfaced': 'neutral',
+  const map: Record<
+    HCCSuspect['status'],
+    'warning' | 'info' | 'purple' | 'success' | 'danger' | 'neutral'
+  > = {
+    Surfaced: 'neutral',
     'Evidence Reviewed': 'info',
     'Clinician Review': 'warning',
-    'Documented': 'purple',
-    'Submitted': 'info',
-    'Confirmed': 'success',
-    'Rejected': 'danger',
+    Documented: 'purple',
+    Submitted: 'info',
+    Confirmed: 'success',
+    Rejected: 'danger',
   };
   return <StatusBadge label={status} variant={map[status]} size="sm" />;
 }
@@ -51,16 +54,34 @@ function WorkflowChip({ suspectId }: { suspectId: string }) {
   if (status === 'idle') return null;
 
   const cfg = {
-    'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `Step ${current}/${total}`, icon: 'PlayIcon' },
-    'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Review', icon: 'ClockIcon' },
-    'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Confirmed', icon: 'CheckCircleIcon' },
-    'rejected': { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]', label: 'Rejected', icon: 'XCircleIcon' },
-    'idle': { cls: '', label: '', icon: '' },
+    'in-progress': {
+      cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+      label: `Step ${current}/${total}`,
+      icon: 'PlayIcon',
+    },
+    'awaiting-review': {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Awaiting Review',
+      icon: 'ClockIcon',
+    },
+    completed: {
+      cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+      label: 'Confirmed',
+      icon: 'CheckCircleIcon',
+    },
+    rejected: {
+      cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]',
+      label: 'Rejected',
+      icon: 'XCircleIcon',
+    },
+    idle: { cls: '', label: '', icon: '' },
   } as const;
 
   const c = cfg[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}
+    >
       <Icon name={c.icon as any} size={10} />
       {c.label}
     </span>
@@ -76,16 +97,34 @@ function GapWorkflowChip({ gapId }: { gapId: string }) {
   if (status === 'idle') return null;
 
   const cfg = {
-    'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `Step ${current}/${total}`, icon: 'PlayIcon' },
-    'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Review', icon: 'ClockIcon' },
-    'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Closed', icon: 'CheckCircleIcon' },
-    'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred', icon: 'ClockIcon' },
-    'idle': { cls: '', label: '', icon: '' },
+    'in-progress': {
+      cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+      label: `Step ${current}/${total}`,
+      icon: 'PlayIcon',
+    },
+    'awaiting-review': {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Awaiting Review',
+      icon: 'ClockIcon',
+    },
+    completed: {
+      cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+      label: 'Closed',
+      icon: 'CheckCircleIcon',
+    },
+    rejected: {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Deferred',
+      icon: 'ClockIcon',
+    },
+    idle: { cls: '', label: '', icon: '' },
   } as const;
 
   const c = cfg[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}
+    >
       <Icon name={c.icon as any} size={10} />
       {c.label}
     </span>
@@ -101,16 +140,34 @@ function AlertWorkflowChip({ alertId }: { alertId: string }) {
   if (status === 'idle') return null;
 
   const cfg = {
-    'in-progress': { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/40', label: `Step ${current}/${total}`, icon: 'PlayIcon' },
-    'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Closure', icon: 'ClockIcon' },
-    'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Closed', icon: 'CheckCircleIcon' },
-    'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed', icon: 'ClockIcon' },
-    'idle': { cls: '', label: '', icon: '' },
+    'in-progress': {
+      cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/40',
+      label: `Step ${current}/${total}`,
+      icon: 'PlayIcon',
+    },
+    'awaiting-review': {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Awaiting Closure',
+      icon: 'ClockIcon',
+    },
+    completed: {
+      cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+      label: 'Closed',
+      icon: 'CheckCircleIcon',
+    },
+    rejected: {
+      cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+      label: 'Dismissed',
+      icon: 'ClockIcon',
+    },
+    idle: { cls: '', label: '', icon: '' },
   } as const;
 
   const c = cfg[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-semibold border ${c.cls}`}
+    >
       <Icon name={c.icon as any} size={10} />
       {c.label}
     </span>
@@ -144,9 +201,13 @@ export default function RiskQualityTab() {
             </h3>
             <p className="text-xs text-carbon-gray-50 mt-0.5">
               {suspects.length} suspects · Est. RAF delta{' '}
-              <span className="font-mono font-semibold text-[#b45309]">+{totalRafDelta.toFixed(3)}</span>
-              {' '}· Revenue at risk{' '}
-              <span className="font-mono font-semibold text-[#da1e28]">${totalRevDelta.toLocaleString()}</span>
+              <span className="font-mono font-semibold text-[#b45309]">
+                +{totalRafDelta.toFixed(3)}
+              </span>{' '}
+              · Revenue at risk{' '}
+              <span className="font-mono font-semibold text-[#da1e28]">
+                ${totalRevDelta.toLocaleString()}
+              </span>
             </p>
           </div>
           <button className="carbon-btn-secondary text-xs py-1.5">
@@ -158,16 +219,16 @@ export default function RiskQualityTab() {
         {/* Active journey panel */}
         {journeyOpen && activeSuspect && (
           <div className="mb-4">
-            <HCCConfirmationJourney
-              suspect={activeSuspect}
-              onClose={() => setJourneyOpen(null)}
-            />
+            <HCCConfirmationJourney suspect={activeSuspect} onClose={() => setJourneyOpen(null)} />
           </div>
         )}
 
         <div className="space-y-2">
           {suspects.map((suspect) => (
-            <div key={suspect.id} className={`border bg-carbon-gray-10 transition-all ${journeyOpen === suspect.id ? 'border-[#0f62fe] ring-1 ring-[#0f62fe]/20' : 'border-carbon-gray-20'}`}>
+            <div
+              key={suspect.id}
+              className={`border bg-carbon-gray-10 transition-all ${journeyOpen === suspect.id ? 'border-[#0f62fe] ring-1 ring-[#0f62fe]/20' : 'border-carbon-gray-20'}`}
+            >
               <button
                 className="w-full flex items-center gap-4 px-4 py-3 hover:bg-white transition-colors text-left"
                 onClick={() => setExpandedHcc(expandedHcc === suspect.id ? null : suspect.id)}
@@ -179,22 +240,32 @@ export default function RiskQualityTab() {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="font-mono text-xs font-semibold text-carbon-gray-70">{suspect.hccCode}</span>
-                    <span className="text-sm font-medium text-carbon-gray-100">{suspect.hccDescription}</span>
+                    <span className="font-mono text-xs font-semibold text-carbon-gray-70">
+                      {suspect.hccCode}
+                    </span>
+                    <span className="text-sm font-medium text-carbon-gray-100">
+                      {suspect.hccDescription}
+                    </span>
                     <HCCStatusBadge status={suspect.status} />
                     <WorkflowChip suspectId={suspect.id} />
                     <FreshnessIndicator source={suspect.dataSource} date={suspect.freshnessDate} />
                   </div>
-                  <p className="text-xs text-carbon-gray-50 mt-0.5 font-mono">{suspect.icdCode} — {suspect.icdDescription}</p>
+                  <p className="text-xs text-carbon-gray-50 mt-0.5 font-mono">
+                    {suspect.icdCode} — {suspect.icdDescription}
+                  </p>
                 </div>
                 <div className="flex items-center gap-6 flex-shrink-0">
                   <div className="text-right">
                     <p className="text-2xs text-carbon-gray-50">RAF Delta</p>
-                    <p className="font-mono text-sm font-semibold text-[#b45309]">+{suspect.estimatedRafDelta.toFixed(3)}</p>
+                    <p className="font-mono text-sm font-semibold text-[#b45309]">
+                      +{suspect.estimatedRafDelta.toFixed(3)}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-2xs text-carbon-gray-50">Revenue</p>
-                    <p className="font-mono text-sm font-semibold text-[#da1e28]">${suspect.estimatedRevenueDelta.toLocaleString()}</p>
+                    <p className="font-mono text-sm font-semibold text-[#da1e28]">
+                      ${suspect.estimatedRevenueDelta.toLocaleString()}
+                    </p>
                   </div>
                   <ConfidenceBar score={suspect.suspectConfidence} />
                 </div>
@@ -207,8 +278,15 @@ export default function RiskQualityTab() {
                       <p className="carbon-label mb-2">Clinical Evidence</p>
                       <ul className="space-y-1">
                         {suspect.evidenceSources.map((e, i) => (
-                          <li key={`ev-${suspect.id}-${i}`} className="flex items-start gap-2 text-xs text-carbon-gray-70">
-                            <Icon name="DocumentMagnifyingGlassIcon" size={12} className="text-carbon-blue mt-0.5 flex-shrink-0" />
+                          <li
+                            key={`ev-${suspect.id}-${i}`}
+                            className="flex items-start gap-2 text-xs text-carbon-gray-70"
+                          >
+                            <Icon
+                              name="DocumentMagnifyingGlassIcon"
+                              size={12}
+                              className="text-carbon-blue mt-0.5 flex-shrink-0"
+                            />
                             {e}
                           </li>
                         ))}
@@ -219,15 +297,21 @@ export default function RiskQualityTab() {
                       <div className="space-y-1.5 text-xs">
                         <div className="flex justify-between">
                           <span className="text-carbon-gray-50">Assigned Physician</span>
-                          <span className="font-medium text-carbon-gray-100">{suspect.assignedPhysician}</span>
+                          <span className="font-medium text-carbon-gray-100">
+                            {suspect.assignedPhysician}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-carbon-gray-50">Last Encounter</span>
-                          <span className="font-mono text-carbon-gray-70">{suspect.lastEncounterDate}</span>
+                          <span className="font-mono text-carbon-gray-70">
+                            {suspect.lastEncounterDate}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-carbon-gray-50">Submission Deadline</span>
-                          <span className="font-mono font-semibold text-[#da1e28]">{suspect.submissionDeadline}</span>
+                          <span className="font-mono font-semibold text-[#da1e28]">
+                            {suspect.submissionDeadline}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -236,20 +320,29 @@ export default function RiskQualityTab() {
                       <div className="flex flex-col gap-2">
                         <button
                           className={`flex items-center gap-2 text-xs py-2 px-3 font-semibold transition-colors w-full justify-center
-                            ${journeyOpen === suspect.id
-                              ? 'bg-[#0353e9] text-white'
-                              : 'bg-[#0f62fe] text-white hover:bg-[#0353e9]'}`}
+                            ${
+                              journeyOpen === suspect.id
+                                ? 'bg-[#0353e9] text-white'
+                                : 'bg-[#0f62fe] text-white hover:bg-[#0353e9]'
+                            }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setJourneyOpen(journeyOpen === suspect.id ? null : suspect.id);
                           }}
                         >
-                          <Icon name={journeyOpen === suspect.id ? 'ChevronUpIcon' : 'ArrowPathIcon'} size={14} />
-                          {journeyOpen === suspect.id ? 'Close Journey' : 'Open Confirmation Journey'}
+                          <Icon
+                            name={journeyOpen === suspect.id ? 'ChevronUpIcon' : 'ArrowPathIcon'}
+                            size={14}
+                          />
+                          {journeyOpen === suspect.id
+                            ? 'Close Journey'
+                            : 'Open Confirmation Journey'}
                         </button>
                         <button
                           className="carbon-btn-ghost text-xs py-1.5 w-full justify-center"
-                          onClick={(e) => { e.stopPropagation(); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           <Icon name="PencilSquareIcon" size={14} />
                           Add Clinical Note
@@ -283,73 +376,113 @@ export default function RiskQualityTab() {
         </div>
 
         {/* Active gap journey panel */}
-        {gapJourneyOpen && (() => {
-          const activeGap = gaps.find((g) => g.id === gapJourneyOpen);
-          return activeGap ? (
-            <div className="mb-4">
-              <CareGapClosureJourney
-                gap={activeGap}
-                onClose={() => setGapJourneyOpen(null)}
-              />
-            </div>
-          ) : null;
-        })()}
+        {gapJourneyOpen &&
+          (() => {
+            const activeGap = gaps.find((g) => g.id === gapJourneyOpen);
+            return activeGap ? (
+              <div className="mb-4">
+                <CareGapClosureJourney gap={activeGap} onClose={() => setGapJourneyOpen(null)} />
+              </div>
+            ) : null;
+          })()}
 
         <div className="border border-carbon-gray-20 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
               <tr>
-                {['Measure', 'Program', 'Status', 'Days Open', 'Due Date', 'Assigned To', 'Action'].map((h) => (
-                  <th key={`gh-${h}`} className="px-4 py-2.5 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                {[
+                  'Measure',
+                  'Program',
+                  'Status',
+                  'Days Open',
+                  'Due Date',
+                  'Assigned To',
+                  'Action',
+                ].map((h) => (
+                  <th
+                    key={`gh-${h}`}
+                    className="px-4 py-2.5 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-carbon-gray-20">
               {gaps.map((gap) => (
                 <React.Fragment key={gap.id}>
-                  <tr className={`hover:bg-carbon-gray-10 group ${gapJourneyOpen === gap.id ? 'bg-[#f0f4ff]' : ''}`}>
+                  <tr
+                    className={`hover:bg-carbon-gray-10 group ${gapJourneyOpen === gap.id ? 'bg-[#f0f4ff]' : ''}`}
+                  >
                     <td className="px-4 py-3">
                       <p className="text-xs font-medium text-carbon-gray-100">{gap.measureName}</p>
                       <p className="text-2xs text-carbon-gray-50 font-mono">{gap.measureId}</p>
                       <GapWorkflowChip gapId={gap.id} />
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-2xs font-semibold px-2 py-0.5 ${
-                        gap.program === 'HEDIS' ? 'bg-[#d0e2ff] text-[#0043ce]' :
-                        gap.program === 'STARS' ? 'bg-[#fdf6dd] text-[#b45309]' :
-                        'bg-[#f6f2ff] text-[#6929c4]'
-                      }`}>
+                      <span
+                        className={`text-2xs font-semibold px-2 py-0.5 ${
+                          gap.program === 'HEDIS'
+                            ? 'bg-[#d0e2ff] text-[#0043ce]'
+                            : gap.program === 'STARS'
+                              ? 'bg-[#fdf6dd] text-[#b45309]'
+                              : 'bg-[#f6f2ff] text-[#6929c4]'
+                        }`}
+                      >
                         {gap.program}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge
                         label={gap.status}
-                        variant={gap.status === 'Closed' ? 'success' : gap.status === 'In Progress' ? 'info' : gap.status === 'Expired' ? 'danger' : 'warning'}
+                        variant={
+                          gap.status === 'Closed'
+                            ? 'success'
+                            : gap.status === 'In Progress'
+                              ? 'info'
+                              : gap.status === 'Expired'
+                                ? 'danger'
+                                : 'warning'
+                        }
                         size="sm"
                       />
                     </td>
                     <td className="px-4 py-3">
                       {gap.status !== 'Closed' ? (
-                        <span className={`font-mono text-xs tabular-nums ${gap.daysOpen > 120 ? 'text-[#da1e28] font-semibold' : gap.daysOpen > 60 ? 'text-[#b45309]' : 'text-carbon-gray-70'}`}>
+                        <span
+                          className={`font-mono text-xs tabular-nums ${gap.daysOpen > 120 ? 'text-[#da1e28] font-semibold' : gap.daysOpen > 60 ? 'text-[#b45309]' : 'text-carbon-gray-70'}`}
+                        >
                           {gap.daysOpen}d
                         </span>
                       ) : (
                         <span className="text-2xs text-[#24a148]">Closed</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-carbon-gray-70 whitespace-nowrap">{gap.dueDate}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-carbon-gray-70 whitespace-nowrap">
+                      {gap.dueDate}
+                    </td>
                     <td className="px-4 py-3 text-xs text-carbon-gray-70">{gap.assignedTo}</td>
                     <td className="px-4 py-3">
                       {gap.status !== 'Closed' && (
                         <button
-                          onClick={() => setGapJourneyOpen(gapJourneyOpen === gap.id ? null : gap.id)}
+                          onClick={() =>
+                            setGapJourneyOpen(gapJourneyOpen === gap.id ? null : gap.id)
+                          }
                           className={`flex items-center gap-1.5 text-2xs font-semibold px-2.5 py-1.5 transition-colors whitespace-nowrap
-                            ${gapJourneyOpen === gap.id
-                              ? 'bg-[#0043ce] text-white'
-                              : 'bg-[#d0e2ff] text-[#0043ce] hover:bg-[#0043ce] hover:text-white'}`}
+                            ${
+                              gapJourneyOpen === gap.id
+                                ? 'bg-[#0043ce] text-white'
+                                : 'bg-[#d0e2ff] text-[#0043ce] hover:bg-[#0043ce] hover:text-white'
+                            }`}
                         >
-                          <Icon name={gapJourneyOpen === gap.id ? 'ChevronUpIcon' : 'ClipboardDocumentCheckIcon'} size={11} />
+                          <Icon
+                            name={
+                              gapJourneyOpen === gap.id
+                                ? 'ChevronUpIcon'
+                                : 'ClipboardDocumentCheckIcon'
+                            }
+                            size={11}
+                          />
                           {gapJourneyOpen === gap.id ? 'Close Journey' : 'Close Gap'}
                         </button>
                       )}
@@ -369,21 +502,24 @@ export default function RiskQualityTab() {
             <Icon name="BellAlertIcon" size={16} className="text-[#da1e28]" />
             Utilization Alerts
           </h3>
-          <span className="text-xs text-carbon-gray-50">{alerts.filter((a) => a.status === 'Active').length} active</span>
+          <span className="text-xs text-carbon-gray-50">
+            {alerts.filter((a) => a.status === 'Active').length} active
+          </span>
         </div>
 
         {/* Active escalation journey panel */}
-        {alertJourneyOpen && (() => {
-          const activeAlert = alerts.find((a) => a.id === alertJourneyOpen);
-          return activeAlert ? (
-            <div className="mb-4">
-              <UtilizationEscalationJourney
-                alert={activeAlert}
-                onClose={() => setAlertJourneyOpen(null)}
-              />
-            </div>
-          ) : null;
-        })()}
+        {alertJourneyOpen &&
+          (() => {
+            const activeAlert = alerts.find((a) => a.id === alertJourneyOpen);
+            return activeAlert ? (
+              <div className="mb-4">
+                <UtilizationEscalationJourney
+                  alert={activeAlert}
+                  onClose={() => setAlertJourneyOpen(null)}
+                />
+              </div>
+            ) : null;
+          })()}
 
         <div className="space-y-2">
           {alerts.map((alert) => (
@@ -401,25 +537,50 @@ export default function RiskQualityTab() {
                   </div>
                   <p className="text-xs text-carbon-gray-70">{alert.description}</p>
                   <div className="flex items-center gap-4 mt-1.5 text-2xs text-carbon-gray-50">
-                    <span>Risk Score: <span className="font-mono font-semibold text-carbon-gray-70">{Math.round(alert.riskScore * 100)}%</span></span>
-                    <span>Est. Cost: <span className="font-mono font-semibold text-[#da1e28]">${alert.estimatedCost.toLocaleString()}</span></span>
+                    <span>
+                      Risk Score:{' '}
+                      <span className="font-mono font-semibold text-carbon-gray-70">
+                        {Math.round(alert.riskScore * 100)}%
+                      </span>
+                    </span>
+                    <span>
+                      Est. Cost:{' '}
+                      <span className="font-mono font-semibold text-[#da1e28]">
+                        ${alert.estimatedCost.toLocaleString()}
+                      </span>
+                    </span>
                     <span className="font-mono">{alert.createdDate}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <StatusBadge
                     label={alert.status}
-                    variant={alert.status === 'Active' ? 'danger' : alert.status === 'Escalated' ? 'warning' : alert.status === 'Resolved' ? 'success' : 'info'}
+                    variant={
+                      alert.status === 'Active'
+                        ? 'danger'
+                        : alert.status === 'Escalated'
+                          ? 'warning'
+                          : alert.status === 'Resolved'
+                            ? 'success'
+                            : 'info'
+                    }
                     size="sm"
                   />
                   <button
-                    onClick={() => setAlertJourneyOpen(alertJourneyOpen === alert.id ? null : alert.id)}
+                    onClick={() =>
+                      setAlertJourneyOpen(alertJourneyOpen === alert.id ? null : alert.id)
+                    }
                     className={`flex items-center gap-1.5 text-2xs font-semibold px-2.5 py-1.5 transition-colors whitespace-nowrap
-                      ${alertJourneyOpen === alert.id
-                        ? 'bg-[#da1e28] text-white'
-                        : 'bg-[#fff1f1] text-[#da1e28] border border-[#da1e28]/30 hover:bg-[#da1e28] hover:text-white'}`}
+                      ${
+                        alertJourneyOpen === alert.id
+                          ? 'bg-[#da1e28] text-white'
+                          : 'bg-[#fff1f1] text-[#da1e28] border border-[#da1e28]/30 hover:bg-[#da1e28] hover:text-white'
+                      }`}
                   >
-                    <Icon name={alertJourneyOpen === alert.id ? 'ChevronUpIcon' : 'BellAlertIcon'} size={11} />
+                    <Icon
+                      name={alertJourneyOpen === alert.id ? 'ChevronUpIcon' : 'BellAlertIcon'}
+                      size={11}
+                    />
                     {alertJourneyOpen === alert.id ? 'Close Journey' : 'Escalate'}
                   </button>
                 </div>

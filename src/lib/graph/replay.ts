@@ -91,10 +91,7 @@ export function isIdentityEvent(event: C2Event): boolean {
  * Keys that come from stable payload refs (a Coverage/Encounter/Practitioner ref)
  * are unchanged, so the same clinical resource is never duplicated across a merge.
  */
-export function rekeyEvents(
-  events: readonly C2Event[],
-  resolution: IdentityResolution,
-): C2Event[] {
+export function rekeyEvents(events: readonly C2Event[], resolution: IdentityResolution): C2Event[] {
   const out: C2Event[] = [];
   for (const event of events) {
     if (isIdentityEvent(event)) continue;
@@ -119,10 +116,7 @@ export function rekeyEvents(
  * same stream onto a fresh store rebuilds a byte-identical graph, and replaying it
  * with a merge event present rekeys the merged member's subgraph to the survivor.
  */
-export function replayEvents(
-  events: readonly C2Event[],
-  deps: ProjectorDeps,
-): Mutation[] {
+export function replayEvents(events: readonly C2Event[], deps: ProjectorDeps): Mutation[] {
   const resolution = resolveIdentity(events);
   const rekeyed = rekeyEvents(events, resolution);
   return project(rekeyed, deps);
@@ -132,7 +126,7 @@ export function replayEvents(
 export async function replayToStore(
   store: GraphStore,
   events: readonly C2Event[],
-  deps: ProjectorDeps,
+  deps: ProjectorDeps
 ): Promise<void> {
   await store.apply(replayEvents(events, deps));
 }

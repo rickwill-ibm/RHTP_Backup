@@ -18,7 +18,11 @@
  */
 import type { GuidelineCode } from '@/lib/policy/extract/criteria';
 import { classifyBasis } from '@/lib/policy/encode/procedure';
-import { excludingStatement, descriptorFlagsExclusion } from './codeRouting';
+import {
+  excludingStatement,
+  descriptorFlagsExclusion,
+  descriptorNamesExcludedProcedure,
+} from './codeRouting';
 import type { CodeDisposition } from '@/lib/policy/crd/coverageDisposition';
 
 export function defaultDispositions(
@@ -33,7 +37,10 @@ export function defaultDispositions(
     // is not-covered / investigational — NEVER covered-pa — so the maker starts from the policy's own
     // stance instead of a covered default they must remember to overturn. Same predicate as routing.
     const stmt = nmn.length > 0 ? excludingStatement(c.code, nmn) : undefined;
-    const evidence = stmt ?? (descriptorFlagsExclusion(c.description) ? c.description : undefined);
+    const evidence =
+      stmt ??
+      (descriptorFlagsExclusion(c.description) ? c.description : undefined) ??
+      descriptorNamesExcludedProcedure(c.description, nmn);
     if (evidence) {
       out[c.code] =
         classifyBasis(evidence) === 'experimental-investigational'

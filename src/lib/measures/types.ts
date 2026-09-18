@@ -63,5 +63,11 @@ export interface FhirMeasureReport {
   subject?: { reference?: string };
   group?: FhirMeasureReportGroup[];
   // extension carrying the human labels the external system provides
-  _meta?: { measureId?: string; measureName?: string; domain?: string; contractName?: string; program?: MeasureProgram };
+  _meta?: {
+    measureId?: string;
+    measureName?: string;
+    domain?: string;
+    contractName?: string;
+    program?: MeasureProgram;
+  };
 }

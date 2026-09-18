@@ -50,7 +50,8 @@ export const procedureSpec = {
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
     const p = event.payload;
     const procedureRef = str(p.procedureRef, `Procedure/${event.memberId}`);
-    const start = str(p.performedDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
+    const start =
+      str(p.performedDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
     const asserter = str(p.provenance, event.source.system);
     const code = procedureCode(p);
     const out: Mutation[] = [memberNode(event)];
@@ -59,7 +60,7 @@ export const procedureSpec = {
         code,
         status: str(p.status, 'completed'),
         performedDateTime: str(p.performedDateTime),
-      }),
+      })
     );
     // The procedure was PERFORMED_ON the member — an asserted clinical act, so a
     // CAUSAL edge carrying who performed it + the procedure code @ procedure ref.

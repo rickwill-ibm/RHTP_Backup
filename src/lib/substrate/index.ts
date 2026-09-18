@@ -31,11 +31,7 @@ export {
   type WiredSubstrate,
 } from './bootstrap';
 
-export {
-  DEFAULT_MIGRATION_SOURCES,
-  fileSource,
-  inlineSource,
-} from './sources';
+export { DEFAULT_MIGRATION_SOURCES, fileSource, inlineSource } from './sources';
 
 export type {
   PgLike,

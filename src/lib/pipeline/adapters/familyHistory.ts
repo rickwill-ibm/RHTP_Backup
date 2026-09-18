@@ -18,7 +18,13 @@
  *
  * C9.2 yield: family-history feed -> family-history T1 (relationship + coded conditions).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR FamilyMemberHistory pulled from the bundle. */
 interface FamilyMemberHistoryResource {
@@ -99,12 +105,17 @@ function parse(payload: string): RawRecord<FamilyMemberHistoryResource>[] {
 function validate(raw: RawRecord<FamilyMemberHistoryResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!patientSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
-  if (!relationshipCode(resource)) issues.push({ reasonCode: 'missing-relationship', fieldPath: 'relationship.coding' });
+  if (!patientSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
+  if (!relationshipCode(resource))
+    issues.push({ reasonCode: 'missing-relationship', fieldPath: 'relationship.coding' });
   return { ok: issues.length === 0, issues };
 }
 
-function normalize(raw: RawRecord<FamilyMemberHistoryResource>, deps: PipelineDeps): NormalizedRecord {
+function normalize(
+  raw: RawRecord<FamilyMemberHistoryResource>,
+  deps: PipelineDeps
+): NormalizedRecord {
   const resource = raw.data.resource;
   const fmhId = str(resource.id);
   const memberId = deps.resolveIdentity(patientSourceId(resource), { feed: SOURCE.feed });

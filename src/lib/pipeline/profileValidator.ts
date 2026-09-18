@@ -57,9 +57,12 @@ export const structuralProfileValidator: FhirProfileValidator = {
   id: 'structural-preflight-not-us-core-validate',
   validate(record) {
     const issues: ValidationResult['issues'] = [];
-    if (!record.memberId) issues.push({ reasonCode: 'profile-missing-subject', fieldPath: 'memberId' });
-    if (!record.resourceType) issues.push({ reasonCode: 'profile-missing-type', fieldPath: 'resourceType' });
-    if (!record.fhirResourceId) issues.push({ reasonCode: 'profile-missing-id', fieldPath: 'fhirResourceId' });
+    if (!record.memberId)
+      issues.push({ reasonCode: 'profile-missing-subject', fieldPath: 'memberId' });
+    if (!record.resourceType)
+      issues.push({ reasonCode: 'profile-missing-type', fieldPath: 'resourceType' });
+    if (!record.fhirResourceId)
+      issues.push({ reasonCode: 'profile-missing-id', fieldPath: 'fhirResourceId' });
     if (!record.payload || Object.keys(record.payload).length === 0)
       issues.push({ reasonCode: 'profile-empty-payload', fieldPath: 'payload' });
     return { ok: issues.length === 0, issues };
@@ -91,7 +94,10 @@ export const productionProfileValidator: FhirProfileValidator = {
       return productionProfileValidationService.validate(record);
     } catch (err) {
       if (err instanceof ProfileValidatorNotConfiguredError) {
-        return { ok: false, issues: [{ reasonCode: 'profile-validation-unavailable', fieldPath: 'payload' }] };
+        return {
+          ok: false,
+          issues: [{ reasonCode: 'profile-validation-unavailable', fieldPath: 'payload' }],
+        };
       }
       throw err;
     }

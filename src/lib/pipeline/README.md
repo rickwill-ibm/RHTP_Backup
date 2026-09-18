@@ -5,13 +5,13 @@ lanes. Adapters are generic over records — no persona is hardcoded (plan §1.2
 
 ## The five stages
 
-| Stage | Contract | Input -> Output | Idempotency key |
-|---|---|---|---|
-| 1. Land | `landStage` | `LandInput` -> `LandedBatch` (checksum, cataloged, verbatim) | `land:<system>:<feed>:<batch>` |
-| 2. Stage + validate | `stageValidate(adapter)` | `LandedBatch` -> staged + PHI-safe quarantine | `stage:<batchId>` |
-| 3. Transform + enrich | `transformEnrich(adapter)` | `RawRecord` -> `NormalizedRecord` \| quarantine | `transform:<feed>:<sourceRef>` |
-| 4. Conform + load | `conformAndLoad` | `NormalizedRecord[]` -> intents committed + recon gate | `conform:<batchId>` |
-| 5. Project + propagate | `projectAndPropagate` | affected members -> C2 events published | `propagate:<memberId>` |
+| Stage                  | Contract                   | Input -> Output                                              | Idempotency key                |
+| ---------------------- | -------------------------- | ------------------------------------------------------------ | ------------------------------ |
+| 1. Land                | `landStage`                | `LandInput` -> `LandedBatch` (checksum, cataloged, verbatim) | `land:<system>:<feed>:<batch>` |
+| 2. Stage + validate    | `stageValidate(adapter)`   | `LandedBatch` -> staged + PHI-safe quarantine                | `stage:<batchId>`              |
+| 3. Transform + enrich  | `transformEnrich(adapter)` | `RawRecord` -> `NormalizedRecord` \| quarantine              | `transform:<feed>:<sourceRef>` |
+| 4. Conform + load      | `conformAndLoad`           | `NormalizedRecord[]` -> intents committed + recon gate       | `conform:<batchId>`            |
+| 5. Project + propagate | `projectAndPropagate`      | affected members -> C2 events published                      | `propagate:<memberId>`         |
 
 Stages 1-3 are pure synchronous functions over `(input, deps)`. Stages 4-5 carry
 I/O over the outbox/FHIR seams. `runPipeline` composes all five end to end.
@@ -22,12 +22,12 @@ anchored member, never the raw source id.
 
 ## The three representative adapters (arrival modes)
 
-| Adapter | Format | Mode | Domain / tier | Event | Provenance |
-|---|---|---|---|---|---|
-| `eligibility834Adapter` | X12 834 | **batch** | Coverage / T1 | `coverage.enrolled` | payer-authoritative |
-| `adtEncounterAdapter` | HL7v2 ADT | **stream** | Encounter / T1 | `encounter.*` | qe-adt-feed |
-| `cboSdohAdapter` | flat-file CSV | **batch (SFTP drop)** | SDOH / T1 | `sdoh.screening.completed` | community-reported |
-| `medicationAdapter` | FHIR JSON | **batch (bundle)** | Medications / T1 | `medication.prescribed` / `medication.dispensed` | prescriber-authoritative / pharmacy-dispense |
+| Adapter                 | Format        | Mode                  | Domain / tier    | Event                                            | Provenance                                   |
+| ----------------------- | ------------- | --------------------- | ---------------- | ------------------------------------------------ | -------------------------------------------- |
+| `eligibility834Adapter` | X12 834       | **batch**             | Coverage / T1    | `coverage.enrolled`                              | payer-authoritative                          |
+| `adtEncounterAdapter`   | HL7v2 ADT     | **stream**            | Encounter / T1   | `encounter.*`                                    | qe-adt-feed                                  |
+| `cboSdohAdapter`        | flat-file CSV | **batch (SFTP drop)** | SDOH / T1        | `sdoh.screening.completed`                       | community-reported                           |
+| `medicationAdapter`     | FHIR JSON     | **batch (bundle)**    | Medications / T1 | `medication.prescribed` / `medication.dispensed` | prescriber-authoritative / pharmacy-dispense |
 
 New domains are added through the golden checklist in
 [`adapters/_TEMPLATE.md`](./adapters/_TEMPLATE.md) — the medications adapter is its
@@ -59,7 +59,7 @@ silently vanish and never poison a load).
 
 `applySegmentation` runs inside `runTransform`, so consent + 42 CFR Part 2 labels
 are a property of the data from the moment it is normalized (§4A stage 3), not a
-read-time afterthought. Adapters attach PHI-safe segmentation *hints* (codes); the
+read-time afterthought. Adapters attach PHI-safe segmentation _hints_ (codes); the
 `SEGMENTATION_RULES` table (data, not code) maps them to durable labels carried on
 the record and echoed into the C2 envelope's `consentContext`, so projectors drop
 Part 2 content by envelope inspection alone (C10.1).

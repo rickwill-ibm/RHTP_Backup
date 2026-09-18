@@ -12,7 +12,10 @@ interface ContractActionBarProps {
   onSelectedContractsChange: (ids: string[]) => void;
 }
 
-export default function ContractActionBar({ selectedContracts, onSelectedContractsChange }: ContractActionBarProps) {
+export default function ContractActionBar({
+  selectedContracts,
+  onSelectedContractsChange,
+}: ContractActionBarProps) {
   const { getActions, user } = useAppContext();
   const actions = getActions('contract-selection');
 
@@ -66,18 +69,27 @@ export default function ContractActionBar({ selectedContracts, onSelectedContrac
   const btnClass = (variant: ActionDefinition['variant']) => {
     const base = 'flex items-center gap-2 px-3 py-1.5 text-xs font-medium border transition-colors';
     switch (variant) {
-      case 'primary': return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
-      case 'secondary': return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
-      default: return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      case 'primary':
+        return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
+      case 'secondary':
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      default:
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
     }
   };
 
   return (
     <div className="mb-4">
       <div className="bg-white border border-carbon-gray-20 px-4 py-2.5 flex items-center gap-2 flex-wrap">
-        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">Contract Actions</span>
+        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">
+          Contract Actions
+        </span>
         {actions.map((action) => (
-          <div key={action.id} className="relative" ref={action.id === 'act-select-contract' ? dropdownRef : undefined}>
+          <div
+            key={action.id}
+            className="relative"
+            ref={action.id === 'act-select-contract' ? dropdownRef : undefined}
+          >
             <button
               className={btnClass(action.variant)}
               title={action.description}
@@ -99,8 +111,12 @@ export default function ContractActionBar({ selectedContracts, onSelectedContrac
               <div className="absolute left-0 top-full mt-1 z-50 bg-white border border-carbon-gray-20 shadow-lg w-80">
                 {/* Header */}
                 <div className="px-3 py-2 border-b border-carbon-gray-20 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-carbon-gray-70">Select Contracts</span>
-                  <span className="text-2xs text-carbon-gray-50">{selectedContracts.length} selected</span>
+                  <span className="text-xs font-semibold text-carbon-gray-70">
+                    Select Contracts
+                  </span>
+                  <span className="text-2xs text-carbon-gray-50">
+                    {selectedContracts.length} selected
+                  </span>
                 </div>
 
                 {/* Contract list */}
@@ -117,14 +133,26 @@ export default function ContractActionBar({ selectedContracts, onSelectedContrac
                             className="mt-0.5 accent-[#0f62fe] w-3.5 h-3.5 flex-shrink-0"
                           />
                           <div className="min-w-0">
-                            <p className="text-xs font-medium text-carbon-gray-70 truncate">{contract.name}</p>
-                            <p className="text-2xs text-carbon-gray-50">{contract.payer} · {contract.programType}</p>
-                            <p className="text-2xs text-carbon-gray-50">{contract.contractPeriod} · {contract.attributedLives.toLocaleString()} lives</p>
+                            <p className="text-xs font-medium text-carbon-gray-70 truncate">
+                              {contract.name}
+                            </p>
+                            <p className="text-2xs text-carbon-gray-50">
+                              {contract.payer} · {contract.programType}
+                            </p>
+                            <p className="text-2xs text-carbon-gray-50">
+                              {contract.contractPeriod} ·{' '}
+                              {contract.attributedLives.toLocaleString()} lives
+                            </p>
                           </div>
-                          <span className={`ml-auto flex-shrink-0 text-2xs font-semibold px-1.5 py-0.5 ${
-                            contract.performanceStatus === 'On Track' ?'bg-[#defbe6] text-[#0e6027]'
-                              : contract.performanceStatus === 'At Risk' ?'bg-[#fff1f1] text-[#da1e28]' :'bg-[#fff8e1] text-[#b28600]'
-                          }`}>
+                          <span
+                            className={`ml-auto flex-shrink-0 text-2xs font-semibold px-1.5 py-0.5 ${
+                              contract.performanceStatus === 'On Track'
+                                ? 'bg-[#defbe6] text-[#0e6027]'
+                                : contract.performanceStatus === 'At Risk'
+                                  ? 'bg-[#fff1f1] text-[#da1e28]'
+                                  : 'bg-[#fff8e1] text-[#b28600]'
+                            }`}
+                          >
                             {contract.performanceStatus}
                           </span>
                         </label>
@@ -163,7 +191,9 @@ export default function ContractActionBar({ selectedContracts, onSelectedContrac
 
         {selectedContracts.length > 0 && (
           <div className="flex items-center gap-2 ml-2 pl-2 border-l border-carbon-gray-20">
-            <span className="text-2xs text-[#0f62fe] font-semibold">{selectedContracts.length} contract{selectedContracts.length > 1 ? 's' : ''} selected</span>
+            <span className="text-2xs text-[#0f62fe] font-semibold">
+              {selectedContracts.length} contract{selectedContracts.length > 1 ? 's' : ''} selected
+            </span>
             <button
               className="text-2xs text-carbon-gray-50 hover:text-carbon-gray-70 underline"
               onClick={() => onSelectedContractsChange([])}
@@ -175,7 +205,9 @@ export default function ContractActionBar({ selectedContracts, onSelectedContrac
 
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-2xs text-carbon-gray-50">Role:</span>
-          <span className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}>
+          <span
+            className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}
+          >
             {user.role === 'physician' ? 'Physician' : 'Care Manager'}
           </span>
         </div>

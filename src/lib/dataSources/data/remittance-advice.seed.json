@@ -1,0 +1,21 @@
+{
+  "_comment": "Seeded 835 remittance advice (O-2, order->cash). Generic demo data, no persona. ONE underpayment scenario: code 72148 / UnitedHealthcare Community Plan. Data is not code: edit here, never in a .ts file. NO precomputed verdict — reconciliation computes it. The CO write-off (650) proves FIX-2: CO must NOT inflate the recoverable delta. Balances: billed 1700 = paid 900 + CO 650 + PR 150. Underpayment: contracted allowed 1150 - PR 150 = payer-owed 1000, but paid only 900 => 100 short (payer over-applied contractual write-off beyond the contracted allowed).",
+  "remittances": [
+    {
+      "remittanceId": "RA-UHC-72148-0001",
+      "claimRef": "CLM-72148-0001",
+      "payer": "UnitedHealthcare Community Plan",
+      "code": "72148",
+      "billedAmount": 1700,
+      "paidAmount": 900,
+      "adjustments": [
+        { "group": "CO", "amount": 650 },
+        { "group": "PR", "amount": 150 }
+      ],
+      "carcCodes": ["45", "2"],
+      "rarcCodes": ["N130"],
+      "carcGroups": ["CO", "PR"],
+      "paidDate": "2026-08-30"
+    }
+  ]
+}

@@ -22,7 +22,17 @@ export interface IntakeOptions {
 }
 
 /** PHI-safe: only known reference/code fields are lifted from the payload. */
-const REF_KEYS = ['measure', 'instrument', 'encounter', 'referral', 'claim', 'pa', 'appointment', 'channel', 'gap'];
+const REF_KEYS = [
+  'measure',
+  'instrument',
+  'encounter',
+  'referral',
+  'claim',
+  'pa',
+  'appointment',
+  'channel',
+  'gap',
+];
 
 function payloadStr(payload: Record<string, unknown>, key: string): string | undefined {
   const v = payload[key];
@@ -36,7 +46,7 @@ function payloadStr(payload: Record<string, unknown>, key: string): string | und
 export function signalFromEvent(
   event: C2Event,
   tax: SignalTaxonomy,
-  opts: IntakeOptions = {},
+  opts: IntakeOptions = {}
 ): Signal | null {
   const { bySourceEvent } = indexTaxonomy(tax);
   const entry = bySourceEvent.get(event.eventType);
@@ -98,7 +108,7 @@ export function signalFromEvent(
 export function intakeSignals(
   events: C2Event[],
   tax: SignalTaxonomy,
-  opts: IntakeOptions = {},
+  opts: IntakeOptions = {}
 ): Signal[] {
   const seen = new Set<string>();
   const out: Signal[] = [];
@@ -132,7 +142,7 @@ export async function intakeSignalsDurable(
   events: C2Event[],
   tax: SignalTaxonomy,
   deps: DurableIntakeDeps = {},
-  opts: IntakeOptions = {},
+  opts: IntakeOptions = {}
 ): Promise<Signal[]> {
   const store = deps.store ?? getIdempotencyStore();
   const consumer = deps.consumer ?? IDEMPOTENCY_CONSUMERS.sdeIntake;

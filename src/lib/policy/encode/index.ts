@@ -55,7 +55,15 @@ export {
   type Determination,
   type Tri,
 } from './evaluate';
-export { toQuestionnaire, questionnaireUrl, type FhirQuestionnaire, type FhirItem } from './fhir';
+export {
+  toQuestionnaire,
+  questionnaireUrl,
+  MEASURE_LOINC,
+  measureLoincCode,
+  isExclusionCriterion,
+  type FhirQuestionnaire,
+  type FhirItem,
+} from './fhir';
 export {
   toCoverageRules,
   crdCoverageInformation,

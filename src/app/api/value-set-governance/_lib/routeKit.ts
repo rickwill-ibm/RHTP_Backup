@@ -81,11 +81,8 @@ export function serverError(reason: string): NextResponse {
  * Returns the actor on success, or the fail-closed response to return.
  */
 export async function requireGovRole(
-  allowed: GovRole[],
-): Promise<
-  | { ok: true; actor: GovActor }
-  | { ok: false; res: NextResponse }
-> {
+  allowed: GovRole[]
+): Promise<{ ok: true; actor: GovActor } | { ok: false; res: NextResponse }> {
   const { authenticated, actor } = await resolveGovActor();
   if (!authenticated) return { ok: false, res: unauthenticated() };
   if (!actor.govRole || !allowed.includes(actor.govRole)) {
@@ -94,7 +91,7 @@ export async function requireGovRole(
       res: forbidden(
         `governance action requires role ${allowed
           .map((r) => (r === 'steward' ? ROLE_STEWARD : ROLE_REVIEWER))
-          .join(' or ')}`,
+          .join(' or ')}`
       ),
     };
   }
@@ -114,11 +111,12 @@ export interface ParsedMutation {
 /** Parse + validate a { valueSetId, version } body. */
 export async function parseMutationBody(
   req: NextRequest,
-  requireVersion: boolean,
+  requireVersion: boolean
 ): Promise<{ ok: true; value: ParsedMutation } | { ok: false; res: NextResponse }> {
-  const body = (await req.json().catch(() => null)) as
-    | { valueSetId?: unknown; version?: unknown }
-    | null;
+  const body = (await req.json().catch(() => null)) as {
+    valueSetId?: unknown;
+    version?: unknown;
+  } | null;
   if (!body || typeof body !== 'object') {
     return { ok: false, res: badRequest('JSON body required') };
   }
@@ -126,10 +124,13 @@ export async function parseMutationBody(
   if (typeof valueSetId !== 'string' || !ID_PATTERN.test(valueSetId)) {
     return { ok: false, res: badRequest('valueSetId is required and must be a valid identifier') };
   }
-  let version = typeof body.version === 'string' ? body.version : '';
+  const version = typeof body.version === 'string' ? body.version : '';
   if (requireVersion) {
     if (!VERSION_PATTERN.test(version)) {
-      return { ok: false, res: badRequest('version is required and must be a valid version token') };
+      return {
+        ok: false,
+        res: badRequest('version is required and must be a valid version token'),
+      };
     }
   } else if (version && !VERSION_PATTERN.test(version)) {
     return { ok: false, res: badRequest('version must be a valid version token') };
@@ -144,7 +145,7 @@ export async function auditGov(
   action: string,
   valueSetId: string,
   outcome: 'success' | 'failure',
-  detail?: string,
+  detail?: string
 ): Promise<void> {
   await audit({
     ts: new Date().toISOString(),

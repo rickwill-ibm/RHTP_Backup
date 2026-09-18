@@ -198,7 +198,9 @@ export function runAssistant(
     const v = validateCell(input, { county, specialty, lob });
     if (!v)
       return { ...base, text: `No data for ${county} · ${specialty} · ${lob}.`, suggestions: [] };
-    const checkLines = v.checks.map((c) => `  ${c.pass ? 'OK' : 'FAIL'} ${c.standard}: ${c.detail}`);
+    const checkLines = v.checks.map(
+      (c) => `  ${c.pass ? 'OK' : 'FAIL'} ${c.standard}: ${c.detail}`
+    );
     return {
       ...base,
       validation: v,

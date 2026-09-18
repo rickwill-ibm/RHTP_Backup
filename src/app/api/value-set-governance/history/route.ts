@@ -5,12 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveGovernanceBackend } from '../_lib/backendAdapter';
-import {
-  requireGovRole,
-  auditGov,
-  badRequest,
-  serverError,
-} from '../_lib/routeKit';
+import { requireGovRole, auditGov, badRequest, serverError } from '../_lib/routeKit';
 
 export const runtime = 'nodejs';
 
@@ -33,7 +28,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       'value-set-governance.history',
       valueSetId,
       'success',
-      `entries=${entries.length}`,
+      `entries=${entries.length}`
     );
     return NextResponse.json({ valueSetId, count: entries.length, entries }, { status: 200 });
   } catch {

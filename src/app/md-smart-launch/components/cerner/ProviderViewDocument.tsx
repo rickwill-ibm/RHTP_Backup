@@ -3,25 +3,20 @@
  * Provider View — Document & Close column.
  * Documentation (DocumentReference write-back), New Orders (ServiceRequest
  * write-back), Referrals, Sign / Return to Cerner session summary.
- * CMS-0057-F Prior Authorization: PA submit + ClaimResponse status polling.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import MPageCard from './MPageCard';
 import { statusTextCls } from './theme';
 import { getFhirClient } from '@/lib/services/fhirClient';
-import { useDocuments, useClaimResponseByRequest, useServiceRequests } from '@/lib/fhir/hooks';
+import { useDocuments, useServiceRequests } from '@/lib/fhir/hooks';
 import { ccText, fmtDate } from '@/lib/fhir/types';
 import type { SmartLaunchContext } from '@/lib/smartFhirTypes';
-import { submitPriorAuthClaim, type PaOutcome } from '@/lib/services/pasService';
-import type { FhirClaimResponse } from '@/lib/fhir/types';
 
 interface DocumentColumnProps {
   patientId: string;
   encounterId?: string;
   launchContext: SmartLaunchContext;
   sessionActions: string[];
-  /** QuestionnaireResponse attached by DtrLaunchModal; enables PA submit */
-  questionnaireResponseId?: string;
   onWriteComplete: (
     kind: 'note' | 'order' | 'referral',
     display: string,
@@ -29,57 +24,6 @@ interface DocumentColumnProps {
   ) => void;
   onOpenResource: (resourceType: string, resourceId: string, label: string) => void;
   onSignAndReturn: () => void;
-}
-
-// ── PA status badge ───────────────────────────────────────────────────────────
-function PaStatusBadge({ claimId }: { claimId: string }) {
-  const { data, loading, refresh } = useClaimResponseByRequest(claimId);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const cr = (data as FhirClaimResponse[])[0];
-
-  // Poll until terminal state
-  useEffect(() => {
-    const isTerminal = cr?.outcome === 'complete' || cr?.outcome === 'error';
-    if (isTerminal) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-    const ms = Number(process.env.NEXT_PUBLIC_PA_POLL_INTERVAL ?? 5000);
-    intervalRef.current = setInterval(refresh, ms);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [cr?.outcome, refresh]);
-
-  if (loading && !cr) {
-    return <span className="text-[11px] text-[#5b6770]">Checking PA status…</span>;
-  }
-  if (!cr) {
-    return <span className="text-[11px] text-[#5b6770]">Awaiting payer response…</span>;
-  }
-
-  const isApproved = cr.outcome === 'complete' && !cr.disposition?.toLowerCase().includes('denied');
-  const isDenied = cr.outcome === 'complete' && cr.disposition?.toLowerCase().includes('denied');
-  const isPended = cr.outcome === 'queued';
-
-  return (
-    <div
-      className="mt-2 p-2 border rounded-sm text-[11.5px]"
-      style={{
-        background: isApproved ? '#f0fdf4' : isDenied ? '#fef2f2' : '#fffbeb',
-        borderColor: isApproved ? '#86efac' : isDenied ? '#fca5a5' : '#fcd34d',
-      }}
-    >
-      <p
-        className={`font-semibold ${isApproved ? 'text-[#166534]' : isDenied ? 'text-[#991b1b]' : 'text-[#92400e]'}`}
-      >
-        PA Status:{' '}
-        {isApproved ? 'Approved ✓' : isDenied ? 'Denied ✗' : isPended ? 'Pended ◷' : cr.outcome}
-      </p>
-      {cr.disposition && <p className="text-[#5b6770] mt-0.5">{cr.disposition}</p>}
-      {cr.created && <p className="text-[#8a949c] mt-0.5">{fmtDate(cr.created)}</p>}
-    </div>
-  );
 }
 
 const QUICK_ORDERS = [
@@ -117,7 +61,6 @@ export default function ProviderViewDocument({
   encounterId,
   launchContext,
   sessionActions,
-  questionnaireResponseId,
   onWriteComplete,
   onOpenResource,
   onSignAndReturn,
@@ -128,10 +71,6 @@ export default function ProviderViewDocument({
   const [noteText, setNoteText] = useState('');
   const [saving, setSaving] = useState<string | null>(null);
   const [writeError, setWriteError] = useState<string | null>(null);
-  // PA state
-  const [paSubmitting, setPaSubmitting] = useState(false);
-  const [paClaimId, setPaClaimId] = useState<string | null>(null);
-  const [paError, setPaError] = useState<string | null>(null);
 
   const referrals = serviceRequests.data.filter((sr) =>
     sr.category?.some((c) => ccText(c).toLowerCase().includes('referral'))
@@ -384,67 +323,6 @@ export default function ProviderViewDocument({
             </tbody>
           </table>
         )}
-      </MPageCard>
-
-      {/* ── Prior Authorization (CMS-0057-F) ── */}
-      <MPageCard title="Prior Authorization">
-        <div className="px-3 py-2">
-          {!paClaimId ? (
-            <>
-              <p className="text-[12px] text-[#5b6770] mb-2">
-                Submit a prior authorization request for orders that require payer approval.
-              </p>
-              {paError && <p className="text-[11.5px] text-[#c8102e] mb-2">Error: {paError}</p>}
-              <button
-                className="text-[12px] px-3 py-1.5 bg-[#2d4a63] text-white rounded-sm hover:bg-[#3a5a77] disabled:opacity-50 w-full"
-                disabled={paSubmitting || serviceRequests.data.length === 0}
-                onClick={async () => {
-                  const sr = serviceRequests.data[0];
-                  if (!sr) return;
-                  setPaSubmitting(true);
-                  setPaError(null);
-                  try {
-                    const result = await submitPriorAuthClaim({
-                      serviceRequest:
-                        sr as unknown as import('@/lib/smartFhirTypes').FhirServiceRequest,
-                      patientId,
-                      practitionerId: launchContext.practitionerId,
-                      questionnaireResponseId,
-                    });
-                    setPaClaimId(result.claimId);
-                    onWriteComplete(
-                      'order',
-                      `PA submitted — ${result.outcome}`,
-                      result.claimResponseId
-                    );
-                  } catch (err) {
-                    setPaError(err instanceof Error ? err.message : String(err));
-                  } finally {
-                    setPaSubmitting(false);
-                  }
-                }}
-              >
-                {paSubmitting
-                  ? 'Submitting PA…'
-                  : questionnaireResponseId
-                    ? '✓ Submit Prior Authorization (DTR complete)'
-                    : 'Submit Prior Authorization'}
-              </button>
-              {serviceRequests.data.length === 0 && !serviceRequests.loading && (
-                <p className="text-[11px] text-[#5b6770] mt-1">
-                  No signed orders found. Sign orders first to submit a PA request.
-                </p>
-              )}
-            </>
-          ) : (
-            <>
-              <p className="text-[12px] font-semibold text-[#1a1a1a] mb-1">
-                PA submitted — Claim/{paClaimId}
-              </p>
-              <PaStatusBadge claimId={paClaimId} />
-            </>
-          )}
-        </div>
       </MPageCard>
 
       {/* ── Sign & Return ── */}

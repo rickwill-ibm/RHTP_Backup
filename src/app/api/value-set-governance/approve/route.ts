@@ -51,7 +51,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         'value-set-governance.approve.maker-checker-denied',
         valueSetId,
         'failure',
-        'submitter may not approve own submission',
+        'submitter may not approve own submission'
       );
       return forbidden('maker-checker: the submitter may not approve their own value-set version');
     }

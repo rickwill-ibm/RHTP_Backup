@@ -4,7 +4,11 @@
  * and which patient the session is scoped to.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { isAuthenticated, getSessionPatient, setDevSessionPatient } from '@/lib/server/smartSession';
+import {
+  isAuthenticated,
+  getSessionPatient,
+  setDevSessionPatient,
+} from '@/lib/server/smartSession';
 
 export const runtime = 'nodejs';
 

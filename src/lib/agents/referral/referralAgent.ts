@@ -47,7 +47,7 @@ export function defaultReferralDeps(): ReferralDeps {
  * runtime's escalation-as-data (SLA -> hierarchy -> park), never silently expiring.
  */
 export function createReferralWorkflow(
-  deps: ReferralDeps = defaultReferralDeps(),
+  deps: ReferralDeps = defaultReferralDeps()
 ): WorkflowDefinition<ReferralTask, ReferralResult> {
   return {
     name: 'referral-journey',
@@ -63,7 +63,11 @@ export function createReferralWorkflow(
       const action = buildReferralAction(task, state);
       const decision = await ctx.proposeAndWait(action);
       if (decision.decision === 'rejected') {
-        return { outcome: 'rejected', referralRef: task.referralRef, decidedBy: decision.decidedBy };
+        return {
+          outcome: 'rejected',
+          referralRef: task.referralRef,
+          decidedBy: decision.decidedBy,
+        };
       }
 
       // NS-04 durable guard: claim the coordination action exactly once per
@@ -72,10 +76,14 @@ export function createReferralWorkflow(
       if (deps.idempotency) {
         const { firstProcessed } = await deps.idempotency.markProcessed(
           IDEMPOTENCY_CONSUMERS.referralAgent,
-          task.referralRef,
+          task.referralRef
         );
         if (!firstProcessed) {
-          return { outcome: 'deduped', referralRef: task.referralRef, decidedBy: decision.decidedBy };
+          return {
+            outcome: 'deduped',
+            referralRef: task.referralRef,
+            decidedBy: decision.decidedBy,
+          };
         }
       }
 

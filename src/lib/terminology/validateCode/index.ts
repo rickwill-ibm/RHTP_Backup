@@ -4,11 +4,7 @@
  * Public surface for the versioned code validation, its membership data helpers,
  * and UCUM unit validation for LOINC quantitative results.
  */
-export {
-  validateCodeVersioned,
-  bindingForSystem,
-  type ValidateContext,
-} from './validateCode';
+export { validateCodeVersioned, bindingForSystem, type ValidateContext } from './validateCode';
 export {
   isGovernedSystem,
   systemDisplay,

@@ -67,7 +67,11 @@ export const claimsFinancialSpec = {
 function submitted(event: C2Event, deps: ProjectorDeps): Mutation[] {
   const p = event.payload;
   const claimRef = str(p.claimRef, `Claim/${event.memberId}`);
-  const start = str(p.billablePeriodStart) || str(p.created) || event.occurredAt || new Date(deps.now()).toISOString();
+  const start =
+    str(p.billablePeriodStart) ||
+    str(p.created) ||
+    event.occurredAt ||
+    new Date(deps.now()).toISOString();
   const out: Mutation[] = [memberNode(event)];
   out.push(
     ...resourceNode(event, CLAIM_KIND, claimRef, {
@@ -77,10 +81,11 @@ function submitted(event: C2Event, deps: ProjectorDeps): Mutation[] {
       total: num(p.total),
       created: str(p.created),
       provenance: str(p.provenance),
-    }),
+    })
   );
   out.push({
-    op: 'UpsertEdge', type: HAS_CLAIM,
+    op: 'UpsertEdge',
+    type: HAS_CLAIM,
     from: { kind: MEMBER_KIND, key: event.memberId },
     to: { kind: CLAIM_KIND, key: claimRef },
     properties: { claimType: str(p.claimType) },
@@ -101,8 +106,8 @@ function submitted(event: C2Event, deps: ProjectorDeps): Mutation[] {
         name: str(p.providerName) || undefined,
         organization: str(p.providerOrganization) || undefined,
       },
-      start,
-    ),
+      start
+    )
   );
   return out;
 }
@@ -136,10 +141,11 @@ function adjudicated(event: C2Event, deps: ProjectorDeps): Mutation[] {
       carcGroups,
       memberLiability,
       created: str(p.created),
-    }),
+    })
   );
   out.push({
-    op: 'UpsertEdge', type: ADJUDICATED_BY,
+    op: 'UpsertEdge',
+    type: ADJUDICATED_BY,
     from: { kind: CLAIM_KIND, key: claimRef },
     to: { kind: CLAIM_RESPONSE_KIND, key: responseRef },
     properties: { outcome, carcCodes: carc, rarcCodes: rarc, carcGroups, memberLiability },
@@ -162,10 +168,11 @@ function explained(event: C2Event, deps: ProjectorDeps): Mutation[] {
       paymentAmount: num(p.paymentAmount),
       claimRef: str(p.claimRef),
       created: str(p.created),
-    }),
+    })
   );
   out.push({
-    op: 'UpsertEdge', type: EXPLAINED_BY,
+    op: 'UpsertEdge',
+    type: EXPLAINED_BY,
     from: { kind: CLAIM_RESPONSE_KIND, key: responseRef },
     to: { kind: EOB_KIND, key: eobRef },
     properties: { outcome: str(p.outcome, 'complete') },

@@ -71,7 +71,8 @@ export function decideDemographic(response: PdqResponse): ExternalDisposition {
     };
   }
   const runnerUp = sorted[1];
-  const dominant = !runnerUp || top.confidence - runnerUp.confidence >= MATCH_THRESHOLDS.possibleMatchMin / 6;
+  const dominant =
+    !runnerUp || top.confidence - runnerUp.confidence >= MATCH_THRESHOLDS.possibleMatchMin / 6;
   const confident = top.confidence >= MATCH_THRESHOLDS.autoLinkMin;
   // E9: a top candidate that carries no enterprise anchor (empty enterpriseId)
   // can never auto-link, however confident the demographic score — linking would

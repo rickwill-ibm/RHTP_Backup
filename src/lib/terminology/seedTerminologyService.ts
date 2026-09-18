@@ -41,7 +41,8 @@ const DATA = seed as unknown as SeedShape;
  * crosswalk seed (classify/data/hcc-crosswalk.json), so the seeded service and the
  * data-driven hccClassify share ONE source of truth (no duplicated, driftable map).
  */
-const HCC_MAP = (hccCrosswalk as unknown as { map: Record<string, { hcc: string; label: string }> }).map;
+const HCC_MAP = (hccCrosswalk as unknown as { map: Record<string, { hcc: string; label: string }> })
+  .map;
 
 /**
  * A registry whose "now" reads the injectable @/lib/clock, so the bound value-set
@@ -53,7 +54,10 @@ const clockRegistry: ValueSetRegistry = createValueSetRegistry({ now: () => cloc
  * Consult the registry for the ACTIVE version of the asset governing `systemUri`,
  * so a classified code carries WHICH value-set version it was resolved against.
  */
-function bindingForSystemUri(registry: ValueSetRegistry, systemUri: string | undefined): CodeAssetBinding | undefined {
+function bindingForSystemUri(
+  registry: ValueSetRegistry,
+  systemUri: string | undefined
+): CodeAssetBinding | undefined {
   if (!systemUri) return undefined;
   const active = registry.getActiveBySystem(systemUri);
   if (!active) return undefined;
@@ -74,7 +78,9 @@ export interface SeedTerminologyOptions {
 }
 
 /** Build a seeded terminology service over the in-repo allowlist. */
-export function createSeedTerminologyService(opts: SeedTerminologyOptions = {}): TerminologyService {
+export function createSeedTerminologyService(
+  opts: SeedTerminologyOptions = {}
+): TerminologyService {
   const registry: ValueSetRegistry =
     opts.registry ?? (opts.now ? createValueSetRegistry({ now: opts.now }) : clockRegistry);
 
@@ -85,7 +91,11 @@ export function createSeedTerminologyService(opts: SeedTerminologyOptions = {}):
       return validateCodeVersioned(system, code, { registry });
     },
 
-    translate(code, sourceSystem: TerminologySystem, targetSystem: TerminologySystem): TranslationResult {
+    translate(
+      code,
+      sourceSystem: TerminologySystem,
+      targetSystem: TerminologySystem
+    ): TranslationResult {
       const key = `${sourceSystem}->${targetSystem}`;
       const map = DATA.conceptMap[key];
       const target = map ? (map[code] ?? null) : null;
@@ -104,7 +114,15 @@ export function createSeedTerminologyService(opts: SeedTerminologyOptions = {}):
         const binding = bindingForSystemUri(registry, SYSTEM_URIS.HCC);
         const raw = HCC_MAP[code];
         if (raw) {
-          return { scheme, code, group: raw.hcc, label: raw.label, classified: true, stub: true, binding };
+          return {
+            scheme,
+            code,
+            group: raw.hcc,
+            label: raw.label,
+            classified: true,
+            stub: true,
+            binding,
+          };
         }
         return { scheme, code, group: null, classified: false, stub: true, binding };
       }

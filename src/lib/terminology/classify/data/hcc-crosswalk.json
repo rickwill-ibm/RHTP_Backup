@@ -7,8 +7,14 @@
     "system": "urn:cms:risk-adjustment:hcc"
   },
   "map": {
-    "E11.9": { "hcc": "HCC38", "label": "Diabetes with glycemic, unspecified, or no complications" },
+    "E11.9": {
+      "hcc": "HCC38",
+      "label": "Diabetes with glycemic, unspecified, or no complications"
+    },
     "I50.9": { "hcc": "HCC226", "label": "Heart failure, except end-stage and severe" },
-    "N18.6": { "hcc": "HCC329", "label": "Chronic kidney disease, stage 5, or end-stage renal disease" }
+    "N18.6": {
+      "hcc": "HCC329",
+      "label": "Chronic kidney disease, stage 5, or end-stage renal disease"
+    }
   }
 }

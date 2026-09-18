@@ -105,6 +105,17 @@ export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>
   wpcRecord: 'WPC_RECORD_STORE_URL',
   measures: 'DEQM_MEASURES_URL',
   episodes: 'EPISODE_FEED_URL',
+  // golden-thread order→cash seams (Wave: goldenThreadE2E). Each names the
+  // server-only env key for its real backend (clearinghouse/ERA feed, contract
+  // rate repository); production stays fail-closed until the key + resolver exist.
+  remittanceGateway: 'REMITTANCE_GATEWAY_URL',
+  contractRepository: 'CONTRACT_REPOSITORY_URL',
+  // Wave-2 ledger integrity: the server-only key that names the real KMS/HSM
+  // signer for the Evidence Record seal; production stays fail-closed until wired.
+  signingKey: 'EVIDENCE_SIGNING_KEY',
+  // Wave-4 governed submission: the server-only endpoint for the real 837/appeal
+  // EDI clearinghouse; production stays fail-closed until the key + resolver exist.
+  submissionGateway: 'SUBMISSION_GATEWAY_URL',
 });
 
 /**

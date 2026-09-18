@@ -59,6 +59,32 @@ describe('Propensity — banding and factors', () => {
     expect(Math.max(0, Math.min(100, Math.round(sum)))).toBe(r.score);
     expect(r.disclaimer).toMatch(/not a coverage determination/i);
   });
+
+  // Wave-13.1 HIGH-4 — a seeded denial rate must be labelled illustrative, never as an
+  // observed statistic; without the flag the label is byte-identical.
+  it('labels a SEEDED historical denial rate as illustrative (not a book of business)', () => {
+    const seeded = scorePropensity({
+      outcome: 'pa-required-list',
+      criteriaMet: null,
+      openDeficiencies: 0,
+      historicalDenialRate: 0.28,
+      historicalDenialRateSeeded: true,
+    });
+    const seededFactor = seeded.factors.find((f) => /28%/.test(f.label));
+    expect(seededFactor?.label).toMatch(/illustrative seeded/i);
+    expect(seededFactor?.label).toMatch(/not a book of business/i);
+    expect(seededFactor?.label).not.toMatch(/^Historical denial rate/);
+  });
+
+  it('byte-identical: without the seeded flag the denial-rate label is unchanged', () => {
+    const real = scorePropensity({
+      outcome: 'pa-required-list',
+      criteriaMet: null,
+      openDeficiencies: 0,
+      historicalDenialRate: 0.28,
+    });
+    expect(real.factors.some((f) => f.label === 'Historical denial rate 28%')).toBe(true);
+  });
 });
 
 describe('Propensity — from a real determination', () => {

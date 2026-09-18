@@ -48,5 +48,5 @@ export const SEED_PROVIDER_DIRECTORY: readonly ProviderIdentity[] = Object.freez
 
 /** Index the seed by NPI for O(1) lookup. Frozen at module load (deterministic). */
 export const SEED_PROVIDER_INDEX: ReadonlyMap<string, ProviderIdentity> = new Map(
-  SEED_PROVIDER_DIRECTORY.map((p) => [p.npi, p]),
+  SEED_PROVIDER_DIRECTORY.map((p) => [p.npi, p])
 );

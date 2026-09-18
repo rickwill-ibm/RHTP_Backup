@@ -15,7 +15,13 @@
  *
  * C9.2 yield: caregiver-household feed -> caregiver-household T1 (relationship role).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR RelatedPerson pulled from the bundle. */
 interface RelatedPersonResource {
@@ -52,8 +58,14 @@ function patientSourceId(resource: Record<string, unknown>): string {
   return str(obj(resource.patient).reference).split('/').pop() ?? '';
 }
 /** relationship[0].coding[0] as a role coding triple (code may be ''). */
-function relationship(resource: Record<string, unknown>): { system: string; code: string; display: string } {
-  const rel = Array.isArray(resource.relationship) ? obj(resource.relationship[0]) : obj(resource.relationship);
+function relationship(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
+  const rel = Array.isArray(resource.relationship)
+    ? obj(resource.relationship[0])
+    : obj(resource.relationship);
   const coding = Array.isArray(rel.coding) ? obj(rel.coding[0]) : {};
   return {
     system: str(coding.system, 'http://terminology.hl7.org/CodeSystem/v3-RoleCode'),
@@ -87,8 +99,10 @@ function parse(payload: string): RawRecord<RelatedPersonResource>[] {
 function validate(raw: RawRecord<RelatedPersonResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!patientSourceId(resource)) issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
-  if (!relationship(resource).code) issues.push({ reasonCode: 'missing-relationship', fieldPath: 'relationship.coding' });
+  if (!patientSourceId(resource))
+    issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
+  if (!relationship(resource).code)
+    issues.push({ reasonCode: 'missing-relationship', fieldPath: 'relationship.coding' });
   return { ok: issues.length === 0, issues };
 }
 

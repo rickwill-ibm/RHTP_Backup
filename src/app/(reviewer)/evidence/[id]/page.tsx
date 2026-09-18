@@ -12,15 +12,26 @@ import { getJson } from '@/lib/client/bff';
 import type { EvidenceRecord } from '@/lib/evidence';
 import { EvidenceTimeline } from '@/components/goldenThread/EvidenceTimeline';
 
+/**
+ * GET /api/evidence/:id returns the stored record AND — when the record carries a
+ * seal and the verifier key resolves — an independent server-verified `integrity`
+ * block (see the BFF's VERIFY-ON-READ). We must carry it through to the timeline;
+ * dropping it would render a bare "Sealed" chip that reads as a positive verdict
+ * even for a TAMPERED record.
+ */
+type FetchedEvidenceRecord = EvidenceRecord & {
+  integrity?: { intact: boolean; signed: boolean };
+};
+
 export default function EvidenceViewerPage(): React.ReactElement {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? '';
-  const [record, setRecord] = useState<EvidenceRecord | null>(null);
+  const [record, setRecord] = useState<FetchedEvidenceRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    getJson<EvidenceRecord>(`/api/evidence/${encodeURIComponent(id)}`).then((r) => {
+    getJson<FetchedEvidenceRecord>(`/api/evidence/${encodeURIComponent(id)}`).then((r) => {
       if (r.ok && r.data) setRecord(r.data);
       else setError(r.error?.issue?.[0]?.diagnostics ?? 'Evidence record not found');
     });
@@ -63,7 +74,7 @@ export default function EvidenceViewerPage(): React.ReactElement {
           </section>
           <section className="rounded-lg border border-slate-200 p-4">
             <h2 className="mb-3 text-sm font-semibold">Coverage Determination Record — timeline</h2>
-            <EvidenceTimeline record={record} />
+            <EvidenceTimeline record={record} integrity={record.integrity} />
           </section>
         </>
       )}

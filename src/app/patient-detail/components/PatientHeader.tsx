@@ -37,15 +37,11 @@ const DATA_SOURCE_GROUPS: DataSourceGroup[] = [
   },
   {
     type: 'Claims',
-    sources: [
-      { name: 'CMS Claims Feed', lastSync: 'Today', daysAgo: 0 },
-    ],
+    sources: [{ name: 'CMS Claims Feed', lastSync: 'Today', daysAgo: 0 }],
   },
   {
     type: 'LPR',
-    sources: [
-      { name: 'LPR Registry', lastSync: 'Today', daysAgo: 0 },
-    ],
+    sources: [{ name: 'LPR Registry', lastSync: 'Today', daysAgo: 0 }],
   },
 ];
 
@@ -81,13 +77,51 @@ export default function PatientHeader() {
         {/* Key clinical metrics */}
         <div className="flex items-stretch gap-0 ml-auto flex-wrap">
           {[
-            { key: 'hdr-raf', label: 'RAF Score', value: patient.rafScore.toFixed(2), delta: `+${patient.rafScoreDelta.toFixed(2)}`, color: 'text-carbon-gray-100', deltaColor: 'text-[#24a148]' },
-            { key: 'hdr-er', label: 'ER Risk (30d)', value: `${Math.round(patient.predictedErRisk * 100)}%`, delta: 'High', color: 'text-[#da1e28]', deltaColor: 'text-[#da1e28]' },
-            { key: 'hdr-pmpm', label: 'PMPM Cost', value: `$${patient.pmpmCost.toLocaleString()}`, delta: `target $${patient.pmpmTarget}`, color: 'text-[#da1e28]', deltaColor: 'text-carbon-gray-50' },
-            { key: 'hdr-gaps', label: 'Open Care Gaps', value: patient.openCareGaps.toString(), delta: '1 closed', color: 'text-[#0043ce]', deltaColor: 'text-[#24a148]' },
-            { key: 'hdr-hcc', label: 'HCC Suspects', value: patient.openHCCSuspects.toString(), delta: `$${(patient.hccSuspectValue / 1000).toFixed(1)}K at risk`, color: 'text-[#b45309]', deltaColor: 'text-[#b45309]' },
+            {
+              key: 'hdr-raf',
+              label: 'RAF Score',
+              value: patient.rafScore.toFixed(2),
+              delta: `+${patient.rafScoreDelta.toFixed(2)}`,
+              color: 'text-carbon-gray-100',
+              deltaColor: 'text-[#24a148]',
+            },
+            {
+              key: 'hdr-er',
+              label: 'ER Risk (30d)',
+              value: `${Math.round(patient.predictedErRisk * 100)}%`,
+              delta: 'High',
+              color: 'text-[#da1e28]',
+              deltaColor: 'text-[#da1e28]',
+            },
+            {
+              key: 'hdr-pmpm',
+              label: 'PMPM Cost',
+              value: `$${patient.pmpmCost.toLocaleString()}`,
+              delta: `target $${patient.pmpmTarget}`,
+              color: 'text-[#da1e28]',
+              deltaColor: 'text-carbon-gray-50',
+            },
+            {
+              key: 'hdr-gaps',
+              label: 'Open Care Gaps',
+              value: patient.openCareGaps.toString(),
+              delta: '1 closed',
+              color: 'text-[#0043ce]',
+              deltaColor: 'text-[#24a148]',
+            },
+            {
+              key: 'hdr-hcc',
+              label: 'HCC Suspects',
+              value: patient.openHCCSuspects.toString(),
+              delta: `$${(patient.hccSuspectValue / 1000).toFixed(1)}K at risk`,
+              color: 'text-[#b45309]',
+              deltaColor: 'text-[#b45309]',
+            },
           ].map((m) => (
-            <div key={m.key} className="px-5 py-3 border-l border-carbon-gray-20 text-center min-w-[90px]">
+            <div
+              key={m.key}
+              className="px-5 py-3 border-l border-carbon-gray-20 text-center min-w-[90px]"
+            >
               <p className="text-2xs text-carbon-gray-50 uppercase tracking-wide mb-1">{m.label}</p>
               <p className={`text-2xl font-bold tabular-nums font-mono ${m.color}`}>{m.value}</p>
               <p className={`text-2xs mt-0.5 ${m.deltaColor}`}>{m.delta}</p>
@@ -98,7 +132,9 @@ export default function PatientHeader() {
 
       {/* Multi-source data freshness strip */}
       <div className="bg-carbon-gray-10 border-t border-carbon-gray-20 px-6 py-2 flex items-center gap-2 flex-wrap">
-        <span className="text-2xs font-medium text-carbon-gray-70 uppercase tracking-wide mr-2">Data Sources:</span>
+        <span className="text-2xs font-medium text-carbon-gray-70 uppercase tracking-wide mr-2">
+          Data Sources:
+        </span>
         {DATA_SOURCE_GROUPS.map((group) => (
           <DataSourceBadge key={group.type} group={group} />
         ))}

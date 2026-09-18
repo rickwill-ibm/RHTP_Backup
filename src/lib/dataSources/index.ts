@@ -6,10 +6,7 @@
  * seam id is registered in the dataMode registry (lib/config/dataMode.ts):
  * goldCardRoster, denialRateFeed, providerDirectory.
  */
-export {
-  DataSourceNotConfiguredError,
-  type DataSourceLoader,
-} from './common';
+export { DataSourceNotConfiguredError, type DataSourceLoader } from './common';
 
 export {
   getGoldCardRosterLoader,
@@ -40,3 +37,33 @@ export {
   type NormalizedDirectoryProvider,
   type ProviderStatus,
 } from './providerDirectory';
+
+export {
+  getRemittanceGatewayLoader,
+  normalizeRemittanceAdvice,
+  seededRemittanceGatewayLoader,
+  productionRemittanceGatewayLoader,
+  type RemittanceAdvice,
+  type Normalized835,
+  type RemittanceAdjustment,
+  type AdjustmentGroup,
+} from './remittanceGateway';
+
+export {
+  getContractRepositoryLoader,
+  normalizeFeeSchedule,
+  seededContractRepositoryLoader,
+  productionContractRepositoryLoader,
+  type FeeSchedule,
+  type ContractedRate,
+} from './contractRepository';
+
+export {
+  getSubmissionGatewayLoader,
+  submitAppealMock,
+  seededSubmissionGatewayLoader,
+  productionSubmissionGatewayLoader,
+  type SubmissionGateway,
+  type SubmissionReceipt,
+  type AppealSubmissionTask,
+} from './submissionGateway';

@@ -317,6 +317,48 @@ export const navItems: NavItem[] = [
     href: '/api-explorer',
     group: 'CMS-0057-F',
   },
+  {
+    key: 'nav-golden-thread-flow',
+    label: 'Golden Thread — End-to-End',
+    icon: 'RectangleStackIcon',
+    href: '/golden-thread-flow',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-golden-thread',
+    label: 'Golden Thread — Recovery',
+    icon: 'CurrencyDollarIcon',
+    href: '/gt-recovery',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-gain-share',
+    label: 'Gain-Share — Modeler',
+    icon: 'ArrowTrendingUpIcon',
+    href: '/gs-modeler',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-escalation-console',
+    label: 'Escalation Console',
+    icon: 'BellAlertIcon',
+    href: '/escalation-console',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-surveillance-library',
+    label: 'Surveillance / FWA Library',
+    icon: 'ShieldExclamationIcon',
+    href: '/surveillance-library',
+    group: 'CMS-0057-F',
+  },
+  {
+    key: 'nav-nist-ai-rmf',
+    label: 'NIST AI-RMF',
+    icon: 'ClipboardDocumentCheckIcon',
+    href: '/nist-ai-rmf',
+    group: 'CMS-0057-F',
+  },
   // Admin Console
   {
     key: 'nav-ac-home',

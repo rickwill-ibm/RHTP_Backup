@@ -8,7 +8,10 @@ import type { DemoPatientExportRow } from './exportUtils.pdf';
 
 // ─── CSV Export ───────────────────────────────────────────────────────────────
 
-export function downloadCSV(filename: string, rows: Record<string, string | number | null | undefined>[]) {
+export function downloadCSV(
+  filename: string,
+  rows: Record<string, string | number | null | undefined>[]
+) {
   if (rows.length === 0) return;
   const headers = Object.keys(rows[0]);
   const escape = (v: string | number | null | undefined): string => {
@@ -64,10 +67,10 @@ export function exportPanelCSV(patients: PanelPatientRow[]) {
     'Open Care Gaps': p.openCareGaps,
     'PMPM Cost ($)': p.pmpmCost,
     'PMPM Target ($)': p.pmpmTarget,
-    'Attribution': p.attributionStatus,
+    Attribution: p.attributionStatus,
     'Last Contact': p.lastContactDate,
-    'PCP': p.primaryCareProvider,
-    'Payer': p.payer,
+    PCP: p.primaryCareProvider,
+    Payer: p.payer,
   }));
   downloadCSV(`panel-cohort-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
@@ -96,8 +99,8 @@ export function exportFinancialCSV(patients: FinancialPatientRow[]) {
     'RAF Score': p.rafScore,
     'HCC Suspects': p.openHCCSuspects,
     'HCC Revenue at Risk ($)': p.hccSuspectValue,
-    'Payer': p.payer,
-    'Attribution': p.attributionStatus,
+    Payer: p.payer,
+    Attribution: p.attributionStatus,
   }));
   downloadCSV(`financial-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
@@ -129,9 +132,9 @@ export function exportReferralsCSV(referrals: ReferralExportRow[]) {
     'Referral ID': r.id,
     'Patient Name': r.patientName,
     'Referral Date': r.referralDate,
-    'Specialty': r.specialty,
-    'Urgency': r.urgency,
-    'Status': r.status,
+    Specialty: r.specialty,
+    Urgency: r.urgency,
+    Status: r.status,
     'Assigned Provider': r.assignedProvider ?? 'Unassigned',
     'Provider Tier': r.providerTier ?? '',
     'ICD Code': r.icdCode,
@@ -140,8 +143,8 @@ export function exportReferralsCSV(referrals: ReferralExportRow[]) {
     'Submitted Date': r.submittedDate ?? '',
     'Appointment Date': r.appointmentDate ?? '',
     'Closed Date': r.closedDate ?? '',
-    'Outcome': r.outcome ?? 'Pending',
-    'Coordinator': r.coordinatorName,
+    Outcome: r.outcome ?? 'Pending',
+    Coordinator: r.coordinatorName,
     'Days Open': r.daysOpen,
   }));
   downloadCSV(`referrals-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
@@ -149,53 +152,81 @@ export function exportReferralsCSV(referrals: ReferralExportRow[]) {
 
 // ─── STARS/HEDIS/MIPS CSV ─────────────────────────────────────────────────────
 
-export function exportSTARSCSV(measures: Array<{
-  measureId: string; measureName: string; domain: string; contractName: string;
-  currentRating: number; targetRating: number; gapCount: number; bonusEstimate: number;
-  deadline: string; status: string;
-}>) {
+export function exportSTARSCSV(
+  measures: Array<{
+    measureId: string;
+    measureName: string;
+    domain: string;
+    contractName: string;
+    currentRating: number;
+    targetRating: number;
+    gapCount: number;
+    bonusEstimate: number;
+    deadline: string;
+    status: string;
+  }>
+) {
   const rows = measures.map((m) => ({
     'Measure ID': m.measureId,
     'Measure Name': m.measureName,
-    'Domain': m.domain,
-    'Contract': m.contractName,
+    Domain: m.domain,
+    Contract: m.contractName,
     'Current Rating': m.currentRating,
     'Target Rating': m.targetRating,
     'Gap Count': m.gapCount,
     'Bonus Estimate ($)': m.bonusEstimate,
-    'Deadline': m.deadline,
-    'Status': m.status,
+    Deadline: m.deadline,
+    Status: m.status,
   }));
   downloadCSV(`stars-measures-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
-export function exportHEDISCSV(measures: Array<{
-  measureId: string; measureName: string; domain: string; contractName: string;
-  complianceRate: number; targetRate: number; patientsDue: number; patientsCompliant: number;
-  dueDate: string; status: string;
-}>) {
+export function exportHEDISCSV(
+  measures: Array<{
+    measureId: string;
+    measureName: string;
+    domain: string;
+    contractName: string;
+    complianceRate: number;
+    targetRate: number;
+    patientsDue: number;
+    patientsCompliant: number;
+    dueDate: string;
+    status: string;
+  }>
+) {
   const rows = measures.map((m) => ({
     'Measure ID': m.measureId,
     'Measure Name': m.measureName,
-    'Domain': m.domain,
-    'Contract': m.contractName,
+    Domain: m.domain,
+    Contract: m.contractName,
     'Compliance Rate (%)': m.complianceRate,
     'Target Rate (%)': m.targetRate,
     'Patients Due': m.patientsDue,
     'Patients Compliant': m.patientsCompliant,
     'Patients Remaining': m.patientsDue - m.patientsCompliant,
     'Due Date': m.dueDate,
-    'Status': m.status,
+    Status: m.status,
   }));
   downloadCSV(`hedis-measures-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
 
-export function exportMIPSCSV(adjustments: Array<{
-  noticeId: string; performanceYear: string; compositeScore: number;
-  adjustmentPct: number; adjustmentAmount: number; qualityScore: number;
-  promotingInteropScore: number; improvementActScore: number; costScore: number;
-  deadline: string; status: string; appealEligible: boolean;
-}>) {
+export function exportMIPSCSV(
+  adjustments: Array<{
+    noticeId: string;
+    performanceYear: string;
+    compositeScore: number;
+    adjustmentPct: number;
+    adjustmentAmount: number;
+    qualityScore: number;
+    promotingInteropScore: number;
+    improvementActScore: number;
+    costScore: number;
+    deadline: string;
+    status: string;
+    appealEligible: boolean;
+  }>
+) {
   const rows = adjustments.map((a) => ({
     'Notice ID': a.noticeId,
     'Performance Year': a.performanceYear,
@@ -206,8 +237,8 @@ export function exportMIPSCSV(adjustments: Array<{
     'Promoting Interop Score': a.promotingInteropScore,
     'Improvement Activity Score': a.improvementActScore,
     'Cost Score': a.costScore,
-    'Deadline': a.deadline,
-    'Status': a.status,
+    Deadline: a.deadline,
+    Status: a.status,
     'Appeal Eligible': a.appealEligible ? 'Yes' : 'No',
   }));
   downloadCSV(`mips-adjustments-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
@@ -218,11 +249,11 @@ export function exportMIPSCSV(adjustments: Array<{
 export function exportDemoTrackCSV(patients: DemoPatientExportRow[]) {
   const rows = patients.map((p) => ({
     'Patient Name': p.name,
-    'MRN': p.mrn,
-    'Age': p.age,
-    'Gender': p.gender,
-    'Payer': p.payer,
-    'Contract': p.contract,
+    MRN: p.mrn,
+    Age: p.age,
+    Gender: p.gender,
+    Payer: p.payer,
+    Contract: p.contract,
     'Risk Tier': p.riskTier,
     'RAF Score': p.rafScore,
     'RAF Delta (YTD)': p.rafDelta,
@@ -258,4 +289,3 @@ export function exportDemoTrackCSV(patients: DemoPatientExportRow[]) {
   }));
   downloadCSV(`demo-track-export-${clock.nowIso().slice(0, 10)}.csv`, rows);
 }
-

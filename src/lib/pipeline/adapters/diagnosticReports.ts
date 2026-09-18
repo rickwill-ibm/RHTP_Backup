@@ -23,7 +23,14 @@
  * C9.2 yield: diagnostic-reports feed -> diagnostic-reports T1 (computable, result-
  * linked) / T2 (narrative-only imaging), assigned honestly per record.
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, Tier, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  Tier,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR DiagnosticReport pulled from the bundle. */
 interface DiagnosticReportResource {
@@ -70,10 +77,18 @@ function subjectSourceId(resource: Record<string, unknown>): string {
   return str(obj(resource.subject).reference).split('/').pop() ?? '';
 }
 /** type/code.coding[0] as a LOINC report-type coding triple (code may be ''). */
-function reportCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function reportCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.code).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
-  return { system: str(first.system, 'http://loinc.org'), code: str(first.code), display: str(first.display) };
+  return {
+    system: str(first.system, 'http://loinc.org'),
+    code: str(first.code),
+    display: str(first.display),
+  };
 }
 /** category[0].coding[0].code, e.g. 'LAB' or 'RAD'. */
 function categoryOf(resource: Record<string, unknown>): string {
@@ -115,7 +130,8 @@ function parse(payload: string): RawRecord<DiagnosticReportResource>[] {
 function validate(raw: RawRecord<DiagnosticReportResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
   // A report with neither structured results NOR a narrative attachment has no
   // content to carry at any tier — reject rather than emit an empty record.
   if (resultRefs(resource).length === 0 && !presentedForm(resource)) {

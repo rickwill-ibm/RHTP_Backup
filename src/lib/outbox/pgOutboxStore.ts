@@ -76,10 +76,20 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
          ON CONFLICT (idempotency_key) DO NOTHING
          RETURNING *`,
         [
-          row.id, row.memberId, row.eventType, row.fhirResourceId, row.idempotencyKey,
-          row.status, row.sequence, row.attempts, row.actor, row.correlationId,
-          row.createdAtMs, row.updatedAtMs, JSON.stringify(row.envelope),
-        ],
+          row.id,
+          row.memberId,
+          row.eventType,
+          row.fhirResourceId,
+          row.idempotencyKey,
+          row.status,
+          row.sequence,
+          row.attempts,
+          row.actor,
+          row.correlationId,
+          row.createdAtMs,
+          row.updatedAtMs,
+          JSON.stringify(row.envelope),
+        ]
       );
       // Real Postgres: a conflicting DO NOTHING returns 0 rows. pg-mem instead
       // returns the EXISTING row, so we detect dedupe by comparing ids, not count.
@@ -87,17 +97,16 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
         const returned = toRow(ins.rows[0]);
         return { row: returned, deduped: returned.id !== row.id };
       }
-      const existing = await db.query(
-        `SELECT * FROM outbox_intent WHERE idempotency_key = $1`,
-        [row.idempotencyKey],
-      );
+      const existing = await db.query(`SELECT * FROM outbox_intent WHERE idempotency_key = $1`, [
+        row.idempotencyKey,
+      ]);
       return { row: toRow(existing.rows[0]), deduped: true };
     },
     async pendingForMember(memberId) {
       const r = await db.query(
         `SELECT * FROM outbox_intent WHERE member_id=$1 AND status='pending'
          ORDER BY created_at_ms ASC, id ASC`,
-        [memberId],
+        [memberId]
       );
       return r.rows.map(toRow);
     },
@@ -105,14 +114,14 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
       const r = await db.query(
         `SELECT * FROM outbox_intent WHERE member_id=$1 AND status='confirmed'
          ORDER BY sequence ASC`,
-        [memberId],
+        [memberId]
       );
       return r.rows.map(toRow);
     },
     async nextSequence(memberId) {
       const r = await db.query(
         `SELECT COALESCE(MAX(sequence), -1) + 1 AS next FROM outbox_intent WHERE member_id=$1`,
-        [memberId],
+        [memberId]
       );
       return Number(r.rows[0].next);
     },
@@ -133,7 +142,7 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
                     updated_at_ms=$2
               WHERE id=$3 AND status='pending'
               RETURNING sequence`,
-            [memberId, nowMs, id],
+            [memberId, nowMs, id]
           );
           if (r.rows.length === 0) return null; // claim lost — someone else has it
           return Number(r.rows[0].sequence);
@@ -163,7 +172,7 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
       const r = await db.query(
         `SELECT * FROM outbox_intent WHERE status='pending' AND created_at_ms < $1
          ORDER BY created_at_ms ASC`,
-        [olderThanMs],
+        [olderThanMs]
       );
       return r.rows.map(toRow);
     },
@@ -173,7 +182,7 @@ export function createPgOutboxStore(db: PgQueryable, id = 'pg-outbox'): OutboxSt
     },
     async all() {
       const r = await db.query(
-        `SELECT * FROM outbox_intent ORDER BY member_id ASC, sequence ASC NULLS LAST, created_at_ms ASC`,
+        `SELECT * FROM outbox_intent ORDER BY member_id ASC, sequence ASC NULLS LAST, created_at_ms ASC`
       );
       return r.rows.map(toRow);
     },

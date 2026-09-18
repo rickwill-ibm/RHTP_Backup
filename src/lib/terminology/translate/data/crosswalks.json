@@ -12,9 +12,16 @@
       "sourceUrl": "https://www.cms.gov/medicare/payment/medicare-advantage-rates-statistics/risk-adjustment",
       "stub": true,
       "map": {
-        "E11.9": [{ "code": "HCC38", "display": "Diabetes with glycemic, unspecified, or no complications" }],
+        "E11.9": [
+          { "code": "HCC38", "display": "Diabetes with glycemic, unspecified, or no complications" }
+        ],
         "I50.9": [{ "code": "HCC226", "display": "Heart failure, except end-stage and severe" }],
-        "N18.6": [{ "code": "HCC329", "display": "Chronic kidney disease, stage 5, or end-stage renal disease" }]
+        "N18.6": [
+          {
+            "code": "HCC329",
+            "display": "Chronic kidney disease, stage 5, or end-stage renal disease"
+          }
+        ]
       }
     },
     {
@@ -44,7 +51,9 @@
       "sourceUrl": "https://www.nlm.nih.gov/healthit/snomedct/us_edition.html",
       "stub": true,
       "map": {
-        "44054006": [{ "code": "E11.9", "display": "Type 2 diabetes mellitus without complications" }]
+        "44054006": [
+          { "code": "E11.9", "display": "Type 2 diabetes mellitus without complications" }
+        ]
       }
     },
     {

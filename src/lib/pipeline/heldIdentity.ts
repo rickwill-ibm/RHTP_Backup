@@ -33,7 +33,7 @@ export class HeldIdentityError extends Error {
   constructor(public readonly signal: HeldIdentitySignal) {
     super(
       `identity held for review: ${signal.reasonCode} ` +
-        `(tier=${signal.matchTier}, confidence=${signal.confidence})`,
+        `(tier=${signal.matchTier}, confidence=${signal.confidence})`
     );
     this.name = 'HeldIdentityError';
   }

@@ -7,6 +7,7 @@ layer for the CDP Assembly demo. It adds no processing logic — the adapters, s
 binding, EMPI, risk/terminology enrichment, WPC record and KG all already exist.
 
 **Public surface** (`index.ts`)
+
 - `runIntake(dir, dispatch, opts)` — the pure orchestrator.
 - `readFolder` / `readManifest` — folder source (Node fs).
 - `classify` / `isUnclassified` — manifest-authoritative classification.
@@ -15,6 +16,7 @@ binding, EMPI, risk/terminology enrichment, WPC record and KG all already exist.
 - Types: `IntakeDispatch`, `IntakeRunResult`, `SourceLoadOutcome`, `IntakeReceipt`, …
 
 **Invariants**
+
 - The core imports NO engine at runtime — only type-only shapes. The real front doors
   (`ingestBundleJson`, `runPipeline`) are bound at the edge and passed in as
   `IntakeDispatch`. This is what keeps the layer pure, testable, and deletable.
@@ -40,10 +42,20 @@ one flag-guarded mount. No pipeline/identity edits to revert.
 ```json
 {
   "sources": [
-    { "file": "member.fhir.json", "sourceSystem": "BENNETT_EHR",
-      "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" },
-    { "file": "eligibility.834.txt", "sourceSystem": "SD_MEDICAID_MMIS",
-      "format": "x12-834", "adapter": "eligibility834", "arrivalMode": "batch" }
+    {
+      "file": "member.fhir.json",
+      "sourceSystem": "BENNETT_EHR",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "eligibility.834.txt",
+      "sourceSystem": "SD_MEDICAID_MMIS",
+      "format": "x12-834",
+      "adapter": "eligibility834",
+      "arrivalMode": "batch"
+    }
   ]
 }
 ```

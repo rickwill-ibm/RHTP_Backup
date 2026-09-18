@@ -19,7 +19,8 @@ export const MATRIX_PART_2: readonly StandardEntry[] = [
         id: 'pixmpdqm-request-logic',
         capability: 'PIXm $ihe-pix / PDQm Patient search build + parse',
         evidence: {
-          codePath: 'src/lib/identity/external/pixmPdqmResolver.ts + src/lib/identity/external/fhirPixm.ts',
+          codePath:
+            'src/lib/identity/external/pixmPdqmResolver.ts + src/lib/identity/external/fhirPixm.ts',
           testId: 'tests/identity/externalEmpi.test.ts',
           status: 'partial',
           note: 'FHIR request build + Parameters/Bundle parse logic is real and verified against a fake FHIR MPI transport, including E9 HELD-not-anchored behavior; the live FHIR endpoint is ci-pending. Partial.',
@@ -169,7 +170,8 @@ export const MATRIX_PART_2: readonly StandardEntry[] = [
         id: 'term-ucum',
         capability: 'UCUM unit validation (offline, LOINC-aware)',
         evidence: {
-          codePath: 'src/lib/terminology/validateCode (UCUM well-formedness + LOINC appropriateness)',
+          codePath:
+            'src/lib/terminology/validateCode (UCUM well-formedness + LOINC appropriateness)',
           testId: 'tests/terminology/ucum.test.ts',
           status: 'supported',
           note: 'UCUM well-formedness and LOINC-unit appropriateness checks are offline, deterministic, and fully tested; no external service required.',
@@ -179,7 +181,8 @@ export const MATRIX_PART_2: readonly StandardEntry[] = [
         id: 'term-semantic-gate',
         capability: 'Stage-4 semantic binding gate (fail-closed)',
         evidence: {
-          codePath: 'src/lib/pipeline/semanticBinding.ts + src/lib/terminology/semanticValidator.ts',
+          codePath:
+            'src/lib/pipeline/semanticBinding.ts + src/lib/terminology/semanticValidator.ts',
           testId: 'tests/terminology/semanticGate.test.ts',
           status: 'partial',
           seamId: 'terminology',

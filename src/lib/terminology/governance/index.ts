@@ -31,12 +31,7 @@ export {
   type GovernancePrincipal,
 } from '@/lib/authz/principal/types';
 
-export {
-  allowedActions,
-  canTransition,
-  nextState,
-  isTerminal,
-} from './stateMachine';
+export { allowedActions, canTransition, nextState, isTerminal } from './stateMachine';
 
 export {
   createInMemoryValueSetGovernanceStore,

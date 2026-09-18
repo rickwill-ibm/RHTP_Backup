@@ -112,10 +112,7 @@ export interface RightToDeleteRequest {
 }
 
 export type RightToDeleteStatus =
-  | 'tombstoned'
-  | 'blocked-legal-hold'
-  | 'not-found'
-  | 'already-tombstoned';
+  'tombstoned' | 'blocked-legal-hold' | 'not-found' | 'already-tombstoned';
 
 /**
  * The result of a right-to-delete. On success the ledger has a NEW appended

@@ -13,21 +13,13 @@
 import * as clock from '@/lib/clock';
 import type { EvidenceStore } from '../evidenceStore';
 import type { EvidenceRecord } from '../evidenceRecord';
-import type {
-  LedgerEntry,
-  LedgerProvenance,
-  PgEvidenceLedgerOptions,
-  PgLike,
-} from './types';
+import type { LedgerEntry, LedgerProvenance, PgEvidenceLedgerOptions, PgLike } from './types';
 
 /** Structural guard mirroring the file-store's isEvidenceRecord: reject foreign JSON. */
 function isEvidenceRecord(v: unknown): v is EvidenceRecord {
   const r = v as Record<string, unknown> | null;
   return (
-    !!r &&
-    typeof r.id === 'string' &&
-    typeof r.memberId === 'string' &&
-    Array.isArray(r.entries)
+    !!r && typeof r.id === 'string' && typeof r.memberId === 'string' && Array.isArray(r.entries)
   );
 }
 
@@ -159,7 +151,9 @@ export function createPgEvidenceLedger(
     },
 
     async maxSeq(): Promise<number> {
-      const res = await pg.query<{ m: unknown }>(`SELECT COALESCE(MAX(seq), 0) AS m FROM evidence_ledger`);
+      const res = await pg.query<{ m: unknown }>(
+        `SELECT COALESCE(MAX(seq), 0) AS m FROM evidence_ledger`
+      );
       return toNum(res.rows[0]?.m ?? 0);
     },
   };

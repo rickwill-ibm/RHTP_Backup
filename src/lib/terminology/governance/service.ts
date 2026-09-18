@@ -49,28 +49,28 @@ export interface ValueSetGovernanceService {
     valueSetId: string,
     version: string,
     principal: GovernancePrincipal,
-    reason?: string,
+    reason?: string
   ): GovernedVersionRecord;
   /** in-review -> approved(active). Maker-checker enforced; supersedes the prior active. */
   approve(
     valueSetId: string,
     version: string,
     principal: GovernancePrincipal,
-    reason?: string,
+    reason?: string
   ): GovernedVersionRecord;
   /** in-review -> rejected. */
   reject(
     valueSetId: string,
     version: string,
     principal: GovernancePrincipal,
-    reason?: string,
+    reason?: string
   ): GovernedVersionRecord;
   /** draft|approved -> retired. */
   retire(
     valueSetId: string,
     version: string,
     principal: GovernancePrincipal,
-    reason?: string,
+    reason?: string
   ): GovernedVersionRecord;
   /** The single ACTIVE version of a value set, or undefined. */
   activeVersion(valueSetId: string): GovernedVersionRecord | undefined;
@@ -92,7 +92,7 @@ export interface GovernanceServiceOptions {
 }
 
 export function createValueSetGovernanceService(
-  opts: GovernanceServiceOptions = {},
+  opts: GovernanceServiceOptions = {}
 ): ValueSetGovernanceService {
   const store = opts.store ?? createInMemoryValueSetGovernanceStore();
   const config = opts.config ?? DEFAULT_GOVERNANCE_CONFIG;
@@ -110,7 +110,7 @@ export function createValueSetGovernanceService(
     action: Parameters<typeof nextState>[1],
     principal: GovernancePrincipal | { userId: string; role: 'system' },
     reason: string | undefined,
-    at: string,
+    at: string
   ): GovernedVersionRecord {
     // Guarded: nextState throws IllegalTransitionError on an illegal edge.
     const to = nextState(rec.state, action);
@@ -178,11 +178,20 @@ export function createValueSetGovernanceService(
       // One-active invariant: supersede the prior active version first.
       const priorActive = store.activeVersion(valueSetId);
       if (priorActive && priorActive.version !== version) {
-        applyTransition(priorActive, 'supersede', { userId: 'system', role: 'system' },
-          `superseded by ${version}`, at);
+        applyTransition(
+          priorActive,
+          'supersede',
+          { userId: 'system', role: 'system' },
+          `superseded by ${version}`,
+          at
+        );
       }
       const approved = applyTransition(current, 'approve', principal, reason, at);
-      const decided: GovernedVersionRecord = { ...approved, decidedBy: principal.userId, decidedAt: at };
+      const decided: GovernedVersionRecord = {
+        ...approved,
+        decidedBy: principal.userId,
+        decidedAt: at,
+      };
       store.putVersion(decided);
       return { ...decided };
     },
@@ -191,7 +200,11 @@ export function createValueSetGovernanceService(
       const current = requireVersion(valueSetId, version);
       const at = nowIso();
       const rejected = applyTransition(current, 'reject', principal, reason, at);
-      const decided: GovernedVersionRecord = { ...rejected, decidedBy: principal.userId, decidedAt: at };
+      const decided: GovernedVersionRecord = {
+        ...rejected,
+        decidedBy: principal.userId,
+        decidedAt: at,
+      };
       store.putVersion(decided);
       return { ...decided };
     },

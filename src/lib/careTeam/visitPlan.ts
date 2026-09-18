@@ -40,7 +40,12 @@ export function visitPlanFor(patientId: string): VisitPlan {
         keystone: true,
         impact: `Unblocks ${k.blockedGaps.join(', ')}`,
       })),
-      { id: 'snap', label: 'Submit SNAP renewal + WIC re-enrollment', domain: 'Social', impact: 'Food access' },
+      {
+        id: 'snap',
+        label: 'Submit SNAP renewal + WIC re-enrollment',
+        domain: 'Social',
+        impact: 'Food access',
+      },
       { id: 'prapare', label: 'Complete PRAPARE social needs screening', domain: 'Social' },
       { id: 'liheap', label: 'LIHEAP utility assistance application', domain: 'Social' },
     ];

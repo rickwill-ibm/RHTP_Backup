@@ -5,31 +5,35 @@ import type { PanelFilters } from '../page';
 
 // ─── Filter option definitions ────────────────────────────────────────────────
 
-const RISK_OPTIONS    = ['All', 'Critical', 'High', 'Moderate', 'Low'] as const;
-const GAP_OPTIONS     = ['All Gaps', 'Has Open Gaps', 'No Gaps'] as const;
-const HCC_OPTIONS     = ['All HCC', 'Has Suspects', 'No Suspects'] as const;
-const ALERT_OPTIONS   = ['All Alerts', 'Has Alerts', 'No Alerts'] as const;
-const ATTR_OPTIONS    = ['All', 'Confirmed', 'Provisional', 'Disputed', 'Dropped'] as const;
+const RISK_OPTIONS = ['All', 'Critical', 'High', 'Moderate', 'Low'] as const;
+const GAP_OPTIONS = ['All Gaps', 'Has Open Gaps', 'No Gaps'] as const;
+const HCC_OPTIONS = ['All HCC', 'Has Suspects', 'No Suspects'] as const;
+const ALERT_OPTIONS = ['All Alerts', 'Has Alerts', 'No Alerts'] as const;
+const ATTR_OPTIONS = ['All', 'Confirmed', 'Provisional', 'Disputed', 'Dropped'] as const;
 
 // Risk chip colours (active state)
 const RISK_COLORS: Record<string, string> = {
   Critical: 'bg-[#da1e28] text-white',
-  High:     'bg-[#f1c21b] text-[#161616]',
+  High: 'bg-[#f1c21b] text-[#161616]',
   Moderate: 'bg-[#0f62fe] text-white',
-  Low:      'bg-[#24a148] text-white',
-  All:      '',
+  Low: 'bg-[#24a148] text-white',
+  All: '',
 };
 const ATTR_COLORS: Record<string, string> = {
-  Confirmed:   'bg-[#24a148] text-white',
-  Disputed:    'bg-[#da1e28] text-white',
+  Confirmed: 'bg-[#24a148] text-white',
+  Disputed: 'bg-[#da1e28] text-white',
   Provisional: 'bg-[#f1c21b] text-[#161616]',
-  Dropped:     'bg-carbon-gray-50 text-white',
-  All:         '',
+  Dropped: 'bg-carbon-gray-50 text-white',
+  All: '',
 };
 
 // Default / "show all" sentinel for each dimension
 const DEFAULT: Record<keyof Omit<PanelFilters, 'search' | 'sort' | 'sortDir'>, string> = {
-  risk: 'All', gap: 'All Gaps', hcc: 'All HCC', alert: 'All Alerts', attribution: 'All',
+  risk: 'All',
+  gap: 'All Gaps',
+  hcc: 'All HCC',
+  alert: 'All Alerts',
+  attribution: 'All',
 };
 
 // ─── Chip pill ────────────────────────────────────────────────────────────────
@@ -38,7 +42,11 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-medium bg-[#d0e2ff] text-[#0043ce] border border-[#97c1ff]">
       {label}
-      <button onClick={onRemove} className="hover:text-[#002d9c]" aria-label={`Remove ${label} filter`}>
+      <button
+        onClick={onRemove}
+        className="hover:text-[#002d9c]"
+        aria-label={`Remove ${label} filter`}
+      >
         <Icon name="XMarkIcon" size={10} />
       </button>
     </span>
@@ -48,7 +56,11 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 // ─── Single-select pill group used inside the flyout ─────────────────────────
 
 function PillGroup<T extends string>({
-  label, options, value, onChange, colorMap,
+  label,
+  options,
+  value,
+  onChange,
+  colorMap,
 }: {
   label: string;
   options: readonly T[];
@@ -58,15 +70,18 @@ function PillGroup<T extends string>({
 }) {
   return (
     <div>
-      <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-1.5">{label}</p>
+      <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-1.5">
+        {label}
+      </p>
       <div className="flex flex-wrap gap-1">
         {options.map((opt) => {
           const isActive = value === opt;
-          const activeClass = colorMap?.[opt] && isActive
-            ? colorMap[opt]
-            : isActive
-            ? 'bg-carbon-gray-90 text-white'
-            : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20';
+          const activeClass =
+            colorMap?.[opt] && isActive
+              ? colorMap[opt]
+              : isActive
+                ? 'bg-carbon-gray-90 text-white'
+                : 'bg-carbon-gray-10 text-carbon-gray-70 hover:bg-carbon-gray-20';
           return (
             <button
               key={opt}
@@ -92,7 +107,7 @@ interface PanelFilterBarProps {
 export default function PanelFilterBar({ filters, onFiltersChange }: PanelFilterBarProps) {
   const [open, setOpen] = useState(false);
   const flyoutRef = useRef<HTMLDivElement>(null);
-  const btnRef    = useRef<HTMLButtonElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const update = (partial: Partial<PanelFilters>) => onFiltersChange({ ...filters, ...partial });
 
@@ -101,8 +116,10 @@ export default function PanelFilterBar({ filters, onFiltersChange }: PanelFilter
     if (!open) return;
     const handler = (e: MouseEvent) => {
       if (
-        flyoutRef.current && !flyoutRef.current.contains(e.target as Node) &&
-        btnRef.current    && !btnRef.current.contains(e.target as Node)
+        flyoutRef.current &&
+        !flyoutRef.current.contains(e.target as Node) &&
+        btnRef.current &&
+        !btnRef.current.contains(e.target as Node)
       ) {
         setOpen(false);
       }
@@ -113,14 +130,22 @@ export default function PanelFilterBar({ filters, onFiltersChange }: PanelFilter
 
   // Active filter chips — only non-default values
   const activeChips: { key: keyof typeof DEFAULT; label: string }[] = [];
-  if (filters.risk        !== DEFAULT.risk)        activeChips.push({ key: 'risk',        label: filters.risk });
-  if (filters.gap         !== DEFAULT.gap)          activeChips.push({ key: 'gap',         label: filters.gap });
-  if (filters.hcc         !== DEFAULT.hcc)          activeChips.push({ key: 'hcc',         label: filters.hcc });
-  if (filters.alert       !== DEFAULT.alert)        activeChips.push({ key: 'alert',       label: filters.alert });
-  if (filters.attribution !== DEFAULT.attribution)  activeChips.push({ key: 'attribution', label: filters.attribution });
+  if (filters.risk !== DEFAULT.risk) activeChips.push({ key: 'risk', label: filters.risk });
+  if (filters.gap !== DEFAULT.gap) activeChips.push({ key: 'gap', label: filters.gap });
+  if (filters.hcc !== DEFAULT.hcc) activeChips.push({ key: 'hcc', label: filters.hcc });
+  if (filters.alert !== DEFAULT.alert) activeChips.push({ key: 'alert', label: filters.alert });
+  if (filters.attribution !== DEFAULT.attribution)
+    activeChips.push({ key: 'attribution', label: filters.attribution });
 
   const clearAll = () =>
-    onFiltersChange({ ...filters, risk: 'All', gap: 'All Gaps', hcc: 'All HCC', alert: 'All Alerts', attribution: 'All' });
+    onFiltersChange({
+      ...filters,
+      risk: 'All',
+      gap: 'All Gaps',
+      hcc: 'All HCC',
+      alert: 'All Alerts',
+      attribution: 'All',
+    });
 
   const removeChip = (key: keyof typeof DEFAULT) =>
     update({ [key]: DEFAULT[key] } as Partial<PanelFilters>);
@@ -129,10 +154,13 @@ export default function PanelFilterBar({ filters, onFiltersChange }: PanelFilter
     <div className="bg-white border border-carbon-gray-20 px-4 py-2.5 mb-4 relative">
       {/* ── Single toolbar row ── */}
       <div className="flex items-center gap-3 flex-wrap">
-
         {/* Search */}
         <div className="relative min-w-[220px] max-w-xs">
-          <Icon name="MagnifyingGlassIcon" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-carbon-gray-50" />
+          <Icon
+            name="MagnifyingGlassIcon"
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-carbon-gray-50"
+          />
           <input
             type="text"
             placeholder="Search patient name or MRN..."

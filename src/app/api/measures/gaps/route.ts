@@ -23,24 +23,39 @@ const VIEW_ROLES = new Set(['pa-reviewer', 'care-manager', 'payer-ops', 'admin',
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
-    return NextResponse.json(ooError('Not authenticated', 'login'), { status: 401, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Not authenticated', 'login'), {
+      status: 401,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
   const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
   if (!VIEW_ROLES.has(principal.role)) {
-    return NextResponse.json(ooError('Care-gap view requires a reviewer/ops role', 'forbidden'), { status: 403, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Care-gap view requires a reviewer/ops role', 'forbidden'), {
+      status: 403,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
 
   try {
     const view = getCareGapView();
     await audit({
-      ts: new Date().toISOString(), actor: principal.userId, action: 'measures.gaps.view',
-      correlationId, outcome: 'success',
+      ts: new Date().toISOString(),
+      actor: principal.userId,
+      action: 'measures.gaps.view',
+      correlationId,
+      outcome: 'success',
       detail: `disposition=${view.disposition}; total=${view.summary.total}; open=${view.summary.open}`,
     });
-    return NextResponse.json(view, { status: 200, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(view, {
+      status: 200,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   } catch (err) {
     const detail = err instanceof Error ? err.name : 'exception';
     const status = detail.includes('NotConfigured') ? 503 : 500;
-    return NextResponse.json(ooError('Care-gap view unavailable', 'exception'), { status, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('Care-gap view unavailable', 'exception'), {
+      status,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
 }

@@ -20,7 +20,9 @@ export { authoredMeasureGaps } from './mockMeasures';
 
 export class MeasuresFeedNotConfiguredError extends Error {
   constructor() {
-    super('DATA_MODE measures=production but no external DEQM feed loader is registered (fail-closed)');
+    super(
+      'DATA_MODE measures=production but no external DEQM feed loader is registered (fail-closed)'
+    );
     this.name = 'MeasuresFeedNotConfiguredError';
   }
 }

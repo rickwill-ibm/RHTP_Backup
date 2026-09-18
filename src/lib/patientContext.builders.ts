@@ -1,16 +1,21 @@
 'use client';
 // patientContext.builders.ts — Functions to build PatientSharedState from registry or FHIR data
 
-import type { RegistryPatient } from './patientRegistry';
-import type { PatientSharedState, EpisodeStatus, BHRiskLevel, GapDomain, GapStatus } from './patientContext.types';
+import { getPatientById, type RegistryPatient } from './patientRegistry';
+import type {
+  PatientSharedState,
+  EpisodeStatus,
+  BHRiskLevel,
+  GapDomain,
+  GapStatus,
+} from './patientContext.types';
 
 /**
  * Map registry patient data to PatientSharedState shape
  */
 export function buildStateFromRegistry(platformId: string): PatientSharedState | null {
   try {
-    const registry = require('./patientRegistry');
-    const rp = registry.getPatientById(platformId);
+    const rp = getPatientById(platformId);
     if (!rp) return null;
 
     return {

@@ -10,13 +10,13 @@ asserts byte-identical results.
 They answer the same questions the demo's five lens filters ask of the hardcoded
 `wholePersonGraphData`, but against the **projected** store.
 
-| Lens | Question | Scope over the projected graph |
-|---|---|---|
-| `whole-person` | the member's complete picture | member + every connected resource (consent-filtered) |
-| `care-gap` | what needs action | OPEN encounters + unmet needs |
-| `sdoh-barrier` | social barriers | SDOH screenings + the causal unmet needs |
-| `care-team` | who is caring for them | assigned care-team members (providers, care managers) |
-| `part2-restricted` | the sensitive subgraph | the 42 CFR Part 2 / segmented nodes - gated by consent |
+| Lens               | Question                      | Scope over the projected graph                         |
+| ------------------ | ----------------------------- | ------------------------------------------------------ |
+| `whole-person`     | the member's complete picture | member + every connected resource (consent-filtered)   |
+| `care-gap`         | what needs action             | OPEN encounters + unmet needs                          |
+| `sdoh-barrier`     | social barriers               | SDOH screenings + the causal unmet needs               |
+| `care-team`        | who is caring for them        | assigned care-team members (providers, care managers)  |
+| `part2-restricted` | the sensitive subgraph        | the 42 CFR Part 2 / segmented nodes - gated by consent |
 
 ## Consent enforcement (C1)
 
@@ -31,7 +31,7 @@ with it**. Part 2 enforcement is asserted on both backends in the acceptance sui
 ```ts
 import { wholePersonLens, careGapLens, LENSES } from '@/lib/graph';
 
-const view = await wholePersonLens(store, memberId);                 // no restricted data
+const view = await wholePersonLens(store, memberId); // no restricted data
 const full = await wholePersonLens(store, memberId, { part2: true }); // with Part 2 consent
 const gaps = await LENSES['care-gap'](store, memberId);
 ```

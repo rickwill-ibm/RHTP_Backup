@@ -51,7 +51,8 @@ export const diagnosticReportsSpec = {
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
     const p = event.payload;
     const reportRef = str(p.diagnosticReportRef, `DiagnosticReport/${event.memberId}`);
-    const start = str(p.effectiveDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
+    const start =
+      str(p.effectiveDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
     const computable = Boolean(p.computable);
     const out: Mutation[] = [memberNode(event)];
     out.push(
@@ -63,7 +64,7 @@ export const diagnosticReportsSpec = {
         // computable:false + a content pointer, never parsed structured data.
         computable,
         contentUrl: contentUrl(p),
-      }),
+      })
     );
     // The member HAS this diagnostic report — factual attachment (associative), dated.
     out.push({

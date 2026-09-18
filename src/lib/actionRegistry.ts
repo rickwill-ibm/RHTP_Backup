@@ -23,7 +23,12 @@ export { workflowDefinitions, actionRegistry } from './actionRegistry.data';
 
 import { actionRegistry } from './actionRegistry.data';
 import { workflowDefinitions } from './actionRegistry.data';
-import type { ActionDefinition, ActionContext, WorkflowType, AuditEntry } from './actionRegistry.types';
+import type {
+  ActionDefinition,
+  ActionContext,
+  WorkflowType,
+  AuditEntry,
+} from './actionRegistry.types';
 import type { UserRole } from './mockData';
 
 /**

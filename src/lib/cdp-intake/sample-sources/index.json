@@ -1,10 +1,40 @@
 {
   "_note": "Seeded RHTP demo population: the 5 canonical demo patients across the demo source systems. Synthetic data only. sourceSystem is authoritative (drives identity scoping). Each patient carries the anchoring Medicaid id from cdp-intake/seededIdentitySource.ts, so records resolve DETERMINISTICALLY (medicaidId-exact) to a stable member — no orphan minting. All ICD-10 / SNOMED / LOINC / RxNorm codes are present in the terminology seed, so nothing quarantines. Raw X12/HL7/NCPDP sources land in a fast-follow; this drop is FHIR bundles, which flow through the real ingestBundle front door end-to-end.",
   "sources": [
-    { "file": "sd-medicaid-mmis.maria.fhir.json",    "sourceSystem": "SD_MEDICAID_MMIS",   "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" },
-    { "file": "bennett-county-ehr.dorothy.fhir.json", "sourceSystem": "BENNETT_COUNTY_EHR", "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" },
-    { "file": "bennett-county-ehr.james.fhir.json",   "sourceSystem": "BENNETT_COUNTY_EHR", "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" },
-    { "file": "sd-chip.robert.fhir.json",             "sourceSystem": "SD_CHIP",            "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" },
-    { "file": "sd-dss-benefits.lisa.fhir.json",       "sourceSystem": "SD_DSS_BENEFITS",    "format": "fhir-json", "adapter": "fhir-bundle", "arrivalMode": "batch" }
+    {
+      "file": "sd-medicaid-mmis.maria.fhir.json",
+      "sourceSystem": "SD_MEDICAID_MMIS",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "bennett-county-ehr.dorothy.fhir.json",
+      "sourceSystem": "BENNETT_COUNTY_EHR",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "bennett-county-ehr.james.fhir.json",
+      "sourceSystem": "BENNETT_COUNTY_EHR",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "sd-chip.robert.fhir.json",
+      "sourceSystem": "SD_CHIP",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    },
+    {
+      "file": "sd-dss-benefits.lisa.fhir.json",
+      "sourceSystem": "SD_DSS_BENEFITS",
+      "format": "fhir-json",
+      "adapter": "fhir-bundle",
+      "arrivalMode": "batch"
+    }
   ]
 }

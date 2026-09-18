@@ -18,8 +18,8 @@ export class MemberLock {
       memberId,
       next.then(
         () => undefined,
-        () => undefined,
-      ),
+        () => undefined
+      )
     );
     return next;
   }

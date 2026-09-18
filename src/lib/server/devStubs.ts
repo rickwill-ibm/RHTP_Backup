@@ -28,4 +28,10 @@ export function devMockEnabled(): boolean {
 
 export { devCrdCards } from './devStubs.cds';
 export { devDtrEvaluation, devQuestionnairePackage } from './devStubs.dtr';
-export { devMemberMatch, devBulkStart, devBulkStatus, devWorkQueueItems, devClaimResponseApproved } from './devStubs.pas';
+export {
+  devMemberMatch,
+  devBulkStart,
+  devBulkStatus,
+  devWorkQueueItems,
+  devClaimResponseApproved,
+} from './devStubs.pas';

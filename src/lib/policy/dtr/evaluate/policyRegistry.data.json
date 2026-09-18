@@ -1,0 +1,41 @@
+{
+  "_note": "Data-driven live-DTR policy registry. SCOPE: criteria-lifting (dtrCriteriaFromReview) is now generic across QUANTITATIVE gates — age, BMI + obesity band, and any measure mapping to a standard LOINC concept (BP, weight, height, HbA1c, glucose, eGFR, LDL/HDL/total-chol/triglycerides, LVEF — the MEASURE_LOINC set), each evaluated from the patient record through the SHARED three-valued engine (evalMeasure), honouring the policy's boolean tree (OR-branches are non-required), unit compatibility (a cross-unit reading is a gap, never a wrong met), exclusions/negation, and between-inclusivity. A measure with no standard coded concept (stenosis%, tumour size) surfaces as a documentation gap, not a silent drop. So 'add a row + a PDF, no new code' now works for any policy whose computable gates are LOINC-mapped quantitative measures. REMAINING (tracked follow-ups, same list as the policyRegistry.ts SCOPE note): a full BoolExpr verdict (distinct OR-pools evaluated independently), multi-pathway population gating, coverage-EXCLUSION denial in this group view, the needs-info vs not-met distinction (collapsed to a gap today), sustainedOver/temporal windows (evaluated on a point reading today), and per-group policy-version provenance. Adding a supported policy = a row here + its PDF under public/sample-policies + (only if it needs a new sample patient) a bundle key in PATIENT_BUNDLES in policyRegistry.ts. evaluateLivePolicy still FAILS LOUD (throws) for a registered code whose lifted criteria carry no valid gate. NOTE: CG-SURG-83 is an Elevance/Anthem COMMERCIAL guideline used as an exemplar; a state-Medicaid arrangement would enumerate its own criteria.",
+  "policies": [
+    {
+      "id": "CG-SURG-83",
+      "title": "Bariatric Surgery and Other Treatments for Clinically Severe Obesity (CG-SURG-83)",
+      "pdfPath": "public/sample-policies/elevance-cgsurg83.pdf",
+      "patientBundleKey": "maria-bariatric",
+      "asOf": "2026-08-30",
+      "cptCodes": [
+        "43644",
+        "43645",
+        "43770",
+        "43771",
+        "43772",
+        "43773",
+        "43774",
+        "43775",
+        "43842",
+        "43843",
+        "43845",
+        "43846",
+        "43847",
+        "43848",
+        "43886",
+        "43887",
+        "43888",
+        "43290",
+        "43291",
+        "43632",
+        "43633",
+        "43659",
+        "43999",
+        "44238",
+        "64999",
+        "C9784",
+        "C9785"
+      ]
+    }
+  ]
+}

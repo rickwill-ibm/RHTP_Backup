@@ -49,15 +49,13 @@ export default function PatientBreadcrumb({
           {/* Step */}
           <div
             className={`flex items-center gap-2 px-4 py-2 ${
-              step.active
-                ? 'bg-carbon-blue' :'bg-white hover:bg-carbon-gray-10 transition-colors'
+              step.active ? 'bg-carbon-blue' : 'bg-white hover:bg-carbon-gray-10 transition-colors'
             }`}
           >
             {/* Step number circle */}
             <div
               className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                step.active
-                  ? 'bg-white text-carbon-blue' :'bg-carbon-gray-20 text-carbon-gray-70'
+                step.active ? 'bg-white text-carbon-blue' : 'bg-carbon-gray-20 text-carbon-gray-70'
               }`}
             >
               {i + 1}
@@ -105,9 +103,7 @@ export default function PatientBreadcrumb({
               <Icon
                 name="ArrowLeftIcon"
                 size={12}
-                className={`flex-shrink-0 ${
-                  step.active ? 'text-white' : 'text-carbon-gray-50'
-                }`}
+                className={`flex-shrink-0 ${step.active ? 'text-white' : 'text-carbon-gray-50'}`}
               />
             )}
           </div>

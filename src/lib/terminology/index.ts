@@ -132,11 +132,7 @@ export {
   decideSystemCurrency,
   decideBindingCurrency,
 } from './registry/currency';
-export type {
-  CurrencyPosture,
-  CurrencyReason,
-  CurrencyDecision,
-} from './registry/currency';
+export type { CurrencyPosture, CurrencyReason, CurrencyDecision } from './registry/currency';
 
 // ── I8A-iii Wave A (value-set governance lifecycle) — appended block ──────────
 // Version-lifecycle state machine (draft -> in-review -> approved(active) /

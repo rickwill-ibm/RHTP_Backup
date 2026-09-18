@@ -41,7 +41,7 @@ function statusForReason(reason: string | undefined): number {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   if (!(await isAuthenticated().catch(() => false))) {
@@ -58,10 +58,9 @@ export async function POST(
       outcome: 'failure',
       detail: `role=${principal.role} is not ops-scoped`,
     });
-    return NextResponse.json(
-      ooError('Dead-letter review requires an ops role', 'forbidden'),
-      { status: 403 },
-    );
+    return NextResponse.json(ooError('Dead-letter review requires an ops role', 'forbidden'), {
+      status: 403,
+    });
   }
 
   const { id } = await params;
@@ -70,7 +69,7 @@ export async function POST(
   if (!isResolutionAction(action)) {
     return NextResponse.json(
       ooError('body.action must be one of retry | resolve | dismiss', 'invalid'),
-      { status: 400 },
+      { status: 400 }
     );
   }
 
@@ -82,7 +81,7 @@ export async function POST(
       store,
       { id, action, actor: principal.userId },
       getRetryLaneRouter(),
-      getIdempotencyStore(),
+      getIdempotencyStore()
     );
     // Audit every attempt, success or failure, PHI-safe (kind + reason, no member data).
     await audit({
@@ -97,11 +96,13 @@ export async function POST(
     if (!result.ok) {
       return NextResponse.json(
         ooError(`dead-letter ${action} failed: ${result.reason}`, 'processing'),
-        { status: statusForReason(result.reason) },
+        { status: statusForReason(result.reason) }
       );
     }
     return NextResponse.json({ ok: true, record: result.record }, { status: 200 });
   } catch {
-    return NextResponse.json(ooError('Failed to action dead-letter item', 'exception'), { status: 500 });
+    return NextResponse.json(ooError('Failed to action dead-letter item', 'exception'), {
+      status: 500,
+    });
   }
 }

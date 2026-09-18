@@ -27,10 +27,12 @@ export const runtime = 'nodejs';
 const WRITE_ROLES = new Set(['pa-reviewer', 'care-manager', 'payer-ops', 'admin']);
 
 async function authorize(req: NextRequest, memberId: string | undefined) {
-  if (!(await isAuthenticated().catch(() => false))) return { ok: false as const, status: 401, reason: 'Not authenticated' };
+  if (!(await isAuthenticated().catch(() => false)))
+    return { ok: false as const, status: 401, reason: 'Not authenticated' };
   const authCtx = await getSessionAuthContext().catch(() => null);
   const principal = getPrincipal(authCtx);
-  if (!WRITE_ROLES.has(principal.role)) return { ok: false as const, status: 403, reason: 'Record write requires a reviewer/ops role' };
+  if (!WRITE_ROLES.has(principal.role))
+    return { ok: false as const, status: 403, reason: 'Record write requires a reviewer/ops role' };
   if (memberId) {
     const access = canAccessMemberTenantAware(principal, authCtx, memberId);
     if (!access.allow) return { ok: false as const, status: 403, reason: access.reason };
@@ -42,48 +44,89 @@ function durable(): boolean {
   return getDataMode('wpcRecord') === 'production';
 }
 
-export async function PUT(req: NextRequest, ctx: { params: Promise<{ type: string; id: string }> }): Promise<NextResponse> {
+export async function PUT(
+  req: NextRequest,
+  ctx: { params: Promise<{ type: string; id: string }> }
+): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   const { type, id } = await ctx.params;
-  const body = (await req.json().catch(() => null)) as { memberId?: string; payload?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as {
+    memberId?: string;
+    payload?: unknown;
+  } | null;
   const auth = await authorize(req, body?.memberId);
-  if (!auth.ok) return NextResponse.json(ooError(auth.reason, auth.status === 401 ? 'login' : 'forbidden'), { status: auth.status, headers: { [CORRELATION_HEADER]: correlationId } });
+  if (!auth.ok)
+    return NextResponse.json(ooError(auth.reason, auth.status === 401 ? 'login' : 'forbidden'), {
+      status: auth.status,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   if (!body || body.payload === undefined) {
-    return NextResponse.json(ooError('payload is required', 'invalid'), { status: 400, headers: { [CORRELATION_HEADER]: correlationId } });
+    return NextResponse.json(ooError('payload is required', 'invalid'), {
+      status: 400,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
   }
 
   const key = `${type}/${id}`;
   const store = getRecordLifecycleStore(durable());
-  const result = await store.record({ key, hash: contentHash(body.payload), status: 'active', nowMs: now() });
+  const result = await store.record({
+    key,
+    hash: contentHash(body.payload),
+    status: 'active',
+    nowMs: now(),
+  });
   await audit({
-    ts: new Date().toISOString(), actor: auth.principal.userId, action: `record.${result.disposition}`,
-    resourceRef: key, correlationId, outcome: 'success',
+    ts: new Date().toISOString(),
+    actor: auth.principal.userId,
+    action: `record.${result.disposition}`,
+    resourceRef: key,
+    correlationId,
+    outcome: 'success',
     detail: `disposition=${result.disposition}; reproject=${result.reproject}; v${result.version}`,
   });
   return NextResponse.json(
     { key, disposition: result.disposition, reproject: result.reproject, version: result.version },
-    { status: result.disposition === 'new' ? 201 : 200, headers: { [CORRELATION_HEADER]: correlationId } },
+    {
+      status: result.disposition === 'new' ? 201 : 200,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    }
   );
 }
 
-export async function DELETE(req: NextRequest, ctx: { params: Promise<{ type: string; id: string }> }): Promise<NextResponse> {
+export async function DELETE(
+  req: NextRequest,
+  ctx: { params: Promise<{ type: string; id: string }> }
+): Promise<NextResponse> {
   const correlationId = correlationFrom(req.headers);
   const { type, id } = await ctx.params;
   const memberId = req.nextUrl.searchParams.get('memberId') ?? undefined;
   const auth = await authorize(req, memberId);
-  if (!auth.ok) return NextResponse.json(ooError(auth.reason, auth.status === 401 ? 'login' : 'forbidden'), { status: auth.status, headers: { [CORRELATION_HEADER]: correlationId } });
+  if (!auth.ok)
+    return NextResponse.json(ooError(auth.reason, auth.status === 401 ? 'login' : 'forbidden'), {
+      status: auth.status,
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
 
   const key = `${type}/${id}`;
   const store = getRecordLifecycleStore(durable());
   // entered-in-error: content hash is irrelevant to a void; pass a stable marker.
-  const result = await store.record({ key, hash: 'entered-in-error', status: 'entered-in-error', nowMs: now() });
+  const result = await store.record({
+    key,
+    hash: 'entered-in-error',
+    status: 'entered-in-error',
+    nowMs: now(),
+  });
   await audit({
-    ts: new Date().toISOString(), actor: auth.principal.userId, action: `record.${result.disposition}`,
-    resourceRef: key, correlationId, outcome: 'success',
+    ts: new Date().toISOString(),
+    actor: auth.principal.userId,
+    action: `record.${result.disposition}`,
+    resourceRef: key,
+    correlationId,
+    outcome: 'success',
     detail: `entered-in-error; retract=${result.retract}; v${result.version}`,
   });
   return NextResponse.json(
     { key, disposition: result.disposition, retract: result.retract, version: result.version },
-    { status: 200, headers: { [CORRELATION_HEADER]: correlationId } },
+    { status: 200, headers: { [CORRELATION_HEADER]: correlationId } }
   );
 }

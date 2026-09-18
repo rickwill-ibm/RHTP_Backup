@@ -31,7 +31,12 @@ export {
   toRows,
 } from './matrix';
 
-export type { CiCeiling, ReadinessStatus, MatrixReadinessSummary, ReadinessRollupRow } from './readinessRollup';
+export type {
+  CiCeiling,
+  ReadinessStatus,
+  MatrixReadinessSummary,
+  ReadinessRollupRow,
+} from './readinessRollup';
 
 export {
   READINESS_STANDARDS,

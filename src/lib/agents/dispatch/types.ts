@@ -54,7 +54,7 @@ export type DispatchedTask =
 export class AgentRoutingError extends Error {
   constructor(
     public readonly field: string,
-    detail: string,
+    detail: string
   ) {
     super(`Agent routing invalid at "${field}": ${detail}`);
     this.name = 'AgentRoutingError';

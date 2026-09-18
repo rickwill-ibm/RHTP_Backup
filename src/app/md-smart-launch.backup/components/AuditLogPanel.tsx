@@ -3,7 +3,17 @@ import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
 
 export type AuditEventType =
-  | 'smart-launch' |'cds-card-viewed' |'cds-card-dismissed' |'cds-card-snoozed' |'cds-card-acknowledged' |'cds-suggestion-accepted' |'order-added' |'order-removed' |'order-signed' |'team-assignment-confirmed' |'cerner-return-initiated';
+  | 'smart-launch'
+  | 'cds-card-viewed'
+  | 'cds-card-dismissed'
+  | 'cds-card-snoozed'
+  | 'cds-card-acknowledged'
+  | 'cds-suggestion-accepted'
+  | 'order-added'
+  | 'order-removed'
+  | 'order-signed'
+  | 'team-assignment-confirmed'
+  | 'cerner-return-initiated';
 
 export interface AuditEvent {
   id: string;
@@ -18,7 +28,10 @@ export interface AuditEvent {
   outcome: 'success' | 'failure' | 'info';
 }
 
-const EVENT_CONFIG: Record<AuditEventType, { label: string; icon: string; color: string; bg: string; border: string }> = {
+const EVENT_CONFIG: Record<
+  AuditEventType,
+  { label: string; icon: string; color: string; bg: string; border: string }
+> = {
   'smart-launch': {
     label: 'SMART Launch',
     icon: 'BoltIcon',
@@ -178,14 +191,18 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
           <Icon name="ClipboardDocumentListIcon" size={16} className="text-[#6929c4]" />
           <div>
             <p className="text-sm font-semibold text-carbon-gray-100">HIPAA Audit Log</p>
-            <p className="text-2xs text-carbon-gray-50">{events.length} event{events.length !== 1 ? 's' : ''} captured this session</p>
+            <p className="text-2xs text-carbon-gray-50">
+              {events.length} event{events.length !== 1 ? 's' : ''} captured this session
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-2xs font-bold px-2 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
             HIPAA COMPLIANT
           </span>
-          <span className="text-2xs text-carbon-gray-50 font-mono">Session: {events[0]?.encounterId ?? '—'}</span>
+          <span className="text-2xs text-carbon-gray-50 font-mono">
+            Session: {events[0]?.encounterId ?? '—'}
+          </span>
         </div>
       </div>
 
@@ -231,7 +248,9 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
               const cfg = EVENT_CONFIG[event.eventType];
               const outcomeCfg = OUTCOME_CONFIG[event.outcome];
               const isExpanded = expandedId === event.id;
-              const detailEntries = Object.entries(event.details).filter(([, v]) => v !== undefined && v !== '');
+              const detailEntries = Object.entries(event.details).filter(
+                ([, v]) => v !== undefined && v !== ''
+              );
 
               return (
                 <div key={event.id} className="hover:bg-carbon-gray-10 transition-colors">
@@ -240,18 +259,26 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                     onClick={() => setExpandedId(isExpanded ? null : event.id)}
                   >
                     {/* Event type icon */}
-                    <div className={`w-7 h-7 flex-shrink-0 flex items-center justify-center border ${cfg.bg} ${cfg.border} mt-0.5`}>
+                    <div
+                      className={`w-7 h-7 flex-shrink-0 flex items-center justify-center border ${cfg.bg} ${cfg.border} mt-0.5`}
+                    >
                       <Icon name={cfg.icon as any} size={13} className={cfg.color} />
                     </div>
 
                     {/* Main content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-carbon-gray-100">{event.action}</span>
-                        <span className={`text-2xs font-medium px-1.5 py-0.5 ${outcomeCfg.bg} ${outcomeCfg.color}`}>
+                        <span className="text-xs font-semibold text-carbon-gray-100">
+                          {event.action}
+                        </span>
+                        <span
+                          className={`text-2xs font-medium px-1.5 py-0.5 ${outcomeCfg.bg} ${outcomeCfg.color}`}
+                        >
                           {outcomeCfg.label}
                         </span>
-                        <span className={`text-2xs px-1.5 py-0.5 ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 ${cfg.bg} ${cfg.color} border ${cfg.border}`}
+                        >
                           {cfg.label}
                         </span>
                       </div>
@@ -300,16 +327,28 @@ export default function AuditLogPanel({ events }: AuditLogPanelProps) {
                         <div className="mt-2 pt-2 border-t border-carbon-gray-20">
                           <div className="flex items-center gap-4">
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">Patient ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.patientId}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                Patient ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.patientId}
+                              </span>
                             </div>
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">User ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.userId}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                User ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.userId}
+                              </span>
                             </div>
                             <div className="flex items-start gap-1.5">
-                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">Event ID:</span>
-                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">{event.id}</span>
+                              <span className="text-2xs text-carbon-gray-50 min-w-[90px]">
+                                Event ID:
+                              </span>
+                              <span className="text-2xs font-mono font-medium text-carbon-gray-100">
+                                {event.id}
+                              </span>
                             </div>
                           </div>
                         </div>

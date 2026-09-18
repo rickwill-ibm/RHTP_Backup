@@ -20,8 +20,8 @@ generic apply-and-start — **no persona is hardcoded**.
 ## API
 
 ```ts
-const tasks = routeBatch({ batch, memberContext, signals });   // pure, deterministic
-const handles = runDispatch(engine, tasks);                    // start on the runtime
+const tasks = routeBatch({ batch, memberContext, signals }); // pure, deterministic
+const handles = runDispatch(engine, tasks); // start on the runtime
 ```
 
 - `routeBatch` — outreach groups by the SDE-composed **coordinated touchpoint**

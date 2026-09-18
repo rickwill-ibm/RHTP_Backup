@@ -60,7 +60,8 @@ const PERSONAS: Persona[] = [
     id: 'state-executive',
     role: 'Persona 1',
     title: 'State Medicaid Executive',
-    question: '"What is this program delivering across clinical, BH, and social domains — and is it worth the investment?"',
+    question:
+      '"What is this program delivering across clinical, BH, and social domains — and is it worth the investment?"',
     color: '#0043ce',
     bgLight: '#d0e2ff',
     textColor: '#001d6c',
@@ -68,12 +69,41 @@ const PERSONAS: Persona[] = [
     initials: 'SE',
     sidebarGroup: 'RHTP Program',
     screens: [
-      { route: '/contract-program-selection', label: 'RHTP Overview', storyBeat: 'All-program view — Clinical / BH / Social program-type filter with multi-domain KPI strip' },
-      { route: '/region-view', label: 'Regions', storyBeat: 'Regional rollup — Clinical gap closure + Social screening rate + BH access rate benchmarked side-by-side' },
-      { route: '/executive-outcomes-dashboard', label: 'Executive Dashboard', storyBeat: 'Whole-person outcomes — care gaps closed, gain share earned, quality score improvement' },
-      { route: '/financial-dashboard', label: 'Financial Dashboard (Braided Funding)', storyBeat: 'Dollar story — shared savings model, braided funding streams, incentive realization' },
-      { route: '/social-needs-dashboard', label: 'Social Needs Dashboard', storyBeat: 'Social ROI — screening funnel, dual-need cohort, population-level social burden' },
-      { route: '/outcomes-linkage', label: 'Outcomes Linkage', storyBeat: 'Housing → ED reduction, food → A1C — social-to-clinical ROI proof' },
+      {
+        route: '/contract-program-selection',
+        label: 'RHTP Overview',
+        storyBeat:
+          'All-program view — Clinical / BH / Social program-type filter with multi-domain KPI strip',
+      },
+      {
+        route: '/region-view',
+        label: 'Regions',
+        storyBeat:
+          'Regional rollup — Clinical gap closure + Social screening rate + BH access rate benchmarked side-by-side',
+      },
+      {
+        route: '/executive-outcomes-dashboard',
+        label: 'Executive Dashboard',
+        storyBeat:
+          'Whole-person outcomes — care gaps closed, gain share earned, quality score improvement',
+      },
+      {
+        route: '/financial-dashboard',
+        label: 'Financial Dashboard (Braided Funding)',
+        storyBeat:
+          'Dollar story — shared savings model, braided funding streams, incentive realization',
+      },
+      {
+        route: '/social-needs-dashboard',
+        label: 'Social Needs Dashboard',
+        storyBeat:
+          'Social ROI — screening funnel, dual-need cohort, population-level social burden',
+      },
+      {
+        route: '/outcomes-linkage',
+        label: 'Outcomes Linkage',
+        storyBeat: 'Housing → ED reduction, food → A1C — social-to-clinical ROI proof',
+      },
     ],
     sampleData: [
       { label: 'Program Counties', value: '47 of 114', highlight: false },
@@ -84,11 +114,27 @@ const PERSONAS: Persona[] = [
       { label: 'Quality Score Δ', value: '+8.3 pts', highlight: true },
     ],
     tooltips: [
-      { id: 'tt-se-1', label: 'Multi-Domain KPI Strip', body: 'The RHTP Overview shows program-type filtered KPIs. Selecting "All Programs" shows Clinical gap closure, Social screening rate, and BH access rate side-by-side — giving the state executive a single-screen whole-person accountability view.', anchor: 'bottom' },
-      { id: 'tt-se-2', label: 'Braided Funding', body: 'The Financial Dashboard shows how Medicaid capitation, FQHC grants, and social program funding are braided into a single payment model. Each funding stream is tracked separately for compliance while shared savings flow to the whole-person care team.', anchor: 'bottom' },
-      { id: 'tt-se-3', label: 'Social-to-Clinical ROI', body: 'The Outcomes Linkage screen quantifies the clinical cost avoidance from social interventions: housing stability → 34% ED reduction, food security → A1C improvement. This is the financial proof point for continued social program investment.', anchor: 'top' },
+      {
+        id: 'tt-se-1',
+        label: 'Multi-Domain KPI Strip',
+        body: 'The RHTP Overview shows program-type filtered KPIs. Selecting "All Programs" shows Clinical gap closure, Social screening rate, and BH access rate side-by-side — giving the state executive a single-screen whole-person accountability view.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-se-2',
+        label: 'Braided Funding',
+        body: 'The Financial Dashboard shows how Medicaid capitation, FQHC grants, and social program funding are braided into a single payment model. Each funding stream is tracked separately for compliance while shared savings flow to the whole-person care team.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-se-3',
+        label: 'Social-to-Clinical ROI',
+        body: 'The Outcomes Linkage screen quantifies the clinical cost avoidance from social interventions: housing stability → 34% ED reduction, food security → A1C improvement. This is the financial proof point for continued social program investment.',
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'The program delivers $4.2M in shared savings across 128,400 lives — with Clinical, BH, and Social programs all tracked in a single hierarchy from state to patient.',
+    keyInsight:
+      'The program delivers $4.2M in shared savings across 128,400 lives — with Clinical, BH, and Social programs all tracked in a single hierarchy from state to patient.',
     handoffTo: 'Network / Population Health Director',
     timing: { full: 12, half: 8, quick: 4 },
   },
@@ -96,7 +142,8 @@ const PERSONAS: Persona[] = [
     id: 'network-director',
     role: 'Persona 2',
     title: 'Network / Population Health Director',
-    question: '"How are my program networks and care team members performing across all three program types?"',
+    question:
+      '"How are my program networks and care team members performing across all three program types?"',
     color: '#6929c4',
     bgLight: '#f6f2ff',
     textColor: '#31135e',
@@ -104,9 +151,24 @@ const PERSONAS: Persona[] = [
     initials: 'ND',
     sidebarGroup: 'RHTP Program',
     screens: [
-      { route: '/provider-level', label: 'Program Networks', storyBeat: 'Clinical / BH / CBO network tabs — org-level performance with domain-appropriate metrics per tab' },
-      { route: '/physician-view', label: 'Care Team Members', storyBeat: 'PCPs + BH counselors + CHW supervisors — role-typed metrics, not just physician gap closure' },
-      { route: '/stars-hedis-mips', label: 'Quality Gaps & Attribution', storyBeat: 'Clinical + BH + Social program quality measures — five tabs, one accountability framework' },
+      {
+        route: '/provider-level',
+        label: 'Program Networks',
+        storyBeat:
+          'Clinical / BH / CBO network tabs — org-level performance with domain-appropriate metrics per tab',
+      },
+      {
+        route: '/physician-view',
+        label: 'Care Team Members',
+        storyBeat:
+          'PCPs + BH counselors + CHW supervisors — role-typed metrics, not just physician gap closure',
+      },
+      {
+        route: '/stars-hedis-mips',
+        label: 'Quality Gaps & Attribution',
+        storyBeat:
+          'Clinical + BH + Social program quality measures — five tabs, one accountability framework',
+      },
     ],
     sampleData: [
       { label: 'Active Regions', value: '4 Regions', highlight: false },
@@ -117,11 +179,27 @@ const PERSONAS: Persona[] = [
       { label: 'Quality Measures', value: 'Clinical + BH + Social', highlight: true },
     ],
     tooltips: [
-      { id: 'tt-nd-1', label: 'Program Networks (renamed)', body: 'Program Networks replaces "Network Level" with three tabs: Clinical Network (FQHCs, hospitals, PCPs), BH Network (counseling centers, crisis orgs), and CBO Network (housing navigators, food banks). Each tab shows domain-appropriate metrics.', anchor: 'bottom' },
-      { id: 'tt-nd-2', label: 'Care Team Members (renamed)', body: 'Care Team Members expands the old physician view to include BH Counselors (BH access rate, FUH/FUM) and CHW Supervisors (home visits, enrollment rate, screening rate) — all at the same NPI-equivalent accountability level.', anchor: 'bottom' },
-      { id: 'tt-nd-3', label: 'Quality & Compliance (renamed)', body: 'Quality & Compliance replaces "STARS/HEDIS/MIPS" with five program tabs: STARS (payer bonus), HEDIS (clinical measures), MIPS (payment adjustment), BH Quality (FUH/FUM/AMM/SAA), and Social Programs (PRAPARE/SNAP/Housing/CHW).', anchor: 'top' },
+      {
+        id: 'tt-nd-1',
+        label: 'Program Networks (renamed)',
+        body: 'Program Networks replaces "Network Level" with three tabs: Clinical Network (FQHCs, hospitals, PCPs), BH Network (counseling centers, crisis orgs), and CBO Network (housing navigators, food banks). Each tab shows domain-appropriate metrics.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-nd-2',
+        label: 'Care Team Members (renamed)',
+        body: 'Care Team Members expands the old physician view to include BH Counselors (BH access rate, FUH/FUM) and CHW Supervisors (home visits, enrollment rate, screening rate) — all at the same NPI-equivalent accountability level.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-nd-3',
+        label: 'Quality & Compliance (renamed)',
+        body: 'Quality & Compliance replaces "STARS/HEDIS/MIPS" with five program tabs: STARS (payer bonus), HEDIS (clinical measures), MIPS (payment adjustment), BH Quality (FUH/FUM/AMM/SAA), and Social Programs (PRAPARE/SNAP/Housing/CHW).',
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'The hierarchy now shows Clinical, BH, and Social programs as co-equal accountability chains — from state → region → program network → care team member → patient.',
+    keyInsight:
+      'The hierarchy now shows Clinical, BH, and Social programs as co-equal accountability chains — from state → region → program network → care team member → patient.',
     handoffTo: 'Primary Care Physician',
     timing: { full: 8, half: 5, quick: 3 },
   },
@@ -129,7 +207,8 @@ const PERSONAS: Persona[] = [
     id: 'physician',
     role: 'Persona 3',
     title: 'Primary Care Physician',
-    question: '"What do I need to act on for my patients today — and who else on the care team is accountable?"',
+    question:
+      '"What do I need to act on for my patients today — and who else on the care team is accountable?"',
     color: '#007d79',
     bgLight: '#d9fbfb',
     textColor: '#004144',
@@ -137,9 +216,23 @@ const PERSONAS: Persona[] = [
     initials: 'MD',
     sidebarGroup: 'Clinical',
     screens: [
-      { route: '/md-smart-launch', label: 'MD Smart Launch', storyBeat: 'SMART on FHIR entry — platform ownership clear, embedded in EMR workflow' },
-      { route: '/panel-cohort-view', label: 'Panel & Cohort (Medicaid RHTP Track 3)', storyBeat: 'Attributed panel — three-column attribution: Clinical PCP / Assigned CHW / BH Provider per patient row' },
-      { route: '/patient-detail', label: 'Patient Detail — Whole Person Care Plan', storyBeat: 'Individual patient — AI care plan, explainability, Whole Person Care Plan tab, gain-share attribution per gap' },
+      {
+        route: '/md-smart-launch',
+        label: 'MD Smart Launch',
+        storyBeat: 'SMART on FHIR entry — platform ownership clear, embedded in EMR workflow',
+      },
+      {
+        route: '/panel-cohort-view',
+        label: 'Panel & Cohort (Medicaid RHTP Track 3)',
+        storyBeat:
+          'Attributed panel — three-column attribution: Clinical PCP / Assigned CHW / BH Provider per patient row',
+      },
+      {
+        route: '/patient-detail',
+        label: 'Patient Detail — Whole Person Care Plan',
+        storyBeat:
+          'Individual patient — AI care plan, explainability, Whole Person Care Plan tab, gain-share attribution per gap',
+      },
     ],
     sampleData: [
       { label: 'Attributed Panel', value: '847 Patients', highlight: false },
@@ -150,11 +243,27 @@ const PERSONAS: Persona[] = [
       { label: 'Gain-Share Eligible', value: '$18,400', highlight: true },
     ],
     tooltips: [
-      { id: 'tt-md-1', label: 'Three-Column Attribution', body: 'Each patient row in Panel & Cohort shows three attribution columns: 🩺 Clinical PCP (claims-based), 🤝 Assigned CHW (social program assignment), and 🧠 BH Provider (behavioral health enrollment). The physician sees the full accountability picture at a glance.', anchor: 'bottom' },
-      { id: 'tt-md-2', label: 'Whole Person Care Plan Tab', body: 'The Patient Detail screen now has a Whole Person Care Plan tab showing clinical, BH, and social care plan goals in a single view — with status, responsible team member, and last update for each goal domain.', anchor: 'bottom' },
-      { id: 'tt-md-3', label: 'Gain-Share Per Gap', body: 'Each open care gap shows the physician\'s attributed gain-share value if closed this measurement year. The $18,400 represents the total opportunity across the panel — visible at the patient level.', anchor: 'top' },
+      {
+        id: 'tt-md-1',
+        label: 'Three-Column Attribution',
+        body: 'Each patient row in Panel & Cohort shows three attribution columns: 🩺 Clinical PCP (claims-based), 🤝 Assigned CHW (social program assignment), and 🧠 BH Provider (behavioral health enrollment). The physician sees the full accountability picture at a glance.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-md-2',
+        label: 'Whole Person Care Plan Tab',
+        body: 'The Patient Detail screen now has a Whole Person Care Plan tab showing clinical, BH, and social care plan goals in a single view — with status, responsible team member, and last update for each goal domain.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-md-3',
+        label: 'Gain-Share Per Gap',
+        body: "Each open care gap shows the physician's attributed gain-share value if closed this measurement year. The $18,400 represents the total opportunity across the panel — visible at the patient level.",
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'Dr. Whitfield sees not just his 847 attributed patients, but which patients have an assigned CHW and BH provider — enabling coordinated whole-person care from a single panel view.',
+    keyInsight:
+      'Dr. Whitfield sees not just his 847 attributed patients, but which patients have an assigned CHW and BH provider — enabling coordinated whole-person care from a single panel view.',
     handoffTo: 'Care Manager',
     timing: { full: 8, half: 5, quick: 3 },
   },
@@ -162,7 +271,8 @@ const PERSONAS: Persona[] = [
     id: 'care-manager',
     role: 'Persona 4',
     title: 'Care Manager',
-    question: '"Who needs me today — and where are patients in their clinical episodes and whole-person care plans?"',
+    question:
+      '"Who needs me today — and where are patients in their clinical episodes and whole-person care plans?"',
     color: '#da1e28',
     bgLight: '#fff1f1',
     textColor: '#750e13',
@@ -170,25 +280,59 @@ const PERSONAS: Persona[] = [
     initials: 'CM',
     sidebarGroup: 'Care Management',
     screens: [
-      { route: '/care-manager', label: 'Care Manager Worklist', storyBeat: 'Smart priority queue — Clinical/BH/Social program filter, BH risk flags, CHW assignment, social needs status per row' },
-      { route: '/patient-episode-summary', label: 'Patient Episode Summary', storyBeat: 'All episodes for a patient — active vs historical, cost vs target' },
-      { route: '/episode-detail', label: 'Episode Detail', storyBeat: 'Episode deep-dive — care setting timeline, quality metrics, claim events' },
-      { route: '/episodic-management-analytics', label: 'Episodic Analytics', storyBeat: 'Portfolio view — Clinical + BH Episodes + Social Program Outcomes tabs; Medicaid RHTP Track 3' },
+      {
+        route: '/care-manager',
+        label: 'Care Manager Worklist',
+        storyBeat:
+          'Smart priority queue — Clinical/BH/Social program filter, BH risk flags, CHW assignment, social needs status per row',
+      },
+      {
+        route: '/patient-episode-summary',
+        label: 'Patient Episode Summary',
+        storyBeat: 'All episodes for a patient — active vs historical, cost vs target',
+      },
+      {
+        route: '/episode-detail',
+        label: 'Episode Detail',
+        storyBeat: 'Episode deep-dive — care setting timeline, quality metrics, claim events',
+      },
+      {
+        route: '/episodic-management-analytics',
+        label: 'Episodic Analytics',
+        storyBeat:
+          'Portfolio view — Clinical + BH Episodes + Social Program Outcomes tabs; Medicaid RHTP Track 3',
+      },
     ],
     sampleData: [
       { label: 'Assigned Patients', value: '156 Patients', highlight: false },
-      { label: 'Today\'s Priority Queue', value: '12 Patients', highlight: true },
+      { label: "Today's Priority Queue", value: '12 Patients', highlight: true },
       { label: 'ADT Alerts (New)', value: '4 Alerts', highlight: true },
       { label: 'Active Episodes', value: '38 Episodes', highlight: false },
       { label: 'BH Risk Flags', value: '9 Patients', highlight: false },
       { label: 'Social Needs Open', value: '14 Patients', highlight: true },
     ],
     tooltips: [
-      { id: 'tt-cm-1', label: 'Clinical/BH/Social Filter', body: 'The worklist now has a program-type filter bar: Clinical / BH / Social / All. Each filter shows patient counts and surfaces domain-appropriate columns — BH Risk (condition, FUH/FUM status) and Social Needs (screening status, CHW assigned, SNAP status) appear alongside clinical episode data.', anchor: 'bottom' },
-      { id: 'tt-cm-2', label: 'BH Episodes Tab', body: 'Episodic Analytics now has a BH Episodes tab showing HEDIS BH scorecard: FUH (Follow-Up After Hospitalization), FUM (Follow-Up After ED), AMM (Antidepressant Medication Management), IET (Initiation & Engagement of SUD Treatment), and CDF (Cardiovascular Monitoring for Patients with Schizophrenia).', anchor: 'bottom' },
-      { id: 'tt-cm-3', label: 'Social Program Outcomes Tab', body: 'Episodic Analytics also has a Social Program Outcomes tab showing SNAP/Housing/LIHEAP/CHW/BH engagement completion rates, an SDOH cost impact line chart, and a cost avoidance summary — quantifying the social program ROI at the care manager portfolio level.', anchor: 'top' },
+      {
+        id: 'tt-cm-1',
+        label: 'Clinical/BH/Social Filter',
+        body: 'The worklist now has a program-type filter bar: Clinical / BH / Social / All. Each filter shows patient counts and surfaces domain-appropriate columns — BH Risk (condition, FUH/FUM status) and Social Needs (screening status, CHW assigned, SNAP status) appear alongside clinical episode data.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-cm-2',
+        label: 'BH Episodes Tab',
+        body: 'Episodic Analytics now has a BH Episodes tab showing HEDIS BH scorecard: FUH (Follow-Up After Hospitalization), FUM (Follow-Up After ED), AMM (Antidepressant Medication Management), IET (Initiation & Engagement of SUD Treatment), and CDF (Cardiovascular Monitoring for Patients with Schizophrenia).',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-cm-3',
+        label: 'Social Program Outcomes Tab',
+        body: 'Episodic Analytics also has a Social Program Outcomes tab showing SNAP/Housing/LIHEAP/CHW/BH engagement completion rates, an SDOH cost impact line chart, and a cost avoidance summary — quantifying the social program ROI at the care manager portfolio level.',
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'Angela Torres has 12 patients in today\'s priority queue, 4 new ADT alerts, 9 BH risk flags, and 14 open social needs — all visible in a single filtered worklist view.',
+    keyInsight:
+      "Angela Torres has 12 patients in today's priority queue, 4 new ADT alerts, 9 BH risk flags, and 14 open social needs — all visible in a single filtered worklist view.",
     handoffTo: 'Community Health Worker',
     timing: { full: 10, half: 6, quick: 3 },
   },
@@ -204,10 +348,28 @@ const PERSONAS: Persona[] = [
     initials: 'CW',
     sidebarGroup: 'Whole Person Care',
     screens: [
-      { route: '/chw-workflow', label: 'CHW Workflow', storyBeat: 'Home Visit Schedule — Start Visit (checklist + notes), Clinical context panel, Reschedule modal; Outreach Log; Resource Navigation' },
-      { route: '/social-needs-screening', label: 'Social Needs Screening', storyBeat: 'PRAPARE screening → social Task creation — feeds Quality & Compliance screening rate' },
-      { route: '/program-eligibility', label: 'Program Eligibility', storyBeat: 'Eligible programs from screening results — SNAP, housing, food, transport' },
-      { route: '/benefit-enrollment', label: 'Benefit Enrollment', storyBeat: 'SNAP enrolled, housing pending, gaps flagged — feeds enrollment rate metric' },
+      {
+        route: '/chw-workflow',
+        label: 'CHW Workflow',
+        storyBeat:
+          'Home Visit Schedule — Start Visit (checklist + notes), Clinical context panel, Reschedule modal; Outreach Log; Resource Navigation',
+      },
+      {
+        route: '/social-needs-screening',
+        label: 'Social Needs Screening',
+        storyBeat:
+          'PRAPARE screening → social Task creation — feeds Quality & Compliance screening rate',
+      },
+      {
+        route: '/program-eligibility',
+        label: 'Program Eligibility',
+        storyBeat: 'Eligible programs from screening results — SNAP, housing, food, transport',
+      },
+      {
+        route: '/benefit-enrollment',
+        label: 'Benefit Enrollment',
+        storyBeat: 'SNAP enrolled, housing pending, gaps flagged — feeds enrollment rate metric',
+      },
     ],
     sampleData: [
       { label: 'Assigned Patients', value: '198 Patients', highlight: false },
@@ -218,11 +380,27 @@ const PERSONAS: Persona[] = [
       { label: 'Start Visit Actions', value: 'Checklist + Notes', highlight: false },
     ],
     tooltips: [
-      { id: 'tt-chw-1', label: 'Start Visit Workflow', body: 'The Start Visit button opens a visit checklist (home safety, medication review, vitals, SDOH screening, care plan goals, referral confirmation) plus a free-text notes field. Completing the visit logs it to the outreach record and notifies the care manager.', anchor: 'bottom' },
-      { id: 'tt-chw-2', label: 'Reschedule Modal', body: 'The Reschedule button opens a date/time picker with a required reason dropdown (patient request, CHW conflict, not home, transportation, medical conflict, weather/safety, other). The rescheduled visit updates the visit schedule and sends a notification.', anchor: 'bottom' },
-      { id: 'tt-chw-3', label: 'Screening Rate → Quality & Compliance', body: 'Every PRAPARE screening completed by a CHW feeds the Social Programs tab in Quality & Compliance. The CHW\'s 91% screening rate directly contributes to the PRAPARE measure completion rate tracked at the program level.', anchor: 'top' },
+      {
+        id: 'tt-chw-1',
+        label: 'Start Visit Workflow',
+        body: 'The Start Visit button opens a visit checklist (home safety, medication review, vitals, SDOH screening, care plan goals, referral confirmation) plus a free-text notes field. Completing the visit logs it to the outreach record and notifies the care manager.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-chw-2',
+        label: 'Reschedule Modal',
+        body: 'The Reschedule button opens a date/time picker with a required reason dropdown (patient request, CHW conflict, not home, transportation, medical conflict, weather/safety, other). The rescheduled visit updates the visit schedule and sends a notification.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-chw-3',
+        label: 'Screening Rate → Quality & Compliance',
+        body: "Every PRAPARE screening completed by a CHW feeds the Social Programs tab in Quality & Compliance. The CHW's 91% screening rate directly contributes to the PRAPARE measure completion rate tracked at the program level.",
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'The CHW workflow now has fully functional action buttons — Start Visit (checklist + notes), Clinical (episode context panel), and Reschedule (date/time + reason) — making the home visit schedule a live workflow tool.',
+    keyInsight:
+      'The CHW workflow now has fully functional action buttons — Start Visit (checklist + notes), Clinical (episode context panel), and Reschedule (date/time + reason) — making the home visit schedule a live workflow tool.',
     handoffTo: 'BH & Crisis Specialist',
     timing: { full: 10, half: 6, quick: 3 },
   },
@@ -230,7 +408,8 @@ const PERSONAS: Persona[] = [
     id: 'bh-crisis',
     role: 'Persona 6',
     title: 'BH & Crisis Specialist',
-    question: '"How do I dispatch the right crisis response and ensure the patient gets connected to ongoing BH care?"',
+    question:
+      '"How do I dispatch the right crisis response and ensure the patient gets connected to ongoing BH care?"',
     color: '#9f1853',
     bgLight: '#fff0f7',
     textColor: '#740937',
@@ -238,9 +417,23 @@ const PERSONAS: Persona[] = [
     initials: 'BH',
     sidebarGroup: 'Whole Person Care + Care Management',
     screens: [
-      { route: '/crisis-pathway', label: 'Crisis Pathway', storyBeat: 'Active crisis events — SDOH context panel per patient, dispatch (988/CSU/Mobile/ED), post-crisis care plan linkage' },
-      { route: '/crisis-pathway', label: 'Patient Pathway — Dorothy Simmons', storyBeat: 'PRAPARE screening → SNAP enrollment → 12-week BH engagement → A1C 9.2% → 7.1% — the connected story' },
-      { route: '/cbo-directory', label: 'CBO Directory', storyBeat: 'Community org network — domain-tagged, capacity status, linked patients' },
+      {
+        route: '/crisis-pathway',
+        label: 'Crisis Pathway',
+        storyBeat:
+          'Active crisis events — SDOH context panel per patient, dispatch (988/CSU/Mobile/ED), post-crisis care plan linkage',
+      },
+      {
+        route: '/crisis-pathway',
+        label: 'Patient Pathway — Dorothy Simmons',
+        storyBeat:
+          'PRAPARE screening → SNAP enrollment → 12-week BH engagement → A1C 9.2% → 7.1% — the connected story',
+      },
+      {
+        route: '/cbo-directory',
+        label: 'CBO Directory',
+        storyBeat: 'Community org network — domain-tagged, capacity status, linked patients',
+      },
     ],
     sampleData: [
       { label: 'Active Crisis Events', value: '3 Events', highlight: true },
@@ -251,11 +444,27 @@ const PERSONAS: Persona[] = [
       { label: 'A1C Improvement', value: '9.2% → 7.1%', highlight: true },
     ],
     tooltips: [
-      { id: 'tt-bh-1', label: 'SDOH Context Panel', body: 'Each crisis patient has an SDOH Context slide-out showing housing/food/safety risk, active social needs, CHW/CBO enrollments, crisis history, and a care manager note. This gives the crisis dispatcher the social context needed for the right dispatch decision.', anchor: 'bottom' },
-      { id: 'tt-bh-2', label: 'Patient Pathway (Dorothy Simmons)', body: 'The Patient Pathway panel shows Dorothy Simmons\' 4-stage journey: PRAPARE Screening (food insecurity, A1C 9.2%) → SNAP Enrollment at Tri-County Food Bank ($234/mo) → 12-Week BH Engagement + 8 CHW home visits (94% med adherence) → A1C improvement 9.2% → 7.1%. This is the single most compelling connected story in the platform.', anchor: 'bottom' },
-      { id: 'tt-bh-3', label: 'Post-Crisis Care Plan Linkage', body: 'After a crisis dispatch, the Crisis Pathway creates a BH follow-up task linked to the patient\'s care manager worklist. The care manager sees the crisis event, the dispatch type, and the BH task status — closing the loop between crisis response and ongoing care management.', anchor: 'top' },
+      {
+        id: 'tt-bh-1',
+        label: 'SDOH Context Panel',
+        body: 'Each crisis patient has an SDOH Context slide-out showing housing/food/safety risk, active social needs, CHW/CBO enrollments, crisis history, and a care manager note. This gives the crisis dispatcher the social context needed for the right dispatch decision.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-bh-2',
+        label: 'Patient Pathway (Dorothy Simmons)',
+        body: "The Patient Pathway panel shows Dorothy Simmons' 4-stage journey: PRAPARE Screening (food insecurity, A1C 9.2%) → SNAP Enrollment at Tri-County Food Bank ($234/mo) → 12-Week BH Engagement + 8 CHW home visits (94% med adherence) → A1C improvement 9.2% → 7.1%. This is the single most compelling connected story in the platform.",
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-bh-3',
+        label: 'Post-Crisis Care Plan Linkage',
+        body: "After a crisis dispatch, the Crisis Pathway creates a BH follow-up task linked to the patient's care manager worklist. The care manager sees the crisis event, the dispatch type, and the BH task status — closing the loop between crisis response and ongoing care management.",
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'The Crisis Pathway is the BH anchor screen — SDOH context per patient, 988/CSU/Mobile/ED dispatch, post-crisis care plan linkage, and the Dorothy Simmons Patient Pathway showing the full social → clinical improvement arc.',
+    keyInsight:
+      'The Crisis Pathway is the BH anchor screen — SDOH context per patient, 988/CSU/Mobile/ED dispatch, post-crisis care plan linkage, and the Dorothy Simmons Patient Pathway showing the full social → clinical improvement arc.',
     handoffTo: 'Specialist / Care Team',
     timing: { full: 10, half: 6, quick: 3 },
   },
@@ -263,7 +472,8 @@ const PERSONAS: Persona[] = [
     id: 'specialist',
     role: 'Persona 7',
     title: 'Specialist / Care Team',
-    question: '"What\'s been sent to me and why does it matter for this patient\'s whole-person care?"',
+    question:
+      '"What\'s been sent to me and why does it matter for this patient\'s whole-person care?"',
     color: '#f1620a',
     bgLight: '#fff2e8',
     textColor: '#8a3800',
@@ -271,10 +481,26 @@ const PERSONAS: Persona[] = [
     initials: 'SP',
     sidebarGroup: 'Clinical + Network',
     screens: [
-      { route: '/care-team-inbox', label: 'Care Team Inbox', storyBeat: 'Universal task inbox — clinical, BH, and social program tasks in one view' },
-      { route: '/specialist-inbox', label: 'Specialist Inbox', storyBeat: 'Assigned tasks — intervention, gain-share value, quality measure impact' },
-      { route: '/referral-tracking', label: 'Referral Tracking', storyBeat: 'Referrals in flight — status, referring provider, due dates' },
-      { route: '/referral-journey-tracker', label: 'Referral Journey Tracker', storyBeat: 'End-to-end referral journey — 7 stages, timestamps, responsible party' },
+      {
+        route: '/care-team-inbox',
+        label: 'Care Team Inbox',
+        storyBeat: 'Universal task inbox — clinical, BH, and social program tasks in one view',
+      },
+      {
+        route: '/specialist-inbox',
+        label: 'Specialist Inbox',
+        storyBeat: 'Assigned tasks — intervention, gain-share value, quality measure impact',
+      },
+      {
+        route: '/referral-tracking',
+        label: 'Referral Tracking',
+        storyBeat: 'Referrals in flight — status, referring provider, due dates',
+      },
+      {
+        route: '/referral-journey-tracker',
+        label: 'Referral Journey Tracker',
+        storyBeat: 'End-to-end referral journey — 7 stages, timestamps, responsible party',
+      },
     ],
     sampleData: [
       { label: 'Pending Tasks', value: '3 Tasks', highlight: true },
@@ -285,11 +511,27 @@ const PERSONAS: Persona[] = [
       { label: 'Avg Referral Age', value: '6.2 Days', highlight: false },
     ],
     tooltips: [
-      { id: 'tt-sp-1', label: 'Gain-Share Attribution', body: 'Each specialist task shows the gain-share value attributed to the referring physician if the intervention closes the associated HEDIS measure. This creates a shared financial incentive between PCP and specialist.', anchor: 'bottom' },
-      { id: 'tt-sp-2', label: 'Quality Measure Impact', body: 'The inbox links each task to the specific HEDIS or STARS measure it closes. Dorothy Simmons\' cardiology evaluation closes CBP-236 (Controlling Hypertension) — worth $195 in gain-share to the referring PCP.', anchor: 'bottom' },
-      { id: 'tt-sp-3', label: 'Referral Journey Stages', body: 'The journey tracker shows 7 stages: Ordered → Scheduled → Seen → Report Sent → PCP Reviewed → Gap Closed → Claim Submitted. Each stage has a timestamp and responsible party for full audit trail.', anchor: 'top' },
+      {
+        id: 'tt-sp-1',
+        label: 'Gain-Share Attribution',
+        body: 'Each specialist task shows the gain-share value attributed to the referring physician if the intervention closes the associated HEDIS measure. This creates a shared financial incentive between PCP and specialist.',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-sp-2',
+        label: 'Quality Measure Impact',
+        body: "The inbox links each task to the specific HEDIS or STARS measure it closes. Dorothy Simmons' cardiology evaluation closes CBP-236 (Controlling Hypertension) — worth $195 in gain-share to the referring PCP.",
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-sp-3',
+        label: 'Referral Journey Stages',
+        body: 'The journey tracker shows 7 stages: Ordered → Scheduled → Seen → Report Sent → PCP Reviewed → Gap Closed → Claim Submitted. Each stage has a timestamp and responsible party for full audit trail.',
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'The specialist inbox surfaces 3 pending tasks with clinical context, gain-share value, and quality measure impact — giving specialists the "why" behind each referral, not just the "what".',
+    keyInsight:
+      'The specialist inbox surfaces 3 pending tasks with clinical context, gain-share value, and quality measure impact — giving specialists the "why" behind each referral, not just the "what".',
     handoffTo: 'Quality / Compliance Analyst',
     timing: { full: 8, half: 5, quick: 2 },
   },
@@ -297,7 +539,8 @@ const PERSONAS: Persona[] = [
     id: 'analyst',
     role: 'Persona 8',
     title: 'Quality / Compliance Analyst',
-    question: '"Can we prove the gap was closed across all three program types and report it to the state?"',
+    question:
+      '"Can we prove the gap was closed across all three program types and report it to the state?"',
     color: '#8a3ffc',
     bgLight: '#f6f2ff',
     textColor: '#31135e',
@@ -305,10 +548,29 @@ const PERSONAS: Persona[] = [
     initials: 'QA',
     sidebarGroup: 'Clinical + Analytics',
     screens: [
-      { route: '/care-gap-closure-verification', label: 'Care Gap Closure & Verification', storyBeat: 'Evidence submitted — procedure, provenance, FHIR resource, EDW submission timeline' },
-      { route: '/stars-hedis-mips', label: 'Quality Gaps & Attribution', storyBeat: 'Five-tab quality framework: STARS + HEDIS + MIPS + BH Quality + Social Programs' },
-      { route: '/outcomes-linkage', label: 'Outcomes Linkage', storyBeat: 'Social ROI — executive closing proof for whole-person program investment' },
-      { route: '/executive-outcomes-dashboard', label: 'Executive Dashboard', storyBeat: 'Closed loop — one patient intervention rolling up to network and state-level outcomes' },
+      {
+        route: '/care-gap-closure-verification',
+        label: 'Care Gap Closure & Verification',
+        storyBeat:
+          'Evidence submitted — procedure, provenance, FHIR resource, EDW submission timeline',
+      },
+      {
+        route: '/stars-hedis-mips',
+        label: 'Quality Gaps & Attribution',
+        storyBeat:
+          'Five-tab quality framework: STARS + HEDIS + MIPS + BH Quality + Social Programs',
+      },
+      {
+        route: '/outcomes-linkage',
+        label: 'Outcomes Linkage',
+        storyBeat: 'Social ROI — executive closing proof for whole-person program investment',
+      },
+      {
+        route: '/executive-outcomes-dashboard',
+        label: 'Executive Dashboard',
+        storyBeat:
+          'Closed loop — one patient intervention rolling up to network and state-level outcomes',
+      },
     ],
     sampleData: [
       { label: 'Gaps Submitted (Clinical)', value: '14,220 Gaps', highlight: false },
@@ -319,11 +581,27 @@ const PERSONAS: Persona[] = [
       { label: 'CMS Reporting Deadline', value: '14 Days', highlight: false },
     ],
     tooltips: [
-      { id: 'tt-qa-1', label: 'Quality & Compliance (5 Tabs)', body: 'Quality & Compliance has five program tabs: STARS (payer bonus journey), HEDIS (clinical measure documentation), MIPS (payment adjustment), BH Quality (FUH/FUM/AMM/SAA rates vs targets), and Social Programs (PRAPARE/SNAP/Housing/CHW/BH engagement completion rates).', anchor: 'bottom' },
-      { id: 'tt-qa-2', label: 'Social Program Measures', body: 'The Social Programs tab tracks PRAPARE screening completion (61% vs 80% target), SNAP enrollment (74% vs 85%), housing referral completion (48% vs 70%), CHW home visit rate (82% vs 85%), and dual-need care plan completion (56% vs 75%).', anchor: 'bottom' },
-      { id: 'tt-qa-3', label: 'Closed Loop Reporting', body: 'The executive dashboard shows the full loop: one patient intervention (Dorothy Simmons\' BP control + housing stability) → clinical gap closed + social measure hit → HEDIS numerator + PRAPARE measure → regional score improvement → state-level outcome reported.', anchor: 'top' },
+      {
+        id: 'tt-qa-1',
+        label: 'Quality & Compliance (5 Tabs)',
+        body: 'Quality & Compliance has five program tabs: STARS (payer bonus journey), HEDIS (clinical measure documentation), MIPS (payment adjustment), BH Quality (FUH/FUM/AMM/SAA rates vs targets), and Social Programs (PRAPARE/SNAP/Housing/CHW/BH engagement completion rates).',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-qa-2',
+        label: 'Social Program Measures',
+        body: 'The Social Programs tab tracks PRAPARE screening completion (61% vs 80% target), SNAP enrollment (74% vs 85%), housing referral completion (48% vs 70%), CHW home visit rate (82% vs 85%), and dual-need care plan completion (56% vs 75%).',
+        anchor: 'bottom',
+      },
+      {
+        id: 'tt-qa-3',
+        label: 'Closed Loop Reporting',
+        body: "The executive dashboard shows the full loop: one patient intervention (Dorothy Simmons' BP control + housing stability) → clinical gap closed + social measure hit → HEDIS numerator + PRAPARE measure → regional score improvement → state-level outcome reported.",
+        anchor: 'top',
+      },
     ],
-    keyInsight: 'Quality & Compliance closes the loop across all three program types — 14,220 clinical gaps, 4 BH HEDIS measures, and 5 social program measures all tracked in a single accountability framework.',
+    keyInsight:
+      'Quality & Compliance closes the loop across all three program types — 14,220 clinical gaps, 4 BH HEDIS measures, and 5 social program measures all tracked in a single accountability framework.',
     handoffTo: null,
     timing: { full: 8, half: 5, quick: 2 },
   },
@@ -398,7 +676,7 @@ const SCREEN_TALKING_POINTS: Record<string, string[]> = {
     'Key message: "One worklist, three program lenses — the care manager doesn\'t need three separate systems."',
   ],
   'care-manager-1': [
-    'Open a patient\'s episode summary — show active vs historical episodes, cost vs target.',
+    "Open a patient's episode summary — show active vs historical episodes, cost vs target.",
     'Point to the episode type: CHF, COPD, Hip Replacement — these are the ETG episode categories.',
     'Transition: "The care manager can drill into any episode to see the care setting timeline."',
   ],
@@ -409,7 +687,7 @@ const SCREEN_TALKING_POINTS: Record<string, string[]> = {
   ],
   'care-manager-3': [
     'Show the three analytics tabs: Clinical Episodes, BH Episodes, Social Program Outcomes.',
-    'BH Episodes tab: FUH 67% vs 85% target — this is the care manager\'s BH accountability metric.',
+    "BH Episodes tab: FUH 67% vs 85% target — this is the care manager's BH accountability metric.",
     'Social Program Outcomes: SNAP enrollment 74%, cost avoidance $4,200 — the social ROI at the portfolio level.',
   ],
   'chw-0': [
@@ -430,14 +708,14 @@ const SCREEN_TALKING_POINTS: Record<string, string[]> = {
   ],
   'chw-3': [
     'Show the benefit enrollment status — SNAP enrolled ($234/mo), housing application pending, food bank referral confirmed.',
-    'Point to the enrollment rate metric: 76% — this feeds the CHW Supervisor\'s performance dashboard.',
+    "Point to the enrollment rate metric: 76% — this feeds the CHW Supervisor's performance dashboard.",
     'Transition: "Every enrollment the CHW completes rolls up to the network-level Social Programs quality measure."',
   ],
   'bh-crisis-0': [
     'Show the active crisis events — 3 events, acuity levels (High/Medium/Low), dispatch status.',
     'Click the SDOH Context panel for a patient — housing instability, food insecurity, prior crisis history.',
     'Show the dispatch options: 988, CSU, Mobile Crisis, ED — and how SDOH context informs the right choice.',
-    'Show the post-crisis care plan linkage — BH follow-up task created and linked to the care manager\'s worklist.',
+    "Show the post-crisis care plan linkage — BH follow-up task created and linked to the care manager's worklist.",
   ],
   'bh-crisis-1': [
     'Scroll to the Patient Pathway panel — this is the Dorothy Simmons story.',
@@ -457,7 +735,7 @@ const SCREEN_TALKING_POINTS: Record<string, string[]> = {
   ],
   'specialist-1': [
     'Show the specialist inbox — 3 pending tasks, 2 urgent/STAT.',
-    'Click a task — show the gain-share value ($195 for Dorothy Simmons\' cardiology evaluation) and the HEDIS measure it closes.',
+    "Click a task — show the gain-share value ($195 for Dorothy Simmons' cardiology evaluation) and the HEDIS measure it closes.",
     'Key message: "The specialist sees the \'why\' behind each referral — not just the clinical need, but the quality and financial impact."',
   ],
   'specialist-2': [
@@ -912,9 +1190,10 @@ PERSONAS.forEach((persona, pi) => {
       screenRoute: screen.route,
       storyBeat: screen.storyBeat,
       talkingPoints: SCREEN_TALKING_POINTS[key] ?? [screen.storyBeat],
-      transitionNote: isLastScreenOfPersona && nextPersona
-        ? `Hand off to ${persona.handoffTo ?? nextPersona.title} — ${nextPersona.role}`
-        : null,
+      transitionNote:
+        isLastScreenOfPersona && nextPersona
+          ? `Hand off to ${persona.handoffTo ?? nextPersona.title} — ${nextPersona.role}`
+          : null,
     });
   });
 });
@@ -955,7 +1234,9 @@ function ReferencePanel({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setDebouncedQuery(query), 150);
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [query]);
 
   const q = debouncedQuery.toLowerCase().trim();
@@ -967,7 +1248,9 @@ function ReferencePanel({
           r.personaTitle.toLowerCase().includes(q) ||
           r.talkingPoints.some((tp) => tp.toLowerCase().includes(q)) ||
           r.walkthroughCues.some((c) => c.toLowerCase().includes(q)) ||
-          r.keyDataPoints.some((d) => d.label.toLowerCase().includes(q) || d.value.toLowerCase().includes(q))
+          r.keyDataPoints.some(
+            (d) => d.label.toLowerCase().includes(q) || d.value.toLowerCase().includes(q)
+          )
       )
     : ALL_SCREEN_REFS;
 
@@ -982,7 +1265,11 @@ function ReferencePanel({
       {/* Search bar */}
       <div className="px-4 py-3 border-b border-white/10 flex-shrink-0">
         <div className="relative">
-          <Icon name="MagnifyingGlassIcon" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+          <Icon
+            name="MagnifyingGlassIcon"
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+          />
           <input
             ref={searchRef}
             type="text"
@@ -1026,7 +1313,7 @@ function ReferencePanel({
         {personaGroups.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-white/30">
             <Icon name="MagnifyingGlassIcon" size={24} className="mb-2" />
-            <p className="text-xs">No screens match "{query}"</p>
+            <p className="text-xs">No screens match &quot;{query}&quot;</p>
           </div>
         ) : (
           <div className="py-2">
@@ -1043,10 +1330,15 @@ function ReferencePanel({
                   >
                     {PERSONAS.indexOf(persona) + 1}
                   </div>
-                  <span className="text-2xs font-bold uppercase tracking-widest" style={{ color: persona.color }}>
+                  <span
+                    className="text-2xs font-bold uppercase tracking-widest"
+                    style={{ color: persona.color }}
+                  >
                     {persona.title}
                   </span>
-                  <span className="text-2xs text-white/20 ml-auto">{screens.length} screen{screens.length !== 1 ? 's' : ''}</span>
+                  <span className="text-2xs text-white/20 ml-auto">
+                    {screens.length} screen{screens.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
 
                 {/* Screen rows */}
@@ -1055,7 +1347,10 @@ function ReferencePanel({
                   const isExpanded = expandedIndex === ref.globalIndex;
 
                   return (
-                    <div key={ref.globalIndex} className="mx-2 mb-1 rounded-lg overflow-hidden border border-white/5">
+                    <div
+                      key={ref.globalIndex}
+                      className="mx-2 mb-1 rounded-lg overflow-hidden border border-white/5"
+                    >
                       {/* Screen header row */}
                       <button
                         onClick={() => setExpandedIndex(isExpanded ? null : ref.globalIndex)}
@@ -1068,7 +1363,9 @@ function ReferencePanel({
                         <div
                           className="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0 mt-0.5"
                           style={{
-                            backgroundColor: isCurrentStep ? ref.personaColor : 'rgba(255,255,255,0.1)',
+                            backgroundColor: isCurrentStep
+                              ? ref.personaColor
+                              : 'rgba(255,255,255,0.1)',
                             fontSize: '9px',
                             fontWeight: 700,
                           }}
@@ -1083,14 +1380,19 @@ function ReferencePanel({
                           >
                             {ref.screenLabel}
                           </p>
-                          <p className="text-2xs text-white/35 mt-0.5 leading-relaxed line-clamp-2">{ref.storyBeat}</p>
+                          <p className="text-2xs text-white/35 mt-0.5 leading-relaxed line-clamp-2">
+                            {ref.storyBeat}
+                          </p>
                         </div>
 
                         <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
                           {isCurrentStep && (
                             <span
                               className="text-2xs font-bold px-1.5 py-0.5 rounded"
-                              style={{ backgroundColor: ref.personaColor + '30', color: ref.personaColor }}
+                              style={{
+                                backgroundColor: ref.personaColor + '30',
+                                color: ref.personaColor,
+                              }}
                             >
                               NOW
                             </span>
@@ -1129,12 +1431,18 @@ function ReferencePanel({
                           {/* Tab content */}
                           {activeTab === 'notes' && (
                             <div className="px-3 py-2.5 space-y-2">
-                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">Speaker Notes</p>
+                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">
+                                Speaker Notes
+                              </p>
                               {ref.talkingPoints.map((point, pi) => (
                                 <div key={pi} className="flex gap-2">
                                   <div
                                     className="w-4 h-4 rounded-full flex items-center justify-center text-white flex-shrink-0 mt-0.5"
-                                    style={{ backgroundColor: ref.personaColor + '60', fontSize: '8px', fontWeight: 700 }}
+                                    style={{
+                                      backgroundColor: ref.personaColor + '60',
+                                      fontSize: '8px',
+                                      fontWeight: 700,
+                                    }}
                                   >
                                     {pi + 1}
                                   </div>
@@ -1146,7 +1454,9 @@ function ReferencePanel({
 
                           {activeTab === 'data' && (
                             <div className="px-3 py-2.5">
-                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">Key Data Points</p>
+                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">
+                                Key Data Points
+                              </p>
                               {ref.keyDataPoints.length > 0 ? (
                                 <div className="grid grid-cols-2 gap-1.5">
                                   {ref.keyDataPoints.map((d, di) => (
@@ -1155,20 +1465,31 @@ function ReferencePanel({
                                       className="rounded-lg px-2.5 py-2 border border-white/8"
                                       style={{ backgroundColor: ref.personaColor + '10' }}
                                     >
-                                      <p className="text-2xs text-white/40 leading-tight">{d.label}</p>
-                                      <p className="text-xs font-bold mt-0.5" style={{ color: ref.personaColor }}>{d.value}</p>
+                                      <p className="text-2xs text-white/40 leading-tight">
+                                        {d.label}
+                                      </p>
+                                      <p
+                                        className="text-xs font-bold mt-0.5"
+                                        style={{ color: ref.personaColor }}
+                                      >
+                                        {d.value}
+                                      </p>
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-2xs text-white/25 italic">No key data points defined for this screen.</p>
+                                <p className="text-2xs text-white/25 italic">
+                                  No key data points defined for this screen.
+                                </p>
                               )}
                             </div>
                           )}
 
                           {activeTab === 'cues' && (
                             <div className="px-3 py-2.5 space-y-1.5">
-                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">Live-Click Walkthrough Cues</p>
+                              <p className="text-2xs font-semibold text-white/40 uppercase tracking-widest mb-1.5">
+                                Live-Click Walkthrough Cues
+                              </p>
                               {ref.walkthroughCues.length > 0 ? (
                                 ref.walkthroughCues.map((cue, ci) => (
                                   <div
@@ -1179,7 +1500,9 @@ function ReferencePanel({
                                   </div>
                                 ))
                               ) : (
-                                <p className="text-2xs text-white/25 italic">No walkthrough cues defined for this screen.</p>
+                                <p className="text-2xs text-white/25 italic">
+                                  No walkthrough cues defined for this screen.
+                                </p>
                               )}
                             </div>
                           )}
@@ -1239,31 +1562,37 @@ function PersonaCard({
 }
 
 // ─── Tooltip Component ────────────────────────────────────────────────────────
-function Tooltip({
-  tooltip,
-  accentColor,
-}: {
-  tooltip: TooltipDef;
-  accentColor: string;
-}) {
+function Tooltip({ tooltip, accentColor }: { tooltip: TooltipDef; accentColor: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative inline-block">
       <button
         onClick={() => setOpen((v) => !v)}
         className="text-2xs font-semibold px-2 py-0.5 rounded-full border transition-colors"
-        style={{ borderColor: accentColor + '40', color: accentColor, backgroundColor: accentColor + '10' }}
+        style={{
+          borderColor: accentColor + '40',
+          color: accentColor,
+          backgroundColor: accentColor + '10',
+        }}
       >
         {tooltip.label}
       </button>
       {open && (
         <div
           className={`absolute z-30 w-64 p-3 rounded-xl border border-white/20 shadow-xl text-xs text-white leading-relaxed ${
-            tooltip.anchor === 'top' ? 'bottom-full mb-2' : tooltip.anchor === 'left' ? 'right-full mr-2 top-0' : tooltip.anchor === 'right' ? 'left-full ml-2 top-0' : 'top-full mt-2'
+            tooltip.anchor === 'top'
+              ? 'bottom-full mb-2'
+              : tooltip.anchor === 'left'
+                ? 'right-full mr-2 top-0'
+                : tooltip.anchor === 'right'
+                  ? 'left-full ml-2 top-0'
+                  : 'top-full mt-2'
           }`}
           style={{ backgroundColor: '#1c1c24' }}
         >
-          <p className="font-semibold mb-1" style={{ color: accentColor }}>{tooltip.label}</p>
+          <p className="font-semibold mb-1" style={{ color: accentColor }}>
+            {tooltip.label}
+          </p>
           <p className="text-white/70">{tooltip.body}</p>
           <button
             onClick={() => setOpen(false)}
@@ -1278,11 +1607,7 @@ function Tooltip({
 }
 
 // ─── Demo Track Overlay ───────────────────────────────────────────────────────
-function DemoTrackOverlay({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+function DemoTrackOverlay({ onClose }: { onClose: () => void }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [talkingPointIndex, setTalkingPointIndex] = useState(0);
@@ -1293,7 +1618,9 @@ function DemoTrackOverlay({
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, []);
 
   const step = DEMO_TRACK_STEPS[stepIndex];
@@ -1312,7 +1639,11 @@ function DemoTrackOverlay({
   const isPersonaStart = step.screenIndex === 0;
 
   function goNext() {
-    setCompletedSteps((prev) => { const n = new Set(prev); n.add(stepIndex); return n; });
+    setCompletedSteps((prev) => {
+      const n = new Set(prev);
+      n.add(stepIndex);
+      return n;
+    });
     setStepIndex((i) => Math.min(i + 1, totalSteps - 1));
     setTalkingPointIndex(0);
     setShowAllPoints(false);
@@ -1347,11 +1678,20 @@ function DemoTrackOverlay({
     }
   }
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goNext(); }
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goPrev(); }
-    if (e.key === 'Escape') onClose();
-  }, [stepIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        goNext();
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        goPrev();
+      }
+      if (e.key === 'Escape') onClose();
+    },
+    [stepIndex]
+  ); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -1383,7 +1723,9 @@ function DemoTrackOverlay({
           </div>
           <div>
             <p className="text-white text-sm font-semibold leading-tight">{step.personaTitle}</p>
-            <p className="text-white/40 text-xs">{step.personaRole} · Screen {screenNum} of {screensInPersona}</p>
+            <p className="text-white/40 text-xs">
+              {step.personaRole} · Screen {screenNum} of {screensInPersona}
+            </p>
           </div>
         </div>
 
@@ -1400,15 +1742,27 @@ function DemoTrackOverlay({
                   PERSONAS[step.personaIndex].id === persona.id
                     ? 'text-white'
                     : allDone
-                    ? 'text-white/50' :'text-white/25 hover:text-white/50'
+                      ? 'text-white/50'
+                      : 'text-white/25 hover:text-white/50'
                 }`}
-                style={PERSONAS[step.personaIndex].id === persona.id ? { backgroundColor: persona.color + '30', color: persona.color } : {}}
+                style={
+                  PERSONAS[step.personaIndex].id === persona.id
+                    ? { backgroundColor: persona.color + '30', color: persona.color }
+                    : {}
+                }
               >
                 <div
                   className="w-4 h-4 rounded-full flex items-center justify-center text-white"
-                  style={{ backgroundColor: allDone ? '#198038' : persona.color, opacity: PERSONAS[step.personaIndex].id === persona.id ? 1 : 0.5 }}
+                  style={{
+                    backgroundColor: allDone ? '#198038' : persona.color,
+                    opacity: PERSONAS[step.personaIndex].id === persona.id ? 1 : 0.5,
+                  }}
                 >
-                  {allDone ? <Icon name="CheckIcon" size={8} /> : <span style={{ fontSize: '8px' }}>{PERSONAS.indexOf(persona) + 1}</span>}
+                  {allDone ? (
+                    <Icon name="CheckIcon" size={8} />
+                  ) : (
+                    <span style={{ fontSize: '8px' }}>{PERSONAS.indexOf(persona) + 1}</span>
+                  )}
                 </div>
                 <span className="hidden xl:inline">{persona.initials}</span>
               </button>
@@ -1417,14 +1771,19 @@ function DemoTrackOverlay({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-white/40 text-xs font-mono">{stepIndex + 1} / {totalSteps}</span>
-          <span className="text-white/20 text-xs hidden sm:inline">← → to navigate · Esc to exit</span>
+          <span className="text-white/40 text-xs font-mono">
+            {stepIndex + 1} / {totalSteps}
+          </span>
+          <span className="text-white/20 text-xs hidden sm:inline">
+            ← → to navigate · Esc to exit
+          </span>
           {/* Reference Panel Toggle */}
           <button
             onClick={() => setRefPanelOpen((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors ${
               refPanelOpen
-                ? 'bg-white/15 text-white border-white/30' :'text-white/60 hover:text-white border border-white/20 hover:border-white/40'
+                ? 'bg-white/15 text-white border-white/30'
+                : 'text-white/60 hover:text-white border border-white/20 hover:border-white/40'
             }`}
           >
             <Icon name="BookOpenIcon" size={14} />
@@ -1448,7 +1807,10 @@ function DemoTrackOverlay({
           {isPersonaStart && (
             <div
               className="mx-5 mt-5 px-4 py-3 rounded-xl border flex items-center gap-3"
-              style={{ backgroundColor: step.personaColor + '18', borderColor: step.personaColor + '40' }}
+              style={{
+                backgroundColor: step.personaColor + '18',
+                borderColor: step.personaColor + '40',
+              }}
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
@@ -1457,10 +1819,15 @@ function DemoTrackOverlay({
                 {step.personaInitials}
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: step.personaColor }}>
+                <p
+                  className="text-xs font-bold uppercase tracking-widest"
+                  style={{ color: step.personaColor }}
+                >
                   {step.personaRole} — New Persona
                 </p>
-                <p className="text-white text-sm font-semibold leading-tight">{step.personaTitle}</p>
+                <p className="text-white text-sm font-semibold leading-tight">
+                  {step.personaTitle}
+                </p>
               </div>
             </div>
           )}
@@ -1475,7 +1842,9 @@ function DemoTrackOverlay({
                 {step.screenIndex + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-base leading-tight">{step.screenLabel}</p>
+                <p className="text-white font-semibold text-base leading-tight">
+                  {step.screenLabel}
+                </p>
                 <p className="text-white/50 text-xs mt-1 leading-relaxed">{step.storyBeat}</p>
               </div>
             </div>
@@ -1493,7 +1862,9 @@ function DemoTrackOverlay({
           {/* Talking points */}
           <div className="mx-5 mt-4 flex-1">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">Talking Points</p>
+              <p className="text-white/60 text-xs font-semibold uppercase tracking-widest">
+                Talking Points
+              </p>
               {!showAllPoints && (
                 <button
                   onClick={() => setShowAllPoints(true)}
@@ -1514,9 +1885,17 @@ function DemoTrackOverlay({
                     key={pi}
                     className={`flex gap-3 p-3 rounded-lg border transition-all ${
                       isCurrent
-                        ? 'border-white/20 bg-white/8' :'border-white/5 bg-white/3 opacity-60'
+                        ? 'border-white/20 bg-white/8'
+                        : 'border-white/5 bg-white/3 opacity-60'
                     }`}
-                    style={isCurrent ? { borderColor: step.personaColor + '50', backgroundColor: step.personaColor + '12' } : {}}
+                    style={
+                      isCurrent
+                        ? {
+                            borderColor: step.personaColor + '50',
+                            backgroundColor: step.personaColor + '12',
+                          }
+                        : {}
+                    }
                   >
                     <div
                       className="w-5 h-5 rounded-full flex items-center justify-center text-white text-2xs font-bold flex-shrink-0 mt-0.5"
@@ -1546,9 +1925,15 @@ function DemoTrackOverlay({
           {step.transitionNote && (
             <div className="mx-5 mt-4 mb-2 p-3 rounded-lg border border-white/10 bg-white/5">
               <div className="flex items-start gap-2">
-                <Icon name="ArrowRightCircleIcon" size={14} className="text-white/40 flex-shrink-0 mt-0.5" />
+                <Icon
+                  name="ArrowRightCircleIcon"
+                  size={14}
+                  className="text-white/40 flex-shrink-0 mt-0.5"
+                />
                 <div>
-                  <p className="text-white/40 text-2xs font-semibold uppercase tracking-widest mb-1">Transition</p>
+                  <p className="text-white/40 text-2xs font-semibold uppercase tracking-widest mb-1">
+                    Transition
+                  </p>
                   <p className="text-white/60 text-xs leading-relaxed">{step.transitionNote}</p>
                 </div>
               </div>
@@ -1588,8 +1973,12 @@ function DemoTrackOverlay({
         </div>
 
         {/* Middle panel — step map (hidden when ref panel is open on smaller screens) */}
-        <div className={`hidden lg:flex flex-col overflow-y-auto p-5 gap-4 transition-all ${refPanelOpen ? 'xl:flex w-[280px] flex-shrink-0' : 'flex-1'}`}>
-          <p className="text-white/40 text-xs font-semibold uppercase tracking-widest flex-shrink-0">Full Sequence Map</p>
+        <div
+          className={`hidden lg:flex flex-col overflow-y-auto p-5 gap-4 transition-all ${refPanelOpen ? 'xl:flex w-[280px] flex-shrink-0' : 'flex-1'}`}
+        >
+          <p className="text-white/40 text-xs font-semibold uppercase tracking-widest flex-shrink-0">
+            Full Sequence Map
+          </p>
           <div className="space-y-3">
             {personaStepGroups.map(({ persona, steps: pSteps, startIndex }) => {
               const isCurrentPersona = PERSONAS[step.personaIndex].id === persona.id;
@@ -1604,11 +1993,18 @@ function DemoTrackOverlay({
                   {/* Persona header */}
                   <div
                     className="flex items-center gap-2.5 px-4 py-2.5"
-                    style={{ backgroundColor: isCurrentPersona ? persona.color + '20' : 'rgba(255,255,255,0.03)' }}
+                    style={{
+                      backgroundColor: isCurrentPersona
+                        ? persona.color + '20'
+                        : 'rgba(255,255,255,0.03)',
+                    }}
                   >
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center text-white text-2xs font-bold flex-shrink-0"
-                      style={{ backgroundColor: persona.color, opacity: isCurrentPersona ? 1 : 0.5 }}
+                      style={{
+                        backgroundColor: persona.color,
+                        opacity: isCurrentPersona ? 1 : 0.5,
+                      }}
                     >
                       {PERSONAS.indexOf(persona) + 1}
                     </div>
@@ -1618,7 +2014,12 @@ function DemoTrackOverlay({
                     >
                       {persona.title}
                     </p>
-                    <span className="ml-auto text-2xs" style={{ color: isCurrentPersona ? persona.color + 'aa' : 'rgba(255,255,255,0.2)' }}>
+                    <span
+                      className="ml-auto text-2xs"
+                      style={{
+                        color: isCurrentPersona ? persona.color + 'aa' : 'rgba(255,255,255,0.2)',
+                      }}
+                    >
                       {pSteps.length} screens
                     </span>
                   </div>
@@ -1640,21 +2041,36 @@ function DemoTrackOverlay({
                           <div
                             className="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0"
                             style={{
-                              backgroundColor: isDone ? '#198038' : isCurrent ? persona.color : 'rgba(255,255,255,0.1)',
+                              backgroundColor: isDone
+                                ? '#198038'
+                                : isCurrent
+                                  ? persona.color
+                                  : 'rgba(255,255,255,0.1)',
                             }}
                           >
-                            {isDone ? <Icon name="CheckIcon" size={9} /> : <span style={{ fontSize: '9px' }}>{si + 1}</span>}
+                            {isDone ? (
+                              <Icon name="CheckIcon" size={9} />
+                            ) : (
+                              <span style={{ fontSize: '9px' }}>{si + 1}</span>
+                            )}
                           </div>
                           <p
                             className={`text-xs flex-1 min-w-0 truncate ${
-                              isCurrent ? 'font-semibold' : isDone ? 'text-white/40' : 'text-white/50'
+                              isCurrent
+                                ? 'font-semibold'
+                                : isDone
+                                  ? 'text-white/40'
+                                  : 'text-white/50'
                             }`}
                             style={isCurrent ? { color: persona.color } : {}}
                           >
                             {s.screenLabel}
                           </p>
                           {isCurrent && (
-                            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: persona.color }} />
+                            <div
+                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: persona.color }}
+                            />
                           )}
                         </button>
                       );
@@ -1682,8 +2098,12 @@ function DemoTrackOverlay({
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Icon name="BookOpenIcon" size={15} className="text-white/50" />
-                <span className="text-xs font-semibold text-white/70 uppercase tracking-widest">Presenter Reference</span>
-                <span className="text-2xs text-white/25 bg-white/8 px-1.5 py-0.5 rounded-full">{ALL_SCREEN_REFS.length} screens</span>
+                <span className="text-xs font-semibold text-white/70 uppercase tracking-widest">
+                  Presenter Reference
+                </span>
+                <span className="text-2xs text-white/25 bg-white/8 px-1.5 py-0.5 rounded-full">
+                  {ALL_SCREEN_REFS.length} screens
+                </span>
               </div>
               <button
                 onClick={() => setRefPanelOpen(false)}
@@ -1735,9 +2155,7 @@ export default function DemoOnboardingPage() {
       breadcrumbs={[{ label: 'System' }, { label: 'Demo Onboarding' }]}
     >
       {/* Demo Track Overlay */}
-      {demoTrackOpen && (
-        <DemoTrackOverlay onClose={() => setDemoTrackOpen(false)} />
-      )}
+      {demoTrackOpen && <DemoTrackOverlay onClose={() => setDemoTrackOpen(false)} />}
 
       {/* Header strip */}
       <div className="mb-6">
@@ -1745,7 +2163,8 @@ export default function DemoOnboardingPage() {
           <div>
             <h2 className="text-lg font-semibold text-carbon-gray-100">8-Persona Demo Sequence</h2>
             <p className="text-sm text-carbon-gray-50 mt-0.5">
-              State Executive → Network Director → Physician → Care Manager → CHW → BH &amp; Crisis → Specialist → Quality Analyst
+              State Executive → Network Director → Physician → Care Manager → CHW → BH &amp; Crisis
+              → Specialist → Quality Analyst
             </p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
@@ -1759,8 +2178,12 @@ export default function DemoOnboardingPage() {
               Start Demo Track
             </button>
             <div className="text-right">
-              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold">Progress</p>
-              <p className="text-sm font-bold text-carbon-gray-100">{completedSet.size} / {PERSONAS.length} complete</p>
+              <p className="text-2xs text-carbon-gray-50 uppercase tracking-widest font-semibold">
+                Progress
+              </p>
+              <p className="text-sm font-bold text-carbon-gray-100">
+                {completedSet.size} / {PERSONAS.length} complete
+              </p>
             </div>
             <div className="w-24 h-2 bg-carbon-gray-20 rounded-full overflow-hidden">
               <div
@@ -1777,7 +2200,8 @@ export default function DemoOnboardingPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-blue-900">Demo Track Mode</p>
             <p className="text-xs text-blue-600 mt-0.5">
-              Step-by-step presenter guidance — {DEMO_TRACK_STEPS.length} steps across 8 personas with talking points, screen links, and transition cues. Use ← → arrow keys to advance.
+              Step-by-step presenter guidance — {DEMO_TRACK_STEPS.length} steps across 8 personas
+              with talking points, screen links, and transition cues. Use ← → arrow keys to advance.
             </p>
           </div>
           <button
@@ -1790,15 +2214,21 @@ export default function DemoOnboardingPage() {
 
         {/* Timing mode selector */}
         <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest">Demo Format:</span>
-          {TIMING_MODES.map(tm => (
+          <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest">
+            Demo Format:
+          </span>
+          {TIMING_MODES.map((tm) => (
             <button
               key={tm.key}
               onClick={() => setTimingMode(tm.key)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border transition-colors rounded-full ${
-                timingMode === tm.key ? 'text-white border-transparent' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                timingMode === tm.key
+                  ? 'text-white border-transparent'
+                  : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
               }`}
-              style={timingMode === tm.key ? { backgroundColor: tm.color, borderColor: tm.color } : {}}
+              style={
+                timingMode === tm.key ? { backgroundColor: tm.color, borderColor: tm.color } : {}
+              }
             >
               <Icon name="ClockIcon" size={12} />
               {tm.label}
@@ -1865,22 +2295,33 @@ export default function DemoOnboardingPage() {
                     </span>
                   )}
                 </div>
-                <h3 className="text-xl font-bold mb-1" style={{ color: persona.textColor }}>{persona.title}</h3>
-                <p className="text-sm italic" style={{ color: persona.color }}>{persona.question}</p>
+                <h3 className="text-xl font-bold mb-1" style={{ color: persona.textColor }}>
+                  {persona.title}
+                </h3>
+                <p className="text-sm italic" style={{ color: persona.color }}>
+                  {persona.question}
+                </p>
               </div>
             </div>
 
             {/* Key insight */}
             <div className="mt-4 p-3 bg-white/70 rounded-lg border border-white">
               <div className="flex items-start gap-2">
-                <Icon name="LightBulbIcon" size={16} className="flex-shrink-0 mt-0.5" style={{ color: persona.color } as React.CSSProperties} />
+                <Icon
+                  name="LightBulbIcon"
+                  size={16}
+                  className="flex-shrink-0 mt-0.5"
+                  style={{ color: persona.color } as React.CSSProperties}
+                />
                 <p className="text-sm text-carbon-gray-70 leading-relaxed">{persona.keyInsight}</p>
               </div>
             </div>
 
             {/* Tooltips */}
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest self-center">Key Concepts:</span>
+              <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest self-center">
+                Key Concepts:
+              </span>
               {persona.tooltips.map((tt) => (
                 <Tooltip key={tt.id} tooltip={tt} accentColor={persona.color} />
               ))}
@@ -1890,12 +2331,19 @@ export default function DemoOnboardingPage() {
           {/* Demo screens */}
           <div className="bg-white border border-carbon-gray-20 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-carbon-gray-20 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-carbon-gray-100">Demo Screens for This Persona</h4>
-              <span className="text-2xs text-carbon-gray-50">{persona.screens.length} screens · ~{persona.timing[timingMode]} min</span>
+              <h4 className="text-sm font-semibold text-carbon-gray-100">
+                Demo Screens for This Persona
+              </h4>
+              <span className="text-2xs text-carbon-gray-50">
+                {persona.screens.length} screens · ~{persona.timing[timingMode]} min
+              </span>
             </div>
             <div className="divide-y divide-carbon-gray-10">
               {persona.screens.map((screen, si) => (
-                <div key={`${screen.route}-${si}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-carbon-gray-10 transition-colors group">
+                <div
+                  key={`${screen.route}-${si}`}
+                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-carbon-gray-10 transition-colors group"
+                >
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                     style={{ backgroundColor: persona.color }}
@@ -1936,7 +2384,12 @@ export default function DemoOnboardingPage() {
                   onClick={() => goTo(i)}
                   className="w-2 h-2 rounded-full transition-all"
                   style={{
-                    backgroundColor: i === activeIndex ? persona.color : completedSet.has(i) ? '#a8a8a8' : '#e0e0e0',
+                    backgroundColor:
+                      i === activeIndex
+                        ? persona.color
+                        : completedSet.has(i)
+                          ? '#a8a8a8'
+                          : '#e0e0e0',
                     transform: i === activeIndex ? 'scale(1.4)' : 'scale(1)',
                   }}
                 />
@@ -1972,12 +2425,19 @@ export default function DemoOnboardingPage() {
               className="px-5 py-3 border-b"
               style={{ backgroundColor: persona.bgLight, borderColor: persona.color + '30' }}
             >
-              <h4 className="text-sm font-semibold" style={{ color: persona.textColor }}>Pre-Populated Sample Data</h4>
-              <p className="text-2xs text-carbon-gray-50 mt-0.5">Representative values for this persona's view</p>
+              <h4 className="text-sm font-semibold" style={{ color: persona.textColor }}>
+                Pre-Populated Sample Data
+              </h4>
+              <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                Representative values for this persona&apos;s view
+              </p>
             </div>
             <div className="divide-y divide-carbon-gray-10">
               {persona.sampleData.map((d) => (
-                <div key={d.label} className={`flex items-center justify-between px-5 py-3 ${d.highlight ? 'bg-carbon-gray-10' : ''}`}>
+                <div
+                  key={d.label}
+                  className={`flex items-center justify-between px-5 py-3 ${d.highlight ? 'bg-carbon-gray-10' : ''}`}
+                >
                   <span className="text-xs text-carbon-gray-50">{d.label}</span>
                   <span
                     className={`text-sm font-bold ${d.highlight ? '' : 'text-carbon-gray-100'}`}
@@ -1995,11 +2455,14 @@ export default function DemoOnboardingPage() {
             <div className="bg-white border border-carbon-gray-20 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Icon name="ArrowRightCircleIcon" size={16} className="text-carbon-gray-50" />
-                <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest">Hands Off To</span>
+                <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-widest">
+                  Hands Off To
+                </span>
               </div>
               <p className="text-sm font-semibold text-carbon-gray-100">{persona.handoffTo}</p>
               <p className="text-xs text-carbon-gray-50 mt-1">
-                The demo narrative continues — each persona's output becomes the next persona's input.
+                The demo narrative continues — each persona&apos;s output becomes the next
+                persona&apos;s input.
               </p>
             </div>
           )}
@@ -2018,18 +2481,32 @@ export default function DemoOnboardingPage() {
                 >
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center text-2xs font-bold text-white flex-shrink-0"
-                    style={{ backgroundColor: completedSet.has(i) ? '#198038' : p.color, opacity: i === activeIndex ? 1 : 0.7 }}
+                    style={{
+                      backgroundColor: completedSet.has(i) ? '#198038' : p.color,
+                      opacity: i === activeIndex ? 1 : 0.7,
+                    }}
                   >
-                    {completedSet.has(i) && i !== activeIndex ? <Icon name="CheckIcon" size={10} /> : i + 1}
+                    {completedSet.has(i) && i !== activeIndex ? (
+                      <Icon name="CheckIcon" size={10} />
+                    ) : (
+                      i + 1
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold truncate ${i === activeIndex ? 'text-carbon-gray-100' : 'text-carbon-gray-50'}`}>
+                    <p
+                      className={`text-xs font-semibold truncate ${i === activeIndex ? 'text-carbon-gray-100' : 'text-carbon-gray-50'}`}
+                    >
                       {p.title}
                     </p>
-                    <p className="text-2xs text-carbon-gray-40 truncate">{p.screens.length} screens · {p.timing[timingMode]}m</p>
+                    <p className="text-2xs text-carbon-gray-40 truncate">
+                      {p.screens.length} screens · {p.timing[timingMode]}m
+                    </p>
                   </div>
                   {i === activeIndex && (
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />
+                    <div
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: p.color }}
+                    />
                   )}
                 </div>
               ))}
@@ -2045,7 +2522,9 @@ export default function DemoOnboardingPage() {
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
               <Icon name="CheckCircleIcon" size={32} className="text-green-600 mx-auto mb-2" />
               <p className="text-sm font-bold text-green-800">Demo Sequence Complete</p>
-              <p className="text-xs text-green-600 mt-1">All 8 personas reviewed. The platform tells a single connected whole-person story.</p>
+              <p className="text-xs text-green-600 mt-1">
+                All 8 personas reviewed. The platform tells a single connected whole-person story.
+              </p>
             </div>
           )}
         </div>

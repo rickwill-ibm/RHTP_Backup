@@ -21,7 +21,13 @@
  *
  * C9.2 yield: pa-lifecycle feed -> pa-lifecycle T1 (captured PA request lifecycle).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One preauthorization Claim resource pulled from the bundle. */
 interface PaResource {
@@ -101,8 +107,10 @@ function parse(payload: string): RawRecord<PaResource>[] {
 function validate(raw: RawRecord<PaResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
-  if (statusHistory(resource).length === 0) issues.push({ reasonCode: 'missing-status-history', fieldPath: 'statusHistory' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'patient.reference' });
+  if (statusHistory(resource).length === 0)
+    issues.push({ reasonCode: 'missing-status-history', fieldPath: 'statusHistory' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -125,9 +133,15 @@ function normalize(raw: RawRecord<PaResource>, deps: PipelineDeps): NormalizedRe
     provenance: 'pa-lifecycle-capture',
   };
   return {
-    domain: 'pa-lifecycle', memberId, resourceType: 'PriorAuthRequest', fhirResourceId: paRef,
-    eventType: 'pa-lifecycle.captured', tier: 'T1', idempotencyKey: `pa-lifecycle:${id}`,
-    provenance: 'pa-lifecycle-capture', consent: { part2Restricted: false, segmentLabels: [] },
+    domain: 'pa-lifecycle',
+    memberId,
+    resourceType: 'PriorAuthRequest',
+    fhirResourceId: paRef,
+    eventType: 'pa-lifecycle.captured',
+    tier: 'T1',
+    idempotencyKey: `pa-lifecycle:${id}`,
+    provenance: 'pa-lifecycle-capture',
+    consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
     occurredAt: submittedAt ? `${submittedAt}T00:00:00Z` : new Date(deps.now()).toISOString(),
     payload: payload as unknown as Record<string, unknown>,

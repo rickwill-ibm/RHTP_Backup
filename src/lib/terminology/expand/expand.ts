@@ -9,7 +9,12 @@
  */
 import { valueSetRegistry, type ValueSetRegistry } from '../registry/valueSetRegistry';
 import { SYSTEM_URIS, type TerminologySystem } from '../types';
-import { declaredCurrentVersion, isGovernedSystem, membersForVersion, systemDisplay } from '../validateCode/membership';
+import {
+  declaredCurrentVersion,
+  isGovernedSystem,
+  membersForVersion,
+  systemDisplay,
+} from '../validateCode/membership';
 
 /** One member of an expansion. */
 export interface ExpansionEntry {
@@ -46,7 +51,7 @@ const DEFAULT_MAX = 1000;
 /** Enumerate the membership of a governed value-set version. */
 export function expandValueSet(
   system: TerminologySystem | string,
-  opts: ExpandOptions = {},
+  opts: ExpandOptions = {}
 ): ValueSetExpansion | undefined {
   if (!isGovernedSystem(system)) return undefined;
   const registry = opts.registry ?? valueSetRegistry;

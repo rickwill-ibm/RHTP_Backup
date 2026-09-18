@@ -36,9 +36,15 @@ export default function ProviderSelectionPage() {
         <div className="bg-[#d0e2ff] border-b border-[#97c1ff] px-6 py-2 flex items-center gap-6 flex-wrap">
           <span className="text-xs font-semibold text-[#0043ce]">Referring for: Maria Redhawk</span>
           <span className="text-xs text-[#0043ce]">Contract Network: Medicaid RHTP Track 3</span>
-          <span className="text-xs text-[#0043ce]">Referral Specialty: Endocrinology / Family Medicine</span>
-          <span className="text-xs text-[#0043ce]">Patient Location: Martin, SD 57551 (Bennett County)</span>
-          <span className="text-xs font-semibold text-[#b45309]">⚠ Frontier county — nearest specialist 47–198 miles</span>
+          <span className="text-xs text-[#0043ce]">
+            Referral Specialty: Endocrinology / Family Medicine
+          </span>
+          <span className="text-xs text-[#0043ce]">
+            Patient Location: Martin, SD 57551 (Bennett County)
+          </span>
+          <span className="text-xs font-semibold text-[#b45309]">
+            ⚠ Frontier county — nearest specialist 47–198 miles
+          </span>
         </div>
       }
     >

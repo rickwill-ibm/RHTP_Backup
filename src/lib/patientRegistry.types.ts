@@ -55,16 +55,27 @@ export interface CdsCardEntry {
 }
 
 export interface HouseholdDependentRec {
-  name: string; relation: string; age: number; dob: string; plan: string; consent: string;
+  name: string;
+  relation: string;
+  age: number;
+  dob: string;
+  plan: string;
+  consent: string;
   gaps: { label: string; urgency: 'critical' | 'high' | 'due'; detail: string }[];
   coordinatedOutreach?: string;
 }
 
 export interface HouseholdCaregiverRec {
-  name: string; relation: string; age: number; condition: string; clinicalMetric: string;
-  pharmacy: string; prescriber: string;
+  name: string;
+  relation: string;
+  age: number;
+  condition: string;
+  clinicalMetric: string;
+  pharmacy: string;
+  prescriber: string;
   meds: { name: string; dose: string; indication: string }[];
-  consentScopeItems: string[]; consentExclusions: string[];
+  consentScopeItems: string[];
+  consentExclusions: string[];
 }
 
 export interface Household {
@@ -129,8 +140,13 @@ export interface RegistryPatient {
   recentOrders?: OrderEntry[];
   carePlanDomains?: CarePlanDomain[];
   recentEncounters?: {
-    id: string; date: string; type: string; setting: string;
-    provider: string; reason: string; status: string;
+    id: string;
+    date: string;
+    type: string;
+    setting: string;
+    provider: string;
+    reason: string;
+    status: string;
   }[];
   fhirGoals?: { id: string; description: string; status: string; dueDate: string; note: string }[];
   household?: Household;

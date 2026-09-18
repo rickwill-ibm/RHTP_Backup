@@ -43,11 +43,11 @@ export async function runProjectionOnce(
   outbox: OutboxStore,
   graph: GraphStore,
   checkpoint: ProjectionCheckpointStore,
-  deps: ProjectionConsumerDeps,
+  deps: ProjectionConsumerDeps
 ): Promise<ProjectionRunResult> {
   const rows = await outbox.all();
   const eligible = rows.filter(
-    (r) => (r.status === 'confirmed' || r.status === 'published') && typeof r.sequence === 'number',
+    (r) => (r.status === 'confirmed' || r.status === 'published') && typeof r.sequence === 'number'
   );
 
   // group by member, ordered by sequence (per-member FIFO)

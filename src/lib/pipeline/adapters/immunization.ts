@@ -10,7 +10,13 @@
  *
  * C9.2 yield: immunizations feed -> immunizations T1 (registry-attested).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR Immunization pulled from the bundle. */
 interface ImmunizationResource {
@@ -39,7 +45,11 @@ function str(v: unknown, fallback = ''): string {
 }
 
 /** vaccineCode.coding[0] as a CVX coding triple (code may be ''). */
-function cvxCode(resource: Record<string, unknown>): { system: string; code: string; display: string } {
+function cvxCode(resource: Record<string, unknown>): {
+  system: string;
+  code: string;
+  display: string;
+} {
   const coding = obj(resource.vaccineCode).coding;
   const first = Array.isArray(coding) ? obj(coding[0]) : {};
   return {
@@ -78,8 +88,10 @@ function parse(payload: string): RawRecord<ImmunizationResource>[] {
 function validate(raw: RawRecord<ImmunizationResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!patientSourceId(resource)) issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
-  if (!cvxCode(resource).code) issues.push({ reasonCode: 'missing-vaccine-code', fieldPath: 'vaccineCode.coding' });
+  if (!patientSourceId(resource))
+    issues.push({ reasonCode: 'missing-patient', fieldPath: 'patient.reference' });
+  if (!cvxCode(resource).code)
+    issues.push({ reasonCode: 'missing-vaccine-code', fieldPath: 'vaccineCode.coding' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -108,7 +120,9 @@ function normalize(raw: RawRecord<ImmunizationResource>, deps: PipelineDeps): No
     provenance: 'immunization-registry',
     consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
-    occurredAt: occurrenceDateTime ? `${occurrenceDateTime}T00:00:00Z` : new Date(deps.now()).toISOString(),
+    occurredAt: occurrenceDateTime
+      ? `${occurrenceDateTime}T00:00:00Z`
+      : new Date(deps.now()).toISOString(),
     payload: payload as unknown as Record<string, unknown>,
   };
 }

@@ -37,10 +37,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       outcome: 'failure',
       detail: `role=${principal.role} is not ops-scoped`,
     });
-    return NextResponse.json(
-      ooError('Dead-letter review requires an ops role', 'forbidden'),
-      { status: 403 },
-    );
+    return NextResponse.json(ooError('Dead-letter review requires an ops role', 'forbidden'), {
+      status: 403,
+    });
   }
 
   const url = new URL(req.url);
@@ -50,7 +49,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json(ooError(`invalid kind "${kindParam}"`, 'invalid'), { status: 400 });
   }
   if (statusParam !== null && !isDeadLetterStatus(statusParam)) {
-    return NextResponse.json(ooError(`invalid status "${statusParam}"`, 'invalid'), { status: 400 });
+    return NextResponse.json(ooError(`invalid status "${statusParam}"`, 'invalid'), {
+      status: 400,
+    });
   }
 
   try {
@@ -60,7 +61,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       ...(kindParam !== null && isDeadLetterKind(kindParam) ? { kind: kindParam } : {}),
       ...(statusParam !== null && isDeadLetterStatus(statusParam) ? { status: statusParam } : {}),
     };
-    const items = statusParam !== null ? await store.list(filter) : await listOpenItems(store, filter);
+    const items =
+      statusParam !== null ? await store.list(filter) : await listOpenItems(store, filter);
     await audit({
       ts: new Date().toISOString(),
       actor: principal.userId,
@@ -71,6 +73,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     });
     return NextResponse.json({ count: items.length, items }, { status: 200 });
   } catch {
-    return NextResponse.json(ooError('Failed to list dead-letter items', 'exception'), { status: 500 });
+    return NextResponse.json(ooError('Failed to list dead-letter items', 'exception'), {
+      status: 500,
+    });
   }
 }

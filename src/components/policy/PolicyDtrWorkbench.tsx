@@ -25,6 +25,7 @@ import {
 } from '@/lib/policy/workflow/stageflow';
 import { GenerateArtifactsStage } from '@/components/policy/workbench/GenerateArtifactsStage';
 import { EncodingReviewPanel } from '@/components/policy/EncodingReviewPanel';
+import { CriteriaReviewPanel } from '@/components/policy/CriteriaReviewPanel';
 import { AssistantDock } from '@/components/policy/workbench/AssistantDock';
 import { projectCoverageRules } from '@/components/policy/workbench/generateInputs';
 import type { CodeDisposition } from '@/lib/policy/crd/coverageDisposition';
@@ -312,14 +313,17 @@ export function PolicyDtrWorkbench(): React.ReactElement {
             )}
 
             {review.kind === 'criteria' && (
-              <EncodingReviewPanel
-                review={review}
-                dispositions={dispositions}
-                onDispositionsChange={setDispositions}
-                onExplainCode={explainCode}
-                onSubmit={submitForSignoff}
-                onProgressChange={setProgress}
-              />
+              <>
+                <CriteriaReviewPanel review={review} onSubmit={submitForSignoff} />
+                <EncodingReviewPanel
+                  review={review}
+                  dispositions={dispositions}
+                  onDispositionsChange={setDispositions}
+                  onExplainCode={explainCode}
+                  onSubmit={submitForSignoff}
+                  onProgressChange={setProgress}
+                />
+              </>
             )}
 
             {review.kind === 'code-table' && (

@@ -13,7 +13,13 @@
  *
  * C9.2 yield: goals/tasks feed -> goals-tasks T1 (goal + task).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR resource pulled from the bundle (goal or task lane). */
 interface GtResource {
@@ -84,18 +90,24 @@ function validate(raw: RawRecord<GtResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { kind, resource } = raw.data;
   if (kind === 'goal') {
-    if (!subjectSourceId(resource, 'subject')) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-    if (!codeOf(obj(resource.description))) issues.push({ reasonCode: 'missing-goal-code', fieldPath: 'description.coding' });
+    if (!subjectSourceId(resource, 'subject'))
+      issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+    if (!codeOf(obj(resource.description)))
+      issues.push({ reasonCode: 'missing-goal-code', fieldPath: 'description.coding' });
   } else {
-    if (!subjectSourceId(resource, 'for')) issues.push({ reasonCode: 'missing-subject', fieldPath: 'for.reference' });
-    if (!codeOf(obj(resource.code))) issues.push({ reasonCode: 'missing-task-code', fieldPath: 'code.coding' });
+    if (!subjectSourceId(resource, 'for'))
+      issues.push({ reasonCode: 'missing-subject', fieldPath: 'for.reference' });
+    if (!codeOf(obj(resource.code)))
+      issues.push({ reasonCode: 'missing-task-code', fieldPath: 'code.coding' });
   }
   return { ok: issues.length === 0, issues };
 }
 
 function normalizeGoal(resource: Record<string, unknown>, deps: PipelineDeps): NormalizedRecord {
   const goalId = str(resource.id);
-  const memberId = deps.resolveIdentity(subjectSourceId(resource, 'subject'), { feed: SOURCE.feed });
+  const memberId = deps.resolveIdentity(subjectSourceId(resource, 'subject'), {
+    feed: SOURCE.feed,
+  });
   const goalRef = `Goal/${goalId}`;
   const startDate = str(resource.startDate);
   const target = Array.isArray(resource.target) ? obj(resource.target[0]) : {};

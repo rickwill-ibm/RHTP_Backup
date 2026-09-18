@@ -1,7 +1,7 @@
 # Terminology-asset registry (`src/lib/terminology/registry/`)
 
 The semantic layer needs more than a code lookup: it needs to manage the
-**currency, versioning, and lifecycle** of *every* value set, code system,
+**currency, versioning, and lifecycle** of _every_ value set, code system,
 classification, and ontology it governs — and HCC is only **one** of many risk
 models, while behavioral and social domains bring their own families. This is
 that facility, built as an **honest stub/registry** now; live refresh/fetch from
@@ -9,26 +9,26 @@ external authorities is the roadmap **Terminology iteration**.
 
 > Every seeded **version** and **date** is an **illustrative stub** pending the
 > real terminology server / VSAC SVS+FHIR / CMS HCC crosswalk / Gravity package /
-> NLM feeds. The registry manages *metadata*; code **content** is answered by the
+> NLM feeds. The registry manages _metadata_; code **content** is answered by the
 > `TerminologyService`, not here.
 
 ## The asset model — `TerminologyAsset`
 
 One **version** of one managed value set / code system / classification:
 
-| field | meaning |
-| --- | --- |
-| `id` | unique per version, e.g. `cms-hcc-v28` |
-| `name` | human name, e.g. `CMS-HCC` |
-| `family` | `clinical` \| `risk` \| `quality` \| `behavioral` \| `social` \| `privacy` |
-| `steward` | the authority (CMS, NLM/VSAC, HL7 Gravity, SAMHSA, …) |
-| `system` | canonical OID/URL; versions of one logical asset **share** this |
-| `version` | version string (stub), e.g. `V28`, `FY2026`, `2.6.0` |
-| `effectiveDate` / `expirationDate` | the version's validity window |
-| `status` | `draft` \| `active` \| `superseded` \| `retired` |
-| `lastRefreshed` / `refreshCadence` | when it was last pulled + how often it must be |
-| `bindingStrength` | `required` \| `extensible` \| `preferred` \| `example` |
-| `sourceUrl` | where the real content is stewarded |
+| field                              | meaning                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `id`                               | unique per version, e.g. `cms-hcc-v28`                                     |
+| `name`                             | human name, e.g. `CMS-HCC`                                                 |
+| `family`                           | `clinical` \| `risk` \| `quality` \| `behavioral` \| `social` \| `privacy` |
+| `steward`                          | the authority (CMS, NLM/VSAC, HL7 Gravity, SAMHSA, …)                      |
+| `system`                           | canonical OID/URL; versions of one logical asset **share** this            |
+| `version`                          | version string (stub), e.g. `V28`, `FY2026`, `2.6.0`                       |
+| `effectiveDate` / `expirationDate` | the version's validity window                                              |
+| `status`                           | `draft` \| `active` \| `superseded` \| `retired`                           |
+| `lastRefreshed` / `refreshCadence` | when it was last pulled + how often it must be                             |
+| `bindingStrength`                  | `required` \| `extensible` \| `preferred` \| `example`                     |
+| `sourceUrl`                        | where the real content is stewarded                                        |
 
 Assets sharing a `system` are **versions of one logical asset** (e.g.
 `cms-hcc-v24` superseded, `cms-hcc-v28` active).

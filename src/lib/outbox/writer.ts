@@ -33,7 +33,7 @@ export class OutboxWriter {
 
   constructor(
     private readonly deps: OutboxDeps,
-    lock?: MemberLock,
+    lock?: MemberLock
   ) {
     this.lock = lock ?? new MemberLock();
   }
@@ -52,7 +52,9 @@ export class OutboxWriter {
   }
 
   /** Convenience: enqueue then pump the member (the common single-writer path). */
-  async submit(input: OutboxIntentInput): Promise<{ intentId: string; deduped: boolean } & PumpResult> {
+  async submit(
+    input: OutboxIntentInput
+  ): Promise<{ intentId: string; deduped: boolean } & PumpResult> {
     const { intentId, deduped } = await this.enqueue(input);
     const result = await this.pump(input.memberId);
     return { intentId, deduped, ...result };

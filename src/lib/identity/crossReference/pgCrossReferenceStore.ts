@@ -43,13 +43,18 @@ interface XrefRow {
 export function createPgCrossReferenceStore(
   pg: PgLike,
   id = 'pg-cross-reference',
-  deps?: Partial<XrefEventDeps>,
+  deps?: Partial<XrefEventDeps>
 ): CrossReferenceStore {
   const eventDeps: XrefEventDeps = { now: deps?.now ?? clock.now, rng: deps?.rng ?? clock.rng };
 
   async function insert(
     op: string,
-    cols: Partial<Record<'source_id' | 'member_id' | 'surviving_member_id' | 'merged_member_id' | 'feed', string | null>>,
+    cols: Partial<
+      Record<
+        'source_id' | 'member_id' | 'surviving_member_id' | 'merged_member_id' | 'feed',
+        string | null
+      >
+    >
   ): Promise<void> {
     await pg.query(
       `INSERT INTO identity_xref
@@ -63,14 +68,17 @@ export function createPgCrossReferenceStore(
         cols.merged_member_id ?? null,
         cols.feed ?? null,
         clock.nowIso(),
-      ],
+      ]
     );
   }
 
-  async function foldFacts(): Promise<{ links: Map<string, Set<string>>; merges: Map<string, string> }> {
+  async function foldFacts(): Promise<{
+    links: Map<string, Set<string>>;
+    merges: Map<string, string>;
+  }> {
     const res = await pg.query<XrefRow>(
       `SELECT op, source_id, member_id, surviving_member_id, merged_member_id
-         FROM identity_xref ORDER BY seq ASC`,
+         FROM identity_xref ORDER BY seq ASC`
     );
     const links = new Map<string, Set<string>>();
     const merges = new Map<string, string>();
@@ -107,23 +115,30 @@ export function createPgCrossReferenceStore(
       return resolveLookup(links, merges, sourceId);
     },
     async merge(survivingMemberId, mergedMemberId): Promise<C2Event> {
-      await insert('merge', { surviving_member_id: survivingMemberId, merged_member_id: mergedMemberId });
+      await insert('merge', {
+        surviving_member_id: survivingMemberId,
+        merged_member_id: mergedMemberId,
+      });
       return mergedEvent(survivingMemberId, mergedMemberId, eventDeps);
     },
     async unmerge(survivingMemberId, mergedMemberId): Promise<C2Event> {
-      await insert('unmerge', { surviving_member_id: survivingMemberId, merged_member_id: mergedMemberId });
+      await insert('unmerge', {
+        surviving_member_id: survivingMemberId,
+        merged_member_id: mergedMemberId,
+      });
       return unmergedEvent(survivingMemberId, mergedMemberId, eventDeps);
     },
     async events(): Promise<C2Event[]> {
       // Rebuild the emitted stream from the fact rows in order (deterministic).
       const res = await pg.query<XrefRow>(
         `SELECT op, source_id, member_id, surviving_member_id, merged_member_id
-           FROM identity_xref ORDER BY seq ASC`,
+           FROM identity_xref ORDER BY seq ASC`
       );
       return res.rows.map((r) => {
         if (r.op === 'link') return linkedEvent(r.source_id!, r.member_id!, undefined, eventDeps);
         if (r.op === 'unlink') return unlinkedEvent(r.source_id!, r.member_id!, eventDeps);
-        if (r.op === 'merge') return mergedEvent(r.surviving_member_id!, r.merged_member_id!, eventDeps);
+        if (r.op === 'merge')
+          return mergedEvent(r.surviving_member_id!, r.merged_member_id!, eventDeps);
         return unmergedEvent(r.surviving_member_id!, r.merged_member_id!, eventDeps);
       });
     },

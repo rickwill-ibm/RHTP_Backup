@@ -12,11 +12,11 @@ endpoint is wired (full integration is a later roadmap iteration).
 Both express the **same seam** (`ExternalIdentityResolver`): a cross-reference
 call and a demographics call. Only the wire encoding differs.
 
-| Seam call          | PIX/PDQ (HL7v2)                  | PIXm/PDQm (FHIR)                         |
-| ------------------ | -------------------------------- | ---------------------------------------- |
-| `crossReference`   | **PIX** `QBP^Q23` / `RSP^K23`    | **PIXm** `Patient/$ihe-pix`              |
-| `demographicQuery` | **PDQ** `QBP^Q22` / `RSP^K22`    | **PDQm** `GET Patient?family=&birthdate=`|
-| Transport          | HL7v2 over MLLP                  | FHIR REST + auth                         |
+| Seam call          | PIX/PDQ (HL7v2)               | PIXm/PDQm (FHIR)                          |
+| ------------------ | ----------------------------- | ----------------------------------------- |
+| `crossReference`   | **PIX** `QBP^Q23` / `RSP^K23` | **PIXm** `Patient/$ihe-pix`               |
+| `demographicQuery` | **PDQ** `QBP^Q22` / `RSP^K22` | **PDQm** `GET Patient?family=&birthdate=` |
+| Transport          | HL7v2 over MLLP               | FHIR REST + auth                          |
 
 - **PIX / PIXm** — Patient Identifier Cross-referencing: given a patient id in
   one assigning authority, return the id(s) in other domains **plus the

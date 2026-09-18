@@ -6,12 +6,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveGovernanceBackend } from '../_lib/backendAdapter';
-import {
-  requireGovRole,
-  parseMutationBody,
-  auditGov,
-  serverError,
-} from '../_lib/routeKit';
+import { requireGovRole, parseMutationBody, auditGov, serverError } from '../_lib/routeKit';
 
 export const runtime = 'nodejs';
 
@@ -32,7 +27,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       'value-set-governance.replay',
       valueSetId,
       'success',
-      `version=${version}`,
+      `version=${version}`
     );
     return NextResponse.json(binding, { status: 200 });
   } catch {

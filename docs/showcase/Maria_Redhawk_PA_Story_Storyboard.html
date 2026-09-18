@@ -1,0 +1,423 @@
+<title>Maria Redhawk's PA Story</title>
+<style>
+  :root{
+    --navy:#0b2140; --navy2:#12325a; --ink:#132339; --paper:#f7f4ee; --card:#fffdf9;
+    --line:#e2dcd0; --teal:#0f766e; --teal2:#0e7490; --amber:#b45309; --red:#b42318;
+    --green:#1f7a3d; --violet:#5b3fa3; --muted:#5c6675; --chip:#eef2f7;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.05);
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  :root[data-theme="dark"], :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#0a1a30; --navy2:#0f2540; --ink:#e8ecf2; --paper:#0c1420; --card:#111c2c;
+      --line:#22344c; --muted:#9aa7b8; --chip:#17263a;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --navy2:#0f2540; }
+  }
+  :root[data-theme="dark"]{
+    --navy:#0a1a30; --navy2:#0f2540; --ink:#e8ecf2; --paper:#0c1420; --card:#111c2c;
+    --line:#22344c; --muted:#9aa7b8; --chip:#17263a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;margin:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 96px}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:600;line-height:1.18;letter-spacing:-.01em}
+  a{color:var(--teal2)}
+  /* header */
+  header.hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#f4f1ea;padding:52px 0 40px;margin-bottom:8px}
+  header.hero .wrap{padding-bottom:0}
+  .kicker{font-family:var(--sans);text-transform:uppercase;letter-spacing:.16em;font-size:11.5px;color:#9fc7d6;font-weight:700}
+  header.hero h1{color:#fff;font-size:38px;margin:.32em 0 .18em}
+  header.hero p.sub{color:#cdd8e6;font-size:16.5px;max-width:760px;margin:.2em 0 0}
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .badge{font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.22);color:#e9f1f7;background:rgba(255,255,255,.06)}
+  .badge b{color:#fff}
+  /* section */
+  section{margin-top:38px}
+  h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-family:var(--sans);font-weight:700;border-top:2px solid var(--ink);padding-top:10px;margin:0 0 18px}
+  .lead{font-size:19px;font-family:var(--serif);color:var(--ink);max-width:820px}
+  .lead .fork{color:var(--amber);font-style:italic}
+  /* member card */
+  .member{display:grid;grid-template-columns:64px 1fr;gap:18px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:14px;padding:20px 22px;box-shadow:var(--shadow)}
+  .avatar{width:64px;height:64px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#2f6f86,#0e3f52);color:#eaf6fb;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;font-weight:600}
+  .member h3{margin:.1em 0 .1em;font-size:21px}
+  .member .role{color:var(--muted);font-size:13.5px;margin-bottom:10px}
+  .protect{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .pill{font-size:12px;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:4px 9px;color:var(--ink)}
+  .pill b{color:var(--teal)}
+  /* honesty ledger */
+  .ledger{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .lcol{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 16px 8px;box-shadow:var(--shadow)}
+  .lcol h4{margin:0 0 6px;font-size:14.5px}
+  .lcol.real{border-top:3px solid var(--green)}
+  .lcol.prop{border-top:3px solid var(--amber)}
+  .lcol.ill{border-top:3px solid var(--violet)}
+  .lcol .tag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .lcol.real .tag{color:var(--green)} .lcol.prop .tag{color:var(--amber)} .lcol.ill .tag{color:var(--violet)}
+  .lcol ul{margin:8px 0 8px;padding-left:16px} .lcol li{font-size:12.8px;margin-bottom:7px;color:var(--ink)}
+  .lcol li code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:11.5px}
+  /* beats */
+  .beat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+  .beat .top{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .beat .no{font-family:var(--serif);font-size:15px;font-weight:700;color:#fff;background:var(--navy2);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .beat .btitle{font-family:var(--serif);font-size:17.5px;font-weight:600;flex:1 1 240px}
+  .lane{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:7px;color:#fff;white-space:nowrap}
+  .lane.emr{background:#0e7490}.lane.pa{background:#5b3fa3}.lane.payer{background:#12325a}.lane.pra{background:#0f766e}.lane.surv{background:#b45309}.lane.ledger{background:#334155}.lane.member{background:#0f766e}
+  .verdict{display:flex;gap:6px;flex:0 0 auto}
+  .vchip{font-size:11px;font-weight:700;border-radius:6px;padding:3px 7px;border:1px solid}
+  .vchip.proof{color:var(--teal);border-color:var(--teal);background:rgba(15,118,110,.07)}
+  .vchip.auth{color:var(--navy2);border-color:var(--navy2);background:rgba(18,50,90,.06)}
+  :root[data-theme="dark"] .vchip.auth, :root:not([data-theme="light"]) .vchip.auth{color:#9db9e0;border-color:#3a5578}
+  .beat .body{padding:14px 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 26px}
+  .beat .body .full{grid-column:1/-1}
+  .beat .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:2px}
+  .beat .see{font-size:14px;margin:0 0 10px}
+  .beat .rec{font-size:12.5px;color:var(--muted);font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;background:var(--chip);border-radius:7px;padding:8px 10px;margin:0}
+  .beat .note{font-size:13px;border-left:3px solid var(--amber);padding:2px 0 2px 12px;margin:10px 0 0;color:var(--ink)}
+  .beat .note b{color:var(--amber)}
+  .beat.clock{border-left:4px solid var(--red)}
+  .beat.clock .no{background:var(--red)}
+  .clocktag{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:7px;padding:4px 9px}
+  .beat.detect{border-left:4px solid var(--amber)}
+  .beat.detect .no{background:var(--amber)}
+  /* fork */
+  .fork2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .path{border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .path.a{background:linear-gradient(180deg,rgba(31,122,61,.09),var(--card));border-top:4px solid var(--green)}
+  .path.b{background:linear-gradient(180deg,rgba(180,35,24,.07),var(--card));border-top:4px solid var(--red)}
+  .path h3{margin:0 0 2px;font-size:19px}
+  .path .ptag{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .path.a .ptag{color:var(--green)} .path.b .ptag{color:var(--red)}
+  .path p{font-size:13.6px;margin:9px 0}
+  .path .rec{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,Consolas,monospace;background:var(--chip);border-radius:7px;padding:8px 10px}
+  .path ul{padding-left:17px;margin:8px 0} .path li{font-size:13px;margin-bottom:6px}
+  /* clock appendix */
+  table.reg{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+  table.reg th,table.reg td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.reg th{background:var(--navy2);color:#eaf1f8;font-family:var(--sans);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+  table.reg td code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12px}
+  table.reg tr:last-child td{border-bottom:none}
+  /* coalition */
+  .redteam{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+  .rt{display:grid;grid-template-columns:76px 1fr;gap:0;border-bottom:1px solid var(--line)}
+  .rt:last-child{border-bottom:none}
+  .rt .sev{font-size:10.5px;font-weight:800;letter-spacing:.05em;padding:14px 12px;color:#fff;display:flex;align-items:flex-start;justify-content:center}
+  .rt .sev.h{background:var(--red)} .rt .sev.m{background:var(--amber)} .rt .sev.l{background:#64748b}
+  .rt .rtb{padding:12px 16px}
+  .rt .rtb .was{font-size:12.5px;color:var(--muted);text-decoration:line-through;margin:0 0 3px}
+  .rt .rtb .fix{font-size:13.4px;margin:0}
+  .rt .rtb .fix b{color:var(--teal)}
+  /* decisions */
+  .qs{display:grid;gap:12px}
+  .q{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--navy2);border-radius:12px;padding:15px 18px;box-shadow:var(--shadow)}
+  .q h4{margin:0 0 4px;font-size:15.5px}
+  .q p{margin:5px 0;font-size:13.6px}
+  .q .rc{font-size:12.5px;color:var(--teal);font-weight:600}
+  .foot{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
+  @media (max-width:720px){
+    .ledger,.fork2,.beat .body{grid-template-columns:1fr}
+    header.hero h1{font-size:29px}
+    .member{grid-template-columns:1fr}.avatar{display:none}
+  }
+  @media print{header.hero{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.beat,.path,.lcol,.q{break-inside:avoid}}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Golden Thread · First End-to-End Showcase · Storyboard v1 (coalition-hardened)</div>
+    <h1>Maria Redhawk's PA Story</h1>
+    <p class="sub">One member, one urgent prior authorization, threaded through the whole simulation — so the thesis lands in the room and survives the skeptic: <b>evidence earns the machine authority; a clinician still owns every clinical&nbsp;“no”; and when the plan misses a clock, the miss is caught, contained, and can’t be hidden.</b></p>
+    <div class="badges">
+      <span class="badge"><b>Aligned, illustrative</b> — NIST does not certify AI systems; not a conformance assessment</span>
+      <span class="badge"><b>Seed data · mock channel</b> — not transmitted; member &amp; provider fictional</span>
+      <span class="badge"><b>PHI-safe</b> — codes/refs only; clinical specifics abstract</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <p class="lead">A clinician marks Maria’s service <b>expedited</b>. Her plan has <b>72&nbsp;hours</b> from receipt to decide. It pends for a missing record — and the clock keeps running. <span class="fork">Two endings are possible, and the demo tells the truth about both:</span> the system catches the jeopardy and gets her a real decision in time — or it misses, and the safety net makes the miss a governed, appealable, fully-visible event rather than a silent denial.</p>
+  </section>
+
+  <!-- MEMBER -->
+  <section>
+    <h2 class="sec">The member — drawn with dignity, protections first</h2>
+    <div class="member">
+      <div class="avatar">MR</div>
+      <div>
+        <h3>Maria Redhawk <span style="font-weight:400;font-size:14px;color:var(--muted)">(illustrative)</span></h3>
+        <div class="role">American Indian / Alaska Native · <b>voluntarily</b> enrolled in a Medicaid MCO (UnitedHealthcare Community Plan, seed) — permissible under SSA §1932(a)(2)(C), which exempts AI/AN members from <i>mandatory</i> managed-care enrollment. Urgent, time-sensitive <b>medical</b> service (not a drug, not SUD-related). Rendering site: an I/T/U-affiliated clinic (illustrative).</div>
+        <div class="lbl" style="margin-top:6px">The story is built on what protects her, not on her being the one who gets denied:</div>
+        <div class="protect">
+          <span class="pill"><b>I/T/U access</b> preserved in- or out-of-network — 42 CFR 438.14</span>
+          <span class="pill"><b>Language access</b> — §1557 / 45 CFR Part 92 (interpreter, taglines on the NABD)</span>
+          <span class="pill"><b>Fairness screen</b> works <i>for</i> her — §1557 four-fifths</span>
+          <span class="pill"><b>Timeliness safeguard</b> — 438.210(d)(2)</span>
+          <span class="pill"><b>Full appeal + State fair hearing</b> — 438 Subpart F</span>
+        </div>
+        <p class="note" style="margin-top:12px"><b>Casting guardrail:</b> Maria is <i>not</i> positioned as the “vulnerable member who gets denied,” and her thread is deliberately <b>decoupled</b> from the seed §1557 disparate-impact cohort. Default demo path is the <b>save</b> (Path&nbsp;A). If the demo is tribal-facing, vet the name and framing with tribal partners before it ships.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HONESTY LEDGER -->
+  <section>
+    <h2 class="sec">Honesty ledger — what’s real, what we’re proposing, what’s illustrative</h2>
+    <div class="ledger">
+      <div class="lcol real">
+        <div class="tag">Real — reused engine</div>
+        <ul>
+          <li>The 11-stage sealed thread (EMR → surveillance) with per-stage decision + audit record.</li>
+          <li>The pend + records-request kickback (<code>277-RFAI</code>) loop.</li>
+          <li>Deemed-adverse fire with its <b>floor</b> — it still fires at full autonomy (<code>pDeemedTimeout</code>).</li>
+          <li>The NABD is issued by a <b>human (UM)</b>, never an agent auto-deny (<code>human:UM</code>).</li>
+          <li>Twin-Ladder verdict per stage — permitted rung, <b>adverse capped at A1 (“Advise”)</b>, submission gate.</li>
+          <li>Hash-chained append-only ledger + live per-entry re-verify; NIST per-record tag.</li>
+        </ul>
+      </div>
+      <div class="lcol prop">
+        <div class="tag">Proposed — build for this showcase</div>
+        <ul>
+          <li>The <b>member-anchored single thread</b> as the spine (today F6 fires across the book, not on one named member).</li>
+          <li>A <b>clock-jeopardy detector</b>. Today only the NIST tag <code>DEEMED-ADVERSE-TIMEOUT</code> exists in <code>nistMap</code>; it is <b>not</b> in the 40-algorithm library and mints <b>no ticket</b>.</li>
+          <li>The <b>acceleration ticket</b> → UM ops, pre-loaded RCA + recommendation + verdict.</li>
+          <li>A distinct <b>member-appeal / fair-hearing</b> pathway (the engine’s recovery lane is for <i>provider payment disputes</i>, not member appeals).</li>
+          <li>The member-facing <b>NABD + §1557 language-access</b> beat, and the <b>oversight signal</b> back to the plan/State.</li>
+        </ul>
+      </div>
+      <div class="lcol ill">
+        <div class="tag">Illustrative — labeled</div>
+        <ul>
+          <li>Maria and the provider are fictional and PHI-safe; member/provider names carry “(illustrative).”</li>
+          <li>Mock channel — nothing transmitted.</li>
+          <li>Clinical specifics kept abstract; no diagnosis narrative.</li>
+          <li>Clock cadence is illustrative pacing.</li>
+          <li>Gold-carding is a commercial/state-statute construct, shown only where a plan adopts it via policy.</li>
+          <li>NIST alignment is demonstrated by the log — not a certification.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORYBOARD -->
+  <section>
+    <h2 class="sec">The storyboard — beat by beat, across every lane</h2>
+
+    <div class="beat">
+      <div class="top"><div class="no">0</div><div class="btitle">Cold open — the human stakes</div><span class="lane member">Member</span></div>
+      <div class="body">
+        <div class="full"><div class="lbl">What the audience sees</div><p class="see">A single quiet card: Maria, and a clock set to 72:00. No machinery yet. Her clinician has flagged the service expedited. The question the whole system exists to answer well: <i>will she get an answer in time?</i></p></div>
+        <div class="full"><p class="note"><b>Presenter:</b> This is who the ladder is for. Everything technical after this is in service of this one card.</p></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">1</div><div class="btitle">EMR launch — SMART on FHIR (Epic)</div><span class="lane emr">EMR</span>
+        <div class="verdict"><span class="vchip proof">PROOF D2</span><span class="vchip auth">AUTH · HOTL</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The clinician opens Maria in the EHR; a SMART-on-FHIR launch mints the thread. Agents attach in read/assist.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">SMART launch sealed · iss + patient ref (masked) + encounter · thread id minted · provenance = EHR context.</p></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">2</div><div class="btitle">CRD — Coverage Requirements Discovery (Da Vinci)</div><span class="lane pra">Payer Agent</span>
+        <div class="verdict"><span class="vchip proof">PROOF D3</span><span class="vchip auth">AUTH · Autonomous</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The payer discloses its rules back to the provider: <b>PA is required</b> for this service, with the documentation set. Disclosure is non-adverse, so the agent can act autonomously.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">CRD response sealed · PA-required flag · documentation rules · policy version pinned.</p></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">3</div><div class="btitle">Gold-card fold — waiver checked, does not apply</div><span class="lane pra">Payer Agent</span>
+        <div class="verdict"><span class="vchip proof">PROOF D3</span><span class="vchip auth">AUTH · Autonomous</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The gold-card program is checked; this service/provider does <b>not</b> clear the waiver bar, so PA is <b>not</b> waived. Automation waives the routine cases — Maria’s is the case that earns a proper human-grade path.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">goldCardApplied=false · criteria evaluated vs published policy · favorable-waiver not met (illustrative construct).</p></div>
+        <div class="full"><p class="note"><b>Presenter:</b> Automation doesn’t paper over the hard case — it routes it correctly. One tight line; gold-carding is shown only where a plan adopts it.</p></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">4</div><div class="btitle">DTR — documentation templates &amp; rules</div><span class="lane pra">Provider Agent</span>
+        <div class="verdict"><span class="vchip proof">PROOF D2</span><span class="vchip auth">AUTH · HOTL</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">Structured documentation is assembled in the EHR and completeness-scored. One <b>specific deficiency</b> is flagged — the missing record that will drive the pend. The system already knows exactly what’s missing.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">DTR QuestionnaireResponse sealed · completeness score · named deficiency flag.</p></div>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">5</div><div class="btitle">PAS — prior-auth submission (X12 278) · clock starts</div><span class="lane pra">Provider Agent</span>
+        <div class="verdict"><span class="vchip proof">PROOF D3</span><span class="vchip auth">AUTH · Human-released</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The 278 bundle is built and sealed, then <b>released by an authorized human</b> — submission is human-gated by design. <b>On the plan’s receipt, the 72-hour expedited decision clock starts</b> (438.210(d)(2)).</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">278 built + sealed · authorized human release (agent will not transmit) · <b>clock t=0 at receipt</b>.</p></div>
+        <div class="full"><p class="note"><b>Correction applied:</b> the decision clock runs from <b>receipt of the request</b> (here) — not from the pend. A pend consumes clock; it doesn’t start or reset it.</p></div>
+      </div>
+    </div>
+
+    <div class="beat clock">
+      <div class="top"><div class="no">6</div><div class="btitle">Payer operations — PEND for records</div><span class="lane payer">Payer</span>
+        <div class="verdict"><span class="vchip proof">PROOF D1</span><span class="vchip auth">AUTH · HOTL</span></div><span class="clocktag">clock running</span></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">Payer UM pends for the missing clinical record, with a <b>specific reason</b> to the provider, and fires the records request (<code>277-RFAI</code>). The 72-hour clock is now <b>ticking down</b>. Any timeframe extension is capped and requires member notice — tightly limited for an expedited request.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">Determination = pend · specific reason to provider · clock consuming · on expiry → deemed-adverse NABD (human-issued), never a silent auto-deny.</p></div>
+        <div class="full"><p class="note"><b>Presenter:</b> This is the jaws of the trap. From here, doing nothing has a rule-defined consequence.</p></div>
+      </div>
+    </div>
+
+    <div class="beat clock">
+      <div class="top"><div class="no">7</div><div class="btitle">The clock runs — records haven’t returned</div><span class="lane ledger">Ledger / Time</span><span class="clocktag">68:00 → 72:00</span></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The records haven’t come back. The clock nears zero. Left alone, the plan’s <b>own rule</b> converts silence into a denial — a <b>constructive denial by operation of law</b> the moment the clock expires.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">Clock provenance visible: t=0 (receipt), extension? (none), member-notice status · countdown sealed at each tick.</p></div>
+      </div>
+    </div>
+
+    <div class="beat detect">
+      <div class="top"><div class="no">8</div><div class="btitle">Detection — clock-jeopardy caught before expiry</div><span class="lane surv">Surveillance → UM Ops</span>
+        <div class="verdict"><span class="vchip proof">PROOF D1→</span><span class="vchip auth">AUTH · Advise</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">A <b>clock-jeopardy detector</b> flags Maria’s pend <b>before</b> expiry and mints a governed ticket to <b>UM operations</b> (the timeliness owner — <i>not</i> the Medical Director yet). The ticket is pre-loaded: which record is missing, the exact DTR deficiency, the recommended action, and the Twin-Ladder verdict. NIST function: <b>MANAGE · Accountable &amp; Transparent</b>.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">Detection sealed · routed to UM ops · RCA + recommendation attached · false-positive discipline noted (rule out benign late-record before escalating).</p></div>
+        <div class="full"><p class="note"><b>Correction applied:</b> the clock ticket goes to <b>UM (timeliness)</b>, not the Medical Director — timeliness is administrative, not a clinical necessity call. Both are labeled <b>Proposed</b> (the detector and ticket aren’t built yet).</p></div>
+      </div>
+    </div>
+
+    <div class="beat detect">
+      <div class="top"><div class="no">9</div><div class="btitle">Assemble the missing evidence — governed, on-ledger, human-released</div><span class="lane pra">Provider + Payer Agent</span>
+        <div class="verdict"><span class="vchip proof">PROOF D1→D3</span><span class="vchip auth">AUTH · capped</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">The agent re-runs DTR against the <b>exact</b> deficiency, pulls the specific missing record via the provider agent, re-assembles the completed 278, and <b>stages it for the reviewer</b>. As the packet completes, <b>PROOF ratchets up D1→D3</b> — but AUTHORITY stays capped: the agent <b>assembles and proposes</b>; it does not decide, and it does not transmit anything adverse. The weakest-link cap is shown on screen.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">Records-gap closed · 278 re-assembled + sealed · proposed → awaiting authorized human action · Part 2 honored if any record is SUD-adjacent.</p></div>
+        <div class="full"><p class="note"><b>Renamed from “initiate PA behind the scenes.”</b> Nothing here is behind the scenes and the agent starts no authorization — it prepares evidence, transparently, for a human to act on.</p></div>
+      </div>
+    </div>
+
+    <!-- FORK -->
+    <div class="beat">
+      <div class="top"><div class="no">10</div><div class="btitle">The determination — the fork (both endings are honest)</div><span class="lane payer">Payer</span></div>
+      <div class="body"><div class="full">
+        <div class="fork2" style="margin-top:2px">
+          <div class="path a">
+            <div class="ptag">Path A · default hero — the save</div>
+            <h3>A decision, in time</h3>
+            <p>The completed packet reaches UM within the clock and hands to the <b>Medical Director (Dr.&nbsp;S.&nbsp;Patel)</b> for the <b>clinical</b> determination. The clinician <b>approves</b> in time. Maria gets her service. Access preserved — the timeliness posture <b>recovered</b>.</p>
+            <p class="rec">Approval sealed within clock · two hand-offs recorded (UM timeliness → MD clinical) · thread closes clean.</p>
+            <p style="font-size:12.5px;color:var(--muted)"><b>This is the thesis, true and literal:</b> evidence earned the machine the right to accelerate; a clinician still owned the decision.</p>
+          </div>
+          <div class="path b">
+            <div class="ptag">Path B · the safety net — an honest failure, contained</div>
+            <h3>The clock expires anyway</h3>
+            <p>This is a <b>plan failure</b> — a constructive denial by operation of law. <b>No human chose it.</b> We do not dress it up as governance working. What the safeguard <b>guarantees</b> is that the failure is caught, attributed, and impossible to hide:</p>
+            <ul>
+              <li>A <b>human (UM) issues a proper NABD</b> — never an agent, never mislabeled as a clinical denial.</li>
+              <li>Member-facing notice with <b>§1557 language access</b> (interpreter, taglines).</li>
+              <li><b>Appeal + State fair hearing</b> rights, incl. <b>deemed exhaustion</b> — 438.408(c)(3) / (f)(1)(i).</li>
+              <li>The miss itself becomes an <b>oversight signal</b> back to plan-performance / program integrity for the State.</li>
+            </ul>
+            <p style="font-size:12.5px;color:var(--muted)"><b>Note:</b> new-PA case → aid-paid-pending does <i>not</i> attach (it would only on a reduction/termination of an existing authorization).</p>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="beat">
+      <div class="top"><div class="no">11</div><div class="btitle">The ledger — hand it to a State auditor</div><span class="lane ledger">Shared Evidence</span>
+        <div class="verdict"><span class="vchip proof">PROOF D2</span><span class="vchip auth">AUTH · HOTL</span></div></div>
+      <div class="body">
+        <div><div class="lbl">What the audience sees</div><p class="see">Maria’s whole thread replays as a sealed, hash-chained, NIST-tagged trail. Re-verify one seal live — integrity holds. Filter by actor: <b>no autonomous adverse action, ever</b>. NIST AI-RMF stops being a checklist and becomes the record of what the agents did.</p></div>
+        <div><div class="lbl">Ledger record</div><p class="rec">Full thread re-derivable · per-entry re-verify · actor filter proves the guardrail · GOVERN/MAP/MEASURE/MANAGE tags on real entries.</p></div>
+        <div class="full"><p class="note"><b>Close:</b> “Evidence earned the machine the right to accelerate. A clinician still owned the decision. Maria got an answer in time — or, when the plan missed, her full due-process rights, on the record. None of it is asserted; all of it is on the ledger.”</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REG CLOCK -->
+  <section>
+    <h2 class="sec">The regulatory clock — precise, for the auditor in the room</h2>
+    <table class="reg">
+      <tr><th>Element</th><th>Rule</th><th>How the story uses it</th></tr>
+      <tr><td>Expedited PA decision — 72 hours</td><td><code>42 CFR 438.210(d)(2)</code> (longstanding)</td><td>Maria’s clock. Anchored here — <b>not</b> to CMS-0057-F, which didn’t change the expedited timeframe.</td></tr>
+      <tr><td>Standard PA decision — 7 calendar days</td><td><code>CMS-0057-F</code>, eff. 1/1/2026 (was 14 days under 438.210(d)(1))</td><td>Cited as <b>broader tightening context</b> only; not Maria’s timeframe. Rule <b>excludes drugs</b> — Maria’s service is a medical service.</td></tr>
+      <tr><td>Untimely decision = adverse determination + NABD</td><td><code>438.404(c)(5)</code></td><td>Path B: expiry <i>is</i> the denial; a human issues the notice.</td></tr>
+      <tr><td>Deemed exhaustion → straight to State fair hearing</td><td><code>438.408(c)(3)</code> + <code>438.408(f)(1)(i)</code></td><td>Path B member rights. (Verified against eCFR.)</td></tr>
+      <tr><td>Expedited <i>appeal</i> resolution — 72 hours</td><td><code>438.408(b)(3)</code></td><td>Kept distinct from the PA <i>decision</i> clock, so the two 72-hours aren’t conflated.</td></tr>
+      <tr><td>AI/AN — exempt from mandatory MCO enrollment; I/T/U access</td><td>SSA <code>§1932(a)(2)(C)</code>; <code>438.14</code></td><td>Maria voluntarily enrolled; I/T/U access preserved in/out of network.</td></tr>
+      <tr><td>Meaningful language access on notices</td><td>§1557 / <code>45 CFR Part 92</code></td><td>The NABD and member notices carry interpreter access + taglines.</td></tr>
+    </table>
+  </section>
+
+  <!-- COALITION -->
+  <section>
+    <h2 class="sec">How the coalition hardened this — the red-team, applied</h2>
+    <p style="font-size:14px;max-width:840px;color:var(--muted);margin-top:-6px">Before drawing a pixel we put the draft to the adversarial reviewer. It returned twelve ranked findings and five gaps. The load-bearing ones — and exactly what changed in this v1 — are below. (This is the “show thinking” you asked for: the story is stronger because it was attacked first.)</p>
+    <div class="redteam">
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb">
+        <p class="was">Draft: “even at full autonomy a human owns the ‘no’ — that’s the floor” — applied to the deemed-adverse ending.</p>
+        <p class="fix"><b>Fixed:</b> a deemed-adverse is a constructive denial by operation of law — <b>no human chose it</b>. Path B is now framed as an <b>honest plan failure, contained</b>, not a governance win. “A human owns the ‘no’” is reserved for the <b>clinical</b> MD denial, where it’s literally true.</p>
+      </div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb">
+        <p class="was">Draft: the one AI/AN member is the safety-net “denial-risk protagonist,” on the same FQHC that carries the seed §1557 disparate-impact ticket.</p>
+        <p class="fix"><b>Fixed:</b> equity recast as <b>protective infrastructure working for her</b>; Path A (save) is the default; her thread is <b>decoupled</b> from the disparate-impact cohort; voluntary MCO enrollment + I/T/U access stated; name/casting flagged for tribal-partner vetting.</p>
+      </div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb">
+        <p class="was">Draft: “position recovery” routed Maria’s member appeal through the recovery lane.</p>
+        <p class="fix"><b>Fixed:</b> the engine’s recovery lane is for <b>provider payment disputes</b>, not member appeals. A distinct <b>member-appeal / fair-hearing</b> pathway is called out as <b>Proposed</b>; “recovery” for Path A now means recovered <b>timeliness/access</b>, not money.</p>
+      </div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb">
+        <p class="was">Draft: “DEEMED-ADVERSE-TIMEOUT already in the 40-algorithm library,” with a seeded ticket to Dr. Patel.</p>
+        <p class="fix"><b>Fixed:</b> only the NIST <i>tag</i> exists today; the <b>detector, the ticket, and the routing are Proposed</b>, not built. The honesty ledger now says so.</p>
+      </div></div>
+      <div class="rt"><div class="sev h">HIGH</div><div class="rtb">
+        <p class="was">Draft: adverse actions “capped at A2.”</p>
+        <p class="fix"><b>Fixed:</b> the engine floors adverse to <b>A1 (“Advise — a human decides”)</b> — a stronger guardrail than the draft claimed. Corrected everywhere. Better story: on anything adverse the machine can only advise.</p>
+      </div></div>
+      <div class="rt"><div class="sev m">MED</div><div class="rtb">
+        <p class="was">Draft: the 72-hour clock “starts at the pend,” and CMS-0057-F is the source of it.</p>
+        <p class="fix"><b>Fixed:</b> clock starts at <b>receipt</b> (Beat 5); the pend consumes it. Maria’s 72h anchored to <b>438.210(d)(2)</b>; CMS-0057-F cited only as the standard-clock context; drugs excluded, so her service is medical.</p>
+      </div></div>
+      <div class="rt"><div class="sev m">MED</div><div class="rtb">
+        <p class="was">Gaps: no member-facing notice / language access; no continuity-of-care clarity; no oversight signal on the miss; Part 2 silent.</p>
+        <p class="fix"><b>Added:</b> §1557 language-access on the NABD; aid-paid-pending clarified (doesn’t attach on a new PA); the miss now feeds a plan-performance <b>oversight signal</b>; Part 2 honored on any SUD-adjacent record pull.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- DECISIONS -->
+  <section>
+    <h2 class="sec">Three decisions before we build</h2>
+    <div class="qs">
+      <div class="q">
+        <h4>1 · Which ending is the live default?</h4>
+        <p>Path A (save) as the hero, Path B (contained failure) as a toggle you can flip to show the safety net — or run both back-to-back.</p>
+        <p class="rc">Recommendation: Path A default; Path B on a deliberate toggle, framed as the failure that can’t hide.</p>
+      </div>
+      <div class="q">
+        <h4>2 · Add an explicit I/T/U provider to the seed book?</h4>
+        <p>Today the seed providers are a big system, a mid-size group, and an FQHC. A named Tribal 638 / Urban Indian clinic makes the AI/AN access beat WA-authentic.</p>
+        <p class="rc">Recommendation: yes — add one I/T/U-affiliated site (illustrative), vetted with tribal partners.</p>
+      </div>
+      <div class="q">
+        <h4>3 · Storyboard only, or schedule the build?</h4>
+        <p>This turn is storyboard + thinking — no engine changes. The build is the member-anchored thread + clock-jeopardy detector + acceleration ticket + member-appeal pathway, on the usual checkpoint cadence (adversarial-before → build → adversarial-after → land byte-verified).</p>
+        <p class="rc">Recommendation: approve v1, then I scope the build as the next checkpoint.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    Storyboard v1 · coalition-hardened · <b>no engine changes made this turn</b> · citations verified against eCFR (438.408) and the CMS-0057-F fact sheet.
+    Real vs Proposed vs Illustrative are tracked on the honesty ledger above. NIST alignment is illustrative — NIST does not certify AI systems.
+  </div>
+</div>

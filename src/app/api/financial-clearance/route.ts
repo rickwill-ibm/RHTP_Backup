@@ -18,9 +18,11 @@ import {
   getSessionAuthContext,
 } from '@/lib/server/smartSession';
 import { getPrincipal, canAccessMember, purposeForRole } from '@/lib/authz/principal';
+import { canAccessMemberTenantAware, resolveActorTenantScope } from '@/lib/security/tenant';
+import { getSigningKeyLoader } from '@/lib/dataSources/signingKey';
 import { fhirSearch } from '@/lib/server/fhirServer';
 import { devMockEnabled } from '@/lib/server/devStubs';
-import { getPatientById } from '@/lib/patientRegistry';
+import { mockEntriesForPatient, type BundleEntry } from './mockBundle';
 import { ooError } from '@/lib/fhir/operationOutcome';
 import { flag } from '@/lib/flags/flags';
 import { correlationFrom } from '@/lib/server/correlation';
@@ -31,100 +33,20 @@ import { mockGoldCardDataSource } from '@/lib/policy/goldCardSource';
 import { mockDenialRateProvider } from '@/lib/policy/denialRates';
 import { getEvidenceStore } from '@/lib/evidence/store';
 import { projectThreadInputs } from '@/lib/goldenThread/fromFhirBundle';
-import { runFinancialClearance } from '@/lib/goldenThread/threadOrchestrator';
+import { runFinancialClearance, type ThreadResult } from '@/lib/goldenThread/threadOrchestrator';
+import { runOrderToCash, type CashResult } from '@/lib/goldenThread/orderToCash';
+import { getRemittanceGatewayLoader, getContractRepositoryLoader } from '@/lib/dataSources';
 import { validateClearanceRequest, validateOrderCode } from '@/lib/goldenThread/validate';
+import { createRuntime, createManualClock } from '@/lib/agentRuntime';
+import { createRecoveryWorkflow } from '@/lib/agents/revenueCycle';
+import { getAgentManifest } from '@/lib/agents/manifest';
 
 export const runtime = 'nodejs';
-
-interface BundleEntry {
-  resource: { resourceType: string; id?: string; [k: string]: unknown };
-}
 
 async function readSeedBundle(): Promise<BundleEntry[]> {
   const p = path.join(process.cwd(), 'tools/seed/maria.bundle.json');
   const parsed = JSON.parse(await fs.readFile(p, 'utf8')) as { entry: BundleEntry[] };
   return parsed.entry;
-}
-
-/**
- * Build mock FHIR bundle entries from the patient registry for a given patient.
- * Used in devMock mode so every patient gets their own conditions/coverage,
- * not Maria's seed bundle every time.
- */
-function mockEntriesForPatient(patientId: string): BundleEntry[] {
-  const p = getPatientById(patientId);
-  if (!p) return [];
-  const entries: BundleEntry[] = [];
-
-  // Conditions
-  for (const c of p.conditions ?? []) {
-    entries.push({
-      resource: {
-        resourceType: 'Condition',
-        id: c.key,
-        subject: { reference: `Patient/${patientId}` },
-        code: {
-          coding: [{ system: 'http://hl7.org/fhir/sid/icd-10-cm', code: c.code, display: c.name }],
-          text: c.name,
-        },
-        clinicalStatus: { coding: [{ code: c.status.toLowerCase().replace(' ', '-') }] },
-        onsetDateTime: c.onset,
-      },
-    });
-  }
-
-  // ServiceRequest — use the patient's primary PA scenario CPT code
-  const { PATIENT_PA_SCENARIOS } = mockScenarios();
-  const scenario = PATIENT_PA_SCENARIOS[patientId] ?? PATIENT_PA_SCENARIOS['MARIA_SD_001'];
-  entries.push({
-    resource: {
-      resourceType: 'ServiceRequest',
-      id: `sr-${patientId}`,
-      status: 'active',
-      intent: 'order',
-      subject: { reference: `Patient/${patientId}` },
-      code: {
-        coding: [
-          {
-            system: 'http://www.ama-assn.org/go/cpt',
-            code: scenario.cptCode,
-            display: scenario.procedureName,
-          },
-        ],
-        text: scenario.procedureName,
-      },
-      requester: { display: p.pcp },
-    },
-  });
-
-  // Coverage
-  entries.push({
-    resource: {
-      resourceType: 'Coverage',
-      id: `cov-${patientId}`,
-      status: 'active',
-      beneficiary: { reference: `Patient/${patientId}` },
-      payor: [{ display: p.contract }],
-    },
-  });
-
-  return entries;
-}
-
-// Inline PA scenario map — mirrors PATIENT_PA_SCENARIOS in api-explorer/page.tsx
-// and devStubs.ts so mock mode is consistent across all three.
-function mockScenarios(): {
-  PATIENT_PA_SCENARIOS: Record<string, { cptCode: string; procedureName: string }>;
-} {
-  return {
-    PATIENT_PA_SCENARIOS: {
-      MARIA_SD_001: { cptCode: '72148', procedureName: 'MRI Lumbar Spine w/o Contrast' },
-      'PAT-0042': { cptCode: '75561', procedureName: 'Cardiac MRI w/ and w/o contrast' },
-      'PAT-0087': { cptCode: '93306', procedureName: 'Echocardiogram (complete transthoracic)' },
-      'PAT-0103': { cptCode: '99243', procedureName: 'Nephrology office consultation' },
-      'PAT-0156': { cptCode: '99244', procedureName: 'Pulmonology office consultation' },
-    },
-  };
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -163,7 +85,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // supplies another member's id in the body is denied (the request id is no
   // longer trusted over the session); a reviewer principal reads within its
   // authorized scope (org-wide today, panel when assignment data is wired).
-  const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
+  const session = await getSessionAuthContext().catch(() => null);
+  const principal = getPrincipal(session);
   const scopeDecision = canAccessMember(principal, patientId);
   if (!scopeDecision.allow) {
     await audit({
@@ -201,6 +124,24 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       detail: decision.reason,
     });
     return NextResponse.json(ooError(decision.reason, 'forbidden'), { status: 403 });
+  }
+
+  // 2c) tenant/plan/LOB boundary (Wave-2 W2-3) — enforced at the READ boundary,
+  // BEFORE any FHIR clinical fetch, fail-closed. Even an org-scoped reviewer cannot
+  // reach a member outside their tenant/LOB (the cross-tenant isolation gap). In
+  // the single-tenant demo (mock) this is permissive so the demo is unchanged.
+  const tenantDecision = canAccessMemberTenantAware(principal, session, patientId);
+  if (!tenantDecision.allow) {
+    await audit({
+      ts: new Date().toISOString(),
+      actor: principal.userId,
+      action: 'financial-clearance.tenant-denied',
+      resourceRef: `Patient/${patientId}`,
+      correlationId,
+      outcome: 'failure',
+      detail: tenantDecision.reason,
+    });
+    return NextResponse.json(ooError(tenantDecision.reason, 'forbidden'), { status: 403 });
   }
 
   try {
@@ -286,7 +227,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const ts = new Date().toISOString();
     const evId = `ev-${patientId}-${inputs.order.code}-${Date.parse(ts)}`;
-    const result = await runFinancialClearance(inputs, {
+    const baseDeps = {
       library: loadMockLibrary(),
       goldCardSource: mockGoldCardDataSource,
       denialRates: mockDenialRateProvider,
@@ -300,7 +241,63 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         eligibility: `${evId}-elig`,
         estimation: `${evId}-est`,
       },
-    });
+    };
+
+    // Nested fork: goldenThread gates the whole route (above); goldenThreadE2E
+    // additionally runs the order→cash continuation. The non-E2E branch is the
+    // existing runFinancialClearance call, VERBATIM.
+    let result: ThreadResult;
+    let cash: CashResult | null = null;
+    if (flag('goldenThreadE2E')) {
+      const [remittance, feeSchedule, signer] = await Promise.all([
+        getRemittanceGatewayLoader().load(ts),
+        getContractRepositoryLoader().load(ts),
+        // W2-1: the ledger signing key (seam mock-default: demo HMAC; production
+        // fails closed until a real KMS/HSM signer is wired).
+        getSigningKeyLoader().load(ts),
+      ]);
+      // Wave-3 (F1/E14): construct the governed agent runtime with a deterministic
+      // clock (ManualClock at Date.parse(ts) — no wall-clock/random in the dispatch
+      // path). runOrderToCash starts the Revenue-Cycle recovery workflow on this
+      // engine; the workflow (createRecoveryWorkflow) is the SINGLE writer of the
+      // recovery draft — reachable from this app entry, so revenueCycle/* is wired.
+      const recoveryRuntime = createRuntime({ clock: createManualClock(Date.parse(ts)) });
+      cash = await runOrderToCash(inputs, {
+        ...baseDeps,
+        remittance,
+        feeSchedule,
+        // FINDING 2: the payer's PA adjudication is a stipulated scenario fact for
+        // the demo (the payer approved the 278) — supplied as an explicit input,
+        // never synthesized from netRequiresPA inside the orchestrator.
+        pasDecision: 'approved',
+        reviewerAuthId: `auth-${patientId}-${inputs.order.code}`,
+        // Wave-3 §5: the autonomy ladder is manifest-backed — a tier promotion is a
+        // reviewed manifest change, never a hardcoded literal here.
+        recoveryAgentTier: getAgentManifest('revenue-cycle-agent').autonomyTier,
+        // Wave-3 F1: the governed recovery runtime (engine + workflow factory). The
+        // agent writes the draft through its own evidence.append tool + the interlock.
+        recovery: { engine: recoveryRuntime.engine, makeWorkflow: createRecoveryWorkflow },
+        // W2-3 tenancy: enforce + stamp the acting principal's resolved tenant
+        // scope (fail-closed before any save). W2-1: seal the record. W2-2: dedupe
+        // 835 replays on payer-side business keys.
+        actorScope: resolveActorTenantScope(principal, session),
+        signer,
+        sealTs: ts,
+        idempotency: true,
+        ids: {
+          ...baseDeps.ids,
+          pasDecision: `${evId}-pas`,
+          claim: `${evId}-claim`,
+          remittance: `${evId}-rem`,
+          reconciliation: `${evId}-recon`,
+          underpayment: `${evId}-under`,
+          recovery: `${evId}-recovery`,
+        },
+      });
+      result = cash;
+    } else {
+      result = await runFinancialClearance(inputs, baseDeps);
+    }
 
     // 5) audit (PHI-safe: references + codes only)
     await audit({
@@ -323,6 +320,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         medicalNecessity: result.medicalNecessity.vm,
         estimate: result.estimate,
         workItem: result.workItem,
+        // E2E branch only: additive order→cash continuation surface.
+        ...(cash
+          ? {
+              // FINDING 3: reconciliation/currentTier are OMITTED on a dedupe replay
+              // (they are undefined there) — a replay never surfaces a live verdict.
+              ...(cash.reconciliation ? { reconciliation: cash.reconciliation } : {}),
+              ...(cash.currentTier ? { currentTier: cash.currentTier } : {}),
+              ...(cash.recovery ? { recovery: cash.recovery } : {}),
+              ...(cash.integrity ? { integrity: cash.integrity } : {}),
+              ...(cash.deduped ? { deduped: cash.deduped } : {}),
+            }
+          : {}),
       },
       { status: 200 }
     );

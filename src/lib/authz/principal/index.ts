@@ -13,20 +13,9 @@
  * via smartSession.getSessionAuthContext() and passes them in.
  */
 import type { Role } from '@/lib/authz/guard';
-import type {
-  Principal,
-  PrincipalSession,
-  MemberScope,
-  AccessDecision,
-} from './types';
+import type { Principal, PrincipalSession, MemberScope, AccessDecision } from './types';
 
-export type {
-  Principal,
-  PrincipalSession,
-  MemberScope,
-  AccessDecision,
-  Role,
-} from './types';
+export type { Principal, PrincipalSession, MemberScope, AccessDecision, Role } from './types';
 
 const KNOWN_ROLES: readonly Role[] = [
   'member',
@@ -106,9 +95,7 @@ export function canAccessMember(
       const ok = !!scope.memberId && scope.memberId === memberId;
       return {
         allow: ok,
-        reason: ok
-          ? 'member self-access'
-          : 'member may only access their own record',
+        reason: ok ? 'member self-access' : 'member may only access their own record',
       };
     }
     case 'panel': {

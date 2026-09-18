@@ -30,8 +30,68 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-const FIRST_NAMES = ['James', 'Mary', 'Robert', 'Linda', 'Michael', 'Patricia', 'David', 'Barbara', 'Joseph', 'Susan', 'Charles', 'Margaret', 'Thomas', 'Dorothy', 'Daniel', 'Helen', 'Walter', 'Grace', 'Frank', 'Ruth', 'Raymond', 'Wilma', 'Leonard', 'Pearl', 'Eugene', 'Agnes', 'Harold', 'Esther', 'Carl', 'Lois'];
-const LAST_NAMES = ['Whitehorse', 'Brave Bird', 'Looking Cloud', 'Two Bulls', 'Red Cloud', 'Iron Shell', 'Spotted Eagle', 'Walking Bull', 'High Hawk', 'Bordeaux', 'Janis', 'Provost', 'Eagleman', 'Black Elk', 'Yellow Hawk', 'Brings Plenty', 'Swift Bird', 'Means', 'Comes Flying', 'Bear Runner', 'Anderson', 'Nelson', 'Larson', 'Hanson', 'Olson', 'Brewer', 'Hawk Wing', 'Little Thunder'];
+const FIRST_NAMES = [
+  'James',
+  'Mary',
+  'Robert',
+  'Linda',
+  'Michael',
+  'Patricia',
+  'David',
+  'Barbara',
+  'Joseph',
+  'Susan',
+  'Charles',
+  'Margaret',
+  'Thomas',
+  'Dorothy',
+  'Daniel',
+  'Helen',
+  'Walter',
+  'Grace',
+  'Frank',
+  'Ruth',
+  'Raymond',
+  'Wilma',
+  'Leonard',
+  'Pearl',
+  'Eugene',
+  'Agnes',
+  'Harold',
+  'Esther',
+  'Carl',
+  'Lois',
+];
+const LAST_NAMES = [
+  'Whitehorse',
+  'Brave Bird',
+  'Looking Cloud',
+  'Two Bulls',
+  'Red Cloud',
+  'Iron Shell',
+  'Spotted Eagle',
+  'Walking Bull',
+  'High Hawk',
+  'Bordeaux',
+  'Janis',
+  'Provost',
+  'Eagleman',
+  'Black Elk',
+  'Yellow Hawk',
+  'Brings Plenty',
+  'Swift Bird',
+  'Means',
+  'Comes Flying',
+  'Bear Runner',
+  'Anderson',
+  'Nelson',
+  'Larson',
+  'Hanson',
+  'Olson',
+  'Brewer',
+  'Hawk Wing',
+  'Little Thunder',
+];
 const REGIONS = ['Bennett County', 'Pine Ridge', 'Rural SD', 'Rapid City', 'Winner', 'Martin'];
 
 const RISK_BANDS: { tier: RiskTier; cum: number }[] = [
@@ -74,7 +134,9 @@ function buildPerson(index: number): PanelPerson {
 }
 
 const PANEL: PanelPerson[] = Array.from({ length: POOL_SIZE }, (_, i) => buildPerson(i));
-const PANEL_BY_ID: Record<string, PanelPerson> = Object.fromEntries(PANEL.map((p) => [p.platformId, p]));
+const PANEL_BY_ID: Record<string, PanelPerson> = Object.fromEntries(
+  PANEL.map((p) => [p.platformId, p])
+);
 
 export function getPanelPerson(platformId: string): PanelPerson | undefined {
   return PANEL_BY_ID[platformId];

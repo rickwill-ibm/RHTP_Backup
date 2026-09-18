@@ -12,7 +12,7 @@
  * (the demo stays green); production runs the real runtime engine.
  */
 import { getDataMode, type DataMode } from '@/lib/config/dataMode';
-import { loadAgentManifests } from '@/lib/agents/manifest';
+import { loadAgentManifests, type AgentManifestRegistry } from '@/lib/agents/manifest';
 import { createManualClock, type ManualClock } from './clock';
 import { createInMemoryWorkflowEngine, InMemoryWorkflowEngine, type RuntimeDeps } from './engine';
 import { createMemoryEventSink, type MemoryEventSink } from './events';
@@ -42,7 +42,12 @@ export { AGENT_C2_EVENT_TYPES, UnallowedAgentEventError } from './types';
 export { createInMemoryWorkflowEngine, InMemoryWorkflowEngine, type RuntimeDeps } from './engine';
 
 // ── Events ──────────────────────────────────────────────────────────────────────
-export { createMemoryEventSink, buildAgentEvent, assertAllowedEventType, type MemoryEventSink } from './events';
+export {
+  createMemoryEventSink,
+  buildAgentEvent,
+  assertAllowedEventType,
+  type MemoryEventSink,
+} from './events';
 
 // ── HITL inbox (work-queue reuse) ────────────────────────────────────────────
 export {
@@ -78,20 +83,26 @@ export function createRuntime(opts?: {
   startMs?: number;
   inbox?: ProposalInbox;
   eventSink?: MemoryEventSink;
+  // ADDITIVE (optional-defaulted): an explicit manifest registry override lets a caller
+  // run the engine under a policy-adjusted manifest (e.g. a preset that promotes the
+  // recovery agent's autonomy tier). Absent → loadAgentManifests(), byte-identical to
+  // the prior behavior for every existing call site.
+  registry?: AgentManifestRegistry;
 }): {
   engine: InMemoryWorkflowEngine;
   clock: ManualClock;
   eventSink: MemoryEventSink;
   inbox: ProposalInbox;
 } {
-  const clock = opts?.clock ?? createManualClock(opts?.startMs ?? Date.parse('2026-08-22T00:00:00.000Z'));
+  const clock =
+    opts?.clock ?? createManualClock(opts?.startMs ?? Date.parse('2026-08-22T00:00:00.000Z'));
   const eventSink = opts?.eventSink ?? createMemoryEventSink();
   const inbox = opts?.inbox ?? createMemoryProposalInbox();
   const deps: RuntimeDeps = {
     clock,
     eventSink,
     inbox,
-    registry: loadAgentManifests(),
+    registry: opts?.registry ?? loadAgentManifests(),
     escalationPolicies: loadEscalationPolicies(),
   };
   return { engine: createInMemoryWorkflowEngine(deps), clock, eventSink, inbox };

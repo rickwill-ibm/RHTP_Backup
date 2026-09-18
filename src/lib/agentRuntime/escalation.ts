@@ -37,7 +37,7 @@ export interface EscalationPolicies {
 export class EscalationPolicyError extends Error {
   constructor(
     public readonly field: string,
-    detail: string,
+    detail: string
   ) {
     super(`Escalation policy invalid at "${field}": ${detail}`);
     this.name = 'EscalationPolicyError';
@@ -61,9 +61,15 @@ export function parseEscalationPolicies(data: unknown): EscalationPolicies {
     req(set && typeof set === 'object', `policies.${ref}`, 'must be an object');
     const tiersRaw = (set as Record<string, unknown>).tiers;
     req(Array.isArray(tiersRaw), `policies.${ref}.tiers`, 'must be an array');
-    const tiers = (tiersRaw as unknown[]).map((t, i) => validateTier(t, `policies.${ref}.tiers[${i}]`));
+    const tiers = (tiersRaw as unknown[]).map((t, i) =>
+      validateTier(t, `policies.${ref}.tiers[${i}]`)
+    );
     for (const p of PRIORITIES) {
-      req(tiers.some((t) => t.priority === p), `policies.${ref}.tiers`, `missing tier for priority "${p}"`);
+      req(
+        tiers.some((t) => t.priority === p),
+        `policies.${ref}.tiers`,
+        `missing tier for priority "${p}"`
+      );
     }
     policies[ref] = { tiers };
   }
@@ -76,13 +82,19 @@ function validateTier(t: unknown, field: string): EscalationTier {
   req(
     typeof o.priority === 'string' && PRIORITIES.includes(o.priority as EscalationPriority),
     `${field}.priority`,
-    `must be one of ${PRIORITIES.join(', ')}`,
+    `must be one of ${PRIORITIES.join(', ')}`
   );
-  req(typeof o.slaHours === 'number' && o.slaHours > 0, `${field}.slaHours`, 'must be a positive number');
   req(
-    Array.isArray(o.hierarchy) && o.hierarchy.length > 0 && o.hierarchy.every((h) => typeof h === 'string'),
+    typeof o.slaHours === 'number' && o.slaHours > 0,
+    `${field}.slaHours`,
+    'must be a positive number'
+  );
+  req(
+    Array.isArray(o.hierarchy) &&
+      o.hierarchy.length > 0 &&
+      o.hierarchy.every((h) => typeof h === 'string'),
     `${field}.hierarchy`,
-    'must be a non-empty array of care-team level strings',
+    'must be a non-empty array of care-team level strings'
   );
   req(o.onExhaust === 'park', `${field}.onExhaust`, "must be 'park' (never silently expire)");
   return {
@@ -102,12 +114,17 @@ export function loadEscalationPolicies(): EscalationPolicies {
 export function getEscalationTier(
   policies: EscalationPolicies,
   ref: string,
-  priority: EscalationPriority,
+  priority: EscalationPriority
 ): EscalationTier {
   const set = policies.policies[ref];
   req(set, `policies.${ref}`, 'no such escalation policy set');
-  const tier = set.tiers.find((t) => t.priority === priority);
-  req(tier, `policies.${ref}.${priority}`, 'no tier for priority');
+  // C6: `deadline-unknown` (a recovery whose appeal-window deadline could not be parsed) is
+  // a triage sentinel, not a policy tier — resolve it to the `high` SLA tier so it keeps the
+  // high-urgency escalation the old overloaded `high` fallback gave it (policies declare only
+  // urgent/high/routine tiers, which stays unchanged).
+  const lookup: EscalationPriority = priority === 'deadline-unknown' ? 'high' : priority;
+  const tier = set.tiers.find((t) => t.priority === lookup);
+  req(tier, `policies.${ref}.${lookup}`, 'no tier for priority');
   return tier as EscalationTier;
 }
 

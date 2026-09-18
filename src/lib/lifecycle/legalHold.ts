@@ -24,7 +24,10 @@ export interface LegalHoldRegistry {
    *  that returns the existing active hold (idempotent). */
   place(input: PlaceHoldInput): { hold: LegalHold; audit: LifecycleAuditEvent };
   /** Release the active hold on a subject. Returns null when none is active. */
-  release(subjectRef: string, releasedBy: string): { hold: LegalHold; audit: LifecycleAuditEvent } | null;
+  release(
+    subjectRef: string,
+    releasedBy: string
+  ): { hold: LegalHold; audit: LifecycleAuditEvent } | null;
   /** True when the subject currently has an active hold. */
   isHeld(subjectRef: string): boolean;
   /** The active hold for a subject, or null. */

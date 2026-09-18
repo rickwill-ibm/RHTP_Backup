@@ -11,7 +11,9 @@ import { exportFinancialCSV, generatePDFReport } from '@/lib/exportUtils';
 // ─── Flag High Cost Modal ─────────────────────────────────────────────────────
 function FlagHighCostModal({ onClose }: { onClose: () => void }) {
   const [selectedPatient, setSelectedPatient] = useState('');
-  const [flagReason, setFlagReason] = useState<'Inpatient' | 'ER' | 'Specialty' | 'Pharmacy' | 'Other'>('Inpatient');
+  const [flagReason, setFlagReason] = useState<
+    'Inpatient' | 'ER' | 'Specialty' | 'Pharmacy' | 'Other'
+  >('Inpatient');
   const [note, setNote] = useState('');
   const [priority, setPriority] = useState<'Routine' | 'Urgent' | 'Critical'>('Routine');
   const [submitted, setSubmitted] = useState(false);
@@ -41,10 +43,15 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h3 className="text-sm font-semibold text-carbon-gray-100">Flag High Cost Patient</h3>
-              <p className="text-2xs text-carbon-gray-50">Medicare MSSP Track 3 — Cost Management</p>
+              <p className="text-2xs text-carbon-gray-50">
+                Medicare MSSP Track 3 — Cost Management
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100">
+          <button
+            onClick={onClose}
+            className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -58,17 +65,23 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
               </div>
               <div>
                 <p className="text-sm font-bold text-carbon-gray-100">Patient Flagged</p>
-                <p className="text-xs text-carbon-gray-50 mt-1">Cost management flag has been logged and routed to the finance team.</p>
+                <p className="text-xs text-carbon-gray-50 mt-1">
+                  Cost management flag has been logged and routed to the finance team.
+                </p>
               </div>
             </div>
             <div className="bg-[#fdf6dd] border border-[#f1c21b] px-4 py-3 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">Flag Receipt</p>
+                <p className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">
+                  Flag Receipt
+                </p>
                 <span className="text-2xs font-mono font-bold text-[#b45309]">{flagId}</span>
               </div>
               <div className="flex justify-between text-2xs border-t border-[#f1c21b] pt-2">
                 <span className="text-carbon-gray-70">Patient</span>
-                <span className="font-medium text-carbon-gray-100">{highCostList.find(p => p.id === selectedPatient)?.name ?? selectedPatient}</span>
+                <span className="font-medium text-carbon-gray-100">
+                  {highCostList.find((p) => p.id === selectedPatient)?.name ?? selectedPatient}
+                </span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Cost Driver</span>
@@ -76,11 +89,21 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Priority</span>
-                <span className={`font-bold ${priority === 'Critical' ? 'text-[#da1e28]' : priority === 'Urgent' ? 'text-[#b45309]' : 'text-[#0e6027]'}`}>{priority}</span>
+                <span
+                  className={`font-bold ${priority === 'Critical' ? 'text-[#da1e28]' : priority === 'Urgent' ? 'text-[#b45309]' : 'text-[#0e6027]'}`}
+                >
+                  {priority}
+                </span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Flagged</span>
-                <span className="font-medium text-carbon-gray-100">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <span className="font-medium text-carbon-gray-100">
+                  {new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
               </div>
               {note.trim() && (
                 <div className="border-t border-[#f1c21b] pt-2">
@@ -90,8 +113,15 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
               )}
             </div>
             <div className="bg-[#d0e2ff] border border-[#97c1ff] px-3 py-2.5 flex items-center gap-2">
-              <Icon name="InformationCircleIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
-              <p className="text-2xs text-[#0043ce]">Finance team will review within 2 business days. A cost review request has been auto-generated.</p>
+              <Icon
+                name="InformationCircleIcon"
+                size={14}
+                className="text-[#0043ce] flex-shrink-0"
+              />
+              <p className="text-2xs text-[#0043ce]">
+                Finance team will review within 2 business days. A cost review request has been
+                auto-generated.
+              </p>
             </div>
             <button className="carbon-btn-primary w-full justify-center py-2.5" onClick={onClose}>
               <Icon name="CheckCircleIcon" size={15} />
@@ -121,7 +151,9 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
 
             {/* Cost driver */}
             <div>
-              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Primary Cost Driver</label>
+              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+                Primary Cost Driver
+              </label>
               <div className="grid grid-cols-5 gap-1.5">
                 {(['Inpatient', 'ER', 'Specialty', 'Pharmacy', 'Other'] as const).map((r) => (
                   <button
@@ -129,11 +161,16 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
                     onClick={() => setFlagReason(r)}
                     className={`py-1.5 text-2xs font-semibold border transition-colors ${
                       flagReason === r
-                        ? r === 'Inpatient' ? 'bg-[#da1e28] text-white border-[#da1e28]'
-                          : r === 'ER' ? 'bg-[#b45309] text-white border-[#b45309]'
-                          : r === 'Specialty' ? 'bg-[#0043ce] text-white border-[#0043ce]'
-                          : r === 'Pharmacy' ? 'bg-[#6929c4] text-white border-[#6929c4]'
-                          : 'bg-carbon-gray-70 text-white border-carbon-gray-70' :'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                        ? r === 'Inpatient'
+                          ? 'bg-[#da1e28] text-white border-[#da1e28]'
+                          : r === 'ER'
+                            ? 'bg-[#b45309] text-white border-[#b45309]'
+                            : r === 'Specialty'
+                              ? 'bg-[#0043ce] text-white border-[#0043ce]'
+                              : r === 'Pharmacy'
+                                ? 'bg-[#6929c4] text-white border-[#6929c4]'
+                                : 'bg-carbon-gray-70 text-white border-carbon-gray-70'
+                        : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
                     }`}
                   >
                     {r}
@@ -144,7 +181,9 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
 
             {/* Priority */}
             <div>
-              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Review Priority</label>
+              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+                Review Priority
+              </label>
               <div className="flex gap-2">
                 {(['Routine', 'Urgent', 'Critical'] as const).map((p) => (
                   <button
@@ -152,9 +191,12 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
                     onClick={() => setPriority(p)}
                     className={`flex-1 py-2 text-xs font-semibold border transition-colors ${
                       priority === p
-                        ? p === 'Critical' ? 'bg-[#da1e28] text-white border-[#da1e28]'
-                          : p === 'Urgent' ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
-                          : 'bg-[#0f62fe] text-white border-[#0f62fe]' :'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                        ? p === 'Critical'
+                          ? 'bg-[#da1e28] text-white border-[#da1e28]'
+                          : p === 'Urgent'
+                            ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
+                            : 'bg-[#0f62fe] text-white border-[#0f62fe]'
+                        : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
                     }`}
                   >
                     {p}
@@ -180,14 +222,20 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
             {/* Summary preview */}
             {selectedPatient && (
               <div className="bg-[#fdf6dd] border border-[#f1c21b] px-4 py-3 space-y-1.5">
-                <p className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">Flag Summary</p>
+                <p className="text-2xs font-semibold text-[#b45309] uppercase tracking-wide">
+                  Flag Summary
+                </p>
                 <div className="flex justify-between text-2xs">
                   <span className="text-carbon-gray-70">Patient</span>
-                  <span className="font-medium text-carbon-gray-100">{highCostList.find(p => p.id === selectedPatient)?.name}</span>
+                  <span className="font-medium text-carbon-gray-100">
+                    {highCostList.find((p) => p.id === selectedPatient)?.name}
+                  </span>
                 </div>
                 <div className="flex justify-between text-2xs">
                   <span className="text-carbon-gray-70">PMPM</span>
-                  <span className="font-mono font-semibold text-[#da1e28]">${highCostList.find(p => p.id === selectedPatient)?.pmpm?.toLocaleString()}</span>
+                  <span className="font-mono font-semibold text-[#da1e28]">
+                    ${highCostList.find((p) => p.id === selectedPatient)?.pmpm?.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-2xs">
                   <span className="text-carbon-gray-70">Driver</span>
@@ -195,13 +243,19 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
                 </div>
                 <div className="flex justify-between text-2xs">
                   <span className="text-carbon-gray-70">Priority</span>
-                  <span className={`font-bold ${priority === 'Critical' ? 'text-[#da1e28]' : priority === 'Urgent' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}>{priority}</span>
+                  <span
+                    className={`font-bold ${priority === 'Critical' ? 'text-[#da1e28]' : priority === 'Urgent' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}
+                  >
+                    {priority}
+                  </span>
                 </div>
               </div>
             )}
 
             <div className="flex gap-2 pt-1">
-              <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>Cancel</button>
+              <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>
+                Cancel
+              </button>
               <button
                 className="carbon-btn-primary flex-1 justify-center py-2.5"
                 onClick={handleSubmit}
@@ -220,9 +274,13 @@ function FlagHighCostModal({ onClose }: { onClose: () => void }) {
 // ─── Request Cost Review Modal ────────────────────────────────────────────────
 function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
   const { user } = useAppContext();
-  const [reviewType, setReviewType] = useState<'Outlier Analysis' | 'Utilization Review' | 'RAF Reconciliation' | 'Contract Variance'>('Outlier Analysis');
+  const [reviewType, setReviewType] = useState<
+    'Outlier Analysis' | 'Utilization Review' | 'RAF Reconciliation' | 'Contract Variance'
+  >('Outlier Analysis');
   const [urgency, setUrgency] = useState<'Standard' | 'Expedited' | 'Immediate'>('Standard');
-  const [scope, setScope] = useState<'Single Patient' | 'Cohort Segment' | 'Full Panel'>('Cohort Segment');
+  const [scope, setScope] = useState<'Single Patient' | 'Cohort Segment' | 'Full Panel'>(
+    'Cohort Segment'
+  );
   const [note, setNote] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [reviewId, setReviewId] = useState('');
@@ -231,14 +289,24 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
   const handleSubmit = () => {
     const id = `CRV-${Date.now().toString(36).toUpperCase().slice(-6)}`;
     const now = new Date();
-    const ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const ts =
+      now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ' · ' +
+      now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     setReviewId(id);
     setSubmittedAt(ts);
     setSubmitted(true);
-    toast.success(`Cost review request submitted (${id})`, { description: `${urgency} · ${reviewType}` });
+    toast.success(`Cost review request submitted (${id})`, {
+      description: `${urgency} · ${reviewType}`,
+    });
   };
 
-  const etaDays = urgency === 'Immediate' ? '1 business day' : urgency === 'Expedited' ? '3 business days' : '5–7 business days';
+  const etaDays =
+    urgency === 'Immediate'
+      ? '1 business day'
+      : urgency === 'Expedited'
+        ? '3 business days'
+        : '5–7 business days';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -254,7 +322,10 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
               <p className="text-2xs text-carbon-gray-50">Medicare MSSP Track 3 — Finance Team</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100">
+          <button
+            onClick={onClose}
+            className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -268,12 +339,16 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
               </div>
               <div>
                 <p className="text-sm font-bold text-carbon-gray-100">Cost Review Requested</p>
-                <p className="text-xs text-carbon-gray-50 mt-1">Your request has been submitted to the finance team for review.</p>
+                <p className="text-xs text-carbon-gray-50 mt-1">
+                  Your request has been submitted to the finance team for review.
+                </p>
               </div>
             </div>
             <div className="bg-[#defbe6] border border-[#a7f0ba] px-4 py-3 space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-2xs font-semibold text-[#0e6027] uppercase tracking-wide">Review Receipt</p>
+                <p className="text-2xs font-semibold text-[#0e6027] uppercase tracking-wide">
+                  Review Receipt
+                </p>
                 <span className="text-2xs font-mono font-bold text-[#0e6027]">{reviewId}</span>
               </div>
               <div className="flex justify-between text-2xs border-t border-[#a7f0ba] pt-2">
@@ -294,7 +369,11 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Urgency</span>
-                <span className={`font-bold ${urgency === 'Immediate' ? 'text-[#da1e28]' : urgency === 'Expedited' ? 'text-[#b45309]' : 'text-[#0e6027]'}`}>{urgency}</span>
+                <span
+                  className={`font-bold ${urgency === 'Immediate' ? 'text-[#da1e28]' : urgency === 'Expedited' ? 'text-[#b45309]' : 'text-[#0e6027]'}`}
+                >
+                  {urgency}
+                </span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Expected Response</span>
@@ -310,7 +389,8 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
             <div className="bg-[#d0e2ff] border border-[#97c1ff] px-3 py-2.5 flex items-center gap-2">
               <Icon name="ClockIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
               <p className="text-2xs text-[#0043ce]">
-                Finance team will respond within {etaDays}. You will be notified when the review is complete.
+                Finance team will respond within {etaDays}. You will be notified when the review is
+                complete.
               </p>
             </div>
             <button className="carbon-btn-primary w-full justify-center py-2.5" onClick={onClose}>
@@ -322,9 +402,18 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
           <div className="p-5 space-y-4">
             {/* Review type */}
             <div>
-              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Review Type</label>
+              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+                Review Type
+              </label>
               <div className="grid grid-cols-2 gap-1.5">
-                {(['Outlier Analysis', 'Utilization Review', 'RAF Reconciliation', 'Contract Variance'] as const).map((t) => (
+                {(
+                  [
+                    'Outlier Analysis',
+                    'Utilization Review',
+                    'RAF Reconciliation',
+                    'Contract Variance',
+                  ] as const
+                ).map((t) => (
                   <button
                     key={t}
                     onClick={() => setReviewType(t)}
@@ -342,7 +431,9 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
 
             {/* Scope */}
             <div>
-              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Review Scope</label>
+              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+                Review Scope
+              </label>
               <div className="flex gap-2">
                 {(['Single Patient', 'Cohort Segment', 'Full Panel'] as const).map((s) => (
                   <button
@@ -362,7 +453,9 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
 
             {/* Urgency */}
             <div>
-              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Urgency</label>
+              <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+                Urgency
+              </label>
               <div className="flex gap-2">
                 {(['Standard', 'Expedited', 'Immediate'] as const).map((u) => (
                   <button
@@ -370,9 +463,12 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
                     onClick={() => setUrgency(u)}
                     className={`flex-1 py-2 text-xs font-semibold border transition-colors ${
                       urgency === u
-                        ? u === 'Immediate' ? 'bg-[#da1e28] text-white border-[#da1e28]'
-                          : u === 'Expedited' ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
-                          : 'bg-[#0f62fe] text-white border-[#0f62fe]' :'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                        ? u === 'Immediate'
+                          ? 'bg-[#da1e28] text-white border-[#da1e28]'
+                          : u === 'Expedited'
+                            ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
+                            : 'bg-[#0f62fe] text-white border-[#0f62fe]'
+                        : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
                     }`}
                   >
                     {u}
@@ -398,7 +494,9 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
 
             {/* Summary */}
             <div className="bg-[#edf5ff] border border-[#97c1ff] px-4 py-3 space-y-1.5">
-              <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">Request Summary</p>
+              <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">
+                Request Summary
+              </p>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Type</span>
                 <span className="font-medium text-carbon-gray-100">{reviewType}</span>
@@ -409,7 +507,11 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Urgency</span>
-                <span className={`font-bold ${urgency === 'Immediate' ? 'text-[#da1e28]' : urgency === 'Expedited' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}>{urgency}</span>
+                <span
+                  className={`font-bold ${urgency === 'Immediate' ? 'text-[#da1e28]' : urgency === 'Expedited' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}
+                >
+                  {urgency}
+                </span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Requested By</span>
@@ -418,7 +520,9 @@ function RequestCostReviewModal({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="flex gap-2 pt-1">
-              <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>Cancel</button>
+              <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>
+                Cancel
+              </button>
               <button
                 className="carbon-btn-primary flex-1 justify-center py-2.5"
                 onClick={handleSubmit}
@@ -444,7 +548,9 @@ export default function FinancialActionBar() {
   const handleAction = (action: ActionDefinition) => {
     if (action.id === 'act-export-financial') {
       exportFinancialCSV(mockPatients);
-      toast.success('Financial CSV downloaded', { description: `${mockPatients.length} patients exported for payer reconciliation` });
+      toast.success('Financial CSV downloaded', {
+        description: `${mockPatients.length} patients exported for payer reconciliation`,
+      });
       return;
     }
     if (action.id === 'act-flag-cost') {
@@ -477,25 +583,55 @@ export default function FinancialActionBar() {
             { label: 'Total Attributed Patients', value: String(patients.length) },
             { label: 'Average PMPM Cost', value: `$${avgPmpm.toLocaleString()}` },
             { label: 'PMPM Target', value: '$890' },
-            { label: 'PMPM Variance', value: `$${(avgPmpm - 890).toLocaleString()} (${(((avgPmpm - 890) / 890) * 100).toFixed(1)}%)` },
+            {
+              label: 'PMPM Variance',
+              value: `$${(avgPmpm - 890).toLocaleString()} (${(((avgPmpm - 890) / 890) * 100).toFixed(1)}%)`,
+            },
             { label: 'High-Cost Patients (>$1K PMPM)', value: `${highCost.length} patients` },
             { label: 'Average RAF Score', value: avgRaf },
             { label: 'Total HCC Revenue at Risk', value: `$${totalHccValue.toLocaleString()}` },
             { label: 'Report Period', value: 'Q1 2026 (Jan–Mar)' },
-            { label: 'Report Date', value: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) },
+            {
+              label: 'Report Date',
+              value: new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }),
+            },
           ],
         },
         {
           title: 'Cost Distribution by Risk Tier',
           rows: [
-            { label: 'Critical', value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Critical').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Critical').length)).toLocaleString()}` },
-            { label: 'High', value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'High').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'High').length)).toLocaleString()}` },
-            { label: 'Moderate', value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Moderate').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Moderate').length)).toLocaleString()}` },
-            { label: 'Low', value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Low').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Low').length)).toLocaleString()}` },
+            {
+              label: 'Critical',
+              value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Critical').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Critical').length)).toLocaleString()}`,
+            },
+            {
+              label: 'High',
+              value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'High').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'High').length)).toLocaleString()}`,
+            },
+            {
+              label: 'Moderate',
+              value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Moderate').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Moderate').length)).toLocaleString()}`,
+            },
+            {
+              label: 'Low',
+              value: `Avg PMPM: $${Math.round(patients.filter((p) => p.riskTier === 'Low').reduce((s, p) => s + p.pmpmCost, 0) / Math.max(1, patients.filter((p) => p.riskTier === 'Low').length)).toLocaleString()}`,
+            },
           ],
         },
       ],
-      tableHeaders: ['Patient Name', 'Risk Tier', 'PMPM Cost', 'PMPM Target', 'Variance', 'RAF Score', 'HCC Revenue at Risk'],
+      tableHeaders: [
+        'Patient Name',
+        'Risk Tier',
+        'PMPM Cost',
+        'PMPM Target',
+        'Variance',
+        'RAF Score',
+        'HCC Revenue at Risk',
+      ],
       tableRows: patients
         .sort((a, b) => b.pmpmCost - a.pmpmCost)
         .slice(0, 20)
@@ -509,7 +645,9 @@ export default function FinancialActionBar() {
           `$${p.hccSuspectValue.toLocaleString()}`,
         ]),
     });
-    toast.success('Financial report opened', { description: 'Use your browser\'s Print dialog to save as PDF' });
+    toast.success('Financial report opened', {
+      description: "Use your browser's Print dialog to save as PDF",
+    });
   };
 
   if (actions.length === 0) return null;
@@ -517,17 +655,23 @@ export default function FinancialActionBar() {
   const btnClass = (variant: ActionDefinition['variant']) => {
     const base = 'flex items-center gap-2 px-3 py-1.5 text-xs font-medium border transition-colors';
     switch (variant) {
-      case 'primary': return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
-      case 'warning': return `${base} bg-[#fdf6dd] text-[#b45309] border-[#f1c21b] hover:bg-[#f1c21b]/30`;
-      case 'secondary': return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
-      default: return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      case 'primary':
+        return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
+      case 'warning':
+        return `${base} bg-[#fdf6dd] text-[#b45309] border-[#f1c21b] hover:bg-[#f1c21b]/30`;
+      case 'secondary':
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      default:
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
     }
   };
 
   return (
     <>
       <div className="bg-white border border-carbon-gray-20 px-4 py-2.5 flex items-center gap-2 flex-wrap mb-4">
-        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">Financial Actions</span>
+        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">
+          Financial Actions
+        </span>
         {/* PDF Report button */}
         <button
           className={btnClass('secondary')}
@@ -550,7 +694,9 @@ export default function FinancialActionBar() {
         ))}
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-2xs text-carbon-gray-50">Role:</span>
-          <span className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}>
+          <span
+            className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}
+          >
             {user.role === 'physician' ? 'Physician' : 'Care Manager'}
           </span>
         </div>

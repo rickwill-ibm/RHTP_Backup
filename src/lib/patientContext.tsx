@@ -12,7 +12,13 @@ import { defaultMariaState, defaultDorothyState } from './patientContext.default
 import { DEMO_MEMBER_ID } from './config/demoDefaults';
 import * as clock from './clock'; // determinism seam (Cycle 1)
 import { buildStateFromRegistry, buildStateFromFhirPatient } from './patientContext.builders';
-import type { GapClosureEvidence, PatientSharedState, EpisodeStatus, BHRiskLevel, GapStatus } from './patientContext.types';
+import type {
+  GapClosureEvidence,
+  PatientSharedState,
+  EpisodeStatus,
+  BHRiskLevel,
+  GapStatus,
+} from './patientContext.types';
 
 // Re-export everything consumers need from the sub-modules
 export type {
@@ -46,7 +52,13 @@ interface PatientContextValue {
 
 const PatientContext = createContext<PatientContextValue | null>(null);
 
-export function PatientContextProvider({ patientId, children }: { patientId?: string; children: React.ReactNode }) {
+export function PatientContextProvider({
+  patientId,
+  children,
+}: {
+  patientId?: string;
+  children: React.ReactNode;
+}) {
   const { useMockData } = useAppContext();
   const gapStore = useContext(GapClosureStoreContext);
 
@@ -63,7 +75,7 @@ export function PatientContextProvider({ patientId, children }: { patientId?: st
 
   useEffect(() => {
     setPatient(getInitialState());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId, useMockData]);
 
   useEffect(() => {
@@ -117,7 +129,14 @@ export function PatientContextProvider({ patientId, children }: { patientId?: st
     setPatient((p) => ({
       ...p,
       careGaps: p.careGaps.map((g) =>
-        g.id === gapId ? { ...g, status: 'Closed' as GapStatus, evidence, closedDate: clock.nowDate().toLocaleDateString() } : g
+        g.id === gapId
+          ? {
+              ...g,
+              status: 'Closed' as GapStatus,
+              evidence,
+              closedDate: clock.nowDate().toLocaleDateString(),
+            }
+          : g
       ),
     }));
   }, []);

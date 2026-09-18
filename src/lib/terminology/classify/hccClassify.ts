@@ -39,16 +39,25 @@ const RISK_FAMILIES = (riskFamilySeed as unknown as RiskFamilySeedShape).familie
  * The registry currency of the model asset at `asOf` as a CodeAssetBinding, so the
  * classification records WHICH model version it bound to and whether it is current.
  */
-function modelBinding(registry: ValueSetRegistry, model: HccModelRef, asOf?: Date): CodeAssetBinding {
+function modelBinding(
+  registry: ValueSetRegistry,
+  model: HccModelRef,
+  asOf?: Date
+): CodeAssetBinding {
   const flag = registry.checkCurrency(model.assetId, asOf);
-  return { assetId: model.assetId, version: flag.version, status: flag.status, current: flag.current };
+  return {
+    assetId: model.assetId,
+    version: flag.version,
+    status: flag.status,
+    current: flag.current,
+  };
 }
 
 /** Build an HCC classifier over a crosswalk + family set + registry (all injectable for tests). */
 export function makeHccClassifier(
   data: HccSeedShape = HCC_DATA,
   families: RiskFamily[] = RISK_FAMILIES,
-  registry: ValueSetRegistry = valueSetRegistry,
+  registry: ValueSetRegistry = valueSetRegistry
 ): HccClassifier {
   return {
     id: 'seed-hcc-classifier',
@@ -58,7 +67,15 @@ export function makeHccClassifier(
       const entry = data.map[diagnosisCode];
       if (!entry) {
         // Unmapped diagnosis: NO group, never a fabricated one.
-        return { scheme: 'HCC', code: diagnosisCode, group: null, classified: false, model: data.model, binding, stub: true };
+        return {
+          scheme: 'HCC',
+          code: diagnosisCode,
+          group: null,
+          classified: false,
+          model: data.model,
+          binding,
+          stub: true,
+        };
       }
       return {
         scheme: 'HCC',

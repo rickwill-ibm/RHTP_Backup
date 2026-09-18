@@ -42,7 +42,8 @@ export const immunizationSpec = {
   toMutations(event: C2Event, deps: ProjectorDeps): Mutation[] {
     const p = event.payload;
     const immunizationRef = str(p.immunizationRef, `Immunization/${event.memberId}`);
-    const start = str(p.occurrenceDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
+    const start =
+      str(p.occurrenceDateTime) || event.occurredAt || new Date(deps.now()).toISOString();
     const code = cvxCode(p);
     const out: Mutation[] = [memberNode(event)];
     out.push(
@@ -51,7 +52,7 @@ export const immunizationSpec = {
         status: str(p.status, 'completed'),
         occurrenceDateTime: str(p.occurrenceDateTime),
         provenance: str(p.provenance),
-      }),
+      })
     );
     // The member was IMMUNIZED_WITH this vaccine — a factual administration-record
     // link (associative), dated from the occurrence date. Provenance is an edge

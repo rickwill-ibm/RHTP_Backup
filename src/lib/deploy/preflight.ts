@@ -30,15 +30,8 @@ import {
   type DataMode,
   type DataModeSeam,
 } from '@/lib/config/dataMode';
-import {
-  SEAM_DISPOSITIONS,
-  type SeamDisposition,
-} from '@/lib/config/seamDispositions';
-import {
-  deploymentEnvName,
-  deploymentValue,
-  type DeploymentEnvName,
-} from '@/lib/server/env';
+import { SEAM_DISPOSITIONS, type SeamDisposition } from '@/lib/config/seamDispositions';
+import { deploymentEnvName, deploymentValue, type DeploymentEnvName } from '@/lib/server/env';
 import { substrateConnectionString, SubstrateNotConfiguredError } from '@/lib/substrate';
 import {
   requiredEnvKeys,
@@ -169,9 +162,7 @@ function checkSchema(unmet: UnmetRequirement[]): void {
  * Run the readiness preflight and return a structured, PHI-safe report.
  * FAIL CLOSED: `ready` is true only when NOTHING is unmet.
  */
-export function runPreflight(
-  env: DeploymentEnvName = deploymentEnvName(),
-): ReadinessReport {
+export function runPreflight(env: DeploymentEnvName = deploymentEnvName()): ReadinessReport {
   const unmet: UnmetRequirement[] = [];
 
   checkSchema(unmet);
@@ -205,7 +196,7 @@ export class PreflightNotReadyError extends Error {
   constructor(report: ReadinessReport) {
     super(
       `deployment preflight FAILED (fail-closed): ${report.summary}. ` +
-        `Unmet: ${report.unmet.map((u) => `${u.kind}:${u.name}`).join('; ')}`,
+        `Unmet: ${report.unmet.map((u) => `${u.kind}:${u.name}`).join('; ')}`
     );
     this.name = 'PreflightNotReadyError';
     this.report = report;
@@ -217,9 +208,7 @@ export class PreflightNotReadyError extends Error {
  * requirement) when not ready, so a misconfigured production deploy refuses to
  * start rather than booting default-ready.
  */
-export function assertReadyOrThrow(
-  env: DeploymentEnvName = deploymentEnvName(),
-): ReadinessReport {
+export function assertReadyOrThrow(env: DeploymentEnvName = deploymentEnvName()): ReadinessReport {
   const report = runPreflight(env);
   if (!report.ready) throw new PreflightNotReadyError(report);
   return report;

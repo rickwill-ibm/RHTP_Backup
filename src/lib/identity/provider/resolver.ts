@@ -87,7 +87,7 @@ function mergeRecord(anchor: ProviderIdentity, record: ProviderIdentity): Provid
  */
 export async function resolveProvider(
   input: ProviderResolveInput,
-  directory: ProviderDirectory = getProviderDirectory(),
+  directory: ProviderDirectory = getProviderDirectory()
 ): Promise<ProviderIdentity | null> {
   // An explicitly-supplied NPI must validate (fail loud). A rawRef-only input
   // that carries no valid NPI is a legitimate "no provider identity here" -> null.

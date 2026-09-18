@@ -64,16 +64,25 @@ export default function ActionQueue({
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { All: 0, Clinical: 0, BH: 0, Social: 0, Administrative: 0 };
-    all.forEach((i) => { if (!done.has(i.id)) { c.All++; c[i.domain]++; } });
+    all.forEach((i) => {
+      if (!done.has(i.id)) {
+        c.All++;
+        c[i.domain]++;
+      }
+    });
     return c;
   }, [all, done]);
 
   const act = (item: TriagedItem) => {
-    toast.success(`Action taken: ${item.nextAction}`, { description: `${item.patientName} · routed to ${item.ownerName}` });
+    toast.success(`Action taken: ${item.nextAction}`, {
+      description: `${item.patientName} · routed to ${item.ownerName}`,
+    });
     setDone((prev) => new Set(prev).add(item.id));
   };
   const reassign = (item: TriagedItem) => {
-    toast(`Reassign ${item.patientName}`, { description: `${item.signalType} — currently ${item.ownerName}` });
+    toast(`Reassign ${item.patientName}`, {
+      description: `${item.signalType} — currently ${item.ownerName}`,
+    });
   };
 
   return (
@@ -82,7 +91,9 @@ export default function ActionQueue({
       <div className="bg-white border border-carbon-gray-20 px-4 py-3 flex items-center gap-3 flex-wrap">
         <Icon name="BoltIcon" size={16} className="text-[#0043ce]" />
         <div>
-          <p className="text-sm font-semibold text-carbon-gray-100">{title ?? 'Action Queue — Triaged Signals'}</p>
+          <p className="text-sm font-semibold text-carbon-gray-100">
+            {title ?? 'Action Queue — Triaged Signals'}
+          </p>
           <p className="text-2xs text-carbon-gray-50">
             {focusCitizenId
               ? `${visible.length} signal${visible.length !== 1 ? 's' : ''} for ${focusCitizenName ?? 'this citizen'}`
@@ -90,11 +101,16 @@ export default function ActionQueue({
           </p>
         </div>
         {focusCitizenId && onClearFocus && (
-          <button onClick={onClearFocus} className="flex items-center gap-1 px-2 py-1 text-2xs font-semibold border border-carbon-gray-20 text-carbon-gray-70 hover:bg-carbon-gray-10">
+          <button
+            onClick={onClearFocus}
+            className="flex items-center gap-1 px-2 py-1 text-2xs font-semibold border border-carbon-gray-20 text-carbon-gray-70 hover:bg-carbon-gray-10"
+          >
             <Icon name="XMarkIcon" size={11} /> Clear citizen filter
           </button>
         )}
-        <div className={`ml-auto flex items-center gap-1.5 flex-wrap ${restrictDomain ? 'hidden' : ''}`}>
+        <div
+          className={`ml-auto flex items-center gap-1.5 flex-wrap ${restrictDomain ? 'hidden' : ''}`}
+        >
           {DOMAINS.map((d) => {
             const active = filter === d;
             return (
@@ -102,11 +118,17 @@ export default function ActionQueue({
                 key={d}
                 onClick={() => setFilter(d)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 text-2xs font-semibold border transition-colors ${
-                  active ? 'bg-carbon-gray-100 text-white border-carbon-gray-100' : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                  active
+                    ? 'bg-carbon-gray-100 text-white border-carbon-gray-100'
+                    : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
                 }`}
               >
                 {d}
-                <span className={`px-1 py-0.5 font-bold ${active ? 'bg-white/20 text-white' : 'bg-carbon-gray-10 text-carbon-gray-70'}`}>{counts[d]}</span>
+                <span
+                  className={`px-1 py-0.5 font-bold ${active ? 'bg-white/20 text-white' : 'bg-carbon-gray-10 text-carbon-gray-70'}`}
+                >
+                  {counts[d]}
+                </span>
               </button>
             );
           })}
@@ -121,37 +143,62 @@ export default function ActionQueue({
           <div key={tier} className="bg-white border border-carbon-gray-20">
             <div className="flex items-center gap-2 px-4 py-2 border-b border-carbon-gray-20">
               <span className={`w-2 h-2 rounded-full ${TIER_STYLE[tier].bar}`} />
-              <p className={`text-xs font-bold uppercase tracking-wide ${TIER_STYLE[tier].label}`}>{tier}</p>
+              <p className={`text-xs font-bold uppercase tracking-wide ${TIER_STYLE[tier].label}`}>
+                {tier}
+              </p>
               <span className="text-2xs text-carbon-gray-50">{tierItems.length}</span>
             </div>
             <div className="divide-y divide-carbon-gray-20">
               {tierItems.map((item) => {
                 const ds = DOMAIN_STYLE[item.domain];
                 return (
-                  <div key={item.id} className="px-4 py-3 hover:bg-carbon-gray-10 transition-colors">
+                  <div
+                    key={item.id}
+                    className="px-4 py-3 hover:bg-carbon-gray-10 transition-colors"
+                  >
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-2xs font-bold px-1.5 py-0.5 ${ds.bg} ${ds.text}`}>{item.domain}</span>
-                          <span className="text-xs font-semibold text-carbon-gray-100">{item.signalType}</span>
+                          <span className={`text-2xs font-bold px-1.5 py-0.5 ${ds.bg} ${ds.text}`}>
+                            {item.domain}
+                          </span>
+                          <span className="text-xs font-semibold text-carbon-gray-100">
+                            {item.signalType}
+                          </span>
                           <span className="text-2xs text-carbon-gray-50">· {item.patientName}</span>
                           {(() => {
-                            const meta = item.patientId && citizenMeta ? citizenMeta(item.patientId) : undefined;
+                            const meta =
+                              item.patientId && citizenMeta
+                                ? citizenMeta(item.patientId)
+                                : undefined;
                             return meta ? (
                               <span className="text-2xs text-carbon-gray-50 font-mono">
-                                {meta.age != null ? `${meta.age}y` : ''}{meta.gender ? ` ${meta.gender}` : ''}{meta.mrn ? ` · ${meta.mrn}` : ''}
+                                {meta.age != null ? `${meta.age}y` : ''}
+                                {meta.gender ? ` ${meta.gender}` : ''}
+                                {meta.mrn ? ` · ${meta.mrn}` : ''}
                               </span>
                             ) : null;
                           })()}
-                          {item.isNew && <span className="text-2xs font-bold px-1 py-0.5 bg-[#da1e28] text-white">NEW</span>}
+                          {item.isNew && (
+                            <span className="text-2xs font-bold px-1 py-0.5 bg-[#da1e28] text-white">
+                              NEW
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-carbon-gray-70 mt-1">{item.summary}</p>
                         <div className="flex items-center gap-3 mt-1.5 flex-wrap text-2xs">
-                          <span className="text-carbon-gray-50"><span className="font-semibold text-carbon-gray-70">Why now:</span> {item.whyNow}</span>
+                          <span className="text-carbon-gray-50">
+                            <span className="font-semibold text-carbon-gray-70">Why now:</span>{' '}
+                            {item.whyNow}
+                          </span>
                           <span className="text-carbon-gray-50">·</span>
-                          <span className="inline-flex items-center gap-1 text-carbon-gray-50"><Icon name="UserCircleIcon" size={11} /> {item.ownerName}</span>
+                          <span className="inline-flex items-center gap-1 text-carbon-gray-50">
+                            <Icon name="UserCircleIcon" size={11} /> {item.ownerName}
+                          </span>
                           <span className="text-carbon-gray-50">·</span>
-                          <span className="inline-flex items-center gap-1 text-[#6929c4]"><Icon name="CpuChipIcon" size={11} /> {item.producedBy}</span>
+                          <span className="inline-flex items-center gap-1 text-[#6929c4]">
+                            <Icon name="CpuChipIcon" size={11} /> {item.producedBy}
+                          </span>
                         </div>
                         <div className="mt-2 inline-flex items-center gap-1.5 text-2xs font-semibold text-[#0043ce] bg-[#edf5ff] border border-[#97c1ff] px-2 py-1">
                           <Icon name="SparklesIcon" size={11} />
@@ -159,14 +206,23 @@ export default function ActionQueue({
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5 flex-shrink-0">
-                        <button onClick={() => act(item)} className="flex items-center gap-1 px-2.5 py-1 bg-[#0043ce] text-white text-2xs font-semibold hover:bg-[#002d9c] whitespace-nowrap">
+                        <button
+                          onClick={() => act(item)}
+                          className="flex items-center gap-1 px-2.5 py-1 bg-[#0043ce] text-white text-2xs font-semibold hover:bg-[#002d9c] whitespace-nowrap"
+                        >
                           <Icon name="CheckIcon" size={11} /> Act
                         </button>
-                        <button onClick={() => reassign(item)} className="flex items-center gap-1 px-2.5 py-1 border border-carbon-gray-20 text-carbon-gray-70 text-2xs font-semibold hover:bg-carbon-gray-10 whitespace-nowrap">
+                        <button
+                          onClick={() => reassign(item)}
+                          className="flex items-center gap-1 px-2.5 py-1 border border-carbon-gray-20 text-carbon-gray-70 text-2xs font-semibold hover:bg-carbon-gray-10 whitespace-nowrap"
+                        >
                           <Icon name="ArrowsRightLeftIcon" size={11} /> Reassign
                         </button>
                         {item.patientId && onViewCitizen && (
-                          <button onClick={() => onViewCitizen(item.patientId!)} className="flex items-center gap-1 px-2.5 py-1 border border-carbon-gray-20 text-[#0043ce] text-2xs font-semibold hover:bg-[#edf5ff] whitespace-nowrap">
+                          <button
+                            onClick={() => onViewCitizen(item.patientId!)}
+                            className="flex items-center gap-1 px-2.5 py-1 border border-carbon-gray-20 text-[#0043ce] text-2xs font-semibold hover:bg-[#edf5ff] whitespace-nowrap"
+                          >
                             <Icon name="UserCircleIcon" size={11} /> View citizen
                           </button>
                         )}

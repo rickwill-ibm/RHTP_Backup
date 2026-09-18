@@ -23,11 +23,11 @@ SDE disposition batch                (src/lib/sde — the DECISION)
 
 ## The three agents
 
-| agent (manifest id) | consumes | proposes | on approval |
-|---|---|---|---|
-| `outreach-agent` | an SDE-approved coordinated touchpoint | `send-outreach` | sends via `comms-channel.send` (mockable) |
-| `referral-coordination-agent` | a referral (open/stalled) | `referral-followup` | records the follow-up; a stall escalates as data |
-| `pa-documentation-agent` | `/prior-auth` thread context (O-8) | `advance-pa-documentation` | appends evidence + a NON-authoritative PA advancement |
+| agent (manifest id)           | consumes                               | proposes                   | on approval                                           |
+| ----------------------------- | -------------------------------------- | -------------------------- | ----------------------------------------------------- |
+| `outreach-agent`              | an SDE-approved coordinated touchpoint | `send-outreach`            | sends via `comms-channel.send` (mockable)             |
+| `referral-coordination-agent` | a referral (open/stalled)              | `referral-followup`        | records the follow-up; a stall escalates as data      |
+| `pa-documentation-agent`      | `/prior-auth` thread context (O-8)     | `advance-pa-documentation` | appends evidence + a NON-authoritative PA advancement |
 
 Every agent is a `WorkflowDefinition` whose `agentId` names the governing
 manifest. All authority (tool allowlist, autonomy tier, escalation policy, PHI

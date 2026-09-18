@@ -59,11 +59,11 @@ export default function ReferralModal({
 
   if (!isOpen) return null;
 
-  const selectedGap = careGaps.find(g => g.id === selectedGapId);
+  const selectedGap = careGaps.find((g) => g.id === selectedGapId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedGapId || !specialistType || !clinicalNotes) {
       alert('Please fill in all required fields');
       return;
@@ -72,7 +72,7 @@ export default function ReferralModal({
     setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     onSubmit({
       careGapId: selectedGapId,
@@ -147,7 +147,8 @@ export default function ReferralModal({
                   <span className="text-blue-700">{selectedGap.name}</span>
                 </div>
                 <div className="text-blue-600">
-                  Priority: {selectedGap.priority} | Status: {selectedGap.status} | Days Open: {selectedGap.daysOpen}
+                  Priority: {selectedGap.priority} | Status: {selectedGap.status} | Days Open:{' '}
+                  {selectedGap.daysOpen}
                 </div>
               </div>
             )}
@@ -191,8 +192,8 @@ export default function ReferralModal({
                       ? p === 'stat' || p === 'urgent'
                         ? 'bg-red-600 text-white'
                         : p === 'asap'
-                        ? 'bg-amber-600 text-white'
-                        : 'bg-blue-600 text-white'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-blue-600 text-white'
                       : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -217,19 +218,25 @@ export default function ReferralModal({
               disabled={isSubmitting}
             />
             <p className="mt-1 text-xs text-gray-500">
-              Include relevant clinical information to help the specialist prepare for the consultation
+              Include relevant clinical information to help the specialist prepare for the
+              consultation
             </p>
           </div>
 
           {/* Info Box */}
           <div className="bg-green-50 border border-green-200 p-4">
             <div className="flex items-start gap-3">
-              <Icon name="InformationCircleIcon" size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
+              <Icon
+                name="InformationCircleIcon"
+                size={20}
+                className="text-green-600 flex-shrink-0 mt-0.5"
+              />
               <div className="text-sm text-green-800">
                 <p className="font-semibold mb-1">Gainshare Eligible Referral</p>
                 <p>
-                  This referral is eligible for gainshare incentives when the care gap is successfully closed.
-                  The specialist will receive notification and can document service completion in the Specialist Portal.
+                  This referral is eligible for gainshare incentives when the care gap is
+                  successfully closed. The specialist will receive notification and can document
+                  service completion in the Specialist Portal.
                 </p>
               </div>
             </div>

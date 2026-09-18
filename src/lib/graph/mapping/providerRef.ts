@@ -58,7 +58,7 @@ export function providerRefMutations(
   from: { kind: string; key: string },
   edgeType: string,
   input: ProviderRefInput,
-  start: string,
+  start: string
 ): Mutation[] {
   const rawRef = input.rawRef;
   if (!rawRef) return [];

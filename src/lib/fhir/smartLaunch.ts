@@ -91,7 +91,7 @@ export async function discoverSmartConfiguration(iss: string): Promise<SmartConf
 export async function buildAuthorizationUrl(
   config: SmartConfiguration,
   iss: string,
-  launch: string,
+  launch: string
 ): Promise<string> {
   const verifier = generateCodeVerifier();
   const challenge = await computeCodeChallenge(verifier);
@@ -113,7 +113,7 @@ export async function buildAuthorizationUrl(
 
 export async function exchangeCodeForToken(
   config: SmartConfiguration,
-  code: string,
+  code: string
 ): Promise<SmartTokenResponse> {
   const verifier = sessionStorage.getItem(PKCE_STORAGE_KEY);
   if (!verifier) throw new Error('PKCE verifier missing — launch flow was not initiated here');

@@ -17,8 +17,17 @@ import type {
   WorkflowHandle,
 } from '@/lib/agentRuntime';
 import { isApproved, type DispositionBatch, type MemberContext, type Signal } from '@/lib/sde';
-import { createOutreachWorkflow, type OutreachResult, type OutreachTask } from '@/lib/agents/outreach';
-import { createReferralWorkflow, type ReferralResult, type ReferralState, type ReferralTask } from '@/lib/agents/referral';
+import {
+  createOutreachWorkflow,
+  type OutreachResult,
+  type OutreachTask,
+} from '@/lib/agents/outreach';
+import {
+  createReferralWorkflow,
+  type ReferralResult,
+  type ReferralState,
+  type ReferralTask,
+} from '@/lib/agents/referral';
 import { createPaWorkflow, type PaResult, type PaTask } from '@/lib/agents/pa';
 import type { PaContext } from '@/lib/workflow/paMachine';
 import routingJson from './data/agent-routing.json';
@@ -52,17 +61,29 @@ function validateRoute(r: unknown, i: number): AgentRoute {
   req(r && typeof r === 'object', `routes[${i}]`, 'must be an object');
   const o = r as Record<string, unknown>;
   req(typeof o.id === 'string' && o.id.length > 0, `routes[${i}].id`, 'must be a non-empty string');
-  req(typeof o.agentId === 'string' && o.agentId.length > 0, `routes[${i}].agentId`, 'must be a non-empty string');
-  req(typeof o.taskKind === 'string' && TASK_KINDS.includes(o.taskKind), `routes[${i}].taskKind`, `must be one of ${TASK_KINDS.join(', ')}`);
+  req(
+    typeof o.agentId === 'string' && o.agentId.length > 0,
+    `routes[${i}].agentId`,
+    'must be a non-empty string'
+  );
+  req(
+    typeof o.taskKind === 'string' && TASK_KINDS.includes(o.taskKind),
+    `routes[${i}].taskKind`,
+    `must be one of ${TASK_KINDS.join(', ')}`
+  );
   req(o.match && typeof o.match === 'object', `routes[${i}].match`, 'must be an object');
   const m = o.match as Record<string, unknown>;
   req(
     m.actionability !== undefined || m.kindPrefix !== undefined,
     `routes[${i}].match`,
-    'must set at least one of actionability, kindPrefix',
+    'must set at least one of actionability, kindPrefix'
   );
   if (o.taskKind === 'pa') {
-    req(o.pa && typeof o.pa === 'object', `routes[${i}].pa`, 'a pa route must carry a { currentState, advanceEvent } template');
+    req(
+      o.pa && typeof o.pa === 'object',
+      `routes[${i}].pa`,
+      'a pa route must carry a { currentState, advanceEvent } template'
+    );
   }
   const route: AgentRoute = {
     id: o.id as string,
@@ -147,7 +168,11 @@ export function routeBatch(input: DispatchInput): DispatchedTask[] {
         taskKind: 'referral',
         memberId: sig.memberId,
         routeId: route.id,
-        task: { referralRef: sig.refs?.referral ?? sig.signalId, priority: sig.priority, knownState },
+        task: {
+          referralRef: sig.refs?.referral ?? sig.signalId,
+          priority: sig.priority,
+          knownState,
+        },
       });
     } else {
       req(route.pa, `routes.${route.id}.pa`, 'a pa route must carry a template');
@@ -195,12 +220,14 @@ export function defaultAgentWorkflows(): AgentWorkflows {
 export function runDispatch(
   engine: WorkflowEngine,
   tasks: DispatchedTask[],
-  workflows: AgentWorkflows = defaultAgentWorkflows(),
+  workflows: AgentWorkflows = defaultAgentWorkflows()
 ): WorkflowHandle[] {
   return tasks.map((t) => {
     const opts: StartOptions<unknown> = { memberId: t.memberId, input: t.task };
-    if (t.taskKind === 'outreach') return engine.start(workflows.outreach, opts as StartOptions<OutreachTask>);
-    if (t.taskKind === 'referral') return engine.start(workflows.referral, opts as StartOptions<ReferralTask>);
+    if (t.taskKind === 'outreach')
+      return engine.start(workflows.outreach, opts as StartOptions<OutreachTask>);
+    if (t.taskKind === 'referral')
+      return engine.start(workflows.referral, opts as StartOptions<ReferralTask>);
     return engine.start(workflows.pa, opts as StartOptions<PaTask>);
   });
 }

@@ -9,7 +9,12 @@
  * iteration HW1..HW6 runs against this net.
  */
 
-export { captureDemoSurface, demoPanelIds, DEMO_CAPTURE_VERSION, type DemoSurface } from './capture';
+export {
+  captureDemoSurface,
+  demoPanelIds,
+  DEMO_CAPTURE_VERSION,
+  type DemoSurface,
+} from './capture';
 export {
   fingerprintPanel,
   hashValue,

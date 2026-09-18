@@ -59,6 +59,12 @@ export interface MedicalNecessityVM {
     reason: string;
     approvalRate?: number;
     program: string;
+    /**
+     * Wave-13.1 (MED-5): the roster / approval history behind `approvalRate` is SEEDED /
+     * illustrative (the mock demo feed), not observed provider history. The panel labels
+     * the per-provider rate accordingly. Absent/false → rendered as before.
+     */
+    seeded?: boolean;
   };
   propensity: {
     score: number;
@@ -86,6 +92,10 @@ export interface RunContext {
   ids: { determination: string; goldCard: string; propensity: string; evidence?: string };
   ts: string;
   historicalDenialRate?: number;
+  /** Wave-13.1 (HIGH-4): the historical denial rate came from a seeded/illustrative feed. */
+  historicalDenialRateSeeded?: boolean;
+  /** Wave-13.1 (MED-5): the gold-card roster/approval history is seeded/illustrative. */
+  goldCardSeeded?: boolean;
 }
 
 function remediationFor(
@@ -153,6 +163,7 @@ export function runMedicalNecessity(
     propensityInputFromDetermination(determination, {
       goldCardApplied: goldCard.applied,
       historicalDenialRate: ctx.historicalDenialRate,
+      historicalDenialRateSeeded: ctx.historicalDenialRateSeeded,
     })
   );
 
@@ -208,6 +219,7 @@ export function runMedicalNecessity(
       reason: goldCard.reason,
       approvalRate: goldCard.approvalRate,
       program: goldCard.program,
+      seeded: ctx.goldCardSeeded,
     },
     propensity: { score: propensity.score, band: propensity.band, factors: propensity.factors },
     remediation: goldCard.applied

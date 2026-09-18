@@ -15,7 +15,13 @@
  *
  * C9.2 yield: assessments feed -> assessments T1 (self-report or clinician-recorded).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 /** One tagged FHIR QuestionnaireResponse pulled from the bundle. */
 interface QuestionnaireResponseResource {
@@ -81,7 +87,9 @@ function items(resource: Record<string, unknown>): AssessmentItem[] {
   for (const it of raw) {
     const item = obj(it);
     const answer = Array.isArray(item.answer) ? obj(item.answer[0]) : {};
-    const coding = Array.isArray(answer.valueCoding) ? obj(answer.valueCoding[0]) : obj(answer.valueCoding);
+    const coding = Array.isArray(answer.valueCoding)
+      ? obj(answer.valueCoding[0])
+      : obj(answer.valueCoding);
     out.push({
       linkId: str(item.linkId),
       code: str(coding.code),
@@ -112,12 +120,17 @@ function parse(payload: string): RawRecord<QuestionnaireResponseResource>[] {
 function validate(raw: RawRecord<QuestionnaireResponseResource>): ValidationResult {
   const issues: ValidationResult['issues'] = [];
   const { resource } = raw.data;
-  if (!subjectSourceId(resource)) issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
-  if (!questionnaireRef(resource)) issues.push({ reasonCode: 'missing-questionnaire', fieldPath: 'questionnaire' });
+  if (!subjectSourceId(resource))
+    issues.push({ reasonCode: 'missing-subject', fieldPath: 'subject.reference' });
+  if (!questionnaireRef(resource))
+    issues.push({ reasonCode: 'missing-questionnaire', fieldPath: 'questionnaire' });
   return { ok: issues.length === 0, issues };
 }
 
-function normalize(raw: RawRecord<QuestionnaireResponseResource>, deps: PipelineDeps): NormalizedRecord {
+function normalize(
+  raw: RawRecord<QuestionnaireResponseResource>,
+  deps: PipelineDeps
+): NormalizedRecord {
   const resource = raw.data.resource;
   const qrId = str(resource.id);
   const memberId = deps.resolveIdentity(subjectSourceId(resource), { feed: SOURCE.feed });

@@ -2,31 +2,162 @@
   "resourceType": "Bundle",
   "type": "collection",
   "entry": [
-    { "resource": { "resourceType": "Patient", "id": "pat-dorothy-042",
-        "identifier": [ { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00042" }, { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0042" } ],
-        "name": [{ "family": "Simmons", "given": ["Dorothy"] }], "gender": "female", "birthDate": "1951-03-14" } },
-    { "resource": { "resourceType": "Coverage", "id": "cov-dorothy-042", "status": "active",
-        "beneficiary": { "reference": "Patient/pat-dorothy-042" }, "payor": [{ "display": "SD Medicaid" }], "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }] } },
-    { "resource": { "resourceType": "Condition", "id": "cond-dm-042",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [ { "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.65", "display": "Type 2 diabetes mellitus with hyperglycemia" }, { "system": "http://snomed.info/sct", "code": "44054006", "display": "Type 2 diabetes mellitus" } ] },
-        "hcc": { "system": "urn:cms:risk-adjustment:hcc", "code": "HCC38", "display": "Diabetes with glycemic, unspecified, or no complications" },
-        "subject": { "reference": "Patient/pat-dorothy-042" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-chf-042",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I50.32", "display": "Chronic diastolic (congestive) heart failure" }] },
-        "subject": { "reference": "Patient/pat-dorothy-042" } } },
-    { "resource": { "resourceType": "Condition", "id": "cond-ckd-042",
-        "clinicalStatus": { "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/condition-clinical", "code": "active" }] },
-        "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.3", "display": "Chronic kidney disease, stage 3 (moderate)" }] },
-        "subject": { "reference": "Patient/pat-dorothy-042" } } },
-    { "resource": { "resourceType": "Observation", "id": "obs-a1c-042", "status": "final",
-        "category": [{ "coding": [{ "system": "http://terminology.hl7.org/CodeSystem/observation-category", "code": "laboratory" }] }],
-        "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }] },
-        "subject": { "reference": "Patient/pat-dorothy-042" }, "effectiveDateTime": "2026-03-15",
-        "valueQuantity": { "value": 9.2, "unit": "%", "system": "http://unitsofmeasure.org", "code": "%" } } },
-    { "resource": { "resourceType": "MedicationRequest", "id": "medrx-furos-042", "status": "active", "intent": "order",
-        "medicationCodeableConcept": { "coding": [{ "system": "http://www.nlm.nih.gov/research/umls/rxnorm", "code": "4603", "display": "Furosemide" }] },
-        "subject": { "reference": "Patient/pat-dorothy-042" } } }
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-dorothy-042",
+        "identifier": [
+          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00042" },
+          { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0042" }
+        ],
+        "name": [{ "family": "Simmons", "given": ["Dorothy"] }],
+        "gender": "female",
+        "birthDate": "1951-03-14"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-dorothy-042",
+        "status": "active",
+        "beneficiary": { "reference": "Patient/pat-dorothy-042" },
+        "payor": [{ "display": "SD Medicaid" }],
+        "class": [{ "type": { "text": "plan" }, "value": "RHTP-T3" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-dm-042",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.65",
+              "display": "Type 2 diabetes mellitus with hyperglycemia"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ]
+        },
+        "hcc": {
+          "system": "urn:cms:risk-adjustment:hcc",
+          "code": "HCC38",
+          "display": "Diabetes with glycemic, unspecified, or no complications"
+        },
+        "subject": { "reference": "Patient/pat-dorothy-042" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-chf-042",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I50.32",
+              "display": "Chronic diastolic (congestive) heart failure"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-dorothy-042" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-ckd-042",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "N18.3",
+              "display": "Chronic kidney disease, stage 3 (moderate)"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-dorothy-042" }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-a1c-042",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-dorothy-042" },
+        "effectiveDateTime": "2026-03-15",
+        "valueQuantity": {
+          "value": 9.2,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "medrx-furos-042",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "4603",
+              "display": "Furosemide"
+            }
+          ]
+        },
+        "subject": { "reference": "Patient/pat-dorothy-042" }
+      }
+    }
   ]
 }

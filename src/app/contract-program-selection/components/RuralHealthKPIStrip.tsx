@@ -65,8 +65,12 @@ export default function RuralHealthKPIStrip() {
             <Icon name="BuildingOffice2Icon" size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-carbon-gray-100">Rural Health Transformation Program</p>
-            <p className="text-xs text-carbon-gray-50">South Dakota DHSS · State Medicaid Initiative · Value-Based Care</p>
+            <p className="text-sm font-bold text-carbon-gray-100">
+              Rural Health Transformation Program
+            </p>
+            <p className="text-xs text-carbon-gray-50">
+              South Dakota DHSS · State Medicaid Initiative · Value-Based Care
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -90,7 +94,9 @@ export default function RuralHealthKPIStrip() {
             </div>
             <p className={`text-2xl font-bold tabular-nums mt-1 font-mono ${k.color}`}>{k.value}</p>
             <p className="text-xs text-carbon-gray-50 mt-0.5">{k.sub}</p>
-            <p className={`text-2xs mt-1 font-medium ${k.trendUp ? 'text-[#24a148]' : 'text-[#da1e28]'}`}>
+            <p
+              className={`text-2xs mt-1 font-medium ${k.trendUp ? 'text-[#24a148]' : 'text-[#da1e28]'}`}
+            >
               {k.trendUp ? '↑' : '↓'} {k.trend}
             </p>
           </div>

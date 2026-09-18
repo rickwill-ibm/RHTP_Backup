@@ -3,9 +3,17 @@
 // ─── fhirCareTeamData.types.ts ────────────────────────────────────────────────
 // Type aliases and interfaces for FHIR CareTeam & Task mock data.
 
-export type CareTeamRoleCategory = 'Clinical' | 'Care Management' | 'Behavioral Health' | 'Community & Social';
-export type TaskProgramType = 'Clinical' | 'Behavioral Health' | 'Food Security' | 'Housing' | 'Transportation' | 'Social Isolation';
-export type TaskStatus = 'requested' | 'accepted' | 'in-progress' | 'completed' | 'rejected' | 'cancelled';
+export type CareTeamRoleCategory =
+  'Clinical' | 'Care Management' | 'Behavioral Health' | 'Community & Social';
+export type TaskProgramType =
+  | 'Clinical'
+  | 'Behavioral Health'
+  | 'Food Security'
+  | 'Housing'
+  | 'Transportation'
+  | 'Social Isolation';
+export type TaskStatus =
+  'requested' | 'accepted' | 'in-progress' | 'completed' | 'rejected' | 'cancelled';
 export type TaskPriority = 'routine' | 'urgent' | 'asap' | 'stat';
 
 export interface FHIRCareTeamParticipant {

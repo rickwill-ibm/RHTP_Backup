@@ -46,8 +46,17 @@ export interface AgentEventSink {
   emit(event: AgentTaskEvent): Promise<void>;
 }
 
-/** Escalation priority tier (drives the SLA + hierarchy walk). */
-export type EscalationPriority = 'urgent' | 'high' | 'routine';
+/**
+ * Escalation priority tier (drives the SLA + hierarchy walk).
+ *
+ * C6: `deadline-unknown` is a DISTINCT recovery sentinel — a recovery whose payer
+ * appeal-window deadline could not be parsed, so it needs human triage. It is NOT the
+ * genuine `high` band (propensity `high`, a reconciliation escalation), which is why the
+ * two are no longer conflated. Escalation SLA lookup normalizes `deadline-unknown` to the
+ * `high` tier (`getEscalationTier`), so a deadline-unknown recovery keeps the high-urgency
+ * triage SLA the old overloaded `high` fallback gave it — without overloading the band name.
+ */
+export type EscalationPriority = 'urgent' | 'high' | 'routine' | 'deadline-unknown';
 
 /**
  * An action a workflow proposes for a human decision (HITL). PHI-safe: it names
@@ -62,6 +71,16 @@ export interface ProposedAction {
   refs?: Record<string, string>;
   /** A short, code-level summary for the reviewer (no free-text PHI). */
   summary?: string;
+  /**
+   * Wave-3 MED-3 (additive, optional): true when this action is a payer-facing
+   * SUBMISSION (transmit/rebill/appeal-submit). A submission ALWAYS requires a
+   * qualified human regardless of autonomy tier — the runtime auto-approve gate
+   * (`isAutoApprovable`) refuses it even at HOTL/autonomous. Existing actions omit
+   * the field → unchanged behavior. This mirrors the workflow-level `isSubmission`
+   * on the twin-ladder interlock so the DURABLE runtime gate carries the same
+   * guarantee the workflow asserts.
+   */
+  isSubmission?: boolean;
 }
 
 /** The outcome of a human (or auto, for non-HITL tiers) decision on a proposal. */
@@ -177,7 +196,7 @@ export class UnallowedAgentEventError extends Error {
   constructor(public readonly eventType: string) {
     super(
       `Agent runtime may only emit the pre-allocated C2 event types ` +
-        `(${AGENT_C2_EVENT_TYPES.join(', ')}); refused "${eventType}"`,
+        `(${AGENT_C2_EVENT_TYPES.join(', ')}); refused "${eventType}"`
     );
     this.name = 'UnallowedAgentEventError';
   }

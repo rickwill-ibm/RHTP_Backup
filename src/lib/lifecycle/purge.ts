@@ -10,9 +10,7 @@
 import * as clock from '@/lib/clock';
 import { auditHeldBack, auditPurged } from './audit';
 import { selectByPolicies } from './policy';
-import type {
-  LegalHoldRegistry,
-} from './legalHold';
+import type { LegalHoldRegistry } from './legalHold';
 import type {
   PurgeableItem,
   PurgePlan,
@@ -39,7 +37,7 @@ export function planPurge(
   items: readonly PurgeableItem[],
   policies: readonly RetentionPolicy[],
   isHeld: HoldPredicate,
-  nowMs: number,
+  nowMs: number
 ): PurgePlan {
   const selected = selectByPolicies(items, policies, nowMs);
   const purge: PurgeSelection[] = [];
@@ -59,7 +57,7 @@ export function planPurge(
 export async function executePurge(
   plan: PurgePlan,
   sources: readonly PurgeSource[],
-  actor: string,
+  actor: string
 ): Promise<PurgeResult> {
   const byStore = new Map(sources.map((s) => [s.store, s]));
   const ts = clock.nowIso();
@@ -70,7 +68,7 @@ export async function executePurge(
     const source = byStore.get(sel.item.store);
     if (!source) {
       throw new Error(
-        `purge: no source registered for store '${sel.item.store}' (item ${sel.item.id})`,
+        `purge: no source registered for store '${sel.item.store}' (item ${sel.item.id})`
       );
     }
     await source.remove(sel.item.id);
@@ -95,7 +93,7 @@ export async function runPurge(
   policies: readonly RetentionPolicy[],
   registry: LegalHoldRegistry,
   actor: string,
-  nowMs: number = clock.now(),
+  nowMs: number = clock.now()
 ): Promise<PurgeResult> {
   const items: PurgeableItem[] = [];
   for (const source of sources) {

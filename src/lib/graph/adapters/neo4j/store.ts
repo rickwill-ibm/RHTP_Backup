@@ -79,13 +79,19 @@ export function createNeo4jGraphStore(runner: Neo4jRunner, id = 'neo4j-graph'): 
       const res = await runner.run(stmt.text, stmt.params);
       if (res.records.length === 0) return null;
       const rec = res.records[0];
-      return toNode((rec.get('props') ?? {}) as Record<string, unknown>, (rec.get('labels') ?? []) as string[]);
+      return toNode(
+        (rec.get('props') ?? {}) as Record<string, unknown>,
+        (rec.get('labels') ?? []) as string[]
+      );
     },
     async listNodes(filter: NodeFilter = {}) {
       const stmt = nodesMatch(filter);
       const res = await runner.run(stmt.text, stmt.params);
       return res.records.map((rec) =>
-        toNode((rec.get('props') ?? {}) as Record<string, unknown>, (rec.get('labels') ?? []) as string[]),
+        toNode(
+          (rec.get('props') ?? {}) as Record<string, unknown>,
+          (rec.get('labels') ?? []) as string[]
+        )
       );
     },
     async listEdges(filter: EdgeFilter = {}) {

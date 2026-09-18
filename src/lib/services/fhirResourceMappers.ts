@@ -98,7 +98,10 @@ interface FhirMedicationRequest {
   resourceType: 'MedicationRequest';
   id: string;
   status?: string;
-  medicationCodeableConcept?: { text?: string; coding?: { system?: string; code?: string; display?: string }[] };
+  medicationCodeableConcept?: {
+    text?: string;
+    coding?: { system?: string; code?: string; display?: string }[];
+  };
   requester?: { display?: string };
   dosageInstruction?: { text?: string }[];
   note?: { text?: string }[];
@@ -162,9 +165,9 @@ const BASE = 'http://tcoc.example.org/fhir/StructureDefinition';
 // ─── Patient mapper ───────────────────────────────────────────────────────────
 
 // LOINC codes for BH screening scores we read from the Observation bundle
-const BH_LOINC_PHQ9      = '44249-1';
+const BH_LOINC_PHQ9 = '44249-1';
 const BH_LOINC_EDINBURGH = '89204-2';
-const BH_LOINC_AUDITC    = '75624-7';
+const BH_LOINC_AUDITC = '75624-7';
 
 export function mapFhirPatientToRegistryPatient(
   patient: FhirPatient,
@@ -175,7 +178,7 @@ export function mapFhirPatientToRegistryPatient(
   fhirMedications: FhirMedicationRequest[] = [],
   fhirCareTeam?: FhirCareTeam,
   fhirEncounters: FhirEncounter[] = [],
-  fhirGoals: FhirGoal[] = [],
+  fhirGoals: FhirGoal[] = []
 ): RegistryPatient {
   // Name
   const officialName = patient.name?.find((n) => n.use === 'official') ?? patient.name?.[0];
@@ -196,8 +199,7 @@ export function mapFhirPatientToRegistryPatient(
   const age = clock.nowDate().getFullYear() - birthYear;
 
   // Contact
-  const phone =
-    patient.telecom?.find((t) => t.system === 'phone')?.value ?? '';
+  const phone = patient.telecom?.find((t) => t.system === 'phone')?.value ?? '';
   const location = patient.address?.find((a) => a.use === 'home')?.text ?? '';
 
   // Language
@@ -210,9 +212,9 @@ export function mapFhirPatientToRegistryPatient(
   const exts = patient.extension;
   const rafScore = extNum(exts, `${BASE}/raf-score`);
   const riskTierRaw = extStr(exts, `${BASE}/risk-tier`);
-  const riskTier = (['Critical', 'High', 'Moderate', 'Low'].includes(riskTierRaw)
-    ? riskTierRaw
-    : 'Moderate') as RegistryPatient['riskTier'];
+  const riskTier = (
+    ['Critical', 'High', 'Moderate', 'Low'].includes(riskTierRaw) ? riskTierRaw : 'Moderate'
+  ) as RegistryPatient['riskTier'];
   const erRiskPct = extNum(exts, `${BASE}/er-risk-pct`);
   const careManager = extStr(exts, `${BASE}/care-manager`);
   const episodeType = extStr(exts, `${BASE}/episode-type`);
@@ -228,12 +230,12 @@ export function mapFhirPatientToRegistryPatient(
   // ── CareTeam extraction ───────────────────────────────────────────────────
   const CARETEAM_ROLE_EXT = `${BASE}/careteam-role`;
   const ctParticipant = (role: string) =>
-    fhirCareTeam?.participant?.find(
-      (p) => p.extension?.some((e) => e.url === CARETEAM_ROLE_EXT && e.valueString === role),
+    fhirCareTeam?.participant?.find((p) =>
+      p.extension?.some((e) => e.url === CARETEAM_ROLE_EXT && e.valueString === role)
     );
-  const ctPcp        = ctParticipant('PCP')?.member?.display ?? '';
+  const ctPcp = ctParticipant('PCP')?.member?.display ?? '';
   const ctCareManager = ctParticipant('CareManager')?.member?.display ?? '';
-  const ctBhProvider  = ctParticipant('BHProvider')?.member?.display ?? '';
+  const ctBhProvider = ctParticipant('BHProvider')?.member?.display ?? '';
 
   // ── BH scores from FHIR Observations ──────────────────────────────────────
   // Filter to just the known BH LOINC codes; split out from care-gap observations.
@@ -251,24 +253,27 @@ export function mapFhirPatientToRegistryPatient(
 
   // ── SDOH values from FHIR PRAPARE Observations ────────────────────────────
   const SDOH_TRANSPORT_LOINC = '93034-7';
-  const SDOH_HOUSING_LOINC   = '93030-5';
-  const SDOH_FOOD_LOINC      = '93031-3';
+  const SDOH_HOUSING_LOINC = '93030-5';
+  const SDOH_FOOD_LOINC = '93031-3';
 
   const sdohValue = (loinc: string): string =>
     sdohObservations.find((o) => o.code?.coding?.[0]?.code === loinc)?.valueString ?? '';
 
   const fhirTransportStatus = sdohValue(SDOH_TRANSPORT_LOINC);
-  const fhirHousingStatus   = sdohValue(SDOH_HOUSING_LOINC);
-  const fhirFoodSecurity    = sdohValue(SDOH_FOOD_LOINC);
+  const fhirHousingStatus = sdohValue(SDOH_HOUSING_LOINC);
+  const fhirFoodSecurity = sdohValue(SDOH_FOOD_LOINC);
 
-  const phq9Obs      = bhObservations.find((o) => o.code?.coding?.[0]?.code === BH_LOINC_PHQ9);
+  const phq9Obs = bhObservations.find((o) => o.code?.coding?.[0]?.code === BH_LOINC_PHQ9);
   const edinburghObs = bhObservations.find((o) => o.code?.coding?.[0]?.code === BH_LOINC_EDINBURGH);
-  const auditcObs    = bhObservations.find((o) => o.code?.coding?.[0]?.code === BH_LOINC_AUDITC);
+  const auditcObs = bhObservations.find((o) => o.code?.coding?.[0]?.code === BH_LOINC_AUDITC);
 
   // Prefer Edinburgh for bhScore when present (postpartum patients), otherwise PHQ-9
   const primaryBhObs = edinburghObs ?? phq9Obs;
-  const bhScoreValue = primaryBhObs?.valueQuantity?.value ?? extNum(primaryBhObs?.extension, `${BASE}/tcoc-bh-score`) ?? null;
-  const auditCValue  = auditcObs?.valueQuantity?.value ?? 0;
+  const bhScoreValue =
+    primaryBhObs?.valueQuantity?.value ??
+    extNum(primaryBhObs?.extension, `${BASE}/tcoc-bh-score`) ??
+    null;
+  const auditCValue = auditcObs?.valueQuantity?.value ?? 0;
 
   // Derive bhRisk from score
   const deriveBhRisk = (score: number | null): RegistryPatient['bhRisk'] => {
@@ -284,36 +289,47 @@ export function mapFhirPatientToRegistryPatient(
     : '';
 
   // ── Conditions from FHIR ──────────────────────────────────────────────────
-  const mappedConditions: import('../patientRegistry').ConditionEntry[] = fhirConditions.map((c) => ({
-    key: c.id,
-    code: c.code?.coding?.[0]?.code ?? c.id,
-    name: c.code?.text ?? c.code?.coding?.[0]?.display ?? 'Unknown Condition',
-    onset: c.onsetDateTime?.substring(0, 7) ?? '',
-    status: c.clinicalStatus?.coding?.[0]?.code ?? 'active',
-    source: 'FHIR',
-  }));
+  const mappedConditions: import('../patientRegistry').ConditionEntry[] = fhirConditions.map(
+    (c) => ({
+      key: c.id,
+      code: c.code?.coding?.[0]?.code ?? c.id,
+      name: c.code?.text ?? c.code?.coding?.[0]?.display ?? 'Unknown Condition',
+      onset: c.onsetDateTime?.substring(0, 7) ?? '',
+      status: c.clinicalStatus?.coding?.[0]?.code ?? 'active',
+      source: 'FHIR',
+    })
+  );
 
   // ── MedicationRequests from FHIR ──────────────────────────────────────────
-  const mappedMedications: import('../patientRegistry').MedicationEntry[] = fhirMedications.map((m) => ({
-    key: m.id,
-    name: m.medicationCodeableConcept?.text ?? m.medicationCodeableConcept?.coding?.[0]?.display ?? 'Unknown Medication',
-    dose: m.dosageInstruction?.[0]?.text ?? '',
-    frequency: m.dosageInstruction?.[0]?.text ?? '',
-    prescriber: m.requester?.display ?? '',
-    lastFill: extStr(m.extension, `${BASE}/last-fill-date`) || m.note?.[0]?.text?.replace('Last fill: ', '') || '',
-    adherence: null,
-    ddi: false,
-  }));
+  const mappedMedications: import('../patientRegistry').MedicationEntry[] = fhirMedications.map(
+    (m) => ({
+      key: m.id,
+      name:
+        m.medicationCodeableConcept?.text ??
+        m.medicationCodeableConcept?.coding?.[0]?.display ??
+        'Unknown Medication',
+      dose: m.dosageInstruction?.[0]?.text ?? '',
+      frequency: m.dosageInstruction?.[0]?.text ?? '',
+      prescriber: m.requester?.display ?? '',
+      lastFill:
+        extStr(m.extension, `${BASE}/last-fill-date`) ||
+        m.note?.[0]?.text?.replace('Last fill: ', '') ||
+        '',
+      adherence: null,
+      ddi: false,
+    })
+  );
 
   // ── Care gaps from Observations ───────────────────────────────────────────
   // Care gaps from Observations
   const careGaps: CareGapEntry[] = gapObservations.map((obs) => {
     const oExts = obs.extension;
     const statusRaw = extStr(oExts, `${BASE}/care-gap-status`);
-    const status = (['Open', 'In Progress', 'Closed', 'Waived'].includes(statusRaw)
-      ? statusRaw
-      : 'Open') as CareGapEntry['status'];
-    const domain = (extStr(oExts, `${BASE}/care-gap-domain`) || 'Clinical') as CareGapEntry['domain'];
+    const status = (
+      ['Open', 'In Progress', 'Closed', 'Waived'].includes(statusRaw) ? statusRaw : 'Open'
+    ) as CareGapEntry['status'];
+    const domain = (extStr(oExts, `${BASE}/care-gap-domain`) ||
+      'Clinical') as CareGapEntry['domain'];
     return {
       id: extStr(oExts, `${BASE}/tcoc-gap-id`) || obs.id,
       domain,
@@ -328,9 +344,9 @@ export function mapFhirPatientToRegistryPatient(
   const cdsCards: CdsCardEntry[] = flags.map((flag) => {
     const fExts = flag.extension;
     const indicatorRaw = flag.code?.coding?.[0]?.code ?? 'info';
-    const indicator = (['critical', 'warning', 'info'].includes(indicatorRaw)
-      ? indicatorRaw
-      : 'info') as CdsCardEntry['indicator'];
+    const indicator = (
+      ['critical', 'warning', 'info'].includes(indicatorRaw) ? indicatorRaw : 'info'
+    ) as CdsCardEntry['indicator'];
     return {
       id: extStr(fExts, `${BASE}/tcoc-cds-id`) || flag.id,
       indicator,
@@ -359,7 +375,13 @@ export function mapFhirPatientToRegistryPatient(
     phone,
     pcp: ctPcp || patient.generalPractitioner?.[0]?.display || local?.pcp || '',
     careManager: ctCareManager || careManager,
-    careManagerInitials: (ctCareManager || careManager).split(' ').map((w: string) => w[0]).join('') || local?.careManagerInitials || '',
+    careManagerInitials:
+      (ctCareManager || careManager)
+        .split(' ')
+        .map((w: string) => w[0])
+        .join('') ||
+      local?.careManagerInitials ||
+      '',
     organization: patient.managingOrganization?.display ?? local?.organization ?? '',
     contract,
     attribution: local?.attribution ?? 'Confirmed',
@@ -402,23 +424,30 @@ export function mapFhirPatientToRegistryPatient(
     recentOrders: local?.recentOrders,
     carePlanDomains: local?.carePlanDomains,
     // Encounters from FHIR — used by episode detail / analytics screens
-    recentEncounters: fhirEncounters.length > 0 ? fhirEncounters.map((e) => ({
-      id: e.id,
-      date: e.period?.start?.split('T')[0] ?? '',
-      type: e.type?.[0]?.text ?? e.class?.display ?? 'Encounter',
-      setting: e.class?.code === 'PHN' ? 'Phone' : e.class?.code === 'AMB' ? 'Outpatient' : 'Other',
-      provider: e.participant?.[0]?.individual?.display ?? e.serviceProvider?.display ?? '',
-      reason: e.reasonCode?.[0]?.text ?? '',
-      status: e.status,
-    })) : local?.recentEncounters,
+    recentEncounters:
+      fhirEncounters.length > 0
+        ? fhirEncounters.map((e) => ({
+            id: e.id,
+            date: e.period?.start?.split('T')[0] ?? '',
+            type: e.type?.[0]?.text ?? e.class?.display ?? 'Encounter',
+            setting:
+              e.class?.code === 'PHN' ? 'Phone' : e.class?.code === 'AMB' ? 'Outpatient' : 'Other',
+            provider: e.participant?.[0]?.individual?.display ?? e.serviceProvider?.display ?? '',
+            reason: e.reasonCode?.[0]?.text ?? '',
+            status: e.status,
+          }))
+        : local?.recentEncounters,
     // Goals from FHIR
-    fhirGoals: fhirGoals.length > 0 ? fhirGoals.map((g) => ({
-      id: g.id,
-      description: g.description?.text ?? '',
-      status: g.lifecycleStatus,
-      dueDate: g.target?.[0]?.dueDate ?? '',
-      note: g.note?.[0]?.text ?? '',
-    })) : undefined,
+    fhirGoals:
+      fhirGoals.length > 0
+        ? fhirGoals.map((g) => ({
+            id: g.id,
+            description: g.description?.text ?? '',
+            status: g.lifecycleStatus,
+            dueDate: g.target?.[0]?.dueDate ?? '',
+            note: g.note?.[0]?.text ?? '',
+          }))
+        : undefined,
     // Care gaps from FHIR (authoritative); fall back to registry if FHIR returned none
     careGaps: careGaps.length > 0 ? careGaps : (local?.careGaps ?? []),
     pathwaySteps,
@@ -436,7 +465,7 @@ export function mapFhirPatientToRegistryPatient(
 
 export function bundleEntries<T extends { resourceType: string }>(
   bundle: FhirBundle<T>,
-  resourceType: string,
+  resourceType: string
 ): T[] {
   return (bundle.entry ?? [])
     .map((e) => e.resource)

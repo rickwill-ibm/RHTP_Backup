@@ -32,7 +32,12 @@ export type AssetStatus = (typeof ASSET_STATUSES)[number];
  * FHIR binding strength — how strongly a use is REQUIRED to draw from the bound
  * value set (required > extensible > preferred > example).
  */
-export const BINDING_STRENGTHS = Object.freeze(['required', 'extensible', 'preferred', 'example'] as const);
+export const BINDING_STRENGTHS = Object.freeze([
+  'required',
+  'extensible',
+  'preferred',
+  'example',
+] as const);
 export type BindingStrength = (typeof BINDING_STRENGTHS)[number];
 
 /**

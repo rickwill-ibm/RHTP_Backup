@@ -53,13 +53,45 @@ changed_src() {
 # measured the on-disk (possibly hand-compacted) line count and PASSED, while the pre-commit
 # reformatted-then-checked and FAILED — the precise "gate said green, commit blocked on size" drift
 # this single-source-of-truth file exists to prevent. A file's size is its FORMATTED size, always.
-g_format()   { local f; f="$(changed_src | tr '\n' ' ')"; [ -z "$f" ] && { echo "(no changed source files)"; return 0; }; npx --no-install prettier --write --ignore-unknown $f && echo "formatted changed files with the repo .prettierrc"; }
+# NOTE (Windows portability, v1.8 §2.1): feed the changed files to prettier via NUL-delimited
+# xargs batching instead of one giant argv. `npx` shells through cmd.exe on Windows, whose command
+# line caps at ~8191 chars; a large landing (hundreds of changed files) overflowed it ("The command
+# line is too long"). xargs runs prettier over as many batches as needed — prettier --write is
+# idempotent and per-file, so the formatted result is byte-identical to the single-invocation form.
+# NUL delimiting also makes paths with spaces safe. Any batch failing propagates (pipefail) → gate FAIL.
+g_format()   { local files; files="$(changed_src)"; [ -z "$files" ] && { echo "(no changed source files)"; return 0; }; printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 -r -n 50 -s 6000 npx --no-install prettier --write --ignore-unknown && echo "formatted changed files with the repo .prettierrc"; }
 g_types()    { npm run --silent check:types; }
 g_sizes()    { npm run --silent check:sizes; }
-# g_lint: lint the changed source files. Exclude src/uhg/ — .eslintignore intentionally
-# excludes that legacy demo/presentation layer, and `next lint --file <ignored>` treats an
-# ignored file as a failure. Aligning the lint set with .eslintignore keeps the gate honest.
-g_lint()     { local f; f="$(changed_src | grep -vE '^src/uhg/|^src/app/uhg-orchestrate/' | sed 's/^/--file /')"; if [ -z "$f" ]; then echo "(no changed lintable source files)"; return 0; fi; npx --no-install next lint $f; }
+# g_lint: lint the changed source files. Exclude src/uhg/ and src/app/uhg-orchestrate/ — the
+# .eslintignore intentionally defers that legacy demo/presentation layer; the product (policy engine
+# + PA/policy UI) stays fully linted. Aligning the lint set with .eslintignore keeps the gate honest.
+#
+# Windows portability (v1.8 §2.1): `next lint` runs through `npx` (→ npx.cmd → cmd.exe, ~8191-char
+# cap), so the whole changed set can't go on one command line. We batch 20 files per invocation. We do
+# it with an explicit bash loop rather than xargs: on MSYS2/Git Bash, xargs exec'ing npx.cmd does NOT
+# reliably propagate the child's exit code — next lint reported "✔ No ESLint warnings or errors" yet
+# the rung failed. Running next lint directly from bash and OR-ing each batch's real exit code makes
+# pass/fail honest, and it names any batch that fails so a lint break is never silent.
+g_lint() {
+  local files; files="$(changed_src | grep -vE '^src/uhg/|^src/app/uhg-orchestrate/')"
+  [ -z "$files" ] && { echo "(no changed lintable source files)"; return 0; }
+  local rc=0 n=0 b=0 f; local -a batch=()
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    batch+=(--file "$f"); n=$((n + 1))
+    if [ "${#batch[@]}" -ge 40 ]; then
+      b=$((b + 1))
+      npx --no-install next lint "${batch[@]}" || { echo "  [g_lint] batch #$b exited non-zero (real lint failure)"; rc=1; }
+      batch=()
+    fi
+  done <<< "$files"
+  if [ "${#batch[@]}" -gt 0 ]; then
+    b=$((b + 1))
+    npx --no-install next lint "${batch[@]}" || { echo "  [g_lint] batch #$b exited non-zero (real lint failure)"; rc=1; }
+  fi
+  echo "  [g_lint] linted $n changed file(s) in $b batch(es); rc=$rc"
+  return $rc
+}
 g_testlink() { local f; f="$(changed_src | tr '\n' ' ')"; node docs/build-provenance/check-testlink.mjs src tests $f --baseline docs/build-provenance/testlink-baseline.json; }
 g_unit()     { npx --no-install vitest run; }
 g_wiring()   { node docs/build-provenance/check-wiring.mjs src --baseline docs/build-provenance/wiring-baseline.json; }

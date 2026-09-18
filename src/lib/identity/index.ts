@@ -34,7 +34,12 @@ export {
   type XrefLookup,
   type XrefLink,
 } from './crossReference';
-export { createXrefEmpiResolver, resolveEmpi, createEmpiResolver, empiResolver } from './empiResolver';
+export {
+  createXrefEmpiResolver,
+  resolveEmpi,
+  createEmpiResolver,
+  empiResolver,
+} from './empiResolver';
 
 // ── I8A wave B (external EMPI made real: PIX/PDQ + PIXm/PDQm) ──────────────────
 // Convergence (Wave D): the external seam is re-surfaced through the shared

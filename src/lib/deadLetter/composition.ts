@@ -23,7 +23,7 @@ export class DeadLetterConnectionNotConfiguredError extends Error {
     super(
       'DATA_MODE deadLetterStore=production: no store connection string is configured. ' +
         'Set DEAD_LETTER_DATABASE_URL (or DATABASE_URL) to the append-only dead-letter store, ' +
-        'or set DATA_MODE_DEAD_LETTER_STORE=mock for the in-memory demo store.',
+        'or set DATA_MODE_DEAD_LETTER_STORE=mock for the in-memory demo store.'
     );
     this.name = 'DeadLetterConnectionNotConfiguredError';
   }

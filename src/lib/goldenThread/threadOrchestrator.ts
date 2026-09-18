@@ -63,10 +63,8 @@ export async function runFinancialClearance(
   inputs: ThreadInputs,
   deps: OrchestratorDeps
 ): Promise<ThreadResult> {
-  const denial = (deps.denialRates ?? nullDenialRateProvider).denialRate(
-    inputs.order.code,
-    inputs.member.plan
-  );
+  const denialProvider = deps.denialRates ?? nullDenialRateProvider;
+  const denial = denialProvider.denialRate(inputs.order.code, inputs.member.plan);
 
   const mn = runMedicalNecessity(inputs.member, inputs.order, {
     library: deps.library,
@@ -79,6 +77,10 @@ export async function runFinancialClearance(
     },
     ts: deps.ts,
     historicalDenialRate: denial,
+    // Wave-13.1: mark seeded/illustrative feeds so the surface never presents a mock
+    // per-code / per-provider rate as an observed statistic.
+    historicalDenialRateSeeded: denialProvider.seeded === true,
+    goldCardSeeded: deps.goldCardSource.seeded === true,
   });
 
   const eligibility = runEligibility(inputs.coverage, {

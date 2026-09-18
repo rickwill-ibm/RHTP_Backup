@@ -60,7 +60,8 @@ export function currencyReasonForFlag(flag: CurrencyFlag): CurrencyReason | unde
   if (flag.status === 'retired') return CURRENCY_REASONS.retired;
   if (flag.status === 'superseded') return CURRENCY_REASONS.superseded;
   if (!flag.current) {
-    if (flag.reason && flag.reason.includes('not yet effective')) return CURRENCY_REASONS.notEffective;
+    if (flag.reason && flag.reason.includes('not yet effective'))
+      return CURRENCY_REASONS.notEffective;
     return CURRENCY_REASONS.expired;
   }
   // Current + in window, but past its refresh cadence.
@@ -76,7 +77,7 @@ export function decideAssetCurrency(
   registry: ValueSetRegistry,
   assetId: string,
   posture: CurrencyPosture,
-  asOf?: Date,
+  asOf?: Date
 ): CurrencyDecision {
   const flag = registry.checkCurrency(assetId, asOf);
   const flagged = flag.flagged;
@@ -99,7 +100,7 @@ export function decideSystemCurrency(
   registry: ValueSetRegistry,
   systemUri: string,
   posture: CurrencyPosture,
-  asOf?: Date,
+  asOf?: Date
 ): CurrencyDecision {
   const active = registry.getActiveBySystem(systemUri, asOf);
   if (active) return decideAssetCurrency(registry, active.id, posture, asOf);
@@ -122,7 +123,7 @@ export function decideBindingCurrency(
   domain: string,
   purpose: string,
   posture: CurrencyPosture,
-  asOf?: Date,
+  asOf?: Date
 ): CurrencyDecision | undefined {
   const spec = registry.listBindings().find((b) => b.domain === domain && b.purpose === purpose);
   if (!spec) return undefined;

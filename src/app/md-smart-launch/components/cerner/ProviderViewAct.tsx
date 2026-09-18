@@ -92,7 +92,7 @@ export function useDerivedCareGaps(patientId: string): { gaps: DerivedGap[]; loa
   }
 
   const hasStatin = meds.data.some((m) =>
-    ccText(m.medicationCodeableConcept).toLowerCase().includes('statin'),
+    ccText(m.medicationCodeableConcept).toLowerCase().includes('statin')
   );
   if (hasDm && !hasStatin) {
     gaps.push({
@@ -106,7 +106,7 @@ export function useDerivedCareGaps(patientId: string): { gaps: DerivedGap[]; loa
   }
 
   const hasColonoscopy = procedures.data.some((p) =>
-    ccText(p.code).toLowerCase().includes('colonoscop'),
+    ccText(p.code).toLowerCase().includes('colonoscop')
   );
   if (!hasColonoscopy) {
     gaps.push({
@@ -156,7 +156,7 @@ export default function ProviderViewAct({
   const hasFluThisSeason = imms.data.some(
     (i) =>
       ccText(i.vaccineCode).toLowerCase().includes('influenza') &&
-      (i.occurrenceDateTime ?? '') >= '2025-08-01',
+      (i.occurrenceDateTime ?? '') >= '2025-08-01'
   );
 
   return (
@@ -245,7 +245,9 @@ export default function ProviderViewAct({
                 <td className="px-3 py-1">
                   <button
                     className="text-[#00539b] hover:underline"
-                    onClick={() => i.id && onOpenResource('Immunization', i.id, ccText(i.vaccineCode))}
+                    onClick={() =>
+                      i.id && onOpenResource('Immunization', i.id, ccText(i.vaccineCode))
+                    }
                   >
                     {ccText(i.vaccineCode)}
                   </button>

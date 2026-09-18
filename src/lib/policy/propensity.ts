@@ -25,6 +25,13 @@ export interface PropensityInput {
   missingDtrAnswers?: number;
   /** 0..1 historical denial rate for this code/plan, if known. */
   historicalDenialRate?: number;
+  /**
+   * Wave-13.1 (HIGH-4, additive & optional): the historical denial rate came from a
+   * SEEDED / illustrative loader (the mock demo feed), NOT this deployment's adjudication
+   * history. When true the factor label is marked illustrative so a seeded per-code rate
+   * is never presented as an observed statistic. Absent/false → label byte-identical.
+   */
+  historicalDenialRateSeeded?: boolean;
   goldCardApplied?: boolean;
 }
 
@@ -93,8 +100,11 @@ export function scorePropensity(input: PropensityInput): PropensityResult {
 
   if (typeof input.historicalDenialRate === 'number') {
     const pts = Math.round(input.historicalDenialRate * 20);
+    const pct = Math.round(input.historicalDenialRate * 100);
     factors.push({
-      label: `Historical denial rate ${Math.round(input.historicalDenialRate * 100)}%`,
+      label: input.historicalDenialRateSeeded
+        ? `Illustrative seeded denial rate ${pct}% (not a book of business)`
+        : `Historical denial rate ${pct}%`,
       points: pts,
     });
   }
@@ -114,7 +124,12 @@ export function scorePropensity(input: PropensityInput): PropensityResult {
 /** Build a propensity input from a determination (+ optional context). */
 export function propensityInputFromDetermination(
   det: CoverageDetermination,
-  opts?: { missingDtrAnswers?: number; historicalDenialRate?: number; goldCardApplied?: boolean }
+  opts?: {
+    missingDtrAnswers?: number;
+    historicalDenialRate?: number;
+    historicalDenialRateSeeded?: boolean;
+    goldCardApplied?: boolean;
+  }
 ): PropensityInput {
   return {
     outcome: det.outcome,
@@ -122,6 +137,7 @@ export function propensityInputFromDetermination(
     openDeficiencies: det.deficiencies.length,
     missingDtrAnswers: opts?.missingDtrAnswers,
     historicalDenialRate: opts?.historicalDenialRate,
+    historicalDenialRateSeeded: opts?.historicalDenialRateSeeded,
     goldCardApplied: opts?.goldCardApplied,
   };
 }

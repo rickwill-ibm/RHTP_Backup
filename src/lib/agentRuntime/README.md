@@ -11,10 +11,10 @@ for the Docker-guarded spec that asserts those properties.
 
 ```ts
 interface WorkflowEngine {
-  start(def, opts): WorkflowHandle;      // deterministic id; per-member ordered
-  signal(workflowId, signal): Promise;   // deliver a human decision; per-member ordered
-  query(workflowId): WorkflowSnapshot;   // visibility read
-  setTimer(workflowId, spec): string;    // deterministic timer (injected clock)
+  start(def, opts): WorkflowHandle; // deterministic id; per-member ordered
+  signal(workflowId, signal): Promise; // deliver a human decision; per-member ordered
+  query(workflowId): WorkflowSnapshot; // visibility read
+  setTimer(workflowId, spec): string; // deterministic timer (injected clock)
   complete(workflowId, result): Promise; // terminal
 }
 ```
@@ -46,11 +46,11 @@ The engine emits ONLY the pre-allocated C2 types — `agent.task.proposed`,
 `autonomyTier` is READ from the manifest and mapped to decision behavior through a
 data lookup (`AUTONOMY_BEHAVIOR`), never a code branch:
 
-| tier | behavior |
-|---|---|
-| `HITL` | wait for a human signal; escalate on SLA breach |
-| `HOTL` | auto-approve after the review (SLA) window unless a human rejects first |
-| `autonomous` | auto-approve immediately |
+| tier         | behavior                                                                |
+| ------------ | ----------------------------------------------------------------------- |
+| `HITL`       | wait for a human signal; escalate on SLA breach                         |
+| `HOTL`       | auto-approve after the review (SLA) window unless a human rejects first |
+| `autonomous` | auto-approve immediately                                                |
 
 Changing a manifest's tier changes behavior with no code change
 (`tests/agents/autonomyTier.test.ts`).

@@ -57,7 +57,7 @@ export function resourceNode(
   event: C2Event,
   kind: string,
   key: string,
-  properties: Props,
+  properties: Props
 ): Mutation[] {
   const restricted = isRestricted(event);
   const node: UpsertNode = { op: 'UpsertNode', kind, key, properties, restricted };

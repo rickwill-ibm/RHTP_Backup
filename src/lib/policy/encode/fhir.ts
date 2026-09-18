@@ -21,7 +21,7 @@ import { isNegationHeading } from './procedure';
 // exclusion, which is meaningless and asserts the opposite of coverage.
 // INVARIANT: an exclusion criterion is never emitted as a Questionnaire item. It stays in the
 // criteria registry (evaluation + CRD still see it); only the DTR questionnaire omits it.
-function isExclusionCriterion(crit: EncodedCriterion): boolean {
+export function isExclusionCriterion(crit: EncodedCriterion): boolean {
   if (crit.negate === true) return true;
   const ms = crit.measures ?? (crit.measure ? [crit.measure] : []);
   if (ms.some((m) => m.negatedLocally === true)) return true;
@@ -87,8 +87,11 @@ export interface FhirItem {
 
 /** Standard LOINC codes for the engine's typed measure fields, so a measured item is a coded
  *  Observation concept (Da Vinci DTR expects coded, pre-populatable items — not bare text). Codes a
- *  field only when there is a well-established LOINC concept; unmapped fields stay uncoded (honest). */
-const MEASURE_LOINC: Record<string, FhirCoding> = {
+ *  field only when there is a well-established LOINC concept; unmapped fields stay uncoded (honest).
+ *
+ *  EXPORTED as the single source of truth for field→LOINC: the DTR questionnaire generator (here) and
+ *  the patient-evaluation projector (`dtr/evaluate`) both read this — never a parallel table. */
+export const MEASURE_LOINC: Record<string, FhirCoding> = {
   age: { system: 'http://loinc.org', code: '30525-0', display: 'Age' },
   bmi: { system: 'http://loinc.org', code: '39156-5', display: 'Body mass index (BMI)' },
   systolicBP: { system: 'http://loinc.org', code: '8480-6', display: 'Systolic blood pressure' },
@@ -113,6 +116,13 @@ const MEASURE_LOINC: Record<string, FhirCoding> = {
 function measureCoding(m: Measure | undefined): FhirCoding[] | undefined {
   const c = m?.field ? MEASURE_LOINC[m.field] : undefined;
   return c ? [c] : undefined;
+}
+
+/** The LOINC code string for a measure field, or undefined when the field has no standard coded
+ *  concept (e.g. stenosis, tumorSize). Exported so the patient-evaluation layer resolves a field to
+ *  the SAME LOINC the questionnaire uses. */
+export function measureLoincCode(field: string | undefined): string | undefined {
+  return field ? MEASURE_LOINC[field]?.code : undefined;
 }
 
 export interface FhirQuestionnaire {

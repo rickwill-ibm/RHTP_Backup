@@ -6,20 +6,113 @@ import { useWorkflowMachine } from '@/lib/workflowMachine';
 import { workflowDefinitions } from '@/lib/actionRegistry';
 
 const tasks = [
-  { id: 'task-001', type: 'HCC Review', description: 'Clinician review required: HCC 85 CHF suspect — $7,200 revenue impact', priority: 'Critical', assignedTo: 'Dr. James Whitfield', dueDate: '2026-04-20', status: 'Pending', createdBy: 'System', createdAt: '2026-04-13T08:00:00Z' },
-  { id: 'task-002', type: 'Care Gap', description: 'Schedule retinal exam for diabetic eye exam measure closure (HEDIS EED)', priority: 'High', assignedTo: 'Sarah Johnson', dueDate: '2026-05-15', status: 'In Progress', createdBy: 'Sarah Johnson', createdAt: '2026-04-10T09:30:00Z' },
-  { id: 'task-003', type: 'Utilization', description: 'Initiate home health authorization to reduce readmission risk post-CHF exacerbation', priority: 'Critical', assignedTo: 'Sarah Johnson', dueDate: '2026-04-17', status: 'Pending', createdBy: 'System (LPR Alert)', createdAt: '2026-04-13T10:15:00Z' },
-  { id: 'task-004', type: 'Medication', description: 'Pharmacist review: Warfarin + Ibuprofen DDI — assess risk and counsel patient', priority: 'High', assignedTo: 'Pharmacy Team', dueDate: '2026-04-22', status: 'Pending', createdBy: 'CDS Hooks', createdAt: '2026-04-14T11:00:00Z' },
-  { id: 'task-005', type: 'AWV', description: 'Annual Wellness Visit scheduled for 04/28 — confirm patient transportation', priority: 'Medium', assignedTo: 'Sarah Johnson', dueDate: '2026-04-28', status: 'In Progress', createdBy: 'Sarah Johnson', createdAt: '2026-03-01T08:00:00Z' },
+  {
+    id: 'task-001',
+    type: 'HCC Review',
+    description: 'Clinician review required: HCC 85 CHF suspect — $7,200 revenue impact',
+    priority: 'Critical',
+    assignedTo: 'Dr. James Whitfield',
+    dueDate: '2026-04-20',
+    status: 'Pending',
+    createdBy: 'System',
+    createdAt: '2026-04-13T08:00:00Z',
+  },
+  {
+    id: 'task-002',
+    type: 'Care Gap',
+    description: 'Schedule retinal exam for diabetic eye exam measure closure (HEDIS EED)',
+    priority: 'High',
+    assignedTo: 'Sarah Johnson',
+    dueDate: '2026-05-15',
+    status: 'In Progress',
+    createdBy: 'Sarah Johnson',
+    createdAt: '2026-04-10T09:30:00Z',
+  },
+  {
+    id: 'task-003',
+    type: 'Utilization',
+    description:
+      'Initiate home health authorization to reduce readmission risk post-CHF exacerbation',
+    priority: 'Critical',
+    assignedTo: 'Sarah Johnson',
+    dueDate: '2026-04-17',
+    status: 'Pending',
+    createdBy: 'System (LPR Alert)',
+    createdAt: '2026-04-13T10:15:00Z',
+  },
+  {
+    id: 'task-004',
+    type: 'Medication',
+    description: 'Pharmacist review: Warfarin + Ibuprofen DDI — assess risk and counsel patient',
+    priority: 'High',
+    assignedTo: 'Pharmacy Team',
+    dueDate: '2026-04-22',
+    status: 'Pending',
+    createdBy: 'CDS Hooks',
+    createdAt: '2026-04-14T11:00:00Z',
+  },
+  {
+    id: 'task-005',
+    type: 'AWV',
+    description: 'Annual Wellness Visit scheduled for 04/28 — confirm patient transportation',
+    priority: 'Medium',
+    assignedTo: 'Sarah Johnson',
+    dueDate: '2026-04-28',
+    status: 'In Progress',
+    createdBy: 'Sarah Johnson',
+    createdAt: '2026-03-01T08:00:00Z',
+  },
 ];
 
 const staticAuditLog = [
-  { id: 'audit-001', action: 'HCC Suspect Surfaced', detail: 'HCC 85 CHF suspect auto-surfaced from EMR echocardiogram data', user: 'System', role: 'Automated', timestamp: '2026-04-13T08:00:00Z' },
-  { id: 'audit-002', action: 'Utilization Alert Created', detail: 'LPR predicted ER risk score 84% — critical alert generated', user: 'System (LPR)', role: 'Automated', timestamp: '2026-04-13T08:05:00Z' },
-  { id: 'audit-003', action: 'Alert Escalated', detail: 'Predicted ER Risk alert escalated to care manager queue', user: 'Sarah Johnson', role: 'Care Manager', timestamp: '2026-04-13T09:15:00Z' },
-  { id: 'audit-004', action: 'Task Created', detail: 'Home health authorization task created for CHF readmission prevention', user: 'Sarah Johnson', role: 'Care Manager', timestamp: '2026-04-13T09:20:00Z' },
-  { id: 'audit-005', action: 'HCC Suspect Reviewed', detail: 'HCC 18 evidence reviewed — sent to Dr. Whitfield for confirmation', user: 'Sarah Johnson', role: 'Care Manager', timestamp: '2026-04-14T10:30:00Z' },
-  { id: 'audit-006', action: 'CDS Hook Triggered', detail: 'High-cost imaging alert: Cardiac MRI order detected — alternative suggested', user: 'System (CDS Hooks)', role: 'Automated', timestamp: '2026-04-14T11:00:00Z' },
+  {
+    id: 'audit-001',
+    action: 'HCC Suspect Surfaced',
+    detail: 'HCC 85 CHF suspect auto-surfaced from EMR echocardiogram data',
+    user: 'System',
+    role: 'Automated',
+    timestamp: '2026-04-13T08:00:00Z',
+  },
+  {
+    id: 'audit-002',
+    action: 'Utilization Alert Created',
+    detail: 'LPR predicted ER risk score 84% — critical alert generated',
+    user: 'System (LPR)',
+    role: 'Automated',
+    timestamp: '2026-04-13T08:05:00Z',
+  },
+  {
+    id: 'audit-003',
+    action: 'Alert Escalated',
+    detail: 'Predicted ER Risk alert escalated to care manager queue',
+    user: 'Sarah Johnson',
+    role: 'Care Manager',
+    timestamp: '2026-04-13T09:15:00Z',
+  },
+  {
+    id: 'audit-004',
+    action: 'Task Created',
+    detail: 'Home health authorization task created for CHF readmission prevention',
+    user: 'Sarah Johnson',
+    role: 'Care Manager',
+    timestamp: '2026-04-13T09:20:00Z',
+  },
+  {
+    id: 'audit-005',
+    action: 'HCC Suspect Reviewed',
+    detail: 'HCC 18 evidence reviewed — sent to Dr. Whitfield for confirmation',
+    user: 'Sarah Johnson',
+    role: 'Care Manager',
+    timestamp: '2026-04-14T10:30:00Z',
+  },
+  {
+    id: 'audit-006',
+    action: 'CDS Hook Triggered',
+    detail: 'High-cost imaging alert: Cardiac MRI order detected — alternative suggested',
+    user: 'System (CDS Hooks)',
+    role: 'Automated',
+    timestamp: '2026-04-14T11:00:00Z',
+  },
 ];
 
 // ─── HCC Workflow Audit Section ───────────────────────────────────────────────
@@ -45,15 +138,17 @@ function CareGapWorkflowAuditSection() {
   const { getWorkflow } = useWorkflowMachine();
   const wfDef = workflowDefinitions['care-gap-closure'];
 
-  const activeWorkflows = CARE_GAP_IDS
-    .map((id) => ({ id, wf: getWorkflow('care-gap-closure', id) }))
-    .filter(({ wf }) => wf !== undefined);
+  const activeWorkflows = CARE_GAP_IDS.map((id) => ({
+    id,
+    wf: getWorkflow('care-gap-closure', id),
+  })).filter(({ wf }) => wf !== undefined);
 
   if (activeWorkflows.length === 0) {
     return (
       <div className="flex items-center gap-3 p-4 bg-carbon-gray-10 border border-carbon-gray-20 text-xs text-carbon-gray-50">
         <Icon name="InformationCircleIcon" size={14} />
-        No active care gap closure workflows. Open the Risk &amp; Quality tab and click &quot;Close Gap&quot; to initiate a journey.
+        No active care gap closure workflows. Open the Risk &amp; Quality tab and click &quot;Close
+        Gap&quot; to initiate a journey.
       </div>
     );
   }
@@ -63,11 +158,17 @@ function CareGapWorkflowAuditSection() {
       {activeWorkflows.map(({ id, wf }) => {
         if (!wf) return null;
         const statusCfg = {
-          'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}` },
-          'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Closure Documentation' },
-          'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Gap Closed' },
-          'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
-          'idle': { cls: '', label: '' },
+          'in-progress': {
+            cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+            label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}`,
+          },
+          'awaiting-review': {
+            cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+            label: 'Awaiting Closure Documentation',
+          },
+          completed: { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Gap Closed' },
+          rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
+          idle: { cls: '', label: '' },
         } as const;
         const sc = statusCfg[wf.status];
 
@@ -84,11 +185,20 @@ function CareGapWorkflowAuditSection() {
                     {wfDef.label} — {CARE_GAP_LABELS[id] ?? id}
                   </p>
                   <p className="text-2xs text-carbon-gray-50 font-mono">
-                    Started {new Date(wf.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} by {wf.startedBy}
+                    Started{' '}
+                    {new Date(wf.startedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    by {wf.startedBy}
                   </p>
                 </div>
               </div>
-              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>{sc.label}</span>
+              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>
+                {sc.label}
+              </span>
             </div>
 
             {/* Step progress bar */}
@@ -96,24 +206,45 @@ function CareGapWorkflowAuditSection() {
               <div className="flex items-center gap-1">
                 {wfDef.steps.map((step) => {
                   const isDone = wf.status === 'completed' || step.step < wf.currentStep;
-                  const isActive = step.step === wf.currentStep && wf.status !== 'completed' && wf.status !== 'rejected';
+                  const isActive =
+                    step.step === wf.currentStep &&
+                    wf.status !== 'completed' &&
+                    wf.status !== 'rejected';
                   const isRejected = wf.status === 'rejected' && step.step === wf.currentStep;
                   return (
                     <React.Fragment key={step.step}>
                       <div className="flex flex-col items-center flex-1 min-w-0">
-                        <div className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
-                          ${isDone ? 'bg-[#24a148] text-white' :
-                            isActive ? 'bg-[#0043ce] text-white': isRejected ?'bg-[#b45309] text-white': 'bg-carbon-gray-20 text-carbon-gray-50'}`}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
+                          ${
+                            isDone
+                              ? 'bg-[#24a148] text-white'
+                              : isActive
+                                ? 'bg-[#0043ce] text-white'
+                                : isRejected
+                                  ? 'bg-[#b45309] text-white'
+                                  : 'bg-carbon-gray-20 text-carbon-gray-50'
+                          }`}
                         >
-                          {isDone ? <Icon name="CheckIcon" size={9} /> : isRejected ? <Icon name="ClockIcon" size={9} /> : step.step}
+                          {isDone ? (
+                            <Icon name="CheckIcon" size={9} />
+                          ) : isRejected ? (
+                            <Icon name="ClockIcon" size={9} />
+                          ) : (
+                            step.step
+                          )}
                         </div>
-                        <p className={`text-2xs mt-1 text-center leading-tight hidden sm:block
-                          ${isActive ? 'text-[#0043ce] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}>
+                        <p
+                          className={`text-2xs mt-1 text-center leading-tight hidden sm:block
+                          ${isActive ? 'text-[#0043ce] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}
+                        >
                           {step.label}
                         </p>
                       </div>
                       {step.step < wfDef.steps.length && (
-                        <div className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -127,7 +258,12 @@ function CareGapWorkflowAuditSection() {
                 <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
                   <tr>
                     {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                      <th key={h} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                      <th
+                        key={h}
+                        className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -135,22 +271,37 @@ function CareGapWorkflowAuditSection() {
                   {wf.stepHistory.map((record, i) => (
                     <tr key={`gap-step-${i}`} className="hover:bg-carbon-gray-10">
                       <td className="px-4 py-2.5">
-                        <div className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}>
-                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1
-                            ? <Icon name="ClockIcon" size={9} className="text-white" />
-                            : <Icon name="CheckIcon" size={9} className="text-white" />}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}
+                        >
+                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? (
+                            <Icon name="ClockIcon" size={9} className="text-white" />
+                          ) : (
+                            <Icon name="CheckIcon" size={9} className="text-white" />
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                        {record.label}
+                      </td>
                       <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                       <td className="px-4 py-2.5">
-                        <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                        >
                           {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                        {record.notes ?? '—'}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                        {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.completedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -170,9 +321,10 @@ function HCCWorkflowAuditSection() {
   const { getWorkflow } = useWorkflowMachine();
   const wfDef = workflowDefinitions['hcc-confirmation'];
 
-  const activeWorkflows = HCC_SUSPECT_IDS
-    .map((id) => ({ id, wf: getWorkflow('hcc-confirmation', id) }))
-    .filter(({ wf }) => wf !== undefined);
+  const activeWorkflows = HCC_SUSPECT_IDS.map((id) => ({
+    id,
+    wf: getWorkflow('hcc-confirmation', id),
+  })).filter(({ wf }) => wf !== undefined);
 
   if (activeWorkflows.length === 0) {
     return (
@@ -188,11 +340,20 @@ function HCCWorkflowAuditSection() {
       {activeWorkflows.map(({ id, wf }) => {
         if (!wf) return null;
         const statusCfg = {
-          'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}` },
-          'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Physician Review' },
-          'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Completed & Submitted' },
-          'rejected': { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]', label: 'Rejected' },
-          'idle': { cls: '', label: '' },
+          'in-progress': {
+            cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+            label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}`,
+          },
+          'awaiting-review': {
+            cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+            label: 'Awaiting Physician Review',
+          },
+          completed: {
+            cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+            label: 'Completed & Submitted',
+          },
+          rejected: { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]', label: 'Rejected' },
+          idle: { cls: '', label: '' },
         } as const;
         const sc = statusCfg[wf.status];
 
@@ -209,11 +370,20 @@ function HCCWorkflowAuditSection() {
                     {wfDef.label} — {HCC_SUSPECT_LABELS[id] ?? id}
                   </p>
                   <p className="text-2xs text-carbon-gray-50 font-mono">
-                    Started {new Date(wf.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} by {wf.startedBy}
+                    Started{' '}
+                    {new Date(wf.startedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    by {wf.startedBy}
                   </p>
                 </div>
               </div>
-              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>{sc.label}</span>
+              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>
+                {sc.label}
+              </span>
             </div>
 
             {/* Step progress bar */}
@@ -221,24 +391,45 @@ function HCCWorkflowAuditSection() {
               <div className="flex items-center gap-1">
                 {wfDef.steps.map((step) => {
                   const isDone = wf.status === 'completed' || step.step < wf.currentStep;
-                  const isActive = step.step === wf.currentStep && wf.status !== 'completed' && wf.status !== 'rejected';
+                  const isActive =
+                    step.step === wf.currentStep &&
+                    wf.status !== 'completed' &&
+                    wf.status !== 'rejected';
                   const isRejected = wf.status === 'rejected' && step.step === wf.currentStep;
                   return (
                     <React.Fragment key={step.step}>
                       <div className="flex flex-col items-center flex-1 min-w-0">
-                        <div className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
-                          ${isDone ? 'bg-[#24a148] text-white' :
-                            isActive ? 'bg-[#0f62fe] text-white': isRejected ?'bg-[#da1e28] text-white': 'bg-carbon-gray-20 text-carbon-gray-50'}`}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
+                          ${
+                            isDone
+                              ? 'bg-[#24a148] text-white'
+                              : isActive
+                                ? 'bg-[#0f62fe] text-white'
+                                : isRejected
+                                  ? 'bg-[#da1e28] text-white'
+                                  : 'bg-carbon-gray-20 text-carbon-gray-50'
+                          }`}
                         >
-                          {isDone ? <Icon name="CheckIcon" size={9} /> : isRejected ? <Icon name="XMarkIcon" size={9} /> : step.step}
+                          {isDone ? (
+                            <Icon name="CheckIcon" size={9} />
+                          ) : isRejected ? (
+                            <Icon name="XMarkIcon" size={9} />
+                          ) : (
+                            step.step
+                          )}
                         </div>
-                        <p className={`text-2xs mt-1 text-center leading-tight hidden sm:block
-                          ${isActive ? 'text-[#0f62fe] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}>
+                        <p
+                          className={`text-2xs mt-1 text-center leading-tight hidden sm:block
+                          ${isActive ? 'text-[#0f62fe] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}
+                        >
                           {step.label}
                         </p>
                       </div>
                       {step.step < wfDef.steps.length && (
-                        <div className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -252,7 +443,12 @@ function HCCWorkflowAuditSection() {
                 <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
                   <tr>
                     {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                      <th key={h} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                      <th
+                        key={h}
+                        className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -264,16 +460,27 @@ function HCCWorkflowAuditSection() {
                           <Icon name="CheckIcon" size={9} className="text-white" />
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                        {record.label}
+                      </td>
                       <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                       <td className="px-4 py-2.5">
-                        <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                        >
                           {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                        {record.notes ?? '—'}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                        {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.completedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -302,15 +509,17 @@ function UtilizationWorkflowAuditSection() {
   const { getWorkflow } = useWorkflowMachine();
   const wfDef = workflowDefinitions['utilization-escalation'];
 
-  const activeWorkflows = ALERT_IDS
-    .map((id) => ({ id, wf: getWorkflow('utilization-escalation', id) }))
-    .filter(({ wf }) => wf !== undefined);
+  const activeWorkflows = ALERT_IDS.map((id) => ({
+    id,
+    wf: getWorkflow('utilization-escalation', id),
+  })).filter(({ wf }) => wf !== undefined);
 
   if (activeWorkflows.length === 0) {
     return (
       <div className="flex items-center gap-3 p-4 bg-carbon-gray-10 border border-carbon-gray-20 text-xs text-carbon-gray-50">
         <Icon name="InformationCircleIcon" size={14} />
-        No active utilization escalation workflows. Open the Risk &amp; Quality tab and click &quot;Escalate&quot; on an alert to initiate a journey.
+        No active utilization escalation workflows. Open the Risk &amp; Quality tab and click
+        &quot;Escalate&quot; on an alert to initiate a journey.
       </div>
     );
   }
@@ -320,11 +529,20 @@ function UtilizationWorkflowAuditSection() {
       {activeWorkflows.map(({ id, wf }) => {
         if (!wf) return null;
         const statusCfg = {
-          'in-progress': { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/40', label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}` },
-          'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Closure Documentation' },
-          'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Escalation Closed' },
-          'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed' },
-          'idle': { cls: '', label: '' },
+          'in-progress': {
+            cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]/40',
+            label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}`,
+          },
+          'awaiting-review': {
+            cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+            label: 'Awaiting Closure Documentation',
+          },
+          completed: {
+            cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+            label: 'Escalation Closed',
+          },
+          rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed' },
+          idle: { cls: '', label: '' },
         } as const;
         const sc = statusCfg[wf.status];
 
@@ -341,11 +559,20 @@ function UtilizationWorkflowAuditSection() {
                     {wfDef.label} — {ALERT_LABELS[id] ?? id}
                   </p>
                   <p className="text-2xs text-carbon-gray-50 font-mono">
-                    Started {new Date(wf.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} by {wf.startedBy}
+                    Started{' '}
+                    {new Date(wf.startedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    by {wf.startedBy}
                   </p>
                 </div>
               </div>
-              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>{sc.label}</span>
+              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>
+                {sc.label}
+              </span>
             </div>
 
             {/* Step progress bar */}
@@ -353,24 +580,45 @@ function UtilizationWorkflowAuditSection() {
               <div className="flex items-center gap-1">
                 {wfDef.steps.map((step) => {
                   const isDone = wf.status === 'completed' || step.step < wf.currentStep;
-                  const isActive = step.step === wf.currentStep && wf.status !== 'completed' && wf.status !== 'rejected';
+                  const isActive =
+                    step.step === wf.currentStep &&
+                    wf.status !== 'completed' &&
+                    wf.status !== 'rejected';
                   const isRejected = wf.status === 'rejected' && step.step === wf.currentStep;
                   return (
                     <React.Fragment key={step.step}>
                       <div className="flex flex-col items-center flex-1 min-w-0">
-                        <div className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
-                          ${isDone ? 'bg-[#24a148] text-white' :
-                            isActive ? 'bg-[#da1e28] text-white': isRejected ?'bg-[#b45309] text-white': 'bg-carbon-gray-20 text-carbon-gray-50'}`}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
+                          ${
+                            isDone
+                              ? 'bg-[#24a148] text-white'
+                              : isActive
+                                ? 'bg-[#da1e28] text-white'
+                                : isRejected
+                                  ? 'bg-[#b45309] text-white'
+                                  : 'bg-carbon-gray-20 text-carbon-gray-50'
+                          }`}
                         >
-                          {isDone ? <Icon name="CheckIcon" size={9} /> : isRejected ? <Icon name="ClockIcon" size={9} /> : step.step}
+                          {isDone ? (
+                            <Icon name="CheckIcon" size={9} />
+                          ) : isRejected ? (
+                            <Icon name="ClockIcon" size={9} />
+                          ) : (
+                            step.step
+                          )}
                         </div>
-                        <p className={`text-2xs mt-1 text-center leading-tight hidden sm:block
-                          ${isActive ? 'text-[#da1e28] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}>
+                        <p
+                          className={`text-2xs mt-1 text-center leading-tight hidden sm:block
+                          ${isActive ? 'text-[#da1e28] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}
+                        >
                           {step.label}
                         </p>
                       </div>
                       {step.step < wfDef.steps.length && (
-                        <div className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -384,7 +632,12 @@ function UtilizationWorkflowAuditSection() {
                 <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
                   <tr>
                     {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                      <th key={`uh-${h}`} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                      <th
+                        key={`uh-${h}`}
+                        className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -392,22 +645,37 @@ function UtilizationWorkflowAuditSection() {
                   {wf.stepHistory.map((record, i) => (
                     <tr key={`util-step-${i}`} className="hover:bg-carbon-gray-10">
                       <td className="px-4 py-2.5">
-                        <div className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}>
-                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1
-                            ? <Icon name="ClockIcon" size={9} className="text-white" />
-                            : <Icon name="CheckIcon" size={9} className="text-white" />}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}
+                        >
+                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? (
+                            <Icon name="ClockIcon" size={9} className="text-white" />
+                          ) : (
+                            <Icon name="CheckIcon" size={9} className="text-white" />
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                        {record.label}
+                      </td>
                       <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                       <td className="px-4 py-2.5">
-                        <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                        >
                           {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                        {record.notes ?? '—'}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                        {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.completedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -434,15 +702,17 @@ function AttributionDisputeAuditSection() {
   const { getWorkflow } = useWorkflowMachine();
   const wfDef = workflowDefinitions['attribution-dispute'];
 
-  const activeWorkflows = DISPUTE_IDS
-    .map((id) => ({ id, wf: getWorkflow('attribution-dispute', id) }))
-    .filter(({ wf }) => wf !== undefined);
+  const activeWorkflows = DISPUTE_IDS.map((id) => ({
+    id,
+    wf: getWorkflow('attribution-dispute', id),
+  })).filter(({ wf }) => wf !== undefined);
 
   if (activeWorkflows.length === 0) {
     return (
       <div className="flex items-center gap-3 p-4 bg-carbon-gray-10 border border-carbon-gray-20 text-xs text-carbon-gray-50">
         <Icon name="InformationCircleIcon" size={14} />
-        No active attribution dispute workflows. Open the Attribution tab and click &quot;Dispute Attribution&quot; to initiate a journey.
+        No active attribution dispute workflows. Open the Attribution tab and click &quot;Dispute
+        Attribution&quot; to initiate a journey.
       </div>
     );
   }
@@ -452,11 +722,20 @@ function AttributionDisputeAuditSection() {
       {activeWorkflows.map(({ id, wf }) => {
         if (!wf) return null;
         const statusCfg = {
-          'in-progress': { cls: 'bg-[#e8daff] text-[#6929c4] border-[#d4bbff]', label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}` },
-          'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Payer Submission' },
-          'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Submitted to Payer' },
-          'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Withdrawn' },
-          'idle': { cls: '', label: '' },
+          'in-progress': {
+            cls: 'bg-[#e8daff] text-[#6929c4] border-[#d4bbff]',
+            label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}`,
+          },
+          'awaiting-review': {
+            cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+            label: 'Awaiting Payer Submission',
+          },
+          completed: {
+            cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+            label: 'Submitted to Payer',
+          },
+          rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Withdrawn' },
+          idle: { cls: '', label: '' },
         } as const;
         const sc = statusCfg[wf.status];
 
@@ -473,11 +752,20 @@ function AttributionDisputeAuditSection() {
                     {wfDef.label} — {DISPUTE_LABELS[id] ?? id}
                   </p>
                   <p className="text-2xs text-carbon-gray-50 font-mono">
-                    Started {new Date(wf.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} by {wf.startedBy}
+                    Started{' '}
+                    {new Date(wf.startedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    by {wf.startedBy}
                   </p>
                 </div>
               </div>
-              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>{sc.label}</span>
+              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>
+                {sc.label}
+              </span>
             </div>
 
             {/* Step progress bar */}
@@ -485,24 +773,45 @@ function AttributionDisputeAuditSection() {
               <div className="flex items-center gap-1">
                 {wfDef.steps.map((step) => {
                   const isDone = wf.status === 'completed' || step.step < wf.currentStep;
-                  const isActive = step.step === wf.currentStep && wf.status !== 'completed' && wf.status !== 'rejected';
+                  const isActive =
+                    step.step === wf.currentStep &&
+                    wf.status !== 'completed' &&
+                    wf.status !== 'rejected';
                   const isRejected = wf.status === 'rejected' && step.step === wf.currentStep;
                   return (
                     <React.Fragment key={step.step}>
                       <div className="flex flex-col items-center flex-1 min-w-0">
-                        <div className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
-                          ${isDone ? 'bg-[#24a148] text-white' :
-                            isActive ? 'bg-[#6929c4] text-white' : isRejected ? 'bg-[#b45309] text-white' : 'bg-carbon-gray-20 text-carbon-gray-50'}`}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
+                          ${
+                            isDone
+                              ? 'bg-[#24a148] text-white'
+                              : isActive
+                                ? 'bg-[#6929c4] text-white'
+                                : isRejected
+                                  ? 'bg-[#b45309] text-white'
+                                  : 'bg-carbon-gray-20 text-carbon-gray-50'
+                          }`}
                         >
-                          {isDone ? <Icon name="CheckIcon" size={9} /> : isRejected ? <Icon name="XMarkIcon" size={9} /> : step.step}
+                          {isDone ? (
+                            <Icon name="CheckIcon" size={9} />
+                          ) : isRejected ? (
+                            <Icon name="XMarkIcon" size={9} />
+                          ) : (
+                            step.step
+                          )}
                         </div>
-                        <p className={`text-2xs mt-1 text-center leading-tight hidden sm:block
-                          ${isActive ? 'text-[#6929c4] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}>
+                        <p
+                          className={`text-2xs mt-1 text-center leading-tight hidden sm:block
+                          ${isActive ? 'text-[#6929c4] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}
+                        >
                           {step.label}
                         </p>
                       </div>
                       {step.step < wfDef.steps.length && (
-                        <div className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -516,7 +825,12 @@ function AttributionDisputeAuditSection() {
                 <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
                   <tr>
                     {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                      <th key={`dh-${h}`} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                      <th
+                        key={`dh-${h}`}
+                        className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -524,22 +838,37 @@ function AttributionDisputeAuditSection() {
                   {wf.stepHistory.map((record, i) => (
                     <tr key={`disp-step-${i}`} className="hover:bg-carbon-gray-10">
                       <td className="px-4 py-2.5">
-                        <div className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}>
-                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1
-                            ? <Icon name="XMarkIcon" size={9} className="text-white" />
-                            : <Icon name="CheckIcon" size={9} className="text-white" />}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}
+                        >
+                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? (
+                            <Icon name="XMarkIcon" size={9} className="text-white" />
+                          ) : (
+                            <Icon name="CheckIcon" size={9} className="text-white" />
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                        {record.label}
+                      </td>
                       <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                       <td className="px-4 py-2.5">
-                        <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                        >
                           {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                        {record.notes ?? '—'}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                        {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.completedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -557,8 +886,16 @@ function AttributionDisputeAuditSection() {
 
 // ─── Referral Workflow Audit Section ───────────────────────────────────────────
 const REFERRAL_IDS = [
-  'ref-prov-001', 'ref-prov-002', 'ref-prov-003', 'ref-prov-004', 'ref-prov-005',
-  'ref-prov-006', 'ref-prov-007', 'ref-prov-008', 'ref-prov-009', 'ref-prov-010',
+  'ref-prov-001',
+  'ref-prov-002',
+  'ref-prov-003',
+  'ref-prov-004',
+  'ref-prov-005',
+  'ref-prov-006',
+  'ref-prov-007',
+  'ref-prov-008',
+  'ref-prov-009',
+  'ref-prov-010',
 ];
 const REFERRAL_LABELS: Record<string, string> = {
   'ref-prov-001': 'Dr. Amara Osei — Cardiology',
@@ -577,15 +914,17 @@ function ReferralWorkflowAuditSection() {
   const { getWorkflow } = useWorkflowMachine();
   const wfDef = workflowDefinitions['provider-referral'];
 
-  const activeWorkflows = REFERRAL_IDS
-    .map((id) => ({ id, wf: getWorkflow('provider-referral', id) }))
-    .filter(({ wf }) => wf !== undefined);
+  const activeWorkflows = REFERRAL_IDS.map((id) => ({
+    id,
+    wf: getWorkflow('provider-referral', id),
+  })).filter(({ wf }) => wf !== undefined);
 
   if (activeWorkflows.length === 0) {
     return (
       <div className="flex items-center gap-3 p-4 bg-carbon-gray-10 border border-carbon-gray-20 text-xs text-carbon-gray-50">
         <Icon name="InformationCircleIcon" size={14} />
-        No active provider referral workflows. Open the Provider tab and click &quot;Referral&quot; to initiate a journey.
+        No active provider referral workflows. Open the Provider tab and click &quot;Referral&quot;
+        to initiate a journey.
       </div>
     );
   }
@@ -595,11 +934,20 @@ function ReferralWorkflowAuditSection() {
       {activeWorkflows.map(({ id, wf }) => {
         if (!wf) return null;
         const statusCfg = {
-          'in-progress': { cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]', label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}` },
-          'awaiting-review': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Awaiting Closure Documentation' },
-          'completed': { cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]', label: 'Referral Closed' },
-          'rejected': { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
-          'idle': { cls: '', label: '' },
+          'in-progress': {
+            cls: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
+            label: `In Progress — Step ${wf.currentStep}/${wf.totalSteps}`,
+          },
+          'awaiting-review': {
+            cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]',
+            label: 'Awaiting Closure Documentation',
+          },
+          completed: {
+            cls: 'bg-[#defbe6] text-[#0e6027] border-[#24a148]',
+            label: 'Referral Closed',
+          },
+          rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
+          idle: { cls: '', label: '' },
         } as const;
         const sc = statusCfg[wf.status];
 
@@ -616,11 +964,20 @@ function ReferralWorkflowAuditSection() {
                     {wfDef.label} — {REFERRAL_LABELS[id] ?? id}
                   </p>
                   <p className="text-2xs text-carbon-gray-50 font-mono">
-                    Started {new Date(wf.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} by {wf.startedBy}
+                    Started{' '}
+                    {new Date(wf.startedAt).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}{' '}
+                    by {wf.startedBy}
                   </p>
                 </div>
               </div>
-              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>{sc.label}</span>
+              <span className={`text-2xs font-semibold px-2.5 py-1 border ${sc.cls}`}>
+                {sc.label}
+              </span>
             </div>
 
             {/* Step progress bar */}
@@ -628,24 +985,45 @@ function ReferralWorkflowAuditSection() {
               <div className="flex items-center gap-1">
                 {wfDef.steps.map((step) => {
                   const isDone = wf.status === 'completed' || step.step < wf.currentStep;
-                  const isActive = step.step === wf.currentStep && wf.status !== 'completed' && wf.status !== 'rejected';
+                  const isActive =
+                    step.step === wf.currentStep &&
+                    wf.status !== 'completed' &&
+                    wf.status !== 'rejected';
                   const isRejected = wf.status === 'rejected' && step.step === wf.currentStep;
                   return (
                     <React.Fragment key={step.step}>
                       <div className="flex flex-col items-center flex-1 min-w-0">
-                        <div className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
-                          ${isDone ? 'bg-[#24a148] text-white' :
-                            isActive ? 'bg-[#0043ce] text-white': isRejected ?'bg-[#b45309] text-white': 'bg-carbon-gray-20 text-carbon-gray-50'}`}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center text-2xs font-bold flex-shrink-0
+                          ${
+                            isDone
+                              ? 'bg-[#24a148] text-white'
+                              : isActive
+                                ? 'bg-[#0043ce] text-white'
+                                : isRejected
+                                  ? 'bg-[#b45309] text-white'
+                                  : 'bg-carbon-gray-20 text-carbon-gray-50'
+                          }`}
                         >
-                          {isDone ? <Icon name="CheckIcon" size={9} /> : isRejected ? <Icon name="ClockIcon" size={9} /> : step.step}
+                          {isDone ? (
+                            <Icon name="CheckIcon" size={9} />
+                          ) : isRejected ? (
+                            <Icon name="ClockIcon" size={9} />
+                          ) : (
+                            step.step
+                          )}
                         </div>
-                        <p className={`text-2xs mt-1 text-center leading-tight hidden sm:block
-                          ${isActive ? 'text-[#0043ce] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}>
+                        <p
+                          className={`text-2xs mt-1 text-center leading-tight hidden sm:block
+                          ${isActive ? 'text-[#0043ce] font-semibold' : isDone ? 'text-[#24a148]' : 'text-carbon-gray-30'}`}
+                        >
                           {step.label}
                         </p>
                       </div>
                       {step.step < wfDef.steps.length && (
-                        <div className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`} />
+                        <div
+                          className={`h-0.5 flex-1 mb-3 ${isDone ? 'bg-[#24a148]' : 'bg-carbon-gray-20'}`}
+                        />
                       )}
                     </React.Fragment>
                   );
@@ -659,7 +1037,12 @@ function ReferralWorkflowAuditSection() {
                 <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
                   <tr>
                     {['Step', 'Action', 'Completed By', 'Role', 'Notes', 'Timestamp'].map((h) => (
-                      <th key={h} className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                      <th
+                        key={h}
+                        className="px-4 py-2 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                      >
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -667,22 +1050,37 @@ function ReferralWorkflowAuditSection() {
                   {wf.stepHistory.map((record, i) => (
                     <tr key={`ref-step-${i}`} className="hover:bg-carbon-gray-10">
                       <td className="px-4 py-2.5">
-                        <div className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}>
-                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1
-                            ? <Icon name="ClockIcon" size={9} className="text-white" />
-                            : <Icon name="CheckIcon" size={9} className="text-white" />}
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center ${wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? 'bg-[#b45309]' : 'bg-[#24a148]'}`}
+                        >
+                          {wf.status === 'rejected' && i === wf.stepHistory.length - 1 ? (
+                            <Icon name="ClockIcon" size={9} className="text-white" />
+                          ) : (
+                            <Icon name="CheckIcon" size={9} className="text-white" />
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{record.label}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                        {record.label}
+                      </td>
                       <td className="px-4 py-2.5 text-carbon-gray-70">{record.completedBy}</td>
                       <td className="px-4 py-2.5">
-                        <span className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                        <span
+                          className={`text-2xs px-1.5 py-0.5 font-medium ${record.completedByRole === 'care_manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                        >
                           {record.completedByRole === 'care_manager' ? 'Care Manager' : 'Physician'}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">{record.notes ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-carbon-gray-50 max-w-xs truncate">
+                        {record.notes ?? '—'}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                        {new Date(record.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(record.completedAt).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </td>
                     </tr>
                   ))}
@@ -699,13 +1097,31 @@ function ReferralWorkflowAuditSection() {
 }
 
 export default function ActionsTasksTab() {
-  const [activeSection, setActiveSection] = useState<'tasks' | 'audit' | 'hcc-trail' | 'gap-trail' | 'util-trail' | 'dispute-trail' | 'referral-trail'>('tasks');
+  const [activeSection, setActiveSection] = useState<
+    | 'tasks'
+    | 'audit'
+    | 'hcc-trail'
+    | 'gap-trail'
+    | 'util-trail'
+    | 'dispute-trail'
+    | 'referral-trail'
+  >('tasks');
   const { getWorkflow } = useWorkflowMachine();
-  const activeHccCount = HCC_SUSPECT_IDS.filter((id) => getWorkflow('hcc-confirmation', id) !== undefined).length;
-  const activeGapCount = CARE_GAP_IDS.filter((id) => getWorkflow('care-gap-closure', id) !== undefined).length;
-  const activeUtilCount = ALERT_IDS.filter((id) => getWorkflow('utilization-escalation', id) !== undefined).length;
-  const activeDisputeCount = DISPUTE_IDS.filter((id) => getWorkflow('attribution-dispute', id) !== undefined).length;
-  const activeReferralCount = REFERRAL_IDS.filter((id) => getWorkflow('provider-referral', id) !== undefined).length;
+  const activeHccCount = HCC_SUSPECT_IDS.filter(
+    (id) => getWorkflow('hcc-confirmation', id) !== undefined
+  ).length;
+  const activeGapCount = CARE_GAP_IDS.filter(
+    (id) => getWorkflow('care-gap-closure', id) !== undefined
+  ).length;
+  const activeUtilCount = ALERT_IDS.filter(
+    (id) => getWorkflow('utilization-escalation', id) !== undefined
+  ).length;
+  const activeDisputeCount = DISPUTE_IDS.filter(
+    (id) => getWorkflow('attribution-dispute', id) !== undefined
+  ).length;
+  const activeReferralCount = REFERRAL_IDS.filter(
+    (id) => getWorkflow('provider-referral', id) !== undefined
+  ).length;
 
   return (
     <div className="space-y-4">
@@ -715,8 +1131,16 @@ export default function ActionsTasksTab() {
           { key: 'audit' as const, label: 'System Audit Trail', count: staticAuditLog.length },
           { key: 'hcc-trail' as const, label: 'HCC Workflow Trail', count: activeHccCount },
           { key: 'gap-trail' as const, label: 'Gap Closure Trail', count: activeGapCount },
-          { key: 'util-trail' as const, label: 'Utilization Escalation Trail', count: activeUtilCount },
-          { key: 'dispute-trail' as const, label: 'Attribution Dispute Trail', count: activeDisputeCount },
+          {
+            key: 'util-trail' as const,
+            label: 'Utilization Escalation Trail',
+            count: activeUtilCount,
+          },
+          {
+            key: 'dispute-trail' as const,
+            label: 'Attribution Dispute Trail',
+            count: activeDisputeCount,
+          },
           { key: 'referral-trail' as const, label: 'Referral Trail', count: activeReferralCount },
         ].map((tab) => (
           <button
@@ -727,15 +1151,15 @@ export default function ActionsTasksTab() {
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className={`text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center ${activeSection === tab.key ? 'bg-[#0f62fe] text-white' : 'bg-carbon-gray-20 text-carbon-gray-70'}`}>
+              <span
+                className={`text-2xs font-bold px-1.5 py-0.5 min-w-[18px] text-center ${activeSection === tab.key ? 'bg-[#0f62fe] text-white' : 'bg-carbon-gray-20 text-carbon-gray-70'}`}
+              >
                 {tab.count}
               </span>
             )}
           </button>
         ))}
-        <button
-          className="ml-auto carbon-btn-primary text-xs py-1.5 mb-1"
-        >
+        <button className="ml-auto carbon-btn-primary text-xs py-1.5 mb-1">
           <Icon name="PlusIcon" size={14} />
           Create Task
         </button>
@@ -751,38 +1175,66 @@ export default function ActionsTasksTab() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className={`text-2xs font-semibold px-2 py-0.5 ${
-                      task?.type === 'HCC Review' ? 'bg-[#fdf6dd] text-[#b45309]' :
-                      task?.type === 'Care Gap' ? 'bg-[#d0e2ff] text-[#0043ce]' :
-                      task?.type === 'Utilization' ? 'bg-[#fff1f1] text-[#da1e28]' :
-                      task?.type === 'Medication' ? 'bg-[#f6f2ff] text-[#6929c4]' :
-                      'bg-carbon-gray-10 text-carbon-gray-70'
-                    }`}>
+                    <span
+                      className={`text-2xs font-semibold px-2 py-0.5 ${
+                        task?.type === 'HCC Review'
+                          ? 'bg-[#fdf6dd] text-[#b45309]'
+                          : task?.type === 'Care Gap'
+                            ? 'bg-[#d0e2ff] text-[#0043ce]'
+                            : task?.type === 'Utilization'
+                              ? 'bg-[#fff1f1] text-[#da1e28]'
+                              : task?.type === 'Medication'
+                                ? 'bg-[#f6f2ff] text-[#6929c4]'
+                                : 'bg-carbon-gray-10 text-carbon-gray-70'
+                      }`}
+                    >
                       {task?.type}
                     </span>
                     <StatusBadge
                       label={task?.priority}
-                      variant={task?.priority === 'Critical' ? 'danger' : task?.priority === 'High' ? 'warning' : 'neutral'}
+                      variant={
+                        task?.priority === 'Critical'
+                          ? 'danger'
+                          : task?.priority === 'High'
+                            ? 'warning'
+                            : 'neutral'
+                      }
                       size="sm"
                     />
                     <StatusBadge
                       label={task?.status}
-                      variant={task?.status === 'Completed' ? 'success' : task?.status === 'In Progress' ? 'info' : 'neutral'}
+                      variant={
+                        task?.status === 'Completed'
+                          ? 'success'
+                          : task?.status === 'In Progress'
+                            ? 'info'
+                            : 'neutral'
+                      }
                       size="sm"
                     />
                   </div>
                   <p className="text-xs text-carbon-gray-100 font-medium">{task?.description}</p>
                   <div className="flex items-center gap-4 mt-1.5 text-2xs text-carbon-gray-50">
-                    <span>Assigned: <span className="text-carbon-gray-70">{task?.assignedTo}</span></span>
-                    <span>Due: <span className="font-mono text-carbon-gray-70">{task?.dueDate}</span></span>
+                    <span>
+                      Assigned: <span className="text-carbon-gray-70">{task?.assignedTo}</span>
+                    </span>
+                    <span>
+                      Due: <span className="font-mono text-carbon-gray-70">{task?.dueDate}</span>
+                    </span>
                     <span>By: {task?.createdBy}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <button className="p-1.5 text-carbon-gray-50 hover:text-[#24a148] hover:bg-[#defbe6] transition-colors" title="Mark complete">
+                  <button
+                    className="p-1.5 text-carbon-gray-50 hover:text-[#24a148] hover:bg-[#defbe6] transition-colors"
+                    title="Mark complete"
+                  >
                     <Icon name="CheckIcon" size={14} />
                   </button>
-                  <button className="p-1.5 text-carbon-gray-50 hover:text-carbon-blue hover:bg-[#d0e2ff] transition-colors" title="Edit task">
+                  <button
+                    className="p-1.5 text-carbon-gray-50 hover:text-carbon-blue hover:bg-[#d0e2ff] transition-colors"
+                    title="Edit task"
+                  >
                     <Icon name="PencilIcon" size={14} />
                   </button>
                 </div>
@@ -798,7 +1250,12 @@ export default function ActionsTasksTab() {
             <thead className="bg-carbon-gray-10 border-b border-carbon-gray-20">
               <tr>
                 {['Timestamp', 'Action', 'Detail', 'User', 'Role']?.map((h) => (
-                  <th key={`ah-${h}`} className="px-4 py-2.5 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide">{h}</th>
+                  <th
+                    key={`ah-${h}`}
+                    className="px-4 py-2.5 text-left text-2xs font-semibold text-carbon-gray-70 uppercase tracking-wide"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -806,13 +1263,22 @@ export default function ActionsTasksTab() {
               {staticAuditLog?.map((entry) => (
                 <tr key={entry?.id} className="hover:bg-carbon-gray-10">
                   <td className="px-4 py-2.5 font-mono text-carbon-gray-50 whitespace-nowrap">
-                    {new Date(entry.timestamp)?.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(entry.timestamp)?.toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </td>
-                  <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">{entry?.action}</td>
+                  <td className="px-4 py-2.5 font-medium text-carbon-gray-100 whitespace-nowrap">
+                    {entry?.action}
+                  </td>
                   <td className="px-4 py-2.5 text-carbon-gray-70 max-w-xs">{entry?.detail}</td>
                   <td className="px-4 py-2.5 text-carbon-gray-70">{entry?.user}</td>
                   <td className="px-4 py-2.5">
-                    <span className={`text-2xs px-1.5 py-0.5 font-medium ${entry?.role === 'Automated' ? 'bg-carbon-gray-10 text-carbon-gray-50' : entry?.role === 'Care Manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}>
+                    <span
+                      className={`text-2xs px-1.5 py-0.5 font-medium ${entry?.role === 'Automated' ? 'bg-carbon-gray-10 text-carbon-gray-50' : entry?.role === 'Care Manager' ? 'bg-[#d0e2ff] text-[#0043ce]' : 'bg-[#defbe6] text-[#0e6027]'}`}
+                    >
                       {entry?.role}
                     </span>
                   </td>

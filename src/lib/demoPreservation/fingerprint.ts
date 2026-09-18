@@ -11,22 +11,11 @@
  * No dependencies: canonical JSON (sorted keys) + FNV-1a/32 hashing.
  */
 
-/** Canonical JSON: object keys sorted recursively, so key ORDER never changes the hash. */
-export function canonicalJson(value: unknown): string {
-  return JSON.stringify(sortDeep(value));
-}
-
-function sortDeep(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sortDeep);
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {};
-    for (const key of Object.keys(value as Record<string, unknown>).sort()) {
-      out[key] = sortDeep((value as Record<string, unknown>)[key]);
-    }
-    return out;
-  }
-  return value;
-}
+// Canonical JSON (sorted-key, array-order-preserving) is single-sourced in
+// lib/util/canonicalJson.ts; re-exported here so the produced bytes are IDENTICAL
+// to the ledger hash-chain and this module's existing public surface is unchanged.
+export { canonicalJson } from '../util/canonicalJson';
+import { canonicalJson } from '../util/canonicalJson';
 
 /** FNV-1a 32-bit hash of a string, returned as 8-hex-char. Deterministic across runs/machines. */
 export function fnv1a(input: string): string {
@@ -50,7 +39,8 @@ export function hashValue(value: unknown): string {
  * sentinel before hashing so the golden is deterministic while still pinning the
  * KEY's presence and everything non-volatile around it.
  */
-const VOLATILE_KEY = /(^|_)(timestamp|expiry|expires|generatedat|createdat|updatedat|ts|time|now|nonce|requestid|correlationid)$/i;
+const VOLATILE_KEY =
+  /(^|_)(timestamp|expiry|expires|generatedat|createdat|updatedat|ts|time|now|nonce|requestid|correlationid)$/i;
 const ISO_DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 
 /** Recursively replace volatile field values with a stable sentinel. */

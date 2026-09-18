@@ -19,7 +19,11 @@ export type {
   TimelinePhase,
 } from './tieredInterventionGenerator.types';
 
-import type { HolisticCarePlan, TieredIntervention, Timeline } from './tieredInterventionGenerator.types';
+import type {
+  HolisticCarePlan,
+  TieredIntervention,
+  Timeline,
+} from './tieredInterventionGenerator.types';
 import {
   buildCaregiverSupportIntervention,
   buildTransportationIntervention,
@@ -30,7 +34,6 @@ import {
 } from './tieredInterventionGenerator.helpers';
 
 export class TieredInterventionGenerator {
-
   generate(context: HolisticPatientContext, analysis: RootCauseAnalysis): HolisticCarePlan {
     const interventions = this.generateInterventions(context, analysis);
     const timeline = this.generateTimeline(interventions);
@@ -46,7 +49,10 @@ export class TieredInterventionGenerator {
     };
   }
 
-  private generateInterventions(context: HolisticPatientContext, analysis: RootCauseAnalysis): TieredIntervention[] {
+  private generateInterventions(
+    context: HolisticPatientContext,
+    analysis: RootCauseAnalysis
+  ): TieredIntervention[] {
     const interventions: TieredIntervention[] = [];
 
     // TIER 1: Address root cause
@@ -57,13 +63,16 @@ export class TieredInterventionGenerator {
     }
 
     // TIER 2: Transportation (if not root cause but still a barrier)
-    if (analysis.rootCause.type !== 'transportation' && context.barriers.transportation.severity === 'high') {
+    if (
+      analysis.rootCause.type !== 'transportation' &&
+      context.barriers.transportation.severity === 'high'
+    ) {
       interventions.push(buildCaregiverFriendlyTransportation(context));
     }
 
-    interventions.push(buildCareDeliveryOptimization(context));    // TIER 3
-    interventions.push(buildClinicalCareIntervention(context));    // TIER 4
-    interventions.push(buildSustainabilityIntervention(context));  // TIER 5
+    interventions.push(buildCareDeliveryOptimization(context)); // TIER 3
+    interventions.push(buildClinicalCareIntervention(context)); // TIER 4
+    interventions.push(buildSustainabilityIntervention(context)); // TIER 5
 
     return interventions;
   }
@@ -72,18 +81,53 @@ export class TieredInterventionGenerator {
     return {
       totalDuration: '12 weeks',
       phases: [
-        { phase: 'Phase 1: Foundation', weeks: 'Weeks 1-2', focus: 'Address root cause', keyMilestones: ['Respite care established', 'Transportation coordinated', 'Support services connected'] },
-        { phase: 'Phase 2: Optimization', weeks: 'Weeks 3-4', focus: 'Optimize care delivery', keyMilestones: ['Telehealth appointments scheduled', 'Home services arranged', 'Appointments consolidated'] },
-        { phase: 'Phase 3: Clinical Care', weeks: 'Weeks 4-12', focus: 'Close care gaps', keyMilestones: ['All labs completed', 'Specialist follow-ups done', 'Care gaps closed'] },
-        { phase: 'Phase 4: Sustainability', weeks: 'Ongoing', focus: 'Maintain improvements', keyMilestones: ['Care management active', 'Support system established', 'Health maintained'] },
+        {
+          phase: 'Phase 1: Foundation',
+          weeks: 'Weeks 1-2',
+          focus: 'Address root cause',
+          keyMilestones: [
+            'Respite care established',
+            'Transportation coordinated',
+            'Support services connected',
+          ],
+        },
+        {
+          phase: 'Phase 2: Optimization',
+          weeks: 'Weeks 3-4',
+          focus: 'Optimize care delivery',
+          keyMilestones: [
+            'Telehealth appointments scheduled',
+            'Home services arranged',
+            'Appointments consolidated',
+          ],
+        },
+        {
+          phase: 'Phase 3: Clinical Care',
+          weeks: 'Weeks 4-12',
+          focus: 'Close care gaps',
+          keyMilestones: ['All labs completed', 'Specialist follow-ups done', 'Care gaps closed'],
+        },
+        {
+          phase: 'Phase 4: Sustainability',
+          weeks: 'Ongoing',
+          focus: 'Maintain improvements',
+          keyMilestones: [
+            'Care management active',
+            'Support system established',
+            'Health maintained',
+          ],
+        },
       ],
     };
   }
 
-  private calculateCostSavings(context: HolisticPatientContext, interventions: TieredIntervention[]): number {
-    const allActions = interventions.flatMap(i => i.actions);
-    let savings = allActions.filter(a => a.modality === 'telehealth').length * 40;
-    savings += allActions.filter(a => a.modality === 'home-visit').length * 60;
+  private calculateCostSavings(
+    context: HolisticPatientContext,
+    interventions: TieredIntervention[]
+  ): number {
+    const allActions = interventions.flatMap((i) => i.actions);
+    let savings = allActions.filter((a) => a.modality === 'telehealth').length * 40;
+    savings += allActions.filter((a) => a.modality === 'home-visit').length * 60;
     if (context.clinicalProfile.riskLevel === 'high') savings += 1500;
     return savings;
   }

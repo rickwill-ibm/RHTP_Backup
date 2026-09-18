@@ -8,15 +8,30 @@ import { useWorkflowMachine } from '@/lib/workflowMachine';
 import type { ActionDefinition } from '@/lib/actionRegistry';
 
 // ─── Initiate Referral Modal ──────────────────────────────────────────────────
-function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: (specialty: string, note: string) => void }) {
+function InitiateReferralModal({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: (specialty: string, note: string) => void;
+}) {
   const [specialty, setSpecialty] = useState('');
   const [clinicalNeed, setClinicalNeed] = useState('');
   const [urgency, setUrgency] = useState<'Routine' | 'Urgent' | 'STAT'>('Routine');
 
   const specialties = [
-    'Cardiology', 'Endocrinology', 'Nephrology', 'Neurology',
-    'Oncology', 'Orthopedics', 'Pulmonology', 'Rheumatology',
-    'Gastroenterology', 'Hematology', 'Infectious Disease', 'Other',
+    'Cardiology',
+    'Endocrinology',
+    'Nephrology',
+    'Neurology',
+    'Oncology',
+    'Orthopedics',
+    'Pulmonology',
+    'Rheumatology',
+    'Gastroenterology',
+    'Hematology',
+    'Infectious Disease',
+    'Other',
   ];
 
   const handleConfirm = () => {
@@ -42,7 +57,10 @@ function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; on
               <p className="text-2xs text-carbon-gray-50">Step 1 of 3 — Identify Referral Need</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100">
+          <button
+            onClick={onClose}
+            className="p-1.5 text-carbon-gray-50 hover:text-carbon-gray-100"
+          >
             <Icon name="XMarkIcon" size={18} />
           </button>
         </div>
@@ -56,8 +74,14 @@ function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; on
               { step: 3, label: 'Submit Referral', active: false },
             ].map((s, i) => (
               <React.Fragment key={s.step}>
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 text-2xs font-semibold ${s.active ? 'bg-[#0f62fe] text-white' : 'bg-carbon-gray-10 text-carbon-gray-50 border border-carbon-gray-20'}`}>
-                  <span className={`w-4 h-4 flex items-center justify-center text-2xs font-bold ${s.active ? 'bg-white text-[#0f62fe]' : 'bg-carbon-gray-20 text-carbon-gray-70'}`}>{s.step}</span>
+                <div
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-2xs font-semibold ${s.active ? 'bg-[#0f62fe] text-white' : 'bg-carbon-gray-10 text-carbon-gray-50 border border-carbon-gray-20'}`}
+                >
+                  <span
+                    className={`w-4 h-4 flex items-center justify-center text-2xs font-bold ${s.active ? 'bg-white text-[#0f62fe]' : 'bg-carbon-gray-20 text-carbon-gray-70'}`}
+                  >
+                    {s.step}
+                  </span>
                   {s.label}
                 </div>
                 {i < 2 && <div className="w-4 h-0.5 bg-carbon-gray-20" />}
@@ -89,7 +113,9 @@ function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; on
 
           {/* Urgency */}
           <div>
-            <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">Urgency</label>
+            <label className="block text-xs font-semibold text-carbon-gray-100 mb-1.5">
+              Urgency
+            </label>
             <div className="flex gap-2">
               {(['Routine', 'Urgent', 'STAT'] as const).map((u) => (
                 <button
@@ -97,9 +123,12 @@ function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; on
                   onClick={() => setUrgency(u)}
                   className={`flex-1 py-2 text-xs font-semibold border transition-colors ${
                     urgency === u
-                      ? u === 'STAT' ? 'bg-[#da1e28] text-white border-[#da1e28]'
-                        : u === 'Urgent' ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
-                        : 'bg-[#0f62fe] text-white border-[#0f62fe]' :'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
+                      ? u === 'STAT'
+                        ? 'bg-[#da1e28] text-white border-[#da1e28]'
+                        : u === 'Urgent'
+                          ? 'bg-[#f1c21b] text-[#161616] border-[#f1c21b]'
+                          : 'bg-[#0f62fe] text-white border-[#0f62fe]'
+                      : 'bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10'
                   }`}
                 >
                   {u}
@@ -125,24 +154,34 @@ function InitiateReferralModal({ onClose, onConfirm }: { onClose: () => void; on
           {/* Summary */}
           {specialty && (
             <div className="bg-[#edf5ff] border border-[#97c1ff] px-4 py-3 space-y-1.5">
-              <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">Referral Summary</p>
+              <p className="text-2xs font-semibold text-[#0043ce] uppercase tracking-wide">
+                Referral Summary
+              </p>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Specialty</span>
                 <span className="font-medium text-carbon-gray-100">{specialty}</span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Urgency</span>
-                <span className={`font-bold ${urgency === 'STAT' ? 'text-[#da1e28]' : urgency === 'Urgent' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}>{urgency}</span>
+                <span
+                  className={`font-bold ${urgency === 'STAT' ? 'text-[#da1e28]' : urgency === 'Urgent' ? 'text-[#b45309]' : 'text-[#0043ce]'}`}
+                >
+                  {urgency}
+                </span>
               </div>
               <div className="flex justify-between text-2xs">
                 <span className="text-carbon-gray-70">Next Step</span>
-                <span className="font-medium text-carbon-gray-100">Select a provider from the directory below</span>
+                <span className="font-medium text-carbon-gray-100">
+                  Select a provider from the directory below
+                </span>
               </div>
             </div>
           )}
 
           <div className="flex gap-2 pt-1">
-            <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>Cancel</button>
+            <button className="carbon-btn-secondary flex-1 justify-center py-2" onClick={onClose}>
+              Cancel
+            </button>
             <button
               className="carbon-btn-primary flex-1 justify-center py-2.5"
               onClick={handleConfirm}
@@ -183,7 +222,9 @@ export default function ProviderActionBar() {
         startWorkflow(action.initiatesWorkflow, entityId, user.name, user.role);
         toast.success(`Workflow started: ${action.label}`, { description: action.description });
       } else if (status === 'in-progress' || status === 'awaiting-review') {
-        toast.info(`${action.label} workflow is already in progress`, { description: 'Continue from where you left off using the step actions below.' });
+        toast.info(`${action.label} workflow is already in progress`, {
+          description: 'Continue from where you left off using the step actions below.',
+        });
       } else {
         startWorkflow(action.initiatesWorkflow, entityId, user.name, user.role);
         toast.success(`Workflow restarted: ${action.label}`, { description: action.description });
@@ -220,16 +261,21 @@ export default function ProviderActionBar() {
       return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
     }
     switch (variant) {
-      case 'primary': return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
-      case 'secondary': return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
-      default: return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      case 'primary':
+        return `${base} bg-[#0f62fe] text-white border-[#0f62fe] hover:bg-[#0353e9]`;
+      case 'secondary':
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
+      default:
+        return `${base} bg-white text-carbon-gray-70 border-carbon-gray-20 hover:bg-carbon-gray-10`;
     }
   };
 
   return (
     <>
       <div className="bg-white border border-carbon-gray-20 px-4 py-2.5 flex items-center gap-2 flex-wrap mb-4">
-        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">Provider Actions</span>
+        <span className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mr-2">
+          Provider Actions
+        </span>
         {actions.map((action) => (
           <button
             key={action.id}
@@ -246,7 +292,9 @@ export default function ProviderActionBar() {
         ))}
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-2xs text-carbon-gray-50">Role:</span>
-          <span className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}>
+          <span
+            className={`text-2xs font-semibold px-1.5 py-0.5 ${user.role === 'physician' ? 'bg-[#f6f2ff] text-[#6929c4]' : 'bg-[#d0e2ff] text-[#0043ce]'}`}
+          >
             {user.role === 'physician' ? 'Physician' : 'Care Manager'}
           </span>
         </div>

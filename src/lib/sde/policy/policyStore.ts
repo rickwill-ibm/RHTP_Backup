@@ -21,7 +21,7 @@ export class SdePolicyStoreNotConfiguredError extends Error {
     super(
       'DATA_MODE signalDisposition=production: no production disposition-policy store is wired yet. ' +
         'Register one with setProductionPolicyPackLoader(() => loadPackFromDb()) ' +
-        '(SEAM: sde-policy-store) or set DATA_MODE_SIGNAL_DISPOSITION=mock.',
+        '(SEAM: sde-policy-store) or set DATA_MODE_SIGNAL_DISPOSITION=mock.'
     );
     this.name = 'SdePolicyStoreNotConfiguredError';
   }

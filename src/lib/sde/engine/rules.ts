@@ -27,7 +27,11 @@ export function resolveChannel(signal: Signal, pack: PolicyPack, ctx: MemberCont
 }
 
 /** True when a care-gap outreach targets a measure already closed for the member. */
-export function isSuperseded(signal: Signal, pack: PolicyPack, closedMeasures: Set<string>): boolean {
+export function isSuperseded(
+  signal: Signal,
+  pack: PolicyPack,
+  closedMeasures: Set<string>
+): boolean {
   if (!pack.suppression.supersedeOnClosure) return false;
   if (signal.actionability !== 'member-outreach') return false;
   return signal.measure !== undefined && closedMeasures.has(signal.measure);
@@ -57,7 +61,7 @@ export function nextSmsWindowMs(nowMs: number, pack: PolicyPack): number {
     pack.smsWindow.startHour,
     0,
     0,
-    0,
+    0
   );
   return nowMs < startToday ? startToday : startToday + DAY_MS;
 }
@@ -82,7 +86,7 @@ export function priorContactCount(
   channel: Channel,
   ctx: MemberContext,
   nowMs: number,
-  pack: PolicyPack,
+  pack: PolicyPack
 ): number {
   const cap = pack.frequencyCaps.find((c) => c.channel === channel);
   if (!cap) return 0;

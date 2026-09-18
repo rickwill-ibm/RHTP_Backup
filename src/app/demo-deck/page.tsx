@@ -36,14 +36,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#d0e2ff',
     textColor: '#001d6c',
     initials: 'SE',
-    personaContext: 'South Dakota DHSS Deputy Director reviewing RHTP program performance across all regions and funding streams.',
+    personaContext:
+      'South Dakota DHSS Deputy Director reviewing RHTP program performance across all regions and funding streams.',
     slides: [
       {
         stepNum: 1,
         route: '/contract-program-selection',
         screenLabel: 'RHTP Overview',
         storyBeat: 'All-program view — Clinical + BH + Social KPIs',
-        speakerNotes: 'Open with the RHTP Overview as the state executive landing page. This is the first thing the Deputy Director sees when they log in — a unified view across all three program pillars.',
+        speakerNotes:
+          'Open with the RHTP Overview as the state executive landing page. This is the first thing the Deputy Director sees when they log in — a unified view across all three program pillars.',
         keyTalkingPoints: [
           'Single platform for Clinical, Behavioral Health, and Social programs — no siloed dashboards',
           'Contract KPI strip shows shared savings target vs. actual in real time',
@@ -61,7 +63,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/region-view',
         screenLabel: 'Regions',
         storyBeat: 'Regional rollup — Clinical + Social + BH benchmarking',
-        speakerNotes: 'Drill from the state level to regional performance. This is where the executive identifies which regions are driving outcomes and which need intervention.',
+        speakerNotes:
+          'Drill from the state level to regional performance. This is where the executive identifies which regions are driving outcomes and which need intervention.',
         keyTalkingPoints: [
           'Regional benchmarking across Clinical, BH, and Social domains simultaneously',
           'Color-coded performance tiers — green/yellow/red at a glance',
@@ -79,7 +82,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/executive-outcomes-dashboard',
         screenLabel: 'Executive Dashboard',
         storyBeat: 'Whole-person outcomes delivered',
-        speakerNotes: 'The executive outcomes dashboard is the proof point — this is what you show legislators and CMS. Whole-person outcomes with attribution back to program interventions.',
+        speakerNotes:
+          'The executive outcomes dashboard is the proof point — this is what you show legislators and CMS. Whole-person outcomes with attribution back to program interventions.',
         keyTalkingPoints: [
           'ED utilization down 18% for patients with closed social gaps — the ROI story',
           'A1C improvement for dual-need (clinical + social) cohort vs. clinical-only cohort',
@@ -97,7 +101,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/financial-dashboard',
         screenLabel: 'Financial Dashboard (Braided Funding)',
         storyBeat: 'Braided funding streams + shared savings model',
-        speakerNotes: 'The financial dashboard shows how RHTP braids Medicaid, CHIP, Title IV-E, and CCBHC funding into a unified cost envelope. This is the CFO conversation.',
+        speakerNotes:
+          'The financial dashboard shows how RHTP braids Medicaid, CHIP, Title IV-E, and CCBHC funding into a unified cost envelope. This is the CFO conversation.',
         keyTalkingPoints: [
           'Braided funding view — Medicaid + BH block grant + social services funding in one PMPM',
           'RAF score trending drives revenue capture — HCC suspects surfaced automatically',
@@ -115,7 +120,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/social-needs-dashboard',
         screenLabel: 'Social Needs Dashboard',
         storyBeat: 'Population screening funnel + dual-need cohort',
-        speakerNotes: 'The social needs dashboard shows the population-level SDOH picture. This is where the state executive sees the screening funnel and the dual-need cohort that drives the whole-person model.',
+        speakerNotes:
+          'The social needs dashboard shows the population-level SDOH picture. This is where the state executive sees the screening funnel and the dual-need cohort that drives the whole-person model.',
         keyTalkingPoints: [
           'Screening funnel: 12,400 screened → 8,200 with identified needs → 4,100 enrolled in programs',
           'Dual-need cohort (clinical + social) has 2.4x higher ED utilization than clinical-only',
@@ -133,7 +139,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/outcomes-linkage',
         screenLabel: 'Outcomes Linkage',
         storyBeat: 'Housing → ED reduction, food → A1C — ROI proof',
-        speakerNotes: 'The outcomes linkage screen is the closing argument for the state executive. It shows the causal chain from social intervention to clinical outcome — the evidence base for continued RHTP investment.',
+        speakerNotes:
+          'The outcomes linkage screen is the closing argument for the state executive. It shows the causal chain from social intervention to clinical outcome — the evidence base for continued RHTP investment.',
         keyTalkingPoints: [
           'Housing intervention → 34% ED reduction within 90 days — statistically significant',
           'Food security enrollment → A1C improvement from 9.2% to 7.1% over 6 months',
@@ -156,14 +163,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#f6f2ff',
     textColor: '#31135e',
     initials: 'ND',
-    personaContext: 'RHTP Network Director responsible for clinical, BH, and CBO network performance across all participating organizations.',
+    personaContext:
+      'RHTP Network Director responsible for clinical, BH, and CBO network performance across all participating organizations.',
     slides: [
       {
         stepNum: 7,
         route: '/provider-level',
         screenLabel: 'Program Networks',
         storyBeat: 'Clinical / BH / CBO network tabs — org-level performance',
-        speakerNotes: 'The network director sees all three program networks in one view. Clinical providers, BH counselors, and CBOs are all managed from this screen.',
+        speakerNotes:
+          'The network director sees all three program networks in one view. Clinical providers, BH counselors, and CBOs are all managed from this screen.',
         keyTalkingPoints: [
           'Three-tab network view: Clinical, Behavioral Health, Community-Based Organizations',
           'Org-level performance metrics: quality scores, referral completion, gain-share attribution',
@@ -181,7 +190,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/physician-view',
         screenLabel: 'Care Team Members',
         storyBeat: 'PCPs + BH counselors + CHW supervisors — role-typed metrics',
-        speakerNotes: 'Individual care team member performance — not just physicians, but BH counselors and CHW supervisors. Each role has role-appropriate metrics.',
+        speakerNotes:
+          'Individual care team member performance — not just physicians, but BH counselors and CHW supervisors. Each role has role-appropriate metrics.',
         keyTalkingPoints: [
           'Role-typed metrics: PCPs see RAF/HCC, BH counselors see PHQ-9/GAD-7 completion, CHWs see visit completion and social gap closure',
           'Attribution accuracy by provider — disputes flagged automatically',
@@ -190,7 +200,7 @@ const DEMO_PERSONAS: DemoPersona[] = [
         ],
         demoActions: [
           'Filter to BH counselors — show the FUH/FUM compliance rate',
-          'Click into a CHW supervisor — show their team\'s social gap closure rate',
+          "Click into a CHW supervisor — show their team's social gap closure rate",
           'Show the gain-share attribution column — each provider sees their contribution',
         ],
       },
@@ -199,7 +209,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/stars-hedis-mips',
         screenLabel: 'Quality Gaps & Attribution',
         storyBeat: 'Clinical + BH + Social program quality measures — 5 tabs',
-        speakerNotes: 'The quality and compliance screen covers all five measure sets: STARS, HEDIS, MIPS, BH-specific measures, and Social program outcomes. This is the compliance officer\'s home screen.',
+        speakerNotes:
+          "The quality and compliance screen covers all five measure sets: STARS, HEDIS, MIPS, BH-specific measures, and Social program outcomes. This is the compliance officer's home screen.",
         keyTalkingPoints: [
           'Five measure tabs: STARS (payer bonus), HEDIS (documentation), MIPS (payment adjustment), BH (FUH/FUM/FBOM), Social (SDOH closure rates)',
           'Measure-level drill-down: which patients are contributing to each gap',
@@ -222,17 +233,19 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#d9fbfb',
     textColor: '#004144',
     initials: 'MD',
-    personaContext: 'Dr. James Whitfield, PCP at a rural FQHC, accessing the RHTP platform via SMART on FHIR launch from Cerner.',
+    personaContext:
+      'Dr. James Whitfield, PCP at a rural FQHC, accessing the RHTP platform via SMART on FHIR launch from Cerner.',
     slides: [
       {
         stepNum: 10,
         route: '/md-smart-launch',
         screenLabel: 'MD Smart Launch',
         storyBeat: 'SMART on FHIR entry — embedded in EMR',
-        speakerNotes: 'The physician enters the RHTP platform via SMART on FHIR launch from Cerner. The platform receives the patient context automatically — no re-login, no re-search.',
+        speakerNotes:
+          'The physician enters the RHTP platform via SMART on FHIR launch from Cerner. The platform receives the patient context automatically — no re-login, no re-search.',
         keyTalkingPoints: [
           'SMART on FHIR launch: patient context passed from Cerner automatically',
-          'CDS Hooks cards surface in the physician\'s workflow — no context switching',
+          "CDS Hooks cards surface in the physician's workflow — no context switching",
           'Whole-person summary visible alongside the clinical record',
           'Return to Cerner button — physician never loses their EMR workflow',
         ],
@@ -247,7 +260,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/panel-cohort-view',
         screenLabel: 'Panel & Cohort (Medicaid RHTP Track 3)',
         storyBeat: 'Attributed panel — PCP / CHW / BH three-column attribution',
-        speakerNotes: 'The physician\'s attributed panel under Medicaid RHTP Track 3. Three-column attribution shows which patients are assigned to the PCP, which CHW is covering them, and which BH counselor is engaged.',
+        speakerNotes:
+          "The physician's attributed panel under Medicaid RHTP Track 3. Three-column attribution shows which patients are assigned to the PCP, which CHW is covering them, and which BH counselor is engaged.",
         keyTalkingPoints: [
           'Medicaid RHTP Track 3 attribution — not Medicare MSSP',
           'Three-column attribution: PCP + CHW + BH counselor for each patient',
@@ -266,7 +280,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/patient-detail',
         screenLabel: 'Patient Detail — Whole Person Care Plan',
         storyBeat: 'Whole Person Care Plan tab + AI care plan + gain-share',
-        speakerNotes: 'The patient detail screen is the heart of the whole-person model. The Whole Person Care Plan tab shows clinical, BH, and social goals in a unified care plan with AI-generated recommendations.',
+        speakerNotes:
+          'The patient detail screen is the heart of the whole-person model. The Whole Person Care Plan tab shows clinical, BH, and social goals in a unified care plan with AI-generated recommendations.',
         keyTalkingPoints: [
           'Whole Person Care Plan: Clinical + BH + Social goals in one view',
           'AI-generated care plan recommendations based on FHIR data',
@@ -291,14 +306,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#fff1f1',
     textColor: '#750e13',
     initials: 'CM',
-    personaContext: 'Sarah Johnson, Care Manager at RHTP, managing a panel of high-risk Medicaid patients across clinical, BH, and social domains.',
+    personaContext:
+      'Sarah Johnson, Care Manager at RHTP, managing a panel of high-risk Medicaid patients across clinical, BH, and social domains.',
     slides: [
       {
         stepNum: 13,
         route: '/care-manager',
         screenLabel: 'Care Manager Worklist',
         storyBeat: 'Clinical/BH/Social filter — BH risk flags + social needs per row',
-        speakerNotes: 'The care manager worklist is Angela\'s daily starting point. Every patient row shows clinical risk, BH flags, and social needs simultaneously — no toggling between systems.',
+        speakerNotes:
+          "The care manager worklist is Angela's daily starting point. Every patient row shows clinical risk, BH flags, and social needs simultaneously — no toggling between systems.",
         keyTalkingPoints: [
           'Unified worklist: Clinical + BH + Social needs visible per patient row',
           'BH risk flags: PHQ-9 ≥10, active crisis pathway, FUH/FUM due',
@@ -317,7 +334,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/patient-episode-summary',
         screenLabel: 'Patient Episode Summary',
         storyBeat: 'All episodes for a patient',
-        speakerNotes: 'The episode summary shows all clinical episodes for a patient — inpatient, ED, SNF, and outpatient — in a unified timeline. This is where the care manager identifies utilization patterns.',
+        speakerNotes:
+          'The episode summary shows all clinical episodes for a patient — inpatient, ED, SNF, and outpatient — in a unified timeline. This is where the care manager identifies utilization patterns.',
         keyTalkingPoints: [
           'All episode types in one timeline: IP, ED, SNF, OP, BH, Social program',
           'Episode cost vs. target — variance flagged for high-cost episodes',
@@ -335,7 +353,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/episode-detail',
         screenLabel: 'Episode Detail',
         storyBeat: 'Episode deep-dive — care setting timeline',
-        speakerNotes: 'The episode detail screen shows the full care setting timeline for a single episode — from admission through discharge and post-acute care.',
+        speakerNotes:
+          'The episode detail screen shows the full care setting timeline for a single episode — from admission through discharge and post-acute care.',
         keyTalkingPoints: [
           'Care setting timeline: ED → IP → SNF → Home Health → Outpatient',
           'Length of stay vs. benchmark — days over target flagged',
@@ -353,7 +372,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/episodic-management-analytics',
         screenLabel: 'Episodic Analytics',
         storyBeat: 'Clinical + BH Episodes + Social Program Outcomes tabs',
-        speakerNotes: 'The episodic analytics screen shows population-level episode patterns across clinical, BH, and social program domains. This is where the care manager identifies systemic issues.',
+        speakerNotes:
+          'The episodic analytics screen shows population-level episode patterns across clinical, BH, and social program domains. This is where the care manager identifies systemic issues.',
         keyTalkingPoints: [
           'Three-tab analytics: Clinical Episodes, BH Episodes, Social Program Outcomes',
           'Episode cost distribution by DRG and risk tier',
@@ -376,14 +396,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#defbe6',
     textColor: '#044317',
     initials: 'CW',
-    personaContext: 'Marcus Johnson, CHW conducting home visits and social needs screenings for high-risk Medicaid patients in rural South Dakota.',
+    personaContext:
+      'Marcus Johnson, CHW conducting home visits and social needs screenings for high-risk Medicaid patients in rural South Dakota.',
     slides: [
       {
         stepNum: 17,
         route: '/chw-workflow',
         screenLabel: 'CHW Workflow',
         storyBeat: 'Home Visit Schedule — Start Visit, Clinical, Reschedule actions',
-        speakerNotes: 'The CHW workflow is Marcus\'s mobile-first daily schedule. Home visits are prioritized by risk score and social need urgency. Each visit has structured actions tied to the care plan.',
+        speakerNotes:
+          "The CHW workflow is Marcus's mobile-first daily schedule. Home visits are prioritized by risk score and social need urgency. Each visit has structured actions tied to the care plan.",
         keyTalkingPoints: [
           'Mobile-optimized visit schedule — GPS-ordered by proximity',
           'Visit actions: Start Visit, Log Contact Attempt, Reschedule, Escalate to Care Manager',
@@ -401,7 +423,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/social-needs-screening',
         screenLabel: 'Social Needs Screening',
         storyBeat: 'PRAPARE screening → social Task creation',
-        speakerNotes: 'The CHW conducts the PRAPARE social needs screening during the home visit. Each positive screen automatically creates a FHIR Task for the appropriate program or CBO.',
+        speakerNotes:
+          'The CHW conducts the PRAPARE social needs screening during the home visit. Each positive screen automatically creates a FHIR Task for the appropriate program or CBO.',
         keyTalkingPoints: [
           'PRAPARE / AHC-HRSN screening instrument — 13 domains',
           'Positive screen → FHIR Task created automatically → routed to appropriate CBO',
@@ -419,11 +442,12 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/program-eligibility',
         screenLabel: 'Program Eligibility',
         storyBeat: 'Eligible programs from screening results',
-        speakerNotes: 'Based on the PRAPARE screening results, the platform automatically calculates program eligibility across SNAP, Medicaid, housing assistance, and other programs.',
+        speakerNotes:
+          'Based on the PRAPARE screening results, the platform automatically calculates program eligibility across SNAP, Medicaid, housing assistance, and other programs.',
         keyTalkingPoints: [
           'Automatic eligibility calculation from screening results — no manual lookup',
           'Programs ranked by impact potential and enrollment ease',
-          'Pre-populated enrollment forms — CHW doesn\'t re-enter data',
+          "Pre-populated enrollment forms — CHW doesn't re-enter data",
           'Eligibility confidence score — based on income, household size, and SDOH factors',
         ],
         demoActions: [
@@ -437,7 +461,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/benefit-enrollment',
         screenLabel: 'Benefit Enrollment',
         storyBeat: 'SNAP enrolled, housing pending, gaps flagged',
-        speakerNotes: 'The benefit enrollment screen shows the enrollment status across all programs for this patient. SNAP is enrolled, housing is pending, and two gaps are flagged for follow-up.',
+        speakerNotes:
+          'The benefit enrollment screen shows the enrollment status across all programs for this patient. SNAP is enrolled, housing is pending, and two gaps are flagged for follow-up.',
         keyTalkingPoints: [
           'Enrollment status dashboard: Enrolled, Pending, Denied, Expired',
           'SNAP enrolled — benefit start date and monthly amount shown',
@@ -461,14 +486,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#fff0f7',
     textColor: '#740937',
     initials: 'BH',
-    personaContext: 'Dr. Sarah Chen, BH Specialist managing crisis pathway activations and BH referral coordination for the RHTP network.',
+    personaContext:
+      'Dr. Sarah Chen, BH Specialist managing crisis pathway activations and BH referral coordination for the RHTP network.',
     slides: [
       {
         stepNum: 21,
         route: '/crisis-pathway',
         screenLabel: 'Crisis Pathway',
         storyBeat: 'SDOH context + 988/CSU/Mobile/ED dispatch + post-crisis linkage',
-        speakerNotes: 'The crisis pathway screen shows the BH specialist the full SDOH context for a patient in crisis — not just the clinical presentation, but the social determinants driving the crisis.',
+        speakerNotes:
+          'The crisis pathway screen shows the BH specialist the full SDOH context for a patient in crisis — not just the clinical presentation, but the social determinants driving the crisis.',
         keyTalkingPoints: [
           'SDOH context panel: housing instability, food insecurity, social isolation — all visible during crisis',
           'Dispatch options: 988 Lifeline, CSU (Crisis Stabilization Unit), Mobile Crisis Team, ED',
@@ -486,15 +513,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/crisis-pathway',
         screenLabel: 'Patient Pathway — Dorothy Simmons',
         storyBeat: 'PRAPARE → SNAP → BH engagement → A1C 9.2% → 7.1%',
-        speakerNotes: 'Dorothy Simmons is the demo\'s anchor patient — her journey from PRAPARE screening through SNAP enrollment, BH engagement, and clinical improvement tells the whole-person story.',
+        speakerNotes:
+          "Dorothy Simmons is the demo's anchor patient — her journey from PRAPARE screening through SNAP enrollment, BH engagement, and clinical improvement tells the whole-person story.",
         keyTalkingPoints: [
-          'Dorothy\'s journey: PRAPARE screening (food insecurity + housing) → SNAP enrolled → BH engagement → A1C 9.2% → 7.1%',
+          "Dorothy's journey: PRAPARE screening (food insecurity + housing) → SNAP enrolled → BH engagement → A1C 9.2% → 7.1%",
           'Timeline shows the causal chain: social intervention → BH engagement → clinical improvement',
           'Each intervention is linked to a FHIR resource — full provenance chain',
           'This is the ROI story: $340 in social program costs → $4,200 in avoided clinical costs',
         ],
         demoActions: [
-          'Show Dorothy\'s full pathway timeline',
+          "Show Dorothy's full pathway timeline",
           'Point to the A1C inflection — 6 months after SNAP enrollment',
           'Show the cost avoidance calculation — $4,200 in avoided ED visits',
         ],
@@ -504,7 +532,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/cbo-directory',
         screenLabel: 'CBO Directory',
         storyBeat: 'Community org network — domain-tagged, capacity status',
-        speakerNotes: 'The CBO directory shows the full community organization network — domain-tagged by SDOH area, with real-time capacity status and registration tier.',
+        speakerNotes:
+          'The CBO directory shows the full community organization network — domain-tagged by SDOH area, with real-time capacity status and registration tier.',
         keyTalkingPoints: [
           'Domain-tagged CBOs: Food, Housing, Transportation, BH, Legal, Employment, Education',
           'Two tiers: Connected (45%) with FHIR integration vs. Unregistered (55%) with manual referral',
@@ -528,14 +557,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#fff2e8',
     textColor: '#8a3800',
     initials: 'SP',
-    personaContext: 'Dr. Michael Park, Endocrinologist receiving referrals through the RHTP platform and managing specialist inbox tasks.',
+    personaContext:
+      'Dr. Michael Park, Endocrinologist receiving referrals through the RHTP platform and managing specialist inbox tasks.',
     slides: [
       {
         stepNum: 24,
         route: '/care-team-inbox',
         screenLabel: 'Care Team Inbox',
         storyBeat: 'Universal task inbox — all programs',
-        speakerNotes: 'The care team inbox is the universal task management hub — clinical tasks, BH referrals, social program tasks, and administrative tasks all in one place.',
+        speakerNotes:
+          'The care team inbox is the universal task management hub — clinical tasks, BH referrals, social program tasks, and administrative tasks all in one place.',
         keyTalkingPoints: [
           'Universal inbox: Clinical + BH + Social + Administrative tasks in one view',
           'Task priority: Urgent, High, Normal — color-coded',
@@ -554,9 +585,10 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/specialist-inbox',
         screenLabel: 'Specialist Inbox',
         storyBeat: 'Clinical specialist role view + gain-share value',
-        speakerNotes: 'The specialist inbox is the role-filtered view for clinical specialists. Each referral shows the gain-share value attributed to the specialist for completing the consultation.',
+        speakerNotes:
+          'The specialist inbox is the role-filtered view for clinical specialists. Each referral shows the gain-share value attributed to the specialist for completing the consultation.',
         keyTalkingPoints: [
-          'Role-filtered view: only referrals relevant to this specialist\'s specialty',
+          "Role-filtered view: only referrals relevant to this specialist's specialty",
           'Gain-share value per referral — specialist sees their financial contribution to the network',
           'Referral urgency and clinical context — ICD codes, referring provider, patient risk tier',
           'Accept/Decline/Redirect actions — specialist manages their own queue',
@@ -573,7 +605,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/referral-tracking',
         screenLabel: 'Referral Tracking',
         storyBeat: 'Referrals in flight + multi-program tasks',
-        speakerNotes: 'The referral tracking screen shows all referrals in flight across the network — clinical, BH, and social program referrals in a unified view.',
+        speakerNotes:
+          'The referral tracking screen shows all referrals in flight across the network — clinical, BH, and social program referrals in a unified view.',
         keyTalkingPoints: [
           'All referral types: Clinical specialist, BH counselor, CBO/social program',
           'Status pipeline: Pending → Submitted → Scheduled → Completed → Closed',
@@ -591,7 +624,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/referral-journey-tracker',
         screenLabel: 'Referral Journey Tracker',
         storyBeat: 'End-to-end journey — 7 stages + audit trail',
-        speakerNotes: 'The referral journey tracker shows the end-to-end lifecycle of a single referral — 7 stages from creation to outcome with a full audit trail.',
+        speakerNotes:
+          'The referral journey tracker shows the end-to-end lifecycle of a single referral — 7 stages from creation to outcome with a full audit trail.',
         keyTalkingPoints: [
           '7-stage journey: Created → Submitted → Acknowledged → Scheduled → Completed → Documented → Closed',
           'Each stage has a timestamp and responsible party',
@@ -599,7 +633,7 @@ const DEMO_PERSONAS: DemoPersona[] = [
           'Bottleneck identification: which stage has the longest average dwell time',
         ],
         demoActions: [
-          'Show the 7-stage journey for Dorothy\'s endocrinology referral',
+          "Show the 7-stage journey for Dorothy's endocrinology referral",
           'Point to the bottleneck — Scheduled stage averages 8.2 days',
           'Show the audit trail — full provenance chain',
         ],
@@ -614,14 +648,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
     bgLight: '#f6f2ff',
     textColor: '#31135e',
     initials: 'QA',
-    personaContext: 'Jennifer Walsh, Quality Analyst responsible for HEDIS measure compliance, care gap closure verification, and outcomes reporting for South Dakota DHSS.',
+    personaContext:
+      'Jennifer Walsh, Quality Analyst responsible for HEDIS measure compliance, care gap closure verification, and outcomes reporting for South Dakota DHSS.',
     slides: [
       {
         stepNum: 28,
         route: '/care-gap-closure-verification',
         screenLabel: 'Care Gap Closure & Verification',
         storyBeat: 'Multi-program evidence chain — FHIR provenance',
-        speakerNotes: 'The care gap closure verification screen is the quality analyst\'s audit tool. Every closed gap has a full evidence chain — clinical encounter, FHIR resource, measure credit, and gain-share attribution.',
+        speakerNotes:
+          "The care gap closure verification screen is the quality analyst's audit tool. Every closed gap has a full evidence chain — clinical encounter, FHIR resource, measure credit, and gain-share attribution.",
         keyTalkingPoints: [
           'Multi-program evidence chain: Clinical + BH + Social gaps all verifiable',
           'FHIR provenance: every gap closure linked to a FHIR resource with timestamp and author',
@@ -641,7 +677,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/stars-hedis-mips',
         screenLabel: 'Quality Gaps & Attribution',
         storyBeat: 'Clinical + BH + Social program quality measures — 5 tabs',
-        speakerNotes: 'The quality analyst reviews all five measure sets — STARS, HEDIS, MIPS, BH-specific, and Social program outcomes — to identify compliance gaps and prioritize interventions.',
+        speakerNotes:
+          'The quality analyst reviews all five measure sets — STARS, HEDIS, MIPS, BH-specific, and Social program outcomes — to identify compliance gaps and prioritize interventions.',
         keyTalkingPoints: [
           'STARS: current star rating vs. target — bonus threshold analysis',
           'HEDIS: measure-level compliance rates — which measures are below benchmark',
@@ -660,7 +697,8 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/outcomes-linkage',
         screenLabel: 'Outcomes Linkage',
         storyBeat: 'Social ROI — executive closing proof',
-        speakerNotes: 'The outcomes linkage screen provides the analyst with the statistical evidence base for the RHTP program\'s ROI. This is the data that goes into the CMS annual report.',
+        speakerNotes:
+          "The outcomes linkage screen provides the analyst with the statistical evidence base for the RHTP program's ROI. This is the data that goes into the CMS annual report.",
         keyTalkingPoints: [
           'Causal analysis: social intervention → clinical outcome with statistical significance',
           'Cohort comparison: intervention group vs. matched control group',
@@ -678,10 +716,11 @@ const DEMO_PERSONAS: DemoPersona[] = [
         route: '/executive-outcomes-dashboard',
         screenLabel: 'Executive Dashboard',
         storyBeat: 'Closed loop — patient → network → state outcome',
-        speakerNotes: 'The demo closes where it started — the executive outcomes dashboard. But now the analyst can show the closed loop: Dorothy Simmons\'s individual journey aggregated into the population-level outcome that the state executive sees.',
+        speakerNotes:
+          "The demo closes where it started — the executive outcomes dashboard. But now the analyst can show the closed loop: Dorothy Simmons's individual journey aggregated into the population-level outcome that the state executive sees.",
         keyTalkingPoints: [
           'Closed loop: individual patient journey → network performance → state-level outcome',
-          'Dorothy Simmons\'s A1C improvement is one data point in the 18% ED reduction trend',
+          "Dorothy Simmons's A1C improvement is one data point in the 18% ED reduction trend",
           'Every CHW visit, SNAP enrollment, and BH session contributes to this dashboard',
           'This is the RHTP value proposition: whole-person care at population scale',
           'Shared savings generated: $2.1M in Year 1 — reinvested into network expansion',
@@ -700,14 +739,16 @@ const DEMO_PERSONAS: DemoPersona[] = [
 // ─── PDF Generation ───────────────────────────────────────────────────────────
 
 function generateDemoDeckPDF(selectedPersonas: string[]) {
-  const personas = selectedPersonas.length > 0
-    ? DEMO_PERSONAS.filter((p) => selectedPersonas.includes(p.id))
-    : DEMO_PERSONAS;
+  const personas =
+    selectedPersonas.length > 0
+      ? DEMO_PERSONAS.filter((p) => selectedPersonas.includes(p.id))
+      : DEMO_PERSONAS;
 
   const totalSlides = personas.reduce((sum, p) => sum + p.slides.length, 0);
 
-  const slideHTML = personas.map((persona) => {
-    const personaHeader = `
+  const slideHTML = personas
+    .map((persona) => {
+      const personaHeader = `
       <div class="persona-header" style="background:${persona.bgLight}; border-left: 6px solid ${persona.color};">
         <div class="persona-badge" style="background:${persona.color};">${persona.initials}</div>
         <div class="persona-info">
@@ -717,7 +758,9 @@ function generateDemoDeckPDF(selectedPersonas: string[]) {
       </div>
     `;
 
-    const slidesHTML = persona.slides.map((slide) => `
+      const slidesHTML = persona.slides
+        .map(
+          (slide) => `
       <div class="slide">
         <div class="slide-header" style="border-top: 4px solid ${persona.color};">
           <div class="slide-meta">
@@ -759,10 +802,13 @@ function generateDemoDeckPDF(selectedPersonas: string[]) {
           </div>
         </div>
       </div>
-    `).join('');
+    `
+        )
+        .join('');
 
-    return personaHeader + slidesHTML;
-  }).join('<div class="persona-break"></div>');
+      return personaHeader + slidesHTML;
+    })
+    .join('<div class="persona-break"></div>');
 
   const html = `<!DOCTYPE html>
 <html>
@@ -916,14 +962,18 @@ function generateDemoDeckPDF(selectedPersonas: string[]) {
   <!-- Table of Contents -->
   <div class="toc">
     <h2>Demo Sequence Overview</h2>
-    ${personas.map((p) => `
+    ${personas
+      .map(
+        (p) => `
       <div class="toc-persona">
         <div class="toc-persona-title" style="color:${p.color};">${p.role} — ${p.title}</div>
         <div class="toc-steps">
           ${p.slides.map((s) => `<div class="toc-step" style="background:${p.color};">Step ${s.stepNum}: ${s.screenLabel}</div>`).join('')}
         </div>
       </div>
-    `).join('')}
+    `
+      )
+      .join('')}
   </div>
 
   <!-- Slides -->
@@ -966,9 +1016,10 @@ export default function DemoDeckPage() {
   const selectAll = () => setSelectedPersonas(DEMO_PERSONAS.map((p) => p.id));
   const clearAll = () => setSelectedPersonas([]);
 
-  const activePersonas = selectedPersonas.length > 0
-    ? DEMO_PERSONAS.filter((p) => selectedPersonas.includes(p.id))
-    : DEMO_PERSONAS;
+  const activePersonas =
+    selectedPersonas.length > 0
+      ? DEMO_PERSONAS.filter((p) => selectedPersonas.includes(p.id))
+      : DEMO_PERSONAS;
 
   const totalSlides = activePersonas.reduce((sum, p) => sum + p.slides.length, 0);
 
@@ -986,14 +1037,14 @@ export default function DemoDeckPage() {
       breadcrumbs={[{ label: 'System' }, { label: 'Demo Deck Generator' }]}
     >
       <div className="p-6 max-w-6xl mx-auto space-y-6">
-
         {/* Header */}
         <div className="bg-white border border-carbon-gray-20 p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold text-carbon-gray-100 mb-1">Demo Deck Generator</h1>
               <p className="text-sm text-carbon-gray-60">
-                Generate a printable PDF walkthrough of the full 8-persona demo sequence with speaker notes, talking points, and demo actions for each step.
+                Generate a printable PDF walkthrough of the full 8-persona demo sequence with
+                speaker notes, talking points, and demo actions for each step.
               </p>
             </div>
             <button
@@ -1018,7 +1069,9 @@ export default function DemoDeckPage() {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-carbon-blue">3</div>
-              <div className="text-xs text-carbon-gray-50 uppercase tracking-wide">Program Pillars</div>
+              <div className="text-xs text-carbon-gray-50 uppercase tracking-wide">
+                Program Pillars
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-[#198038]">$3.40</div>
@@ -1026,7 +1079,8 @@ export default function DemoDeckPage() {
             </div>
             <div className="ml-auto">
               <p className="text-xs text-carbon-gray-50">
-                Each slide includes speaker notes, key talking points, and step-by-step demo actions. Print or save as PDF from the browser print dialog.
+                Each slide includes speaker notes, key talking points, and step-by-step demo
+                actions. Print or save as PDF from the browser print dialog.
               </p>
             </div>
           </div>
@@ -1035,7 +1089,9 @@ export default function DemoDeckPage() {
         {/* Persona selector */}
         <div className="bg-white border border-carbon-gray-20 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-carbon-gray-100 uppercase tracking-wide">Select Personas to Include</h2>
+            <h2 className="text-sm font-semibold text-carbon-gray-100 uppercase tracking-wide">
+              Select Personas to Include
+            </h2>
             <div className="flex gap-2">
               <button
                 onClick={selectAll}
@@ -1054,7 +1110,8 @@ export default function DemoDeckPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {DEMO_PERSONAS.map((persona) => {
-              const isSelected = selectedPersonas.length === 0 || selectedPersonas.includes(persona.id);
+              const isSelected =
+                selectedPersonas.length === 0 || selectedPersonas.includes(persona.id);
               const isExplicitlySelected = selectedPersonas.includes(persona.id);
               return (
                 <button
@@ -1064,7 +1121,8 @@ export default function DemoDeckPage() {
                     isExplicitlySelected
                       ? 'border-current'
                       : selectedPersonas.length === 0
-                      ? 'border-carbon-gray-20 hover:border-carbon-gray-30' :'border-carbon-gray-20 opacity-50 hover:opacity-75'
+                        ? 'border-carbon-gray-20 hover:border-carbon-gray-30'
+                        : 'border-carbon-gray-20 opacity-50 hover:opacity-75'
                   }`}
                   style={isExplicitlySelected ? { borderColor: persona.color } : {}}
                 >
@@ -1076,10 +1134,15 @@ export default function DemoDeckPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-bold uppercase tracking-wide" style={{ color: persona.color }}>
+                      <span
+                        className="text-xs font-bold uppercase tracking-wide"
+                        style={{ color: persona.color }}
+                      >
                         {persona.role}
                       </span>
-                      <span className="text-sm font-semibold text-carbon-gray-100">{persona.title}</span>
+                      <span className="text-sm font-semibold text-carbon-gray-100">
+                        {persona.title}
+                      </span>
                     </div>
                     <p className="text-xs text-carbon-gray-60 mb-2">{persona.personaContext}</p>
                     <div className="flex flex-wrap gap-1">
@@ -1098,7 +1161,12 @@ export default function DemoDeckPage() {
                     </div>
                   </div>
                   {isExplicitlySelected && (
-                    <Icon name="CheckCircleIcon" size={18} style={{ color: persona.color } as React.CSSProperties} className="flex-shrink-0 mt-0.5" />
+                    <Icon
+                      name="CheckCircleIcon"
+                      size={18}
+                      style={{ color: persona.color } as React.CSSProperties}
+                      className="flex-shrink-0 mt-0.5"
+                    />
                   )}
                 </button>
               );
@@ -1108,14 +1176,19 @@ export default function DemoDeckPage() {
 
         {/* Slide preview */}
         <div className="bg-white border border-carbon-gray-20 p-6">
-          <h2 className="text-sm font-semibold text-carbon-gray-100 uppercase tracking-wide mb-4">Slide Preview</h2>
+          <h2 className="text-sm font-semibold text-carbon-gray-100 uppercase tracking-wide mb-4">
+            Slide Preview
+          </h2>
           <div className="space-y-6">
             {activePersonas.map((persona) => (
               <div key={persona.id}>
                 {/* Persona header */}
                 <div
                   className="flex items-center gap-3 p-3 mb-3"
-                  style={{ backgroundColor: persona.bgLight, borderLeft: `4px solid ${persona.color}` }}
+                  style={{
+                    backgroundColor: persona.bgLight,
+                    borderLeft: `4px solid ${persona.color}`,
+                  }}
                 >
                   <div
                     className="w-8 h-8 flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
@@ -1124,10 +1197,15 @@ export default function DemoDeckPage() {
                     {persona.initials}
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wide mr-2" style={{ color: persona.color }}>
+                    <span
+                      className="text-xs font-bold uppercase tracking-wide mr-2"
+                      style={{ color: persona.color }}
+                    >
                       {persona.role}
                     </span>
-                    <span className="text-sm font-semibold text-carbon-gray-100">{persona.title}</span>
+                    <span className="text-sm font-semibold text-carbon-gray-100">
+                      {persona.title}
+                    </span>
                     <p className="text-xs text-carbon-gray-60 mt-0.5">{persona.personaContext}</p>
                   </div>
                 </div>
@@ -1135,7 +1213,10 @@ export default function DemoDeckPage() {
                 {/* Slides */}
                 <div className="space-y-3 ml-4">
                   {persona.slides.map((slide) => (
-                    <div key={slide.stepNum} className="border border-carbon-gray-20 overflow-hidden">
+                    <div
+                      key={slide.stepNum}
+                      className="border border-carbon-gray-20 overflow-hidden"
+                    >
                       {/* Slide header */}
                       <div
                         className="px-4 py-3"
@@ -1148,9 +1229,13 @@ export default function DemoDeckPage() {
                           >
                             Step {slide.stepNum}
                           </span>
-                          <span className="text-xs text-carbon-gray-50 font-mono">{slide.route}</span>
+                          <span className="text-xs text-carbon-gray-50 font-mono">
+                            {slide.route}
+                          </span>
                         </div>
-                        <h3 className="text-sm font-bold text-carbon-gray-100">{slide.screenLabel}</h3>
+                        <h3 className="text-sm font-bold text-carbon-gray-100">
+                          {slide.screenLabel}
+                        </h3>
                         <p className="text-xs text-carbon-gray-60 italic">{slide.storyBeat}</p>
                       </div>
 
@@ -1159,37 +1244,75 @@ export default function DemoDeckPage() {
                         {/* Screen placeholder */}
                         <div
                           className="w-48 flex-shrink-0 flex items-center justify-center m-3 border-2 border-dashed"
-                          style={{ borderColor: persona.color, backgroundColor: persona.bgLight, minHeight: 100 }}
+                          style={{
+                            borderColor: persona.color,
+                            backgroundColor: persona.bgLight,
+                            minHeight: 100,
+                          }}
                         >
                           <div className="text-center p-3">
-                            <Icon name="ComputerDesktopIcon" size={24} style={{ color: persona.color } as React.CSSProperties} className="mx-auto mb-1" />
-                            <p className="text-xs font-semibold" style={{ color: persona.color }}>{slide.screenLabel}</p>
+                            <Icon
+                              name="ComputerDesktopIcon"
+                              size={24}
+                              style={{ color: persona.color } as React.CSSProperties}
+                              className="mx-auto mb-1"
+                            />
+                            <p className="text-xs font-semibold" style={{ color: persona.color }}>
+                              {slide.screenLabel}
+                            </p>
                           </div>
                         </div>
 
                         {/* Notes */}
                         <div className="flex-1 p-3 space-y-3">
                           <div>
-                            <p className="text-2xs font-bold uppercase tracking-wide mb-1" style={{ color: persona.color }}>Speaker Notes</p>
-                            <p className="text-xs text-carbon-gray-70 leading-relaxed">{slide.speakerNotes}</p>
+                            <p
+                              className="text-2xs font-bold uppercase tracking-wide mb-1"
+                              style={{ color: persona.color }}
+                            >
+                              Speaker Notes
+                            </p>
+                            <p className="text-xs text-carbon-gray-70 leading-relaxed">
+                              {slide.speakerNotes}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-2xs font-bold uppercase tracking-wide mb-1" style={{ color: persona.color }}>Key Talking Points</p>
+                            <p
+                              className="text-2xs font-bold uppercase tracking-wide mb-1"
+                              style={{ color: persona.color }}
+                            >
+                              Key Talking Points
+                            </p>
                             <ul className="space-y-0.5">
                               {slide.keyTalkingPoints.map((pt, i) => (
                                 <li key={i} className="text-xs text-carbon-gray-70 flex gap-1.5">
-                                  <span className="flex-shrink-0 mt-0.5" style={{ color: persona.color }}>•</span>
+                                  <span
+                                    className="flex-shrink-0 mt-0.5"
+                                    style={{ color: persona.color }}
+                                  >
+                                    •
+                                  </span>
                                   <span>{pt}</span>
                                 </li>
                               ))}
                             </ul>
                           </div>
                           <div>
-                            <p className="text-2xs font-bold uppercase tracking-wide mb-1" style={{ color: persona.color }}>Demo Actions</p>
+                            <p
+                              className="text-2xs font-bold uppercase tracking-wide mb-1"
+                              style={{ color: persona.color }}
+                            >
+                              Demo Actions
+                            </p>
                             <ol className="space-y-0.5">
                               {slide.demoActions.map((action, i) => (
                                 <li key={i} className="text-xs text-carbon-gray-70 flex gap-1.5">
-                                  <span className="flex-shrink-0 font-bold" style={{ color: persona.color }}>{i + 1}.</span>
+                                  <span
+                                    className="flex-shrink-0 font-bold"
+                                    style={{ color: persona.color }}
+                                  >
+                                    {i + 1}.
+                                  </span>
                                   <span>{action}</span>
                                 </li>
                               ))}
@@ -1216,7 +1339,6 @@ export default function DemoDeckPage() {
             {generating ? 'Generating…' : `Generate & Print PDF (${totalSlides} slides)`}
           </button>
         </div>
-
       </div>
     </AppLayout>
   );

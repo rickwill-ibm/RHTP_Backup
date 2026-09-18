@@ -58,14 +58,24 @@ interface ReadinessStandardDef {
  * of the 18 CLAIMED_STANDARDS appears in exactly one entry (asserted by the test).
  */
 export const READINESS_STANDARDS: readonly ReadinessStandardDef[] = [
-  { id: 'us-core-uscdi', name: 'US Core / USCDI', claimIds: ['us-core-uscdi'], ciCeiling: 'material-ci-gap' },
+  {
+    id: 'us-core-uscdi',
+    name: 'US Core / USCDI',
+    claimIds: ['us-core-uscdi'],
+    ciCeiling: 'material-ci-gap',
+  },
   { id: 'davinci-pas', name: 'Da Vinci PAS', claimIds: ['davinci-pas'], ciCeiling: 'ci-complete' },
   { id: 'davinci-crd', name: 'Da Vinci CRD', claimIds: ['davinci-crd'], ciCeiling: 'ci-complete' },
   { id: 'davinci-dtr', name: 'Da Vinci DTR', claimIds: ['davinci-dtr'], ciCeiling: 'ci-complete' },
   { id: 'carin', name: 'CARIN (Blue Button)', claimIds: ['carin'], ciCeiling: 'material-ci-gap' },
   { id: 'smart', name: 'SMART on FHIR', claimIds: ['smart'], ciCeiling: 'ci-complete' },
   { id: 'cds-hooks', name: 'CDS Hooks', claimIds: ['cds-hooks'], ciCeiling: 'ci-complete' },
-  { id: 'cms-0057-f', name: 'CMS-0057-F APIs', claimIds: ['cms-0057-f'], ciCeiling: 'material-ci-gap' },
+  {
+    id: 'cms-0057-f',
+    name: 'CMS-0057-F APIs',
+    claimIds: ['cms-0057-f'],
+    ciCeiling: 'material-ci-gap',
+  },
   {
     id: 'ihe-pix-pdq',
     name: 'IHE PIX / PDQ (+ PIXm / PDQm)',
@@ -78,9 +88,24 @@ export const READINESS_STANDARDS: readonly ReadinessStandardDef[] = [
     claimIds: ['x12-834', 'x12-837', 'x12-835', 'x12-278', 'x12-270-271'],
     ciCeiling: 'material-ci-gap',
   },
-  { id: 'terminology', name: 'Terminology services', claimIds: ['terminology'], ciCeiling: 'ci-complete' },
-  { id: 'part2-hipaa', name: '42 CFR Part 2 / HIPAA', claimIds: ['part2-hipaa'], ciCeiling: 'material-ci-gap' },
-  { id: 'npi-nppes', name: 'NPI / NPPES provider identity', claimIds: ['npi-nppes'], ciCeiling: 'material-ci-gap' },
+  {
+    id: 'terminology',
+    name: 'Terminology services',
+    claimIds: ['terminology'],
+    ciCeiling: 'ci-complete',
+  },
+  {
+    id: 'part2-hipaa',
+    name: '42 CFR Part 2 / HIPAA',
+    claimIds: ['part2-hipaa'],
+    ciCeiling: 'material-ci-gap',
+  },
+  {
+    id: 'npi-nppes',
+    name: 'NPI / NPPES provider identity',
+    claimIds: ['npi-nppes'],
+    ciCeiling: 'material-ci-gap',
+  },
 ] as const;
 
 /** ciCeiling -> readiness status. Never emits `ready` (that requires live/accredited proof). */
@@ -96,8 +121,15 @@ export function statusForCeiling(ceiling: CiCeiling): ReadinessStatus {
 }
 
 /** Aggregate capability-status counts across the claim ids of a readiness standard. */
-export function capabilityStatusCounts(claimIds: readonly ClaimedStandardId[]): Record<EvidenceStatus, number> {
-  const counts: Record<EvidenceStatus, number> = { supported: 0, partial: 0, 'ci-pending': 0, absent: 0 };
+export function capabilityStatusCounts(
+  claimIds: readonly ClaimedStandardId[]
+): Record<EvidenceStatus, number> {
+  const counts: Record<EvidenceStatus, number> = {
+    supported: 0,
+    partial: 0,
+    'ci-pending': 0,
+    absent: 0,
+  };
   for (const entry of CONFORMANCE_MATRIX) {
     if (!claimIds.includes(entry.claimId)) continue;
     for (const cap of entry.capabilities) counts[cap.evidence.status] += 1;
@@ -174,7 +206,8 @@ export function rollupInvariantViolations(): string[] {
     }
     // Every aggregated claim id must actually exist in the matrix.
     for (const claimId of row.claimIds) {
-      if (!CLAIMED_STANDARDS.includes(claimId)) problems.push(`${row.id}: unknown claim id ${claimId}`);
+      if (!CLAIMED_STANDARDS.includes(claimId))
+        problems.push(`${row.id}: unknown claim id ${claimId}`);
     }
   }
   return problems;

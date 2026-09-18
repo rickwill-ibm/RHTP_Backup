@@ -52,7 +52,7 @@ function mergeShape(a: Shape, b: Shape): Shape {
     return { k: 'object', fields };
   }
   if (a.k === 'array' && b.k === 'array') {
-    const of = a.of && b.of ? mergeShape(a.of, b.of) : a.of ?? b.of;
+    const of = a.of && b.of ? mergeShape(a.of, b.of) : (a.of ?? b.of);
     return { k: 'array', of };
   }
   return a;
@@ -96,7 +96,10 @@ export function diffShape(a: Shape, b: Shape, path = '$'): ParityDiff[] {
 export function assertShapeEquivalent(mock: unknown, prod: unknown, label = 'seam'): void {
   const diffs = diffShape(shapeOf(mock), shapeOf(prod));
   if (diffs.length) {
-    const detail = diffs.slice(0, 12).map((d) => `  ${d.path}: ${d.reason}`).join('\n');
+    const detail = diffs
+      .slice(0, 12)
+      .map((d) => `  ${d.path}: ${d.reason}`)
+      .join('\n');
     throw new Error(`E15 parity FAIL for ${label}: mock and production shapes diverge:\n${detail}`);
   }
 }

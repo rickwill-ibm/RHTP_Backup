@@ -8,12 +8,12 @@ licensed crosswalk.**
 
 Each entry is one ConceptMap-style crosswalk between two governed code systems:
 
-| crosswalk | source → target | asset / version | represents |
-| --- | --- | --- | --- |
-| `icd10cm-to-cms-hcc-v28` | ICD-10-CM → HCC | `cms-hcc-v28` / `V28` | diagnosis → CMS-HCC risk group |
-| `cms-hcc-v28-to-icd10cm` | HCC → ICD-10-CM | `cms-hcc-v28` / `V28` | exemplar diagnoses in a group |
-| `snomedct-to-icd10cm-us20260301` | SNOMED-CT → ICD-10-CM | `snomed-ct-us-20260301` / `US20260301` | NLM US-Edition SNOMED→ICD map |
-| `icd10cm-to-snomedct-fy2026` | ICD-10-CM → SNOMED-CT | `icd-10-cm-fy2026` / `FY2026` | reverse NLM map |
+| crosswalk                        | source → target       | asset / version                        | represents                     |
+| -------------------------------- | --------------------- | -------------------------------------- | ------------------------------ |
+| `icd10cm-to-cms-hcc-v28`         | ICD-10-CM → HCC       | `cms-hcc-v28` / `V28`                  | diagnosis → CMS-HCC risk group |
+| `cms-hcc-v28-to-icd10cm`         | HCC → ICD-10-CM       | `cms-hcc-v28` / `V28`                  | exemplar diagnoses in a group  |
+| `snomedct-to-icd10cm-us20260301` | SNOMED-CT → ICD-10-CM | `snomed-ct-us-20260301` / `US20260301` | NLM US-Edition SNOMED→ICD map  |
+| `icd10cm-to-snomedct-fy2026`     | ICD-10-CM → SNOMED-CT | `icd-10-cm-fy2026` / `FY2026`          | reverse NLM map                |
 
 Each crosswalk declares its own `assetId` + `version`, so a translated target is
 auditable back to the versioned map that produced it. The versions are

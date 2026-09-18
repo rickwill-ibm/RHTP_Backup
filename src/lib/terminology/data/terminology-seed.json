@@ -1,5 +1,5 @@
 {
-  "_comment": "Minimal in-repo terminology allowlist for the SEEDED TerminologyService stub (data-is-not-code). Covers exactly the RxNorm / LOINC / SNOMED-CT / ICD-10-CM codes the demo pipeline fixtures use, plus a few ICD-10 diagnoses with a stub CMS-HCC mapping so classify() has demo data. NOT a real terminology server; production uses a FHIR terminology server ($validate-code / $translate / ValueSet $expand).",
+  "_comment": "Minimal in-repo terminology allowlist for the SEEDED TerminologyService stub (data-is-not-code). Covers exactly the RxNorm / LOINC / SNOMED-CT / ICD-10-CM / CPT-HCPCS codes the demo pipeline fixtures use (CPT-HCPCS includes the CG-SURG-83 bariatric surgery code set, sourced from the ingested guideline PDF), plus a few ICD-10 diagnoses with a stub CMS-HCC mapping so classify() has demo data. NOT a real terminology server; production uses a FHIR terminology server ($validate-code / $translate / ValueSet $expand).",
   "codeSystems": {
     "RxNorm": {
       "uri": "http://www.nlm.nih.gov/research/umls/rxnorm",
@@ -106,7 +106,35 @@
         "99213": "Office/outpatient visit, established patient",
         "99242": "Office consultation, new or established patient",
         "T2003": "Non-emergency transportation; encounter/trip",
-        "2022F": "Dilated retinal eye exam"
+        "2022F": "Dilated retinal eye exam",
+        "72148": "MRI Lumbar Spine w/o Contrast",
+        "43644": "Laparoscopy, surgical, gastric restrictive procedure; with gastric bypass and Roux-en-Y gastroenterostomy (roux limb 150 cm or less)",
+        "43645": "Laparoscopy, surgical, gastric restrictive procedure; with gastric bypass and small intestine reconstruction to limit absorption",
+        "43770": "Laparoscopy, surgical, gastric restrictive procedure; placement of adjustable gastric restrictive device (eg, gastric band and subcutaneous port components)",
+        "43771": "Laparoscopy, surgical, gastric restrictive procedure; revision of adjustable gastric restrictive device component only",
+        "43772": "Laparoscopy, surgical, gastric restrictive procedure; removal of adjustable gastric restrictive device component only",
+        "43773": "Laparoscopy, surgical, gastric restrictive procedure; removal and replacement of adjustable gastric restrictive device component only",
+        "43774": "Laparoscopy, surgical, gastric restrictive procedure; removal of adjustable gastric restrictive device and subcutaneous port components",
+        "43775": "Laparoscopy, surgical, gastric restrictive procedure; longitudinal gastrectomy (ie, sleeve gastrectomy)",
+        "43842": "Gastric restrictive procedure, without gastric bypass, for morbid obesity; vertical-banded gastroplasty",
+        "43843": "Gastric restrictive procedure, without gastric bypass, for morbid obesity; other than vertical-banded gastroplasty",
+        "43845": "Gastric restrictive procedure with partial gastrectomy, pylorus-preserving duodenoileostomy and ileoileostomy (50 to 100 cm common channel) to limit absorption (biliopancreatic diversion with duodenal switch)",
+        "43846": "Gastric restrictive procedure, with gastric bypass for morbid obesity; with short limb (150 cm or less) Roux-en-Y gastroenterostomy",
+        "43847": "Gastric restrictive procedure, with gastric bypass for morbid obesity; with small intestine reconstruction to limit absorption",
+        "43848": "Revision, open, of gastric restrictive procedure for morbid obesity, other than adjustable gastric restrictive device (separate procedure)",
+        "43886": "Gastric restrictive procedure, open; revision of subcutaneous port component only",
+        "43887": "Gastric restrictive procedure, open; removal of subcutaneous port component only",
+        "43888": "Gastric restrictive procedure, open; removal and replacement of subcutaneous port component only",
+        "43290": "Esophagogastroduodenoscopy, flexible, transoral; with deployment of intragastric bariatric balloon",
+        "43291": "Esophagogastroduodenoscopy, flexible, transoral; with removal of intragastric bariatric balloon(s)",
+        "43632": "Gastrectomy, partial distal; with gastrojejunostomy (Billroth II) [when specified as bariatric surgery]",
+        "43633": "Gastrectomy, partial, distal; with Roux-en-Y reconstruction [when specified as bariatric surgery]",
+        "43659": "Unlisted laparoscopy procedure, stomach [when specified as gastric plication (laparoscopic greater curvature plication [LGCP]) with or without gastric banding, sleeve gastroplasty, or mini-gastric bypass procedure]",
+        "43999": "Unlisted procedure, stomach [when specified as endoluminal gastric restrictive surgery, or aspiration therapy]",
+        "44238": "Unlisted laparoscopy procedure, intestine (except rectum) [when specified as a bariatric procedure identified as not medically necessary such as SADI-S]",
+        "64999": "Unlisted procedure, nervous system [when specified as implantation, revision, replacement, or removal of vagus nerve blocking neurostimulator electrode array or pulse generator at the esophagogastric junction]",
+        "C9784": "Gastric restrictive procedure, endoscopic sleeve gastroplasty, with esophagogastroduodenoscopy and intraluminal tube insertion, if performed, including all system and tissue anchoring components",
+        "C9785": "Endoscopic outlet reduction, gastric pouch application, with endoscopy and intraluminal tube insertion, if performed, including all system and tissue anchoring components"
       }
     },
     "HCC": {
@@ -128,12 +156,7 @@
     }
   },
   "valueSets": {
-    "sdoh-z-codes": [
-      "Z59.82",
-      "Z59.41",
-      "Z71.41",
-      "Z59.86"
-    ],
+    "sdoh-z-codes": ["Z59.82", "Z59.41", "Z71.41", "Z59.86"],
     "chronic-conditions": [
       "E11.9",
       "I50.9",
@@ -154,28 +177,20 @@
     "systems": {
       "ICD-10-CM": {
         "currentVersion": "FY2026",
-        "retiredInCurrent": [
-          "R51"
-        ],
+        "retiredInCurrent": ["R51"],
         "priorVersions": {
           "FY2025": {
-            "adds": [
-              "R51"
-            ],
+            "adds": ["R51"],
             "removes": []
           }
         }
       },
       "HCC": {
         "currentVersion": "V28",
-        "retiredInCurrent": [
-          "HCC58"
-        ],
+        "retiredInCurrent": ["HCC58"],
         "priorVersions": {
           "V24": {
-            "adds": [
-              "HCC58"
-            ],
+            "adds": ["HCC58"],
             "removes": []
           }
         }
@@ -200,17 +215,9 @@
       "ng/mL"
     ],
     "loincUnits": {
-      "4548-4": [
-        "%",
-        "mmol/mol"
-      ],
-      "8480-6": [
-        "mm[Hg]"
-      ],
-      "2339-0": [
-        "mg/dL",
-        "mmol/L"
-      ]
+      "4548-4": ["%", "mmol/mol"],
+      "8480-6": ["mm[Hg]"],
+      "2339-0": ["mg/dL", "mmol/L"]
     }
   }
 }

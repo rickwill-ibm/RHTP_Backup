@@ -35,33 +35,45 @@ function req(cond: unknown, field: string, detail: string): asserts cond {
 function validateManifest(m: unknown, idx: number): AgentManifest {
   req(m && typeof m === 'object', `agents[${idx}]`, 'must be an object');
   const o = m as Record<string, unknown>;
-  req(typeof o.id === 'string' && o.id.length > 0, `agents[${idx}].id`, 'must be a non-empty string');
-  req(typeof o.version === 'string' && o.version.length > 0, `agents[${idx}].version`, 'must be a version string');
-  req(typeof o.purpose === 'string' && o.purpose.length > 0, `agents[${idx}].purpose`, 'must be a non-empty string');
+  req(
+    typeof o.id === 'string' && o.id.length > 0,
+    `agents[${idx}].id`,
+    'must be a non-empty string'
+  );
+  req(
+    typeof o.version === 'string' && o.version.length > 0,
+    `agents[${idx}].version`,
+    'must be a version string'
+  );
+  req(
+    typeof o.purpose === 'string' && o.purpose.length > 0,
+    `agents[${idx}].purpose`,
+    'must be a non-empty string'
+  );
   req(
     Array.isArray(o.toolAllowlist) && o.toolAllowlist.every((t) => typeof t === 'string'),
     `agents[${idx}].toolAllowlist`,
-    'must be an array of tool-id strings (least privilege: list the minimum)',
+    'must be an array of tool-id strings (least privilege: list the minimum)'
   );
   req(
     typeof o.autonomyTier === 'string' && AUTONOMY_TIERS.includes(o.autonomyTier as AutonomyTier),
     `agents[${idx}].autonomyTier`,
-    `must be one of ${AUTONOMY_TIERS.join(', ')}`,
+    `must be one of ${AUTONOMY_TIERS.join(', ')}`
   );
   req(
     typeof o.escalationPolicyRef === 'string' && o.escalationPolicyRef.length > 0,
     `agents[${idx}].escalationPolicyRef`,
-    'must name an escalation policy set',
+    'must name an escalation policy set'
   );
   req(
     typeof o.phiPosture === 'string' && PHI_POSTURES.includes(o.phiPosture as PhiPosture),
     `agents[${idx}].phiPosture`,
-    `must be one of ${PHI_POSTURES.join(', ')}`,
+    `must be one of ${PHI_POSTURES.join(', ')}`
   );
   req(
     typeof o.owningModule === 'string' && o.owningModule.length > 0,
     `agents[${idx}].owningModule`,
-    'must name the module that owns the agent behavior',
+    'must name the module that owns the agent behavior'
   );
   return {
     id: o.id as string,
@@ -94,7 +106,7 @@ export function parseRegistry(data: unknown): AgentManifestRegistry {
 export class AgentManifestRegistry {
   constructor(
     public readonly version: string,
-    private readonly byId: Map<string, AgentManifest>,
+    private readonly byId: Map<string, AgentManifest>
   ) {}
 
   /** All registered manifests (stable order). */

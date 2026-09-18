@@ -31,7 +31,7 @@ export class OutboxSweeper {
 
   constructor(
     private readonly deps: OutboxDeps,
-    lock?: MemberLock,
+    lock?: MemberLock
   ) {
     this.lock = lock ?? new MemberLock();
   }
@@ -40,7 +40,12 @@ export class OutboxSweeper {
   async sweep(thresholdMs: number = DEFAULT_SWEEP_THRESHOLD_MS): Promise<SweepResult> {
     const cutoff = this.deps.now() - thresholdMs;
     const stale = await this.deps.store.stalePending(cutoff);
-    const result: SweepResult = { scanned: stale.length, recovered: [], failed: [], stillPending: [] };
+    const result: SweepResult = {
+      scanned: stale.length,
+      recovered: [],
+      failed: [],
+      stillPending: [],
+    };
 
     const byMember = new Map<string, OutboxIntentRow[]>();
     for (const row of stale) {

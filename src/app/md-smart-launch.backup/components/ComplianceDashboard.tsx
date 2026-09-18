@@ -28,11 +28,38 @@ interface ComplianceSection {
   items: ComplianceItem[];
 }
 
-const STATUS_CONFIG: Record<ComplianceStatus, { label: string; icon: string; color: string; bg: string; border: string }> = {
-  pass: { label: 'PASS', icon: 'CheckCircleIcon', color: 'text-[#0e6027]', bg: 'bg-[#defbe6]', border: 'border-[#a7f0ba]' },
-  warn: { label: 'WARN', icon: 'ExclamationTriangleIcon', color: 'text-[#b45309]', bg: 'bg-[#fdf6dd]', border: 'border-[#f1c21b]' },
-  fail: { label: 'FAIL', icon: 'XCircleIcon', color: 'text-[#da1e28]', bg: 'bg-[#fff1f1]', border: 'border-[#ffb3b8]' },
-  info: { label: 'INFO', icon: 'InformationCircleIcon', color: 'text-[#0043ce]', bg: 'bg-[#edf5ff]', border: 'border-[#97c1ff]' },
+const STATUS_CONFIG: Record<
+  ComplianceStatus,
+  { label: string; icon: string; color: string; bg: string; border: string }
+> = {
+  pass: {
+    label: 'PASS',
+    icon: 'CheckCircleIcon',
+    color: 'text-[#0e6027]',
+    bg: 'bg-[#defbe6]',
+    border: 'border-[#a7f0ba]',
+  },
+  warn: {
+    label: 'WARN',
+    icon: 'ExclamationTriangleIcon',
+    color: 'text-[#b45309]',
+    bg: 'bg-[#fdf6dd]',
+    border: 'border-[#f1c21b]',
+  },
+  fail: {
+    label: 'FAIL',
+    icon: 'XCircleIcon',
+    color: 'text-[#da1e28]',
+    bg: 'bg-[#fff1f1]',
+    border: 'border-[#ffb3b8]',
+  },
+  info: {
+    label: 'INFO',
+    icon: 'InformationCircleIcon',
+    color: 'text-[#0043ce]',
+    bg: 'bg-[#edf5ff]',
+    border: 'border-[#97c1ff]',
+  },
 };
 
 function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
@@ -59,9 +86,11 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'r4-service-request',
           label: 'ServiceRequest Resource',
-          description: 'Orders written as FHIR R4 ServiceRequest with required fields (status, intent, code, subject)',
+          description:
+            'Orders written as FHIR R4 ServiceRequest with required fields (status, intent, code, subject)',
           status: 'pass',
-          detail: 'resourceType: ServiceRequest · status: active · intent: order · subject: Patient reference',
+          detail:
+            'resourceType: ServiceRequest · status: active · intent: order · subject: Patient reference',
           spec: 'FHIR R4 ServiceRequest §12.5',
         },
         {
@@ -117,7 +146,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'smart-token-exchange',
           label: 'Authorization Code Exchange',
-          description: 'Launch token exchanged for access token via OAuth 2.0 authorization code flow',
+          description:
+            'Launch token exchanged for access token via OAuth 2.0 authorization code flow',
           status: 'pass',
           detail: 'Token exchange completed · Access token issued · Refresh token available',
           spec: 'SMART App Launch 2.0 §4.3',
@@ -135,7 +165,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'smart-context-patient',
           label: 'Patient Context Binding',
-          description: 'Patient ID bound from EHR launch context — no manual patient selection required',
+          description:
+            'Patient ID bound from EHR launch context — no manual patient selection required',
           status: 'pass',
           detail: `Patient ID: ${ctx.patientId} · Encounter ID: ${ctx.encounterId}`,
           spec: 'SMART App Launch 2.0 §6.1',
@@ -151,7 +182,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'smart-state-param',
           label: 'State Parameter Anti-CSRF',
-          description: 'Opaque state parameter included in authorization request and verified on callback',
+          description:
+            'Opaque state parameter included in authorization request and verified on callback',
           status: 'pass',
           detail: 'State nonce generated, stored in session, verified on redirect',
           spec: 'SMART App Launch 2.0 §4.2 / RFC 6749',
@@ -243,9 +275,11 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'err-token-expiry',
           label: 'Token Expiry Detection',
-          description: 'Access token expiry checked before each FHIR API call — re-auth triggered if expired',
+          description:
+            'Access token expiry checked before each FHIR API call — re-auth triggered if expired',
           status: 'pass',
-          detail: 'Token expiry timestamp validated on every request; silent refresh attempted before hard re-auth',
+          detail:
+            'Token expiry timestamp validated on every request; silent refresh attempted before hard re-auth',
           spec: 'SMART App Launch 2.0 §4.4',
         },
         {
@@ -253,15 +287,18 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
           label: 'Launch Failure Handling',
           description: 'Invalid or missing launch parameter shows error screen with retry option',
           status: 'pass',
-          detail: 'SmartLaunchHandler renders error state with error code, description, and retry CTA',
+          detail:
+            'SmartLaunchHandler renders error state with error code, description, and retry CTA',
           spec: 'SMART App Launch 2.0 §4.1',
         },
         {
           id: 'err-fhir-4xx',
           label: 'FHIR 4xx Error Handling',
-          description: '401 Unauthorized and 403 Forbidden responses trigger re-authentication flow',
+          description:
+            '401 Unauthorized and 403 Forbidden responses trigger re-authentication flow',
           status: 'pass',
-          detail: '401 → token refresh → retry; 403 → scope error displayed; 404 → resource not found state shown',
+          detail:
+            '401 → token refresh → retry; 403 → scope error displayed; 404 → resource not found state shown',
           spec: 'FHIR R4 §3.2.0 HTTP Status Codes',
         },
         {
@@ -269,13 +306,15 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
           label: 'FHIR 5xx / Network Error Handling',
           description: 'Server errors and network failures show user-facing error with retry',
           status: 'pass',
-          detail: 'Exponential backoff retry (3 attempts) · Fallback to cached data where available',
+          detail:
+            'Exponential backoff retry (3 attempts) · Fallback to cached data where available',
           spec: 'FHIR R4 §3.2.0',
         },
         {
           id: 'err-cds-timeout',
           label: 'CDS Hooks Timeout Handling',
-          description: 'CDS service calls time out after 5 seconds — cards shown as unavailable, workflow continues',
+          description:
+            'CDS service calls time out after 5 seconds — cards shown as unavailable, workflow continues',
           status: 'pass',
           detail: 'CDS timeout does not block order entry or encounter workflow per CDS Hooks spec',
           spec: 'CDS Hooks 2.0 §5.2',
@@ -283,9 +322,11 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'err-order-conflict',
           label: 'Order Conflict / Duplicate Detection',
-          description: 'Duplicate order detection via order-select CDS hook before basket submission',
+          description:
+            'Duplicate order detection via order-select CDS hook before basket submission',
           status: 'pass',
-          detail: 'CDS order-select hook fires on each order add; duplicate warning card returned if conflict detected',
+          detail:
+            'CDS order-select hook fires on each order add; duplicate warning card returned if conflict detected',
           spec: 'CDS Hooks 2.0 §3.1',
         },
         {
@@ -293,7 +334,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
           label: 'Critical Alert Override Enforcement',
           description: 'Critical CDS cards cannot be bypassed without documented override reason',
           status: 'pass',
-          detail: 'Order sign blocked until all critical cards acknowledged with override reason — enforced in UI and audit log',
+          detail:
+            'Order sign blocked until all critical cards acknowledged with override reason — enforced in UI and audit log',
           spec: 'CDS Hooks 2.0 §4.3 / HIPAA §164.312(b)',
         },
       ],
@@ -317,7 +359,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
         {
           id: 'hl7-required-fields',
           label: 'Required Field Cardinality',
-          description: 'ServiceRequest required fields: status (1..1), intent (1..1), code (1..1), subject (1..1)',
+          description:
+            'ServiceRequest required fields: status (1..1), intent (1..1), code (1..1), subject (1..1)',
           status: 'pass',
           detail: 'All 1..1 cardinality fields populated before resource creation',
           spec: 'FHIR R4 ServiceRequest §12.5.2',
@@ -327,7 +370,8 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
           label: 'Terminology Binding Validation',
           description: 'Coded values bound to required value sets — SNOMED CT, LOINC, RxNorm',
           status: 'pass',
-          detail: 'Medication: RxNorm · Lab: LOINC · Procedure/Referral: SNOMED CT · Priority: FHIR required binding',
+          detail:
+            'Medication: RxNorm · Lab: LOINC · Procedure/Referral: SNOMED CT · Priority: FHIR required binding',
           spec: 'FHIR R4 Terminology §2.16',
         },
         {
@@ -343,23 +387,28 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
           label: 'Resource Identifier Format',
           description: 'Resource IDs follow FHIR ID format — [A-Za-z0-9\\-\\.]{1,64}',
           status: 'pass',
-          detail: 'Patient IDs, Encounter IDs, Order IDs validated against FHIR ID regex before use',
+          detail:
+            'Patient IDs, Encounter IDs, Order IDs validated against FHIR ID regex before use',
           spec: 'FHIR R4 §2.24.0 id type',
         },
         {
           id: 'hl7-us-core',
           label: 'US Core R4 Profile Conformance',
-          description: 'Resources conform to US Core R4 profiles for interoperability with payers and HIEs',
+          description:
+            'Resources conform to US Core R4 profiles for interoperability with payers and HIEs',
           status: 'warn',
-          detail: 'US Core profile URLs not yet declared in meta.profile — functional conformance met, formal declaration pending',
+          detail:
+            'US Core profile URLs not yet declared in meta.profile — functional conformance met, formal declaration pending',
           spec: 'US Core R4 IG v4.0.0',
         },
         {
           id: 'hl7-cds-hooks-schema',
           label: 'CDS Hooks Request/Response Schema',
-          description: 'CDS Hooks service requests and card responses validated against CDS Hooks 2.0 JSON schema',
+          description:
+            'CDS Hooks service requests and card responses validated against CDS Hooks 2.0 JSON schema',
           status: 'pass',
-          detail: 'hookInstance, hook, context, prefetch fields present · Card summary ≤140 chars · indicator values validated',
+          detail:
+            'hookInstance, hook, context, prefetch fields present · Card summary ≤140 chars · indicator values validated',
           spec: 'CDS Hooks 2.0 §3.0',
         },
       ],
@@ -370,7 +419,9 @@ function buildSections(ctx: SmartLaunchContext): ComplianceSection[] {
 function StatusBadge({ status }: { status: ComplianceStatus }) {
   const cfg = STATUS_CONFIG[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-bold border ${cfg.bg} ${cfg.color} ${cfg.border}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-2xs font-bold border ${cfg.bg} ${cfg.color} ${cfg.border}`}
+    >
       <Icon name={cfg.icon as any} size={11} />
       {cfg.label}
     </span>
@@ -446,8 +497,12 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`px-3 py-1.5 border text-center ${overallScore >= 90 ? 'bg-[#defbe6] border-[#a7f0ba]' : overallScore >= 70 ? 'bg-[#fdf6dd] border-[#f1c21b]' : 'bg-[#fff1f1] border-[#ffb3b8]'}`}>
-              <p className={`text-xl font-bold font-mono ${overallScore >= 90 ? 'text-[#0e6027]' : overallScore >= 70 ? 'text-[#b45309]' : 'text-[#da1e28]'}`}>
+            <div
+              className={`px-3 py-1.5 border text-center ${overallScore >= 90 ? 'bg-[#defbe6] border-[#a7f0ba]' : overallScore >= 70 ? 'bg-[#fdf6dd] border-[#f1c21b]' : 'bg-[#fff1f1] border-[#ffb3b8]'}`}
+            >
+              <p
+                className={`text-xl font-bold font-mono ${overallScore >= 90 ? 'text-[#0e6027]' : overallScore >= 70 ? 'text-[#b45309]' : 'text-[#da1e28]'}`}
+              >
                 {overallScore}%
               </p>
               <p className="text-2xs text-carbon-gray-50 font-medium">Compliance Score</p>
@@ -466,15 +521,48 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
         {/* KPI row */}
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Passed', count: totalPass, color: 'text-[#0e6027]', bg: 'bg-[#defbe6]', border: 'border-[#a7f0ba]', icon: 'CheckCircleIcon' },
-            { label: 'Warnings', count: totalWarn, color: 'text-[#b45309]', bg: 'bg-[#fdf6dd]', border: 'border-[#f1c21b]', icon: 'ExclamationTriangleIcon' },
-            { label: 'Failed', count: totalFail, color: 'text-[#da1e28]', bg: 'bg-[#fff1f1]', border: 'border-[#ffb3b8]', icon: 'XCircleIcon' },
-            { label: 'Info', count: totalInfo, color: 'text-[#0043ce]', bg: 'bg-[#edf5ff]', border: 'border-[#97c1ff]', icon: 'InformationCircleIcon' },
+            {
+              label: 'Passed',
+              count: totalPass,
+              color: 'text-[#0e6027]',
+              bg: 'bg-[#defbe6]',
+              border: 'border-[#a7f0ba]',
+              icon: 'CheckCircleIcon',
+            },
+            {
+              label: 'Warnings',
+              count: totalWarn,
+              color: 'text-[#b45309]',
+              bg: 'bg-[#fdf6dd]',
+              border: 'border-[#f1c21b]',
+              icon: 'ExclamationTriangleIcon',
+            },
+            {
+              label: 'Failed',
+              count: totalFail,
+              color: 'text-[#da1e28]',
+              bg: 'bg-[#fff1f1]',
+              border: 'border-[#ffb3b8]',
+              icon: 'XCircleIcon',
+            },
+            {
+              label: 'Info',
+              count: totalInfo,
+              color: 'text-[#0043ce]',
+              bg: 'bg-[#edf5ff]',
+              border: 'border-[#97c1ff]',
+              icon: 'InformationCircleIcon',
+            },
           ].map((kpi) => (
-            <div key={kpi.label} className={`flex items-center gap-2 px-3 py-2 border ${kpi.bg} ${kpi.border}`}>
+            <div
+              key={kpi.label}
+              className={`flex items-center gap-2 px-3 py-2 border ${kpi.bg} ${kpi.border}`}
+            >
               <Icon name={kpi.icon as any} size={16} className={kpi.color} />
               <div>
-                <p className={`text-lg font-bold font-mono leading-none ${kpi.color}`}>{kpi.count}</p>
+                <p className={`text-lg font-bold font-mono leading-none ${kpi.color}`}>
+                  {kpi.count}
+                </p>
                 <p className="text-2xs text-carbon-gray-50">{kpi.label}</p>
               </div>
             </div>
@@ -499,7 +587,9 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
           Launched: {new Date(launchContext.launchTimestamp).toLocaleTimeString()}
         </span>
         <span className="w-px h-3 bg-carbon-gray-20" />
-        <span className={`flex items-center gap-1.5 font-medium ${launchContext.tokenExpiry > Date.now() ? 'text-[#0e6027]' : 'text-[#da1e28]'}`}>
+        <span
+          className={`flex items-center gap-1.5 font-medium ${launchContext.tokenExpiry > Date.now() ? 'text-[#0e6027]' : 'text-[#da1e28]'}`}
+        >
           <Icon name="KeyIcon" size={12} />
           Token: {launchContext.tokenExpiry > Date.now() ? 'Active' : 'Expired'}
         </span>
@@ -517,7 +607,9 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
                 className="w-full flex items-center justify-between px-4 py-3 hover:bg-carbon-gray-10 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-7 h-7 flex items-center justify-center border ${section.bg} ${section.border}`}>
+                  <div
+                    className={`w-7 h-7 flex items-center justify-center border ${section.bg} ${section.border}`}
+                  >
                     <Icon name={section.icon as any} size={14} className={section.color} />
                   </div>
                   <div className="text-left">
@@ -548,8 +640,12 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
                           <div className="flex items-start gap-3 min-w-0">
                             <StatusBadge status={item.status} />
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-carbon-gray-100">{item.label}</p>
-                              <p className="text-2xs text-carbon-gray-50 mt-0.5">{item.description}</p>
+                              <p className="text-xs font-semibold text-carbon-gray-100">
+                                {item.label}
+                              </p>
+                              <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                                {item.description}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
@@ -566,7 +662,9 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
                           </div>
                         </div>
                         {isItemExpanded && item.detail && (
-                          <div className={`mt-2 ml-[68px] px-3 py-2 border text-2xs font-mono text-carbon-gray-70 ${STATUS_CONFIG[item.status].bg} ${STATUS_CONFIG[item.status].border}`}>
+                          <div
+                            className={`mt-2 ml-[68px] px-3 py-2 border text-2xs font-mono text-carbon-gray-70 ${STATUS_CONFIG[item.status].bg} ${STATUS_CONFIG[item.status].border}`}
+                          >
                             {item.detail}
                             {item.spec && (
                               <span className="ml-3 text-carbon-gray-40">· Ref: {item.spec}</span>
@@ -587,8 +685,9 @@ export default function ComplianceDashboard({ launchContext }: ComplianceDashboa
       <div className="bg-carbon-gray-10 border border-carbon-gray-20 px-4 py-2.5 flex items-center gap-2 text-2xs text-carbon-gray-50">
         <Icon name="ShieldCheckIcon" size={12} className="text-[#6929c4]" />
         <span>
-          Compliance checks run at launch time against FHIR R4 (HL7 v4.0.1), SMART App Launch 2.0, CDS Hooks 2.0, and US Core R4 IG.
-          Results reflect app-layer conformance — server-side validation performed by Cerner FHIR endpoint.
+          Compliance checks run at launch time against FHIR R4 (HL7 v4.0.1), SMART App Launch 2.0,
+          CDS Hooks 2.0, and US Core R4 IG. Results reflect app-layer conformance — server-side
+          validation performed by Cerner FHIR endpoint.
         </span>
       </div>
     </div>

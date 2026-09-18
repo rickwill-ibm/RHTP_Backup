@@ -95,6 +95,93 @@ export function excludingStatement(code: string, statements: string[]): string |
   return undefined;
 }
 
+/** Ordinary connective words, stripped before phrase comparison — never a clinical term, so dropping
+ *  them can't hide a real exclusion match or manufacture a false one. */
+const STOPWORDS = new Set([
+  'the',
+  'a',
+  'an',
+  'of',
+  'or',
+  'and',
+  'with',
+  'without',
+  'to',
+  'for',
+  'including',
+  'but',
+  'not',
+  'limited',
+  'such',
+  'as',
+  'other',
+  'than',
+  'is',
+  'are',
+  'be',
+  'when',
+  'on',
+  'in',
+  'at',
+  'by',
+  'this',
+  'that',
+  'from',
+  'specified',
+]);
+
+function significantWords(text: string): string[] {
+  return (text.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
+    (w) => w.length >= 3 && !STOPWORDS.has(w)
+  );
+}
+
+/** True when `needle` appears in `haystack` as a contiguous, ordered run (token-exact, never a
+ *  substring collision across word boundaries). */
+function containsRun(haystack: string[], needle: string[]): boolean {
+  outer: for (let i = 0; i <= haystack.length - needle.length; i += 1) {
+    for (let j = 0; j < needle.length; j += 1) {
+      if (haystack[i + j] !== needle[j]) continue outer;
+    }
+    return true;
+  }
+  return false;
+}
+
+/** Does a code's OWN descriptor NAME a procedure that a not-medically-necessary statement also names
+ *  — as the same run of 3+ significant words, in order — even though neither the code number nor an
+ *  explicit determination word ("investigational", etc.) appears in the descriptor? This is the gap
+ *  `excludingStatement` and `descriptorFlagsExclusion` both miss: an "unlisted procedure" code exists
+ *  ONLY because the payer has no dedicated CPT/HCPCS code for a technique it separately excludes, so
+ *  the coding appendix's bracket and the exclusion list can never share a code number, and the bracket
+ *  states the procedure's NAME, not a determination ("gastric plication … or mini-gastric bypass
+ *  procedure" — no "investigational" anywhere in it). Two or fewer shared words is never enough on its
+ *  own — "gastric", "procedure", "restrictive" are this domain's ordinary vocabulary and appear in
+ *  nearly every code in a bariatric policy, covered and excluded alike (regression-tested below); three
+ *  or more of them in the SAME ORDER naming the same technique is not a coincidence. Payer-agnostic —
+ *  it reads word order, never any tenant's specific phrasing. */
+export function descriptorNamesExcludedProcedure(
+  desc: string | undefined,
+  statements: string[]
+): string | undefined {
+  if (!desc) return undefined;
+  const descWords = significantWords(desc);
+  for (const s of statements) {
+    // Unlike `excludingStatement`'s code-number match, this does NOT gate on `readsAsExclusion(s)`:
+    // `notMedicallyNecessary[]` is already section-scoped by the extractor (every entry is a line
+    // lifted from under a "Not Medically Necessary" heading — see `criteria.ts`), and a lettered
+    // sub-item ("D. Laparoscopic gastric plication …") names the excluded technique WITHOUT repeating
+    // the determination wording, which lives once in the list's own intro sentence as a SEPARATE
+    // array entry. Gating here would silently skip every sub-item and catch nothing.
+    if (!s) continue;
+    const stmtWords = significantWords(s);
+    for (let i = 0; i <= descWords.length - 3; i += 1) {
+      if (containsRun(stmtWords, descWords.slice(i, i + 3))) return s;
+    }
+  }
+  return undefined;
+}
+
 /**
  * Route every extracted guideline code. Deterministic and pure. Codes named in an explicit
  * exclusion/investigational statement route `excluded` (with provenance); all others route `assign`.
@@ -110,8 +197,15 @@ export function routeGuidelineCodes(review: PolicyReview): Record<string, Routin
     // subject, so no token match is needed; the descriptor IS the statement. This is the signal the
     // prose-only matcher missed, letting a not-medically-necessary code default to covered.
     const descExcludes = !stmt && descriptorFlagsExclusion(c.description);
-    if (stmt || descExcludes) {
-      const evidence = stmt ?? c.description;
+    // A third signal: the descriptor names the SAME procedure an exclusion statement names, without
+    // repeating a determination word (see `descriptorNamesExcludedProcedure`) — the "unlisted code,
+    // no shared code number, no shared determination word" case.
+    const namedExcluded =
+      !stmt && !descExcludes
+        ? descriptorNamesExcludedProcedure(c.description, statements)
+        : undefined;
+    if (stmt || descExcludes || namedExcluded) {
+      const evidence = stmt ?? namedExcluded ?? c.description;
       out[c.code] = {
         bucket: 'excluded',
         label: LABEL.excluded,

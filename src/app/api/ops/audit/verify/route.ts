@@ -28,10 +28,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const principal = getPrincipal(await getSessionAuthContext().catch(() => null));
   // Ops OR auditor may verify the trail (auditor is the compliance reviewer role).
   if (!isOpsPrincipal(principal) && principal.role !== 'auditor') {
-    return NextResponse.json(ooError('Audit verification requires an ops or auditor role', 'forbidden'), {
-      status: 403,
-      headers: { [CORRELATION_HEADER]: correlationId },
-    });
+    return NextResponse.json(
+      ooError('Audit verification requires an ops or auditor role', 'forbidden'),
+      {
+        status: 403,
+        headers: { [CORRELATION_HEADER]: correlationId },
+      }
+    );
   }
 
   try {
@@ -46,10 +49,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       outcome: verification.ok ? 'success' : 'failure',
       detail: `intact=${verification.ok}; count=${verification.count}${verification.ok ? '' : `; brokenAt=${verification.brokenAt}`}`,
     });
-    return NextResponse.json({ ...verification, head }, {
-      status: verification.ok ? 200 : 409,
-      headers: { [CORRELATION_HEADER]: correlationId },
-    });
+    return NextResponse.json(
+      { ...verification, head },
+      {
+        status: verification.ok ? 200 : 409,
+        headers: { [CORRELATION_HEADER]: correlationId },
+      }
+    );
   } catch (err) {
     const detail = err instanceof Error ? err.name : 'exception';
     const status = detail.includes('NotConfigured') ? 503 : 500;

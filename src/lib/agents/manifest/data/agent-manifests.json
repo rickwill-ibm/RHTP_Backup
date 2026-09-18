@@ -46,6 +46,21 @@
       "escalationPolicyRef": "default",
       "phiPosture": "references-only",
       "owningModule": "src/lib/agents/pa"
+    },
+    {
+      "id": "revenue-cycle-agent",
+      "version": "1.0.0",
+      "purpose": "Draft an underpayment recovery appeal under a human gate, then submit it ONLY after a qualified-human decision: read reconciliation context (references-only), write the recovery DRAFT via its own governed evidence.append tool, propose it HITL, and on a qualified-human APPROVE run the governed claim.submit-appeal in the post-approval branch. Never auto-submits — submission requires a qualified-human decision at every tier (no auto-submit path); a reject is terminal with no submission (Wave-4, evolving Wave-1 FIX-1).",
+      "toolAllowlist": [
+        "reconciliation.read",
+        "evidence.append",
+        "claim.submit-appeal",
+        "work-queue.submit"
+      ],
+      "autonomyTier": "HITL",
+      "escalationPolicyRef": "default",
+      "phiPosture": "references-only",
+      "owningModule": "src/lib/agents/revenueCycle"
     }
   ]
 }

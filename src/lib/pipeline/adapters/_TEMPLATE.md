@@ -15,20 +15,20 @@ persona), AI-CODING-CONVENTIONS v2 (≤400 lines src / ≤500 tests, clock injec
 
 ## Files to create (per domain `<d>`)
 
-| Purpose | Path |
-|---|---|
-| Pipeline adapter | `src/lib/pipeline/adapters/<d>.ts` |
-| Graph mapping spec | `src/lib/graph/mapping/<d>.ts` |
-| Source fixture (synthetic) | `tests/**/fixtures/<d>.<ext>` |
-| Adapter + tier + e2e tests | `tests/pipeline/<d>.test.ts` |
-| Projection + lens tests | `tests/graph/<d>.test.ts` |
+| Purpose                    | Path                               |
+| -------------------------- | ---------------------------------- |
+| Pipeline adapter           | `src/lib/pipeline/adapters/<d>.ts` |
+| Graph mapping spec         | `src/lib/graph/mapping/<d>.ts`     |
+| Source fixture (synthetic) | `tests/**/fixtures/<d>.<ext>`      |
+| Adapter + tier + e2e tests | `tests/pipeline/<d>.test.ts`       |
+| Projection + lens tests    | `tests/graph/<d>.test.ts`          |
 
 ## Registries to touch (exactly two)
 
-| Registry | File | Edit |
-|---|---|---|
-| Pipeline adapter registry | `src/lib/pipeline/index.ts` | `export { <d>Adapter } from './adapters/<d>';` |
-| Graph mapping registry | `src/lib/graph/mapping/index.ts` | import `<d>Spec`, add it to `MAPPING_SPECS` |
+| Registry                  | File                             | Edit                                           |
+| ------------------------- | -------------------------------- | ---------------------------------------------- |
+| Pipeline adapter registry | `src/lib/pipeline/index.ts`      | `export { <d>Adapter } from './adapters/<d>';` |
+| Graph mapping registry    | `src/lib/graph/mapping/index.ts` | import `<d>Spec`, add it to `MAPPING_SPECS`    |
 
 Plus, when the domain adds a new canonical **domain id** or **wire format**, widen
 the unions in `src/lib/pipeline/types.ts` (`WpcDomain`, `SourceFormat`). The
@@ -40,6 +40,7 @@ read the registries and never name a domain, so nothing else changes.
 ## The 8-step checklist
 
 ### 1. Source parse (fixture -> raw records)
+
 Add a synthetic, PHI-safe fixture under `tests/**/fixtures/`. The adapter's
 `parse(payload: string): RawRecord<Raw>[]` splits it into raw records, each with a
 PHI-free `sourceRef` (a row index, control id, or resource id — never a name).
@@ -53,6 +54,7 @@ exercised.
 > `{ kind: 'request' | 'dispense', resource }`. `sourceRef` = the resource id.
 
 ### 2. Normalize to the canonical domain type
+
 `normalize(raw, deps): NormalizedRecord`. Anchor identity through the injected seam
 — `deps.resolveIdentity(sourceMemberId, { feed })` — and use the ANCHORED
 `memberId`, never the raw source id (§1.2). **When the source carries demographic
@@ -78,6 +80,7 @@ there is no separate per-domain types file).
 > `MedicationDispensePayload` live in `adapters/medication.ts`.
 
 ### 3. Assign C9 tier + provenance
+
 Set `tier` per the C9 tier grammar and a `provenance` string naming the
 authoritative source. Coded clinical/record domains are **T1**.
 
@@ -85,6 +88,7 @@ authoritative source. Coded clinical/record domains are **T1**.
 > and `pharmacy-dispense` (dispensed).
 
 ### 4. Segmentation label if sensitive
+
 Do NOT label in the adapter. Attach PHI-safe segmentation **hints** to the payload
 (`payload.segmentationHints = ['part2-sud' | 'behavioral-health' | ...]`); the
 shared `applySegmentation` in `runTransform` maps hints to durable labels via the
@@ -97,6 +101,7 @@ so projectors drop Part 2 by envelope inspection alone (C10.1). Set
 > consent object is emitted uniformly.
 
 ### 5. Map to graph mutations (node/edge types, dated, causal-with-provenance)
+
 In `src/lib/graph/mapping/<d>.ts` write `<d>Spec` implementing `MappingSpec`:
 `matches(eventType)` claims `<domain>.*`; `toMutations(event, deps)` emits the
 neutral instruction set only (no SQL/Cypher). Always start with `memberNode(event)`
@@ -107,6 +112,7 @@ basis)`** with PHI-safe provenance. Export the pinned node-kind and edge-type
 constants for step 7.
 
 > **medications**:
+>
 > - `(Member)-[:PRESCRIBED_FOR {from authoredOn}]->(Medication)` — associative, dated.
 > - `(MedicationDispense)-[:DISPENSED_UNDER {causal, asserter, basis}]->(Medication)`
 >   — the pharmacy asserts this fill satisfied that order, so causal with
@@ -115,6 +121,7 @@ constants for step 7.
 >   `PRESCRIBED_FOR`, `DISPENSED_UNDER`.
 
 ### 6. Register in BOTH registries
+
 `export { <d>Adapter }` from `src/lib/pipeline/index.ts`; import `<d>Spec` and add
 it to `MAPPING_SPECS` in `src/lib/graph/mapping/index.ts`. Widen the `types.ts`
 unions if a new domain id or format was introduced.
@@ -124,6 +131,7 @@ unions if a new domain id or format was introduced.
 > `'fhir-json'`.
 
 ### 7. Tests: normalization + projection + lens read + C9 tier + namespace pinning
+
 - **Adapter normalization** (`tests/pipeline/<d>.test.ts`): fixture -> normalized;
   assert `domain`, `resourceType`, `eventType`, anchored `memberId` (`/^mem-/`,
   never the raw id), payload has no PHI, and the malformed record quarantines with
@@ -141,12 +149,14 @@ unions if a new domain id or format was introduced.
   domain's spec.
 
 ### 8. Update the C9 coverage matrix row
+
 Add/flip the domain's row in the wave report's C9 coverage matrix (domain id,
 tier, adapter, mapping, node/edge types, arrival mode) and bump the `n/20` count.
 
 ---
 
 ## Definition of done (every domain)
+
 `npx tsc --noEmit` = 0 · `npx vitest run` fully green (nothing prior breaks) ·
 `bash check-file-sizes.sh` PASS · ≤400 lines/src file, ≤500/test · clock injected
 (deterministic) · the namespace pinning test passes · generic + synthetic, no

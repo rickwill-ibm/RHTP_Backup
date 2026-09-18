@@ -9,7 +9,13 @@
  *
  * C9.2 yield: CBO/HMIS flat file -> SDOH T1 (community-reported provenance).
  */
-import type { DomainAdapter, NormalizedRecord, PipelineDeps, RawRecord, ValidationResult } from '../types';
+import type {
+  DomainAdapter,
+  NormalizedRecord,
+  PipelineDeps,
+  RawRecord,
+  ValidationResult,
+} from '../types';
 
 interface SdohRow {
   fields: Record<string, string>;
@@ -20,7 +26,10 @@ const SOURCE = { system: 'cbo-sftp', feed: 'sdoh-flat-file' } as const;
 const REQUIRED = ['member_source_id', 'domain', 'zcode'] as const;
 
 function parse(payload: string): RawRecord<SdohRow>[] {
-  const lines = payload.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = payload
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length === 0) return [];
   const header = lines[0].split(',').map((h) => h.trim());
   return lines.slice(1).map((line, i) => {
@@ -28,7 +37,10 @@ function parse(payload: string): RawRecord<SdohRow>[] {
     const fields: Record<string, string> = {};
     header.forEach((h, col) => (fields[h] = cells[col] ?? ''));
     const memberSourceId = fields['member_source_id'] || `row-${i + 1}`;
-    return { sourceRef: `${memberSourceId}:${fields['domain'] || `r${i + 1}`}`, data: { fields, rowIndex: i + 1 } };
+    return {
+      sourceRef: `${memberSourceId}:${fields['domain'] || `r${i + 1}`}`,
+      data: { fields, rowIndex: i + 1 },
+    };
   });
 }
 
@@ -38,7 +50,8 @@ function validate(raw: RawRecord<SdohRow>): ValidationResult {
     if (!raw.data.fields[field]) issues.push({ reasonCode: `missing-${field}`, fieldPath: field });
   }
   const z = raw.data.fields['zcode'];
-  if (z && !/^Z\d{2}(\.\d+)?$/.test(z)) issues.push({ reasonCode: 'malformed-zcode', fieldPath: 'zcode' });
+  if (z && !/^Z\d{2}(\.\d+)?$/.test(z))
+    issues.push({ reasonCode: 'malformed-zcode', fieldPath: 'zcode' });
   return { ok: issues.length === 0, issues };
 }
 
@@ -58,8 +71,10 @@ function normalize(raw: RawRecord<SdohRow>, deps: PipelineDeps): NormalizedRecor
     provenance: 'community-reported',
   };
   const program = (f['program'] ?? '').toLowerCase();
-  if (program.includes('sud') || program.includes('substance')) payload.segmentationHints = ['part2-sud'];
-  else if (program.includes('behavioral') || program.includes('mental')) payload.segmentationHints = ['behavioral-health'];
+  if (program.includes('sud') || program.includes('substance'))
+    payload.segmentationHints = ['part2-sud'];
+  else if (program.includes('behavioral') || program.includes('mental'))
+    payload.segmentationHints = ['behavioral-health'];
   return {
     domain: 'sdoh',
     memberId,
@@ -71,7 +86,9 @@ function normalize(raw: RawRecord<SdohRow>, deps: PipelineDeps): NormalizedRecor
     provenance: 'community-reported',
     consent: { part2Restricted: false, segmentLabels: [] },
     source: SOURCE,
-    occurredAt: f['screen_date'] ? `${f['screen_date']}T00:00:00Z` : new Date(deps.now()).toISOString(),
+    occurredAt: f['screen_date']
+      ? `${f['screen_date']}T00:00:00Z`
+      : new Date(deps.now()).toISOString(),
     payload,
   };
 }

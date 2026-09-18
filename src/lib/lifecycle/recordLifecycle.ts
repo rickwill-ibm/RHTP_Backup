@@ -64,12 +64,22 @@ export interface ClassifyResult {
 export function classify(prior: RecordState | null, input: ClassifyInput): ClassifyResult {
   if (input.status === 'entered-in-error') {
     const already = prior?.status === 'entered-in-error';
-    return { disposition: already ? 'revoid' : 'void', reproject: false, retract: !already, version: (prior?.version ?? 0) + (already ? 0 : 1) };
+    return {
+      disposition: already ? 'revoid' : 'void',
+      reproject: false,
+      retract: !already,
+      version: (prior?.version ?? 0) + (already ? 0 : 1),
+    };
   }
   if (!prior) return { disposition: 'new', reproject: true, retract: false, version: 1 };
   if (prior.status === 'entered-in-error') {
     // resurrecting a voided key with new active content is a correction
-    return { disposition: 'correction', reproject: true, retract: false, version: prior.version + 1 };
+    return {
+      disposition: 'correction',
+      reproject: true,
+      retract: false,
+      version: prior.version + 1,
+    };
   }
   if (prior.hash === input.hash) {
     return { disposition: 'unchanged', reproject: false, retract: false, version: prior.version };
@@ -86,7 +96,9 @@ export interface RecordLifecycleStore {
 }
 
 /** In-memory lifecycle store — the demo/mock default. */
-export function createMemoryRecordLifecycleStore(id = 'mock-record-lifecycle'): RecordLifecycleStore {
+export function createMemoryRecordLifecycleStore(
+  id = 'mock-record-lifecycle'
+): RecordLifecycleStore {
   const states = new Map<string, RecordState>();
   return {
     id,
@@ -95,7 +107,13 @@ export function createMemoryRecordLifecycleStore(id = 'mock-record-lifecycle'): 
       const result = classify(prior, input);
       // persist the new state (a no-op disposition still refreshes updatedAt)
       const status: RecordStatus = input.status;
-      states.set(input.key, { key: input.key, hash: input.hash, status, version: result.version, updatedAtMs: input.nowMs });
+      states.set(input.key, {
+        key: input.key,
+        hash: input.hash,
+        status,
+        version: result.version,
+        updatedAtMs: input.nowMs,
+      });
       return result;
     },
     async current(key) {

@@ -9,9 +9,36 @@ const HOUSEHOLDS = [
     id: 'hh-001',
     address: '412 Cottonwood Lane, Bennett County, SD 57716',
     members: [
-      { id: 'PAT-0006', name: 'Maria Redhawk', role: 'Head of Household', age: 52, riskTier: 'HIGH', openGaps: 8, activePrograms: 3, lastContact: '2 days ago' },
-      { id: 'PAT-0061', name: 'Thomas Redhawk', role: 'Spouse', age: 55, riskTier: 'MEDIUM', openGaps: 3, activePrograms: 1, lastContact: '14 days ago' },
-      { id: 'PAT-0062', name: 'Lily Redhawk', role: 'Dependent', age: 16, riskTier: 'LOW', openGaps: 1, activePrograms: 1, lastContact: '30 days ago' },
+      {
+        id: 'PAT-0006',
+        name: 'Maria Redhawk',
+        role: 'Head of Household',
+        age: 52,
+        riskTier: 'HIGH',
+        openGaps: 8,
+        activePrograms: 3,
+        lastContact: '2 days ago',
+      },
+      {
+        id: 'PAT-0061',
+        name: 'Thomas Redhawk',
+        role: 'Spouse',
+        age: 55,
+        riskTier: 'MEDIUM',
+        openGaps: 3,
+        activePrograms: 1,
+        lastContact: '14 days ago',
+      },
+      {
+        id: 'PAT-0062',
+        name: 'Lily Redhawk',
+        role: 'Dependent',
+        age: 16,
+        riskTier: 'LOW',
+        openGaps: 1,
+        activePrograms: 1,
+        lastContact: '30 days ago',
+      },
     ],
     sharedSdoh: ['Transportation Barrier', 'Food Insecurity', 'Tribal Land — Remote Access'],
     householdRisk: 'HIGH',
@@ -25,8 +52,26 @@ const HOUSEHOLDS = [
     id: 'hh-002',
     address: '88 Prairie View Dr, Jackson County, MO 64050',
     members: [
-      { id: 'PAT-0042', name: 'Dorothy Simmons', role: 'Head of Household', age: 68, riskTier: 'HIGH', openGaps: 5, activePrograms: 2, lastContact: '1 day ago' },
-      { id: 'PAT-0421', name: 'Harold Simmons', role: 'Spouse', age: 71, riskTier: 'HIGH', openGaps: 7, activePrograms: 2, lastContact: '3 days ago' },
+      {
+        id: 'PAT-0042',
+        name: 'Dorothy Simmons',
+        role: 'Head of Household',
+        age: 68,
+        riskTier: 'HIGH',
+        openGaps: 5,
+        activePrograms: 2,
+        lastContact: '1 day ago',
+      },
+      {
+        id: 'PAT-0421',
+        name: 'Harold Simmons',
+        role: 'Spouse',
+        age: 71,
+        riskTier: 'HIGH',
+        openGaps: 7,
+        activePrograms: 2,
+        lastContact: '3 days ago',
+      },
     ],
     sharedSdoh: ['Social Isolation', 'Medication Adherence Risk'],
     householdRisk: 'HIGH',
@@ -40,10 +85,46 @@ const HOUSEHOLDS = [
     id: 'hh-003',
     address: '2201 Elm Street, Clay County, MO 64116',
     members: [
-      { id: 'PAT-0031', name: 'Rosa Gutierrez', role: 'Head of Household', age: 34, riskTier: 'MEDIUM', openGaps: 2, activePrograms: 2, lastContact: '5 days ago' },
-      { id: 'PAT-0311', name: 'Carlos Gutierrez', role: 'Spouse', age: 37, riskTier: 'LOW', openGaps: 0, activePrograms: 0, lastContact: '45 days ago' },
-      { id: 'PAT-0312', name: 'Sofia Gutierrez', role: 'Dependent', age: 8, riskTier: 'LOW', openGaps: 1, activePrograms: 1, lastContact: '10 days ago' },
-      { id: 'PAT-0313', name: 'Miguel Gutierrez', role: 'Dependent', age: 5, riskTier: 'LOW', openGaps: 0, activePrograms: 1, lastContact: '10 days ago' },
+      {
+        id: 'PAT-0031',
+        name: 'Rosa Gutierrez',
+        role: 'Head of Household',
+        age: 34,
+        riskTier: 'MEDIUM',
+        openGaps: 2,
+        activePrograms: 2,
+        lastContact: '5 days ago',
+      },
+      {
+        id: 'PAT-0311',
+        name: 'Carlos Gutierrez',
+        role: 'Spouse',
+        age: 37,
+        riskTier: 'LOW',
+        openGaps: 0,
+        activePrograms: 0,
+        lastContact: '45 days ago',
+      },
+      {
+        id: 'PAT-0312',
+        name: 'Sofia Gutierrez',
+        role: 'Dependent',
+        age: 8,
+        riskTier: 'LOW',
+        openGaps: 1,
+        activePrograms: 1,
+        lastContact: '10 days ago',
+      },
+      {
+        id: 'PAT-0313',
+        name: 'Miguel Gutierrez',
+        role: 'Dependent',
+        age: 5,
+        riskTier: 'LOW',
+        openGaps: 0,
+        activePrograms: 1,
+        lastContact: '10 days ago',
+      },
     ],
     sharedSdoh: ['Childcare Barrier', 'Language Access (Spanish)'],
     householdRisk: 'MEDIUM',
@@ -89,12 +170,15 @@ export default function HouseholdViewPage() {
         ).length;
         if (count > 0) setFhirPatientCount(count);
       })
-      .catch(() => { /* non-fatal */ });
+      .catch(() => {
+        /* non-fatal */
+      });
   }, []);
 
-  const filteredHouseholds = HOUSEHOLDS.filter((hh) =>
-    hh.address.toLowerCase().includes(search.toLowerCase()) ||
-    hh.members.some((m) => m.name.toLowerCase().includes(search.toLowerCase()))
+  const filteredHouseholds = HOUSEHOLDS.filter(
+    (hh) =>
+      hh.address.toLowerCase().includes(search.toLowerCase()) ||
+      hh.members.some((m) => m.name.toLowerCase().includes(search.toLowerCase()))
   );
 
   const selected = HOUSEHOLDS.find((hh) => hh.id === selectedHousehold);
@@ -112,18 +196,49 @@ export default function HouseholdViewPage() {
       {/* KPI Strip */}
       {fhirPatientCount !== null && (
         <div className="flex items-center gap-2 mb-3 px-1">
-          <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">FHIR R4</span>
-          <span className="text-xs text-[#0e6027]">{fhirPatientCount} patients verified in HAPI FHIR</span>
+          <span className="text-xs font-semibold px-1.5 py-0.5 bg-[#defbe6] text-[#0e6027] border border-[#a7f0ba]">
+            FHIR R4
+          </span>
+          <span className="text-xs text-[#0e6027]">
+            {fhirPatientCount} patients verified in HAPI FHIR
+          </span>
         </div>
       )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Households', value: totalHouseholds.toString(), icon: 'HomeIcon', color: 'text-[#0043ce]', bg: 'bg-[#d0e2ff]' },
-          { label: 'High Risk Households', value: highRiskHouseholds.toString(), icon: 'ExclamationTriangleIcon', color: 'text-[#da1e28]', bg: 'bg-[#fff1f1]' },
-          { label: 'Total Members', value: totalMembers.toString(), icon: 'UserGroupIcon', color: 'text-[#198038]', bg: 'bg-[#defbe6]' },
-          { label: 'Open Care Gaps', value: totalGaps.toString(), icon: 'ClipboardDocumentListIcon', color: 'text-[#b45309]', bg: 'bg-[#fdf6dd]' },
+          {
+            label: 'Households',
+            value: totalHouseholds.toString(),
+            icon: 'HomeIcon',
+            color: 'text-[#0043ce]',
+            bg: 'bg-[#d0e2ff]',
+          },
+          {
+            label: 'High Risk Households',
+            value: highRiskHouseholds.toString(),
+            icon: 'ExclamationTriangleIcon',
+            color: 'text-[#da1e28]',
+            bg: 'bg-[#fff1f1]',
+          },
+          {
+            label: 'Total Members',
+            value: totalMembers.toString(),
+            icon: 'UserGroupIcon',
+            color: 'text-[#198038]',
+            bg: 'bg-[#defbe6]',
+          },
+          {
+            label: 'Open Care Gaps',
+            value: totalGaps.toString(),
+            icon: 'ClipboardDocumentListIcon',
+            color: 'text-[#b45309]',
+            bg: 'bg-[#fdf6dd]',
+          },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-white border border-carbon-gray-20 p-4 flex items-center gap-3">
+          <div
+            key={kpi.label}
+            className="bg-white border border-carbon-gray-20 p-4 flex items-center gap-3"
+          >
             <div className={`w-10 h-10 ${kpi.bg} flex items-center justify-center flex-shrink-0`}>
               <Icon name={kpi.icon as any} size={20} className={kpi.color} />
             </div>
@@ -141,7 +256,11 @@ export default function HouseholdViewPage() {
           <div className="px-4 py-3 border-b border-carbon-gray-20">
             <p className="text-sm font-semibold text-carbon-gray-100 mb-2">Households</p>
             <div className="relative">
-              <Icon name="MagnifyingGlassIcon" size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-50" />
+              <Icon
+                name="MagnifyingGlassIcon"
+                size={14}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-carbon-gray-50"
+              />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -162,16 +281,32 @@ export default function HouseholdViewPage() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-carbon-gray-100 truncate">{hh.address}</p>
-                      <p className="text-2xs text-carbon-gray-50 mt-0.5">{hh.members.length} members · {hh.totalOpenGaps} open gaps</p>
+                      <p className="text-xs font-semibold text-carbon-gray-100 truncate">
+                        {hh.address}
+                      </p>
+                      <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                        {hh.members.length} members · {hh.totalOpenGaps} open gaps
+                      </p>
                     </div>
-                    <span className="px-1.5 py-0.5 text-2xs font-semibold flex-shrink-0" style={{ background: rc.bg, color: rc.text }}>{hh.householdRisk}</span>
+                    <span
+                      className="px-1.5 py-0.5 text-2xs font-semibold flex-shrink-0"
+                      style={{ background: rc.bg, color: rc.text }}
+                    >
+                      {hh.householdRisk}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {hh.members.slice(0, 3).map((m) => (
-                      <span key={m.id} className="text-2xs bg-carbon-gray-10 text-carbon-gray-70 px-1.5 py-0.5">{m.name.split(' ')[0]}</span>
+                      <span
+                        key={m.id}
+                        className="text-2xs bg-carbon-gray-10 text-carbon-gray-70 px-1.5 py-0.5"
+                      >
+                        {m.name.split(' ')[0]}
+                      </span>
                     ))}
-                    {hh.members.length > 3 && <span className="text-2xs text-carbon-gray-50">+{hh.members.length - 3}</span>}
+                    {hh.members.length > 3 && (
+                      <span className="text-2xs text-carbon-gray-50">+{hh.members.length - 3}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -189,25 +324,69 @@ export default function HouseholdViewPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <Icon name="HomeIcon" size={16} className="text-[#0043ce]" />
                     <p className="text-sm font-semibold text-carbon-gray-100">{selected.address}</p>
-                    <span className="px-1.5 py-0.5 text-2xs font-semibold" style={{ background: RISK_CONFIG[selected.householdRisk].bg, color: RISK_CONFIG[selected.householdRisk].text }}>{selected.householdRisk} RISK</span>
+                    <span
+                      className="px-1.5 py-0.5 text-2xs font-semibold"
+                      style={{
+                        background: RISK_CONFIG[selected.householdRisk].bg,
+                        color: RISK_CONFIG[selected.householdRisk].text,
+                      }}
+                    >
+                      {selected.householdRisk} RISK
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-4 text-xs text-carbon-gray-50">
-                    <span>Coverage: <span className="font-medium text-carbon-gray-70">{selected.insuranceCoverage}</span></span>
-                    <span>Income: <span className="font-medium text-carbon-gray-70">{selected.incomeLevel}</span></span>
-                    <span>Last Assessment: <span className="font-medium text-carbon-gray-70">{selected.lastHouseholdAssessment}</span></span>
+                    <span>
+                      Coverage:{' '}
+                      <span className="font-medium text-carbon-gray-70">
+                        {selected.insuranceCoverage}
+                      </span>
+                    </span>
+                    <span>
+                      Income:{' '}
+                      <span className="font-medium text-carbon-gray-70">
+                        {selected.incomeLevel}
+                      </span>
+                    </span>
+                    <span>
+                      Last Assessment:{' '}
+                      <span className="font-medium text-carbon-gray-70">
+                        {selected.lastHouseholdAssessment}
+                      </span>
+                    </span>
                   </div>
                 </div>
                 <div className="flex gap-4 text-center flex-shrink-0">
-                  <div><p className="text-xl font-bold text-carbon-gray-100">{selected.totalOpenGaps}</p><p className="text-2xs text-carbon-gray-50">Open Gaps</p></div>
-                  <div><p className="text-xl font-bold text-carbon-gray-100">{selected.activeInterventions}</p><p className="text-2xs text-carbon-gray-50">Interventions</p></div>
+                  <div>
+                    <p className="text-xl font-bold text-carbon-gray-100">
+                      {selected.totalOpenGaps}
+                    </p>
+                    <p className="text-2xs text-carbon-gray-50">Open Gaps</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-carbon-gray-100">
+                      {selected.activeInterventions}
+                    </p>
+                    <p className="text-2xs text-carbon-gray-50">Interventions</p>
+                  </div>
                 </div>
               </div>
               {/* Shared SDOH */}
               <div className="mt-3 pt-3 border-t border-carbon-gray-10">
-                <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-2">Shared SDOH Factors</p>
+                <p className="text-2xs font-semibold text-carbon-gray-50 uppercase tracking-wide mb-2">
+                  Shared SDOH Factors
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {selected.sharedSdoh.map((s) => (
-                    <span key={s} className="px-2 py-0.5 text-2xs font-semibold" style={{ background: (SDOH_COLORS[s] || '#4d5358') + '22', color: SDOH_COLORS[s] || '#4d5358' }}>{s}</span>
+                    <span
+                      key={s}
+                      className="px-2 py-0.5 text-2xs font-semibold"
+                      style={{
+                        background: (SDOH_COLORS[s] || '#4d5358') + '22',
+                        color: SDOH_COLORS[s] || '#4d5358',
+                      }}
+                    >
+                      {s}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -228,20 +407,33 @@ export default function HouseholdViewPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-carbon-gray-100">{member.name}</span>
+                          <span className="text-sm font-semibold text-carbon-gray-100">
+                            {member.name}
+                          </span>
                           <span className="text-xs text-carbon-gray-50">{member.role}</span>
                           <span className="text-xs text-carbon-gray-50">Age {member.age}</span>
-                          <span className="px-1.5 py-0.5 text-2xs font-semibold" style={{ background: rc.bg, color: rc.text }}>{member.riskTier}</span>
+                          <span
+                            className="px-1.5 py-0.5 text-2xs font-semibold"
+                            style={{ background: rc.bg, color: rc.text }}
+                          >
+                            {member.riskTier}
+                          </span>
                         </div>
-                        <p className="text-2xs text-carbon-gray-50 mt-0.5">{member.id} · Last contact: {member.lastContact}</p>
+                        <p className="text-2xs text-carbon-gray-50 mt-0.5">
+                          {member.id} · Last contact: {member.lastContact}
+                        </p>
                       </div>
                       <div className="flex gap-4 text-center flex-shrink-0">
                         <div>
-                          <p className="text-sm font-bold text-carbon-gray-100">{member.openGaps}</p>
+                          <p className="text-sm font-bold text-carbon-gray-100">
+                            {member.openGaps}
+                          </p>
                           <p className="text-2xs text-carbon-gray-50">Gaps</p>
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-carbon-gray-100">{member.activePrograms}</p>
+                          <p className="text-sm font-bold text-carbon-gray-100">
+                            {member.activePrograms}
+                          </p>
                           <p className="text-2xs text-carbon-gray-50">Programs</p>
                         </div>
                       </div>

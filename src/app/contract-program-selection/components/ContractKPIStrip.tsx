@@ -11,10 +11,34 @@ export default function ContractKPIStrip() {
   const below = mockContracts?.filter((c) => c?.performanceStatus === 'Below Target')?.length;
 
   const kpis = [
-    { key: 'kpi-lives', label: 'Total Attributed Lives', value: totalLives?.toLocaleString(), sub: `${mockContracts?.length} active contracts`, color: 'text-carbon-gray-100' },
-    { key: 'kpi-alerts', label: 'Active Utilization Alerts', value: totalAlerts?.toString(), sub: 'Across all contracts', color: 'text-[#da1e28]' },
-    { key: 'kpi-hcc', label: 'HCC Revenue at Risk', value: `$${(totalHCCRisk / 1000000)?.toFixed(2)}M`, sub: 'Unconfirmed suspects', color: 'text-[#b45309]' },
-    { key: 'kpi-gap', label: 'Avg Gap Closure Rate', value: `${(avgGap * 100)?.toFixed(1)}%`, sub: 'Portfolio average', color: avgGap >= 0.75 ? 'text-[#24a148]' : 'text-[#b45309]' },
+    {
+      key: 'kpi-lives',
+      label: 'Total Attributed Lives',
+      value: totalLives?.toLocaleString(),
+      sub: `${mockContracts?.length} active contracts`,
+      color: 'text-carbon-gray-100',
+    },
+    {
+      key: 'kpi-alerts',
+      label: 'Active Utilization Alerts',
+      value: totalAlerts?.toString(),
+      sub: 'Across all contracts',
+      color: 'text-[#da1e28]',
+    },
+    {
+      key: 'kpi-hcc',
+      label: 'HCC Revenue at Risk',
+      value: `$${(totalHCCRisk / 1000000)?.toFixed(2)}M`,
+      sub: 'Unconfirmed suspects',
+      color: 'text-[#b45309]',
+    },
+    {
+      key: 'kpi-gap',
+      label: 'Avg Gap Closure Rate',
+      value: `${(avgGap * 100)?.toFixed(1)}%`,
+      sub: 'Portfolio average',
+      color: avgGap >= 0.75 ? 'text-[#24a148]' : 'text-[#b45309]',
+    },
     { key: 'kpi-status', label: 'Contract Performance', value: '', sub: '', color: '' },
   ];
 
@@ -43,7 +67,9 @@ export default function ContractKPIStrip() {
           ) : (
             <div key={k?.key} className="px-6 py-4">
               <p className="carbon-label">{k?.label}</p>
-              <p className={`text-2xl font-bold tabular-nums mt-1 font-mono ${k?.color}`}>{k?.value}</p>
+              <p className={`text-2xl font-bold tabular-nums mt-1 font-mono ${k?.color}`}>
+                {k?.value}
+              </p>
               <p className="text-xs text-carbon-gray-50 mt-0.5">{k?.sub}</p>
             </div>
           )

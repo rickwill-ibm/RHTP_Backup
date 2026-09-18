@@ -12,7 +12,12 @@
  * alone is not a live MPI, so the default (unwired) resolver still fails loud.
  */
 import type { IdentityResolver } from '@/lib/pipeline/types';
-import { buildPdqmRequest, buildPixmRequest, parsePdqmResponse, parsePixmResponse } from './fhirPixm';
+import {
+  buildPdqmRequest,
+  buildPixmRequest,
+  parsePdqmResponse,
+  parsePixmResponse,
+} from './fhirPixm';
 import {
   ExternalEmpiNotConfiguredError,
   type ExternalIdentityResolver,
@@ -52,7 +57,7 @@ function requireTransport(capability: string, transport?: FhirTransport): FhirTr
  */
 export function createPixmPdqmResolver(
   config?: PixmPdqmConfig,
-  transport?: FhirTransport,
+  transport?: FhirTransport
 ): ExternalIdentityResolver {
   return {
     id: 'external-pixm-pdqm-fhir',

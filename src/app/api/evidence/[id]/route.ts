@@ -17,10 +17,21 @@ import { canReadMemberData } from '@/lib/authz/guard';
 import { getPrincipal, canAccessMember, purposeForRole } from '@/lib/authz/principal';
 import { audit } from '@/lib/server/audit';
 import { getEvidenceStore } from '@/lib/evidence/store';
+import { loadVerifiedRecord, type StoredIntegrity, type EvidenceRecord } from '@/lib/evidence';
+import { getSigningKeyLoader } from '@/lib/dataSources/signingKey';
 import { validateEvidenceId } from '@/lib/goldenThread/validate';
 import { devMockEnabled } from '@/lib/server/devStubs';
 import { getPatientById } from '@/lib/patientRegistry';
 import { getProviderAccessConsentStore } from '@/lib/consent/providerAccessOptOut';
+import { flag } from '@/lib/flags/flags';
+import { nowIso } from '@/lib/clock';
+import { projectForParty, type LedgerParty } from '@/lib/evidence/partyView';
+import { deriveEscalationSignals } from '@/lib/goldenThread/escalationSignals';
+import { routeEscalation } from '@/lib/goldenThread/escalationRouter';
+import { runAnalysis } from '@/lib/goldenThread/ledgerAnalytics';
+import { getAgentManifest } from '@/lib/agents/manifest';
+import { REVENUE_CYCLE_AGENT_ID } from '@/lib/agents/revenueCycle';
+import { createMemoryProposalInbox, loadEscalationPolicies } from '@/lib/agentRuntime';
 
 /**
  * Parse the member id out of an evidence id (ev-{memberId}-{cpt}-{epoch}).
@@ -88,13 +99,8 @@ const CPT_META: Record<
 };
 const DEFAULT_META = CPT_META['72148'];
 
-// Seeded Evidence Record for mock/demo — patient-aware.
-//
-// ID pattern: ev-{memberId}-{cptCode}-{epochMs}
-// memberId may contain hyphens (e.g. PAT-0042), so we parse from the right:
-//   last segment  = epochMs
-//   second-to-last = cptCode
-//   everything between "ev-" and the two trailing segments = memberId
+// Seeded Evidence Record for mock/demo — patient-aware. ID pattern
+// ev-{memberId}-{cptCode}-{epochMs}; memberId may contain hyphens, so parse from the right.
 function seededEvidenceRecord(id: string) {
   const ts = '2026-05-15T14:22:00Z';
   const withoutPrefix = id.startsWith('ev-') ? id.slice(3) : id;
@@ -259,36 +265,131 @@ export async function GET(
     return NextResponse.json(ooError(decision.reason, 'forbidden'), { status: 403 });
   }
 
-  try {
-    // In mock mode always return the seeded record — the in-memory store is empty
-    // on a fresh session, but we still want to demonstrate the audit spine.
-    if (devMockEnabled()) {
-      const seeded = seededEvidenceRecord(id);
-      await audit({
-        ts: new Date().toISOString(),
-        actor: actorId,
-        action: 'evidence.read',
-        resourceRef: `Evidence/${id}`,
-        correlationId,
-        outcome: 'success',
-      });
-      return NextResponse.json(seeded, { status: 200 });
-    }
-    const record = await getEvidenceStore().get(id);
-    if (!record) {
-      return NextResponse.json(ooError(`Evidence record ${id} not found`, 'not-found'), {
-        status: 404,
-      });
-    }
-    await audit({
+  // DUAL-PARTY VIEW (Wave-6, additive, behind goldenThreadE2E). When the flag is on AND a
+  // valid `?party=payer|provider` is present, augment the SAME authorized response with a
+  // PHI-safe party projection of the shared ledger + the notification/escalation signals.
+  // The param NEVER widens access — it is read only AFTER every auth/consent/authz/tenancy
+  // gate above; the augmentation is over the record this principal is already entitled to
+  // read. Flag-off OR param-absent → `withParty` returns the base body unchanged
+  // (byte-identical to the pre-Wave-6 response).
+  const partyParam = req.nextUrl.searchParams.get('party');
+  const party: LedgerParty | null =
+    flag('goldenThreadE2E') && (partyParam === 'payer' || partyParam === 'provider')
+      ? partyParam
+      : null;
+  // E14 (Wave-8): a curated ledger-analysis id, honored only with a valid (flag-gated) party.
+  const analysisParam = party ? req.nextUrl.searchParams.get('analysis') : null;
+  const withParty = async <T extends object>(
+    base: T,
+    rec: EvidenceRecord,
+    integrity: StoredIntegrity | null
+  ): Promise<
+    | T
+    | (T & {
+        partyView: unknown;
+        escalation: unknown;
+        routedEscalation: unknown;
+        analysis?: unknown;
+      })
+  > => {
+    if (!party) return base;
+    const manifest = getAgentManifest(REVENUE_CYCLE_AGENT_ID);
+    const now = nowIso();
+    // Derive the gate + PHI-safe signals ONCE (Wave-6) and thread the SAME result into the
+    // Wave-7 router (nothing re-derived); the fresh per-request inbox is the demo substrate (a
+    // durable queue backend is a production item — FAKE_FIDELITY.md).
+    const escalation = deriveEscalationSignals(rec, {
+      now,
+      manifestTier: manifest.autonomyTier,
+      integrity,
+    });
+    const routedEscalation = await routeEscalation(
+      rec,
+      {
+        now,
+        inbox: createMemoryProposalInbox(),
+        policies: loadEscalationPolicies(),
+        escalationPolicyRef: manifest.escalationPolicyRef,
+        manifestTier: manifest.autonomyTier,
+        integrity,
+      },
+      escalation
+    );
+    const augmented = {
+      ...base,
+      partyView: projectForParty(rec, party, { integrity, correlationId }),
+      escalation,
+      routedEscalation,
+    };
+    // Wave-8 Ledger Intelligence (additive): with `?analysis=<id>`, run the curated, gated
+    // analysis over the SAME record this principal may read — no access widened.
+    if (!analysisParam) return augmented;
+    const analysis = await runAnalysis(rec, party, analysisParam, {
+      now,
+      manifestTier: manifest.autonomyTier,
+      inbox: createMemoryProposalInbox(),
+      policies: loadEscalationPolicies(),
+      escalationPolicyRef: manifest.escalationPolicyRef,
+      integrity,
+    });
+    return { ...augmented, analysis };
+  };
+
+  // A-audit: record WHICH analysis was asked over PHI-adjacent data + party + gate outcome
+  // (ok/plan-rejected/eval-rejected) — ids only, PHI-safe. Read from the augmented body.
+  const auditRead = (body: object) => {
+    const outcome = (body as { analysis?: { outcome?: string } }).analysis?.outcome;
+    const detail = party
+      ? `party=${party}${analysisParam ? `; analysis=${analysisParam}; gate=${outcome ?? 'n/a'}` : ''}`
+      : undefined;
+    return audit({
       ts: new Date().toISOString(),
       actor: actorId,
       action: 'evidence.read',
       resourceRef: `Evidence/${id}`,
       correlationId,
       outcome: 'success',
+      ...(detail !== undefined ? { detail } : {}),
     });
-    return NextResponse.json(record, { status: 200 });
+  };
+
+  try {
+    const store = getEvidenceStore();
+    // A5: when the flag-gated party/analysis (workbench) path is engaged AND the record is
+    // PERSISTED, source the analysis from THAT real, sealed store record — the SAME one the
+    // Wave-9 action route acts on — so the finding the analyst SEES is the basis for the
+    // action, never the seed skeleton. Non-party GETs (and party GETs with no persisted
+    // record) keep the dev-mock seeded behavior unchanged.
+    const persistedForParty = party ? await store.get(id).catch(() => null) : null;
+    if (devMockEnabled() && !persistedForParty) {
+      const seeded = seededEvidenceRecord(id);
+      const augmented = await withParty(seeded, seeded as unknown as EvidenceRecord, null);
+      await auditRead(augmented);
+      return NextResponse.json(augmented, { status: 200 });
+    }
+    // VERIFY-ON-READ (W2-1): a persisted record is UNTRUSTED on read. When sealed, re-verify
+    // against the live loaded entries (recompute chain head + count — never trust a stored
+    // flag) and surface an independent `integrity` block. Key resolution is tolerant: on
+    // failure fall back to a plain load and omit integrity (legacy records read as before).
+    let record: EvidenceRecord | null;
+    let integrity: StoredIntegrity | null = null;
+    try {
+      const verifier = await getSigningKeyLoader().load(new Date().toISOString());
+      const verified = await loadVerifiedRecord(store, id, verifier);
+      record = verified?.record ?? null;
+      integrity = verified?.integrity ?? null;
+    } catch {
+      record = await store.get(id);
+    }
+    if (!record) {
+      return NextResponse.json(ooError(`Evidence record ${id} not found`, 'not-found'), {
+        status: 404,
+      });
+    }
+    const base = integrity ? { ...record, integrity } : record;
+    const augmented = await withParty(base, record, integrity);
+    await auditRead(augmented);
+    return NextResponse.json(augmented, { status: 200 });
   } catch {
     return NextResponse.json(ooError('Failed to read evidence record', 'exception'), {
       status: 500,

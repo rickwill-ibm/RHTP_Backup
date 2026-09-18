@@ -21,7 +21,7 @@ import type { OutboxDeps, OutboxIntentRow } from './types';
  */
 export async function confirmAndPublish(
   deps: OutboxDeps,
-  row: OutboxIntentRow,
+  row: OutboxIntentRow
 ): Promise<number | null> {
   const sequence = await deps.store.claimForConfirm(row.id, row.memberId, deps.now());
   if (sequence === null) return null; // lost the claim: another worker owns this intent
@@ -44,7 +44,7 @@ export async function failIntent(
   deps: OutboxDeps,
   row: OutboxIntentRow,
   attempts: number,
-  reasonCode: string,
+  reasonCode: string
 ): Promise<void> {
   await deps.store.update(row.id, { status: 'failed', updatedAtMs: deps.now() });
   deps.alarm?.raise({

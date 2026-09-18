@@ -73,7 +73,7 @@ function heldFor(event: C2Event, claimRef: string): DeadLetterAppendInput {
 export function projectClaimsWithIntegrity(
   events: readonly C2Event[],
   deps: ProjectorDeps,
-  opts: ClaimsIntegrityOptions = {},
+  opts: ClaimsIntegrityOptions = {}
 ): ClaimsIntegrityResult {
   const known = new Set(opts.knownClaims ?? []);
   const mutations: Mutation[] = [];
@@ -104,7 +104,7 @@ export function projectClaimsWithIntegrity(
  */
 export async function holdOrphanClaims(
   held: readonly DeadLetterAppendInput[],
-  store: DeadLetterStore = getDeadLetterStore(),
+  store: DeadLetterStore = getDeadLetterStore()
 ): Promise<DeadLetterRecord[]> {
   const out: DeadLetterRecord[] = [];
   for (const input of held) out.push(await store.append(input));

@@ -8,7 +8,13 @@
 // re-exported below is the mock source; when a production SDE/resource-directory
 // backend exists, switch on getDataMode('sde') here so consumers never change.
 
-export type { SDCountyOffice, SDCBO, SDProgram, SDCrisisResource, SDProvider } from './sdResourceData.types';
+export type {
+  SDCountyOffice,
+  SDCBO,
+  SDProgram,
+  SDCrisisResource,
+  SDProvider,
+} from './sdResourceData.types';
 
 export {
   SD_MAP_CENTER,

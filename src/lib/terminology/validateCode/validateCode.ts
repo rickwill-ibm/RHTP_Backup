@@ -13,7 +13,12 @@
  * PHI-free (system + code + status + version metadata only).
  */
 import { valueSetRegistry, type ValueSetRegistry } from '../registry/valueSetRegistry';
-import { SYSTEM_URIS, type CodeAssetBinding, type CodeValidation, type TerminologySystem } from '../types';
+import {
+  SYSTEM_URIS,
+  type CodeAssetBinding,
+  type CodeValidation,
+  type TerminologySystem,
+} from '../types';
 import { currentMembers, isGovernedSystem, isRetiredInCurrent, systemDisplay } from './membership';
 
 /** Context for a versioned validation: which registry answers, at what time. */
@@ -27,7 +32,7 @@ export interface ValidateContext {
 export function bindingForSystem(
   system: string,
   registry: ValueSetRegistry,
-  asOf?: Date,
+  asOf?: Date
 ): CodeAssetBinding | undefined {
   const uri = SYSTEM_URIS[system as TerminologySystem];
   if (!uri) return undefined;
@@ -45,7 +50,7 @@ export function bindingForSystem(
 export function validateCodeVersioned(
   system: TerminologySystem | string,
   code: string,
-  ctx: ValidateContext = {},
+  ctx: ValidateContext = {}
 ): CodeValidation {
   if (!isGovernedSystem(system)) {
     return { system, code, valid: false, status: 'unsupported-system', stub: true };

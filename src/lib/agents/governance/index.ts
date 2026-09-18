@@ -6,6 +6,7 @@
  */
 export {
   isAdverseCoverageAction,
+  isSubmissionActionType,
   isQualifiedHumanDecision,
   evaluateDecision,
   isAutoApprovable,

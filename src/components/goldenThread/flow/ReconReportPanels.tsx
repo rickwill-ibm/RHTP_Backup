@@ -23,6 +23,8 @@ import {
   type RollUp,
 } from '@/lib/goldenThread/reconReport';
 import { buildReconCsv, buildReconJson } from '@/lib/goldenThread/reconExport';
+import type { OperatingSim } from '@/components/goldenThread/flow/useOperatingSim';
+import { PatternActions } from '@/components/goldenThread/flow/PatternActions';
 
 const usd = (n: number): string => `$${Math.round(Math.abs(n)).toLocaleString()}`;
 
@@ -63,9 +65,11 @@ function RollUpCard({ title, rows }: { title: string; rows: RollUp[] }): React.R
 }
 
 export function ReconReportPanels({
+  op,
   records,
   appeals,
 }: {
+  op?: OperatingSim;
   records: ReconRecord[];
   appeals: Workflow[];
 }): React.ReactElement {
@@ -194,6 +198,7 @@ export function ReconReportPanels({
                 Export these
               </button>
             </div>
+            {op && <PatternActions op={op} p={drill} records={records} />}
             <table className="w-full text-left text-[9px]">
               <tbody>
                 {drilled.map((r) => (

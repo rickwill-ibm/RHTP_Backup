@@ -133,7 +133,9 @@ export function ReconciliationBoard({ op }: { op: OperatingSim }): React.ReactEl
       />
 
       <div {...tabPanelProps('Reconciliation views', subView)}>
-        {subView === 'overview' && <ReconReportPanels records={records} appeals={appeals} />}
+        {subView === 'overview' && (
+          <ReconReportPanels op={op} records={records} appeals={appeals} />
+        )}
 
         {subView === 'ledger' && (
           <ReconLedgerPanel

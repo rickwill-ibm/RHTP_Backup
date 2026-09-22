@@ -13,7 +13,7 @@
  *
  * CLIENT-SAFE: shared sim + library data + presentational helpers only. No `@/lib/evidence` barrel.
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ALGORITHMS } from '@/lib/surveillance/library';
 import { TICKETS as SEED_TICKETS, type OpsTicket } from '@/lib/goldenThread/e2eFlow';
 import { isWiredLibraryId } from '@/lib/goldenThread/surveillanceMap';
@@ -26,6 +26,7 @@ import {
 } from '@/components/goldenThread/flow/LiveDetectionFeed';
 import { DetectorLibraryPanel } from '@/components/goldenThread/flow/DetectorLibraryPanel';
 import { QueueHealthPanel } from '@/components/goldenThread/flow/QueueHealthPanel';
+import { LiveEventTicker } from '@/components/goldenThread/flow/LiveEventTicker';
 
 const seedByRef = (ref: string): OpsTicket | undefined => SEED_TICKETS.find((t) => t.id === ref);
 
@@ -42,6 +43,11 @@ export function SurveillanceConsole({
 }: SurveillanceConsoleProps): React.ReactElement {
   const s = op.sim;
   const [subView, setSubView] = useState<SubView>('queue');
+  // Baseline the sealed-records count on first render so the tile can show how many records this
+  // session has sealed since the console opened ("+N sealed since play started"). Ref, so it is
+  // captured once and never resets a re-render — a pure presentational delta over real state.
+  const sealedBaseline = useRef(s.ledgerSeq);
+  const sealedDelta = s.ledgerSeq - sealedBaseline.current;
 
   // Live detections = the OPEN governed tickets the run has minted, joined to the seed narrative.
   const detections: Detection[] = s.tickets
@@ -91,7 +97,12 @@ export function SurveillanceConsole({
             { label: 'Catalog detectors', value: String(ALGORITHMS.length), color: '#24427e' },
             { label: 'Scripted (narrative)', value: String(wiredCount), color: '#0f766e' },
             { label: 'Flagged detections', value: String(detections.length), color: '#5b3fa3' },
-            { label: 'Sealed records', value: String(s.ledgerSeq), color: '#b45309' },
+            {
+              label: 'Sealed records',
+              value: String(s.ledgerSeq),
+              color: '#b45309',
+              delta: sealedDelta,
+            },
           ] as const
         ).map((tile) => (
           <div key={tile.label} className="ed-card p-2">
@@ -101,6 +112,11 @@ export function SurveillanceConsole({
             <p className="num text-xl" style={{ color: tile.color }}>
               {tile.value}
             </p>
+            {'delta' in tile && tile.delta > 0 && (
+              <p className="mono text-[9px] font-semibold text-[#24a148]">
+                +{tile.delta} sealed since play started
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -116,7 +132,10 @@ export function SurveillanceConsole({
 
       <div {...tabPanelProps('Surveillance views', subView)}>
         {subView === 'queue' && (
-          <LiveDetectionFeed op={op} s={s} detections={detections} onOpenTicket={onOpenTicket} />
+          <div className="space-y-3">
+            <LiveDetectionFeed op={op} s={s} detections={detections} onOpenTicket={onOpenTicket} />
+            <LiveEventTicker s={s} />
+          </div>
         )}
         {subView === 'library' && <DetectorLibraryPanel detections={detections} />}
         {subView === 'health' && <QueueHealthPanel s={s} detections={detections} />}

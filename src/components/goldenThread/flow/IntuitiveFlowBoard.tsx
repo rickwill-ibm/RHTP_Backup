@@ -31,6 +31,7 @@ import { AuthorizationSpine } from '@/components/goldenThread/flow/Authorization
 import { JourneyLedgerTrail } from '@/components/goldenThread/flow/JourneyLedgerTrail';
 import { StageFocusPanel } from '@/components/goldenThread/flow/StageFocusPanel';
 import { FlowCanvas } from '@/components/goldenThread/flow/FlowCanvas';
+import { IntakeChannelBar } from '@/components/goldenThread/flow/IntakeChannelBar';
 import { LifecycleChip, TicketActionBar } from '@/components/goldenThread/flow/opsShared';
 
 type OpenTicket = (
@@ -104,6 +105,9 @@ export function IntuitiveFlowBoard({
           </button>
         </div>
       </div>
+
+      {/* (a2) multi-channel intake — the four real entering paths, live-counted from sim.txns */}
+      <IntakeChannelBar sim={op.sim} />
 
       {/* (b) the hero spine */}
       <AuthorizationSpine sim={op.sim} focused={focusedStage} onFocus={setFocusedStage} />

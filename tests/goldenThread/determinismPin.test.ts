@@ -9,12 +9,13 @@ import { createSim } from '@/lib/goldenThread/flowSim';
 describe('determinism pins', () => {
   it('default scenario (wa-medicaid) createSim(20260914) is frozen', () => {
     const s = createSim(20260914);
-    // Re-pinned once when the earned-clamp was corrected to exempt A1 detection/advisory seals (an agent
-    // may always advise): the fairness-screen advisory now records A1 (not A0/watch), so the sealed rungs —
-    // and thus the chain hash — changed by design. ledgerSeq/tick are unchanged, proving it is a pure
-    // rung-recording correction with zero RNG/behavioral drift, not a reordered draw.
-    expect(s.chainHead).toBe(2487355187);
-    expect(s.ledgerSeq).toBe(250);
+    // Re-pinned when one in-flight underpayment→appeal is now SEEDED at the end of warm-up (so the
+    // Reconciliation "Appeals" tab opens populated with a real, sealed workflow instead of blank).
+    // startAppealWorkflow draws NO mulberry(), so the per-scenario RNG stream is untouched: `tick`
+    // stays 684 (zero behavioral drift / no reordered draw) and exactly ONE advisory step is sealed →
+    // ledgerSeq 250→251 and the chain head changes by design. A bounded, documented re-pin — not a break.
+    expect(s.chainHead).toBe(3794285767);
+    expect(s.ledgerSeq).toBe(251);
     expect(s.tick).toBe(684);
   });
 

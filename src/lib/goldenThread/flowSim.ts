@@ -34,6 +34,7 @@ import {
 } from '@/lib/goldenThread/e2eFlow';
 import { nistSpec, deriveOversight, type NistFn, type Oversight } from '@/lib/goldenThread/nistMap';
 import { scenarioOf, type ScenarioId } from '@/lib/goldenThread/scenarios';
+import { CHANNELS, STAGE_CHANNEL_MIX, type IntakeChannel } from '@/lib/goldenThread/intakeChannels';
 import {
   classifyRecon,
   RECON_CLASS_SPEC,
@@ -346,6 +347,7 @@ export interface Txn {
   id: string;
   kind: TxnKind;
   type: TxnType; // real-world transaction type (drives token shape/color + evidence route)
+  channel: IntakeChannel; // HOW it arrived — SMART / 278-batch / portal / fax (deterministic mix)
   batchId?: string;
   idx: number;
   targetIdx: number;
@@ -768,8 +770,20 @@ export function createSim(
       kind: 'info',
       text: `Warm operational environment — ${s.ledgerSeq} sealed records from prior operation. Live shadow validation begins now; authority starts at A0.`,
     });
+    // Seed ONE in-flight underpayment→appeal so the Reconciliation "Appeals" tab opens populated with a
+    // REAL, sealed workflow (not an empty tab, and not fake unsealed provenance). Selected by a STABLE
+    // predicate — the largest identified underpayment on the systematic-cluster provider — so it never
+    // depends on a magic seq. startAppealWorkflow draws no RNG (per-scenario streams stay frozen); it
+    // seals one advisory step, so the determinism pin moves by exactly +1 sealed record (a bounded,
+    // documented re-pin, not a stream reorder). No-ops for scenarios without seedMedicaidTickets.
+    if (scenarioOf(s).seedMedicaidTickets) {
+      const appealSeed = s.reconLedger
+        .filter((r) => r.reconClass === 'underpayment' && r.provider === RECON_CLUSTER_PROVIDER)
+        .sort((a, b) => Math.abs(b.deltaUsd) - Math.abs(a.deltaUsd))[0];
+      if (appealSeed) startAppealWorkflow(s, appealSeed.seq);
+    }
     // Scenario hero: Diane's named PA thread — gated on 'diane-ma', so the default 'wa-medicaid' stream is
-    // byte-identical (this branch never runs for the default). Seeded AFTER the warm-up/burst block.
+    // byte-identical apart from the seeded appeal above. Seeded AFTER the warm-up/burst block.
     if (s.scenario === 'diane-ma') seedHeroThread(s);
   }
   return s;
@@ -1557,17 +1571,36 @@ function stepWorkflows(s: SimState): void {
   if (s.workflows.length > 24) s.workflows.splice(0, s.workflows.length - 24); // window
 }
 
+/**
+ * Deterministic intake channel — proportional to the illustrative per-stage mix, from the existing
+ * `spawnSeq` counter (NOT a new mulberry draw, so the determinism pin is unmoved). This makes the four
+ * channels (SMART / 278-batch / portal / fax) REAL per-transaction origins rather than a static label.
+ */
+function pickChannel(startKey: StageKey, spawnSeq: number): IntakeChannel {
+  const mix = STAGE_CHANNEL_MIX[startKey] ?? STAGE_CHANNEL_MIX['emr-launch'];
+  if (!mix || mix.length === 0) return 'smart-fhir';
+  const v = (spawnSeq * 41) % 100; // deterministic rotation across the 0..99 band, coprime step
+  let acc = 0;
+  for (const m of mix) {
+    acc += m.pct;
+    if (v < acc) return m.channel;
+  }
+  return mix[mix.length - 1].channel;
+}
+
 function spawnTxn(s: SimState, type: TxnType, batchId?: string): void {
   s.spawnSeq += 1;
   const meta = TXN_TYPE_META[type];
   const startIdx = idxOf(meta.startKey);
   const stopIdx = idxOf(meta.stopKey);
+  const channel = pickChannel(meta.startKey, s.spawnSeq);
   // appeals are always-human by definition; other types draw an adverse/high-dollar/novel cohort.
   const must = meta.human === true || mulberry(s) < HONESTY_FLOOR;
   s.txns.push({
     id: `${type}-${String(s.spawnSeq).padStart(4, '0')}`,
     kind: meta.kind,
     type,
+    channel,
     batchId,
     idx: startIdx,
     targetIdx: startIdx,
@@ -1597,6 +1630,13 @@ function spawnTxn(s: SimState, type: TxnType, batchId?: string): void {
     kbResumeSub: 0,
   });
   s.counters.inFlight += 1;
+  // Channel-labelled intake event (unsealed narration → pin-safe): the live feed now shows HOW each
+  // transaction arrived, not an all-SMART world. Provenance line is carried on the channel meta.
+  pushEvent(s, {
+    tick: s.tick,
+    kind: 'edi',
+    text: `Intake · ${CHANNELS[channel].label} — ${meta.label}`,
+  });
 }
 
 /** Ratchet a txn's PROOF as it clears a stage; authority follows as the weakest link (pulse on rise). */
@@ -2000,12 +2040,29 @@ export function routeDetection(
  * full detection-replay engine. Returns true iff the entry's stored hash matches the re-derivation.
  */
 export function verifyEntry(s: SimState, seq: number): boolean {
+  return verifyEntryDetail(s, seq)?.ok ?? false;
+}
+
+/**
+ * The DETAILED tamper-evidence re-check for one ledger entry — exposes the numbers that PROVE (or
+ * disprove) integrity so a UI can SHOW the work instead of a bare boolean: the recomputed hash vs the
+ * stored hash, and whether the prior-link into this entry holds. Pure read (no RNG, no seal, no
+ * mutation) → determinism-safe. This is a local integrity re-derivation, NOT a detection-replay.
+ */
+export interface EntryVerifyDetail {
+  seq: number;
+  ok: boolean;
+  prevOk: boolean; // the chain link INTO this entry matches the prior entry's hash
+  recomputed: string; // hex of the hash re-derived from the stored fields
+  stored: string; // hex of the hash actually stored on the entry
+}
+export function verifyEntryDetail(s: SimState, seq: number): EntryVerifyDetail | null {
   const i = s.ledger.findIndex((e) => e.seq === seq);
-  if (i < 0) return false;
+  if (i < 0) return null;
   const e = s.ledger[i];
   const prev = i === 0 ? e.prevHash : s.ledger[i - 1].hash;
-  if (prev !== e.prevHash) return false; // the chain link into this entry must hold
-  const hash = mixHash(prev, [
+  const prevOk = prev === e.prevHash; // the chain link into this entry must hold
+  const recomputed = mixHash(prev, [
     e.seq,
     e.tick,
     e.actor,
@@ -2020,7 +2077,13 @@ export function verifyEntry(s: SimState, seq: number): boolean {
     e.oversight,
     e.reproducible,
   ]);
-  return hash === e.hash;
+  return {
+    seq,
+    ok: prevOk && recomputed === e.hash,
+    prevOk,
+    recomputed: (recomputed >>> 0).toString(16).padStart(8, '0'),
+    stored: (e.hash >>> 0).toString(16).padStart(8, '0'),
+  };
 }
 
 function beginNext(s: SimState, txn: Txn): void {

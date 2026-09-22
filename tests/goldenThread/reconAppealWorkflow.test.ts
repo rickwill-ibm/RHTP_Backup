@@ -20,14 +20,17 @@ const firstUnroutedUnderpayment = (s: ReturnType<typeof createSim>) =>
   s.reconLedger.find((r) => r.reconClass === 'underpayment' && !r.routed)!;
 
 describe('appeal workflow — determinism isolation', () => {
-  it('no workflow/notification exists at warm start; the pin is byte-identical', () => {
+  it('warm start seeds exactly ONE in-flight underpayment appeal; the pin is the documented re-pin', () => {
     const s = createSim(20260914);
-    expect(s.workflows.length).toBe(0);
-    expect(s.notifications.length).toBe(0); // notify() lives only in UI-only verbs → none fire in warm-up
-    expect(s.chainHead).toBe(2487355187);
-    expect(s.ledgerSeq).toBe(250);
+    const seeded = s.workflows.filter((w) => w.kind === 'underpayment-appeal');
+    expect(seeded.length).toBe(1); // one real, sealed appeal so the Appeals tab opens populated
+    expect(seeded[0].state).toBe('awaiting-review');
+    expect(s.notifications.length).toBe(1); // the reviewer approval-needed notification for the seeded appeal
+    // startAppealWorkflow draws no mulberry() → tick unchanged (no reordered draw); +1 advisory seal.
+    expect(s.chainHead).toBe(3794285767);
+    expect(s.ledgerSeq).toBe(251);
     expect(s.tick).toBe(684);
-    expect(s.tickets.length).toBe(4); // mintTicket ref-dedup collapses the duplicated seed refs to one row each (was 9 with dups)
+    expect(s.tickets.length).toBe(5); // 4 deduped seed tickets + the seeded appeal's RCLM ticket
   });
   it('the response/SLA sweep is a no-op with no workflows — advancing stays deterministic', () => {
     const run = (): number => {
@@ -42,7 +45,7 @@ describe('appeal workflow — determinism isolation', () => {
       const s = createSim(20260914);
       const rec = firstUnroutedUnderpayment(s);
       startAppealWorkflow(s, rec.seq);
-      const wf = s.workflows[0];
+      const wf = s.workflows[s.workflows.length - 1];
       reviewAppeal(s, wf.id, 'M.Cho', true);
       releaseAppeal(s, wf.id, 'auth');
       for (let i = 0; i < 20; i += 1) advance(s); // through the modelled response
@@ -60,13 +63,13 @@ describe('appeal workflow — lifecycle + queue + notifications', () => {
     const s = createSim(20260914);
     const rec = firstUnroutedUnderpayment(s);
     startAppealWorkflow(s, rec.seq);
-    const wf = s.workflows[0];
+    const wf = s.workflows[s.workflows.length - 1];
     expect(wf.state).toBe('awaiting-review');
     expect(wf.steps.find((x) => x.key === 'assemble')!.done).toBe(true); // agent produced the artifact
     expect(wf.artifact.transmitted).toBe(false); // mock, not transmitted
     expect(wf.recoveredUsd).toBeUndefined(); // NOTHING recovered yet
     expect(s.tickets.find((t) => t.key === wf.ticketKey)!.status).toBe('Assigned'); // single-source projection
-    const notif = s.notifications[0];
+    const notif = s.notifications[s.notifications.length - 1];
     expect(notif.to).toBe(APPEAL_REVIEWER_SEAT);
     expect(notif.kind).toBe('approval-needed');
   });
@@ -82,7 +85,9 @@ describe('appeal workflow — lifecycle + queue + notifications', () => {
 describe('appeal workflow — governance honesty', () => {
   it('segregation of duties: the releaser must differ from the reviewer', () => {
     const s = createSim(20260914);
-    const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
+    const wf =
+      (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq),
+      s.workflows[s.workflows.length - 1]);
     reviewAppeal(s, wf.id, 'M.Cho', true);
     releaseAppeal(s, wf.id, 'M.Cho'); // same person → blocked
     expect(wf.state).toBe('awaiting-release');
@@ -93,7 +98,9 @@ describe('appeal workflow — governance honesty', () => {
     const s = createSim(20260914);
     s.earnedCeiling = 3;
     s.maturity = 1.0; // full autonomy earned
-    const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
+    const wf =
+      (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq),
+      s.workflows[s.workflows.length - 1]);
     reviewAppeal(s, wf.id, 'M.Cho', true);
     releaseAppeal(s, wf.id, 'provider-authorizer');
     const releaseStep = wf.steps.find((x) => x.key === 'release')!;
@@ -143,7 +150,9 @@ describe('appeal workflow — governance honesty', () => {
   });
   it('a rejected review never releases and never touches the payer', () => {
     const s = createSim(20260914);
-    const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
+    const wf =
+      (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq),
+      s.workflows[s.workflows.length - 1]);
     reviewAppeal(s, wf.id, 'M.Cho', false);
     expect(wf.state).toBe('rejected');
     expect(wf.steps.find((x) => x.key === 'release')!.done).toBe(false);
@@ -177,7 +186,9 @@ describe('appeal workflow — KPI honesty + eviction + SLA', () => {
   });
   it('an in-flight appeal ticket is NOT evicted when the queue overflows with newer tickets', () => {
     const s = createSim(20260914);
-    const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
+    const wf =
+      (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq),
+      s.workflows[s.workflows.length - 1]);
     // flood with 20 newer tickets; the appeal ticket (backing a non-terminal workflow) must survive
     for (let i = 0; i < 20; i += 1) advance(s);
     // force extra mints via surveillance completions by advancing more
@@ -205,7 +216,9 @@ describe('appeal workflow — KPI honesty + eviction + SLA', () => {
 describe('appeal workflow — notifications lifecycle', () => {
   it('notifications fire through the lifecycle and are dismissible', () => {
     const s = createSim(20260914);
-    const wf = (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq), s.workflows[0]);
+    const wf =
+      (startAppealWorkflow(s, firstUnroutedUnderpayment(s).seq),
+      s.workflows[s.workflows.length - 1]);
     reviewAppeal(s, wf.id, 'M.Cho', true);
     releaseAppeal(s, wf.id, 'auth');
     const kinds = s.notifications.map((n) => n.kind);

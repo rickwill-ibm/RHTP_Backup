@@ -12,9 +12,9 @@ describe('Diane MA scenario — Step 1 foundation', () => {
   it('does not perturb the default (wa-medicaid) stream', () => {
     const wa = createSim(20260914);
     expect(wa.scenario).toBe('wa-medicaid');
-    expect(wa.chainHead).toBe(2487355187); // re-pinned with the advisory-clamp fix (see determinismPin.test.ts)
-    expect(wa.ledgerSeq).toBe(250);
-    expect(wa.tickets.length).toBe(4); // Medicaid seed tickets, one row per ref (TKT-4472 dedup collapsed the dups)
+    expect(wa.chainHead).toBe(3794285767); // re-pinned when the in-flight appeal is seeded (see determinismPin.test.ts)
+    expect(wa.ledgerSeq).toBe(251);
+    expect(wa.tickets.length).toBe(5); // 4 deduped seed tickets + the seeded appeal RCLM ticket
   });
 
   it('seeds Diane as the spotlighted hero with an administrative cert gap, no fabricated denial', () => {

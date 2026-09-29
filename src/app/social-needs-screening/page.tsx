@@ -556,7 +556,7 @@ const MARIA_PRAPARE_RESPONSES: Record<string, number> = {
   // Financial: Very hard (index 3 = HIGH risk) — single parent, early shift
   fi1: 3,
   fi2: 1,
-  // Employment: Part-time (index 1) — Bennett County School District
+  // Employment: Part-time (index 1) — Frontier School District
   e1: 1,
   // Mental Health: More than half the days (index 2) — Edinburgh PND 11
   mh1: 2,

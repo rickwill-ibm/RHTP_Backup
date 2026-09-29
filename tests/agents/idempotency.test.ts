@@ -11,7 +11,7 @@ import { createReferralWorkflow, type ReferralTask } from '@/lib/agents/referral
 import type { MemberContext, Touchpoint } from '@/lib/sde';
 import { createMemoryIdempotencyStore, IDEMPOTENCY_CONSUMERS } from '@/lib/idempotency';
 import { createRuntime, waitFor } from './helpers';
-import { approve } from './helpers';
+import { approve, disclosedForTest } from './helpers';
 
 const TOUCHPOINT: Touchpoint = {
   touchpointId: 'tp-1',
@@ -22,10 +22,18 @@ const TOUCHPOINT: Touchpoint = {
 const GRANTED: MemberContext = { memberId: 'm1', consentScopesGranted: ['care-outreach'] };
 
 function outreachTask(): OutreachTask {
-  return { touchpoint: TOUCHPOINT, memberContext: GRANTED, consentScope: 'care-outreach', priority: 'high' };
+  return {
+    touchpoint: disclosedForTest(TOUCHPOINT),
+    memberContext: GRANTED,
+    consentScope: 'care-outreach',
+    priority: 'high',
+  };
 }
 
-async function runOutreach(idempotency: ReturnType<typeof createMemoryIdempotencyStore>, sent: string[]) {
+async function runOutreach(
+  idempotency: ReturnType<typeof createMemoryIdempotencyStore>,
+  sent: string[]
+) {
   const wf = createOutreachWorkflow({
     async send(_a, t) {
       sent.push(t.touchpoint.touchpointId);
@@ -105,7 +113,7 @@ describe('referral action is not duplicated on republish (NS-04)', () => {
     const second = await runReferral(idempotency);
     expect(second.outcome).toBe('deduped');
     expect(
-      await idempotency.isProcessed(IDEMPOTENCY_CONSUMERS.referralAgent, 'ServiceRequest/ref-12'),
+      await idempotency.isProcessed(IDEMPOTENCY_CONSUMERS.referralAgent, 'ServiceRequest/ref-12')
     ).toBe(true);
   });
 });

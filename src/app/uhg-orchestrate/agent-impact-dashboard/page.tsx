@@ -185,7 +185,7 @@ function buildMilestones(t: ImpactTokens, coalition: CoalitionAgent[]): Mileston
   });
 }
 
-const MARIA_MILESTONES: Milestone[] = ([] = [
+const MARIA_MILESTONES: Milestone[] = [
   {
     id: 'ms-0',
     time: 'T+0',
@@ -292,7 +292,7 @@ const MARIA_MILESTONES: Milestone[] = ([] = [
     kpiImpact: 'Patient safety risk surfaced — prescribers notified in 44m',
     kpiColor: '#fa4d56',
   },
-]);
+];
 
 // ─── Thread Status Rows ───────────────────────────────────────────────────────
 
@@ -432,7 +432,7 @@ function buildThreadRows(t: ImpactTokens): ThreadRow[] {
   return R;
 }
 
-const MARIA_THREAD_ROWS: ThreadRow[] = ([] = [
+const MARIA_THREAD_ROWS: ThreadRow[] = [
   {
     id: 'th-signal',
     label: 'Signal Disposition',
@@ -550,7 +550,7 @@ const MARIA_THREAD_ROWS: ThreadRow[] = ([] = [
     agentColor: '#fa4d56',
     icon: '⚠',
   },
-]);
+];
 
 // ─── Channel attribution per thread ──────────────────────────────────────────
 
@@ -1031,7 +1031,7 @@ function AgentImpactDashboardInner() {
                     }}
                   />
                   {MILESTONES.map((ms) => {
-                    let pct = (ms.timeMin / 47) * 100;
+                    const pct = (ms.timeMin / 47) * 100;
                     const isVisible = visibleMilestones.includes(ms.id);
                     return (
                       <div
@@ -1056,7 +1056,7 @@ function AgentImpactDashboardInner() {
                 </div>
                 <div className="relative mt-2" style={{ height: 14 }}>
                   {MILESTONES.map((ms) => {
-                    let pct = (ms.timeMin / 47) * 100;
+                    const pct = (ms.timeMin / 47) * 100;
                     return (
                       <span
                         key={`lbl-${ms.id}`}

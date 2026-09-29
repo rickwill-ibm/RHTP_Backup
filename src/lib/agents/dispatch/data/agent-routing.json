@@ -1,24 +1,35 @@
 {
-  "version": "1.0.0",
   "routes": [
     {
-      "id": "member-outreach",
       "agentId": "outreach-agent",
-      "taskKind": "outreach",
-      "match": { "actionability": "member-outreach" }
+      "id": "member-outreach",
+      "match": {
+        "actionability": "member-outreach"
+      },
+      "taskKind": "outreach"
     },
     {
-      "id": "referral-coordination",
       "agentId": "referral-coordination-agent",
-      "taskKind": "referral",
-      "match": { "kindPrefix": "referral" }
+      "id": "referral-coordination",
+      "match": {
+        "kindPrefix": "referral"
+      },
+      "taskKind": "referral"
     },
     {
-      "id": "pa-appeal-documentation",
       "agentId": "pa-documentation-agent",
-      "taskKind": "pa",
-      "match": { "kindPrefix": "denial" },
-      "pa": { "currentState": "Denied", "advanceEvent": { "type": "appeal" } }
+      "id": "pa-appeal-documentation",
+      "match": {
+        "kindPrefix": "denial"
+      },
+      "pa": {
+        "advanceEvent": {
+          "type": "appeal"
+        },
+        "currentState": "Denied"
+      },
+      "taskKind": "pa"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }

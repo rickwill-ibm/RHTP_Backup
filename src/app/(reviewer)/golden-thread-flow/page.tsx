@@ -142,18 +142,39 @@ export default async function GoldenThreadFlowPage(): Promise<React.ReactElement
     >
       <div className="min-h-0 flex-1 overflow-hidden">
         <EditorialShell
-          eyebrow="Governed autonomy · End-to-end process flow"
-          title="Golden Thread — End-to-End"
+          eyebrow="Governed autonomy · Golden Thread · Phase 1"
+          title="Authorization Spine — The Governed Thread, End to End"
           subtitle={
             <>
-              EMR launch (SMART on FHIR · Epic / Cerner) → CRD → gold-card → DTR → PAS → payer
-              operations → claim → remittance → reconciliation → recovery → continuous surveillance
-              — one swimlane over the shared, append-only evidence ledger. Detections become
-              governed <span className="mono">tickets</span> queued to named operators with RCA, a
+              <strong>Phase 1</strong> showcases one thread of the Golden Thread program, end to end
+              — the authorization-to-recovery spine: eligibility → CRD coverage-requirements →
+              gold-card waiver → DTR → PAS → payer utilization management → claim → remittance →
+              reconciliation → recovery, with continuous program-integrity surveillance. It rides
+              the payer&rsquo;s real connectivity estate, not a single app — SMART on FHIR /
+              CDS-Hooks at the EMR, and X12 <span className="mono">270/271</span>,{' '}
+              <span className="mono">278</span>, <span className="mono">837</span> and{' '}
+              <span className="mono">835</span> across the clearinghouse, acknowledged at the
+              interchange (<span className="mono">TA1</span>/<span className="mono">999</span>) with{' '}
+              <span className="mono">277CA</span> on the 837 claim — over one swimlane on the
+              shared, append-only evidence ledger. Detections become governed{' '}
+              <span className="mono">tickets</span> queued to named operators with RCA, a
               recommendation, and the REAL Twin-Ladder verdict; every step writes a forensic,
-              NIST-aligned record.
+              NIST-aligned record.{' '}
+              <span style={{ color: '#9fc2e0' }}>
+                This is <strong>Phase 1</strong> — the prior-authorization spine.{' '}
+                <strong>Phase 2</strong> and <strong>Phase 3</strong> add support for the additional
+                transaction sets across the estate. <strong>Phase 2</strong> brings the full
+                claims-and-payment set — <span className="mono">837</span> P/I/D adjudication,{' '}
+                <span className="mono">276/277</span> claim status,{' '}
+                <span className="mono">275</span> attachments and <span className="mono">835</span>{' '}
+                remittance / ERA posting. <strong>Phase 3</strong> brings the member-and-money and
+                pharmacy sets — enrollment (<span className="mono">834</span>), premium / capitation
+                (<span className="mono">820</span>), NCPDP pharmacy and cross-payer (payer-to-payer)
+                exchange — so the thread starts at member enrollment, not the encounter.
+              </span>
             </>
           }
+          wideSubtitle
           badge="Prototype on seed data · mock channel, not transmitted"
         >
           <FlowBoards

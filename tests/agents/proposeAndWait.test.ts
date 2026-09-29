@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createRuntime, type ProposedAction } from '@/lib/agentRuntime';
-import { flush, proposingWorkflow, waitFor } from './helpers';
+import { flush, proposingWorkflow, testReviewer, waitFor } from './helpers';
+
+/** The seeded reviewer of record. A signal now carries a real qualification proof, not a name. */
+const REVIEWER = 'Practitioner/dev';
 
 const ACTION: ProposedAction = {
   actionType: 'send-outreach',
@@ -18,11 +21,14 @@ describe('HITL proposeAndWait (suspend / resume)', () => {
     });
 
     // Suspended: proposed event out, work-queue item created, awaiting a decision.
-    await waitFor(() => engine.query(handle.workflowId)?.status === 'waiting-decision', 'suspended');
+    await waitFor(
+      () => engine.query(handle.workflowId)?.status === 'waiting-decision',
+      'suspended'
+    );
     const snap = engine.query(handle.workflowId)!;
     expect(snap.awaitingProposalId).toBeDefined();
     expect(eventSink.ofType('agent.task.proposed')).toHaveLength(1);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0); // NOT executed yet
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0); // NOT executed yet
     const pending = await inbox.pending();
     expect(pending).toHaveLength(1);
     expect(pending[0].item.queue).toBe('agent-proposal');
@@ -32,22 +38,23 @@ describe('HITL proposeAndWait (suspend / resume)', () => {
     await engine.signal(handle.workflowId, {
       name: 'agent.task.approved',
       proposalId,
-      decidedBy: 'reviewer:rn-7',
+      decidedBy: REVIEWER,
+      reviewer: testReviewer(),
     });
     const result = await handle.done;
     expect(result).toBe('approved');
     expect(eventSink.ofType('agent.task.approved')).toHaveLength(1);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(1);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(1);
     expect((await inbox.get(proposalId))?.status).toBe('approved');
     // Event order: proposed -> approved -> executed.
     expect(eventSink.events.map((e) => e.eventType)).toEqual([
       'agent.task.proposed',
       'agent.task.approved',
-      'agent.task.executed',
+      'agent.task.settled',
     ]);
   });
 
-  it('rejection path: emits rejected, NO executed, workflow resolves rejected', async () => {
+  it('rejection path: emits rejected, settles with outcome `rejected`, no effect', async () => {
     const { engine, eventSink } = createRuntime();
     const handle = engine.start(proposingWorkflow('outreach-agent', ACTION), {
       memberId: 'm2',
@@ -59,11 +66,17 @@ describe('HITL proposeAndWait (suspend / resume)', () => {
     await engine.signal(handle.workflowId, {
       name: 'agent.task.rejected',
       proposalId,
-      decidedBy: 'reviewer:rn-7',
+      decidedBy: REVIEWER,
+      reviewer: testReviewer(),
     });
     expect(await handle.done).toBe('rejected');
     expect(eventSink.ofType('agent.task.rejected')).toHaveLength(1);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    // The workflow settled; it did not execute. Those are different claims, and collapsing them is
+    // what `agent.task.executed` did.
+    const settled = eventSink.ofType('agent.task.settled');
+    expect(settled).toHaveLength(1);
+    expect(settled[0].payload.outcome).toBe('rejected');
+    expect(settled[0].payload.status).toBe('completed');
   });
 
   it('a stale / duplicate decision signal is idempotent (no double resume)', async () => {
@@ -74,12 +87,17 @@ describe('HITL proposeAndWait (suspend / resume)', () => {
     });
     await waitFor(() => engine.query(handle.workflowId)?.status === 'waiting-decision');
     const proposalId = engine.query(handle.workflowId)!.awaitingProposalId!;
-    const sig = { name: 'agent.task.approved' as const, proposalId, decidedBy: 'rn' };
+    const sig = {
+      name: 'agent.task.approved' as const,
+      proposalId,
+      decidedBy: REVIEWER,
+      reviewer: testReviewer(),
+    };
     await engine.signal(handle.workflowId, sig);
     await engine.signal(handle.workflowId, sig); // duplicate: ignored
     await handle.done;
     await flush();
     expect(eventSink.ofType('agent.task.approved')).toHaveLength(1);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(1);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(1);
   });
 });

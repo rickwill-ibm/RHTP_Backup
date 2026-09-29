@@ -14,7 +14,7 @@ export const mockSmartLaunchContext: SmartLaunchContext = {
   patientId: 'patient/maria-redhawk-001',
   encounterId: 'enc-20260615-001',
   practitionerId: 'pract-bch-001',
-  practitionerName: 'Bennett County Health PCP',
+  practitionerName: 'Prairie Health PCP',
   practitionerNpi: '1234567890',
   fhirBaseUrl: 'https://fhir.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d',
   accessToken: 'mock-access-token-xyz',
@@ -56,7 +56,7 @@ export const mockCdsCards: CdsCard[] = [
     cardType: 'warning',
     summary: 'HbA1c gap 38 days — pre-diabetes monitoring critical',
     detail:
-      'Pre-diabetic HbA1c recheck is 38 days overdue. Last HbA1c: 6.2% (Pre-diabetic range). Due date: June 22, 2026. Primary barrier: 47-mile distance to Winner Regional Healthcare with no reliable transport. Consider NEMT enrollment and bundle with Well-Child visit.',
+      'Pre-diabetic HbA1c recheck is 38 days overdue. Last HbA1c: 6.2% (Pre-diabetic range). Due date: June 22, 2026. Primary barrier: 47-mile distance to Cedar Bluff Regional Healthcare with no reliable transport. Consider NEMT enrollment and bundle with Well-Child visit.',
     source: 'CDS Hooks / Care Gap Engine',
     indicator: 'warning',
     suggestions: [

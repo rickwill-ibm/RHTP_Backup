@@ -133,7 +133,7 @@ const QUALITY_METRICS_MOCK: QualityMetric[] = [
     lastRun: '2026-07-14',
   },
   {
-    connector: 'Bennett County CBO',
+    connector: 'Frontier Community Action CBO',
     completeness: 96.5,
     duplicateRate: 0.8,
     errorRate: 0.5,

@@ -35,11 +35,19 @@ The runtime's ONE way to act. A workflow calls `ctx.proposeAndWait(action)`, whi
    (reuse, not a second inbox — DP-3);
 3. registers escalation timers; then **suspends**;
 4. resumes when a human decision signal arrives (`agent.task.approved` →
-   also emits `agent.task.executed`; `agent.task.rejected`).
+   `agent.task.rejected`). The engine emits NO execution event at decision time — it performs no
+   effects — only `agent.task.settled` when the workflow actually settles, carrying the outcome the
+   workflow itself reported (register G-002).
 
 The engine emits ONLY the pre-allocated C2 types — `agent.task.proposed`,
-`.approved`, `.rejected`, `.executed`, `.escalated`. Emitting anything else throws
-`UnallowedAgentEventError`. Partition key = `memberId`.
+`.approved`, `.rejected`, `.settled`, `.escalated`, `.abandoned`. Emitting anything
+else throws `UnallowedAgentEventError`. Partition key = `memberId`.
+
+`.executed` was REMOVED (register G-002): it was emitted at approval time, before the
+workflow body resumed, so the engine was asserting an effect it neither performed nor
+observed. `.settled` replaces it and fires when the workflow actually settles, carrying
+an outcome code from a closed vocabulary. `.abandoned` was ADDED (G-001) so the
+escalation terminal stops masquerading as one more `escalated` hop.
 
 ## Autonomy is configuration (§10.5)
 
@@ -60,8 +68,10 @@ Changing a manifest's tier changes behavior with no code change
 The engine exposes NO API to set a domain state (e.g. a PA approval). Its only
 mutation path is a proposal + a decision; an HITL proposal resolves only on an
 external human signal. The owning state machine (e.g. `paMachine`) remains the
-single authority — `tests/agents/guardrail.test.ts` asserts no `executed` event
-appears without a human approval.
+single authority. `tests/agents/guardrail.test.ts` asserts no `agent.task.settled`
+event appears without a human approval, and `tests/agents/paDocumentation.test.ts`
+asserts that an agent handed an authoritative event fails BEFORE proposing — with the
+refusal on the record as `settled{status:'failed', outcome:'errored'}`, not in silence.
 
 ## Least privilege (§10.3)
 
@@ -75,7 +85,16 @@ the effect runs; a tool not in the agent's manifest allowlist throws
 priority tier → escalate up the care-team hierarchy → PARK with audit (never
 silently expire). Timer-driven off the injected clock. Tunable without a code
 change. On each hop the runtime emits `agent.task.escalated` and moves the work
-item to the `escalated` queue; the terminal park is audited and re-activatable.
+item to the `escalated` queue. The terminal is an ABANDONMENT, not a park: the item
+moves to its own `parked` queue, `agent.task.abandoned` is emitted, and the workflow is
+terminated with status `abandoned`. It is **not re-activatable** — a decision arriving
+afterwards is refused with `WorkflowTerminatedError`, because resolving it would resume
+a body the runtime had already declared abandoned and run its effect invisibly. Re-filing
+a parked item is a human act.
+
+**The ladder does not fire in the running application.** Timers advance only through
+`advanceTime()`, which has no caller in `src/`; every composition root pins the clock.
+See FAKE_FIDELITY.md.
 
 ## Wiring
 

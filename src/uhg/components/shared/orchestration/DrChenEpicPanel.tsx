@@ -129,7 +129,7 @@ export function DrChenEpicPanel({ onClose }: { onClose: () => void }) {
           {acknowledged && (
             <div className="rounded p-3 flex flex-col gap-1.5" style={{ background: 'rgba(66,190,101,0.06)', border: '1px solid rgba(66,190,101,0.3)' }}>
               <div className="flex items-center gap-2"><span style={{ fontSize: '10px', color: '#42be65' }}>✓</span><span className="font-mono" style={{ fontSize: '10px', color: '#42be65', letterSpacing: '0.08em' }}>PROVIDER ACKNOWLEDGED — T+8m</span></div>
-              <span style={{ fontSize: '10px', color: '#d1d5db' }}>"Duplicate therapy flagged — discontinuing Metformin. HbA1c lab ordered — home kit confirmed. Postpartum rehab referral placed — auth retrieved."</span>
+              <span style={{ fontSize: '10px', color: '#d1d5db' }}>&quot;Duplicate therapy flagged — discontinuing Metformin. HbA1c lab ordered — home kit confirmed. Postpartum rehab referral placed — auth retrieved.&quot;</span>
               <span className="font-mono" style={{ fontSize: '9px', color: '#4b5563' }}>AUDIT_20241115_100600_EPIC_DRPROVIDER_001 · Graph updated</span>
             </div>
           )}
@@ -220,7 +220,7 @@ export function DrChenEpicPanel({ onClose }: { onClose: () => void }) {
           <div className="rounded p-3 flex flex-col gap-2" style={{ background: 'rgba(66,190,101,0.06)', border: '1px solid rgba(66,190,101,0.3)' }}>
             <div className="flex items-center gap-2"><div className="rounded-full" style={{ width: 7, height: 7, background: '#42be65', boxShadow: '0 0 6px #42be65' }} /><span className="font-mono font-semibold" style={{ fontSize: '10px', color: '#42be65', letterSpacing: '0.08em' }}>PROVIDER ACKNOWLEDGED — T+8m</span></div>
             <div className="rounded p-2.5" style={{ background: 'rgba(28,28,28,0.8)', border: '1px solid rgba(57,57,57,0.5)' }}>
-              <span style={{ fontSize: '10px', color: '#d1d5db', lineHeight: 1.5, fontStyle: 'italic' }}>"Duplicate therapy flagged — discontinuing Metformin. HbA1c lab ordered — home kit confirmed. Postpartum rehab referral placed — auth retrieved."</span>
+              <span style={{ fontSize: '10px', color: '#d1d5db', lineHeight: 1.5, fontStyle: 'italic' }}>&quot;Duplicate therapy flagged — discontinuing Metformin. HbA1c lab ordered — home kit confirmed. Postpartum rehab referral placed — auth retrieved.&quot;</span>
             </div>
             <div className="flex flex-col gap-1 pl-1">
               {[{ label: 'A1C monitoring: Scheduled — 7 days', color: '#42be65' }, { label: 'Metformin: Discontinued in Epic', color: '#42be65' }, { label: 'HbA1c lab: Ordered — home kit active', color: '#42be65' }, { label: 'Postpartum rehab: Referral placed — pre-auth attached', color: '#42be65' }].map((item) => (

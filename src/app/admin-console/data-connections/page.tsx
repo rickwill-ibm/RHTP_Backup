@@ -63,7 +63,7 @@ const CONNECTORS_MOCK: Connector[] = [
   },
   {
     id: 'conn-04',
-    name: 'Bennett County CBO',
+    name: 'Frontier Community Action CBO',
     type: 'CBO',
     status: 'LIVE',
     lastSync: '2026-07-14 10:58',
@@ -123,7 +123,7 @@ const SYNC_LOG_MOCK: SyncLogEntry[] = [
   {
     id: 'sl-03',
     timestamp: '2026-07-14 10:58',
-    connector: 'Bennett County CBO',
+    connector: 'Frontier Community Action CBO',
     records: 12,
     status: 'SUCCESS',
     message: 'ServiceRequest updates received',

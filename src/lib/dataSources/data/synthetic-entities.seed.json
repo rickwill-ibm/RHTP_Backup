@@ -1,0 +1,835 @@
+{
+  "_comment": "CANONICAL SYNTHETIC-ENTITY REGISTRY. Single source of truth (AI-CODING-CONVENTIONS §1.1, §4 'single source') for every de-attributed organisation in the RHTP demo corpus. Wave 1 de-attributed three screens by hand and the same names survived in 30+ other files; this registry exists so that never happens again: names, short/graph forms, phones, emails, domains and street addresses are owned HERE and nowhere else. RULE THIS ENCODES: a real place name may appear as a LOCATION (county, city, ZIP, lat/lng, map label) but never inside an ORGANISATION name; tribal and people names may not appear in an organisation name at all. Consequently county/city/ZIP/lat/lng values are NOT substituted anywhere in this file — 'Bennett', 'Oglala Lakota', 'Pine Ridge', 'Winner', 'Rapid City' remain as geography, and county keys in particular are load-bearing for the networkAdequacy engine. Phones use the NANP-reserved 555-0100..555-0199 fictitious range; emails and domains use RFC 2606 example.org. The oldNames / oldPhones / oldDomains / oldStreets fields are PROVENANCE: they record what was replaced so the coherence sweep can prove zero residue, and they are the only place an old name may legitimately appear.",
+  "_provenanceNote": "oldNames/oldPhones/oldDomains/oldStreets are provenance-only and must never be rendered in the UI.",
+  "entities": [
+    {
+      "id": "ent-prairie-health",
+      "name": "Prairie Health Services",
+      "shortName": "Prairie Health Ctr",
+      "graphLabel": "Prairie Health",
+      "category": "clinic",
+      "domain": "prairie-health.example.org",
+      "email": "info@prairie-health.example.org",
+      "phone": "(605) 555-0168",
+      "address": {
+        "street": "410 Prairie Ridge Rd",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "Bennett County Health Services",
+        "Bennett County Health",
+        "Bennett County CAH"
+      ]
+    },
+    {
+      "id": "ent-frontier-action",
+      "name": "Frontier Community Action CBO",
+      "shortName": "Frontier Community Action",
+      "graphLabel": "Frontier Action",
+      "category": "cbo",
+      "domain": "frontier-action.example.org",
+      "email": "enroll@frontier-action.example.org",
+      "phone": "(605) 555-0166",
+      "address": {
+        "street": "212 Frontier Way",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "Bennett County Action CBO",
+        "Bennett County Action",
+        "Bennett County CBO"
+      ]
+    },
+    {
+      "id": "ent-prairie-roots",
+      "name": "Prairie Roots Food Network",
+      "shortName": "Prairie Roots",
+      "graphLabel": "Prairie Roots",
+      "category": "cbo",
+      "domain": "prairie-roots.example.org",
+      "email": "food@prairie-roots.example.org",
+      "phone": "(605) 555-0182",
+      "address": {
+        "street": "45 Cottonwood Dr",
+        "city": "Pine Ridge",
+        "county": "Oglala Lakota",
+        "zip": "57770"
+      },
+      "oldNames": [
+        "Oglala Sioux Tribe Community Services"
+      ]
+    },
+    {
+      "id": "ent-tribal-health-admin",
+      "name": "Tribal Health Program Administration",
+      "shortName": "Tribal Health Admin",
+      "graphLabel": "Tribal Health Admin",
+      "category": "agency",
+      "domain": "tribal-health-admin.example.org",
+      "email": "health@tribal-health-admin.example.org",
+      "phone": "(605) 555-0183",
+      "address": {
+        "street": "4400 E Hwy 18",
+        "city": "Oglala",
+        "county": "Oglala Lakota",
+        "zip": "57764"
+      },
+      "oldNames": [
+        "Oglala Sioux Tribe Health Administration"
+      ]
+    },
+    {
+      "id": "ent-tribal-employment",
+      "name": "Tribal Employment Program",
+      "shortName": "Tribal Employment",
+      "graphLabel": "Tribal Employment",
+      "category": "agency",
+      "domain": "tribal-health-admin.example.org",
+      "email": "jobs@tribal-health-admin.example.org",
+      "phone": "(605) 555-0184",
+      "address": {
+        "street": "4400 E Hwy 18",
+        "city": "Oglala",
+        "county": "Oglala Lakota",
+        "zip": "57764"
+      },
+      "oldNames": [
+        "Oglala Sioux Tribe Employment"
+      ]
+    },
+    {
+      "id": "ent-badlands-pcp",
+      "name": "Badlands Primary Care Group",
+      "shortName": "Badlands PCP",
+      "graphLabel": "Badlands PCP",
+      "category": "clinic",
+      "domain": "badlands-pcp.example.org",
+      "email": "care@badlands-pcp.example.org",
+      "phone": "(605) 555-0185",
+      "address": {
+        "street": "88 Cottonwood Rd",
+        "city": "Pine Ridge",
+        "county": "Oglala Lakota",
+        "zip": "57770"
+      },
+      "oldNames": [
+        "Oglala Lakota PCP Group"
+      ]
+    },
+    {
+      "id": "ent-frontier-fqhc",
+      "name": "Frontier FQHC",
+      "shortName": "Frontier FQHC",
+      "graphLabel": "Frontier FQHC",
+      "category": "fqhc",
+      "domain": "frontier-fqhc.example.org",
+      "email": "info@frontier-fqhc.example.org",
+      "phone": "(605) 555-0186",
+      "address": {
+        "street": "120 Cottonwood Dr",
+        "city": "Pine Ridge",
+        "county": "Oglala Lakota",
+        "zip": "57770"
+      },
+      "oldNames": [
+        "Pine Ridge FQHC"
+      ]
+    },
+    {
+      "id": "ent-state-housing",
+      "name": "State Housing Finance Agency",
+      "shortName": "Housing Agency",
+      "graphLabel": "State Housing Agy",
+      "category": "agency",
+      "domain": "state-housing.example.org",
+      "email": "housing@state-housing.example.org",
+      "phone": "(605) 555-0174",
+      "address": {
+        "street": "500 Capitol Plaza",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SDHDA — South Dakota Housing Development Authority",
+        "SD Housing Development Authority"
+      ]
+    },
+    {
+      "id": "ent-regional-wic",
+      "name": "Regional WIC Office",
+      "shortName": "Regional WIC",
+      "graphLabel": "Regional WIC",
+      "category": "agency",
+      "domain": "state-benefits.example.org",
+      "email": "wic@state-benefits.example.org",
+      "phone": "(605) 555-0170",
+      "address": {
+        "street": "410 Prairie Ridge Rd",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "Bennett County WIC Office"
+      ]
+    },
+    {
+      "id": "ent-state-benefits-frontier",
+      "name": "State Benefits Office — Frontier District",
+      "shortName": "State Benefits Office",
+      "graphLabel": "State Benefits Office",
+      "category": "agency",
+      "domain": "state-benefits.example.org",
+      "email": "benefits@state-benefits.example.org",
+      "phone": "(605) 555-0169",
+      "address": {
+        "street": "410 Prairie Ridge Rd",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "SD DSS Bennett County Office",
+        "SD DSS Bennett County",
+        "Bennett County DSS",
+        "Bennett DSS"
+      ]
+    },
+    {
+      "id": "ent-state-benefits-line",
+      "name": "State Benefits Line",
+      "shortName": "State Benefits Line",
+      "graphLabel": "State Benefits Line",
+      "category": "agency",
+      "domain": "state-benefits.example.org",
+      "email": "line@state-benefits.example.org",
+      "phone": "(800) 555-0190",
+      "address": {
+        "street": "500 Capitol Plaza",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD DSS Statewide Benefits Line",
+        "SD DSS"
+      ]
+    },
+    {
+      "id": "ent-state-workforce-frontier",
+      "name": "State Workforce Office — Frontier District",
+      "shortName": "State Workforce Office",
+      "graphLabel": "State Workforce Office",
+      "category": "agency",
+      "domain": "state.example.org",
+      "email": "jobs@state.example.org",
+      "phone": "(605) 555-0178",
+      "address": {
+        "street": "212 Frontier Way",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "SD Department of Labor — Bennett County",
+        "SD Department of Labor"
+      ]
+    },
+    {
+      "id": "ent-cedar-valley",
+      "name": "Cedar Valley Critical Access Hospital",
+      "shortName": "Cedar Valley CAH",
+      "graphLabel": "Cedar Valley CAH",
+      "category": "hospital",
+      "domain": "cedar-valley.example.org",
+      "email": "info@cedar-valley.example.org",
+      "phone": "(605) 555-0181",
+      "address": {
+        "street": "820 Cedar Bluff Dr",
+        "city": "Winner",
+        "county": "Tripp",
+        "zip": "57580"
+      },
+      "oldNames": [
+        "Avera Sacred Heart CAH",
+        "Avera Sacred Heart"
+      ]
+    },
+    {
+      "id": "ent-summit-regional",
+      "name": "Summit Regional",
+      "shortName": "Summit Regional",
+      "graphLabel": "Summit Regional",
+      "category": "hospital",
+      "domain": "summit-regional.example.org",
+      "email": "info@summit-regional.example.org",
+      "phone": "(605) 555-0172",
+      "address": {
+        "street": "1450 Summit Ridge Rd",
+        "city": "Rapid City",
+        "county": "Pennington",
+        "zip": "57701"
+      },
+      "oldNames": [
+        "Monument Health",
+        "Rapid City Regional Health"
+      ]
+    },
+    {
+      "id": "ent-cedar-bluff-regional",
+      "name": "Cedar Bluff Regional Medical Center",
+      "shortName": "Cedar Bluff Regional",
+      "graphLabel": "Cedar Bluff",
+      "category": "hospital",
+      "domain": "cedar-bluff.example.org",
+      "email": "info@cedar-bluff.example.org",
+      "phone": "(605) 555-0167",
+      "address": {
+        "street": "745 Cedar Bluff Dr",
+        "city": "Winner",
+        "county": "Tripp",
+        "zip": "57580"
+      },
+      "oldNames": [
+        "Winner Regional Medical Center"
+      ]
+    },
+    {
+      "id": "ent-riverbend-fqhc",
+      "name": "Riverbend Community Health FQHC",
+      "shortName": "Riverbend FQHC",
+      "graphLabel": "Riverbend FQHC",
+      "category": "fqhc",
+      "domain": "riverbend-health.example.org",
+      "email": "info@riverbend-health.example.org",
+      "phone": "(605) 555-0171",
+      "address": {
+        "street": "310 Riverbend Ave",
+        "city": "Winner",
+        "county": "Tripp",
+        "zip": "57580"
+      },
+      "oldNames": [
+        "Winner Community Health FQHC"
+      ]
+    },
+    {
+      "id": "ent-riverbend-health",
+      "name": "Riverbend Health Services",
+      "shortName": "Riverbend Health",
+      "graphLabel": "Riverbend Health",
+      "category": "clinic",
+      "domain": "riverbend-health.example.org",
+      "email": "su@riverbend-health.example.org",
+      "phone": "(605) 555-0173",
+      "address": {
+        "street": "1201 Riverbend Hwy",
+        "city": "Hot Springs",
+        "county": "Fall River",
+        "zip": "57747"
+      },
+      "oldNames": [
+        "Fall River Health Services"
+      ]
+    },
+    {
+      "id": "ent-southridge-specialists",
+      "name": "Southridge Specialist Network",
+      "shortName": "Southridge Specialists",
+      "graphLabel": "Southridge Spec",
+      "category": "specialist",
+      "domain": "southridge-spec.example.org",
+      "email": "referrals@southridge-spec.example.org",
+      "phone": "(605) 555-0176",
+      "address": {
+        "street": "455 Southridge Dr",
+        "city": "Hot Springs",
+        "county": "Fall River",
+        "zip": "57747"
+      },
+      "oldNames": [
+        "Fall River Specialist Network",
+        "Fall River Specialists"
+      ]
+    },
+    {
+      "id": "ent-southridge-mhc",
+      "name": "Southridge Mental Health Center",
+      "shortName": "Southridge MHC",
+      "graphLabel": "Southridge MHC",
+      "category": "behavioral",
+      "domain": "southridge-spec.example.org",
+      "email": "bh@southridge-spec.example.org",
+      "phone": "(605) 555-0177",
+      "address": {
+        "street": "455 Southridge Dr",
+        "city": "Hot Springs",
+        "county": "Fall River",
+        "zip": "57747"
+      },
+      "oldNames": [
+        "Fall River County Mental Health Center"
+      ]
+    },
+    {
+      "id": "ent-highland-cap",
+      "name": "Highland Community Action Partnership",
+      "shortName": "Highland CAP",
+      "graphLabel": "Highland CAP",
+      "category": "cbo",
+      "domain": "highland-cap.example.org",
+      "email": "liheap@highland-cap.example.org",
+      "phone": "(605) 555-0165",
+      "address": {
+        "street": "2525 Highland Main St",
+        "city": "Rapid City",
+        "county": "Pennington",
+        "zip": "57702"
+      },
+      "oldNames": [
+        "Community Action Partnership of the Black Hills"
+      ]
+    },
+    {
+      "id": "ent-safe-harbor",
+      "name": "Safe Harbor Center — Domestic Violence",
+      "shortName": "Safe Harbor Center",
+      "graphLabel": "Safe Harbor Ctr",
+      "category": "cbo",
+      "domain": "safe-harbor.example.org",
+      "email": "dv@safe-harbor.example.org",
+      "phone": "(605) 555-0180",
+      "address": {
+        "street": "PO Box 37",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "Sacred Heart Center — DV"
+      ]
+    },
+    {
+      "id": "ent-riverside-medical",
+      "name": "Riverside Medical Associates",
+      "shortName": "Riverside Medical",
+      "graphLabel": "Riverside Medical",
+      "category": "clinic",
+      "domain": "riverside-medical.example.org",
+      "email": "wellness@riverside-medical.example.org",
+      "phone": "(605) 555-0179",
+      "address": {
+        "street": "789 Riverside Blvd",
+        "city": "Gregory",
+        "county": "Gregory",
+        "zip": "57533"
+      },
+      "oldNames": [
+        "Gregory County Medical Associates",
+        "Gregory Co. Medical"
+      ]
+    },
+    {
+      "id": "ent-statewide-advocacy",
+      "name": "Statewide Disability Advocacy Services",
+      "shortName": "Statewide Advocacy",
+      "graphLabel": "Statewide Advocacy",
+      "category": "cbo",
+      "domain": "statewide-advocacy.example.org",
+      "email": "advocacy@statewide-advocacy.example.org",
+      "phone": "(605) 555-0159",
+      "address": {
+        "street": "104 N Statewide Ave",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD Advocacy Services",
+        "SD Disability Rights"
+      ]
+    },
+    {
+      "id": "ent-statewide-literacy",
+      "name": "Statewide Literacy Council",
+      "shortName": "Statewide Literacy",
+      "graphLabel": "Statewide Literacy",
+      "category": "cbo",
+      "domain": "statewide-literacy.example.org",
+      "email": "learn@statewide-literacy.example.org",
+      "phone": "(605) 555-0160",
+      "address": {
+        "street": "306 E Statewide Ave",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD Literacy Council"
+      ]
+    },
+    {
+      "id": "ent-statewide-credit",
+      "name": "Statewide Credit Counseling Service",
+      "shortName": "Statewide Credit Counseling",
+      "graphLabel": "Statewide Credit",
+      "category": "cbo",
+      "domain": "statewide-credit.example.org",
+      "email": "counsel@statewide-credit.example.org",
+      "phone": "(605) 555-0162",
+      "address": {
+        "street": "3900 S Statewide Ave",
+        "city": "Sioux Falls",
+        "county": "Minnehaha",
+        "zip": "57105"
+      },
+      "oldNames": [
+        "SD Consumer Credit Counseling"
+      ]
+    },
+    {
+      "id": "ent-state-hhs",
+      "name": "State HHS Agency",
+      "shortName": "State HHS",
+      "graphLabel": "State HHS",
+      "category": "agency",
+      "domain": "state.example.org",
+      "email": "hhs@state.example.org",
+      "phone": "(605) 555-0157",
+      "address": {
+        "street": "700 Statehouse Dr",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD Department of Health & Human Services (DHSS)",
+        "SD DHSS"
+      ]
+    },
+    {
+      "id": "ent-tribal-bh",
+      "name": "Tribal BH Program",
+      "shortName": "Tribal BH Prog",
+      "graphLabel": "Tribal BH Prog",
+      "category": "behavioral",
+      "domain": "tribal-health-admin.example.org",
+      "email": "bh@tribal-health-admin.example.org",
+      "phone": "(605) 555-0158",
+      "address": {
+        "street": "4400 E Hwy 18",
+        "city": "Oglala",
+        "county": "Oglala Lakota",
+        "zip": "57764"
+      },
+      "oldNames": [
+        "Rosebud BH Prog"
+      ]
+    },
+    {
+      "id": "ent-frontier-outreach",
+      "name": "Frontier Outreach",
+      "shortName": "Frontier Outreach",
+      "graphLabel": "Frontier Outreach",
+      "category": "cbo",
+      "domain": "frontier-action.example.org",
+      "email": "outreach@frontier-action.example.org",
+      "phone": "(605) 555-0161",
+      "address": {
+        "street": "212 Frontier Way",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "Lakota Outreach"
+      ]
+    },
+    {
+      "id": "ent-highland-bhc",
+      "name": "Highland BHC",
+      "shortName": "Highland BHC",
+      "graphLabel": "Highland BHC",
+      "category": "behavioral",
+      "domain": "highland-cap.example.org",
+      "email": "bhc@highland-cap.example.org",
+      "phone": "(605) 555-0163",
+      "address": {
+        "street": "601 Highland St",
+        "city": "Rapid City",
+        "county": "Pennington",
+        "zip": "57701"
+      },
+      "oldNames": [
+        "Rapid City BHC"
+      ]
+    },
+    {
+      "id": "ent-metro-csu",
+      "name": "Metro CSU",
+      "shortName": "Metro CSU",
+      "graphLabel": "Metro CSU",
+      "category": "behavioral",
+      "domain": "metro-health.example.org",
+      "email": "csu@metro-health.example.org",
+      "phone": "(605) 555-0164",
+      "address": {
+        "street": "4701 N Metro Ave",
+        "city": "Sioux Falls",
+        "county": "Minnehaha",
+        "zip": "57107"
+      },
+      "oldNames": [
+        "Sioux Falls CSU"
+      ]
+    },
+    {
+      "id": "ent-state-crisis-line",
+      "name": "State Crisis Line",
+      "shortName": "State Crisis Line",
+      "graphLabel": "State Crisis Line",
+      "category": "agency",
+      "domain": "state.example.org",
+      "email": "crisis@state.example.org",
+      "phone": "(800) 555-0188",
+      "address": {
+        "street": "700 Statehouse Dr",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD Crisis Line"
+      ]
+    },
+    {
+      "id": "ent-regional-legal-aid",
+      "name": "Regional Legal Aid",
+      "shortName": "Regional Legal Aid",
+      "graphLabel": "Regional Legal Aid",
+      "category": "cbo",
+      "domain": "regional-legal.example.org",
+      "email": "intake@regional-legal.example.org",
+      "phone": "(605) 555-0155",
+      "address": {
+        "street": "221 S Regional Ave",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "SD Legal Aid"
+      ]
+    },
+    {
+      "id": "ent-state-snap",
+      "name": "State SNAP Office",
+      "shortName": "State SNAP",
+      "graphLabel": "State SNAP",
+      "category": "agency",
+      "domain": "state-benefits.example.org",
+      "email": "snap@state-benefits.example.org",
+      "phone": "(605) 555-0154",
+      "address": {
+        "street": "410 Prairie Ridge Rd",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "SD SNAP Office"
+      ]
+    },
+    {
+      "id": "ent-rides-to-care",
+      "name": "Rides to Care",
+      "shortName": "Rides to Care",
+      "graphLabel": "Rides to Care",
+      "category": "program",
+      "domain": "state.example.org",
+      "email": "rides@state.example.org",
+      "phone": "(800) 555-0189",
+      "address": {
+        "street": "700 Statehouse Dr",
+        "city": "Pierre",
+        "county": "Hughes",
+        "zip": "57501"
+      },
+      "oldNames": [
+        "Rides to Wellness"
+      ]
+    },
+    {
+      "id": "ent-regional-food-bank",
+      "name": "Regional Food Bank Network",
+      "shortName": "Regional Food Bank",
+      "graphLabel": "Regional Food Bank",
+      "category": "cbo",
+      "domain": "regional-foodbank.example.org",
+      "email": "info@regional-foodbank.example.org",
+      "phone": "(605) 555-0153",
+      "address": {
+        "street": "3301 Regional Ave",
+        "city": "Martin",
+        "county": "Bennett",
+        "zip": "57551"
+      },
+      "oldNames": [
+        "SD Food Bank Network"
+      ]
+    }
+  ],
+  "_variantComment": "Organisation-name variants that resolve to an entity above but carry a suffix/qualifier. Applied longest-match-first AFTER entity oldNames so 'Avera Sacred Heart CAH — BH' beats 'Avera Sacred Heart'. Location suffixes (— Winner, — Rapid City, — Pine Ridge) are deliberately preserved: a real place name is allowed as a LOCATION.",
+  "variantSubstitutions": {
+    "Avera Sacred Heart CAH — BH": "Cedar Valley BH",
+    "Avera Sacred Heart Hospital ED": "Cedar Valley Hospital ED",
+    "Avera Sacred Heart — Nephrology": "Cedar Valley — Nephrology",
+    "Avera Sacred Heart BH": "Cedar Valley BH",
+    "Avera Behavioral Health Mobile Crisis": "Cedar Valley Behavioral Health Mobile Crisis",
+    "Avera Behavioral Health": "Cedar Valley Behavioral Health",
+    "Avera Endocrinology": "Cedar Valley Endocrinology",
+    "Avera Nephrology": "Cedar Valley Nephrology",
+    "Avera McKennan Hospital": "Cedar Valley Metro Hospital",
+    "Avera Specialists": "Cedar Valley Spec",
+    "Avera BH Svcs": "Cedar Valley BH",
+    "Sacred Heart Center": "Safe Harbor Center",
+    "Rosebud Area Food Security Network": "Tribal Area Food Security Network",
+    "Rapid City Pharmacy": "Highland Pharmacy",
+    "Sioux Falls Community Health": "Metro Community Health",
+    "SD Food Bank": "Regional Food Bank",
+    "Monument Health Crisis Stabilization Unit": "Summit Regional Crisis Stabilization Unit",
+    "Monument Health Crisis Line": "Summit Regional Crisis Line",
+    "Monument Health Cardiology": "Summit Regional Cardiology",
+    "Monument Health Rapid City": "Summit Regional — Rapid City",
+    "Winner Regional Healthcare Center": "Cedar Bluff Regional Healthcare Center",
+    "Winner Regional Healthcare": "Cedar Bluff Regional Healthcare",
+    "Winner Regional Ophthalmology": "Cedar Bluff Regional Ophthalmology",
+    "Winner Pharmacy": "Cedar Bluff Pharmacy",
+    "Bennett County Health Services — RHTP Network": "Prairie Health Services — RHTP Network",
+    "Bennett County Health Network": "Prairie Health Network",
+    "Bennett County Health Pediatric": "Prairie Health Pediatric",
+    "Bennett County Health CCBHC": "Prairie Health CCBHC",
+    "Bennett County Health PCP": "Prairie Health PCP",
+    "Bennett County Health CAH": "Prairie Health CAH",
+    "Bennett County Health EHR": "Prairie Health EHR",
+    "Bennett County Health RHTP": "Prairie Health RHTP",
+    "Bennett County School District": "Frontier School District",
+    "Bennett County Schools": "Frontier Schools",
+    "SD DSS Integrated Benefits": "State Benefits — Integrated Benefits",
+    "SD DSS Benefits Stream": "State Benefits Stream",
+    "SD Department of Social Services": "State Benefits Agency",
+    "SD Dept of Social Services": "State Benefits Agency",
+    "SD DHSS BH Division": "State HHS Agency BH Division",
+    "SD Division of Behavioral Health": "State Division of Behavioral Health",
+    "SD DV Hotline": "State DV Hotline",
+    "SD Substance Use Counseling": "State Substance Use Counseling",
+    "SD Area Agency on Aging": "State Area Agency on Aging",
+    "SD Medicaid Transport Benefit": "State Medicaid Transport Benefit",
+    "Southeast SD Crisis Services": "Southeast Regional Crisis Services",
+    "Southeast SD Housing Navigation": "Southeast Regional Housing Navigation",
+    "SD DOH": "State DOH",
+    "SD DLR": "State Workforce Agy",
+    "SDHDA": "Housing Agency",
+    "SD Housing Auth": "State Housing Agy",
+    "Oglala Lakota PCP": "Badlands PCP",
+    "Bennett Co. Health": "Prairie Health Ctr",
+    "Bennett Co. HC": "Prairie Health Ctr",
+    "Winner Regional": "Cedar Bluff Regional",
+    "Winner FQHC": "Riverbend FQHC",
+    "Monument Cardio": "Summit Cardio"
+  },
+  "_contactComment": "Contact-detail substitutions. Real-looking phone numbers become NANP-reserved 555-01xx (area code preserved as geography); real domains become RFC 2606 example.org; real street addresses become synthetic while city/county/ZIP are preserved.",
+  "contactSubstitutions": {
+    "phones": {
+      "(312) 864-6000": "(312) 555-0152",
+      "(312) 926-2000": "(312) 555-0153",
+      "(312) 926-8400": "(312) 555-0154",
+      "(312) 942-5000": "(312) 555-0155",
+      "(312) 942-6200": "(312) 555-0157",
+      "(312) 996-6500": "(312) 555-0158",
+      "(605) 224-8294": "(605) 555-0159",
+      "(605) 224-9738": "(605) 555-0160",
+      "(605) 322-4065": "(605) 555-0161",
+      "(605) 334-6004": "(605) 555-0162",
+      "(605) 335-0364": "(605) 555-0163",
+      "(605) 336-0624": "(605) 555-0164",
+      "(605) 348-0820": "(605) 555-0165",
+      "(605) 685-6100": "(605) 555-0166",
+      "(605) 685-6581": "(605) 555-0167",
+      "(605) 685-6622": "(605) 555-0168",
+      "(605) 685-6623": "(605) 555-0169",
+      "(605) 685-6996": "(605) 555-0170",
+      "(605) 745-3159": "(605) 555-0171",
+      "(605) 755-1000": "(605) 555-0172",
+      "(605) 773-3165": "(605) 555-0173",
+      "(605) 773-3181": "(605) 555-0174",
+      "(605) 773-3455": "(605) 555-0176",
+      "(605) 773-3656": "(605) 555-0177",
+      "(605) 773-5017": "(605) 555-0178",
+      "(605) 835-8394": "(605) 555-0179",
+      "(605) 842-1234": "(605) 555-0180",
+      "(605) 842-7100": "(605) 555-0181",
+      "(605) 867-5131": "(605) 555-0182",
+      "(605) 867-5821": "(605) 555-0183",
+      "(708) 216-9000": "(708) 555-0184",
+      "(773) 702-1000": "(773) 555-0185",
+      "(773) 975-1600": "(773) 555-0186",
+      "(800) 430-7233": "(800) 555-0188",
+      "(800) 772-1213": "(800) 555-0189",
+      "(800) 843-8394": "(800) 555-0190"
+    },
+    "domains": {
+      "bennett.sd.gov": "state-benefits.example.org",
+      "averasacredheart.org": "cedar-valley.example.org",
+      "bennettcountyhealth.org": "prairie-health.example.org",
+      "bennettcountyaction.org": "frontier-action.example.org",
+      "monumenthealth.org": "summit-regional.example.org",
+      "monument.health": "summit-regional.example.org",
+      "sacredheartcenter.org": "safe-harbor.example.org",
+      "gregorycountymed.org": "riverside-medical.example.org",
+      "fallriverhealth.org": "riverbend-health.example.org",
+      "sdadvocacy.org": "statewide-advocacy.example.org",
+      "sdliteracy.org": "statewide-literacy.example.org",
+      "sdccc.org": "statewide-credit.example.org",
+      "sdhda.org": "state-housing.example.org",
+      "ostcs.org": "prairie-roots.example.org",
+      "ostadmin.org": "tribal-health-admin.example.org",
+      "capbh.org": "highland-cap.example.org",
+      "avera.org": "cedar-valley.example.org",
+      "sd.gov": "state.example.org"
+    },
+    "streets": {
+      "102 N. Van Buren St": "410 Prairie Ridge Rd",
+      "102 N Van Buren St": "410 Prairie Ridge Rd",
+      "204 W 3rd St": "212 Frontier Way",
+      "501 Summit St": "820 Cedar Bluff Dr",
+      "677 Cathedral Dr": "1450 Summit Ridge Rd",
+      "3060 E. Elizabeth St": "500 Capitol Plaza",
+      "3060 E Elizabeth St": "500 Capitol Plaza",
+      "1 Crazy Horse Dr": "45 Cottonwood Dr",
+      "601 E. St. Joseph St": "601 Highland St",
+      "601 E St Joseph St": "601 Highland St",
+      "700 Governors Dr": "700 Statehouse Dr",
+      "1201 Highway 71": "1201 Riverbend Hwy",
+      "4701 N Westport Ave": "4701 N Metro Ave",
+      "4901 E 26th St": "4901 E Metro St",
+      "3900 S Kiwanis Ave": "3900 S Statewide Ave",
+      "2525 W Main St": "2525 Highland Main St",
+      "306 E Capitol Ave": "306 E Statewide Ave",
+      "104 N Euclid Ave": "104 N Statewide Ave",
+      "221 S Central Ave": "221 S Regional Ave",
+      "3301 Vine Ave": "3301 Regional Ave",
+      "512 Prospect Ave": "512 Statehouse Ave",
+      "1842 Oak Street": "1842 Cedar Bluff Street",
+      "847 Oak Street": "847 Summit Street",
+      "789 Grand Blvd": "789 Riverside Blvd",
+      "223 Pine Ave": "223 Metro Ave",
+      "412 Main St": "412 Prairie Main St"
+    }
+  }
+}

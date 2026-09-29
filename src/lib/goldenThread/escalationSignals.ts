@@ -18,6 +18,7 @@
  * (references, codes, amounts, rungs — never a memberId / name / clinical free-text).
  */
 import { evaluateInterlock } from '@/lib/agents/governance/interlock';
+import { effectiveAutonomy, PROCESS_GATE_OF } from '@/lib/goldenThread/nistMap';
 import {
   computeProcessTier,
   latestOfType,
@@ -30,7 +31,15 @@ import type { AutonomyTier } from '@/lib/agents/manifest/types';
 import { daysToDeadline, RECOVERY_URGENT_WINDOW_DAYS } from './recoveryDispatch';
 import { isRecoveryTerminal } from './workQueueView';
 
-/** The process gate over the authority-ladder semantics (weakest → strongest). */
+/**
+ * The process gate over the authority-ladder semantics (weakest → strongest).
+ *
+ * NOMINAL ON PURPOSE, not a `.toLowerCase()` of `EffectiveAutonomy`. `gate` crosses an HTTP boundary —
+ * `/api/evidence/[id]` returns it inside `analysis.routed`, a client renders the raw token, and a test
+ * fixture pins the literal `'hitl'` — so deriving it by string transform would change an API body with
+ * no compile-time signal. The values come from `PROCESS_GATE_OF` in nistMap, one explicit table, so
+ * widening the vocabulary is a type error there rather than a silent wire change here.
+ */
 export type ProcessGate = 'assist' | 'hitl' | 'hotl' | 'autonomous';
 
 /** Notification severity (informational → tamper-critical). */
@@ -64,10 +73,10 @@ export interface EscalationResult {
 
 /** Authority rung → process-gate vocabulary (A0 assist … A3 autonomous). */
 const RUNG_GATE: Readonly<Record<AuthorityRung, ProcessGate>> = Object.freeze({
-  A0: 'assist',
-  A1: 'hitl',
-  A2: 'hotl',
-  A3: 'autonomous',
+  A0: PROCESS_GATE_OF[effectiveAutonomy('A0')] as ProcessGate,
+  A1: PROCESS_GATE_OF[effectiveAutonomy('A1')] as ProcessGate,
+  A2: PROCESS_GATE_OF[effectiveAutonomy('A2')] as ProcessGate,
+  A3: PROCESS_GATE_OF[effectiveAutonomy('A3')] as ProcessGate,
 });
 
 /**

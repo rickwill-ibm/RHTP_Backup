@@ -17,7 +17,23 @@ export type QueueName =
   | 'denied-appeal'
   | 'more-info'
   | 'agent-proposal' // G4: an agent-runtime proposal awaiting a human decision (HITL)
-  | 'escalated'; // G4: an agent proposal escalated past its SLA up the care-team hierarchy
+  | 'escalated' // G4: an agent proposal escalated past its SLA up the care-team hierarchy
+  /**
+   * W8/G-001: the escalation ladder is exhausted and the runtime ABANDONED the work item.
+   *
+   * Its own queue, because a parked proposal used to stay on `escalated` with `status: 'pending'` —
+   * visible, but indistinguishable from one still actively escalating. A reviewer scanning
+   * `escalated` for live work could not tell a dead row from a live one, and that mislabelling was
+   * the actual defect rather than invisibility.
+   *
+   * THE ITEM IS NOT ACTIONABLE. This said it was, which was the claim `escalationLadder.ts` was
+   * written to retract and this line did not get the retraction. The proposal record does outlive
+   * the terminated workflow — but only so the refusal is LOUD: the body is still suspended on its
+   * decision promise, so resolving the record would resume it and run its effect after the runtime
+   * declared the work abandoned. `decide()` refuses with `WorkflowTerminatedError`. A parked row is
+   * a dead row that must be RE-FILED by a human; the runtime provides no re-activation path.
+   */
+  | 'parked';
 
 export interface WorkItem {
   queue: QueueName;

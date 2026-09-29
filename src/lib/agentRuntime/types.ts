@@ -14,16 +14,71 @@
  * typed data driven by a generic engine (plan §1.2).
  */
 import type { AutonomyTier } from '@/lib/agents/manifest';
+import type { NeedDomain, ProofScope, QualifiedReviewer } from '@/lib/authz/credentialing';
 
 /** The pre-allocated C2 agent-task event types (the ONLY types this lane emits). */
 export const AGENT_C2_EVENT_TYPES = [
   'agent.task.proposed',
   'agent.task.approved',
   'agent.task.rejected',
-  'agent.task.executed',
+  /**
+   * The workflow SETTLED, carrying the outcome it reported.
+   *
+   * THIS REPLACED AN `agent.task.executed` EMITTED AT APPROVAL TIME (register G-002) — before
+   * `rec.resolve()` let the body resume, and therefore before the body attempted its state
+   * transition. The durable C2 record asserted that a thread executed when it may not have advanced,
+   * and `PaResult`'s honest `not-advanced` terminal reached only a demo projection, never the stream
+   * an auditor reads. The honesty had landed in the shallowest layer and was absent in the deepest.
+   *
+   * AND THE ENGINE WAS ASSERTING SOMETHING IT COULD NOT KNOW. It performs no effects — `useTool`
+   * does. `executed` at approval time was the engine claiming an effect it neither performed nor
+   * observed. So it no longer claims one: it records that the workflow settled and copies, verbatim,
+   * the outcome string the workflow reported. It parses nothing and understands nothing, which is
+   * what keeps domain semantics out of the runtime.
+   *
+   * A workflow that reports no outcome yields `'unreported'` — an explicitly NEGATIVE record rather
+   * than silence or a false affirmative. That is the same negative-sink discipline
+   * `parseDemoOutcome` uses, and it is why a body that forgets cannot default to "it worked".
+   */
+  'agent.task.settled',
   'agent.task.escalated',
+  /**
+   * The escalation ladder is exhausted and the work item was ABANDONED by the runtime (G-001).
+   *
+   * Distinct from `escalated` because a parked proposal used to be emitted as one more `escalated`
+   * with `hop: 'park'`, on a work item still sitting at `queue: 'escalated'` and `status: 'pending'`
+   * — visible, but INDISTINGUISHABLE from a proposal still actively escalating. The defect was
+   * mislabelling, not invisibility, and a reviewer scanning the escalated queue had no way to tell a
+   * live item from a dead one.
+   */
+  'agent.task.abandoned',
 ] as const;
 export type AgentC2EventType = (typeof AGENT_C2_EVENT_TYPES)[number];
+
+/**
+ * The statuses from which a workflow never moves again.
+ *
+ * WHY THIS EXISTS AS A CONST AND NOT AS `=== 'completed' || === 'failed'` AT EACH SITE. W8 added
+ * `'abandoned'` to `WorkflowSnapshot['status']`. This file argues at length (see `HumanDecision`)
+ * that abandonment must NOT be a widened `HumanDecision`, because every consumer tests for
+ * `'rejected'` and treats everything else as approval, so the widening would compile clean. The
+ * same trap was then walked into one union over: two sites tested for specific terminal members and
+ * treated everything else as "keep waiting", and neither produced a compile error.
+ *
+ *   - `driveAutoApprove` accepted only completed|failed, so an abandoned workflow was never
+ *     `allSettled` and the loop spun its full iteration budget before falling out.
+ *   - `awaitSuspension` tested waiting-decision|failed, so an abandoned workflow fell through its
+ *     turn cap and threw "never suspended within N turns" — a wrong diagnosis on a fail-closed path
+ *     that a route maps to a 500.
+ *
+ * One const, one predicate, and a `satisfies` that makes the next added status a compile error at
+ * the definition rather than a silent behaviour change at two call sites.
+ */
+export const TERMINAL_STATUSES = ['completed', 'failed', 'abandoned'] as const;
+
+export function isTerminalStatus(s: WorkflowSnapshot['status'] | undefined): boolean {
+  return s !== undefined && (TERMINAL_STATUSES as readonly string[]).includes(s);
+}
 
 /** A PHI-safe agent-task event (C2 envelope subset; partitionKey = memberId). */
 export interface AgentTaskEvent {
@@ -72,6 +127,17 @@ export interface ProposedAction {
   /** A short, code-level summary for the reviewer (no free-text PHI). */
   summary?: string;
   /**
+   * Which of 42 CFR 438.210(b)(3)'s three need domains this action addresses — medical, behavioral
+   * health, or LTSS.
+   *
+   * DELIBERATELY UNDEFAULTED for an adverse action: a reviewer attested for `medical` is not thereby
+   * attested for behavioral health or LTSS, and silently defaulting would let a medical attestation
+   * satisfy a behavioral-health denial — precisely the substitution the rule exists to prevent, and
+   * the shape of the error this programme already retracted once ("qualified physician decider").
+   * A NON-adverse action does not need one; `engine.propose` refuses an adverse one that omits it.
+   */
+  needDomain?: NeedDomain;
+  /**
    * Wave-3 MED-3 (additive, optional): true when this action is a payer-facing
    * SUBMISSION (transmit/rebill/appeal-submit). A submission ALWAYS requires a
    * qualified human regardless of autonomy tier — the runtime auto-approve gate
@@ -105,9 +171,30 @@ export interface WorkflowSnapshot {
   workflowId: string;
   memberId: string;
   agentId: string;
-  status: 'running' | 'waiting-decision' | 'completed' | 'failed';
+  /**
+   * `abandoned` is a GOVERNANCE TERMINAL, not a crash and not a decision.
+   *
+   * The escalation ladder exhausted without a human. The instance is TERMINATED from the engine side
+   * — the body's `await` is left dangling, which is the honest representation because the body
+   * genuinely never ran further. It is deliberately NOT modelled by resolving the proposal with a
+   * synthesised `HumanDecision`: `decision` is `'approved' | 'rejected'`, every consumer tests for
+   * `'rejected'` and treats everything else as approval (`paAgent.ts:76`, `referralAgent.ts:65`,
+   * `governedAction.ts:299`), so widening that union would have compiled clean and routed an
+   * abandoned proposal straight into the execution branch. And `'rejected'` would be worse still: a
+   * timer-manufactured adverse benefit determination carrying 42 CFR 438.404 notice and appeal
+   * duties that nothing discharges.
+   */
+  status: 'running' | 'waiting-decision' | 'completed' | 'failed' | 'abandoned';
   /** The proposalId currently awaiting a decision, if any. */
   awaitingProposalId?: string;
+  /**
+   * What a proof resolving that proposal must cover: the determination class and the need domain.
+   *
+   * Published so a caller can mint the RIGHT proof rather than guessing. Without it a driver mints
+   * one proof for the whole batch and hopes every proposal happens to match — which is what the demo
+   * driver did, safely only by accident of today's seed being all-medical.
+   */
+  awaitingScope?: ProofScope;
   startedAtMs: number;
   updatedAtMs: number;
   result?: unknown;
@@ -125,9 +212,11 @@ export interface WorkflowContext {
   /**
    * HITL primitive: propose an action and WAIT for a human decision. Emits
    * `agent.task.proposed`, creates an `agent-proposal` work-queue item, registers
-   * escalation timers, then suspends. Resolves on `agent.task.approved` (also
-   * emitting `agent.task.executed`) or `agent.task.rejected`. Autonomy tier
-   * (read from the manifest) decides whether a human signal is required.
+   * escalation timers, then suspends. Resolves on `agent.task.approved` (carrying
+   * `effectPending: true` — the effect has NOT happened yet) or `agent.task.rejected`.
+   * Autonomy tier (read from the manifest) decides whether a human signal is required.
+   * If the escalation ladder is exhausted first the workflow is ABANDONED and this
+   * promise never resolves; a decision arriving afterwards is refused loudly.
    */
   proposeAndWait(action: ProposedAction): Promise<HumanDecision>;
   /**
@@ -171,6 +260,16 @@ export interface WorkflowSignal {
   name: 'agent.task.approved' | 'agent.task.rejected';
   proposalId: string;
   decidedBy: string;
+  /**
+   * PROOF that `decidedBy` is a qualified reviewer, minted by
+   * `@/lib/authz/credentialing.assertReviewerQualified` and unforgeable outside it.
+   *
+   * REQUIRED whenever the proposal took the human-required path (an adverse coverage action, or a
+   * HITL tier) — `engineSupport.assertSignalDecider` refuses the signal without it. Optional in the
+   * type because a non-human-required proposal does not need one, and because making it required
+   * everywhere would push callers toward minting a proof for resolutions that do not warrant one.
+   */
+  reviewer?: QualifiedReviewer;
 }
 
 /**

@@ -1,12 +1,20 @@
 /**
- * Escalation-as-data (G4). SLA per priority tier, then escalate up the care-team
- * hierarchy, then PARK with audit — never silently expire (DP-3). The policy is
- * data (data/escalation-policies.json), tunable without a code change; the runtime
- * loads it and schedules timers off the injected clock (deterministic).
+ * Escalation-as-data (G4). An internal review window per priority tier, then escalate up the
+ * care-team hierarchy, then ABANDON with audit — never silently expire (DP-3). The policy is data
+ * (data/escalation-policies.json), tunable without a code change; the runtime loads it and schedules
+ * timers off the injected clock (deterministic).
  *
- * This module holds the policy types, the hand validator (refuses loudly, the
- * house pattern), and the pure step function. The engine owns timer scheduling
- * and emits `agent.task.escalated` for each hop and the terminal park.
+ * This module holds the policy types, the hand validator (refuses loudly, the house pattern), and
+ * the pure step function. `escalationLadder.ts` — NOT the engine — owns timer scheduling behind a
+ * narrow port, emits `agent.task.escalated` for each hop, and emits `agent.task.abandoned` at the
+ * terminal. The `'park'` spelling survives in `onExhaust` and in `EscalationStep` as a DATA
+ * vocabulary that has drifted from the behaviour it names; renaming it is a data-contract change
+ * with its own wave (register G-055).
+ *
+ * `slaHours` HERE IS AN INTERNAL REVIEW CLOCK. It is measured from `proposeAndWait` — the moment
+ * this runtime was asked — and has no relationship to 42 CFR 438.210(d), whose 7-calendar-day
+ * standard and 72-hour expedited timeframes run from RECEIPT OF THE REQUEST FOR SERVICE, an instant
+ * this runtime never observes. See register G-056 for the collision risk in the numbers themselves.
  */
 import policiesJson from './data/escalation-policies.json';
 import type { EscalationPriority } from './types';

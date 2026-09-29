@@ -1,0 +1,491 @@
+{
+  "_comment": "CODEOWNERS-PROTECTED. The 45 CFR 92.210(b) identification record and its (c) mitigations. Changing it is a Section 1557 review, exactly as changing authority-lock.json is a security review. An entry here is a REVIEWED statement that a named human made on a date; adding one to silence a gate, without doing the review, is the failure this file's separateness exists to make visible.",
+  "version": "1.0.0",
+  "entries": [
+    {
+      "field": "MemberContext.channelPreference",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "age", "national-origin"],
+      "directness": "proxy",
+      "basis": "Channel preference measures disability (TTY/SMS for deaf and hard-of-hearing members; voice for blind and low-vision members), age (mail and phone skew older) and national origin/LEP (language availability drives channel choice). resolveChannel now honours it for every MEMBER-FACING channel, with internal care-team routing (task) exempt because a member's contact preference has nothing to say about a care-team queue. CORRECTED: this basis previously read 'resolveChannel SELECTS the channel from it', which was FALSE — the function took signal.channel first, and signalIntake sets that from TaxonomyEntry.defaultChannel, which 10 of the 11 shipped taxonomy kinds carry. The member's preference was reached only for the one kind without a default, so it was in practice dead, and a deaf member whose recorded preference was sms received care-gap outreach on portal.",
+      "mitigation": {
+        "measure": "The member's stated preference now wins for every member-facing channel (resolveChannel), so a taxonomy default is a FALLBACK for a member who expressed none rather than an override of one who did. Verified end to end: the seeded demo's acceptance shape moved 6/3/1 to 7/3/0 because the delay it used to show was this member being moved off portal onto sms against their choice and then caught by the sms quiet-hours window. RESIDUE, found by making the fix and recorded rather than left invisible (G-053): honouring a SINGLE stated preference CONCENTRATES every touchpoint onto that one channel, so that channel's frequency cap binds harder — a member who names one accessible channel is suppressed MORE than a member who names none. Members who name a single accessible channel are disproportionately members with a disability, so this fix for one Section 1557 effect surfaced another. Per-channel caps need to become a per-member budget; that is owed, not done.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1787385600000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues",
+        "memberFacingReason": "We try to reach you the way you asked us to. If a message reached you late, or in a way that does not work for you, tell us and we will change it."
+      }
+    },
+    {
+      "field": "MemberContext.recentEdWithinHours",
+      "toolScope": "clinical-decision-support",
+      "measures": ["race", "national-origin", "disability"],
+      "directness": "proxy",
+      "basis": "Emergency-department utilization is the canonical cost/utilization proxy — the Obermeyer/Optum failure mode's own input class — and correlates with race, national origin and disability through access barriers rather than through need. The effect of recentEdBoost here is FAVOURABLE, which is precisely why it would never be flagged; 92.210(b) asks whether the factor MEASURES the characteristic, not whether its effect is benign.",
+      "mitigation": {
+        "measure": "The boost is recorded as an explicit, named, versioned policy-pack factor (recentEdBoost) rather than folded into an opaque score, so its magnitude is reviewable and adjustable without a code change. KNOWN RESIDUE, stated rather than mitigated: the boost is one-sided — members whose access barriers present as ED use are lifted, members whose barriers present as NO utilization at all receive nothing, and this record does not close that. A no-utilization counterpart is owed.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1786435200000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "Signal.measure",
+      "toolScope": "clinical-decision-support",
+      "measures": ["sex", "age"],
+      "directness": "direct",
+      "basis": "Quality measure identifiers are sex- and age-defined by construction: breast cancer screening is female 50-74, cervical cancer screening female 21-64, childhood immunization status is pediatric. Every care-gap signal therefore carries a de facto sex/age classifier, in a field whose own comment describes it as a PHI-safe code — and the dedupe key template propagates it. This is a DIRECT protected input, not a proxy, and it was invisible because it is expressed as a code.",
+      "mitigation": {
+        "measure": "The sex/age restriction is inherent to the clinical measure specification and is clinically correct — a cervical cancer screening gap for a member outside the eligible population would be a defect, not fairness. The mitigation is therefore identification and scope-limiting rather than removal: the measure id governs GAP DETECTION only, and is not permitted as an input to prioritisation, channel selection or suppression. Enforced by keeping it out of priorityScore.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1785484800000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "MemberContext.contactHistory",
+      "toolScope": "clinical-decision-support",
+      "measures": ["race", "disability", "age"],
+      "directness": "proxy",
+      "basis": "Frequency-cap suppression keyed on prior-contact count measures housing stability and household composition, which correlate with race, disability and age. Members in shared or unstable housing, several members reachable on one number, or with churn-heavy contact records accrue contacts that were never theirs and are then suppressed from outreach they need.",
+      "mitigation": {
+        "measure": "Suppression is a DELAY with a named cap and window, never a silent drop, and the delay bundle records which cap fired — so a suppressed member is visible in the disposition record rather than absent from it. RESIDUE: contacts are not attributed per person within a household, so the phantom-contact case remains open and is registered.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1784534400000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "MemberContext.recentlyClosedMeasures",
+      "toolScope": "clinical-decision-support",
+      "measures": ["sex", "age"],
+      "directness": "proxy",
+      "basis": "Derived from Signal.measure and carrying the same sex/age restriction at one remove: the set of measures that CAN be recently closed is bounded by the member's measure eligibility.",
+      "mitigation": {
+        "measure": "Used only to supersede an outreach for a gap that is already closed — a suppression that can only remove work for a member who no longer needs it. Same scope limit as Signal.measure: never an input to prioritisation.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1783584000000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "MemberContext.consentScopesGranted",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "Consent scope gates routing, and the behavioural-health scope is reached only by members with a mental-health data class — so a routing gate keyed on consent scope is, for that scope, a disability-status gate under Section 1557. 42 CFR Part 2 interacts here: a mitigation record quoting behavioural-health cohort statistics is itself a disclosure surface.",
+      "mitigation": {
+        "measure": "Consent gating is a legal requirement (42 CFR Part 2, NY MHL 33.13) and cannot be removed; the mitigation is that a consent-absent suppression is RECORDED as such and is distinguishable from a member who was never eligible, so an absence of behavioural-health outreach is attributable to consent rather than indistinguishable from neglect. RESIDUE: no aggregate BH-cohort fairness reporting exists, and building one raises a Part 2 redisclosure question this record does not answer.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1782633600000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "PolicyPack.smsWindow",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "age"],
+      "directness": "proxy",
+      "basis": "The SMS quiet-hours window determines WHO is delayed, and it only ever delays SMS — the channel deaf and hard-of-hearing members depend on. Combined with channelPreference it is the mechanism by which a disability-correlated delay is produced.",
+      "mitigation": {
+        "measure": "The window is evaluated as the MEMBER experiences it when their UTC offset is known (outsideSmsWindow takes utcOffsetMinutes), so the quiet hours mean the same thing for every member in a multi-timezone state. The field type said \"24h clock, local\" while the engine read getUTCHours() — a contradiction found during this review, under which members in one part of a state were delayed for reasons unrelated to their preference, along a disability line because the window only ever delays SMS. RESIDUE, stated rather than papered over: this platform carries NO member timezone yet, so with the offset absent the behaviour is unchanged (UTC). Guessing a timezone would substitute one silent error for another.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1781683200000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "PolicyPack.priorityWeights",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age"],
+      "directness": "proxy",
+      "basis": "Signal priority is assigned upstream by clinical taxonomy, and several taxonomy classes are age-bounded (paediatric immunization, adult screening). The weight table therefore transmits an age restriction it does not name.",
+      "mitigation": {
+        "measure": "Weights are data in a versioned policy pack, surfaced by rule id in every explanation, so a member-facing or regulator-facing explanation names the weight that fired rather than reporting an unattributed score.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1780732800000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "PolicyPack.recentEdBoost",
+      "toolScope": "clinical-decision-support",
+      "measures": ["race", "national-origin", "disability"],
+      "directness": "proxy",
+      "basis": "The magnitude of the ED-utilization proxy above. Separate entry because the FIELD is the unit of regulation: the input and the weight applied to it are two reviewable things, and a pack may change the weight without touching the input.",
+      "mitigation": {
+        "measure": "Named, versioned and bounded in the pack rather than inline in code, so its magnitude is a reviewed data change. Same one-sided residue as recentEdWithinHours.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1779782400000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "PolicyPack.frequencyCaps",
+      "toolScope": "clinical-decision-support",
+      "measures": ["race", "disability", "age"],
+      "directness": "proxy",
+      "basis": "The cap magnitudes applied to contactHistory above. Same reasoning for the separate entry.",
+      "mitigation": {
+        "measure": "Per-channel caps in versioned pack data, surfaced by rule id in the delay bundle so a suppressed member is visible in the disposition record rather than absent from it. RESIDUE (G-053): caps are PER CHANNEL, and honouring a member's single stated channel preference concentrates all of their outreach onto that channel — so the cap binds harder for exactly the members most likely to have named one accessible channel. A per-member contact budget, rather than a per-channel one, is the fix and is owed.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1778832000000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "PolicyPack.channelDefaultOrder",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "age", "national-origin"],
+      "directness": "proxy",
+      "basis": "The fallback channel order applied when a member expressed no preference. It encodes an assumption about how people are best reached, and that assumption is not neutral across disability, age or language. CORRECTED: this previously claimed 'the member's own preference always overrides the default order' as a mitigation. That was false before W7.5d — the taxonomy default preempted both — and is true now only because resolveChannel was reordered.",
+      "mitigation": {
+        "measure": "resolveChannel consults the member's stated preference BEFORE any default, so this order governs only members who expressed none. RESIDUE: no field records WHY a preference is absent, so a member who was never asked is indistinguishable from one who declined to say.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1777881600000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "MemberContext.memberId",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "An opaque identifier.",
+      "exclusionBasis": "An OPAQUE IDENTIFIER, and that is the whole ground. It measures no protected characteristic, so 45 CFR 92.210(b) — which reaches input variables or factors that MEASURE race, colour, national origin, sex, age or disability — does not reach it. CORRECTED: this previously led with 'it supports no clinical decision', which is false and is the kind of sentence a reviewer pulls on. The member id is the join key on which every member-level decision in the fold is resolved, including the hard opt-out lookup that decides whether the member is contacted at all. It is load-bearing; it is simply not a measurement."
+    },
+    {
+      "field": "PolicyPack.packId",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "An identifier naming which policy pack is in force.",
+      "exclusionBasis": "Names the rule set, and is surfaced in explanations so a decision can be traced to the pack that produced it. It supports no clinical decision and measures nothing about a member; 45 CFR 92.4 reaches tools that support clinical decision-making, and an identifier for the rules themselves is not one."
+    },
+    {
+      "field": "PolicyPack.version",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The version of the policy pack in force.",
+      "exclusionBasis": "Version metadata for the rule set. It is essential to provenance — a decision must be attributable to a specific pack version — but it is not an input variable about a member and measures no protected characteristic."
+    },
+    {
+      "field": "PolicyPack.ruleIds",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "Rule id/version strings surfaced in explanations.",
+      "exclusionBasis": "Labels that let an explanation name the rule that fired, which is what makes a disposition reviewable by a member or a regulator at all. They are outputs of the rule set, not inputs about a member, and measure no protected characteristic."
+    },
+    {
+      "field": "PolicyPack.bundling",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "maxIntentsPerTouchpoint caps how many care intents may be combined into one contact, so a member with MORE open needs has their outreach split across more touchpoints or deferred. Need complexity correlates with disability and with multiple chronic conditions, so the cap measures disability at one remove: the members with the most to be told are the ones most likely to be told it late.",
+      "mitigation": {
+        "measure": "Overflow intents are DEFERRED into a recorded delay bundle rather than dropped, and the bundle names the cap that fired — so a member whose needs exceeded a touchpoint is visible in the disposition record instead of silently under-served. RESIDUE, stated: the cap is uniform rather than scaled to need, so a high-complexity member still waits longer in aggregate. Scaling it is registered, not built.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1773129600000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues",
+        "memberFacingReason": "If you have several things due at once, we may reach out about them over more than one message so it is easier to follow. Tell us if you would rather hear everything at once."
+      }
+    },
+    {
+      "field": "PolicyPack.suppression",
+      "toolScope": "clinical-decision-support",
+      "measures": ["sex", "age"],
+      "directness": "proxy",
+      "basis": "supersedeOnClosure decides outreach from recentlyClosedMeasures, and therefore inherits the sex- and age-bounded eligibility built into quality measure specifications at one remove. duplicateCollapse decides which of several signals about one member survives to become outreach.",
+      "mitigation": {
+        "measure": "Supersede fires only when a gap is already CLOSED, so it can remove work only for a member who no longer needs it — the one suppression whose worst case is no harm. Collapse is recorded in the delay bundle with the superseding signal named, so a collapsed signal is traceable rather than absent. Neither is permitted as an input to prioritisation.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1772179200000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.signalId",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "An opaque per-signal identifier.",
+      "exclusionBasis": "An identifier for one signal occurrence, used for dedupe bookkeeping and explanation. It measures no protected characteristic; 45 CFR 92.210(b) reaches factors that MEASURE race, colour, national origin, sex, age or disability, and an occurrence id is not one."
+    },
+    {
+      "field": "Signal.memberId",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The member this signal concerns.",
+      "exclusionBasis": "An OPAQUE IDENTIFIER, and that is the whole ground. It measures no protected characteristic, so 45 CFR 92.210(b) — which reaches input variables or factors that MEASURE race, colour, national origin, sex, age or disability — does not reach it. CORRECTED: this previously led with 'it supports no clinical decision', which is false and is the kind of sentence a reviewer pulls on. The member id is the join key on which every member-level decision in the fold is resolved, including the hard opt-out lookup that decides whether the member is contacted at all. It is load-bearing; it is simply not a measurement."
+    },
+    {
+      "field": "Signal.sourceEventType",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The upstream event type the signal was derived from.",
+      "exclusionBasis": "Provenance for the taxonomy mapping. It names the SOURCE SYSTEM's event, not an attribute of the member, and measures no protected characteristic."
+    },
+    {
+      "field": "Signal.refs",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "PHI-safe resource references carried for explanation.",
+      "exclusionBasis": "Opaque resource ids and codes carried so a disposition can be traced. They identify records, not member characteristics."
+    },
+    {
+      "field": "Signal.sequence",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "Arrival order within a fold.",
+      "exclusionBasis": "A deterministic tie-breaker so two signals arriving together fold in a stable order. Order of arrival measures nothing about the member."
+    },
+    {
+      "field": "Signal.dedupeKey",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The collapse key for duplicate signals.",
+      "exclusionBasis": "Derived from TaxonomyEntry.dedupeKeyTemplate, which is separately identified. The key itself is a string used for equality; what it is BUILT from is where the duty attaches, and that entry carries it."
+    },
+    {
+      "field": "TaxonomyEntry.signalType",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The taxonomy row's own kind label.",
+      "exclusionBasis": "Names the row. The DECISIONS the row drives are identified field by field below; the label itself measures nothing."
+    },
+    {
+      "field": "TaxonomyEntry.sourceEventTypes",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "Which upstream event types map to this kind.",
+      "exclusionBasis": "A mapping table from source systems to signal kinds. It measures no member characteristic."
+    },
+    {
+      "field": "TaxonomyEntry.dedupeKeyTemplate",
+      "toolScope": "administrative-excluded",
+      "measures": [],
+      "basis": "The template used to build a signal's dedupe key.",
+      "exclusionBasis": "RECORDED RATHER THAN OMITTED because the template for care-gap kinds interpolates {measure}, which IS a sex- and age-bounded value (see Signal.measure). The template is therefore a CARRIER of an identified input rather than an input of its own: the duty attaches to Signal.measure, which is identified, and collapsing two signals that share a measure does not treat two members differently on the basis of it."
+    },
+    {
+      "field": "Signal.kind",
+      "toolScope": "clinical-decision-support",
+      "measures": ["sex", "age"],
+      "directness": "proxy",
+      "basis": "The signal kind determines which taxonomy row governs it, and several kinds are clinically bounded by sex or age (care-gap kinds inherit the eligibility of their measure; bh.screening.indicated is reached only through a mental-health pathway). The kind therefore carries those restrictions at one remove.",
+      "mitigation": {
+        "measure": "Kind governs ROUTING and priority defaults, not eligibility: a member does not become ineligible because of the kind, they receive a differently-routed touchpoint. The kind is surfaced by name in every explanation, so a disposition can be attributed to it. Scope-limited: kind is not an input to suppression.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1778227200000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.occurredAtMs",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age", "disability"],
+      "directness": "proxy",
+      "basis": "When the source event happened, combined with ttlHours, decides whether a signal is still actionable. Members whose care generates events irregularly — through access barriers correlated with disability, and through the episodic care patterns of older members — are more likely to have a signal age out before it is folded.",
+      "mitigation": {
+        "measure": "Staleness is a DELAY-or-expire decision recorded with its rule id rather than a silent drop, so an expired signal is visible in the disposition record. RESIDUE: expiry is uniform rather than sensitive to how often a member generates events at all.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1777276800000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.priority",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age"],
+      "directness": "proxy",
+      "basis": "Signal priority is assigned by the taxonomy from clinical urgency, and several taxonomy rows are age-bounded, so the priority value transmits an age restriction it does not name. It is then weighted by PolicyPack.priorityWeights, which is separately identified.",
+      "mitigation": {
+        "measure": "Priority is data from a versioned taxonomy, surfaced by rule id in every explanation, so a prioritisation can be attributed to the row that set it rather than to an unattributed score.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1776326400000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.actionability",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "Actionability decides whether a signal can produce member outreach at all or only internal work. Kinds that resolve to internal-only actionability are concentrated in the clinical-escalation and behavioural-health pathways, so a member whose needs arrive through those pathways receives proportionally less direct outreach.",
+      "mitigation": {
+        "measure": "Actionability is taxonomy data rather than engine logic, and a non-actionable signal still produces a recorded disposition, so 'this member received no outreach' is attributable rather than invisible. RESIDUE: nothing reports outreach volume by actionability class per cohort.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1775376000000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.foldBehavior",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "Immediate versus windowed folding decides how quickly a signal reaches a member. Windowed kinds accumulate; immediate kinds do not. The split correlates with clinical urgency, and therefore with the conditions that generate urgent signals.",
+      "mitigation": {
+        "measure": "The fold behaviour is taxonomy data and the coordination window is a named, versioned pack value; a windowed signal's wait is recorded in the delay bundle with the window that governed it.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1774425600000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.channel",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "age", "national-origin"],
+      "directness": "proxy",
+      "basis": "A signal-level channel, set by signalIntake from TaxonomyEntry.defaultChannel. It is the field that USED to preempt the member's stated preference for every taxonomy kind carrying a default — the defect corrected in W7.5d.",
+      "mitigation": {
+        "measure": "resolveChannel now consults the member's preference FIRST for member-facing channels; this field is the fallback for a member who expressed none, plus internal 'task' routing which a contact preference does not govern. See the MemberContext.channelPreference entry for the residue this fix surfaced.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1773475200000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "Signal.consentScope",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "The consent scope a signal requires. The behavioural-health scope is reached only by members with a mental-health data class, so gating on it is, for that scope, a disability-status gate under Section 1557.",
+      "mitigation": {
+        "measure": "Consent gating is a legal requirement (42 CFR Part 2, NY MHL 33.13) and cannot be removed. A consent-absent suppression is RECORDED as such and is distinguishable from a member who was never eligible, so an absence of behavioural-health outreach is attributable to consent rather than indistinguishable from neglect.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1772524800000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "Signal.ttlHours",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age", "disability"],
+      "directness": "proxy",
+      "basis": "The staleness bound applied to occurredAtMs; the same reasoning, and a separate entry because the FIELD is the unit of regulation and a taxonomy may change the bound without changing the timestamp.",
+      "mitigation": {
+        "measure": "Taxonomy data, versioned, and the expiry names the rule that fired.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1787126400000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "Signal.part2Restricted",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "42 CFR Part 2 restriction marks substance-use-disorder records. SUD is a disability under Section 1557, so this flag is a disability marker in all but name, and it gates disclosure and routing.",
+      "mitigation": {
+        "measure": "The restriction is a legal disclosure control, not a benefit decision: it governs what may be SAID and to whom, never whether the member is served. A Part 2 signal still produces a disposition; what changes is the disclosure envelope. RESIDUE, and it is a real tension: building cohort-level fairness reporting over Part 2 signals would itself be a redisclosure, so the population this flag marks is the hardest to measure fairness for. Unresolved and recorded.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1786176000000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.defaultPriority",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age"],
+      "directness": "proxy",
+      "basis": "The priority a taxonomy row assigns, inherited by every signal of that kind; the upstream of Signal.priority and separately reviewable because a taxonomy edit changes it without touching any signal.",
+      "mitigation": {
+        "measure": "Versioned taxonomy data surfaced by rule id in explanations.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1785225600000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.actionability",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "The upstream of Signal.actionability; same basis, separately reviewable.",
+      "mitigation": {
+        "measure": "Versioned taxonomy data; a non-actionable signal still produces a recorded disposition.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1784275200000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.foldBehavior",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "The upstream of Signal.foldBehavior; same basis, separately reviewable.",
+      "mitigation": {
+        "measure": "Versioned taxonomy data; a windowed wait is recorded with the window that governed it.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1783324800000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.defaultChannel",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "age", "national-origin"],
+      "directness": "proxy",
+      "basis": "THE INPUT THAT ACTUALLY SELECTED THE MEMBER'S CHANNEL, and it was invisible to the first version of this record. 10 of the 11 shipped taxonomy rows carry a default, signalIntake copies it onto the signal, and resolveChannel used to take it before the member's stated preference — so a deaf member whose recorded preference was sms received care-gap outreach on portal. Channel choice measures disability, age and LEP, and this field made the choice.",
+      "mitigation": {
+        "measure": "resolveChannel was reordered in W7.5d so the member's stated preference wins for every member-facing channel; this default now governs only members who expressed none, and internal 'task' routing which a contact preference does not govern. The demo's acceptance shape moved 6/3/1 to 7/3/0 as a direct result, and the delay it used to show was this defect.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1782374400000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues",
+        "memberFacingReason": "We contact you the way you told us you prefer. If we have not, tell us and we will fix it."
+      }
+    },
+    {
+      "field": "TaxonomyEntry.consentScope",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "The upstream of Signal.consentScope; same basis, separately reviewable.",
+      "mitigation": {
+        "measure": "Legal disclosure control; a consent-absent suppression is recorded and attributable.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1781424000000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.dataClassFloor",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability"],
+      "directness": "proxy",
+      "basis": "THE FIFTH PROXY NAMED IN THE MODULE HEADER, which the first version of this lock did not carry. A data-class floor of ['mental-health'] on the behavioural-health screening row is a routing gate keyed on a mental-health class, and mental-health status is a disability under Section 1557. The first record mapped this concern onto MemberContext.consentScopesGranted — a different field, a different mechanism, and one that does not reach the taxonomy-level gate at all. The count of five was preserved while the item was dropped.",
+      "mitigation": {
+        "measure": "The class floor drives the DISCLOSURE decision (which recipient kinds may receive the signal), which is a legal control under 42 CFR Part 2 and NY MHL 33.13 rather than a benefit decision — the member is served either way, the envelope differs. It is recorded on the disposition so a narrowed audience is attributable. RESIDUE: no aggregate reporting exists for the cohort this gate defines, and building one raises the Part 2 redisclosure question recorded on Signal.part2Restricted.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1780473600000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.ttlHours",
+      "toolScope": "clinical-decision-support",
+      "measures": ["age", "disability"],
+      "directness": "proxy",
+      "basis": "The upstream of Signal.ttlHours; same basis, separately reviewable.",
+      "mitigation": {
+        "measure": "Versioned taxonomy data; expiry names the rule that fired.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1779523200000,
+        "evidenceRef": "docs/build-provenance/coalition-log.md#w75d-92210"
+      }
+    },
+    {
+      "field": "TaxonomyEntry.sourceGated",
+      "toolScope": "clinical-decision-support",
+      "measures": ["disability", "race", "national-origin"],
+      "directness": "proxy",
+      "basis": "A source-gated row produces NO signal for anyone until its source is wired — signalIntake returns null. Who the platform never reaches at all is a fairness input, and it was outside the identification set entirely: the gated rows are concentrated in the pathways that serve members with the most complex needs, so the population most affected by a missing source is not random.",
+      "mitigation": {
+        "measure": "Gating is recorded per row in versioned taxonomy data rather than being an absence, so 'this platform produces no signal of this kind' is a statement someone can read rather than a silence. RESIDUE, and it is the honest one: nothing reports WHICH populations are affected by a gated source, because the platform by construction holds no signals for them. Owed.",
+        "reviewedBy": "role:section-1557-coordinator",
+        "reviewedAtMs": 1778572800000,
+        "evidenceRef": "docs/build-provenance/gap-stub-risk-register.md#g-051-92210-residues"
+      }
+    }
+  ],
+  "_reviewCadence": "Review dates are STAGGERED across a ~6-month window ending at the demo clock (2026-08-22), deliberately. Every entry originally carried the SAME reviewedAtMs (2026-06-01), so the whole record would have gone stale on one day — 2027-06-01 — and once the demotion in dispositionEngine was wired, the platform would have demoted 100% of its decision paths to human-gated in a single step. That is the same single-epoch cliff this programme already had to fix in the credentialing seed, reproduced here on the same date, and it was hidden only because nothing read the result. A real programme reviews a portion of the record each month, and the staggering is what lets a lapse be a signal rather than a cliff."
+}

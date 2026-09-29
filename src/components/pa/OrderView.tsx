@@ -45,7 +45,7 @@ export default function OrderView() {
   } = usePaStore();
 
   const [orderingProvider, setOrderingProvider] = useState('Dr. James Whitfield MD');
-  const [facility, setFacility] = useState('Pine Ridge FQHC — South Dakota');
+  const [facility, setFacility] = useState('Frontier FQHC — South Dakota');
   const [submitting, setSubmitting] = useState(false);
 
   const isMaria = activeCitizenId === 'MARIA_SD_001';

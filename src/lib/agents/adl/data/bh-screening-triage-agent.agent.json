@@ -1,0 +1,25 @@
+{
+  "autonomyTier": "HITL",
+  "body": {
+    "kind": "module",
+    "owningModule": "src/lib/agents/behavioralHealth"
+  },
+  "dataCapability": {
+    "dataClasses": [
+      "mental-health"
+    ],
+    "purposeOfUse": "care-coordination"
+  },
+  "escalationPolicyRef": "default",
+  "id": "bh-screening-triage-agent",
+  "owningModule": "src/lib/agents/behavioralHealth",
+  "phiPosture": "references-only",
+  "purpose": "Triage a behavioral-health screening signal into a proposed care-team follow-up under a human gate. It proposes and escalates; it never contacts a member, never writes a clinical record, and never determines risk.",
+  "routes": [],
+  "toolAllowlist": [
+    "person-context.read",
+    "work-queue.submit",
+    "signal.report"
+  ],
+  "version": "1.0.0"
+}

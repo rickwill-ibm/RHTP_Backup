@@ -736,7 +736,7 @@ function CaregiverElenaInner() {
                     fontStyle: 'italic',
                   }}
                 >
-                  The system doesn't just understand {__firstName}. It understands{' '}
+                  The system doesn&apos;t just understand {__firstName}. It understands{' '}
                   <span style={{ color: '#ff7eb6', fontWeight: 600, fontStyle: 'normal' }}>
                     everyone who depends on her
                   </span>{' '}
@@ -1125,7 +1125,7 @@ function CaregiverElenaInner() {
                           fontStyle: 'italic',
                         }}
                       >
-                        The system didn't just verify that {__firstName} has proxy consent. It
+                        The system didn&apos;t just verify that {__firstName} has proxy consent. It
                         verified that{' '}
                         <span style={{ color: '#8b5cf6', fontWeight: 600, fontStyle: 'normal' }}>
                           this specific action

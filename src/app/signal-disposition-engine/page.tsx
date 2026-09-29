@@ -63,7 +63,7 @@ function buildSignals(memberId: string): Signal[] {
       id: 'sig-2',
       type: 'BENEFIT_GAP',
       label: 'BENEFIT_GAP — Childcare CCAP',
-      source: 'SD DSS Benefits Stream 8',
+      source: 'State Benefits Stream 8',
       member: memberId,
       timestamp: 'T+0:23',
       rawScore: 0.89,
@@ -464,7 +464,7 @@ function ClassificationEngine({ signal }: { signal: Signal }) {
         "MATCH (m:Member {id:'MARIA_SD_001'})-[:HAS_CARE_GAP]->(g:CareGap) WHERE g.hedisWindow < 30 AND g.status = 'OPEN' RETURN g",
     },
     'sig-2': {
-      text: 'Childcare CCAP benefit gap confirmed. Maria eligible-not-enrolled at $487/mo. Enrollment directly unblocks HbA1c appointment scheduling. SD DSS stream confirms eligibility window open. Priority: HIGH — enrollment window time-sensitive.',
+      text: 'Childcare CCAP benefit gap confirmed. Maria eligible-not-enrolled at $487/mo. Enrollment directly unblocks HbA1c appointment scheduling. State Benefits Line stream confirms eligibility window open. Priority: HIGH — enrollment window time-sensitive.',
     },
     'sig-3': {
       text: 'Martin Pharmacy pickup pattern flagged: Maria collecting Elena medications (Metformin + Lisinopril) on irregular cadence. Zarit burden score 48 — caregiver burden cascade risk. Formal assessment not yet initiated.',
@@ -475,7 +475,7 @@ function ClassificationEngine({ signal }: { signal: Signal }) {
         '42 CFR PART 2 — Maria BH consent: ACTIVE ✓ · Disclosure log updated · Gate: PASSED',
     },
     'sig-5': {
-      text: 'Transportation barrier HIGH — 47 miles to Bennett County Health, no vehicle, no public transit. SD winter road closures compound seasonal risk. PRAPARE transport domain not yet updated post-CHW visit.',
+      text: 'Transportation barrier HIGH — 47 miles to Prairie Health Services, no vehicle, no public transit. SD winter road closures compound seasonal risk. PRAPARE transport domain not yet updated post-CHW visit.',
     },
     'sig-6': {
       text: 'WIC lapsed — $320/mo unclaimed. Maria previously enrolled, lapsed at postpartum transition. Re-enrollment straightforward. Bundle with childcare CCAP outreach to reduce SMS fatigue (single touchpoint).',

@@ -91,6 +91,10 @@ export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>
   denialRateFeed: 'DENIAL_RATE_FEED_URL',
   providerDirectory: 'PROVIDER_DIRECTORY_URL',
   providerIdentity: 'NPPES_BASE_URL',
+  // The credentialing SYSTEM OF RECORD — deliberately not NPPES_BASE_URL. NPPES carries no licence,
+  // expiry, board certification, sanction or exclusion, so pointing this at it would wire a
+  // credentialing gate to a registry that cannot answer the question (C-REVQUAL).
+  credentialing: 'CREDENTIALING_SOURCE_URL',
   valueSetGovernanceStore: 'VALUE_SET_GOVERNANCE_STORE_URL',
   // substrate-backed seams: the single substrate entry (Wave A) is DATABASE_URL
   evidence: 'DATABASE_URL',
@@ -116,6 +120,14 @@ export const SEAM_CONNECTION_KEYS: Readonly<Partial<Record<DataModeSeam, string>
   // Wave-4 governed submission: the server-only endpoint for the real 837/appeal
   // EDI clearinghouse; production stays fail-closed until the key + resolver exist.
   submissionGateway: 'SUBMISSION_GATEWAY_URL',
+  // WPCO agent tranche: the three agent seams registered in dataMode.ts. Each names
+  // the server-only key that would configure its real backend — the model-reasoning
+  // provider, the consent-scoped recall read-model, and the deployment-supplied tool
+  // binding table. None exists yet; production stays fail-closed until key + resolver
+  // are both present (see lib/agents/seams/resolve.ts).
+  agentReasoner: 'AGENT_REASONER_URL',
+  agentMemoryRecall: 'AGENT_RECALL_STORE_URL',
+  agentToolBinding: 'AGENT_TOOL_BINDING_TABLE_URL',
 });
 
 /**

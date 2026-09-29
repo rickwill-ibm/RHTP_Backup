@@ -62,7 +62,7 @@ const order: PaOrder = {
     },
   ],
   orderingProvider: 'Dr. James Whitfield MD',
-  facility: 'Pine Ridge FQHC',
+  facility: 'Frontier FQHC',
   orderDate: '07/20/2026',
 };
 

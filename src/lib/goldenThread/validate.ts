@@ -6,6 +6,8 @@
  * structured OperationOutcome, so bad input never reaches the engine.
  */
 
+import { isValidNpi } from '@/lib/identity/provider';
+
 export interface ValidationResult {
   ok: boolean;
   error?: string;
@@ -13,7 +15,6 @@ export interface ValidationResult {
 
 // 5-char codes: CPT (99213), Category III CPT (0523T), or HCPCS (A9576).
 const CPT_HCPCS = /^(\d{4}[0-9A-Z]|[A-Z]\d{4})$/;
-const NPI = /^\d{10}$/;
 const PATIENT_ID = /^[A-Za-z0-9._-]{1,64}$/;
 
 export function validateOrderCode(code: unknown): ValidationResult {
@@ -26,10 +27,23 @@ export function validateOrderCode(code: unknown): ValidationResult {
   return { ok: true };
 }
 
+/**
+ * Validate an optional provider NPI.
+ *
+ * WHY THIS DELEGATES RATHER THAN MATCHING A REGEX. It was `/^\d{10}$/` — a SECOND, weaker NPI
+ * validator alongside `@/lib/identity/provider`'s `isValidNpi`, which runs the real NPPES
+ * 80840-prefixed Luhn. Two validators that disagree is one validator plus a hole, and this one WAS
+ * the hole: the demo reviewer of record carried `npi: '1730154783'`, whose check digit is 2, not 3.
+ * It was check-digit invalid, it appeared in 26 files, and `tests/goldenThread/hardening.test.ts:33`
+ * asserted it was valid — a green test proving only that the string had ten digits.
+ *
+ * So there is now ONE NPI validator. The `optional` semantics stay here, because they belong to this
+ * input surface and not to the identity module.
+ */
 export function validateNpi(npi: unknown): ValidationResult {
   if (npi === undefined || npi === null || npi === '') return { ok: true }; // optional
-  if (typeof npi !== 'string' || !NPI.test(npi)) {
-    return { ok: false, error: 'providerNpi must be a 10-digit NPI' };
+  if (typeof npi !== 'string' || !isValidNpi(npi)) {
+    return { ok: false, error: 'providerNpi must be a valid 10-digit NPI (NPPES check digit)' };
   }
   return { ok: true };
 }

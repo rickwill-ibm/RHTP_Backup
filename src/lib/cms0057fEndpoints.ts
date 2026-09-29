@@ -96,7 +96,7 @@ export const PATIENT_SCENARIOS: Record<string, PatientScenario> = {
 };
 
 export const DEFAULT_PATIENT_ID = DEMO_MEMBER_ID;
-export const DEFAULT_PROVIDER_NPI = '1730154783';
+export const DEFAULT_PROVIDER_NPI = '1730154782';
 export const DEFAULT_REVIEWER_EMAIL = 'reviewer@rhtp-health.org';
 
 export function getScenario(patientId: string): PatientScenario {

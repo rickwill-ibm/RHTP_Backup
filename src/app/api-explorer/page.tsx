@@ -315,7 +315,7 @@ function buildEndpoints(patientId: string): Record<Exclude<TabId, 'postman-suite
           'CMS-0057-F §4 — Prior Authorization API (eligibility + medical necessity + PA automation)',
         annotation:
           'Runs the full eligibility → medical necessity → PA determination → cost estimation thread. Returns propensity score, work queue routing, and persisted Evidence Record ID. Gold-card exemption is applied when provider approval rate ≥ 90% — a voluntary payer program, not a §4 mandate requirement.',
-        buildBody: (pid) => ({ patientId: pid, orderCode: pa.cptCode, providerNpi: '1730154783' }),
+        buildBody: (pid) => ({ patientId: pid, orderCode: pa.cptCode, providerNpi: '1730154782' }),
       },
       {
         id: 'pa-submit',
@@ -420,7 +420,7 @@ function buildEndpoints(patientId: string): Record<Exclude<TabId, 'postman-suite
         id: 'pa-evidence',
         method: 'GET',
         path: '/api/evidence',
-        buildPath: (pid) => `/api/evidence/ev-${pid}-${paScenarioFor(pid).cptCode}-1730154783`,
+        buildPath: (pid) => `/api/evidence/ev-${pid}-${paScenarioFor(pid).cptCode}-1730154782`,
         label: 'Evidence Record — Da Vinci CDex audit spine',
         mandate: 'CMS-0057-F §4 — Coverage Determination Record (CDex)',
         annotation: `Fetches a persisted Evidence Record for the active patient (CPT ${pa.cptCode} — ${pa.procedureName}). This is the Da Vinci CDex Coverage Determination Record — the auditable chain linking every PA decision to its source data.`,

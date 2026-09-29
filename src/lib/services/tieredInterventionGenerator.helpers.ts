@@ -27,7 +27,7 @@ export function buildCaregiverSupportIntervention(
   const actions: InterventionAction[] = [
     {
       action: 'Refer to South Dakota Lifespan Respite Care Program',
-      provider: 'SD Department of Social Services',
+      provider: 'State Benefits Agency',
       timeline: 'Immediate',
       expectedOutcome: '4-8 hours/week respite care',
       modality: 'in-person',

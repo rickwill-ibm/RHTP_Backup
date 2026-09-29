@@ -200,7 +200,7 @@ export const MOCK_GOLD_CARD_CONTEXT: Omit<GoldCardContext, 'asOf'> = {
   },
   roster: [
     {
-      providerNpi: '1730154783', // Maria's imaging provider
+      providerNpi: '1730154782', // Maria's imaging provider
       code: '72148',
       payer: 'UnitedHealthcare Community Plan',
       program: 'UHC voluntary gold card',

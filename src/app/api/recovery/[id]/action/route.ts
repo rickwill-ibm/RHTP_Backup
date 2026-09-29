@@ -34,7 +34,8 @@ import type { HumanDecision } from '@/lib/agentRuntime';
 import { createMemoryProposalInbox, loadEscalationPolicies } from '@/lib/agentRuntime';
 import { getAgentManifest } from '@/lib/agents/manifest';
 import { REVENUE_CYCLE_AGENT_ID } from '@/lib/agents/revenueCycle';
-import { isQualifiedHumanDecision } from '@/lib/agents/governance/decisionGate';
+import { isNonAutomatedDecider } from '@/lib/agents/governance/decisionGate';
+import { qualifyRecoveryDecider } from '../qualifyDecider';
 import { validateEvidenceId } from '@/lib/goldenThread/validate';
 import {
   runGovernedAction,
@@ -199,12 +200,22 @@ export async function POST(
     proposalId: `${actionId}::decision`,
     decidedAtMs: Date.parse(ts),
   };
-  if (!isQualifiedHumanDecision(humanDecision)) {
-    await audit1('recovery.action.blocked', 'failure', 'decider is not a qualified human', ref);
+  if (!isNonAutomatedDecider(humanDecision)) {
+    await audit1('recovery.action.blocked', 'failure', 'decider is not an identified person', ref);
     return NextResponse.json(
-      ooError('A governed action requires a qualified-human decider', 'forbidden'),
+      ooError('A governed action requires an identified, non-automated decider', 'forbidden'),
       { status: 403, headers }
     );
+  }
+  // (g2) REVIEWER QUALIFICATION (C-REVQUAL) — see ./qualifyDecider.ts for why `administrative`.
+  // Found by `check-reviewer-qualification.mjs` on its FIRST run: this route records a governed
+  // action (including a payer-facing appeal submission) through `runGovernedAction` directly, with
+  // no workflow signal — so the engine's gate never sees it and the route's own check was
+  // decider-CLASS only, which cannot tell whether the person exists in a credentialing source.
+  const qualified = qualifyRecoveryDecider(decidedBy, Date.parse(ts), headers);
+  if (qualified.refusal) {
+    await audit1('recovery.action.blocked', 'failure', qualified.refusal.auditDetail, ref);
+    return qualified.refusal.response;
   }
 
   // (h0) C1 cross-route bind: ONE submission-intent per recovery. The decision route submits
@@ -275,6 +286,7 @@ export async function POST(
         now: ts,
         manifestTier: manifest.autonomyTier,
         decision: humanDecision,
+        reviewer: qualified.reviewer, // runGovernedAction refuses to EXECUTE without the proof
         gateway,
         inbox: createMemoryProposalInbox(),
         policies: loadEscalationPolicies(),

@@ -47,7 +47,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   // Clinical
   {
     id: 'prov-001',
-    name: 'Bennett County Health Services',
+    name: 'Prairie Health Services',
     type: 'FQHC',
     programTab: 'Clinical',
     county: 'Bennett County',
@@ -70,7 +70,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-002',
-    name: 'Winner Regional Medical Center',
+    name: 'Cedar Bluff Regional Medical Center',
     type: 'Rural Hospital',
     programTab: 'Clinical',
     county: 'Tripp County',
@@ -93,7 +93,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-003',
-    name: 'Oglala Lakota PCP Group',
+    name: 'Badlands Primary Care Group',
     type: 'PCP Practice',
     programTab: 'Clinical',
     county: 'Oglala Lakota County',
@@ -116,7 +116,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-004',
-    name: 'Winner Community Health FQHC',
+    name: 'Riverbend Community Health FQHC',
     type: 'FQHC',
     programTab: 'Clinical',
     county: 'Tripp County',
@@ -139,7 +139,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-005',
-    name: 'Fall River Specialist Network',
+    name: 'Southridge Specialist Network',
     type: 'Specialist Group',
     programTab: 'Clinical',
     county: 'Fall River County',
@@ -162,7 +162,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-006',
-    name: 'Gregory County Medical Associates',
+    name: 'Riverside Medical Associates',
     type: 'PCP Practice',
     programTab: 'Clinical',
     county: 'Gregory County',
@@ -185,7 +185,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-007',
-    name: 'Avera Sacred Heart CAH',
+    name: 'Cedar Valley Critical Access Hospital',
     type: 'Rural Hospital',
     programTab: 'Clinical',
     county: 'Charles Mix County',
@@ -208,7 +208,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'prov-008',
-    name: 'Monument Health Cardiology',
+    name: 'Summit Regional Cardiology',
     type: 'Specialist Group',
     programTab: 'Clinical',
     county: 'Pennington County',
@@ -256,7 +256,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'bh-002',
-    name: 'Southeast SD Crisis Services',
+    name: 'Southeast Regional Crisis Services',
     type: 'Crisis Center',
     programTab: 'BH',
     county: 'Tripp County',
@@ -354,7 +354,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'cbo-002',
-    name: 'Southeast SD Housing Navigation',
+    name: 'Southeast Regional Housing Navigation',
     type: 'Housing Navigator',
     programTab: 'CBO',
     county: 'Tripp County',
@@ -379,7 +379,7 @@ const ALL_PROVIDERS: ProviderData[] = [
   },
   {
     id: 'cbo-003',
-    name: 'Rosebud Area Food Security Network',
+    name: 'Tribal Area Food Security Network',
     type: 'Food Bank',
     programTab: 'CBO',
     county: 'Todd County',

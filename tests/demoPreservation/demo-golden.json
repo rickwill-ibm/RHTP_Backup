@@ -61,7 +61,7 @@
         "n51",
         "n52"
       ],
-      "hash": "5c64093b"
+      "hash": "c769dfee"
     },
     {
       "panel": "graph.edges",
@@ -182,7 +182,7 @@
         "cds-maria-4",
         "cds-maria-5"
       ],
-      "hash": "0cf3a8c7"
+      "hash": "e1f3aff8"
     },
     {
       "panel": "smart.orderCatalog",
@@ -254,7 +254,7 @@
         "prov-009",
         "prov-010"
       ],
-      "hash": "03a0cda4"
+      "hash": "61f8545e"
     },
     {
       "panel": "measures.stars",
@@ -290,14 +290,18 @@
     },
     {
       "panel": "config.dataModes",
-      "count": 29,
+      "count": 33,
       "ids": [
         "adequacy",
         "agentManifests",
+        "agentMemoryRecall",
+        "agentReasoner",
         "agentRuntime",
+        "agentToolBinding",
         "carePlan",
         "consent",
         "contractRepository",
+        "credentialing",
         "crossReference",
         "deadLetterStore",
         "denialRateFeed",
@@ -322,7 +326,7 @@
         "valueSetGovernanceStore",
         "wpcRecord"
       ],
-      "hash": "f87ba47d"
+      "hash": "c2c94ef6"
     }
   ]
 }

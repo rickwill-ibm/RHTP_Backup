@@ -8,480 +8,8 @@ import { useAppContext } from '@/lib/appContext';
 import { useActiveCitizen } from '@/uhg/store/useActiveCitizen';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
 
-type Provider = 'findhelp' | 'uniteus';
-type Capacity = 'Accepting' | 'Waitlist' | 'Full';
-type TaskStatus = 'Pending' | 'Accepted' | 'Completed';
-
-interface MoCBO {
-  id: string;
-  number: number;
-  name: string;
-  org: string;
-  domain: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  county: string;
-  zip: string;
-  capacity: Capacity;
-  connected: boolean;
-  provider: Provider;
-  lat: number;
-  lng: number;
-}
-
-// ─── Bennett County Action Referral Tasks ─────────────────────────────────────
-interface ReferralTask {
-  id: string;
-  taskId: string;
-  program: string;
-  domain: string;
-  status: TaskStatus;
-  createdDate: string;
-  dueDate: string;
-  priority: 'High' | 'Medium' | 'Low';
-  patientName: string;
-  patientId: string;
-  patientMrn: string;
-  patientPhone: string;
-  patientAddress: string;
-  patientDob: string;
-  enrolledBy: string;
-  notes: string;
-  monthlyValue: string;
-}
-
-const BENNETT_REFERRAL_TASKS: ReferralTask[] = [
-  {
-    id: 'rt-001',
-    taskId: 'UU-SD-48821',
-    program: 'WIC — Women, Infants & Children',
-    domain: 'Nutrition',
-    status: 'Pending',
-    createdDate: '2026-06-10',
-    dueDate: '2026-06-17',
-    priority: 'High',
-    patientName: 'Maria Redhawk',
-    patientId: 'MARIA_SD_001',
-    patientMrn: 'MRN-SD-001',
-    patientPhone: '(605) 555-0122',
-    patientAddress: '412 Main St, Martin, SD 57551',
-    patientDob: '1992-03-22',
-    enrolledBy: 'Sarah Johnson (Care Manager)',
-    notes:
-      'Eligible — income ≤185% FPL. Postpartum + infant Sophia. Documents partially collected. NEMT available for appointment.',
-    monthlyValue: '$320/mo',
-  },
-  {
-    id: 'rt-002',
-    taskId: 'UU-SD-48822',
-    program: 'SD Childcare Assistance Program (CCAP)',
-    domain: 'Childcare',
-    status: 'Accepted',
-    createdDate: '2026-06-10',
-    dueDate: '2026-06-17',
-    priority: 'High',
-    patientName: 'Maria Redhawk',
-    patientId: 'MARIA_SD_001',
-    patientMrn: 'MRN-SD-001',
-    patientPhone: '(605) 555-0122',
-    patientAddress: '412 Main St, Martin, SD 57551',
-    patientDob: '1992-03-22',
-    enrolledBy: 'Sarah Johnson (Care Manager)',
-    notes:
-      'Childcare barrier blocking HbA1c appointment. CCAP enrollment unblocks A1C recheck. Sophia (24mo) — childcare provider TBD.',
-    monthlyValue: '$487/mo',
-  },
-  {
-    id: 'rt-003',
-    taskId: 'UU-SD-48823',
-    program: 'SNAP Food Assistance — Renewal',
-    domain: 'Food',
-    status: 'Pending',
-    createdDate: '2026-06-08',
-    dueDate: '2026-06-15',
-    priority: 'High',
-    patientName: 'Maria Redhawk',
-    patientId: 'MARIA_SD_001',
-    patientMrn: 'MRN-SD-001',
-    patientPhone: '(605) 555-0122',
-    patientAddress: '412 Main St, Martin, SD 57551',
-    patientDob: '1992-03-22',
-    enrolledBy: 'Angela Torres (CHW Supervisor)',
-    notes:
-      'SNAP expired T+47d. Renewal overdue. SD DSS online renewal available at dss.sd.gov. Reminder SMS set for T+30d.',
-    monthlyValue: '$281/mo',
-  },
-  {
-    id: 'rt-004',
-    taskId: 'UU-SD-48824',
-    program: 'TANF — Temporary Assistance for Needy Families',
-    domain: 'Financial',
-    status: 'Pending',
-    createdDate: '2026-06-11',
-    dueDate: '2026-06-18',
-    priority: 'Medium',
-    patientName: 'Maria Redhawk',
-    patientId: 'MARIA_SD_001',
-    patientMrn: 'MRN-SD-001',
-    patientPhone: '(605) 555-0122',
-    patientAddress: '412 Main St, Martin, SD 57551',
-    patientDob: '1992-03-22',
-    enrolledBy: 'Sarah Johnson (Care Manager)',
-    notes:
-      'Single parent household. Eligible for TANF cash assistance. Documents needed: birth certificates for Sophia, proof of income.',
-    monthlyValue: '$463/mo',
-  },
-  {
-    id: 'rt-005',
-    taskId: 'UU-SD-48825',
-    program: 'LIHEAP — Low Income Home Energy Assistance',
-    domain: 'Utility',
-    status: 'Completed',
-    createdDate: '2026-05-20',
-    dueDate: '2026-05-27',
-    priority: 'Low',
-    patientName: 'Maria Redhawk',
-    patientId: 'MARIA_SD_001',
-    patientMrn: 'MRN-SD-001',
-    patientPhone: '(605) 555-0122',
-    patientAddress: '412 Main St, Martin, SD 57551',
-    patientDob: '1992-03-22',
-    enrolledBy: 'Angela Torres (CHW Supervisor)',
-    notes:
-      'LIHEAP application submitted. Approved for $180/season heating assistance. Community Action Partnership of the Black Hills processed.',
-    monthlyValue: '$180/season',
-  },
-];
-
-// ─── SD-focused CBO data ──────────────────────────────────────────────────────
-const MO_CBOS: MoCBO[] = [
-  {
-    id: 'sd-001',
-    number: 1,
-    name: 'Benefit Enrollment Assistance',
-    org: 'Bennett County Action CBO',
-    domain: 'Financial',
-    email: 'enroll@bennettcountyaction.org',
-    phone: '(605) 685-6100',
-    address: '204 W 3rd St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.18,
-    lng: -101.73,
-  },
-  {
-    id: 'sd-002',
-    number: 2,
-    name: 'Medical Transportation (NEMT)',
-    org: 'Medicaid NEMT — Bennett County',
-    domain: 'Transportation',
-    email: 'nemt@sd.gov',
-    phone: '(800) 843-8394',
-    address: '102 N Van Buren St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.18,
-    lng: -101.74,
-  },
-  {
-    id: 'sd-003',
-    number: 3,
-    name: 'Food Pantry & SNAP Assistance',
-    org: 'Oglala Sioux Tribe Community Services',
-    domain: 'Food',
-    email: 'food@ostcs.org',
-    phone: '(605) 867-5821',
-    address: '1 Crazy Horse Dr',
-    city: 'Pine Ridge',
-    county: 'Oglala Lakota',
-    zip: '57770',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'findhelp',
-    lat: 43.02,
-    lng: -102.55,
-  },
-  {
-    id: 'sd-004',
-    number: 4,
-    name: 'Emergency Housing & Shelter',
-    org: 'SD Housing Development Authority',
-    domain: 'Housing',
-    email: 'housing@sdhda.org',
-    phone: '(605) 773-3181',
-    address: '3060 E Elizabeth St',
-    city: 'Pierre',
-    county: 'Hughes',
-    zip: '57501',
-    capacity: 'Waitlist',
-    connected: true,
-    provider: 'uniteus',
-    lat: 44.37,
-    lng: -100.34,
-  },
-  {
-    id: 'sd-005',
-    number: 5,
-    name: 'Postpartum Support Group',
-    org: 'Bennett County Health Services',
-    domain: 'Mental Health',
-    email: 'bh@bennettcountyhealth.org',
-    phone: '(605) 685-6622',
-    address: '102 N Van Buren St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.18,
-    lng: -101.73,
-  },
-  {
-    id: 'sd-006',
-    number: 6,
-    name: 'WIC — Women, Infants & Children',
-    org: 'Bennett County WIC Office',
-    domain: 'Nutrition',
-    email: 'wic@bennett.sd.gov',
-    phone: '(605) 685-6622',
-    address: '102 N Van Buren St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'findhelp',
-    lat: 43.18,
-    lng: -101.73,
-  },
-  {
-    id: 'sd-007',
-    number: 7,
-    name: 'Childcare Assistance (CCAP)',
-    org: 'SD DSS Bennett County Office',
-    domain: 'Childcare',
-    email: 'dss@bennett.sd.gov',
-    phone: '(605) 685-6622',
-    address: '102 N Van Buren St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.18,
-    lng: -101.73,
-  },
-  {
-    id: 'sd-008',
-    number: 8,
-    name: 'Behavioral Health Services',
-    org: 'Avera Sacred Heart CAH — BH',
-    domain: 'Mental Health',
-    email: 'bh@averasacredheart.org',
-    phone: '(605) 842-7100',
-    address: '501 Summit St',
-    city: 'Winner',
-    county: 'Tripp',
-    zip: '57580',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 43.37,
-    lng: -99.86,
-  },
-  {
-    id: 'sd-009',
-    number: 9,
-    name: 'Employment & Job Training',
-    org: 'SD Department of Labor — Bennett County',
-    domain: 'Employment',
-    email: 'jobs@sd.gov',
-    phone: '(605) 685-6622',
-    address: '102 N Van Buren St',
-    city: 'Martin',
-    county: 'Bennett',
-    zip: '57551',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 43.18,
-    lng: -101.73,
-  },
-  {
-    id: 'sd-010',
-    number: 10,
-    name: 'Utility Assistance (LIHEAP)',
-    org: 'Community Action Partnership of the Black Hills',
-    domain: 'Utility',
-    email: 'liheap@capbh.org',
-    phone: '(605) 348-0820',
-    address: '601 E St Joseph St',
-    city: 'Rapid City',
-    county: 'Pennington',
-    zip: '57701',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 44.08,
-    lng: -103.23,
-  },
-  {
-    id: 'sd-011',
-    number: 11,
-    name: 'Tribal Health Services',
-    org: 'Oglala Sioux Tribe Health Administration',
-    domain: 'Health',
-    email: 'health@ostadmin.org',
-    phone: '(605) 867-5131',
-    address: '1 Crazy Horse Dr',
-    city: 'Pine Ridge',
-    county: 'Oglala Lakota',
-    zip: '57770',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.02,
-    lng: -102.55,
-  },
-  {
-    id: 'sd-012',
-    number: 12,
-    name: 'Crisis & Safety Services',
-    org: 'Monument Health Crisis Line',
-    domain: 'Safety',
-    email: 'crisis@monument.health',
-    phone: '(605) 755-1000',
-    address: '677 Cathedral Dr',
-    city: 'Rapid City',
-    county: 'Pennington',
-    zip: '57701',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 44.08,
-    lng: -103.23,
-  },
-  {
-    id: 'sd-013',
-    number: 13,
-    name: 'Substance Use Treatment',
-    org: 'Fall River Health Services',
-    domain: 'Substance Use',
-    email: 'su@fallriverhealth.org',
-    phone: '(605) 745-3159',
-    address: '1201 Highway 71',
-    city: 'Hot Springs',
-    county: 'Fall River',
-    zip: '57747',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 43.43,
-    lng: -103.47,
-  },
-  {
-    id: 'sd-014',
-    number: 14,
-    name: 'Disability & Independent Living',
-    org: 'SD Advocacy Services',
-    domain: 'Disabilities',
-    email: 'advocacy@sdadvocacy.org',
-    phone: '(605) 224-8294',
-    address: '221 S Central Ave',
-    city: 'Pierre',
-    county: 'Hughes',
-    zip: '57501',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 44.37,
-    lng: -100.34,
-  },
-  {
-    id: 'sd-015',
-    number: 15,
-    name: 'Domestic Violence Services',
-    org: 'Sacred Heart Center — DV',
-    domain: 'Safety',
-    email: 'dv@sacredheartcenter.org',
-    phone: '(605) 842-1234',
-    address: '501 Summit St',
-    city: 'Winner',
-    county: 'Tripp',
-    zip: '57580',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'findhelp',
-    lat: 43.37,
-    lng: -99.86,
-  },
-  {
-    id: 'sd-016',
-    number: 16,
-    name: 'Education & Literacy',
-    org: 'SD Literacy Council',
-    domain: 'Education',
-    email: 'learn@sdliteracy.org',
-    phone: '(605) 224-9738',
-    address: '104 N Euclid Ave',
-    city: 'Pierre',
-    county: 'Hughes',
-    zip: '57501',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 44.37,
-    lng: -100.34,
-  },
-  {
-    id: 'sd-017',
-    number: 17,
-    name: 'Physical Activity & Wellness',
-    org: 'Gregory County Medical Associates',
-    domain: 'Physical Activity',
-    email: 'wellness@gregorycountymed.org',
-    phone: '(605) 835-8394',
-    address: '400 Park St',
-    city: 'Burke',
-    county: 'Gregory',
-    zip: '57523',
-    capacity: 'Accepting',
-    connected: false,
-    provider: 'findhelp',
-    lat: 43.18,
-    lng: -99.29,
-  },
-  {
-    id: 'sd-018',
-    number: 18,
-    name: 'Financial Counseling',
-    org: 'SD Consumer Credit Counseling',
-    domain: 'Financial',
-    email: 'counsel@sdccc.org',
-    phone: '(605) 334-6004',
-    address: '4901 E 26th St',
-    city: 'Sioux Falls',
-    county: 'Minnehaha',
-    zip: '57110',
-    capacity: 'Accepting',
-    connected: true,
-    provider: 'uniteus',
-    lat: 43.54,
-    lng: -96.73,
-  },
-];
+import { ANCHOR_CBO_ORG, CBO_REFERRAL_TASKS, MO_CBOS } from './cboDirectory.data';
+import type { Capacity, MoCBO, Provider, ReferralTask, TaskStatus } from './cboDirectory.data';
 
 const CAPACITY_CONFIG: Record<Capacity, { bg: string; text: string }> = {
   Accepting: { bg: '#defbe6', text: '#0e6027' },
@@ -920,9 +448,9 @@ function SouthDakotaMap({ cbos, highlightId }: { cbos: MoCBO[]; highlightId: str
   );
 }
 
-// ─── Bennett County Action Panel ─────────────────────────────────────────────
-function BennettCountyActionPanel() {
-  const [tasks, setTasks] = useState<ReferralTask[]>(BENNETT_REFERRAL_TASKS);
+// ─── Anchor CBO referral-task panel ──────────────────────────────────────────
+function AnchorCboActionPanel() {
+  const [tasks, setTasks] = useState<ReferralTask[]>(CBO_REFERRAL_TASKS);
   const [statusFilter, setStatusFilter] = useState<TaskStatus | 'All'>('All');
   const [selectedTask, setSelectedTask] = useState<ReferralTask | null>(null);
 
@@ -951,10 +479,10 @@ function BennettCountyActionPanel() {
           <Icon name="BuildingOffice2Icon" size={20} className="text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-carbon-gray-100">Bennett County Action CBO</p>
+          <p className="text-sm font-semibold text-carbon-gray-100">{ANCHOR_CBO_ORG}</p>
           <p className="text-xs text-carbon-gray-70">
-            204 W 3rd St, Martin, SD 57551 · <span className="font-medium">(605) 685-6100</span> ·{' '}
-            <span className="text-[#0043ce]">enroll@bennettcountyaction.org</span>
+            210 Prairie Ave, Martin, SD 57551 · <span className="font-medium">(605) 555-0130</span>{' '}
+            · <span className="text-[#0043ce]">enroll@frontier-action.example.org</span>
           </p>
           <p className="text-2xs text-carbon-gray-50 mt-0.5">
             Unite Us Connected · Accepting Referrals · Bennett County, SD
@@ -1303,15 +831,15 @@ export default function CBODirectoryPage() {
           onClick={() => setActiveTab('bennett-tasks')}
           className={`px-5 py-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'bennett-tasks' ? 'border-[#6929c4] text-[#6929c4]' : 'border-transparent text-carbon-gray-70 hover:text-carbon-gray-100'}`}
         >
-          Bennett County Action — Referral Tasks
+          Frontier Community Action — Referral Tasks
           <span className="px-1.5 py-0.5 text-2xs font-bold bg-[#fdf6dd] text-[#b45309] border border-[#f1c21b]">
-            {BENNETT_REFERRAL_TASKS.filter((t) => t.status === 'Pending').length} Pending
+            {CBO_REFERRAL_TASKS.filter((t) => t.status === 'Pending').length} Pending
           </span>
         </button>
       </div>
 
       {activeTab === 'bennett-tasks' ? (
-        <BennettCountyActionPanel />
+        <AnchorCboActionPanel />
       ) : (
         <>
           {/* Provider Toggle */}
@@ -1458,15 +986,15 @@ export default function CBODirectoryPage() {
                 {paginated.map((cbo) => {
                   const cap = CAPACITY_CONFIG[cbo.capacity];
                   const domColor = DOMAIN_COLORS[cbo.domain] ?? '#6f6f6f';
-                  const isBennett = cbo.org === 'Bennett County Action CBO';
+                  const isAnchorCbo = cbo.org === ANCHOR_CBO_ORG;
                   return (
                     <div
                       key={cbo.id}
                       onMouseEnter={() => setHighlightId(cbo.id)}
                       onMouseLeave={() => setHighlightId(null)}
-                      className={`bg-white border p-4 hover:border-[#0043ce] transition-colors cursor-default ${isBennett ? 'border-[#6929c4] ring-1 ring-[#6929c4]/30' : 'border-carbon-gray-20'}`}
+                      className={`bg-white border p-4 hover:border-[#0043ce] transition-colors cursor-default ${isAnchorCbo ? 'border-[#6929c4] ring-1 ring-[#6929c4]/30' : 'border-carbon-gray-20'}`}
                     >
-                      {isBennett && (
+                      {isAnchorCbo && (
                         <div className="flex items-center gap-1 mb-2 text-2xs font-bold text-[#6929c4]">
                           <Icon name="StarIcon" size={11} />
                           Primary Referral Partner
@@ -1520,7 +1048,7 @@ export default function CBODirectoryPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
-                          {isBennett && (
+                          {isAnchorCbo && (
                             <button
                               onClick={() => setActiveTab('bennett-tasks')}
                               className="px-2 py-1 text-2xs font-semibold bg-[#6929c4] text-white hover:bg-[#4f2196] transition-colors flex items-center gap-1"

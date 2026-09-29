@@ -12,7 +12,7 @@ describe('Diane MA scenario — Step 1 foundation', () => {
   it('does not perturb the default (wa-medicaid) stream', () => {
     const wa = createSim(20260914);
     expect(wa.scenario).toBe('wa-medicaid');
-    expect(wa.chainHead).toBe(3794285767); // re-pinned when the in-flight appeal is seeded (see determinismPin.test.ts)
+    expect(wa.chainHead).toBe(1204273244); // re-pin 3: the ledger records the rung EXERCISED (see determinismPin.test.ts)
     expect(wa.ledgerSeq).toBe(251);
     expect(wa.tickets.length).toBe(5); // 4 deduped seed tickets + the seeded appeal RCLM ticket
   });

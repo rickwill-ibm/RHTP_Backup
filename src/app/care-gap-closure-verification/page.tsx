@@ -46,7 +46,7 @@ function buildClinicalEvidenceConfig(
 
   if (isRetinal) {
     const closedDate = closure?.dateOfService ?? '2026-06-10';
-    const performingProvider = closure?.performingProvider ?? 'Winner Regional Ophthalmology';
+    const performingProvider = closure?.performingProvider ?? 'Cedar Bluff Regional Ophthalmology';
     const placeOfService = closure?.placeOfService ?? 'Ophthalmology Clinic';
 
     return {
@@ -141,7 +141,7 @@ function buildClinicalEvidenceConfig(
           label: 'Eye Exam Outreach Initiated',
           date: '2026-04-18',
           actor: 'Sarah Johnson',
-          org: 'Winner Regional Medical Center',
+          org: 'Cedar Bluff Regional Medical Center',
         },
         {
           label: 'Retinal Exam Scheduled',
@@ -181,7 +181,7 @@ function buildClinicalEvidenceConfig(
     qualityPoints: '+7.0',
     evidence: buildHbA1cEvidence(
       closure?.dateOfService ?? '2026-06-10',
-      closure?.performingProvider ?? 'Bennett County Health PCP',
+      closure?.performingProvider ?? 'Prairie Health PCP',
       closure?.placeOfService ?? 'Lab',
       closure?.resultValue ?? 6.8,
       closure?.hedisCompliance ?? 'MET'
@@ -189,7 +189,7 @@ function buildClinicalEvidenceConfig(
     provenance: buildHbA1cProvenance(closure?.dateOfService ?? '2026-06-10'),
     timeline: buildHbA1cTimeline(
       closure?.dateOfService ?? '2026-06-10',
-      closure?.performingProvider ?? 'Bennett County Health PCP'
+      closure?.performingProvider ?? 'Prairie Health PCP'
     ),
   };
 }
@@ -223,7 +223,7 @@ function buildHbA1cEvidence(
       id: 'hba1c-003',
       type: 'Provider',
       label: 'Performing Provider',
-      value: performingProvider || 'Bennett County Health PCP',
+      value: performingProvider || 'Prairie Health PCP',
       icon: 'UserIcon',
       color: 'text-[#6929c4]',
     },
@@ -231,7 +231,7 @@ function buildHbA1cEvidence(
       id: 'hba1c-004',
       type: 'Organization',
       label: 'Organization',
-      value: 'Bennett County Health Services — Martin, SD',
+      value: 'Prairie Health Services — Martin, SD',
       icon: 'BuildingOffice2Icon',
       color: 'text-carbon-gray-70',
     },
@@ -258,7 +258,7 @@ function buildHbA1cProvenance(dateOfService: string): ProgramEvidenceConfig['pro
   return [
     {
       label: 'Source System',
-      value: 'Bennett County Health — Cerner PowerChart',
+      value: 'Prairie Health Services — Cerner PowerChart',
       icon: 'ComputerDesktopIcon',
     },
     {
@@ -269,7 +269,7 @@ function buildHbA1cProvenance(dateOfService: string): ProgramEvidenceConfig['pro
     { label: 'Timestamp', value: `${dateOfService || '2026-06-10'}T10:30:00Z`, icon: 'ClockIcon' },
     {
       label: 'Submitting Organization',
-      value: 'Bennett County Health Services — RHTP Network',
+      value: 'Prairie Health Services — RHTP Network',
       icon: 'BuildingOffice2Icon',
     },
     {
@@ -300,19 +300,19 @@ function buildHbA1cTimeline(
       label: 'Outreach Initiated',
       date: '2026-04-18',
       actor: 'Sarah Johnson',
-      org: 'Bennett County Health Services',
+      org: 'Prairie Health Services',
     },
     {
       label: 'Lab Order Placed',
       date: dateOfService || '2026-06-08',
-      actor: performingProvider || 'Bennett County Health PCP',
-      org: 'Bennett County Health Services',
+      actor: performingProvider || 'Prairie Health PCP',
+      org: 'Prairie Health Services',
     },
     {
       label: 'HbA1c Lab Performed',
       date: dateOfService || '2026-06-10',
-      actor: performingProvider || 'Bennett County Health PCP',
-      org: 'Bennett County Health Services',
+      actor: performingProvider || 'Prairie Health PCP',
+      org: 'Prairie Health Services',
     },
     {
       label: 'Evidence Submitted',
@@ -486,7 +486,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         id: 'food-002',
         type: 'Delivery',
         label: 'Food Box Delivery Confirmed',
-        value: 'Emergency food box delivered 2026-05-10. 2-week supply. SD Food Bank Network.',
+        value: 'Emergency food box delivered 2026-05-10. 2-week supply. Regional Food Bank.',
         icon: 'TruckIcon',
         color: 'text-[#b45309]',
       },
@@ -494,7 +494,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         id: 'food-003',
         type: 'Provider',
         label: 'Food Security Case Worker',
-        value: 'James Holloway — SD Food Bank Network',
+        value: 'James Holloway — Regional Food Bank Network',
         icon: 'UserIcon',
         color: 'text-[#b45309]',
       },
@@ -502,7 +502,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         id: 'food-004',
         type: 'Organization',
         label: 'CBO Organization',
-        value: 'SD Food Bank Network — Bennett County',
+        value: 'Regional Food Bank Network — Bennett County',
         icon: 'BuildingOffice2Icon',
         color: 'text-carbon-gray-70',
       },
@@ -526,7 +526,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
     provenance: [
       {
         label: 'Source System',
-        value: 'SD Food Bank Network — Case Management System',
+        value: 'Regional Food Bank Network — Case Management System',
         icon: 'ComputerDesktopIcon',
       },
       {
@@ -537,7 +537,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
       { label: 'Timestamp', value: '2026-05-10T14:00:00Z', icon: 'ClockIcon' },
       {
         label: 'Submitting Organization',
-        value: 'SD Food Bank Network via RHTP Platform',
+        value: 'Regional Food Bank Network via RHTP Platform',
         icon: 'BuildingOffice2Icon',
       },
       {
@@ -556,7 +556,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         label: 'Food Insecurity Identified',
         date: '2026-04-18',
         actor: 'Robert Chen',
-        org: 'Bennett County Health Services',
+        org: 'Prairie Health Services',
       },
       {
         label: 'Food Task Created',
@@ -568,19 +568,19 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         label: 'CBO Case Worker Assigned',
         date: '2026-04-19',
         actor: 'James Holloway',
-        org: 'SD Food Bank Network',
+        org: 'Regional Food Bank Network',
       },
       {
         label: 'SNAP Application Filed',
         date: '2026-04-25',
         actor: 'James Holloway',
-        org: 'SD Food Bank Network',
+        org: 'Regional Food Bank Network',
       },
       {
         label: 'Emergency Food Box Delivered',
         date: '2026-05-10',
         actor: 'James Holloway',
-        org: 'SD Food Bank Network',
+        org: 'Regional Food Bank Network',
       },
       {
         label: 'Task Completed',
@@ -688,7 +688,7 @@ const STATIC_PROGRAM_EVIDENCE: Record<string, ProgramEvidenceConfig> = {
         label: 'Housing Instability Identified',
         date: '2026-04-19',
         actor: 'Lisa Fontaine, LCSW',
-        org: 'Fall River County Mental Health Center',
+        org: 'Southridge Mental Health Center',
       },
       {
         label: 'Housing Task Created',
@@ -1080,7 +1080,7 @@ export default function CareGapClosureVerificationPage() {
                   label: 'Compliance',
                   value: hedisCompliance === 'MET' ? 'MET (< 8.0%)' : 'NOT MET (≥ 8.0%)',
                 },
-                { label: 'Gainshare Attribution', value: '$8,100 · Bennett County Health' },
+                { label: 'Gainshare Attribution', value: '$8,100 · Prairie Health Services' },
                 { label: 'Track', value: 'Medicaid RHTP Track 3' },
               ].map((item) => (
                 <div key={item.label} className="border border-carbon-gray-20 p-3">
@@ -1102,7 +1102,7 @@ export default function CareGapClosureVerificationPage() {
               <div className="flex-1">
                 <p className="text-sm font-bold text-[#0e6027]">Gainshare Attributed — $8,100</p>
                 <p className="text-xs text-[#0e6027]/80">
-                  Patient: {patientName} · Attribution: Bennett County Health · Track: Medicaid RHTP
+                  Patient: {patientName} · Attribution: Prairie Health Ctr · Track: Medicaid RHTP
                   Track 3 · Status: ATTRIBUTED ✓
                 </p>
               </div>

@@ -17,6 +17,10 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { serverEnv, requireWso2, requireSessionSecret, type ServerEnv } from './env';
 import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
+// The role BOUNDARY (parse an untrusted claim / an opened cookie field) lives in
+// sessionRole.ts; the vocabulary itself is authz's, never copied here.
+import { parseRoleClaim, sessionRoleOrNull, type RoleClaimSource } from './sessionRole';
+import type { Role } from '@/lib/authz/principal';
 
 const SESSION_COOKIE = 'rhtp_smart_session';
 const PKCE_COOKIE = 'rhtp_pkce';
@@ -28,8 +32,36 @@ export interface SessionData {
   scope: string;
   patient?: string; // launch/patient context
   fhirUser?: string;
+  /**
+   * The IdP-asserted role, when the token response carried one this server
+   * recognises. ABSENT is the normal case and the safe one: the principal model
+   * then derives from `fhirUser` exactly as before, and a caller nothing
+   * identifies is a self-only `member`. An unrecognised claim is DROPPED at the
+   * token boundary and never reaches this field.
+   */
+  role?: Role;
   expiresAt: number; // epoch ms
 }
+
+/**
+ * The role the DEV-ONLY offline session acts under.
+ *
+ * WHY IT IS NOT ABSENT. With no role the principal model derived `pa-reviewer`
+ * from `fhirUser: 'Practitioner/dev'`, and `pa-reviewer` is deliberately NOT an ops
+ * role (`isOpsPrincipal`) — so every `/api/ops/**` surface answered 403 to the ONLY
+ * session an offline install can establish. Those routes' 200 paths existed under
+ * test mocks and nowhere else.
+ *
+ * WHY IT IS SAFE. `payer-ops` is a superset of `pa-reviewer` in both policies this
+ * touches — `guard.ALLOWED_PURPOSE` grants it `['operations','payment']` against
+ * pa-reviewer's `['operations']`, and `deriveScope` treats both as non-self — so no
+ * existing surface LOSES access and no member-scoping decision changes.
+ * `purposeForRole` maps both to `'operations'`, so the extra `payment` purpose is
+ * never actually derived. It is stamped ONLY here, and `startDevSession` is
+ * double-gated on `!tokenUrl && allowDevMockAuth` (the U1 invariant), so it can
+ * never be minted once real auth is configured.
+ */
+const DEV_SESSION_ROLE: Role = 'payer-ops';
 
 // ---- cookie crypto (AES-256-GCM) -------------------------------------------
 
@@ -214,6 +246,24 @@ export interface SessionAuthContext {
   patient: string | null;
   fhirUser: string | null;
   scope: string | null;
+  /**
+   * The IdP-asserted role this session carries, or `null` when it carries none.
+   * `null` FAILS CLOSED downstream and must keep doing so: getPrincipal then
+   * derives from `fhirUser`, and a caller nothing identifies is a self-only
+   * `member`. Re-parsed here rather than trusted off the cookie, so a session
+   * sealed by another build can never hand a route an unrecognised role.
+   */
+  role: Role | null;
+}
+
+/** Project an opened session into the non-secret authorization context. */
+function authContextOf(session: SessionData): SessionAuthContext {
+  return {
+    patient: session.patient ?? null,
+    fhirUser: session.fhirUser ?? null,
+    scope: session.scope ?? null,
+    role: sessionRoleOrNull(session.role),
+  };
 }
 
 /** The acting session's authorization context (for lib/authz/principal). */
@@ -221,20 +271,12 @@ export async function getSessionAuthContext(): Promise<SessionAuthContext | null
   const env = serverEnv();
   const jar = await cookies();
   const session = open<SessionData>(jar.get(SESSION_COOKIE)?.value ?? '', env);
-  if (session && session.expiresAt > clock.now()) {
-    return {
-      patient: session.patient ?? null,
-      fhirUser: session.fhirUser ?? null,
-      scope: session.scope ?? null,
-    };
-  }
+  if (session && session.expiresAt > clock.now()) return authContextOf(session);
   // Dev offline path: mirror isAuthenticated's auto-established dev session.
   if (!env.tokenUrl && env.allowDevMockAuth) {
     await startDevSession();
     const dev = open<SessionData>((await cookies()).get(SESSION_COOKIE)?.value ?? '', env);
-    return dev
-      ? { patient: dev.patient ?? null, fhirUser: dev.fhirUser ?? null, scope: dev.scope ?? null }
-      : null;
+    return dev === null ? null : authContextOf(dev);
   }
   return null;
 }
@@ -259,6 +301,9 @@ export async function startDevSession(patient = DEMO_MEMBER_ID): Promise<boolean
     scope: env.scope,
     patient,
     fhirUser: 'Practitioner/dev',
+    // See DEV_SESSION_ROLE: without it every /api/ops/** surface 403s the only
+    // session an offline install can establish.
+    role: DEV_SESSION_ROLE,
     expiresAt: clock.now() + 8 * 60 * 60 * 1000,
   };
   jar.set(SESSION_COOKIE, seal(session, env), {
@@ -273,7 +318,8 @@ export async function startDevSession(patient = DEMO_MEMBER_ID): Promise<boolean
 
 // ---- internals --------------------------------------------------------------
 
-interface TokenResponse {
+/** `RoleClaimSource` contributes the `role`/`roles` claims — see sessionRole.ts. */
+interface TokenResponse extends RoleClaimSource {
   access_token: string;
   refresh_token?: string;
   id_token?: string;
@@ -285,6 +331,7 @@ interface TokenResponse {
 
 async function writeSession(tok: TokenResponse, env: ServerEnv): Promise<void> {
   const jar = await cookies();
+  const role = parseRoleClaim(tok);
   const session: SessionData = {
     accessToken: tok.access_token,
     refreshToken: tok.refresh_token,
@@ -292,6 +339,7 @@ async function writeSession(tok: TokenResponse, env: ServerEnv): Promise<void> {
     scope: tok.scope ?? env.scope,
     patient: tok.patient,
     fhirUser: tok.fhirUser,
+    ...(role === undefined ? {} : { role }),
     expiresAt: clock.now() + (tok.expires_in ?? 3600) * 1000,
   };
   jar.set(SESSION_COOKIE, seal(session, env), {

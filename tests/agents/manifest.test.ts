@@ -16,11 +16,12 @@ describe('agent manifest registry (manifest-as-data, §10.2)', () => {
   it('registers exactly the pre-allocated agent ids', () => {
     expect(loadAgentManifests().ids().sort()).toEqual(
       [
+        'bh-screening-triage-agent',
         'outreach-agent',
         'pa-documentation-agent',
         'referral-coordination-agent',
         'revenue-cycle-agent',
-      ].sort(),
+      ].sort()
     );
   });
 
@@ -78,19 +79,21 @@ describe('agent manifest registry (manifest-as-data, §10.2)', () => {
     expect(reg.isToolAllowed('pa-documentation-agent', 'comms-channel.send')).toBe(false);
     expect(reg.isToolAllowed('pa-documentation-agent', 'pa-machine.transition')).toBe(true);
     expect(() => reg.assertToolAllowed('outreach-agent', 'pa-machine.transition')).toThrow(
-      ToolNotAllowedError,
+      ToolNotAllowedError
     );
     expect(() => reg.assertToolAllowed('outreach-agent', 'comms-channel.send')).not.toThrow();
   });
 
   it('a malformed manifest refuses LOUDLY (house pattern, no silent default)', () => {
-    expect(() => parseRegistry({ version: '1', agents: [{ id: 'x' }] })).toThrow(AgentManifestError);
+    expect(() => parseRegistry({ version: '1', agents: [{ id: 'x' }] })).toThrow(
+      AgentManifestError
+    );
     expect(() =>
-      parseRegistry({ version: '1', agents: [{ ...good(), autonomyTier: 'bogus' }] }),
+      parseRegistry({ version: '1', agents: [{ ...good(), autonomyTier: 'bogus' }] })
     ).toThrow(/autonomyTier/);
-    expect(() =>
-      parseRegistry({ version: '1', agents: [good(), { ...good() }] }),
-    ).toThrow(/duplicate agent id/);
+    expect(() => parseRegistry({ version: '1', agents: [good(), { ...good() }] })).toThrow(
+      /duplicate agent id/
+    );
   });
 });
 

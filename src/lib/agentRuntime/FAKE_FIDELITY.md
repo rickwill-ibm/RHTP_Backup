@@ -27,8 +27,50 @@ Temporal's DURABILITY and DELIVERY guarantees. The gaps:
 - The HITL primitive suspends until a decision and never auto-executes at the
   `HITL` tier (guardrail).
 - Per-member ordering under concurrent signals (partition = memberId).
-- Escalation walks the hierarchy then parks with audit; never silent expiry.
-- Only the five pre-allocated C2 event types are emitted.
+- Escalation walks the hierarchy, then ABANDONS the proposal with audit: its own
+  `agent.task.abandoned` event, the work item moved to the `parked` queue, and the
+  workflow terminated with status `abandoned`. Never a silent expiry, and never a
+  synthesised approval or rejection. A decision arriving afterwards is refused with
+  `WorkflowTerminatedError`; the runtime provides NO re-activation path, so re-filing
+  a parked item is a human act.
+- **The escalation SLA is an INTERNAL review clock, with no relationship to 42 CFR
+  438.210(d).** It is measured from `proposeAndWait` — the moment this runtime was
+  asked — whereas the regulation's 7-calendar-day standard and 72-hour expedited
+  timeframes run from RECEIPT OF THE REQUEST FOR SERVICE, which this runtime never
+  observes. Abandonment is therefore not a determination: it issues no notice and
+  starts no appeal clock, and 42 CFR 438.404(c)(5) (an untimely decision IS a denial,
+  notice due the day the timeframe expires) is discharged by nothing here. Reading a
+  green escalation suite as timeliness compliance would be a category error.
+- Only the pre-allocated C2 event types are emitted; anything else throws
+  `UnallowedAgentEventError`.
+
+### 6 · THE ESCALATION LADDER NEVER FIRES IN THE RUNNING APPLICATION
+
+This is the most important line in this file and it was missing from it.
+
+Virtual time advances **only** through `advanceTime()`, and `advanceTime()` has **zero callers in
+`src/`** — verified by grep, not asserted. Every composition root constructs
+`createManualClock(Date.parse(...))` at a pinned instant and never moves it: the financial-clearance
+route, the recovery decision-support path, the escalation console and its sibling reviewer pages. No
+driver exists.
+
+So, in the app a reviewer actually uses:
+
+- no `agent.task.escalated` hop is ever emitted;
+- no proposal is ever abandoned, so `agent.task.abandoned` is never emitted;
+- **no work item ever reaches the `parked` queue by this path**, and the "Parked (escalation
+  exhausted)" lane on the work-queue page is, from the runtime, permanently empty;
+- `WorkflowTerminatedError` is unreachable in production — the only production signaller
+  (`runReconstructAndSignal`) builds a *fresh* engine and replays to suspension, so it has no
+  abandoned instance to refuse against and the decision is simply accepted.
+
+Row 1 above ("a restart loses every pending timer") is true and is the WEAKER claim; read alone it
+implies timers fire between restarts. They do not fire at all. The ladder, its terminal and their
+tests are a correct, tested subsystem with no production driver — which is a real gap and is filed as
+G-057, not something this file should let a reader discover for themselves.
+
+Closing it needs a wall-clock or sweep driver at the `// SEAM: workflow-engine` anchor, wired from a
+composition root and asserted by an E14 wired-path test. That is a wave with its own design round.
 
 ## How to run the real spec
 

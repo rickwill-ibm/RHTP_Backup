@@ -13,27 +13,31 @@
  */
 
 /**
- * The autonomy dial (conventions §10.5). Read from the manifest per agent per
- * deployment; the runtime maps the tier to decision behavior through a data
- * lookup, never a hardcoded branch:
- *   HITL       — a human must approve every proposed action (human-in-the-loop).
- *   HOTL       — auto-approves after a review window unless a human rejects
- *                (human-on-the-loop); the review window is the escalation SLA.
- *   autonomous — auto-approves immediately (no human gate).
- * Regardless of tier, an agent NEVER sets an authoritative domain state (e.g. a
- * PA approval) directly; the owning state machine is the single authority.
+ * The autonomy dial and the PHI posture — RE-EXPORTED, declared in `@/lib/agents/authority`.
+ *
+ * They moved there (register G-005) because the authority lock's strength ladders `AUTONOMY_ORDER` /
+ * `PHI_ORDER` must agree with these unions, and that module may not import from this one: it sits
+ * BELOW manifest by design, and `registry.ts` + `authorityGate.ts` import from it. Declared together
+ * over there, both the union and the ordered array derive from ONE object, so a member cannot be added
+ * to one and forgotten in the other. Re-exported here so every existing
+ * `import type { AutonomyTier } from '@/lib/agents/manifest'` keeps resolving, and because a manifest
+ * is still where a tier is DECLARED for an agent — only the vocabulary lives elsewhere.
+ *
+ * See that module for what each tier and posture means.
  */
-export type AutonomyTier = 'HITL' | 'HOTL' | 'autonomous';
+import type { AutonomyTier, PhiPosture } from '@/lib/agents/authority';
+export type { AutonomyTier, PhiPosture };
 
 /**
- * PHI posture (conventions §10, PHI-safe guardrail). Declares what member data
- * an agent's proposals and tool calls may carry:
- *   none            — no member data at all.
- *   references-only — resource ids + codes only, never free-text payload.
- *   full            — cleared to carry PHI (requires a compliance sign-off; no
- *                     shipped agent uses this tier).
+ * What the agent declares it will ask for: the purpose it operates under and the
+ * classes of member data it intends to touch. Capped by the authority lock like
+ * any other authority, and an INPUT to the runtime disclosure decision — never
+ * the decision. An agent cannot consent on a member's behalf by declaring it.
  */
-export type PhiPosture = 'none' | 'references-only' | 'full';
+export interface ManifestDataCapability {
+  purposeOfUse: string;
+  dataClasses: string[];
+}
 
 /** A single agent's governing manifest (versioned data). */
 export interface AgentManifest {
@@ -41,6 +45,8 @@ export interface AgentManifest {
   id: string;
   /** Manifest version (additive; a promotion or allowlist change bumps it). */
   version: string;
+  /** Declared data capability. Absent means the agent requests no member data. */
+  dataCapability?: ManifestDataCapability;
   /** One-line statement of what the agent is for (auditable intent). */
   purpose: string;
   /** The MINIMUM set of tool ids this agent may invoke (least privilege, §10.3). */

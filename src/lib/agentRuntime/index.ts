@@ -36,7 +36,13 @@ export type {
   AgentEventSink,
   AgentC2EventType,
 } from './types';
-export { AGENT_C2_EVENT_TYPES, UnallowedAgentEventError } from './types';
+export {
+  AGENT_C2_EVENT_TYPES,
+  TERMINAL_STATUSES,
+  isTerminalStatus,
+  UnallowedAgentEventError,
+} from './types';
+export { WorkflowTerminatedError } from './engineSupport';
 
 // ── Engine (the fake) ────────────────────────────────────────────────────────
 export { createInMemoryWorkflowEngine, InMemoryWorkflowEngine, type RuntimeDeps } from './engine';

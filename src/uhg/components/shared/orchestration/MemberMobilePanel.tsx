@@ -146,7 +146,7 @@ export function MemberMobilePanel({ onClose }: { onClose: () => void }) {
               <div className="rounded-xl p-2.5 flex flex-col gap-1.5" style={{ background: 'rgba(28,28,28,0.8)', border: '1px solid rgba(57,57,57,0.5)' }}>
                 <span style={{ fontSize: '9px', color: '#6f6f6f' }}>Maria types:</span>
                 <div className="flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: 'rgba(57,57,57,0.4)', border: '1px solid rgba(57,57,57,0.6)' }}>
-                  <span style={{ fontSize: '9px', color: '#9ca3af', fontStyle: 'italic' }}>"Thank you, when will I get the kit?"</span>
+                  <span style={{ fontSize: '9px', color: '#9ca3af', fontStyle: 'italic' }}>&quot;Thank you, when will I get the kit?&quot;</span>
                   <button onClick={() => setFollowOnVisible(true)} className="ml-auto rounded-full flex items-center justify-center" style={{ width: 20, height: 20, background: 'rgba(16,185,129,0.3)', border: '1px solid rgba(16,185,129,0.6)', color: '#10b981', fontSize: '10px', cursor: 'pointer' }}>↑</button>
                 </div>
                 {followOnVisible && (
@@ -194,7 +194,7 @@ export function MemberMobilePanel({ onClose }: { onClose: () => void }) {
             <div className="flex items-start gap-2"><span style={{ fontSize: '9px', color: '#4b5563', width: 90, flexShrink: 0 }}>Policy ref:</span><span className="font-mono" style={{ fontSize: '9px', color: '#4b5563' }}>CHANNEL_INTEL.SAFETY.OVERRIDE.001</span></div>
           </div>
           <div className="rounded p-2 mt-1" style={{ background: 'rgba(28,28,28,0.7)', border: '1px solid rgba(57,57,57,0.5)' }}>
-            <span style={{ fontSize: '9px', color: '#9ca3af', lineHeight: 1.5, fontStyle: 'italic' }}>"The system knows Maria prefers portal. But it also knows this is a safety alert that can&apos;t wait for her next login. Mobile push within the digital channel family she trusts — preference honored, clinical urgency not compromised."</span>
+            <span style={{ fontSize: '9px', color: '#9ca3af', lineHeight: 1.5, fontStyle: 'italic' }}>&quot;The system knows Maria prefers portal. But it also knows this is a safety alert that can&apos;t wait for her next login. Mobile push within the digital channel family she trusts — preference honored, clinical urgency not compromised.&quot;</span>
           </div>
         </div>
 

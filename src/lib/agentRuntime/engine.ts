@@ -13,16 +13,28 @@
  */
 import { buildAgentEvent } from './events';
 import { buildProposalWorkItem } from './inbox';
-import { getEscalationTier, nextEscalationStep } from './escalation';
+import { getEscalationTier } from './escalation';
+import { scheduleEscalation, type LadderPort } from './escalationLadder';
 import { isAutoApprovable } from '@/lib/agents/governance';
 import {
   AUTONOMY_BEHAVIOR,
   defer,
   type Instance,
+  assertSignalDecider,
+  decisionBehavior,
+  determinationScope,
+  setAwaiting,
+  WorkflowTerminatedError,
   type PendingRecord,
   type RuntimeDeps,
-  type TimerEntry,
 } from './engineSupport';
+import { MemberTimers } from './memberTimers';
+import {
+  failInstance,
+  settleInstance,
+  terminateInstance,
+  type TerminalDeps,
+} from './instanceTerminal';
 import type {
   HumanDecision,
   ProposedAction,
@@ -41,13 +53,13 @@ export type { RuntimeDeps } from './engineSupport';
 export class InMemoryWorkflowEngine implements WorkflowEngine {
   private readonly instances = new Map<string, Instance>();
   private readonly pending = new Map<string, PendingRecord>();
-  private readonly timers = new Map<string, TimerEntry>();
-  private readonly memberChains = new Map<string, Promise<void>>();
+  private readonly timers: MemberTimers;
   private wfCounter = 0;
   private proposalCounter = 0;
-  private timerCounter = 0;
 
-  constructor(private readonly deps: RuntimeDeps) {}
+  constructor(private readonly deps: RuntimeDeps) {
+    this.timers = new MemberTimers(deps.clock);
+  }
 
   // ── WorkflowEngine ──────────────────────────────────────────────────────────
 
@@ -64,7 +76,13 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       startedAtMs: now,
       updatedAtMs: now,
     };
-    this.instances.set(workflowId, { snapshot, done });
+    this.instances.set(workflowId, {
+      snapshot,
+      done,
+      agentId: def.agentId,
+      memberId: opts.memberId,
+      correlationId,
+    });
     const ctx = this.makeContext(def, opts.memberId, workflowId, correlationId);
     Promise.resolve()
       .then(() => def.run(ctx, opts.input))
@@ -83,6 +101,14 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     await this.runOnMember(inst.snapshot.memberId, async () => {
       const rec = this.pending.get(signal.proposalId);
       if (!rec || rec.workflowId !== workflowId) return; // idempotent / unknown decision
+      assertSignalDecider(rec, signal); // G-045 — THROWS; a refused resolution must be loud
+      // A HUMAN is waiting on this one, so a terminated workflow must refuse OUT LOUD rather than
+      // return silently. The machine paths (auto-approve, the after-SLA timer) take the same check
+      // through `decidable` and simply stop: nobody is waiting, and throwing there landed in a
+      // `void`ed promise chain as an unhandled rejection.
+      const state = this.decidable(rec);
+      if (state === 'terminated')
+        throw new WorkflowTerminatedError(rec.proposalId, this.statusOf(rec.workflowId));
       const decision = signal.name === 'agent.task.approved' ? 'approved' : 'rejected';
       await this.decide(rec, decision, signal.decidedBy);
     });
@@ -105,24 +131,12 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     this.settle(workflowId, 'completed', result);
   }
 
-  // ── Test/driver seam: advance virtual time and fire due timers in order ──────
-
   /**
-   * Advance the injected clock by `ms` and fire every timer now due, in
-   * (dueAt, insertion) order, each under its member lock (preserves per-member
-   * ordering). Not part of WorkflowEngine — a real engine fires on real time.
+   * Advance the injected clock by `ms` and fire every timer now due, in (dueAt, insertion) order,
+   * each under its member lock. Not part of WorkflowEngine — a real engine fires on real time.
    */
   async advanceTime(ms: number): Promise<void> {
-    const target = this.deps.clock.advance(ms);
-    for (;;) {
-      const due = [...this.timers.values()]
-        .filter((t) => !t.cancelled && t.dueAtMs <= target)
-        .sort((a, b) => a.dueAtMs - b.dueAtMs || a.seq - b.seq);
-      if (due.length === 0) break;
-      const t = due[0];
-      this.timers.delete(t.id);
-      await this.runOnMember(t.memberId, () => t.fire());
-    }
+    await this.timers.advance(ms);
   }
 
   // ── HITL primitive ───────────────────────────────────────────────────────────
@@ -167,26 +181,33 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     );
     const item = buildProposalWorkItem({ proposalId, memberId, action, submittedAtMs: now });
 
-    await this.emit(
+    await this.emit({
       agentId,
-      'agent.task.proposed',
+      eventType: 'agent.task.proposed',
       memberId,
       workflowId,
       correlationId,
-      now,
+      occurredAtMs: now,
       proposalId,
-      {
+      payload: {
         actionType: action.actionType,
         priority: action.priority,
         refs: action.refs ?? {},
         autonomyTier: manifest.autonomyTier,
         escalationPolicyRef: manifest.escalationPolicyRef,
-      }
+      },
+    });
+    const scope = determinationScope(action);
+    const tierBehavior = AUTONOMY_BEHAVIOR[manifest.autonomyTier].autoApprove;
+    const behavior = decisionBehavior(
+      isAutoApprovable(action, manifest.autonomyTier),
+      tierBehavior
     );
-
     const decided = defer<HumanDecision>();
     const rec: PendingRecord = {
       proposalId,
+      humanRequired: behavior === 'human-required', // read by signal() to demand a reviewer proof
+      ...scope, // determinationClass + needDomain, from the ACTION; refuses adverse w/o needDomain
       workflowId,
       memberId,
       agentId,
@@ -194,7 +215,6 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       correlationId,
       tier,
       hopsSoFar: 0,
-      parked: false,
       item,
       resolve: decided.resolve,
     };
@@ -207,23 +227,24 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
       item,
       status: 'pending',
     });
-    this.setStatus(workflowId, 'waiting-decision', proposalId);
+    this.setStatus(workflowId, 'waiting-decision', proposalId, scope);
+    const inst0 = this.instances.get(workflowId);
+    if (inst0) inst0.lastProposalId = proposalId; // join key for the settle event
 
-    // Autonomy tier -> decision behavior via DATA lookup (never a branch on agentId).
-    // HW-AI / I16 (C-DEC): the tier-independent invariant. An adverse coverage-
-    // affecting action (a denial / termination / reduction) can NEVER auto-resolve,
-    // regardless of HITL / HOTL / autonomous — it is forced onto the human path.
-    // This kills the HOTL SLA-timeout auto-approve and the autonomous-tier flip for
-    // adverse determinations, which qualified humans must make.
-    const behavior = isAutoApprovable(action, manifest.autonomyTier)
-      ? AUTONOMY_BEHAVIOR[manifest.autonomyTier].autoApprove
-      : 'human-required';
     if (behavior === 'immediate') {
-      void Promise.resolve().then(() =>
-        this.runOnMember(memberId, () =>
-          this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`)
+      // `.catch` is not optional here. `runOnMember` returns a promise that DOES reject (only the
+      // stored chain swallows), `decide` awaits two injected seams — an outbox writer and a durable
+      // queue in production, i.e. things that fail — and a `void`ed rejection is an unhandled
+      // rejection that, on Node's default, takes the process. Worse, `rec.resolve` is never reached,
+      // so the workflow hangs at `waiting-decision` with no timer armed and no signal path: a silent
+      // wedge. Failing the instance puts it in a terminal state WITH a record instead.
+      void Promise.resolve()
+        .then(() =>
+          this.runOnMember(memberId, () =>
+            this.decide(rec, 'approved', `autonomy:${manifest.autonomyTier}`)
+          )
         )
-      );
+        .catch((err: unknown) => this.fail(workflowId, err));
     } else if (behavior === 'after-sla') {
       rec.timerId = this.scheduleTimer(memberId, tier.slaHours * 3600_000, async () => {
         if (this.pending.get(proposalId) === rec)
@@ -232,9 +253,29 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     } else {
       // HITL or an adverse coverage action: escalate on SLA breach; resolve ONLY on
       // an external qualified-human signal (never an auto-approve timer).
-      this.scheduleEscalation(rec);
+      scheduleEscalation(this.ladderPort(), rec);
     }
     return decided.promise;
+  }
+
+  /**
+   * May this proposal still be decided?
+   *
+   * FAIL-CLOSED ON A MISSING INSTANCE. `!inst` returns `'terminated'`, not `'ok'`. The instance map
+   * is never reaped today, so an absent instance is unreachable — but the moment anything evicts
+   * (and a Temporal-class engine ages history out by design), an optional-chained `inst?.done.settled`
+   * would read `undefined`, fall through as falsy, and resume a body the runtime had abandoned.
+   * That is the whole defect this guard exists to prevent, reintroduced by a `?.`.
+   */
+  private decidable(rec: PendingRecord): 'ok' | 'gone' | 'terminated' {
+    if (!this.pending.has(rec.proposalId)) return 'gone';
+    const inst = this.instances.get(rec.workflowId);
+    if (!inst || inst.done.settled) return 'terminated';
+    return 'ok';
+  }
+
+  private statusOf(workflowId: string): string {
+    return this.instances.get(workflowId)?.snapshot.status ?? 'gone';
   }
 
   private async decide(
@@ -242,36 +283,33 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
     decision: 'approved' | 'rejected',
     decidedBy: string
   ): Promise<void> {
-    if (!this.pending.has(rec.proposalId)) return;
+    if (this.decidable(rec) !== 'ok') return; // signal() raises; the machine paths stay quiet
     this.pending.delete(rec.proposalId);
     if (rec.timerId) this.cancelTimer(rec.timerId);
     const now = this.deps.clock.now();
     const eventType = decision === 'approved' ? 'agent.task.approved' : 'agent.task.rejected';
-    await this.emit(
-      rec.agentId,
+    await this.emit({
+      agentId: rec.agentId,
       eventType,
-      rec.memberId,
-      rec.workflowId,
-      rec.correlationId,
-      now,
-      rec.proposalId,
-      {
+      memberId: rec.memberId,
+      workflowId: rec.workflowId,
+      correlationId: rec.correlationId,
+      occurredAtMs: now,
+      proposalId: rec.proposalId,
+      payload: {
         decidedBy,
         actionType: rec.action.actionType,
-      }
-    );
-    if (decision === 'approved') {
-      await this.emit(
-        rec.agentId,
-        'agent.task.executed',
-        rec.memberId,
-        rec.workflowId,
-        rec.correlationId,
-        now,
-        rec.proposalId,
-        { actionType: rec.action.actionType, decidedBy }
-      );
-    }
+        ...(decision === 'approved' ? { effectPending: true } : {}),
+      },
+    });
+    // NO `agent.task.executed` HERE (G-002). The engine performs no effects — `useTool` does — so an
+    // `executed` emitted at APPROVAL time was the engine asserting an effect it neither performed nor
+    // observed, before the body had even resumed to attempt its state transition. The truthful
+    // record of "what happened" is `agent.task.settled`, emitted when the workflow actually settles.
+    //
+    // `effectPending` makes the interval queryable: an `approved` with no matching `settled` is an
+    // OPEN item, which is what a crash between the two looks like. Without it, silence after an
+    // approval is indistinguishable from a workflow that never existed.
     await this.deps.inbox.resolve(rec.proposalId, decision, decidedBy);
     this.setStatus(rec.workflowId, 'running', undefined);
     rec.resolve({ decision, decidedBy, proposalId: rec.proposalId, decidedAtMs: now });
@@ -279,139 +317,100 @@ export class InMemoryWorkflowEngine implements WorkflowEngine {
 
   // ── Escalation (timer-driven, escalation-as-data) ────────────────────────────
 
-  private scheduleEscalation(rec: PendingRecord): void {
-    rec.timerId = this.scheduleTimer(rec.memberId, rec.tier.slaHours * 3600_000, async () => {
-      if (this.pending.get(rec.proposalId) !== rec) return; // decided -> cancelled
-      const step = nextEscalationStep(rec.tier, rec.hopsSoFar);
-      const now = this.deps.clock.now();
-      if (step.kind === 'escalate') {
-        rec.hopsSoFar += 1;
-        rec.item = { ...rec.item, queue: 'escalated' };
-        await this.deps.inbox.enqueue({
+  /**
+   * The ladder's view of this engine. Five capabilities and no more; see `escalationLadder.ts` for
+   * why the port is narrow rather than a handle on the engine itself.
+   */
+  private ladderPort(): LadderPort {
+    return {
+      isCurrent: (rec) => this.pending.get(rec.proposalId) === rec,
+      now: () => this.deps.clock.now(),
+      scheduleTimer: (memberId, delayMs, fire) => this.scheduleTimer(memberId, delayMs, fire),
+      enqueue: (rec) =>
+        this.deps.inbox.enqueue({
           proposalId: rec.proposalId,
           workflowId: rec.workflowId,
           memberId: rec.memberId,
           agentId: rec.agentId,
           item: rec.item,
           status: 'pending',
-        });
-        await this.emit(
-          rec.agentId,
-          'agent.task.escalated',
-          rec.memberId,
-          rec.workflowId,
-          rec.correlationId,
-          now,
-          rec.proposalId,
-          { hop: 'escalate', level: step.level, target: step.target, priority: rec.action.priority }
-        );
-        this.scheduleEscalation(rec); // next hop after another SLA window
-      } else {
-        rec.parked = true; // parked with audit; re-activatable, NEVER silently expired
-        await this.emit(
-          rec.agentId,
-          'agent.task.escalated',
-          rec.memberId,
-          rec.workflowId,
-          rec.correlationId,
-          now,
-          rec.proposalId,
-          {
-            hop: 'park',
-            parked: true,
-            auditedHops: step.auditedHops,
-            priority: rec.action.priority,
-          }
-        );
-      }
-    });
+        }),
+      emit: (rec, eventType, occurredAtMs, payload) =>
+        this.emit({
+          agentId: rec.agentId,
+          eventType,
+          memberId: rec.memberId,
+          workflowId: rec.workflowId,
+          correlationId: rec.correlationId,
+          occurredAtMs,
+          proposalId: rec.proposalId,
+          payload,
+        }),
+      terminate: (workflowId) => this.terminate(workflowId),
+    };
+  }
+
+  private terminate(workflowId: string): void {
+    terminateInstance(this.instances.get(workflowId), this.terminalDeps());
   }
 
   // ── Internals ────────────────────────────────────────────────────────────────
 
   private scheduleTimer(memberId: string, delayMs: number, fire: () => Promise<void>): string {
-    const id = `t${this.timerCounter++}`;
-    this.timers.set(id, {
-      id,
-      memberId,
-      dueAtMs: this.deps.clock.now() + delayMs,
-      seq: this.timerCounter,
-      cancelled: false,
-      fire,
-    });
-    return id;
+    return this.timers.schedule(memberId, delayMs, fire);
   }
 
   private cancelTimer(id: string): void {
-    const t = this.timers.get(id);
-    if (t) t.cancelled = true;
+    this.timers.cancel(id);
   }
 
   private runOnMember(memberId: string, fn: () => Promise<void>): Promise<void> {
-    const prev = this.memberChains.get(memberId) ?? Promise.resolve();
-    const next = prev.then(fn, fn);
-    this.memberChains.set(
-      memberId,
-      next.catch(() => undefined)
-    );
-    return next;
+    return this.timers.runOnMember(memberId, fn);
   }
 
-  private emit(
-    agentId: string,
-    eventType: Parameters<typeof buildAgentEvent>[0]['eventType'],
-    memberId: string,
-    workflowId: string,
-    correlationId: string,
-    occurredAtMs: number,
-    proposalId: string,
-    payload: Record<string, unknown>
-  ): Promise<void> {
-    return this.deps.eventSink.emit(
-      buildAgentEvent({
-        eventType,
-        memberId,
-        workflowId,
-        agentId,
-        occurredAtMs,
-        correlationId,
-        proposalId,
-        payload,
-      })
-    );
+  /** One event, one object. `buildAgentEvent` asserts the type is pre-allocated and omits an
+   *  absent `proposalId` rather than substituting anything for it. */
+  private emit(e: Parameters<typeof buildAgentEvent>[0]): Promise<void> {
+    return this.deps.eventSink.emit(buildAgentEvent(e));
   }
 
   private setStatus(
     workflowId: string,
     status: WorkflowSnapshot['status'],
-    awaitingProposalId?: string
+    proposalId?: string,
+    scope?: WorkflowSnapshot['awaitingScope']
   ): void {
     const inst = this.instances.get(workflowId);
-    if (!inst) return;
+    if (!inst || inst.done.settled) return; // a terminal status is terminal
     inst.snapshot.status = status;
     inst.snapshot.updatedAtMs = this.deps.clock.now();
-    if (awaitingProposalId) inst.snapshot.awaitingProposalId = awaitingProposalId;
-    else delete inst.snapshot.awaitingProposalId;
+    setAwaiting(inst.snapshot, proposalId, scope);
+  }
+
+  /** The terminal trio's view of this engine: the clock, and the one event they may emit. */
+  private terminalDeps(): TerminalDeps {
+    return {
+      now: () => this.deps.clock.now(),
+      emit: (inst, occurredAtMs, payload) =>
+        void this.emit({
+          agentId: inst.agentId,
+          eventType: 'agent.task.settled',
+          memberId: inst.memberId,
+          workflowId: inst.snapshot.workflowId,
+          correlationId: inst.correlationId,
+          occurredAtMs,
+          proposalId: inst.lastProposalId,
+          payload,
+        }),
+    };
   }
 
   private settle(workflowId: string, status: 'completed' | 'failed', result: unknown): void {
-    const inst = this.instances.get(workflowId);
-    if (!inst || inst.done.settled) return;
-    inst.done.settled = true;
-    inst.snapshot.status = status;
-    inst.snapshot.updatedAtMs = this.deps.clock.now();
-    inst.snapshot.result = result;
-    inst.done.resolve(result);
+    settleInstance(this.instances.get(workflowId), status, result, this.terminalDeps());
   }
 
   private fail(workflowId: string, err: unknown): void {
-    const inst = this.instances.get(workflowId);
-    if (!inst || inst.done.settled) return;
-    inst.done.settled = true;
-    inst.snapshot.status = 'failed';
-    inst.snapshot.error = err instanceof Error ? err.message : String(err);
-    inst.snapshot.updatedAtMs = this.deps.clock.now();
-    inst.done.reject(err);
+    failInstance(this.instances.get(workflowId), err, this.terminalDeps());
   }
 }
 

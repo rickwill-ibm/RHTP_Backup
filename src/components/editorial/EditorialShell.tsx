@@ -24,12 +24,15 @@ export function EditorialShell({
   title,
   subtitle,
   badge,
+  wideSubtitle = false,
   children,
 }: {
   eyebrow: string;
   title: string;
   subtitle?: React.ReactNode;
   badge?: string;
+  /** When true, the subtitle spans the full banner width instead of the default reading measure. */
+  wideSubtitle?: boolean;
   children: React.ReactNode;
 }): React.ReactElement {
   return (
@@ -50,7 +53,10 @@ export function EditorialShell({
         </p>
         <h1 className="mt-1.5 text-[26px]">{title}</h1>
         {subtitle ? (
-          <p className="mt-2 max-w-3xl text-sm" style={{ color: '#d6e4f2', lineHeight: 1.55 }}>
+          <p
+            className={`mt-2 text-sm ${wideSubtitle ? 'max-w-none' : 'max-w-3xl'}`}
+            style={{ color: '#d6e4f2', lineHeight: 1.55 }}
+          >
             {subtitle}
           </p>
         ) : null}

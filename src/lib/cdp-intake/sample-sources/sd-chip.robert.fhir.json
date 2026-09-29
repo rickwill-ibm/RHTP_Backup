@@ -7,7 +7,7 @@
         "resourceType": "Patient",
         "id": "pat-robert-103",
         "identifier": [
-          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-00103" },
+          { "system": "https://medicaid.state.example.org/mmis", "value": "SD-MEDICAID-00103" },
           { "system": "urn:bennett-county-ehr:mrn", "value": "MRN-0103" }
         ],
         "name": [{ "family": "Chen", "given": ["Robert"] }],

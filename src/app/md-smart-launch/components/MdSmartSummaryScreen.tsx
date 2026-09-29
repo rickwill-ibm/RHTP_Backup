@@ -92,7 +92,7 @@ export default function MdSmartSummaryScreen({
     primary: patient.payer ?? 'CMS / Medicare Advantage',
     memberId: patient.insuranceId ?? 'MCR-4472910',
     secondary: 'State Medicaid Wrap',
-    pcp: launchContext.practitionerName ?? 'Bennett County Health PCP',
+    pcp: launchContext.practitionerName ?? 'Prairie Health PCP',
   });
   const [consentsData, setConsentsData] = useState<string[]>([
     'SMART on FHIR',

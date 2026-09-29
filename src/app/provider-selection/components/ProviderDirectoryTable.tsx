@@ -16,7 +16,7 @@ import { useWorkflowMachine } from '@/lib/workflowMachine';
 const SD_PROVIDERS = [
   {
     id: 'sd-prov-001',
-    name: 'Bennett County Health Services',
+    name: 'Prairie Health Services',
     type: 'FQHC',
     city: 'Martin',
     county: 'Bennett',
@@ -29,7 +29,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-002',
-    name: 'Winner Regional Healthcare Center',
+    name: 'Cedar Bluff Regional Healthcare Center',
     type: 'CAH',
     city: 'Winner',
     county: 'Tripp',
@@ -42,7 +42,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-003',
-    name: 'Avera Sacred Heart CAH',
+    name: 'Cedar Valley Critical Access Hospital',
     type: 'Hospital',
     city: 'Yankton',
     county: 'Yankton',
@@ -55,7 +55,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-004',
-    name: 'Fall River Health Services',
+    name: 'Riverbend Health Services',
     type: 'CAH',
     city: 'Hot Springs',
     county: 'Fall River',
@@ -68,7 +68,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-005',
-    name: 'Monument Health Rapid City',
+    name: 'Summit Regional — Rapid City',
     type: 'Hospital',
     city: 'Rapid City',
     county: 'Pennington',
@@ -81,7 +81,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-006',
-    name: 'Gregory County Medical Associates',
+    name: 'Riverside Medical Associates',
     type: 'FQHC',
     city: 'Gregory',
     county: 'Gregory',
@@ -94,7 +94,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-007',
-    name: 'Oglala Sioux Tribe Health Administration',
+    name: 'Tribal Health Program Administration',
     type: 'IHS',
     city: 'Pine Ridge',
     county: 'Oglala Lakota',
@@ -107,7 +107,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-008',
-    name: 'Avera McKennan Hospital',
+    name: 'Cedar Valley Metro Hospital',
     type: 'Hospital',
     city: 'Sioux Falls',
     county: 'Minnehaha',
@@ -120,7 +120,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-009',
-    name: 'Winner FQHC',
+    name: 'Riverbend Community Health FQHC',
     type: 'FQHC',
     city: 'Winner',
     county: 'Tripp',
@@ -133,7 +133,7 @@ const SD_PROVIDERS = [
   },
   {
     id: 'sd-prov-010',
-    name: 'Bennett County Action CBO',
+    name: 'Frontier Community Action CBO',
     type: 'CBO',
     city: 'Martin',
     county: 'Bennett',

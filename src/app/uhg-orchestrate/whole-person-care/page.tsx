@@ -1043,8 +1043,8 @@ export default function WholePersonCareScreen() {
                       fontStyle: 'italic',
                     }}
                   >
-                    "The system doesn't just coordinate care. It coordinates care that will actually
-                    work."
+                    &quot;The system doesn&apos;t just coordinate care. It coordinates care that
+                    will actually work.&quot;
                   </p>
                   <div
                     className="flex items-center gap-6 mt-4 pt-4"

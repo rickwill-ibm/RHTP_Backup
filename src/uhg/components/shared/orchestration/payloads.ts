@@ -13,7 +13,7 @@ const FOUNDATIONAL_PAYLOADS: Record<string, object> = {
     timestamp: '2024-11-15T14:22:57Z',
     memberId: 'MARIA_SD_001',
     signals: [
-      { type: 'AUTH_EXPIRY', severity: 'HIGH', source: 'Claims System', detail: 'CAREGAP_HBA1C expiring T-4 days · HbA1c lab order · Bennett County Health · Winner Regional Healthcare' },
+      { type: 'AUTH_EXPIRY', severity: 'HIGH', source: 'Claims System', detail: 'CAREGAP_HBA1C expiring T-4 days · HbA1c lab order · Bennett County Health · Cedar Bluff Regional Healthcare' },
       { type: 'CARE_GAP', severity: 'HIGH', source: 'EHR/Quality Engine', detail: 'HbA1c gap open 45 days · last value 9.2% · Q4 SD Medicaid quality window closes Dec 31' },
       { type: 'BEHAVIORAL', severity: 'MEDIUM', source: 'Engagement Platform', detail: 'Portal logins 3x this week · receptivity 87% · caregiver stress elevated' },
     ],
@@ -204,7 +204,7 @@ const FOUNDATIONAL_PAYLOADS: Record<string, object> = {
       deductibleRemaining: 300,
       oopMaxRemaining: 1840,
       procedureCode: 'HbA1c',
-      networkStatus: 'IN_NETWORK — Winner Regional Healthcare',
+      networkStatus: 'IN_NETWORK — Cedar Bluff Regional Healthcare',
     },
     oopLiabilityRange: { min: 340, max: 480, currency: 'USD', confidence: 'HIGH' },
     outOfNetworkExposureAvoided: 2400,

@@ -155,10 +155,15 @@ console.log(
 console.log(
   `  candidates: ${candidates.length} | untested: ${untested.length} (baseline ${baseSet.size})`
 );
-if (nowLinked.length)
+if (nowLinked.length) {
   console.log(
     `  ratchet: ${nowLinked.length} baseline module(s) are now TESTED - drop them from ${BASELINE}.`
   );
+  // Naming them is the difference between an actionable ratchet and a nag: a gate that reports a
+  // count it will not itemise gets read once and ignored, and the slack it is reporting never gets
+  // taken up. `--list` prints them so the baseline edit is mechanical instead of a guess.
+  if (process.argv.includes('--list')) for (const n of nowLinked) console.log(`    - ${n}`);
+}
 if (fresh.length) {
   console.log(`FAIL (E13): ${fresh.length} NEW untested module(s) - shipped with no test:`);
   for (const u of fresh) console.log(`    ${u}`);

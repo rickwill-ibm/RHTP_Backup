@@ -1,5 +1,29 @@
 {
   "note": "E14 wired-path ratchet: known unwired modules (the backlog). New orphans not listed here fail the gate.",
+  "shrinkReview": {
+    "date": "2026-09-27",
+    "reviewer": "C1 convention-steward",
+    "verdict": "SHRINK WITHHELD \u2014 25 entries the gate reports as now-WIRED were verified individually and NONE is wired end-to-end. No entry removed.",
+    "gateAdvisory": "ratchet: 25 baseline module(s) are now WIRED - drop them from docs/build-provenance/wiring-baseline.json",
+    "why": [
+      "All 25 become 'reachable' through exactly ONE importer: src/app/api/ops/agents/actions/route.ts. Verified: grep for importers of @/lib/agents/demo, @/lib/agents/dispatch and @/lib/sde outside those trees returns that single file and nothing else.",
+      "That route returns 403 to EVERY real authenticated session. src/lib/server/smartSession.ts's SessionAuthContext is {patient, fhirUser, scope} with no role field, so lib/authz/principal deriveRole() can only ever yield 'pa-reviewer' or 'member'; the route admits OPS_ROLES=['payer-ops','admin'] plus 'auditor'. The 200 path exists only under a test that mocks a role field the real context does not have. E14's own rule is 'a capability is DONE only when a production caller reaches it end-to-end' \u2014 an entry point that 403s for every caller does not satisfy it.",
+      "13 of the 25 are reachable only across 'export ... from' barrel re-export edges or type-only edges, which check-wiring.mjs counts as graph edges (its IMPORT_RE matches 'import type ... from' and 'export ... from'). Barrel-reachable is not called. Verified per module: agents/dispatch/dispatcher.ts, agents/dispatch/types.ts, agents/outreach/{index,outreachAgent,types}.ts, agents/pa/{index,paAgent,types}.ts, agents/referral/{index,referralAgent,types}.ts and sde/engine/explain.ts are REEXPORT-ONLY.",
+      "The E1 seam manifest names getAgentDemoActions() as the agentRuntime productionResolverRef, but the route's production branch calls runRealAgentDemo() instead \u2014 so the declared production resolver is not the one a production caller reaches."
+    ],
+    "consequence": "Removing these now would record 25 modules as wired on the strength of an unreachable route \u2014 the ratchet rotting in the direction that flatters the report, which is the failure E14 exists to prevent. The shrink is owed the moment the ops-route authz defect and the manifest resolverRef defect are fixed AND a test drives the 200 path from a real SessionAuthContext.",
+    "reShrinkWhen": "Re-run `npm run check:wiring`; for each entry the advisory names, confirm (a) a non-test importer chain from an entry point that a real session can actually reach, and (b) at least one value (non-type, non-barrel) edge. Then remove only the confirmed entries.",
+    "caveat": "`check-wiring.mjs --write-baseline` regenerates this file from the orphan scan alone and will DROP this key. Re-add it, or record the review in docs/build-provenance/coalition-log.md instead.",
+    "reaffirmed": [
+      {
+        "date": "2026-09-28",
+        "reviewer": "W8 adversarial-AFTER (R4 gate-integrity lens)",
+        "what": "W8 REMOVED these 25 entries on the strength of the gate's own advisory line, without reading the withheld verdict four lines above the list. Restored.",
+        "whyRestored": "Of the four blockers recorded above, exactly ONE has since cleared: SessionAuthContext now carries `role` (src/lib/server/smartSession.ts). Blocker 3 (13 of 25 reachable only across barrel re-export or type-only edges; check-wiring.mjs's IMPORT_RE still matches both) and blocker 4 (the E1 manifest names getAgentDemoActions() while the route's production branch calls runRealAgentDemo()) are both still true of the live tree. The reShrinkWhen precondition is not met.",
+        "lesson": "A gate advisory that says 'drop them from the baseline' is a measurement, not an authorisation. The ratchet exists to resist exactly the edit the advisory invites, and the recorded verdict is part of the baseline."
+      }
+    ]
+  },
   "orphans": [
     "src/lib/agents/demo/index.ts",
     "src/lib/agents/dispatch/dispatcher.ts",

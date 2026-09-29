@@ -1,9 +1,38 @@
 {
-  "version": "1.0.0",
   "agents": [
     {
+      "autonomyTier": "HITL",
+      "dataCapability": {
+        "dataClasses": [
+          "mental-health"
+        ],
+        "purposeOfUse": "care-coordination"
+      },
+      "escalationPolicyRef": "default",
+      "id": "bh-screening-triage-agent",
+      "owningModule": "src/lib/agents/behavioralHealth",
+      "phiPosture": "references-only",
+      "purpose": "Triage a behavioral-health screening signal into a proposed care-team follow-up under a human gate. It proposes and escalates; it never contacts a member, never writes a clinical record, and never determines risk.",
+      "toolAllowlist": [
+        "person-context.read",
+        "work-queue.submit",
+        "signal.report"
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "autonomyTier": "HITL",
+      "dataCapability": {
+        "dataClasses": [
+          "demographic",
+          "social-need"
+        ],
+        "purposeOfUse": "care-coordination"
+      },
+      "escalationPolicyRef": "default",
       "id": "outreach-agent",
-      "version": "1.0.0",
+      "owningModule": "src/lib/agents/outreach",
+      "phiPosture": "references-only",
       "purpose": "Consume an SDE-approved member-outreach touchpoint, propose the outreach action, and wait at the HITL gate before any contact is sent.",
       "toolAllowlist": [
         "person-context.read",
@@ -11,29 +40,21 @@
         "work-queue.submit",
         "signal.report"
       ],
-      "autonomyTier": "HITL",
-      "escalationPolicyRef": "default",
-      "phiPosture": "references-only",
-      "owningModule": "src/lib/agents/outreach"
+      "version": "1.0.0"
     },
     {
-      "id": "referral-coordination-agent",
-      "version": "1.0.0",
-      "purpose": "Open and track a referral, propose a nudge on stall, and escalate up the care-team hierarchy per escalation-as-data; never books external transactions.",
-      "toolAllowlist": [
-        "referral-status.read",
-        "provider-context.read",
-        "work-queue.submit",
-        "signal.report"
-      ],
       "autonomyTier": "HITL",
+      "dataCapability": {
+        "dataClasses": [
+          "demographic",
+          "clinical-general"
+        ],
+        "purposeOfUse": "treatment"
+      },
       "escalationPolicyRef": "default",
-      "phiPosture": "references-only",
-      "owningModule": "src/lib/agents/referral"
-    },
-    {
       "id": "pa-documentation-agent",
-      "version": "1.0.0",
+      "owningModule": "src/lib/agents/pa",
+      "phiPosture": "references-only",
       "purpose": "Drive the existing /prior-auth (goldenThread) flow from thread context, proposing documentation and submission under a human gate; never sets an authoritative PA state.",
       "toolAllowlist": [
         "person-context.read",
@@ -42,14 +63,43 @@
         "evidence.append",
         "work-queue.submit"
       ],
-      "autonomyTier": "HITL",
-      "escalationPolicyRef": "default",
-      "phiPosture": "references-only",
-      "owningModule": "src/lib/agents/pa"
+      "version": "1.0.0"
     },
     {
+      "autonomyTier": "HITL",
+      "dataCapability": {
+        "dataClasses": [
+          "demographic",
+          "social-need"
+        ],
+        "purposeOfUse": "social-care-referral"
+      },
+      "escalationPolicyRef": "default",
+      "id": "referral-coordination-agent",
+      "owningModule": "src/lib/agents/referral",
+      "phiPosture": "references-only",
+      "purpose": "Open and track a referral, propose a nudge on stall, and escalate up the care-team hierarchy per escalation-as-data; never books external transactions.",
+      "toolAllowlist": [
+        "referral-status.read",
+        "provider-context.read",
+        "work-queue.submit",
+        "signal.report"
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "autonomyTier": "HITL",
+      "dataCapability": {
+        "dataClasses": [
+          "demographic",
+          "financial"
+        ],
+        "purposeOfUse": "payment"
+      },
+      "escalationPolicyRef": "default",
       "id": "revenue-cycle-agent",
-      "version": "1.0.0",
+      "owningModule": "src/lib/agents/revenueCycle",
+      "phiPosture": "references-only",
       "purpose": "Draft an underpayment recovery appeal under a human gate, then submit it ONLY after a qualified-human decision: read reconciliation context (references-only), write the recovery DRAFT via its own governed evidence.append tool, propose it HITL, and on a qualified-human APPROVE run the governed claim.submit-appeal in the post-approval branch. Never auto-submits — submission requires a qualified-human decision at every tier (no auto-submit path); a reject is terminal with no submission (Wave-4, evolving Wave-1 FIX-1).",
       "toolAllowlist": [
         "reconciliation.read",
@@ -57,10 +107,8 @@
         "claim.submit-appeal",
         "work-queue.submit"
       ],
-      "autonomyTier": "HITL",
-      "escalationPolicyRef": "default",
-      "phiPosture": "references-only",
-      "owningModule": "src/lib/agents/revenueCycle"
+      "version": "1.0.0"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }

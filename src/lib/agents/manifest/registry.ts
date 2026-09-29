@@ -14,12 +14,15 @@
  * reference registry, independent of mode, so tests are reproducible.
  */
 import { getDataMode } from '@/lib/config/dataMode';
+import { assertManifestsWithinLock } from './authorityGate';
+import type { AuthorityLockFile } from '@/lib/agents/authority';
 import registryJson from './data/agent-manifests.json';
 import {
   AgentManifestError,
   ToolNotAllowedError,
   UnknownAgentError,
   type AgentManifest,
+  type ManifestDataCapability,
   type AgentManifestRegistryData,
   type AutonomyTier,
   type PhiPosture,
@@ -75,7 +78,7 @@ function validateManifest(m: unknown, idx: number): AgentManifest {
     `agents[${idx}].owningModule`,
     'must name the module that owns the agent behavior'
   );
-  return {
+  const manifest: AgentManifest = {
     id: o.id as string,
     version: o.version as string,
     purpose: o.purpose as string,
@@ -85,10 +88,63 @@ function validateManifest(m: unknown, idx: number): AgentManifest {
     phiPosture: o.phiPosture as PhiPosture,
     owningModule: o.owningModule as string,
   };
+  if (o.dataCapability !== undefined) {
+    manifest.dataCapability = validateDataCapability(o.dataCapability, idx);
+  }
+  return manifest;
 }
 
-/** Parse + validate a registry data blob, or throw AgentManifestError loudly. */
+/**
+ * Validate the declared capability on a LOADED manifest — not only on the ADL
+ * definition. `setProductionManifestLoader` installs a store-backed loader whose
+ * manifests the compiler never saw, so a validator that only runs at build time
+ * is a statement about the repository rather than about the running process.
+ */
+function validateDataCapability(raw: unknown, idx: number): ManifestDataCapability {
+  const at = `agents[${String(idx)}].dataCapability`;
+  req(raw !== null && typeof raw === 'object' && !Array.isArray(raw), at, 'must be an object');
+  const c = raw as Record<string, unknown>;
+  req(
+    typeof c.purposeOfUse === 'string' && c.purposeOfUse.length > 0,
+    `${at}.purposeOfUse`,
+    'must be a non-empty purpose code'
+  );
+  req(
+    Array.isArray(c.dataClasses) &&
+      c.dataClasses.every((d) => typeof d === 'string' && d.length > 0),
+    `${at}.dataClasses`,
+    'must be an array of non-empty data-class codes'
+  );
+  return {
+    purposeOfUse: c.purposeOfUse,
+    dataClasses: (c.dataClasses as string[]).slice(),
+  };
+}
+
+/**
+ * Parse + validate a registry data blob, or throw AgentManifestError loudly.
+ *
+ * There is deliberately NO lock parameter here. `parseRegistry` is a live path —
+ * `src/lib/goldenThread/presetRegistry.ts` calls it directly and hands the
+ * result to the decision engine — so an override on this function would be a
+ * public bypass of the authority ceiling, not a testing convenience. A caller
+ * that genuinely needs a different reviewed lock uses
+ * `parseRegistryUnderLock`, which application code is forbidden to call and
+ * tests/agents/authorityWiring.test.ts enforces.
+ */
 export function parseRegistry(data: unknown): AgentManifestRegistry {
+  return parseRegistryUnderLock(data);
+}
+
+/**
+ * Parse under an explicit lock. NOT application API — see `parseRegistry`.
+ * Exported for the ADL/test paths that must model a widened ceiling, and kept
+ * out of the module barrel so it cannot be reached by an ordinary import.
+ */
+export function parseRegistryUnderLock(
+  data: unknown,
+  lock?: AuthorityLockFile
+): AgentManifestRegistry {
   req(data && typeof data === 'object', 'registry', 'must be an object');
   const o = data as Record<string, unknown>;
   req(typeof o.version === 'string' && o.version.length > 0, 'version', 'must be a version string');
@@ -99,6 +155,10 @@ export function parseRegistry(data: unknown): AgentManifestRegistry {
     req(!byId.has(manifest.id), `agents[${i}].id`, `duplicate agent id "${manifest.id}"`);
     byId.set(manifest.id, manifest);
   });
+  // The authority lock, applied to the manifests actually parsed — not to the
+  // definitions they were generated from. A registry that widens an allowlist
+  // relative to the reviewed lock refuses to load rather than loading ungoverned.
+  assertManifestsWithinLock([...byId.values()], lock);
   return new AgentManifestRegistry(o.version as string, byId);
 }
 
@@ -162,10 +222,27 @@ export function setProductionManifestLoader(loader: (() => AgentManifestRegistry
   productionLoader = loader;
 }
 
-/** Load the active registry for the resolved `agentManifests` data mode. */
+/**
+ * Load the active registry for the resolved `agentManifests` data mode.
+ *
+ * The production loader's output is checked AND REBUILT, not merely inspected:
+ * a store-backed loader is free to construct an AgentManifestRegistry directly
+ * and to answer list() and get() differently, and a security gate a caller can
+ * step around by overriding a method is not a gate.
+ */
 export function loadAgentManifests(): AgentManifestRegistry {
   const mode = getDataMode('agentManifests');
-  if (mode === 'production' && productionLoader) return productionLoader();
+  if (mode === 'production' && productionLoader) {
+    const loaded = productionLoader();
+    // Rebuild from what was checked. `loaded` is a caller-supplied object whose
+    // list() and get() need not agree — a lazy store-backed registry would have
+    // the gate inspect a warm cache while callers hit the store. Building a new
+    // registry from the verified manifests makes the checked set and the served
+    // set the same thing by construction.
+    const checked = loaded.list();
+    assertManifestsWithinLock(checked);
+    return new AgentManifestRegistry(loaded.version, new Map(checked.map((m) => [m.id, m])));
+  }
   return defaultRegistry();
 }
 

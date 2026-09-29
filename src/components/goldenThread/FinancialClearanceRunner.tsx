@@ -27,7 +27,7 @@ interface RunResult {
 }
 
 const PROVIDERS = [
-  { npi: '1730154783', label: 'Provider A (gold-carded)' },
+  { npi: '1730154782', label: 'Provider A (gold-carded)' },
   { npi: '1518998765', label: 'Provider B (not gold-carded)' },
 ];
 

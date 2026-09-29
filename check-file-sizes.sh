@@ -40,12 +40,17 @@ for arg in "$@"; do
   fi
 done
 if [[ ${#SCAN_DIRS[@]} -eq 0 ]]; then
-  SCAN_DIRS=("src" "tests" "e2e")
+  # `tools`, `scripts` and `docs/build-provenance` were OUTSIDE this scan (register G-062), and
+  # `.mjs`/`.sh` were outside EXTENSIONS. So every enforcement gate this repo runs — the plain-node
+  # ADL mirror that `adl:check` executes, `ci-gates.sh` itself, and all nine `check-*.mjs` — was the
+  # one part of the codebase with no size cap and no ratchet. The files that police the ratchet were
+  # the files the ratchet could not see.
+  SCAN_DIRS=("src" "tests" "e2e" "tools" "scripts" "docs/build-provenance")
 fi
 
-EXTENSIONS=("ts" "tsx" "js" "jsx")
+EXTENSIONS=("ts" "tsx" "js" "jsx" "mjs" "sh")
 
-# Genuinely exempt: data, generated artefacts, template/copy generators, backups.
+# Genuinely exempt: data, generated artefacts, template/copy generators.
 # Reviewed-monolith page exemptions from v1 have been MIGRATED to the baseline —
 # the ratchet also catches growth in those files, which patterns never could.
 EXEMPT_PATTERNS=(
@@ -57,7 +62,6 @@ EXEMPT_PATTERNS=(
   "*.seed.json"
   "*/generateDetailedScreenPDF*.ts"
   "*/generateTalkTrackPDF*.ts"
-  "*/md-smart-launch.backup/*"
   "*/AppLayout.nav.ts"
 )
 

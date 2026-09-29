@@ -9,6 +9,19 @@
 export { DataSourceNotConfiguredError, type DataSourceLoader } from './common';
 
 export {
+  SYNTHETIC_ENTITIES,
+  syntheticEntity,
+  entityName,
+  entityShortName,
+  entityGraphLabel,
+  substitutionPairs,
+  retiredStrings,
+  type SyntheticEntity,
+  type SyntheticEntityAddress,
+  type EntityCategory,
+} from './syntheticEntities';
+
+export {
   getGoldCardRosterLoader,
   normalizeGoldCardRoster,
   seededGoldCardRosterLoader,

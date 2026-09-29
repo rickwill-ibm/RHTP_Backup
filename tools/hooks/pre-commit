@@ -15,14 +15,54 @@
 set -e
 cd "$(git rev-parse --show-toplevel)"
 
+# 0) SECRET BLOCK — FAIL-CLOSED, runs first and costs milliseconds.
+#    Added 2026-09-28 after an API key reached a remote. A scanner that only WARNS is the
+#    same broken-control class this repo keeps finding: it reports and stops nothing. This
+#    one EXITS NON-ZERO. The only bypass is `git commit --no-verify`, which is deliberate,
+#    visible in your shell history, and yours to justify.
+#    It never prints the matching line — printing a secret to a terminal is how it ends up
+#    in a scrollback buffer, a screen share, or a CI log.
+SEC_STAGED=$(git diff --cached --name-only --diff-filter=ACMR || true)
+if [ -n "$SEC_STAGED" ]; then
+  echo "[pre-commit] secret scan (fail-closed)"
+
+  # 0a) env files must never be staged — only *.example templates may be.
+  BAD_ENV=$(printf '%s\n' "$SEC_STAGED" | grep -E '(^|/)\.env($|\.)' | grep -v '\.example$' || true)
+  if [ -n "$BAD_ENV" ]; then
+    echo "  BLOCKED — env files are staged. These must never be committed:"
+    printf '    %s\n' $BAD_ENV
+    echo "  Real values belong in .env (gitignored). Commit a *.example template instead."
+    exit 1
+  fi
+
+  # 0b) known credential formats in the staged CONTENT (added lines only).
+  #     Each pattern requires a realistic length, so prose mentioning a bare prefix
+  #     (documentation, this comment, a register entry) does NOT trip it.
+  SEC_PAT='sk-ant-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|xox[baprs]-[0-9A-Za-z-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----'
+  if git diff --cached --no-color -U0 2>/dev/null | grep -E '^\+' | grep -qE "$SEC_PAT"; then
+    echo "  BLOCKED — staged content matches a known credential format."
+    echo "  The matching line is deliberately NOT printed. Find it yourself with:"
+    echo "    git diff --cached | grep -nE '"'"'$SEC_PAT'"'"'"
+    echo "  Remove the value, put it in .env (gitignored), re-stage, commit again."
+    exit 1
+  fi
+  echo "  clean — $(printf '%s\n' "$SEC_STAGED" | grep -c . ) staged file(s) scanned"
+fi
+
 # 1) Auto-format staged code with Prettier (repo .prettierrc == the lint gate's config), so
 #    formatting can never fail the lint gate after the fact. Formatted files are re-staged.
 FILES=$(git diff --cached --name-only --diff-filter=ACMR -- \
   '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs')
 if [ -n "$FILES" ]; then
   echo "[pre-commit] prettier --write (staged)"
-  echo "$FILES" | xargs -r npx --no-install prettier --write --ignore-unknown
-  echo "$FILES" | xargs -r git add
+  # BOUNDED BATCHES (2026-09-29). Unbounded, this splats every staged file onto ONE command
+  # line - 13,022 chars at 332 staged files. `npx` shells through cmd.exe on Windows, whose
+  # limit is 8,191 ("The command line is too long"), and xargs' own buffer is 131,072 so it has
+  # no reason to split on its own. scripts/ci-gates.sh g_format was bounded for exactly this
+  # reason (-n 50 -s 6000); this hook - its twin - was not. Same fix, same numbers. NUL
+  # separation so a path containing a space can never be split into two arguments.
+  printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 -r -n 50 -s 6000 npx --no-install prettier --write --ignore-unknown
+  printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 -r -n 50 -s 6000 git add
 fi
 
 # 1.5) Size preflight (ADVISORY) — print the ratchet status of every staged source file

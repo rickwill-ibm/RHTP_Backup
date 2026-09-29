@@ -36,6 +36,68 @@ export type PaEvent =
   | { type: 'close-gap'; approvedBy?: string } // HUMAN-GATED
   | { type: 'appeal' };
 
+/**
+ * The closed PA vocabularies, DERIVED from their unions — the same discipline as
+ * `AGENT_TASK_KINDS`. `Record<PaState, true>` / `Record<PaEvent['type'], true>` are
+ * exhaustive, so a state or event added to a union without a key here fails
+ * `tsc --noEmit` ON THAT LITERAL.
+ *
+ * WHY THEY EXIST. A route's `pa` template was authored as free strings and cast into
+ * these unions unchecked (`routingSchema.ts`: `o.pa as AgentRoute['pa']`). Author
+ * `"currentState": "denied"` (lower-case d) and: `tsc` is clean, `adl:check` is
+ * byte-identical, `parseAgentRouting` accepts it — and at runtime `transition()` returns
+ * an `error` WITHOUT THROWING, so the PA thread silently does not advance while the
+ * audited row reads `executed`. A soft-failing consumer is exactly why the authoring
+ * layer has to be the one that refuses.
+ */
+const PA_STATE_SET: Record<PaState, true> = {
+  Draft: true,
+  CRD: true,
+  NoAuthRequired: true,
+  RequirementsKnown: true,
+  DTR: true,
+  Prepopulated: true,
+  EvidenceComplete: true,
+  Submitted: true,
+  Pending: true,
+  Approved: true,
+  Denied: true,
+  MoreInfo: true,
+  AppealOrReview: true,
+  GapClosed: true,
+};
+
+const PA_EVENT_TYPE_SET: Record<PaEvent['type'], true> = {
+  'order-created': true,
+  'crd-none': true,
+  'crd-required': true,
+  'launch-dtr': true,
+  prepopulated: true,
+  'evidence-complete': true,
+  submit: true,
+  acknowledged: true,
+  'claim-response': true,
+  resubmit: true,
+  'close-gap': true,
+  appeal: true,
+};
+
+/** Every legal PA state, for membership tests in hand validators. */
+export const PA_STATES: readonly string[] = Object.keys(PA_STATE_SET);
+
+/** Every legal PA event type, for membership tests in hand validators. */
+export const PA_EVENT_TYPES: readonly string[] = Object.keys(PA_EVENT_TYPE_SET);
+
+/** Narrow an untrusted string to `PaState`. */
+export function isPaState(v: unknown): v is PaState {
+  return typeof v === 'string' && PA_STATES.includes(v);
+}
+
+/** Narrow an untrusted string to a legal `PaEvent['type']`. */
+export function isPaEventType(v: unknown): v is PaEvent['type'] {
+  return typeof v === 'string' && PA_EVENT_TYPES.includes(v);
+}
+
 export interface PaContext {
   priority: 'expedited' | 'standard';
   denialReasons?: string[];

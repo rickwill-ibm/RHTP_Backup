@@ -1,0 +1,41 @@
+# CODEOWNERS — the files whose change IS the review.
+#
+# WHY THIS FILE EXISTS, and why it is being created rather than assumed. Two modules in this
+# repository describe themselves as CODEOWNERS-protected:
+#
+#   src/lib/agents/authority/types.ts:101 — "The whole lock file (CODEOWNERS-protected; changing it
+#                                            is a security review)"
+#   src/lib/agents/adl/README.md:30       — "Put it under CODEOWNERS."
+#
+# There was no CODEOWNERS file. The authority lock's protection was a comment asserting a control
+# that did not exist, which in this programme's terms is a defect in its own right — and the §92.210
+# fairness lock added in W7.5d was about to inherit the same claim by copying the sentence.
+#
+# The two locks below are the same KIND of object: a separate, reviewed record that an artifact may
+# only narrow against, whose value comes entirely from someone other than the artifact's author
+# having looked at it. A lock any contributor can edit alongside the thing it governs is a form.
+#
+# NOTE ON FORCE: a CODEOWNERS file only binds where the host enforces required reviews on protected
+# branches. It is a declaration of who must look, not a mechanism that stops an edit. The mechanical
+# half lives in the gates — `adl:check` (byte-identity), `check:92210` (identification by
+# construction, orphan-refusing), `check:revqual`. Neither half is sufficient alone, and neither
+# should be described as if it were.
+
+# ── The authority lock: what each agent is permitted to BE ───────────────────────────────────────
+# Changing a ceiling here widens what an agent may do, at build time and at load time.
+/src/lib/agents/authority/data/authority-lock.json   @security-review @platform-owners
+
+# ── The §92.210 fairness lock: what each input MEASURES, and what was done about it ──────────────
+# Every entry is a statement a named human made on a date about whether an input variable measures
+# race, color, national origin, sex, age or disability — and what mitigates the resulting risk.
+# Adding an entry to silence a gate, without doing the review, is the failure its separateness
+# exists to make visible.
+/src/lib/fairness/data/fairness-lock.json            @section-1557-coordinator @platform-owners
+
+# ── The agent definitions and their compiled manifest ────────────────────────────────────────────
+/src/lib/agents/adl/data/                            @platform-owners
+/src/lib/agents/manifest/data/                       @platform-owners
+
+# ── The quality ratchet and the provenance record ────────────────────────────────────────────────
+/quality-baseline.json                               @platform-owners
+/docs/build-provenance/                              @platform-owners

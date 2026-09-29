@@ -27,7 +27,7 @@ describe('appeal workflow — determinism isolation', () => {
     expect(seeded[0].state).toBe('awaiting-review');
     expect(s.notifications.length).toBe(1); // the reviewer approval-needed notification for the seeded appeal
     // startAppealWorkflow draws no mulberry() → tick unchanged (no reordered draw); +1 advisory seal.
-    expect(s.chainHead).toBe(3794285767);
+    expect(s.chainHead).toBe(1204273244);
     expect(s.ledgerSeq).toBe(251);
     expect(s.tick).toBe(684);
     expect(s.tickets.length).toBe(5); // 4 deduped seed tickets + the seeded appeal's RCLM ticket

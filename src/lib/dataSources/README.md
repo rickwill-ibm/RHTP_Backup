@@ -47,3 +47,34 @@ the **engine** injection points. Callers are unchanged this iteration.
 `tests/dataSources/adapters.test.ts` — normalization (happy path, defaults,
 malformed-row rejection), the seeded/production selector, and NotConfigured
 behavior for all three.
+
+## Synthetic-entity registry (`syntheticEntities.ts`)
+
+The **single source of truth** for every de-attributed organisation in the demo
+corpus. Data lives in `data/synthetic-entities.seed.json`; the module is a thin
+typed loader over it.
+
+Why it exists: an earlier wave de-attributed three screens by hand and the same
+real names survived in 30+ other files, so `NetworkParticipantsPanel` routed a
+click to `/provider-level` and showed the _same organisation under two names_.
+Names, short/graph forms, phones, emails, domains and street addresses are now
+owned here, and seeds carry an `entityId` rather than a name.
+
+The rule the registry encodes — a real place name may appear as a **LOCATION**
+(county, city, ZIP, lat/lng, map label) but never inside an **ORGANISATION**
+name; tribal and people names never appear in an organisation name at all.
+County values are deliberately _not_ substituted: `Bennett` and `Oglala Lakota`
+are load-bearing keys for the networkAdequacy engine.
+
+Contact safety: phones use the NANP-reserved `555-0100..555-0199` fictitious
+range, emails and domains use RFC 2606 `example.org`.
+
+`oldNames` / `contactSubstitutions` keys are **provenance only** — the record of
+what was retired, and the input to the zero-residue check. Never rendered.
+
+- Apply the registry repo-wide: `node tools/deattribution/sweep.mjs --check|--write`
+  (idempotent; carries a documented carve-out for the `Bennett County Health`
+  homograph in `src/uhg/**`, explained in the tool's header).
+- `tests/dataSources/syntheticEntities.test.ts` — registry shape, contact safety,
+  seed resolution, and the repo-wide coherence gate that fails if any retired
+  name reappears.

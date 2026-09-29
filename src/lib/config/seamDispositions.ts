@@ -26,6 +26,8 @@
  * See src/lib/config/README.seams.md for the full contract.
  */
 import type { DataModeSeam } from './dataMode';
+import { AGENT_SEAM_DISPOSITIONS } from './seamDispositions.agents';
+import { AUTHZ_SEAM_DISPOSITIONS } from './seamDispositions.authz';
 
 /**
  * The three honest production dispositions a seam can have.
@@ -68,6 +70,8 @@ export interface SeamDispositionEntry {
  */
 export const SEAM_DISPOSITIONS: Readonly<Record<DataModeSeam, SeamDispositionEntry>> =
   Object.freeze({
+    ...AGENT_SEAM_DISPOSITIONS, // WPCO agent tranche — entries in ./seamDispositions.agents.ts
+    ...AUTHZ_SEAM_DISPOSITIONS, // reviewer qualification — entries in ./seamDispositions.authz.ts
     // ── fail-closed-stub: production throws a named *NotConfiguredError ──────────
     identity: {
       seamId: 'identity',

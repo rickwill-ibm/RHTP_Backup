@@ -15,6 +15,7 @@
  */
 
 import type { ProposedAction, HumanDecision } from '@/lib/agentRuntime/types';
+import { isPlaceholderIdentity } from '@/lib/authz/principal';
 
 /**
  * Action types that are COVERAGE-AFFECTING and ADVERSE — they deny, reduce, or
@@ -91,13 +92,33 @@ export function isSubmissionActionType(actionType: string | null | undefined): b
   return typeof actionType === 'string' && SUBMISSION_ACTION_TYPES.has(actionType);
 }
 
-/** A human decision is one made by a qualified reviewer, NOT an autonomy actor. */
-export function isQualifiedHumanDecision(decision: HumanDecision | null | undefined): boolean {
-  if (!decision) return false;
-  const by = (decision.decidedBy || '').toLowerCase();
-  // The runtime stamps auto-approvals as `autonomy:<tier>`; a real human decision
-  // never carries that prefix. An empty/auto actor is not a qualified human.
-  return by.length > 0 && !by.startsWith('autonomy:') && by !== 'system';
+/**
+ * Is this decider a person rather than an automation actor or a placeholder?
+ *
+ * RENAMED from `isQualifiedHumanDecision`, which is what it was called while testing exactly this.
+ * The old name documented a control that did not exist — it never looked at a licence, a specialty
+ * or a credential, so `'human:bob'` passed — and three of its four callers gate X12/appeal
+ * SUBMISSIONS (financial recovery), where a clinical-peer requirement has no statutory basis and
+ * would block legitimate revenue-cycle operations. So the decider-CLASS predicate keeps its job
+ * under an honest name, and clinical qualification is a separate assert
+ * (`@/lib/authz/credentialing.assertReviewerQualified`) wired only where a 42 CFR 438.210 object is
+ * in play.
+ *
+ * `'session-user'` is now refused (register G-046). `authz/principal.deriveUserId` returns that
+ * literal when a session carries no `fhirUser`, `approvalAuthority.isNonIdentity` has always blocked
+ * it, and this function accepted it — two reviewer-authorization mechanisms disagreeing about the
+ * placeholder identity, live, on `/api/pa/decision`.
+ */
+export function isNonAutomatedDecider(
+  decision: HumanDecision | string | null | undefined
+): boolean {
+  const raw = typeof decision === 'string' ? decision : (decision?.decidedBy ?? '');
+  const by = raw.trim().toLowerCase();
+  // The runtime stamps auto-approvals as `autonomy:<tier>`; a real human decision never carries
+  // that prefix. An empty, automated or placeholder actor is not a person. The placeholder set is
+  // single-sourced (`authz/principal`) because three copies of it had already drifted apart.
+  if (by.startsWith('autonomy:') || by === 'system') return false;
+  return !isPlaceholderIdentity(by);
 }
 
 export interface GateInput {
@@ -124,7 +145,7 @@ export interface GateResult {
 export function evaluateDecision(input: GateInput): GateResult {
   const requiresHuman = isAdverseCoverageAction(input.action);
   if (requiresHuman) {
-    const human = isQualifiedHumanDecision(input.humanDecision);
+    const human = isNonAutomatedDecider(input.humanDecision);
     return {
       resolved: human,
       requiresHuman: true,
@@ -133,20 +154,54 @@ export function evaluateDecision(input: GateInput): GateResult {
         : 'adverse coverage action BLOCKED: qualified human decision required (tier-independent)',
     };
   }
-  // Non-adverse: the tier governs.
-  if (input.autonomyTier === 'HITL') {
-    const human = isQualifiedHumanDecision(input.humanDecision);
-    return {
-      resolved: human,
-      requiresHuman: false,
-      reason: human ? 'HITL human decision' : 'HITL awaiting human',
-    };
+  // Non-adverse: the tier governs — EXHAUSTIVELY, and fail-closed on anything else.
+  //
+  // WHAT THIS REPLACED (register MED-9). The branch was `if (tier === 'HITL') {...}` followed by an
+  // unconditional `return { resolved: true }`. That trailing return was the default for every value
+  // that is not the string 'HITL' — so a fourth autonomy tier, or a manifest carrying a typo'd tier
+  // string, auto-resolved the action with no human. A safety gate whose unknown-input default is
+  // "permit" is the fail-open this module exists to prevent, on the other axis from the adverse one.
+  //
+  // HONEST REACHABILITY, because the first draft of this comment overstated it and was corrected in
+  // adversarial review: no CURRENT path delivers an unknown tier here. `manifest/registry.ts`
+  // validates the tier on the default path, and the production-loader path routes through
+  // `assertManifestsWithinLock` → `assertAuthority.rank`, which THROWS on a tier outside
+  // `AUTONOMY_ORDER`. So this is defence in depth behind a gate that does hold, and the load-bearing
+  // half is the compile-time `never` below, not a runtime rescue. Saying otherwise would point a
+  // future reviewer at a load path that already validates and away from one that might not.
+  switch (input.autonomyTier) {
+    case 'HITL': {
+      const human = isNonAutomatedDecider(input.humanDecision);
+      return {
+        resolved: human,
+        requiresHuman: false,
+        reason: human ? 'HITL human decision' : 'HITL awaiting human',
+      };
+    }
+    case 'HOTL':
+    case 'autonomous':
+      return {
+        resolved: true,
+        requiresHuman: false,
+        reason: `auto-resolved under ${input.autonomyTier}`,
+      };
+    default: {
+      // INVARIANT: exhaustive over the autonomy tiers. Adding a tier without deciding here fails
+      // `tsc --noEmit` on this assignment — the decision is forced at compile time. And at RUNTIME
+      // an unrecognised tier blocks and demands a human rather than resolving.
+      const unknownTier: never = input.autonomyTier;
+      void unknownTier;
+      return {
+        resolved: false,
+        requiresHuman: true,
+        // FIXED string: `reason` is documented PHI-safe (no free-text payload) and is returned in an
+        // API body, so an unvalidated manifest value does not get interpolated into it. The offending
+        // value belongs in a structured log field, not in a member-derivable reason.
+        reason:
+          'BLOCKED: unrecognised autonomy tier — a tier this gate does not know is never permitted to auto-resolve',
+      };
+    }
   }
-  return {
-    resolved: true,
-    requiresHuman: false,
-    reason: `auto-resolved under ${input.autonomyTier}`,
-  };
 }
 
 /**

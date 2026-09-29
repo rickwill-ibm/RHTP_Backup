@@ -48,7 +48,7 @@ describe('Medical Necessity — gold-carded provider waives PA', () => {
     code: '72148',
     codeSystem: 'CPT',
     display: 'MRI lumbar',
-    providerNpi: '1730154783',
+    providerNpi: '1730154782',
     payer,
   };
 

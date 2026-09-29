@@ -127,8 +127,8 @@ export const MARIA_INTERACTIONS: JourneyInteraction[] = [
     hourOfDay: 16,
     type: 'inbound',
     outcome: 'engaged',
-    agent: 'Bennett DSS',
-    note: 'Bennett County DSS — benefit question',
+    agent: 'State Benefits Office — Frontier District',
+    note: 'State Benefits Office — Frontier District — benefit question',
     timestamp: 'Day 34 · 4:20 PM',
   },
   {
@@ -150,7 +150,7 @@ export const MARIA_INTERACTIONS: JourneyInteraction[] = [
     type: 'visit',
     outcome: 'engaged',
     agent: 'Sarah Johnson',
-    note: 'Bennett County Health PCP',
+    note: 'Prairie Health PCP',
     timestamp: 'Day 21 · 2:30 PM',
   },
   {
@@ -171,8 +171,8 @@ export const MARIA_INTERACTIONS: JourneyInteraction[] = [
     hourOfDay: 9,
     type: 'outreach',
     outcome: 'ignored',
-    agent: 'SD DHSS',
-    note: 'SD DHSS enrollment notice — no email engagement',
+    agent: 'State HHS Agency',
+    note: 'State HHS Agency enrollment notice — no email engagement',
     timestamp: 'Day 60 · 9:00 AM',
   },
 ];

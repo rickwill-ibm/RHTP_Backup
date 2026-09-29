@@ -72,7 +72,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 90,
     baseCaseload: 19,
     status: 'Active',
-    organization: 'RHTP Maternal Health — Winner Regional',
+    organization: 'RHTP Maternal Health — Cedar Bluff Regional',
   },
   {
     id: 'cm-grace-thunderhawk',
@@ -87,7 +87,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 100,
     baseCaseload: 24,
     status: 'Active',
-    organization: 'RHTP Complex Care — Monument Health',
+    organization: 'RHTP Complex Care — Summit Regional',
   },
   {
     id: 'cm-lisa-fontaine',
@@ -102,7 +102,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 85,
     baseCaseload: 22,
     status: 'Active',
-    organization: 'Bennett County Health Services — BH',
+    organization: 'Prairie Health Services — BH',
     fhirParticipantId: 'ct-p-007',
   },
   {
@@ -118,7 +118,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 150,
     baseCaseload: 41,
     status: 'Active',
-    organization: 'Bennett County Action CBO',
+    organization: 'Frontier Community Action CBO',
     fhirParticipantId: 'ct-p-005',
   },
   {
@@ -134,7 +134,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 140,
     baseCaseload: 37,
     status: 'Active',
-    organization: 'Oglala Sioux Tribe Community Services',
+    organization: 'Prairie Roots Food Network',
     fhirParticipantId: 'ct-p-008',
   },
   // ── Specialists / clinicians (not cohort owners) ──────────────────────────
@@ -151,7 +151,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 200,
     baseCaseload: 0,
     status: 'Active',
-    organization: 'Monument Health Cardiology',
+    organization: 'Summit Regional Cardiology',
     fhirParticipantId: 'ct-p-002',
   },
   {
@@ -167,7 +167,7 @@ export const CARE_TEAM_MEMBERS: CareTeamMember[] = [
     maxCaseload: 120,
     baseCaseload: 0,
     status: 'Active',
-    organization: 'Avera Behavioral Health — Winner',
+    organization: 'Cedar Valley Behavioral Health — Winner',
     fhirParticipantId: 'ct-p-006',
   },
 ];

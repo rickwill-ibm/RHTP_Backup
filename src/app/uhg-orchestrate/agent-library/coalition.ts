@@ -43,10 +43,29 @@ export const DOMAIN_COALITION: CoalitionAgent[] = [
     trigger: 'AUTH_EXPIRY',
   },
   {
+    // IDENTITY CORRECTED. This entry read `id: 'agent-appeals'`, `libId: 'appeals'`,
+    // `name: 'Behavioral Health Agent'`, `role: 'COMPLIANCE'` — four answers to one
+    // question, on the most Part-2-exposed component in the set. Appeals and BH
+    // clinical are DISJOINT legal surfaces: appeals runs under 42 CFR 438.406 and
+    // NY PHL §4904 (45 days to file, 30 to determine, 2 business days expedited);
+    // BH clinical runs under NY MHL §33.13. An agent holding both holds an
+    // authority union no single consent instrument can satisfy.
     id: 'agent-appeals',
     libId: 'appeals',
-    name: 'Behavioral Health Agent',
+    name: 'Appeals & Grievances Agent',
     role: 'COMPLIANCE',
+    color: '#ef4444',
+    trigger: 'AUTH_EXPIRY',
+  },
+  {
+    // A NEW id, not a rename. Repurposing `agent-appeals` would leave every
+    // existing ledger row, escalation record and audit entry filed under an id
+    // that now means something else — which is how a privacy officer fails to
+    // find a disclosure during a breach review.
+    id: 'agent-bh-screening-triage',
+    libId: 'bh-screening-triage',
+    name: 'Behavioral Health Screening Triage Agent',
+    role: 'SPECIALIST',
     color: '#ef4444',
     trigger: 'BH',
   },

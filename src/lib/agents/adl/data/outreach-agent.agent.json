@@ -1,0 +1,36 @@
+{
+  "autonomyTier": "HITL",
+  "body": {
+    "kind": "module",
+    "owningModule": "src/lib/agents/outreach"
+  },
+  "dataCapability": {
+    "dataClasses": [
+      "demographic",
+      "social-need"
+    ],
+    "purposeOfUse": "care-coordination"
+  },
+  "escalationPolicyRef": "default",
+  "id": "outreach-agent",
+  "owningModule": "src/lib/agents/outreach",
+  "phiPosture": "references-only",
+  "purpose": "Consume an SDE-approved member-outreach touchpoint, propose the outreach action, and wait at the HITL gate before any contact is sent.",
+  "routes": [
+    {
+      "dispatchOrder": 10,
+      "id": "member-outreach",
+      "match": {
+        "actionability": "member-outreach"
+      },
+      "taskKind": "outreach"
+    }
+  ],
+  "toolAllowlist": [
+    "person-context.read",
+    "comms-channel.send",
+    "work-queue.submit",
+    "signal.report"
+  ],
+  "version": "1.0.0"
+}

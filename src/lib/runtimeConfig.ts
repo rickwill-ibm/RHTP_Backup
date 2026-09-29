@@ -82,7 +82,7 @@ export function getDefaultConfig(): RuntimeConfig {
     allowDevMockAuth: (process.env.ALLOW_DEV_MOCK_AUTH ?? 'false').toLowerCase() === 'true',
     postmanPatientId: DEMO_MEMBER_ID,
     postmanReviewerEmail: 'reviewer@rhtp-health.org',
-    postmanProviderNpi: '1730154783',
+    postmanProviderNpi: '1730154782',
     postmanScopes: {
       patientAccess: true,
       providerAccess: true,

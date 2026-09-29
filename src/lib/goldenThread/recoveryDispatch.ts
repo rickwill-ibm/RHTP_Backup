@@ -21,6 +21,7 @@ import { recordRecovery, type EvidenceRecord, type EvidenceTier } from '@/lib/ev
 import { permittedRung, evaluateInterlock } from '@/lib/agents/governance/interlock';
 import type { AutonomyTier } from '@/lib/agents/manifest/types';
 import type { AuthorityRung } from '@/lib/evidence/tierConfig';
+import { isTerminalStatus } from '@/lib/agentRuntime';
 import type { EscalationPriority, WorkflowDefinition, WorkflowEngine } from '@/lib/agentRuntime';
 import {
   REVENUE_CYCLE_AGENT_ID,
@@ -144,9 +145,14 @@ export async function awaitSuspension(engine: WorkflowEngine, workflowId: string
   for (let i = 0; i < SUSPENSION_TURN_CAP; i++) {
     const snapshot = engine.query(workflowId);
     if (snapshot?.status === 'waiting-decision') return;
-    if (snapshot?.status === 'failed') {
+    // ANY terminal status, not just `failed`. This tested `failed` alone, so a workflow that
+    // completed or was abandoned fell through the whole turn cap and threw "never suspended within
+    // N turns" — a wrong diagnosis on a fail-closed path a route maps to a 500. `isTerminalStatus`
+    // is the single vocabulary, so the next status added is caught here by construction.
+    if (isTerminalStatus(snapshot?.status)) {
       throw new Error(
-        `recovery workflow ${workflowId} failed before proposing: ${snapshot.error ?? 'unknown'}`
+        `recovery workflow ${workflowId} reached ${snapshot?.status} before proposing: ` +
+          (snapshot?.error ?? 'no error recorded')
       );
     }
     await Promise.resolve();

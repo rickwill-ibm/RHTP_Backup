@@ -585,9 +585,9 @@ export default function FragmentationScreen() {
                 margin: 0,
               }}
             >
-              "Before any agent can act intelligently —
+              &quot;Before any agent can act intelligently —
               <br />
-              the system must first know who it's acting for."
+              the system must first know who it&apos;s acting for.&quot;
             </p>
             <div
               style={{

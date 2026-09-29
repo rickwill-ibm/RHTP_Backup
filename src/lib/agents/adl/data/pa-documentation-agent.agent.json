@@ -1,0 +1,43 @@
+{
+  "autonomyTier": "HITL",
+  "body": {
+    "kind": "module",
+    "owningModule": "src/lib/agents/pa"
+  },
+  "dataCapability": {
+    "dataClasses": [
+      "demographic",
+      "clinical-general"
+    ],
+    "purposeOfUse": "treatment"
+  },
+  "escalationPolicyRef": "default",
+  "id": "pa-documentation-agent",
+  "owningModule": "src/lib/agents/pa",
+  "phiPosture": "references-only",
+  "purpose": "Drive the existing /prior-auth (goldenThread) flow from thread context, proposing documentation and submission under a human gate; never sets an authoritative PA state.",
+  "routes": [
+    {
+      "dispatchOrder": 30,
+      "id": "pa-appeal-documentation",
+      "match": {
+        "kindPrefix": "denial"
+      },
+      "pa": {
+        "advanceEvent": {
+          "type": "appeal"
+        },
+        "currentState": "Denied"
+      },
+      "taskKind": "pa"
+    }
+  ],
+  "toolAllowlist": [
+    "person-context.read",
+    "dtr.generate",
+    "pa-machine.transition",
+    "evidence.append",
+    "work-queue.submit"
+  ],
+  "version": "1.0.0"
+}

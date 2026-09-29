@@ -91,7 +91,7 @@ const MARIA_AUTHORED: Partial<CitizenScenario> = {
   ],
   conditions: [
     { id: 1, type: 'BH_PND', label: 'Edinburgh PND follow-up', deadline: '427d open', severity: 'CRITICAL', regulatory: true, description: 'Moderate postpartum depression — 427 days open; BH follow-up gated by 42 CFR Part 2' },
-    { id: 2, type: 'SDOH_TRANSPORT', label: 'Transportation barrier', severity: 'HIGH', description: '47 miles to Winner Regional — keystone barrier that BLOCKS the HbA1c lab and appointments' },
+    { id: 2, type: 'SDOH_TRANSPORT', label: 'Transportation barrier', severity: 'HIGH', description: '47 miles to Cedar Bluff Regional — keystone barrier that BLOCKS the HbA1c lab and appointments' },
     { id: 3, type: 'CARE_GAP_HBA1C', label: 'HbA1c lab overdue', deadline: '38d open', severity: 'HIGH', description: 'Pre-diabetic A1C 6.2% rising — lab blocked by transportation + childcare barriers' },
     { id: 4, type: 'FAMILY_BENEFITS', label: 'Family + benefits load', severity: 'MEDIUM', description: 'Sophia well-child overdue + Elena caregiver burden; WIC/childcare/LIHEAP eligible, not enrolled' },
   ],

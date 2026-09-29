@@ -11,7 +11,7 @@
  * evolving Wave-1 FIX-1): the agent MAY call `claim.submit-appeal`, but ONLY in the
  * post-approval branch after `proposeAndWait` resolves with a qualified human — the
  * runtime auto-approve gate (isAutoApprovable, isSubmission) refuses it at every tier
- * and the workflow body asserts isQualifiedHumanDecision, so no auto-submit path
+ * and the workflow body asserts isNonAutomatedDecider, so no auto-submit path
  * exists at any tier.
  *
  * Nothing here keys on a persona — the task is typed data (claim/remittance/auth

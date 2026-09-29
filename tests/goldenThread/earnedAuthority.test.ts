@@ -28,24 +28,41 @@ describe('earned authority — cold start & display', () => {
     expect(s.shadow.total).toBe(0);
   });
 
-  it('never records a non-human AUTONOMOUS act (rung > A1) above the earned ceiling — advisory A1 is exempt', () => {
+  it('DISCLOSES every non-human act above the earned ceiling instead of relabelling it (G-039)', () => {
+    // THIS ASSERTION WAS INVERTED, AND THE INVERSION IS THE FINDING. It previously read
+    // `expect(above.length).toBe(0)` — "no autonomous act is RECORDED above what was earned" — and it
+    // was green because `seal` CLAMPED: an act stated at A2 with nothing earned was re-sealed
+    // `rung: 'A0'`, `version: 'assist·D2'`, `oversight: 'watch'`. The act still ran. The invariant was
+    // satisfied by rewriting the evidence, which is the one way a safety pin must never go green.
+    //
+    // What is true of this engine today: the modelled fleet runs its pipeline at A2 while the trust
+    // ladder says A0, across ten agent actors — 218 of 251 warm-start rows. The record now says so on
+    // every one of them, and `assessCeiling` (ceilingRecord.ts) is detection, not prevention.
+    // ADMISSION CONTROL — holding the act, the way `proposeOutbound` already does — is G-039, W8.
     const s = createSim(20260914);
-    // Single-sourced with displayAuthority: only AUTONOMOUS action above Advise is earned-capped. An agent
-    // may always DETECT and ADVISE (A1) — governed by the human gate, not the earned ceiling — so an A1
-    // advisory seal records A1 honestly at cold-start A0 instead of being clamped to A0/watch. The ceiling
-    // any non-human act may be recorded at is therefore max(A1, earned), never below A1 for advisory work.
     const floor = Math.max(1, execEarnedCeiling(s));
     const above = s.ledger.filter((e) => !e.human && Number(e.rung.replace(/[^0-9]/g, '')) > floor);
-    expect(above.length).toBe(0); // no autonomous act recorded above what was earned
-    // and the exemption is REAL, not vacuous: advisory agent acts (fairness-screen, clock-jeopardy) record
-    // A1 at cold start — the badge↔provenance contradiction the adversarial panel caught is closed.
+    expect(above.length).toBeGreaterThan(0); // the gap is real; pretending otherwise was the defect
+    // EVERY one of them carries the disclosure. A single undisclosed over-ceiling act is the whole
+    // failure mode back, because an auditor's query would then silently miss it.
+    for (const e of above) {
+      expect(e.overCeiling, `${e.actor} seq ${e.seq} acted at ${e.rung} with no disclosure`).toBe(
+        true
+      );
+      expect(e.earnedCeiling).toBe(execEarnedCeiling(s));
+    }
+    // and the advisory exemption is REAL, not vacuous: agent acts at A1 (fairness-screen,
+    // clock-jeopardy) are governed by the human gate, not the earned ceiling, so they are NOT flagged.
     const advisoryA1 = s.ledger.filter((e) => !e.human && e.rung === 'A1');
     expect(advisoryA1.length).toBeGreaterThan(0);
+    for (const e of advisoryA1) expect(e.overCeiling).toBe(false);
   });
 
   it('never seals an A0/A1 non-human "EXECUTED" act', () => {
     const s = createSim(20260914);
-    const bad = s.ledger.filter((e) => !e.human && /EXECUTED/.test(e.decision) && Number(e.rung.replace(/[^0-9]/g, '')) < 2);
+    const bad = s.ledger.filter(
+      (e) => !e.human && /EXECUTED/.test(e.decision) && Number(e.rung.replace(/[^0-9]/g, '')) < 2
+    );
     expect(bad.length).toBe(0);
   });
 });

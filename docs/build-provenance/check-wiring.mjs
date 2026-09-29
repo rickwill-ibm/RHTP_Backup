@@ -148,10 +148,14 @@ console.log('E14 wired-path gate - is every module reached by a real entry point
 console.log(
   `  entries: ${files.filter(isEntry).length} | reachable: ${reachable.size} | lib orphans: ${orphans.length} (baseline ${baseSet.size})`
 );
-if (nowWired.length)
+if (nowWired.length) {
   console.log(
     `  ratchet: ${nowWired.length} baseline module(s) are now WIRED - drop them from ${BASELINE}.`
   );
+  // See check-testlink.mjs: a ratchet that reports a count without naming the modules is a nag, and
+  // the slack it reports never gets taken up. `--list` makes the baseline edit mechanical.
+  if (process.argv.includes('--list')) for (const n of nowWired) console.log(`    - ${n}`);
+}
 if (fresh.length) {
   console.log(
     `FAIL (E14): ${fresh.length} NEW unwired module(s) - built but reached by no real entry point:`

@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "environment": "demo",
+  "mode": "mock",
+  "bindings": [
+    { "kind": "in-process", "tool": "person-context.read", "phiClass": "references-only", "handlerId": "mock.personContextRead" },
+    { "kind": "in-process", "tool": "provider-context.read", "phiClass": "references-only", "handlerId": "mock.providerContextRead" },
+    { "kind": "in-process", "tool": "referral-status.read", "phiClass": "references-only", "handlerId": "mock.referralStatusRead" },
+    { "kind": "in-process", "tool": "reconciliation.read", "phiClass": "references-only", "handlerId": "mock.reconciliationRead" },
+    { "kind": "in-process", "tool": "comms-channel.send", "phiClass": "references-only", "handlerId": "mock.commsChannelSend" },
+    { "kind": "in-process", "tool": "work-queue.submit", "phiClass": "references-only", "handlerId": "mock.workQueueSubmit" },
+    { "kind": "in-process", "tool": "signal.report", "phiClass": "none", "handlerId": "mock.signalReport" },
+    { "kind": "in-process", "tool": "evidence.append", "phiClass": "references-only", "handlerId": "mock.evidenceAppend" },
+    { "kind": "in-process", "tool": "dtr.generate", "phiClass": "references-only", "handlerId": "mock.dtrGenerate" },
+    { "kind": "in-process", "tool": "pa-machine.transition", "phiClass": "references-only", "handlerId": "mock.paMachineTransition" },
+    { "kind": "in-process", "tool": "claim.submit-appeal", "phiClass": "references-only", "handlerId": "mock.claimSubmitAppeal" }
+  ]
+}

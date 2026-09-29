@@ -152,7 +152,7 @@ export function contextFor(citizenId?: string): CitizenContext {
     },
     providers: [
       { name: p.organization, role: 'PCP · CAH', distance: '0 miles' },
-      { name: 'Winner Regional', role: 'Specialty · ENT/IM', distance: p.ruralDistance || '47 miles' },
+      { name: 'Cedar Bluff Regional Medical Center', role: 'Specialty · ENT/IM', distance: p.ruralDistance || '47 miles' },
     ],
     sources, benefits, lifecycle, consentDomains,
   };

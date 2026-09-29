@@ -39,7 +39,7 @@ import { getContractRepositoryLoader } from '@/lib/dataSources';
 import { getSigningKeyLoader } from '@/lib/dataSources/signingKey';
 import { createRuntime, createManualClock } from '@/lib/agentRuntime';
 import { createRecoveryWorkflow } from '@/lib/agents/revenueCycle';
-import { buildPresetRegistry } from '@/lib/goldenThread/presetRegistry';
+import { buildPresetRegistry, resolvePresetTier } from '@/lib/goldenThread/presetRegistry';
 import {
   THREAD_SCENARIOS,
   scenarioList,
@@ -99,7 +99,14 @@ async function runThread(
 
   // The preset promotes the recovery agent's autonomy tier via a manifest registry
   // override threaded into the runtime engine (additive createRuntime shim).
-  const presetRegistry = buildPresetRegistry(preset.autonomyTier);
+  // The AUTHORITY LOCK caps the preset. Resolve it ONCE here and use the applied
+  // tier for every consumer below: the runtime registry, the rung computation and
+  // the display. Clamping only the registry (as an earlier fix did) left
+  // `recoveryAgentTier` raw, so `permittedRung` still computed authority from the
+  // tier the reviewer asked for rather than the tier the lock permits — and the
+  // page rendered two interlocks that disagreed about the same agent on the same run.
+  const appliedTier = resolvePresetTier(preset.autonomyTier).applied;
+  const presetRegistry = buildPresetRegistry(appliedTier);
   const recoveryRuntime = createRuntime({
     clock: createManualClock(Date.parse(DEMO_THREAD_TS)),
     registry: presetRegistry,
@@ -115,7 +122,7 @@ async function runThread(
     feeSchedule,
     pasDecision: scenario.pasDecision, // stipulated scenario fact
     reviewerAuthId: `auth-${memberId}-${scenarioId}`,
-    recoveryAgentTier: preset.autonomyTier,
+    recoveryAgentTier: appliedTier,
     materiality: preset.materiality,
     filingWindowDays: preset.filingWindowDays,
     recovery: { engine: recoveryRuntime.engine, makeWorkflow: createRecoveryWorkflow },
@@ -162,18 +169,27 @@ export default async function GoldenThreadPage({
   if (!flag('goldenThreadE2E')) return NotEnabled();
 
   const sp = await searchParams;
+  // `in` walks the prototype chain, so `?preset=constructor`, `toString`,
+  // `valueOf`, `hasOwnProperty` and `__proto__` all passed this guard and
+  // resolved to an Object.prototype member with no `autonomyTier` — an
+  // unauthenticated 500 on a force-dynamic route, from a query string. Own-key
+  // checks only.
+  const has = (o: object, k: string): boolean => Object.prototype.hasOwnProperty.call(o, k);
   const scenarioId: ThreadScenarioId =
-    sp.scenario && sp.scenario in THREAD_SCENARIOS
+    sp.scenario && has(THREAD_SCENARIOS, sp.scenario)
       ? (sp.scenario as ThreadScenarioId)
       : 'underpayment';
   const presetId: ThreadPresetId =
-    sp.preset && sp.preset in THREAD_PRESETS ? (sp.preset as ThreadPresetId) : 'balanced';
+    sp.preset && has(THREAD_PRESETS, sp.preset) ? (sp.preset as ThreadPresetId) : 'balanced';
   const scenario = THREAD_SCENARIOS[scenarioId];
   const preset = THREAD_PRESETS[presetId];
 
   // Resolve the member from the session (SMART launch) or fall back to the configured demo member.
   const memberId = (await getSessionPatient().catch(() => null)) ?? DEMO_MEMBER_ID;
   const cash = await runThread(memberId, scenarioId, presetId, scenario, preset);
+  // The same resolution the run used, so the surface reports the tier that actually
+  // governed rather than the one the dropdown label advertises.
+  const tier = resolvePresetTier(preset.autonomyTier);
 
   // Mask the member-embedding record id before it reaches the surface/rail; forward the
   // real recovery work-item id ONLY to the decision panel (to address the endpoint).
@@ -223,7 +239,10 @@ export default async function GoldenThreadPage({
           scenarios={scenarioList}
           presets={presetList}
           memberLabel={memberId}
-          presetAutonomyTier={preset.autonomyTier}
+          presetAutonomyTier={tier.applied}
+          {...(tier.clamped
+            ? { presetClamp: { requested: tier.requested, lockedMax: tier.lockedMax } }
+            : {})}
           {...(integrity ? { integrity } : {})}
         />
       </div>

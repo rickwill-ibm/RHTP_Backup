@@ -6,6 +6,7 @@
  * the tamper-evident audit ledger (C-AUD).
  */
 
+import type { QualificationVerdict } from '@/lib/authz/credentialing';
 import type { ProposedAction, HumanDecision } from '@/lib/agentRuntime/types';
 
 export interface DecisionProvenance {
@@ -25,6 +26,30 @@ export interface DecisionProvenance {
   /** Reference to the appeal artifact/pathway generated for an adverse decision. */
   appealRef?: string;
   decidedAtMs: number;
+  /**
+   * THE REVIEWER-QUALIFICATION RECEIPT — who was qualified, under which standard, as at when.
+   *
+   * WHY IT IS HERE. The qualification was being computed, used for admission control, and then
+   * DISCARDED. The one artifact that proves 42 CFR 438.210(b)(3) compliance never reached the
+   * durable record, so a state auditor or a fair-hearing officer asking "who decided this, and what
+   * made them appropriate" would have found `decidedBy` and nothing else. `standardApplied` and
+   * `attestationRef` are precisely what they ask for.
+   *
+   * Identity-safe: no licence number, no NPI. Carried verbatim from the verdict so the record cannot
+   * disagree with the proof that admitted the decision.
+   */
+  reviewerQualification?: {
+    reviewerRef: string;
+    standardApplied: string;
+    attestationRef?: string;
+    licenceVerdict: string;
+    licenceType?: string;
+    licenceJurisdiction?: string;
+    needDomain: string;
+    sourceId: string;
+    sourceAsOfMs: number;
+    qualifiedAsOfMs: number;
+  };
 }
 
 export interface BuildProvenanceInput {
@@ -36,6 +61,8 @@ export interface BuildProvenanceInput {
   memberFacingReason: string;
   /** Provide when the decision is adverse (an appeal path is mandatory). */
   appealRef?: string;
+  /** The verdict from the qualification gate that admitted this decision. */
+  qualification?: QualificationVerdict;
 }
 
 /** Build a PHI-safe decision provenance record from a resolved decision. */
@@ -52,6 +79,22 @@ export function buildDecisionProvenance(input: BuildProvenanceInput): DecisionPr
     memberFacingReason: input.memberFacingReason,
     appealRef: input.appealRef,
     decidedAtMs: input.humanDecision.decidedAtMs,
+    ...(input.qualification
+      ? {
+          reviewerQualification: {
+            reviewerRef: input.qualification.reviewerRef,
+            standardApplied: input.qualification.standardApplied,
+            attestationRef: input.qualification.attestationRef,
+            licenceVerdict: input.qualification.licenceVerdict,
+            licenceType: input.qualification.licenceType,
+            licenceJurisdiction: input.qualification.licenceJurisdiction,
+            needDomain: input.qualification.needDomain,
+            sourceId: input.qualification.sourceId,
+            sourceAsOfMs: input.qualification.sourceAsOfMs,
+            qualifiedAsOfMs: input.qualification.asOfMs,
+          },
+        }
+      : {}),
   };
 }
 

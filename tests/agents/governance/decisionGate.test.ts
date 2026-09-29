@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 import {
   isAdverseCoverageAction,
   isSubmissionActionType,
-  isQualifiedHumanDecision,
+  isNonAutomatedDecider,
   evaluateDecision,
   isAutoApprovable,
   buildDecisionProvenance,
@@ -109,10 +109,10 @@ describe('tier-independent invariant', () => {
   });
 
   it('an auto/system decider is not a qualified human', () => {
-    expect(isQualifiedHumanDecision(auto)).toBe(false);
-    expect(isQualifiedHumanDecision(human)).toBe(true);
-    expect(isQualifiedHumanDecision({ ...human, decidedBy: 'system' })).toBe(false);
-    expect(isQualifiedHumanDecision({ ...human, decidedBy: '' })).toBe(false);
+    expect(isNonAutomatedDecider(auto)).toBe(false);
+    expect(isNonAutomatedDecider(human)).toBe(true);
+    expect(isNonAutomatedDecider({ ...human, decidedBy: 'system' })).toBe(false);
+    expect(isNonAutomatedDecider({ ...human, decidedBy: '' })).toBe(false);
   });
 
   it('a NON-adverse action follows the tier via evaluateDecision', () => {
@@ -169,5 +169,52 @@ describe('decision provenance', () => {
     expect(
       isAdverseProvenanceComplete({ ...base, decision: 'approved', appealRef: undefined })
     ).toBe(true);
+  });
+});
+
+describe('MED-9 — an autonomy tier this gate does not know NEVER auto-resolves', () => {
+  /**
+   * The tier is read from an agent manifest, and `agents/manifest/registry.ts` documents that a
+   * production loader may serve a manifest the build-time authority gate never saw. So the narrow
+   * union on `GateInput.autonomyTier` is a claim about callers, not a guarantee about values, and the
+   * cast below models exactly what arrives at runtime — not a type-system workaround.
+   */
+  const asTier = (t: string): 'HITL' | 'HOTL' | 'autonomous' => t as 'HITL' | 'HOTL' | 'autonomous';
+
+  it('blocks a non-adverse action on an unrecognised tier, and demands a human', () => {
+    // Before this change the branch was `if (tier === 'HITL')` + an unconditional
+    // `return { resolved: true }`, so EVERY value that was not the string 'HITL' auto-resolved.
+    const r = evaluateDecision({
+      action: approval,
+      autonomyTier: asTier('supervisor'),
+      humanDecision: null,
+    });
+    expect(r.resolved).toBe(false);
+    expect(r.requiresHuman).toBe(true);
+    expect(r.reason).toContain('unrecognised autonomy tier');
+  });
+
+  it('blocks even when a qualified human decision IS present — the tier itself is the defect', () => {
+    // Fail-closed means the gate refuses to characterise an act it cannot govern, rather than
+    // quietly treating an unknown tier as HITL and calling the result governed.
+    const r = evaluateDecision({
+      action: approval,
+      autonomyTier: asTier(''),
+      humanDecision: { ...human, decision: 'approved' },
+    });
+    expect(r.resolved).toBe(false);
+    expect(r.requiresHuman).toBe(true);
+  });
+
+  it('and the three known tiers still resolve exactly as before', () => {
+    expect(evaluateDecision({ action: approval, autonomyTier: 'HOTL' }).resolved).toBe(true);
+    expect(evaluateDecision({ action: approval, autonomyTier: 'autonomous' }).resolved).toBe(true);
+    expect(evaluateDecision({ action: approval, autonomyTier: 'HITL' }).resolved).toBe(false);
+  });
+
+  it('isAutoApprovable was ALREADY fail-closed on an unknown tier — pinned so it stays that way', () => {
+    // Its trailing expression is `tier === 'HOTL' || tier === 'autonomous'`, which returns false for
+    // anything unknown. The two gates now agree on the unknown-tier answer; this pins the agreement.
+    expect(isAutoApprovable(approval, asTier('supervisor'))).toBe(false);
   });
 });

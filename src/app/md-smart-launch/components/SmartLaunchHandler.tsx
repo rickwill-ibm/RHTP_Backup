@@ -39,13 +39,18 @@ export default function SmartLaunchHandler({
 
     const urlParams = new URLSearchParams(window.location.search);
     // Prefer patientId from URL query param (passed by RHTP patient selector)
-    const patientId = urlParams.get('patientId') || 'patient/maria-redhawk-001';
-    const patientName = urlParams.get('patientName') || 'Maria Redhawk';
+    // A SMART launch with no patient in scope must NOT banner a real member's identity into
+    // an EHR-embedded view. The id is echoed back unresolved so the clinician can see what
+    // the launch failed to carry; no name is invented.
+    const patientId = urlParams.get('patientId') ?? '';
+    const patientName =
+      urlParams.get('patientName') ??
+      (patientId ? `${patientId} (unresolved)` : 'No patient in launch scope');
 
     const launchContext: SmartLaunchContext = {
       ...mockSmartLaunchContext,
       patientId,
-      practitionerName: 'Bennett County Health PCP',
+      practitionerName: 'Prairie Health PCP',
     };
 
     const steps: Array<{ step: LaunchStep; label: string; duration: number; progress: number }> = [
@@ -117,7 +122,7 @@ export default function SmartLaunchHandler({
       const launchContext: SmartLaunchContext = {
         ...mockSmartLaunchContext,
         patientId: fhirPatientId,
-        practitionerName: 'Bennett County Health PCP',
+        practitionerName: 'Prairie Health PCP',
       };
 
       setStep('ready');

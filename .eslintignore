@@ -4,7 +4,13 @@ coverage
 node_modules
 public
 
-# --- Legacy demo / presentation layer (deferred lint refactor) ---
-# Demo/presentation code only. The product (policy engine + PA/policy UI) stays fully linted.
-src/uhg/
-src/app/uhg-orchestrate/
+# --- G-031 CLOSED 2026-09-28 — this zone is no longer excluded. ---
+# src/uhg/ and src/app/uhg-orchestrate/ were excluded here on 2026-08-28/09-05 to stop
+# 24 error-level findings failing `npm run check:all`. The findings were never fixed,
+# only hidden — and the comment that sat here claimed the product was "fully linted"
+# while 35 product files imported from src/uhg/.
+#
+# The 24 are now FIXED (20 react/no-unescaped-entities, 2 prefer-const, 2 no-empty-pattern)
+# and both paths are linted again. Verified: tsc clean, eslint 0 errors over both trees.
+# scripts/ci-gates.sh g_lint carries a guard that FAILS if either path is re-added here.
+# If you are about to re-add one: fix the findings instead, or the guard will stop you.

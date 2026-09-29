@@ -469,18 +469,18 @@ describe('§4D Prior Auth — Work queue seed', () => {
 describe('§4E Prior Auth — Evidence record ID validation', () => {
   it('validateEvidenceId accepts hyphens — required for PAT-xxxx IDs', () => {
     // This is the exact ID the API Explorer builds for Dorothy
-    const id = 'ev-PAT-0042-75561-1730154783';
+    const id = 'ev-PAT-0042-75561-1730154782';
     const v = validateEvidenceId(id);
     expect(v.ok, `Evidence ID "${id}" must be valid. Error: ${v.error}`).toBe(true);
   });
 
   it('validateEvidenceId accepts all 5 patient evidence IDs', () => {
     const ids: Record<string, string> = {
-      MARIA_SD_001: 'ev-MARIA_SD_001-72148-1730154783',
-      'PAT-0042': 'ev-PAT-0042-75561-1730154783',
-      'PAT-0087': 'ev-PAT-0087-93306-1730154783',
-      'PAT-0103': 'ev-PAT-0103-99243-1730154783',
-      'PAT-0156': 'ev-PAT-0156-99244-1730154783',
+      MARIA_SD_001: 'ev-MARIA_SD_001-72148-1730154782',
+      'PAT-0042': 'ev-PAT-0042-75561-1730154782',
+      'PAT-0087': 'ev-PAT-0087-93306-1730154782',
+      'PAT-0103': 'ev-PAT-0103-99243-1730154782',
+      'PAT-0156': 'ev-PAT-0156-99244-1730154782',
     };
     for (const [pid, id] of Object.entries(ids)) {
       const v = validateEvidenceId(id);

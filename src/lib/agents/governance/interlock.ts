@@ -39,14 +39,32 @@ export const AUTONOMY_RUNG: Readonly<Record<AutonomyTier, AuthorityRung>> = Obje
   autonomous: 'A3',
 });
 
-/** The lower (weaker) of two rungs by ordinal. */
+/**
+ * The lower (weaker) of two rungs by ordinal.
+ *
+ * FAIL-CLOSED ON AN UNRANKED INPUT, and it was not. `RUNG_ORDER[a]` is `undefined` for a rung this
+ * table does not know, and `undefined <= 2` evaluates to `false` — so the comparison fell through and
+ * returned `b`, the OTHER input. A "weakest link" primitive that returns the STRONGER of its two
+ * arguments when one of them is unreadable is a fail-open, and it is the kind that gets reused: one
+ * unranked input to this function silently licenses the full evidence ceiling, and then `lowRung` is
+ * false, and then the human gate never engages. Unranked now floors to A0, which is what "I cannot
+ * rank this" should mean in a function that exists to bound authority.
+ */
 function minRung(a: AuthorityRung, b: AuthorityRung): AuthorityRung {
-  return RUNG_ORDER[a] <= RUNG_ORDER[b] ? a : b;
+  const ra = RUNG_ORDER[a];
+  const rb = RUNG_ORDER[b];
+  if (ra === undefined || rb === undefined) return 'A0';
+  return ra <= rb ? a : b;
 }
 
 /**
  * The permitted authority rung: the weakest link between what autonomy grants
  * and what the evidence tier's ceiling can license.
+ *
+ * The two lookups can miss for the same reason `minRung` guards: the tier is read from a MANIFEST and
+ * the evidence tier from a record, and the narrow parameter types are a claim about callers. A miss
+ * reaches `minRung` as `undefined` and floors to A0 — assist-only, human-gated — rather than
+ * inheriting whichever side happened to resolve.
  */
 export function permittedRung(
   manifestTier: AutonomyTier,
@@ -115,11 +133,18 @@ export function evaluateInterlock(input: InterlockInput): InterlockResult {
     humanDecision: input.humanDecision ?? null,
   });
   const resolved = gate.resolved;
+  // The gate's answer is ADDITIVE, never discarded. This returned the locally computed
+  // `requiresHuman` alone, so a gate that blocked for a reason the interlock does not model — an
+  // unrecognised autonomy tier, say — produced `{ resolved: false, requiresHuman: false }` with a
+  // reason string claiming the action auto-resolved. Consumers read the flag (`governedAction.ts`,
+  // `ledgerAnalytics.ts` both surface it to the UI and the API body), so the item would have landed
+  // labelled "no human needed" and then never resolved: a silent stall, not a safe refusal.
+  const humanRequired = requiresHuman || gate.requiresHuman;
 
   return {
     permittedRung: rung,
     cappedByEvidence,
-    requiresHuman,
+    requiresHuman: humanRequired,
     resolved,
     reason: buildReason({
       rung,
@@ -127,7 +152,7 @@ export function evaluateInterlock(input: InterlockInput): InterlockResult {
       adverse,
       submission,
       lowRung,
-      requiresHuman,
+      requiresHuman: humanRequired,
       resolved,
     }),
   };

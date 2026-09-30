@@ -1,0 +1,36 @@
+{
+  "autonomyTier": "HITL",
+  "body": {
+    "kind": "module",
+    "owningModule": "src/lib/agents/referral"
+  },
+  "dataCapability": {
+    "dataClasses": [
+      "demographic",
+      "social-need"
+    ],
+    "purposeOfUse": "social-care-referral"
+  },
+  "escalationPolicyRef": "default",
+  "id": "referral-coordination-agent",
+  "owningModule": "src/lib/agents/referral",
+  "phiPosture": "references-only",
+  "purpose": "Open and track a referral, propose a nudge on stall, and escalate up the care-team hierarchy per escalation-as-data; never books external transactions.",
+  "routes": [
+    {
+      "dispatchOrder": 20,
+      "id": "referral-coordination",
+      "match": {
+        "kindPrefix": "referral"
+      },
+      "taskKind": "referral"
+    }
+  ],
+  "toolAllowlist": [
+    "referral-status.read",
+    "provider-context.read",
+    "work-queue.submit",
+    "signal.report"
+  ],
+  "version": "1.0.0"
+}

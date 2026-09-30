@@ -1,0 +1,84 @@
+{
+  "entries": [
+    {
+      "agentId": "outreach-agent",
+      "dataClasses": [
+        "demographic",
+        "social-need"
+      ],
+      "escalationPolicyRef": "default",
+      "maxAutonomyTier": "HITL",
+      "maxPhiPosture": "references-only",
+      "tools": [
+        "comms-channel.send",
+        "person-context.read",
+        "signal.report",
+        "work-queue.submit"
+      ]
+    },
+    {
+      "agentId": "pa-documentation-agent",
+      "dataClasses": [
+        "demographic",
+        "clinical-general"
+      ],
+      "escalationPolicyRef": "default",
+      "maxAutonomyTier": "HITL",
+      "maxPhiPosture": "references-only",
+      "tools": [
+        "dtr.generate",
+        "evidence.append",
+        "pa-machine.transition",
+        "person-context.read",
+        "work-queue.submit"
+      ]
+    },
+    {
+      "agentId": "referral-coordination-agent",
+      "dataClasses": [
+        "demographic",
+        "social-need"
+      ],
+      "escalationPolicyRef": "default",
+      "maxAutonomyTier": "HITL",
+      "maxPhiPosture": "references-only",
+      "tools": [
+        "provider-context.read",
+        "referral-status.read",
+        "signal.report",
+        "work-queue.submit"
+      ]
+    },
+    {
+      "agentId": "revenue-cycle-agent",
+      "dataClasses": [
+        "demographic",
+        "financial"
+      ],
+      "escalationPolicyRef": "default",
+      "maxAutonomyTier": "HITL",
+      "maxPhiPosture": "references-only",
+      "tools": [
+        "claim.submit-appeal",
+        "evidence.append",
+        "reconciliation.read",
+        "work-queue.submit"
+      ]
+    },
+    {
+      "agentId": "bh-screening-triage-agent",
+      "dataClasses": [
+        "mental-health"
+      ],
+      "escalationPolicyRef": "default",
+      "maxAutonomyTier": "HITL",
+      "maxPhiPosture": "references-only",
+      "tools": [
+        "person-context.read",
+        "work-queue.submit",
+        "signal.report"
+      ]
+    }
+  ],
+  "version": "1.0.0"
+}

@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "routes": [
+    {
+      "id": "member-outreach",
+      "agentId": "outreach-agent",
+      "taskKind": "outreach",
+      "match": {
+        "actionability": "member-outreach"
+      }
+    },
+    {
+      "id": "referral-coordination",
+      "agentId": "referral-coordination-agent",
+      "taskKind": "referral",
+      "match": {
+        "kindPrefix": "referral"
+      }
+    },
+    {
+      "id": "pa-appeal-documentation",
+      "agentId": "pa-documentation-agent",
+      "taskKind": "pa",
+      "match": {
+        "kindPrefix": "denial"
+      },
+      "pa": {
+        "currentState": "Denied",
+        "advanceEvent": {
+          "type": "appeal"
+        }
+      }
+    }
+  ]
+}

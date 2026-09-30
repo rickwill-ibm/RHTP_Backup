@@ -1,0 +1,239 @@
+{
+  "_comment": "Generic demo data, no persona. Synthetic findhelp/UniteUs screening results. Organisation names in recommendedCBOs are the canonical synthetic-entity names (src/lib/dataSources/data/synthetic-entities.seed.json); county/city values are geography only. Extracted from socialMockData.data1.ts so this data no longer counts against that file's size cap (AI-CODING-CONVENTIONS §2: data goes to *.json, not inline TS).",
+  "results": [
+    {
+      "patientId": "MARIA_SD_001",
+      "screeningDate": "2026-04-15",
+      "instrument": "findhelp",
+      "provider": "findhelp South Dakota",
+      "domains": [
+        {
+          "id": "food",
+          "label": "Food",
+          "unmetNeed": true,
+          "responses": {
+            "f1": 2,
+            "f2": 2
+          },
+          "recommendedCBOs": [
+            "Regional WIC Office",
+            "State Benefits Office — Frontier District — SNAP"
+          ]
+        },
+        {
+          "id": "financial",
+          "label": "Financial",
+          "unmetNeed": true,
+          "responses": {
+            "fi1": 3,
+            "fi2": 1
+          },
+          "recommendedCBOs": [
+            "State Benefits Office — Frontier District",
+            "Frontier Community Action CBO"
+          ]
+        },
+        {
+          "id": "housing",
+          "label": "Housing",
+          "unmetNeed": true,
+          "responses": {
+            "h1": 2,
+            "h2": 0
+          },
+          "recommendedCBOs": [
+            "State Housing Finance Agency",
+            "Frontier Community Action CBO"
+          ]
+        },
+        {
+          "id": "transportation",
+          "label": "Transportation",
+          "unmetNeed": true,
+          "responses": {
+            "t1": 2
+          },
+          "recommendedCBOs": [
+            "Medicaid NEMT — Bennett County",
+            "Frontier Community Action CBO"
+          ]
+        },
+        {
+          "id": "support",
+          "label": "Support",
+          "unmetNeed": true,
+          "responses": {
+            "su1": 2,
+            "su2": 2
+          },
+          "recommendedCBOs": [
+            "Prairie Health Services — Postpartum Support Group"
+          ]
+        },
+        {
+          "id": "mental_health",
+          "label": "Mental Health",
+          "unmetNeed": true,
+          "responses": {
+            "mh1": 2,
+            "mh2": 2,
+            "mh3": 3
+          },
+          "recommendedCBOs": [
+            "Cedar Valley Behavioral Health — Winner",
+            "Prairie Health CCBHC"
+          ]
+        }
+      ],
+      "totalUnmetNeeds": 5,
+      "tasksCreated": [
+        "TASK-F-MARIA",
+        "TASK-FI-MARIA",
+        "TASK-H-MARIA",
+        "TASK-T-MARIA",
+        "TASK-SU-MARIA"
+      ],
+      "savedToRecord": true
+    },
+    {
+      "patientId": "PAT-0042",
+      "screeningDate": "2026-01-08",
+      "instrument": "findhelp",
+      "provider": "findhelp South Dakota",
+      "domains": [
+        {
+          "id": "housing",
+          "label": "Housing",
+          "unmetNeed": true,
+          "responses": {
+            "h1": 2,
+            "h2": 0
+          },
+          "recommendedCBOs": [
+            "State Housing Finance Agency",
+            "Frontier Community Action CBO"
+          ]
+        },
+        {
+          "id": "food",
+          "label": "Food",
+          "unmetNeed": true,
+          "responses": {
+            "f1": 2,
+            "f2": 1
+          },
+          "recommendedCBOs": [
+            "Prairie Roots Food Network",
+            "State Benefits Office — Frontier District — SNAP"
+          ]
+        },
+        {
+          "id": "financial",
+          "label": "Financial",
+          "unmetNeed": true,
+          "responses": {
+            "fi1": 3,
+            "fi2": 1
+          },
+          "recommendedCBOs": [
+            "Frontier Community Action CBO",
+            "State Benefits Office — Frontier District"
+          ]
+        },
+        {
+          "id": "support",
+          "label": "Support",
+          "unmetNeed": true,
+          "responses": {
+            "su1": 3,
+            "su2": 3
+          },
+          "recommendedCBOs": [
+            "State Area Agency on Aging",
+            "Prairie Health Services"
+          ]
+        },
+        {
+          "id": "transportation",
+          "label": "Transportation",
+          "unmetNeed": false,
+          "responses": {
+            "t1": 0
+          },
+          "recommendedCBOs": []
+        },
+        {
+          "id": "mental_health",
+          "label": "Mental Health",
+          "unmetNeed": false,
+          "responses": {
+            "mh1": 0,
+            "mh2": 0,
+            "mh3": 1
+          },
+          "recommendedCBOs": []
+        }
+      ],
+      "totalUnmetNeeds": 4,
+      "tasksCreated": [
+        "TASK-H-0042",
+        "TASK-F-0042",
+        "TASK-FI-0042",
+        "TASK-SU-0042"
+      ],
+      "savedToRecord": true
+    },
+    {
+      "patientId": "PAT-0087",
+      "screeningDate": "2025-11-14",
+      "instrument": "findhelp",
+      "provider": "findhelp South Dakota",
+      "domains": [
+        {
+          "id": "financial",
+          "label": "Financial",
+          "unmetNeed": true,
+          "responses": {
+            "fi1": 3,
+            "fi2": 1
+          },
+          "recommendedCBOs": [
+            "Frontier Community Action CBO",
+            "State Benefits Office — Frontier District"
+          ]
+        },
+        {
+          "id": "transportation",
+          "label": "Transportation",
+          "unmetNeed": true,
+          "responses": {
+            "t1": 2
+          },
+          "recommendedCBOs": [
+            "Medicaid NEMT — Bennett County",
+            "SD Medicaid Transport"
+          ]
+        },
+        {
+          "id": "support",
+          "label": "Support",
+          "unmetNeed": true,
+          "responses": {
+            "su1": 2,
+            "su2": 3
+          },
+          "recommendedCBOs": [
+            "State Area Agency on Aging"
+          ]
+        }
+      ],
+      "totalUnmetNeeds": 3,
+      "tasksCreated": [
+        "TASK-FI-0087",
+        "TASK-T-0087",
+        "TASK-SU-0087"
+      ],
+      "savedToRecord": true
+    }
+  ]
+}

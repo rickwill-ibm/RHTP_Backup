@@ -1,0 +1,292 @@
+{
+  "_comment": "Generic demo data, no persona. Synthetic program-eligibility rows per member. Extracted from socialMockData.data1.ts so this data no longer counts against that file's size cap (AI-CODING-CONVENTIONS §2: data goes to *.json, not inline TS).",
+  "byPatient": {
+    "MARIA_SD_001": [
+      {
+        "id": "pm1",
+        "name": "WIC — Women, Infants & Children",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "eligible",
+        "actionRequired": "Eligible — not yet enrolled. Monthly value: $320/mo"
+      },
+      {
+        "id": "pm2",
+        "name": "SD Childcare Assistance Program (CCAP)",
+        "domain": "Childcare",
+        "fundingSource": "State Benefits Line",
+        "status": "eligible",
+        "actionRequired": "Eligible — not yet enrolled. Monthly value: $487/mo"
+      },
+      {
+        "id": "pm3",
+        "name": "SNAP Food Assistance",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "expired",
+        "expiryDate": "2026-01-31",
+        "actionRequired": "Renewal overdue T+47d — recertify immediately"
+      },
+      {
+        "id": "pm4",
+        "name": "TANF — Temporary Assistance for Needy Families",
+        "domain": "Financial",
+        "fundingSource": "State Benefits Line",
+        "status": "eligible",
+        "actionRequired": "Eligible — not yet enrolled"
+      },
+      {
+        "id": "pm5",
+        "name": "LIHEAP — Low Income Home Energy Assistance",
+        "domain": "Utilities",
+        "fundingSource": "Federal LIHEAP",
+        "status": "eligible",
+        "actionRequired": "Income verification required"
+      },
+      {
+        "id": "pm6",
+        "name": "State Housing Finance Agency — Rental Assistance",
+        "domain": "Housing",
+        "fundingSource": "State Housing Finance Agency",
+        "status": "pending",
+        "actionRequired": "Waitlist position 47 — est. 18 months"
+      },
+      {
+        "id": "pm7",
+        "name": "Medicaid Non-Emergency Transportation",
+        "domain": "Transportation",
+        "fundingSource": "SD Medicaid",
+        "status": "enrolled",
+        "enrolledDate": "2026-01-15"
+      },
+      {
+        "id": "pm8",
+        "name": "Postpartum Support Group — Bennett County",
+        "domain": "Behavioral Health",
+        "fundingSource": "CCBHC",
+        "status": "eligible",
+        "actionRequired": "Referred — not yet enrolled"
+      },
+      {
+        "id": "pm9",
+        "name": "CHW Outreach — RHTP Program",
+        "domain": "Care Coordination",
+        "fundingSource": "Medicaid 1115 Waiver",
+        "status": "enrolled",
+        "enrolledDate": "2026-02-01"
+      }
+    ],
+    "PAT-0042": [
+      {
+        "id": "p1",
+        "name": "Section 8 Housing Voucher",
+        "domain": "Housing",
+        "fundingSource": "HUD",
+        "status": "pending",
+        "actionRequired": "Application submitted 2026-02-10 — awaiting approval"
+      },
+      {
+        "id": "p2",
+        "name": "SNAP Food Assistance",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "expired",
+        "expiryDate": "2025-12-31",
+        "actionRequired": "Renewal overdue — recertify immediately"
+      },
+      {
+        "id": "p3",
+        "name": "Senior Companion Program",
+        "domain": "Social Isolation",
+        "fundingSource": "AmeriCorps",
+        "status": "eligible",
+        "actionRequired": "Referral to Area Agency on Aging"
+      },
+      {
+        "id": "p4",
+        "name": "CCBHC Behavioral Health",
+        "domain": "Behavioral Health",
+        "fundingSource": "BH Block Grant",
+        "status": "enrolled",
+        "enrolledDate": "2025-06-01"
+      },
+      {
+        "id": "p5",
+        "name": "SSI Supplemental Income",
+        "domain": "Financial",
+        "fundingSource": "SSA",
+        "status": "enrolled",
+        "enrolledDate": "2020-01-01"
+      },
+      {
+        "id": "p6",
+        "name": "Community Health Worker Outreach",
+        "domain": "Care Coordination",
+        "fundingSource": "Medicaid 1115 Waiver",
+        "status": "enrolled",
+        "enrolledDate": "2026-01-15"
+      },
+      {
+        "id": "p7",
+        "name": "Meals on Wheels",
+        "domain": "Food Security",
+        "fundingSource": "Older Americans Act",
+        "status": "pending",
+        "actionRequired": "Waitlist — position 4 of 12"
+      }
+    ],
+    "PAT-0087": [
+      {
+        "id": "p8",
+        "name": "Medicaid BH Services",
+        "domain": "Behavioral Health",
+        "fundingSource": "Medicaid",
+        "status": "enrolled",
+        "enrolledDate": "2025-03-01"
+      },
+      {
+        "id": "p9",
+        "name": "Medicaid Non-Emergency Transport",
+        "domain": "Transportation",
+        "fundingSource": "Medicaid",
+        "status": "enrolled",
+        "enrolledDate": "2026-01-01"
+      },
+      {
+        "id": "p10",
+        "name": "SSI Supplemental Income",
+        "domain": "Financial",
+        "fundingSource": "SSA",
+        "status": "enrolled",
+        "enrolledDate": "2018-01-01"
+      },
+      {
+        "id": "p11",
+        "name": "Senior Companion Program",
+        "domain": "Social Isolation",
+        "fundingSource": "AmeriCorps",
+        "status": "eligible",
+        "actionRequired": "Referral to Area Agency on Aging"
+      },
+      {
+        "id": "p12",
+        "name": "SNAP Food Assistance",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "not-eligible"
+      }
+    ],
+    "PAT-0103": [
+      {
+        "id": "p13",
+        "name": "SNAP Food Assistance",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "enrolled",
+        "enrolledDate": "2025-09-01",
+        "expiryDate": "2026-08-31"
+      },
+      {
+        "id": "p14",
+        "name": "Workforce Development Program",
+        "domain": "Employment",
+        "fundingSource": "WIOA",
+        "status": "eligible",
+        "actionRequired": "Enroll via Workforce Development Center"
+      },
+      {
+        "id": "p15",
+        "name": "Utility Assistance (LIHEAP)",
+        "domain": "Financial",
+        "fundingSource": "Federal LIHEAP",
+        "status": "eligible",
+        "actionRequired": "Income verification required"
+      },
+      {
+        "id": "p16",
+        "name": "Community Health Worker Outreach",
+        "domain": "Care Coordination",
+        "fundingSource": "Medicaid 1115 Waiver",
+        "status": "enrolled",
+        "enrolledDate": "2026-02-01"
+      }
+    ],
+    "PAT-0156": [
+      {
+        "id": "p17",
+        "name": "Emergency Housing Assistance",
+        "domain": "Housing",
+        "fundingSource": "HUD ESG",
+        "status": "enrolled",
+        "enrolledDate": "2026-03-01",
+        "expiryDate": "2026-08-31"
+      },
+      {
+        "id": "p18",
+        "name": "SNAP Food Assistance",
+        "domain": "Food Security",
+        "fundingSource": "USDA",
+        "status": "enrolled",
+        "enrolledDate": "2025-09-01",
+        "expiryDate": "2026-08-31"
+      },
+      {
+        "id": "p19",
+        "name": "Medicaid Non-Emergency Transport",
+        "domain": "Transportation",
+        "fundingSource": "Medicaid",
+        "status": "eligible",
+        "actionRequired": "Enroll via Medicaid portal"
+      },
+      {
+        "id": "p20",
+        "name": "Medicaid BH Services",
+        "domain": "Behavioral Health",
+        "fundingSource": "Medicaid",
+        "status": "not-eligible"
+      },
+      {
+        "id": "p21",
+        "name": "Community Health Worker Outreach",
+        "domain": "Care Coordination",
+        "fundingSource": "Medicaid 1115 Waiver",
+        "status": "enrolled",
+        "enrolledDate": "2026-01-15"
+      }
+    ],
+    "PAT-0201": [
+      {
+        "id": "p22",
+        "name": "CCBHC Behavioral Health",
+        "domain": "Behavioral Health",
+        "fundingSource": "BH Block Grant",
+        "status": "eligible",
+        "actionRequired": "Crisis stabilization enrollment pending"
+      },
+      {
+        "id": "p23",
+        "name": "Section 8 Housing Voucher",
+        "domain": "Housing",
+        "fundingSource": "HUD",
+        "status": "eligible",
+        "actionRequired": "Application not yet submitted"
+      },
+      {
+        "id": "p24",
+        "name": "SSI Supplemental Income",
+        "domain": "Financial",
+        "fundingSource": "SSA",
+        "status": "pending",
+        "actionRequired": "Disability determination in progress"
+      },
+      {
+        "id": "p25",
+        "name": "Medicaid BH Services",
+        "domain": "Behavioral Health",
+        "fundingSource": "Medicaid",
+        "status": "enrolled",
+        "enrolledDate": "2025-10-01"
+      }
+    ]
+  }
+}

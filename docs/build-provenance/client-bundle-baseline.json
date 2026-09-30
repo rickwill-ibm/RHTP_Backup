@@ -1,0 +1,4 @@
+{
+  "latentEntries": 2,
+  "note": "Client entries whose import chain reaches a Node builtin and build green ONLY because webpack tree-shakes the barrel re-export. Each is one value import away from the failure that broke the build at src/app/cbo-directory. May only fall. See register G-066."
+}

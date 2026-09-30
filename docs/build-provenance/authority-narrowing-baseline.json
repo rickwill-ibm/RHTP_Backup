@@ -1,0 +1,4 @@
+{
+  "agentsNarrowing": 0,
+  "note": "May only rise. Zero is the CURRENT state and a registered defect, not an acceptable resting point: authority-lock.json was bootstrapped from the definitions it governs, so no agent sits below its ceiling on any dimension and assertWithinAuthorityLock cannot fail on this set. See register G-063."
+}

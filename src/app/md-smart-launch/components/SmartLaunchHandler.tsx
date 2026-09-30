@@ -6,6 +6,17 @@ import Icon from '@/components/ui/AppIcon';
 import { SmartErrorFallback, type SmartError } from './SmartErrorBoundary';
 import { shouldUseMockData } from '@/lib/config/appConfig';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import { useDemoStore } from '@/uhg/store/demoStore';
+import { PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
+import {
+  readLaunchParams,
+  readAuthCode,
+  discoverSmartConfiguration,
+  buildAuthorizationUrl,
+  exchangeCodeForToken,
+  storedIss,
+} from '@/lib/fhir/smartLaunch';
+import { resolvePatientId } from '../lib/resolvePatientId';
 
 interface SmartLaunchHandlerProps {
   onLaunchReady: (ctx: SmartLaunchContext) => void;
@@ -32,103 +43,164 @@ export default function SmartLaunchHandler({
    * Mock launch sequence for development
    */
   // ── Mock launch sequence ─────────────────────────────────────────────────────
+  // Supports all Connect360 / RHTP ID forms via resolvePatientId:
+  //   UUIDv4 (Connect360)  → UUID_TO_FHIR_ID_MAP → static resolution
+  //   Platform ID (PAT-*)  → PLATFORM_TO_FHIR_ID_MAP
+  //   MRN                  → MRN_TO_FHIR_ID_MAP
+  //   FHIR slug (patient-*) → mock store passthrough
+  //   Empty / unresolvable  → surfaces "No patient in launch scope", never a silent fallback
   const runMockLaunchSequence = useCallback(() => {
     setStep('validating');
     setProgress(0);
     setSmartError(null);
 
     const urlParams = new URLSearchParams(window.location.search);
-    // Prefer patientId from URL query param (passed by RHTP patient selector)
-    const patientId = urlParams.get('patientId') || 'patient/maria-redhawk-001';
-    const patientName = urlParams.get('patientName') || 'Maria Redhawk';
+    const rawId = urlParams.get('patientId') ?? '';
 
-    const launchContext: SmartLaunchContext = {
-      ...mockSmartLaunchContext,
-      patientId,
-      practitionerName: 'Bennett County Health PCP',
-    };
+    // Resolve asynchronously but kick off the timed UI sequence immediately
+    // so the progress animation is not blocked on ID resolution.
+    resolvePatientId(rawId, /* mock */ true).then((resolved) => {
+      const patientId = resolved?.canonicalFhirId ?? '';
+      const patientName =
+        urlParams.get('patientName') ??
+        (patientId ? `${patientId} (unresolved)` : 'No patient in launch scope');
 
-    const steps: Array<{ step: LaunchStep; label: string; duration: number; progress: number }> = [
-      { step: 'validating', label: 'Validating Cerner launch token…', duration: 600, progress: 25 },
-      {
-        step: 'exchanging-token',
-        label: 'Exchanging authorization token…',
-        duration: 700,
-        progress: 55,
-      },
-      {
-        step: 'loading-patient',
-        label: `Loading ${patientName} context from FHIR R4…`,
-        duration: 800,
-        progress: 85,
-      },
-      { step: 'ready', label: 'Launch complete', duration: 400, progress: 100 },
-    ];
+      const launchContext: SmartLaunchContext = {
+        ...mockSmartLaunchContext,
+        patientId,
+        practitionerName: 'Prairie Health PCP',
+      };
 
-    let delay = 0;
-    steps.forEach(({ step: s, duration, progress: p }) => {
-      delay += duration;
-      setTimeout(() => {
-        setStep(s);
-        setProgress(p);
-        if (s === 'ready') {
-          setTimeout(() => onLaunchReady(launchContext), 300);
-        }
-      }, delay);
+      const steps: Array<{ step: LaunchStep; label: string; duration: number; progress: number }> =
+        [
+          {
+            step: 'validating',
+            label: 'Validating Cerner launch token…',
+            duration: 600,
+            progress: 25,
+          },
+          {
+            step: 'exchanging-token',
+            label: 'Exchanging authorization token…',
+            duration: 700,
+            progress: 55,
+          },
+          {
+            step: 'loading-patient',
+            label: `Loading ${patientName} context from FHIR R4…`,
+            duration: 800,
+            progress: 85,
+          },
+          { step: 'ready', label: 'Launch complete', duration: 400, progress: 100 },
+        ];
+
+      let delay = 0;
+      steps.forEach(({ step: s, duration, progress: p }) => {
+        delay += duration;
+        setTimeout(() => {
+          setStep(s);
+          setProgress(p);
+          if (s === 'ready') {
+            setTimeout(() => onLaunchReady(launchContext), 300);
+          }
+        }, delay);
+      });
     });
   }, [onLaunchReady]);
 
   // ── Live FHIR launch sequence ────────────────────────────────────────────────
-  // Reads Patient/{id} from HAPI to confirm existence and extract the real name,
-  // then fires onLaunchReady with a fully-populated SmartLaunchContext.
+  // SMART on FHIR EHR-launch (HL7 STU 2.1):
+  //   1. EHR opens app with ?iss=<fhir-base>&launch=<opaque-token>
+  //   2. App discovers .well-known/smart-configuration
+  //   3. App builds authorize URL (OAuth 2.0 + PKCE) → redirect to EHR
+  //   4. EHR redirects back with ?code=
+  //   5. App exchanges code → token response carries patient / encounter context
+  //   6. token.patient is a FHIR relative ref: "Patient/{id}" where {id} may be a
+  //      UUID (Connect360 / Cerner), an MRN, or a platform ID — resolved via
+  //      resolvePatientId() which handles all forms without corrupting the ID.
   const runLiveFhirLaunchSequence = useCallback(async () => {
     setStep('validating');
     setProgress(0);
     setSmartError(null);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const rawPatientId = urlParams.get('patientId') || 'patient-maria-001';
-
     try {
-      setStep('exchanging-token');
-      setProgress(25);
-      await new Promise((r) => setTimeout(r, 400)); // brief UI pause for auth step
+      // ── Step 1: EHR launch or auth-code callback? ──────────────────────────
+      const launchParams = readLaunchParams();
+      const authCode = readAuthCode();
+      const iss = storedIss();
 
+      let rawPatientId: string;
+
+      if (authCode && iss) {
+        // ── Step 4-5: auth-code callback — exchange for token ────────────────
+        setStep('exchanging-token');
+        setProgress(25);
+        const config = await discoverSmartConfiguration(iss);
+        const tokenResponse = await exchangeCodeForToken(config, authCode);
+
+        // token.patient is the SMART-standard carrier of patient context.
+        // It is a relative reference "Patient/{id}" — strip the resource type
+        // prefix to get the bare resource ID (which may be a UUID on Cerner).
+        rawPatientId = (tokenResponse.patient ?? '').replace(/^Patient\//i, '');
+      } else if (launchParams) {
+        // ── Step 2-3: initial EHR launch — redirect to authorize endpoint ────
+        setStep('exchanging-token');
+        setProgress(15);
+        const config = await discoverSmartConfiguration(launchParams.iss);
+        const authorizeUrl = await buildAuthorizationUrl(
+          config,
+          launchParams.iss,
+          launchParams.launch
+        );
+        // Redirect — this function will be called again on the callback leg.
+        window.location.assign(authorizeUrl);
+        return;
+      } else {
+        // ── No EHR launch params — fall back to URL param / store ────────────
+        // This covers direct navigation in dev/staging environments.
+        const urlParams = new URLSearchParams(window.location.search);
+        const storeActiveCitizen = useDemoStore.getState().activeCitizenId;
+        const defaultId = storeActiveCitizen
+          ? (PLATFORM_TO_FHIR_ID_MAP[storeActiveCitizen] ?? storeActiveCitizen)
+          : '';
+        rawPatientId = urlParams.get('patientId') || defaultId;
+      }
+
+      // ── Step 6: resolve the patient ID to a canonical FHIR resource ID ─────
+      // Handles UUIDv4 (Connect360), platform IDs (PAT-*), MRNs, and FHIR slugs.
       setStep('loading-patient');
       setProgress(55);
 
-      // Resolve the HAPI patient resource ID (strip legacy 'patient/' prefix if present)
-      const fhirPatientId = rawPatientId.startsWith('patient/')
-        ? rawPatientId.replace('patient/', 'patient-')
-        : rawPatientId;
+      const resolved = await resolvePatientId(rawPatientId, /* mock */ false);
+      if (!resolved) {
+        // resolvePatientId returns null only when all resolution strategies
+        // are exhausted — surface an explicit error rather than loading the
+        // wrong patient.
+        setSmartError({
+          code: 'MISSING_PATIENT_DATA',
+          message: `Patient not found: "${rawPatientId}". Verify the identifier carried by the launch context.`,
+        });
+        setStep('error');
+        return;
+      }
 
-      // Attempt to read Patient resource from HAPI
-      const patientResource = await getFhirClient().read<{
-        resourceType: string;
-        id?: string;
-        name?: { family?: string; given?: string[] }[];
-        birthDate?: string;
-        gender?: string;
-      }>('Patient', fhirPatientId);
+      // Confirm the resource exists on HAPI before declaring launch ready.
+      await getFhirClient().read<{ resourceType: string }>('Patient', resolved.canonicalFhirId);
 
       setProgress(85);
       await new Promise((r) => setTimeout(r, 300));
 
       const launchContext: SmartLaunchContext = {
         ...mockSmartLaunchContext,
-        patientId: fhirPatientId,
-        practitionerName: 'Bennett County Health PCP',
+        patientId: resolved.canonicalFhirId,
+        practitionerName: 'Prairie Health PCP',
       };
 
       setStep('ready');
       setProgress(100);
       setTimeout(() => onLaunchReady(launchContext), 300);
     } catch (err) {
-      // Patient not found on HAPI — fall back to mock launch sequence
-      console.warn(
-        '[SmartLaunchHandler] Live FHIR patient read failed, falling back to mock:',
-        err
-      );
+      console.warn('[SmartLaunchHandler] Live FHIR launch failed, falling back to mock:', err);
       runMockLaunchSequence();
     }
   }, [onLaunchReady, runMockLaunchSequence]);

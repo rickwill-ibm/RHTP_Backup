@@ -1,0 +1,14 @@
+{
+  "wpco.outreach-priority": {
+    "suggestedRefs": {
+      "outreachPriorityTier": "tier-2",
+      "preferredChannelRef": "Communication/chan-demo-1"
+    },
+    "toolRequests": ["person-context.read"],
+    "producedBy": {
+      "promptId": "wpco.outreach-priority",
+      "promptVersion": "1.0.0",
+      "modelId": "recorded-transcript"
+    }
+  }
+}

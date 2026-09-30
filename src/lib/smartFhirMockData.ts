@@ -13,8 +13,8 @@ import { getPatientByFhirId, getPatientById } from './patientRegistry';
 export const mockSmartLaunchContext: SmartLaunchContext = {
   patientId: 'patient/maria-redhawk-001',
   encounterId: 'enc-20260615-001',
-  practitionerId: 'pract-bch-001',
-  practitionerName: 'Bennett County Health PCP',
+  practitionerId: 'practitioner-001',
+  practitionerName: 'Prairie Health PCP',
   practitionerNpi: '1234567890',
   fhirBaseUrl: 'https://fhir.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d',
   accessToken: 'mock-access-token-xyz',
@@ -22,6 +22,57 @@ export const mockSmartLaunchContext: SmartLaunchContext = {
   launchTimestamp: new Date().toISOString(),
   cernerOrgId: 'cerner-org-bennett-county',
 };
+
+// ─── Mock CDS Cards — Denise Fontaine (Franklin County NY Demo) ─────────────
+export const mockDeniseCdsCards: CdsCard[] = [
+  {
+    id: 'cds-denise-1',
+    hookType: 'patient-view',
+    cardType: 'critical',
+    summary: 'Glycemic Status Assessment Overdue — Distance / Winter Blocker Identified',
+    detail:
+      'HbA1c recheck overdue. Root-cause analyzer identified a 45-minute clinic transit barrier and winter road conditions as the primary Keystone blocker. Medicaid NEMT transport via MAS scheduled to unblock clinic lab draw.',
+    source: 'CDS Hooks / Whole-Person Intelligence Engine',
+    indicator: 'warning',
+    suggestions: [
+      {
+        id: 'sug-denise-1a',
+        label: 'Dispatch MAS NEMT Ride Confirmation',
+        actions: [
+          {
+            type: 'create',
+            description: 'Verify 72-hr advance NEMT booking with Medical Answering Services (MAS)',
+          },
+        ],
+      },
+    ],
+    timestamp: new Date().toISOString(),
+  },
+  {
+    id: 'cds-denise-2',
+    hookType: 'patient-view',
+    cardType: 'warning',
+    summary: 'Diabetic Retinal Exam Needed — 5-Week Specialist Waitlist',
+    detail:
+      'Annual diabetic retinal exam overdue. Regional specialist shortage in Franklin County (73% specialist deficit). Referral placed to Alice Hyde Specialty Eye Clinic; tracked with 5-week estimated wait time.',
+    source: 'CDS Hooks / Program Eligibility & Network Engine',
+    indicator: 'info',
+    suggestions: [
+      {
+        id: 'sug-denise-2a',
+        label: 'Track Alice Hyde Referral',
+        actions: [
+          {
+            type: 'create',
+            description:
+              'Track referral status and evaluate primary-care teleretinal screening alternative',
+          },
+        ],
+      },
+    ],
+    timestamp: new Date().toISOString(),
+  },
+];
 
 // ─── Mock CDS Cards — Maria Redhawk Standardized ─────────────────────────────
 export const mockCdsCards: CdsCard[] = [
@@ -56,7 +107,7 @@ export const mockCdsCards: CdsCard[] = [
     cardType: 'warning',
     summary: 'HbA1c gap 38 days — pre-diabetes monitoring critical',
     detail:
-      'Pre-diabetic HbA1c recheck is 38 days overdue. Last HbA1c: 6.2% (Pre-diabetic range). Due date: June 22, 2026. Primary barrier: 47-mile distance to Winner Regional Healthcare with no reliable transport. Consider NEMT enrollment and bundle with Well-Child visit.',
+      'Pre-diabetic HbA1c recheck is 38 days overdue. Last HbA1c: 6.2% (Pre-diabetic range). Due date: June 22, 2026. Primary barrier: 47-mile distance to Cedar Bluff Regional Healthcare with no reliable transport. Consider NEMT enrollment and bundle with Well-Child visit.',
     source: 'CDS Hooks / Care Gap Engine',
     indicator: 'warning',
     suggestions: [

@@ -95,6 +95,28 @@ Problem it prevents: a module that is correct at RUNTIME can still break the BUI
 The gate: run the real production build (`next build`) as a gate - it is the only check that exercises the bundler's cross-runtime import resolution. It runs in the `ci` tier (Linux CI), NOT the fast/push local tiers, because it is slow and environment-sensitive (Windows/no-Docker parity is out of scope per the v1.6 residual gaps) - same rationale as mutation. Pairs with the RUNTIME-BOUNDARY convention (AI-CODING-CONVENTIONS SS4): a Node-only module must not be reachable from an instrumentation/edge/client graph without BOTH a `NEXT_RUNTIME` runtime guard AND a bundler exclusion at the seam. The convention is the rule; E16 is the gate that makes it more than a suggestion.
 Adoption: `g_build` in `scripts/ci-gates.sh` (ci tier) + `.github/workflows/convention-gates.yml`. Landed green: `next build` must pass before E16 is wired (a gate is landed green or not at all). Build into an isolated `DIST_DIR` in CI so it never collides with a running dev server's `.next`. Shift-left companion (E9 doctrine): `docs/build-provenance/check-page-boundaries.mjs` runs in the fast/pre-commit tier and flags the two common page classes (useSearchParams with no Suspense boundary; a heavy Node-only import in `src/app` not in serverExternalPackages) in seconds - so an author catches them at commit, not at the slow CI build.
 
+## E18 - Secret / sensitive-data gate (prevents credential and personal-data leakage) - added v1.9
+(E17 is reserved by v1.8 for the negative-fixture meta-check, FW-5 - see E13 above.)
+Three invariants, each written WITH the gate that enforces it. An invariant with no gate is recorded
+as UNENFORCED in the register (E8) - never written as though it were in force, because a rule nobody
+checks reads as a control and is not one.
+- **No credential material in source.** Gate: a fail-closed pre-commit secret scan over staged
+  ADDED lines, matching the credential shapes the stack actually issues. It must EXIT NON-ZERO, not
+  warn, and must never print the matching line - a secret echoed to a terminal reaches a scrollback,
+  a screen share and a CI log. The only bypass is the explicit one the VCS already provides, which
+  is visible in shell history and is the committer's to justify.
+- **No environment file committed except a template.** Gate: the same hook, on staged PATHS, with an
+  explicit allowance for `*.example` and no other exception.
+- **No secret or personal/health data in logs, and no stack trace or system detail returned to a
+  caller.** Gate: project-specific - a logger-call lint plus an error-envelope test. Where a project
+  has neither, this is an OPEN register item, not a satisfied rule.
+
+Scope every security obligation to what the agent can actually verify. A rule such as "every
+dependency is actively maintained" or "always use the latest version" cannot be checked by the thing
+being asked to check it, and conflicts with lockfiles and reproducible builds; written as an agent
+obligation it produces silent skipping or false compliance. Route those to human review, and record
+them as review items rather than as gates.
+
 ## Definition of Done (the composite gate every increment must pass)
 - **Definition of READY (v1.5): before the iteration starts, its NFR + regulatory manifest is specified - the -ilities it must meet (security, tenancy/isolation, availability, observability, auditability, privacy, performance) with acceptance criteria, and the required adversarial LENS-COVERAGE MAP (every domain risk dimension has an owning persona). NFRs are designed-in, not bolted-on.**
 - Types clean, full test suite green (orchestrator-run, E5), size/ratchet gate pass (E2).
@@ -111,4 +133,5 @@ Adoption: `g_build` in `scripts/ci-gates.sh` (ci tier) + `.github/workflows/conv
 - **Every seam's mock and production dispositions are shape-equivalent (E15) - the demo honestly represents production.**
 - **The production build resolves across every runtime (E16): `next build` passes - no Node-only module bled into an edge/client graph; the runtime-boundary convention holds. Runs in the ci tier.**
 - **Production-READINESS gate (v1.5): the NFR manifest from Definition of Ready is VERIFIED, not just the functional tests - the increment is production-ready (observable, tenant-safe, secure, available), not merely CI-green. Every CRITICAL finding fixed this iteration passed the Critical-finding protocol (N-skeptic verify + mutation-tested regression + a red-team RE-ATTACK proving the exploit is closed).**
+- **No credential material, environment file, secret or personal/health data entered the increment (E18) - each invariant verified by its named gate; any invariant without a gate is an OPEN register item, not a satisfied one.**
 - One sync per boundary; recovery point current; a labeled backup precedes an XL/irreversible iteration (L10).

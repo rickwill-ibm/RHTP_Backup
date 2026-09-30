@@ -18,6 +18,8 @@ import dorothyBundle from '../../../fhir/seed/patients/dorothy-simmons.bundle.js
 import jamesBundle from '../../../fhir/seed/patients/james-wilson.bundle.json';
 import robertBundle from '../../../fhir/seed/patients/robert-chen.bundle.json';
 import lisaBundle from '../../../fhir/seed/patients/lisa-thompson.bundle.json';
+import deniseBundle from '../../../fhir/seed/patients/denise-fontaine.bundle.json';
+import alexBundle from '../../../fhir/seed/patients/alex-kirby.bundle.json';
 
 type AnyResource = FhirResource & Record<string, unknown>;
 
@@ -27,6 +29,8 @@ const SEED_BUNDLES: FhirBundle[] = [
   jamesBundle as unknown as FhirBundle,
   robertBundle as unknown as FhirBundle,
   lisaBundle as unknown as FhirBundle,
+  deniseBundle as unknown as FhirBundle,
+  alexBundle as unknown as FhirBundle,
 ];
 
 /**
@@ -54,6 +58,14 @@ const PATIENT_ID_ALIASES: Record<string, string> = {
   // Lisa
   'PAT-0156': 'patient-lisa-156',
   'patient-0156': 'patient-lisa-156',
+  // Denise
+  DENISE_NY_001: 'patient-denise-fontaine',
+  'patient-denise': 'patient-denise-fontaine',
+  'patient-denise-fontaine': 'patient-denise-fontaine',
+  // Alex
+  'PAT-0200': 'patient-alex-kirby',
+  'patient-0200': 'patient-alex-kirby',
+  'patient-alex': 'patient-alex-kirby',
   // ── MRNs (safety net — resolver handles these first; store covers edge cases) ─
   // Maria — system: urn:rhtp:mrn
   'SD-448291': 'patient-maria-001',
@@ -65,6 +77,8 @@ const PATIENT_ID_ALIASES: Record<string, string> = {
   'MRN-0103': 'patient-robert-103',
   // Lisa
   'MRN-0156': 'patient-lisa-156',
+  // Denise
+  'NY-882104': 'patient-denise-fontaine',
   // ── Connect360 UUIDs (safety net — resolver handles these first) ─────────────
   '5bc9fe31-5ffe-4c6b-a896-8ef63e4a4acb': 'patient-dorothy-042',
   '9c075c8e-9ed6-44ec-a059-80a5d5aaac68': 'patient-james-087',

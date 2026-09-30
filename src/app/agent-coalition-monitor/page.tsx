@@ -232,8 +232,8 @@ export default function AgentCoalitionMonitorPage() {
           </div>
           <div className="divide-y divide-carbon-gray-10">
             {filtered.map((agent) => {
-              const sc = STATUS_CONFIG[agent.status];
-              const pc = PRIORITY_CONFIG[agent.priority];
+              const sc = STATUS_CONFIG[agent.status] ?? STATUS_CONFIG['ACTIVE'];
+              const pc = PRIORITY_CONFIG[agent.priority] ?? PRIORITY_CONFIG['MEDIUM'];
               const isSelected = selectedAgent === agent.id;
               return (
                 <div

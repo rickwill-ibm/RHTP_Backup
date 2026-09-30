@@ -274,7 +274,7 @@ export default function CdpAssemblyViewPage() {
             </thead>
             <tbody>
               {filtered.map((src, i) => {
-                const sc = STATUS_CONFIG[src.status];
+                const sc = STATUS_CONFIG[src.status] ?? STATUS_CONFIG['ACTIVE'];
                 return (
                   <tr
                     key={src.id}

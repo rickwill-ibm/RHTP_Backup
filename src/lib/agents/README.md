@@ -18,7 +18,8 @@ SDE disposition batch                (src/lib/sde — the DECISION)
         │
         ▼
   runtime.proposeAndWait  → agent.task.proposed → work queue (HITL) →
-        approve → agent.task.executed  |  reject → agent.task.rejected
+        approve → agent.task.approved   |  reject → agent.task.rejected
+           (… then agent.task.settled, with the outcome the workflow reported)
 ```
 
 ## The three agents
@@ -72,7 +73,7 @@ tasks)` starts each task on the runtime (per-member ordered by the engine).
   ([`demo/authored-agent-actions.json`](./demo/authored-agent-actions.json)); the
   demo stays green.
 - `production` — runs the real agents over the seeded SDE demo batch
-  (SDE → dispatcher → agents → HITL auto-approved → executed) and projects the
+  (SDE → dispatcher → agents → HITL auto-approved → settled) and projects the
   emergent actions. Authored == emergent (parity), proven in
   `tests/agents/demoSeam.test.ts`.
 
@@ -80,6 +81,6 @@ tasks)` starts each task on the runtime (per-member ordered by the engine).
 
 `tests/agents/` — each agent proposes-and-waits then executes on approval /
 rejects on rejection; outreach consent-suppression; referral stall → escalation →
-park; the PA guardrail (cannot set an authoritative PA state); the dispatcher
+abandonment terminal; the PA guardrail (cannot set an authoritative PA state); the dispatcher
 routes a seeded SDE batch to the right agents; per-member ordering; and the full
 seeded decide→act loop (`endToEnd.test.ts`).

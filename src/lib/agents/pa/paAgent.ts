@@ -91,14 +91,25 @@ export function createPaWorkflow(
         return transition(task.currentState, applied, task.paContext);
       });
 
-      const result: PaResult = {
+      // The transition FAILS SOFT — `transition()` returns `{ state: current, error }`
+      // for an illegal advancement rather than throwing. Reporting `executed` here
+      // recorded an advancement that did not occur, on a surface an auditor reads, after
+      // `evidence.append` had already fired. The outcome now names what happened.
+      if (outcome.error !== undefined) {
+        return {
+          outcome: 'not-advanced',
+          threadRef: task.threadRef,
+          state: outcome.state,
+          decidedBy: decision.decidedBy,
+          transitionError: outcome.error,
+        };
+      }
+      return {
         outcome: 'executed',
         threadRef: task.threadRef,
         state: outcome.state,
         decidedBy: decision.decidedBy,
       };
-      if (outcome.error) result.transitionError = outcome.error;
-      return result;
     },
   };
 }

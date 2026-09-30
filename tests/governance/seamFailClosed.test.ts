@@ -20,6 +20,12 @@
  *   6. MOCK-ONLY INERTNESS — each mock-only seam has NO production decision consumer;
  *      wiring one forces reclassification, turning the gate red.
  */
+import {
+  CredentialingNotConfiguredError,
+  getCredentialingSource,
+  seededCredentialingSource,
+} from '@/lib/authz/credentialing';
+import { modeProber } from './seamProber';
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
@@ -130,6 +136,7 @@ import {
   RecordLifecycleNotConfiguredError,
   setProductionRecordLifecycleFactory,
 } from '@/lib/lifecycle';
+import { AGENT_SEAM_PROBERS } from './probers.agentSeams';
 
 // A structurally-complete record (so the mock/seeded validators pass — proving the
 // production throw is production-specific, not a shape rejection).
@@ -159,15 +166,14 @@ const dataSourceProber =
   };
 
 const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
+  ...AGENT_SEAM_PROBERS, // WPCO agent tranche — probers in ./probers.agentSeams.ts
   // ── fail-closed-stub: production throws; mock does not ──────────────────────
-  identity: () => {
-    setSessionDataMode('identity', 'production');
-    setProductionIdentitySource(null);
-    expect(() => getIdentitySource()).toThrow(EmpiCandidateSourceNotConfiguredError);
-    setSessionDataMode('identity', 'mock');
-    expect(getIdentitySource()).toBe(mockIdentitySource); // never throws in mock
-    setProductionIdentitySource(null);
-  },
+  identity: modeProber(
+    'identity',
+    getIdentitySource,
+    mockIdentitySource,
+    EmpiCandidateSourceNotConfiguredError
+  ),
   terminology: () => {
     setSessionDataMode('terminology', 'production');
     const prod = selectTerminologyService();
@@ -281,17 +287,18 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
   contractRepository: dataSourceProber('contractRepository', getContractRepositoryLoader),
   signingKey: dataSourceProber('signingKey', getSigningKeyLoader),
   submissionGateway: dataSourceProber('submissionGateway', getSubmissionGatewayLoader),
-  // I8A wave C (F5): NPPES provider directory fails closed in production. ───────
-  providerIdentity: () => {
-    setProductionProviderDirectory(null);
-    setSessionDataMode('providerIdentity', 'production');
-    expect(() => getProviderDirectory()).toThrow(NppesNotConfiguredError);
-    setSessionDataMode('providerIdentity', 'seeded');
-    expect(getProviderDirectory()).toBe(seededProviderDirectory); // seed, no throw
-    setSessionDataMode('providerIdentity', 'mock');
-    expect(getProviderDirectory()).toBe(seededProviderDirectory);
-    setProductionProviderDirectory(null);
-  },
+  credentialing: modeProber(
+    'credentialing',
+    getCredentialingSource,
+    seededCredentialingSource,
+    CredentialingNotConfiguredError
+  ),
+  providerIdentity: modeProber(
+    'providerIdentity',
+    getProviderDirectory,
+    seededProviderDirectory,
+    NppesNotConfiguredError
+  ),
   // I8A wave A (F3): the member<->source-id xref fails closed in production. ─────
   crossReference: () => {
     setProductionCrossReferenceStoreFactory(null);
@@ -323,8 +330,8 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
   agentManifests: () => {
     setProductionManifestLoader(null);
     setSessionDataMode('agentManifests', 'production');
-    // No mock variant exists; production honors a registered store-backed loader.
-    const sentinel = defaultRegistry();
+    // No mock variant; production honors a store-backed loader by CONTENT, not
+    const sentinel = defaultRegistry(); // reference — manifestLoaderProvenance.test.ts
     let called = false;
     setProductionManifestLoader(() => {
       called = true;
@@ -332,7 +339,7 @@ const PROBERS: Partial<Record<DataModeSeam, Prober>> = {
     });
     const reg = loadAgentManifests();
     expect(called).toBe(true);
-    expect(reg).toBe(sentinel); // returns the production loader's registry, never a mock
+    expect(reg.ids()).toEqual(sentinel.ids()); // loader's content, never a mock
     setProductionManifestLoader(null);
     // Even with no loader, production serves the validated reference registry.
     expect(loadAgentManifests().get).toBeTypeOf('function');

@@ -287,13 +287,18 @@ describe('a system / autonomy decider is BLOCKED (403, no submit)', () => {
     await waitFor(() => rt.engine.query(workflowId)?.status === 'waiting-decision', 'suspended');
     expect(submitAppeal).not.toHaveBeenCalled(); // no auto-submit at autonomous tier
     const proposalId = rt.engine.query(workflowId)!.awaitingProposalId!;
-    await rt.engine.signal(workflowId, {
-      name: 'agent.task.approved',
-      proposalId,
-      decidedBy: 'autonomy:autonomous',
-    });
-    await expect(handle.done).rejects.toThrow();
+    // G-045: the ENGINE now refuses the signal, so the workflow stays suspended rather than
+    // failing — a refused signal is a no-op on the workflow, which is the safer shape.
+    await expect(
+      rt.engine.signal(workflowId, {
+        name: 'agent.task.approved',
+        proposalId,
+        decidedBy: 'autonomy:autonomous',
+      })
+    ).rejects.toThrow(/reviewer-proof-absent/);
+    expect(rt.engine.query(workflowId)?.status).toBe('waiting-decision');
     expect(submitAppeal).not.toHaveBeenCalled();
+    void handle;
   });
 });
 

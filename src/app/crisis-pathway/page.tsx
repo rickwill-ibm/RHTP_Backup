@@ -49,13 +49,13 @@ const SDOH_CONTEXT: Record<string, SDOHContext> = {
     safetyRisk: 'Moderate',
     activeNeeds: ['Food Insecurity', 'Housing Instability', 'Transportation'],
     chwAssigned: 'Angela Torres (CHW)',
-    cboEnrollments: ['SD DSS Bennett County (SNAP)', 'SD Housing Development Authority'],
+    cboEnrollments: ['State Benefits Office — Frontier District (SNAP)', 'Housing Agency'],
     snapStatus: 'Active',
     clinicalComorbidities: ['COPD', 'Anxiety', 'T2DM'],
     lastCrisisDate: '2026-04-15',
     crisisCount30d: 1,
     careManagerNote:
-      'SNAP enrolled. Housing referral in progress. BH engagement ongoing — Avera Sacred Heart BH, Winner SD.',
+      'SNAP enrolled. Housing referral in progress. BH engagement ongoing — Cedar Valley BH, Winner SD.',
   },
   'P-10043': {
     patientId: 'P-10043',
@@ -66,13 +66,13 @@ const SDOH_CONTEXT: Record<string, SDOHContext> = {
     safetyRisk: 'High',
     activeNeeds: ['Housing', 'Transportation', 'Caregiver Support'],
     chwAssigned: 'Angela Torres (CHW)',
-    cboEnrollments: ['SD Housing Development Authority'],
+    cboEnrollments: ['State Housing Finance Agency'],
     snapStatus: 'Not Enrolled',
     clinicalComorbidities: ['CHF', 'CKD Stage 3', 'Major Depression'],
     lastCrisisDate: '2026-05-10',
     crisisCount30d: 2,
     careManagerNote:
-      'High-risk patient. CHF + depression comorbidity. SNF discharge pending. 89 miles to Avera Sacred Heart, Winner SD.',
+      'High-risk patient. CHF + depression comorbidity. SNF discharge pending. 89 miles to Cedar Valley Critical Access Hospital, Winner SD.',
   },
   'P-10044': {
     patientId: 'P-10044',
@@ -83,13 +83,13 @@ const SDOH_CONTEXT: Record<string, SDOHContext> = {
     safetyRisk: 'Moderate',
     activeNeeds: ['Food Insecurity', 'Utilities'],
     chwAssigned: 'James Okafor (CHW)',
-    cboEnrollments: ['Community Action Partnership of the Black Hills (LIHEAP)'],
+    cboEnrollments: ['Highland Community Action Partnership (LIHEAP)'],
     snapStatus: 'Pending',
     clinicalComorbidities: ['T2DM', 'Hypertension', 'SUD — Alcohol'],
     lastCrisisDate: null,
     crisisCount30d: 0,
     careManagerNote:
-      'SUD treatment initiated at Fall River Health Services. SNAP application pending at SD DSS Bennett County. A1C recheck due.',
+      'SUD treatment initiated at Riverbend Health Services. SNAP application pending at State Benefits Office — Frontier District. A1C recheck due.',
   },
 };
 
@@ -311,7 +311,7 @@ const CARE_PLAN_LINKS: CarePlanLink[] = [
     cmWorklist: 'Linked',
     followUpDate: '2026-05-22',
     assignedCM: 'Sarah Johnson',
-    nextStep: 'Quarterly BH check-in scheduled for 6/15 — Avera Sacred Heart BH, Winner SD',
+    nextStep: 'Quarterly BH check-in scheduled for 6/15 — Cedar Valley BH, Winner SD',
   },
   {
     patientId: 'P-10043',
@@ -343,7 +343,7 @@ const PATHWAY_STAGES = [
       { label: 'Housing Stability', value: 'At Risk', flag: 'medium' },
     ],
     detail:
-      'Dorothy Simmons screened positive for food insecurity and housing instability. A1C at 9.2% — uncontrolled diabetes linked to dietary gaps. Screened at Bennett County Health, Martin SD 57551.',
+      'Dorothy Simmons screened positive for food insecurity and housing instability. A1C at 9.2% — uncontrolled diabetes linked to dietary gaps. Screened at Prairie Health Services, Martin SD 57551.',
     outcome: 'Referred to SNAP enrollment + BH intake',
   },
   {
@@ -355,15 +355,15 @@ const PATHWAY_STAGES = [
     bg: '#d0e2ff',
     border: '#0043ce',
     status: 'completed',
-    title: 'SNAP Enrollment — SD DSS Bennett County',
+    title: 'SNAP Enrollment — State Benefits Office — Frontier District',
     metrics: [
       { label: 'SNAP Status', value: 'Enrolled', flag: 'good' },
       { label: 'Monthly Benefit', value: '$234/mo', flag: 'good' },
-      { label: 'CBO Partner', value: 'Bennett County Action CBO', flag: 'neutral' },
+      { label: 'CBO Partner', value: 'Frontier Community Action CBO', flag: 'neutral' },
     ],
     detail:
-      'CHW Angela Torres assisted with SNAP application at SD DSS Bennett County Office, 102 N Van Buren St, Martin SD 57551. Enrollment completed within 7 days of referral.',
-    outcome: 'SNAP active · SD DSS Bennett County',
+      'CHW Angela Torres assisted with SNAP application at State Benefits Office — Frontier District, 410 Prairie Ridge Rd, Martin SD 57551. Enrollment completed within 7 days of referral.',
+    outcome: 'SNAP active · State Benefits Office — Frontier District',
   },
   {
     id: 'stage-3',
@@ -381,7 +381,7 @@ const PATHWAY_STAGES = [
       { label: 'Medication Adherence', value: '94%', flag: 'good' },
     ],
     detail:
-      'CHW conducted 8 home visits over 12 weeks. BH counselor at Avera Sacred Heart CAH (Winner, SD 57580) completed 12 sessions addressing depression and diabetes self-management. Medication adherence improved from 61% to 94%.',
+      'CHW conducted 8 home visits over 12 weeks. BH counselor at Cedar Valley Critical Access Hospital (Winner, SD 57580) completed 12 sessions addressing depression and diabetes self-management. Medication adherence improved from 61% to 94%.',
     outcome: 'Full 12-week BH engagement completed',
   },
   {
@@ -539,7 +539,7 @@ export default function CrisisPathwayPage() {
               <p className="text-2xs text-carbon-gray-50">
                 {activePatient?.name ?? 'Patient'} · {activePatient?.platformId ?? '—'} ·{' '}
                 {activePatient?.ehrMrn ?? '—'} · Age {activePatient?.age ?? '—'} ·{' '}
-                {activePatient?.contract ?? 'Medicaid RHTP Track 3'}
+                {activePatient?.contract ?? 'Program unresolved'}
               </p>
             </div>
           </div>

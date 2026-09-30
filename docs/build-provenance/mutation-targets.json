@@ -48,5 +48,40 @@
     "file": "src/lib/policy/crd/coverageRequirementCards.ts",
     "test": "npx vitest run tests/policy/crd/coverageRequirementCards.test.ts",
     "maxMutants": 8
+  },
+  {
+    "file": "src/lib/agents/dispatch/dispatcher.ts",
+    "test": "npx vitest run tests/agents/dispatcher.test.ts tests/agents/dispatchTotality.test.ts tests/agents/dispatchFidelity.test.ts tests/agents/disclosure/part2Dispatch.test.ts tests/agents/disclosure/gateWiring.test.ts",
+    "maxMutants": 8
+  },
+  {
+    "file": "src/lib/agents/dispatch/disclosureGate.ts",
+    "test": "npx vitest run tests/agents/disclosure/gateWiring.test.ts tests/agents/disclosure/part2Dispatch.test.ts tests/agents/disclosure/demoPathRefuses.test.ts tests/agents/behavioralHealth/bhDisclosure.test.ts",
+    "maxMutants": 12
+  },
+  {
+    "file": "src/lib/agents/dispatch/touchpointDisclosure.ts",
+    "test": "npx vitest run tests/agents/dispatcher.test.ts tests/agents/disclosure/gateWiring.test.ts tests/agents/disclosure/part2Dispatch.test.ts tests/agents/disclosure/demoPathRefuses.test.ts",
+    "maxMutants": 6
+  },
+  {
+    "file": "src/lib/sde/consentGate.ts",
+    "test": "npx vitest run tests/sde/consentGate.test.ts",
+    "maxMutants": 5
+  },
+  {
+    "file": "src/lib/sde/dataClassFloor.ts",
+    "test": "npx vitest run tests/sde/dataClassFloor.test.ts",
+    "maxMutants": 4
+  },
+  {
+    "file": "src/lib/agents/dispatch/dispatchTasks.ts",
+    "test": "npx vitest run tests/agents/dispatchTotality.test.ts tests/agents/dispatchFidelity.test.ts tests/agents/dispatcher.test.ts",
+    "maxMutants": 8
+  },
+  {
+    "file": "src/lib/agents/dispatch/routingSchema.ts",
+    "test": "npx vitest run tests/agents/routingSchemaGuards.test.ts tests/agents/dispatcher.test.ts tests/agents/adl/mirrorFailsClosed.test.ts",
+    "maxMutants": 8
   }
 ]

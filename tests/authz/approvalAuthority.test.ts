@@ -30,7 +30,7 @@ describe('approvalAuthority — dynamic association (same path in mock & prod)',
     expect(d.approver).toEqual({
       reference: 'Practitioner/dev',
       display: 'Dr. Alex Rivera, UM Reviewer',
-      npi: '1730154783',
+      npi: '1730154782',
     });
   });
 

@@ -10,6 +10,11 @@
  * the real entry point that makes the governance invariant reachable, not just
  * unit-tested. Reviewer/ops authz, audited, PHI-safe body.
  */
+import {
+  assertAdverseEligible,
+  ModelSourcedFactRefused,
+  type ProvenancedFact,
+} from '@/lib/agents/provenance';
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated, getSessionAuthContext } from '@/lib/server/smartSession';
 import { ooError } from '@/lib/fhir/operationOutcome';
@@ -17,6 +22,12 @@ import { correlationFrom, CORRELATION_HEADER } from '@/lib/server/correlation';
 import { getPrincipal } from '@/lib/authz/principal';
 import { audit } from '@/lib/server/audit';
 import { now } from '@/lib/clock';
+import {
+  CredentialingNotConfiguredError,
+  ReviewerNotQualifiedError,
+  type QualifiedReviewer,
+} from '@/lib/authz/credentialing';
+import { isDenialBasis, isNeedDomain, qualifyReviewer } from './qualification';
 import {
   evaluateDecision,
   buildDecisionProvenance,
@@ -60,6 +71,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     appealRef?: string;
     /** A coarse, PHI-safe cohort label for disparate-impact monitoring (HW-AI-B). */
     cohort?: string;
+    /**
+     * The facts that DETERMINED this decision, each carrying its origin.
+     *
+     * REQUIRED when `decision === 'rejected'`. An adverse determination with no declared
+     * fact provenance is refused — see the gate below.
+     */
+    determinativeFacts?: Record<string, ProvenancedFact<string>>;
+    /**
+     * Which of 42 CFR 438.210(b)(3)'s three need domains this determination addresses:
+     * 'medical' | 'behavioral-health' | 'ltss'. REQUIRED on an adverse decision and deliberately
+     * undefaulted — see `qualification.ts`.
+     */
+    needDomain?: string;
+    /** The jurisdiction whose licence the reviewer must hold (USPS state code). */
+    licenceJurisdiction?: string;
+    /**
+     * Why this denial is adverse: 'clinical' (default) | 'eligibility' | 'timeliness' |
+     * 'benefit-exhaustion'. Only the last three relax the clinical-peer requirement, they are
+     * validated against a closed set, and anything unrecognised is treated as CLINICAL — the safe
+     * end. A rejection never gets to be administrative by accident.
+     */
+    denialBasis?: string;
   } | null;
 
   if (
@@ -107,7 +140,145 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
   }
 
+  /**
+   * REVIEWER QUALIFICATION (C-REVQUAL) — 42 CFR 438.210(b)(3). Runs BEFORE the fact-taint gate; see
+   * `qualification.ts` for why the order matters. `decidedBy` is the authenticated principal, so
+   * this asks the credentialing system of record about the person who is actually acting.
+   */
+  const decidedAtMs = humanDecision.decidedAtMs;
+  const adverseDecision = body.decision === 'rejected';
+  if (adverseDecision && !isNeedDomain(body.needDomain)) {
+    return NextResponse.json(
+      ooError(
+        'An adverse determination must declare needDomain (medical | behavioral-health | ltss) — ' +
+          'a reviewer attested for one is not thereby attested for another',
+        'invalid'
+      ),
+      { status: 422, headers: { [CORRELATION_HEADER]: correlationId } }
+    );
+  }
+  let qualified: QualifiedReviewer;
+  try {
+    qualified = qualifyReviewer({
+      reviewerRef: principal.userId,
+      decision: body.decision,
+      denialBasis: isDenialBasis(body.denialBasis) ? body.denialBasis : 'clinical',
+      needDomain: isNeedDomain(body.needDomain) ? body.needDomain : 'medical',
+      licenceJurisdiction: body.licenceJurisdiction ?? 'NY',
+      asOfMs: decidedAtMs,
+    });
+  } catch (err) {
+    if (err instanceof CredentialingNotConfiguredError) {
+      await audit({
+        ts: new Date().toISOString(),
+        actor: principal.userId,
+        action: 'pa.decision.credentialing-unavailable',
+        resourceRef: body.proposalId,
+        correlationId,
+        outcome: 'failure',
+        detail: 'credentialing system of record is not wired; no determination can be attributed',
+      });
+      return NextResponse.json(
+        ooError(
+          'Reviewer credentialing is unavailable; no determination can be recorded',
+          'exception'
+        ),
+        { status: 503, headers: { [CORRELATION_HEADER]: correlationId } }
+      );
+    }
+    if (!(err instanceof ReviewerNotQualifiedError)) throw err;
+    await audit({
+      ts: new Date().toISOString(),
+      actor: principal.userId,
+      action: 'pa.decision.reviewer-not-qualified',
+      resourceRef: body.proposalId,
+      correlationId,
+      outcome: 'failure',
+      // The CODE, never the licence number or the NPI: this detail is identity-safe by construction.
+      detail: `reviewer qualification refused: ${err.code}`,
+    });
+    return NextResponse.json(
+      ooError(`Reviewer is not qualified for this determination (${err.code})`, 'forbidden'),
+      { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
+    );
+  }
+
+  /**
+   * THE ADVERSE FACT-TAINT GATE. `assertAdverseEligible` refuses a fact set a model shaped,
+   * and this is the first place in the application it runs on a member path.
+   *
+   * WHY IT WAS NEEDED. The gate had exactly ONE non-test caller in `src/`:
+   * `api/ops/agents/reasoning/probeChain.ts`, whose own header says it is "an OPS self-test
+   * surface, not a member-facing path". So the platform's central regulatory claim — that a
+   * model cannot be the sole basis of an adverse determination — was made by a function
+   * whose only caller was a self-test. `isAdverseProvenanceComplete` below is a DIFFERENT
+   * check: it validates the decision RECORD carries a member-facing reason and an appeal
+   * reference (42 CFR 438.404 notice content). Nothing validated the FACTS that produced it.
+   *
+   * FAIL CLOSED ON ABSENCE. An adverse decision that declares no determinative facts is
+   * REFUSED, not passed. A gate that treats "no provenance supplied" as clean is the
+   * fail-open this whole plane exists to prevent, and it is the easy mistake here.
+   *
+   * KNOWN RESIDUE, named rather than hidden: the facts arrive in the request body, so a
+   * caller could mis-declare an origin. The same is already true of `firedRule` and
+   * `ruleVersion`. The structural fix is a server-side determinative-fact store that this
+   * route reads instead of trusts; that is its own wave. Until then this gate stops the
+   * accidental case (a model-shaped fact flowing through an honest client) and not the
+   * dishonest one, and the audit row records which it was.
+   */
+  if (body.decision === 'rejected') {
+    const facts = body.determinativeFacts;
+    if (!facts || Object.keys(facts).length === 0) {
+      await audit({
+        ts: new Date().toISOString(),
+        actor: principal.userId,
+        action: 'pa.decision.no-fact-provenance',
+        resourceRef: body.proposalId,
+        correlationId,
+        outcome: 'failure',
+        detail:
+          'adverse determination declared no determinative facts' +
+          ` [reviewer ${qualified.verdict.reviewerRef} via ${qualified.verdict.sourceId}]`,
+      });
+      return NextResponse.json(
+        ooError(
+          'An adverse determination must declare the facts that determined it, each with its origin',
+          'invalid'
+        ),
+        { status: 422, headers: { [CORRELATION_HEADER]: correlationId } }
+      );
+    }
+    try {
+      assertAdverseEligible(facts);
+    } catch (err) {
+      if (!(err instanceof ModelSourcedFactRefused)) throw err;
+      await audit({
+        ts: new Date().toISOString(),
+        actor: principal.userId,
+        action: 'pa.decision.model-sourced-fact-refused',
+        resourceRef: body.proposalId,
+        correlationId,
+        outcome: 'failure',
+        // The verdict from the FIRST gate rides along, so a taint refusal is still attributable to
+        // a credentialed actor — otherwise a re-submission with different facts is untraceable.
+        detail:
+          `fact "${err.factName}" is model-sourced or has unresolvable ancestry` +
+          ` [reviewer ${qualified.verdict.reviewerRef} via ${qualified.verdict.sourceId}` +
+          ` as-of ${String(qualified.verdict.asOfMs)}]`,
+      });
+      return NextResponse.json(
+        ooError(
+          'An adverse determination may not rest on a model-sourced fact: ' +
+            `"${err.factName}" was refused`,
+          'forbidden'
+        ),
+        { status: 403, headers: { [CORRELATION_HEADER]: correlationId } }
+      );
+    }
+  }
+
   const provenance = buildDecisionProvenance({
+    qualification: qualified.verdict, // the receipt reaches the durable record, not just the gate
     action,
     humanDecision,
     requiresHuman: gate.requiresHuman,

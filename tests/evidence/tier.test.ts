@@ -19,7 +19,7 @@ function baseRecord(): EvidenceRecord {
   return createEvidenceRecord({
     id: 'ev-tier-1',
     memberId: 'MARIA_SD_001',
-    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154783' },
+    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154782' },
     createdAt: '2026-08-25T00:00:00.000Z',
   });
 }
@@ -60,7 +60,13 @@ const reconciliation = (): EvidenceEntry =>
   });
 
 const recovery = (): EvidenceEntry =>
-  entry({ stage: 'recovery', type: 'recovery', action: 'draft-appeal', status: 'draft', rung: 'A2' });
+  entry({
+    stage: 'recovery',
+    type: 'recovery',
+    action: 'draft-appeal',
+    status: 'draft',
+    rung: 'A2',
+  });
 
 describe('config ordinals + ceiling', () => {
   it('tier order is D0<D1<D2<D3', () => {
@@ -79,11 +85,37 @@ describe('tierOfEntry — data lookup table', () => {
   const cases: Array<[EvidenceEntry, string]> = [
     [remittance(), 'D0'],
     [eligibility(), 'D1'],
-    [entry({ stage: 'medical-necessity', type: 'coverage-determination', determination: { outcome: 'covered-no-pa', requiresPA: false, propensityToDeny: 'low', deficiencies: [] } as never }), 'D1'],
-    [entry({ stage: 'eligibility', type: 'gold-card', exemption: { applied: true, providerNpi: 'n', code: '72148', payer: 'p', reason: 'r' } }), 'D1'],
+    [
+      entry({
+        stage: 'medical-necessity',
+        type: 'coverage-determination',
+        determination: {
+          outcome: 'covered-no-pa',
+          requiresPA: false,
+          propensityToDeny: 'low',
+          deficiencies: [],
+        } as never,
+      }),
+      'D1',
+    ],
+    [
+      entry({
+        stage: 'eligibility',
+        type: 'gold-card',
+        exemption: { applied: true, providerNpi: 'n', code: '72148', payer: 'p', reason: 'r' },
+      }),
+      'D1',
+    ],
     [entry({ stage: 'medical-necessity', type: 'dtr-response', itemCount: 3 }), 'D1'],
     [entry({ stage: 'medical-necessity', type: 'propensity', score: 0.2, band: 'low' }), 'D1'],
-    [entry({ stage: 'prior-auth', type: 'pas-submission', approver: { reference: 'Practitioner/x', display: 'Dr X' } }), 'D1'],
+    [
+      entry({
+        stage: 'prior-auth',
+        type: 'pas-submission',
+        approver: { reference: 'Practitioner/x', display: 'Dr X' },
+      }),
+      'D1',
+    ],
     [entry({ stage: 'prior-auth', type: 'pas-decision', decision: 'approved' }), 'D1'],
     [entry({ stage: 'patient-estimation', type: 'note', text: 'n' }), 'D1'],
     [entry({ stage: 'claim', type: 'claim-submission', claimRef: 'C-1', total: 200 }), 'D1'],

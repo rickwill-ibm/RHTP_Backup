@@ -16,13 +16,13 @@
  * a qualified-human decision. The agent MAY call `claim.submit-appeal`, but ONLY in
  * the post-approval branch — after `proposeAndWait` resolves with a qualified human.
  * The runtime auto-approve gate (isAutoApprovable + isSubmission) refuses the proposal
- * at every tier, and the body ASSERTS isQualifiedHumanDecision before the submit tool,
+ * at every tier, and the body ASSERTS isNonAutomatedDecider before the submit tool,
  * so a `system`/`autonomy:*` signaller can never reach submission — there is no
  * auto-submit path at any tier.
  */
 import type { ProposedAction, WorkflowContext, WorkflowDefinition } from '@/lib/agentRuntime';
 import { evaluateInterlock } from '@/lib/agents/governance/interlock';
-import { isQualifiedHumanDecision } from '@/lib/agents/governance/decisionGate';
+import { isNonAutomatedDecider } from '@/lib/agents/governance/decisionGate';
 import {
   REVENUE_CYCLE_AGENT_ID,
   type RecoveryDeps,
@@ -138,7 +138,7 @@ export function createRecoveryWorkflow(
       // APPROVE: submission requires a QUALIFIED human (defense-in-depth). The runtime
       // gate already refuses auto-approval for a submission at every tier; assert it
       // here too so a `system`/`autonomy:*` signaller can NEVER reach the submit tool.
-      if (!isQualifiedHumanDecision(decision)) {
+      if (!isNonAutomatedDecider(decision)) {
         throw new Error(
           'revenue-cycle submission invariant violated: a payer-facing submission requires ' +
             'a qualified-human decision (never system/autonomy)'

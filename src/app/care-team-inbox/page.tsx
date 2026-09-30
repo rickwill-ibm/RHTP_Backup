@@ -115,7 +115,7 @@ const INITIAL_THREADS: Record<string, ThreadMessage[]> = {
       author: 'Dr. James Whitfield',
       role: 'PCP',
       avatar: 'JW',
-      body: 'HEDIS EED gap — Maria has not had a diabetic eye exam in 18 months. Referring to Dr. Chen at Avera Sacred Heart.',
+      body: 'HEDIS EED gap — Maria has not had a diabetic eye exam in 18 months. Referring to Dr. Chen at Cedar Valley Critical Access Hospital.',
       timestamp: '2026-04-14 10:05',
       isOwn: false,
     },
@@ -208,7 +208,7 @@ const INITIAL_CARE_PLAN_GOALS: CarePlanGoal[] = [
   {
     id: 'cpg-005',
     category: 'Social',
-    description: 'Stabilize housing — SDHDA rental assistance application submitted',
+    description: 'Stabilize housing — Housing Agency rental assistance application submitted',
     target: 'Rental assistance approved',
     status: 'on-hold',
     dueDate: '2026-06-01',
@@ -656,7 +656,7 @@ function CarePlanEditPanel({
       target: newGoal.target ?? '',
       status: (newGoal.status as CarePlanGoal['status']) ?? 'active',
       dueDate: newGoal.dueDate ?? '',
-      owner: newGoal.owner ?? 'Sarah Johnson',
+      owner: newGoal.owner ?? 'Unassigned',
       lastUpdated: new Date().toISOString().slice(0, 10),
     };
     setGoals((prev) => [...prev, goal]);
@@ -1503,10 +1503,10 @@ export default function CareTeamInboxPage() {
               patientName: reg?.name ?? fhirId,
               patientId: activePatientId,
               patientDob: reg?.dob ?? '—',
-              riskTier: reg?.riskTier ?? 'Moderate',
+              riskTier: reg?.riskTier ?? 'Unresolved',
               requester: {
-                reference: 'Practitioner/practitioner-rick',
-                display: reg?.pcp ?? 'Dr. Rick',
+                reference: reg?.pcp ? 'Practitioner/practitioner-rick' : '',
+                display: reg?.pcp ?? 'PCP unresolved',
                 role: 'PCP',
               },
               owner: {

@@ -39,7 +39,7 @@ import { getSigningKeyLoader } from '@/lib/dataSources/signingKey';
 import { getSubmissionGatewayLoader } from '@/lib/dataSources/submissionGateway';
 import type { HumanDecision } from '@/lib/agentRuntime';
 import { REVENUE_CYCLE_AGENT_ID, type RecoveryTask } from '@/lib/agents/revenueCycle';
-import { isQualifiedHumanDecision } from '@/lib/agents/governance/decisionGate';
+import { isNonAutomatedDecider } from '@/lib/agents/governance/decisionGate';
 import { validateEvidenceId } from '@/lib/goldenThread/validate';
 import { governedActionId, governedActionTerminal } from '@/lib/goldenThread/governedAction';
 import { terminalOutcome, runReconstructAndSignal } from '../decisionSupport';
@@ -147,7 +147,7 @@ export async function POST(
   };
   // A `system`/`autonomy:*` decider (never a qualified human) is BLOCKED here — there
   // is no auto-submit path at any tier (defense-in-depth with the workflow-body assert).
-  if (!isQualifiedHumanDecision(humanDecision)) {
+  if (!isNonAutomatedDecider(humanDecision)) {
     await audit1('recovery.decision.blocked', 'failure', 'decider is not a qualified human', ref);
     return NextResponse.json(
       ooError('A recovery decision requires a qualified-human decider', 'forbidden'),

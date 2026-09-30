@@ -35,11 +35,11 @@ BASELINE_JSON="quality-baseline.json"
 BASE="${GATE_BASE:-origin/main}"
 STRICT=0
 
-# Exempt globs mirror check-file-sizes.sh EXEMPT_PATTERNS (data / generated / backup).
+# Exempt globs mirror check-file-sizes.sh EXEMPT_PATTERNS (data / generated).
 is_exempt() {
   case "$1" in
     */data/*.json|*/data/*.yaml|tools/seed/*|*.generated.ts|*.generated.tsx|*.seed.json| \
-    */generateDetailedScreenPDF*.ts|*/generateTalkTrackPDF*.ts|*/md-smart-launch.backup/*|*/AppLayout.nav.ts)
+    */generateDetailedScreenPDF*.ts|*/generateTalkTrackPDF*.ts|*/AppLayout.nav.ts)
       return 0 ;;
   esac
   return 1

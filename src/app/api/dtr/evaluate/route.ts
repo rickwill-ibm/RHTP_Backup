@@ -21,12 +21,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!body?.cptCode) {
     return NextResponse.json({ error: 'cptCode required' }, { status: 400 });
   }
+  // `patientId` was defaulted to the golden member id, so a request that named no patient was
+  // answered with a REAL member's DTR evaluation. The route already refuses a missing cptCode;
+  // a missing patient is the same malformed request and the mis-attribution is worse.
+  if (!body?.patientId) {
+    return NextResponse.json({ error: 'patientId required' }, { status: 400 });
+  }
 
   // Dev mock mode — patient-aware scenario
   if (devMockEnabled()) {
     await new Promise((r) => setTimeout(r, 600));
     try {
-      const result = await devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode);
+      const result = await devDtrEvaluation(body.patientId, body.cptCode);
       return NextResponse.json(result);
     } catch (e) {
       // A registered live policy failed to evaluate (missing/broken PDF asset, misconfigured row, or an
@@ -56,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Policy Engine offline — fall through to patient-aware mock
     await new Promise((r) => setTimeout(r, 600));
     try {
-      const result = await devDtrEvaluation(body.patientId ?? 'MARIA_SD_001', body.cptCode);
+      const result = await devDtrEvaluation(body.patientId, body.cptCode);
       return NextResponse.json(result);
     } catch (e) {
       return NextResponse.json(

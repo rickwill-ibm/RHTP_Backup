@@ -2,121 +2,7 @@
 import React, { useState } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import { useRouter } from 'next/navigation';
-
-const NETWORK_ORGS = [
-  {
-    id: 'org-1',
-    name: 'Bennett County Health Services',
-    type: 'FQHC',
-    county: 'Bennett County',
-    region: 'region-west-river',
-    regionName: 'West River Region',
-    providers: 12,
-    patients: 8420,
-    gapClosure: 71,
-    gainShare: '$142K',
-    status: 'Active',
-    color: 'bg-[#0043ce]',
-  },
-  {
-    id: 'org-2',
-    name: 'Winner Regional Medical Center',
-    type: 'Rural Hospital',
-    county: 'Tripp County',
-    region: 'region-southeast',
-    regionName: 'Southeast SD Region',
-    providers: 34,
-    patients: 11200,
-    gapClosure: 64,
-    gainShare: '$218K',
-    status: 'Active',
-    color: 'bg-[#6929c4]',
-  },
-  {
-    id: 'org-3',
-    name: 'Oglala Lakota PCP Group',
-    type: 'PCP Practice',
-    county: 'Oglala Lakota County',
-    region: 'region-west-river',
-    regionName: 'West River Region',
-    providers: 6,
-    patients: 3100,
-    gapClosure: 78,
-    gainShare: '$88K',
-    status: 'Active',
-    color: 'bg-[#24a148]',
-  },
-  {
-    id: 'org-4',
-    name: 'Winner Community Health FQHC',
-    type: 'FQHC',
-    county: 'Tripp County',
-    region: 'region-central',
-    regionName: 'Missouri River Corridor',
-    providers: 9,
-    patients: 5640,
-    gapClosure: 69,
-    gainShare: '$104K',
-    status: 'Active',
-    color: 'bg-[#0043ce]',
-  },
-  {
-    id: 'org-5',
-    name: 'Fall River Specialist Network',
-    type: 'Specialist Group',
-    county: 'Fall River County',
-    region: 'region-southeast',
-    regionName: 'Southeast SD Region',
-    providers: 8,
-    patients: 2890,
-    gapClosure: 55,
-    gainShare: '$61K',
-    status: 'At Risk',
-    color: 'bg-[#b45309]',
-  },
-  {
-    id: 'org-6',
-    name: 'Gregory County Medical Associates',
-    type: 'PCP Practice',
-    county: 'Gregory County',
-    region: 'region-central',
-    regionName: 'Missouri River Corridor',
-    providers: 7,
-    patients: 4200,
-    gapClosure: 73,
-    gainShare: '$97K',
-    status: 'Active',
-    color: 'bg-[#24a148]',
-  },
-  {
-    id: 'org-7',
-    name: 'Avera Sacred Heart CAH',
-    type: 'Rural Hospital',
-    county: 'Charles Mix County',
-    region: 'region-northeast',
-    regionName: 'Northeast SD Region',
-    providers: 18,
-    patients: 6100,
-    gapClosure: 61,
-    gainShare: '$133K',
-    status: 'Active',
-    color: 'bg-[#6929c4]',
-  },
-  {
-    id: 'org-8',
-    name: 'Monument Health Cardiology',
-    type: 'Specialist Group',
-    county: 'Pennington County',
-    region: 'region-southeast',
-    regionName: 'Southeast SD Region',
-    providers: 4,
-    patients: 1820,
-    gapClosure: 82,
-    gainShare: '$74K',
-    status: 'Active',
-    color: 'bg-[#24a148]',
-  },
-];
+import { NETWORK_ORGS, PARTICIPANT_TYPES } from '../networkParticipants.data';
 
 const TYPE_COLORS: Record<string, string> = {
   FQHC: 'bg-[#d0e2ff] text-[#0043ce] border-[#97c1ff]',
@@ -128,7 +14,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function NetworkParticipantsPanel() {
   const router = useRouter();
   const [filterType, setFilterType] = useState('All');
-  const types = ['All', 'FQHC', 'Rural Hospital', 'PCP Practice', 'Specialist Group'];
+  const types = ['All', ...PARTICIPANT_TYPES];
 
   const filtered =
     filterType === 'All' ? NETWORK_ORGS : NETWORK_ORGS.filter((o) => o.type === filterType);

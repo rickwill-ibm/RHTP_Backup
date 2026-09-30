@@ -74,6 +74,12 @@ export const DATA_MODE_SEAMS = Object.freeze([
   'signingKey', //  wired: ledger signing-key material — demo HMAC key (mock/seeded) vs a real KMS/HSM asymmetric signer, fail-closed until wired (lib/dataSources/signingKey.ts)
   // ── Wave-4 governed submission (durable resume/submit loop) — appended block ──
   'submissionGateway', // wired: payer appeal/837 EDI submission transport — mock not-transmitted receipt (mock/seeded) vs a real 837/appeal EDI clearinghouse, fail-closed until wired (lib/dataSources/submissionGateway.ts)
+  // ── WPCO agent tranche (C-SEAM / C-REASON) — appended block ───────────────────
+  'agentReasoner', //     wired: model-reasoning provider — recorded deterministic transcript (mock/seeded) vs a configured provider, fail-closed until wired (lib/agents/seams/resolve.ts)
+  'agentMemoryRecall', // wired: cross-run recall read-model — seeded decisions (mock/seeded) vs a consent-scoped read-model, fail-closed until wired; NO production consumer exists by design (lib/agents/seams/resolve.ts)
+  'agentToolBinding', //  wired: deployment-time tool-binding table — in-process mock handlers (mock/seeded) vs tool-bindings.production.json, which ships zero bindings so resolveBinding fails closed (lib/agents/seams/resolve.ts)
+  // ── W7.5c reviewer qualification (C-REVQUAL) — appended block ────────────────
+  'credentialing', //     wired: credentialing system of record — seeded reviewer directory (mock/seeded), fail-closed until wired in production. NOT providerIdentity: NPPES carries no licence, expiry, board certification, sanction or exclusion (lib/authz/credentialing/)
 ] as const);
 export type DataModeSeam = (typeof DATA_MODE_SEAMS)[number];
 

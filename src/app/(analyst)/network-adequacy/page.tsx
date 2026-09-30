@@ -110,7 +110,10 @@ export default function NetworkAdequacyPage(): React.ReactElement {
               <h2 className="border-b border-slate-100 p-3 text-sm font-semibold">
                 Prioritized adequacy gaps
               </h2>
-              {!summary ? (
+              {/* Guarded by `error` for the same reason as the work queue: the alert above and
+                  this spinner were independent, so a failed load showed both at once and the
+                  spinner never cleared. */}
+              {error !== null ? null : !summary ? (
                 <p className="p-3 text-sm text-slate-500">Loading...</p>
               ) : summary.gaps.length === 0 ? (
                 <p className="p-3 text-sm text-slate-500">No gaps -- all cells meet target.</p>

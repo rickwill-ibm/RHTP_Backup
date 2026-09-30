@@ -33,7 +33,16 @@ import {
   type OpsRole,
 } from '@/lib/goldenThread/e2eFlow';
 import { nistSpec, deriveOversight, type NistFn, type Oversight } from '@/lib/goldenThread/nistMap';
+import { assessCeiling, rungLevel } from '@/lib/goldenThread/ceilingRecord';
+import {
+  assertSealGrammar,
+  ledgerHashParts,
+  mixHash,
+  type LedgerEntry,
+  type LedgerHashable,
+} from '@/lib/goldenThread/ledgerSeal';
 import { scenarioOf, type ScenarioId } from '@/lib/goldenThread/scenarios';
+import { CHANNELS, STAGE_CHANNEL_MIX, type IntakeChannel } from '@/lib/goldenThread/intakeChannels';
 import {
   classifyRecon,
   RECON_CLASS_SPEC,
@@ -58,6 +67,9 @@ import {
 } from '@/lib/goldenThread/workflow';
 
 export type { NistFn, Oversight } from '@/lib/goldenThread/nistMap';
+// Re-exported so every existing `import type { LedgerEntry } from '@/lib/goldenThread/flowSim'` still
+// resolves: the row shape moved modules, the public surface did not.
+export type { LedgerEntry } from '@/lib/goldenThread/ledgerSeal';
 
 export const SIM_LANES: Lane[] = ['emr', 'provider-agent', 'payer', 'payer-agent', 'surveillance'];
 
@@ -153,7 +165,11 @@ export function displayAuthority(
   requiresHuman: boolean,
   s: SimState
 ): DisplayAuthority {
-  const want = Number(permittedRung.replace(/[^0-9]/g, '')) || 0;
+  // The SAME parser the ledger uses (single source; it was a byte-identical duplicate here). An
+  // unreadable rung reads as 0 for DISPLAY — understating what is available is safe in a capability
+  // statement. The ledger's `assessCeiling` treats the same input as over-ceiling instead, because an
+  // unprovable RECORD is the opposite case. Two questions, deliberately two answers.
+  const want = Math.max(0, rungLevel(permittedRung));
   const ceiling = execEarnedCeiling(s);
   const capApplies = !requiresHuman && want > 1; // only autonomous action above Advise is earned-gated
   const shownN = capApplies ? Math.min(want, ceiling) : want;
@@ -346,6 +362,7 @@ export interface Txn {
   id: string;
   kind: TxnKind;
   type: TxnType; // real-world transaction type (drives token shape/color + evidence route)
+  channel: IntakeChannel; // HOW it arrived — SMART / 278-batch / portal / fax (deterministic mix)
   batchId?: string;
   idx: number;
   targetIdx: number;
@@ -388,23 +405,6 @@ export interface Txn {
 // ── Evidence ledger (NIST-AI-RMF-tagged, hash-chained, append-only) ───────────────
 // The NIST map + oversight derivation live in the SINGLE shared source `@/lib/goldenThread/nistMap`,
 // used identically by the engine and every view — so there is exactly one work→NIST-function map.
-export interface LedgerEntry {
-  seq: number;
-  tick: number;
-  actor: string;
-  human: boolean;
-  fired: string;
-  version: string;
-  tier: string;
-  rung: string;
-  decision: string;
-  nistFn: NistFn; // AI-RMF FUNCTION this act contributes to (single-sourced from NIST_SPEC)
-  nistChar: string; // trustworthiness CHARACTERISTIC it supports (illustrative alignment)
-  oversight: Oversight; // human-oversight mode on this act (HITL / HOTL / none)
-  prevHash: number;
-  hash: number;
-  reproducible: boolean;
-}
 
 export interface SimEvent {
   tick: number;
@@ -545,18 +545,6 @@ function mulberry(s: SimState): number {
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
-function mixHash(prev: number, parts: Array<string | number | boolean>): number {
-  let h = prev | 0;
-  const push = (n: number): void => {
-    h = Math.imul(h ^ n, 0x01000193) | 0;
-  };
-  push(0x9e3779b1);
-  for (const p of parts) {
-    const str = String(p);
-    for (let i = 0; i < str.length; i += 1) push(str.charCodeAt(i));
-  }
-  return h >>> 0;
-}
 /** Cap the live-ticket window, but NEVER evict a ticket backing a non-terminal workflow (else an
  *  in-flight appeal's queue item vanishes under load — the "action produces nothing" bug relapsing).
  *  With no workflows this is identical to the old newest-12 truncation, so warm-up is byte-identical. */
@@ -595,52 +583,28 @@ interface SealArgs {
   rung: string;
   decision: string;
   reproducible?: boolean;
+  /**
+   * Declared grammar (G-037). An act's `version` is `<autonomy>·<tier>`; an authority change's is
+   * `GRANT·A{n}` / `REVOKE·A{n}`. Both contain a `·`, so it is DECLARED here rather than inferred —
+   * inferring it re-sealed a fail-closed revocation as an act. Defaults to 'act', and
+   * `assertSealGrammar` refuses a grammar-2 version that forgot to say so.
+   */
+  kind?: 'act' | 'authority-change';
 }
 function seal(s: SimState, e: SealArgs): void {
   s.ledgerSeq += 1;
   const prevHash = s.chainHead;
   const spec = nistSpec(e.fired); // NIST AI-RMF specifics on every record (function + characteristic)
-  // LEDGER HONESTY: an AGENT (non-human) act can never be recorded above what the fleet has EARNED. The
-  // stated rung is the action-class ceiling; the EXERCISED authority is capped by execEarnedCeiling. So at
-  // A0 the record shows agent acts at A0 — it cannot claim an autonomous A2 before A2 was earned + granted.
-  if (!e.human) {
-    const want = Number(e.rung.replace(/[^0-9]/g, '')) || 0;
-    const capped = Math.min(want, execEarnedCeiling(s));
-    // Only AUTONOMOUS ACTION above "Advise" (A1) is earned-capped. An agent may ALWAYS detect and advise a
-    // human — that work is governed by the human gate, not the earned autonomous ceiling — so A1 detection/
-    // advisory seals (clock-jeopardy, fairness-screen) are NOT clamped down to A0. This is single-sourced
-    // with displayAuthority's `capApplies = !requiresHuman && want > 1`, so a ticket's A1 badge and its
-    // sealed provenance row agree instead of contradicting each other.
-    if (want > 1 && /^A[0-3]$/.test(e.rung) && capped !== want) {
-      // Clamp the rung AND the version's autonomy token so the record is internally consistent — an A0 act
-      // must not carry a HOTL/autonomous version tag. oversight (below) is derived from the clamped rung.
-      const autoTok =
-        capped >= 3 ? 'autonomous' : capped >= 2 ? 'HOTL' : capped >= 1 ? 'HITL' : 'watch';
-      const tierPart = e.version.includes('·') ? e.version.split('·')[1] : e.tier;
-      e = { ...e, rung: `A${capped}`, version: `${autoTok}·${tierPart}` };
-    }
-  }
-  const oversight = deriveOversight(e.human, e.rung); // human-oversight mode, single-sourced
-  const reproducible = e.reproducible ?? true;
-  // Every field the record displays or asserts is inside the hash — incl. `human` (the solid/hollow
-  // ring, who decided) and `reproducible` — so "any edit breaks the chain on re-read" holds for all of them.
-  const hash = mixHash(prevHash, [
-    s.ledgerSeq,
-    s.tick,
-    e.actor,
-    e.human,
-    e.fired,
-    e.version,
-    e.tier,
-    e.rung,
-    e.decision,
-    spec.fn,
-    spec.char,
-    oversight,
-    reproducible,
-  ]);
-  s.chainHead = hash;
-  s.ledger.push({
+  // OBSERVED, never rewritten. An earlier cut clamped `rung`/`version` DOWN to the earned ceiling,
+  // which prevented nothing (the act had already run) and produced the one row `proposeOutbound`
+  // below says can never exist: an "A0 … EXECUTED" agent act. See ceilingRecord.ts.
+  const ceiling = assessCeiling({
+    human: e.human,
+    kind: assertSealGrammar(e.version, e.kind),
+    rung: e.rung,
+    earnedCeiling: execEarnedCeiling(s),
+  });
+  const row: LedgerHashable = {
     seq: s.ledgerSeq,
     tick: s.tick,
     actor: e.actor,
@@ -652,11 +616,14 @@ function seal(s: SimState, e: SealArgs): void {
     decision: e.decision,
     nistFn: spec.fn,
     nistChar: spec.char,
-    oversight,
-    prevHash,
-    hash,
-    reproducible,
-  });
+    oversight: deriveOversight(e.human, e.rung), // human-oversight mode, single-sourced
+    reproducible: e.reproducible ?? true,
+    earnedCeiling: ceiling.earnedCeiling,
+    overCeiling: ceiling.overCeiling,
+  };
+  const hash = mixHash(prevHash, ledgerHashParts(row));
+  s.chainHead = hash;
+  s.ledger.push({ ...row, prevHash, hash });
   if (s.ledger.length > 400) s.ledger.shift(); // window; integrity re-derives from ledger[0].prevHash
 }
 function sealStage(s: SimState, node: PathNode, decision: string): void {
@@ -768,8 +735,20 @@ export function createSim(
       kind: 'info',
       text: `Warm operational environment — ${s.ledgerSeq} sealed records from prior operation. Live shadow validation begins now; authority starts at A0.`,
     });
+    // Seed ONE in-flight underpayment→appeal so the Reconciliation "Appeals" tab opens populated with a
+    // REAL, sealed workflow (not an empty tab, and not fake unsealed provenance). Selected by a STABLE
+    // predicate — the largest identified underpayment on the systematic-cluster provider — so it never
+    // depends on a magic seq. startAppealWorkflow draws no RNG (per-scenario streams stay frozen); it
+    // seals one advisory step, so the determinism pin moves by exactly +1 sealed record (a bounded,
+    // documented re-pin, not a stream reorder). No-ops for scenarios without seedMedicaidTickets.
+    if (scenarioOf(s).seedMedicaidTickets) {
+      const appealSeed = s.reconLedger
+        .filter((r) => r.reconClass === 'underpayment' && r.provider === RECON_CLUSTER_PROVIDER)
+        .sort((a, b) => Math.abs(b.deltaUsd) - Math.abs(a.deltaUsd))[0];
+      if (appealSeed) startAppealWorkflow(s, appealSeed.seq);
+    }
     // Scenario hero: Diane's named PA thread — gated on 'diane-ma', so the default 'wa-medicaid' stream is
-    // byte-identical (this branch never runs for the default). Seeded AFTER the warm-up/burst block.
+    // byte-identical apart from the seeded appeal above. Seeded AFTER the warm-up/burst block.
     if (s.scenario === 'diane-ma') seedHeroThread(s);
   }
   return s;
@@ -1557,17 +1536,36 @@ function stepWorkflows(s: SimState): void {
   if (s.workflows.length > 24) s.workflows.splice(0, s.workflows.length - 24); // window
 }
 
+/**
+ * Deterministic intake channel — proportional to the illustrative per-stage mix, from the existing
+ * `spawnSeq` counter (NOT a new mulberry draw, so the determinism pin is unmoved). This makes the four
+ * channels (SMART / 278-batch / portal / fax) REAL per-transaction origins rather than a static label.
+ */
+function pickChannel(startKey: StageKey, spawnSeq: number): IntakeChannel {
+  const mix = STAGE_CHANNEL_MIX[startKey] ?? STAGE_CHANNEL_MIX['emr-launch'];
+  if (!mix || mix.length === 0) return 'smart-fhir';
+  const v = (spawnSeq * 41) % 100; // deterministic rotation across the 0..99 band, coprime step
+  let acc = 0;
+  for (const m of mix) {
+    acc += m.pct;
+    if (v < acc) return m.channel;
+  }
+  return mix[mix.length - 1].channel;
+}
+
 function spawnTxn(s: SimState, type: TxnType, batchId?: string): void {
   s.spawnSeq += 1;
   const meta = TXN_TYPE_META[type];
   const startIdx = idxOf(meta.startKey);
   const stopIdx = idxOf(meta.stopKey);
+  const channel = pickChannel(meta.startKey, s.spawnSeq);
   // appeals are always-human by definition; other types draw an adverse/high-dollar/novel cohort.
   const must = meta.human === true || mulberry(s) < HONESTY_FLOOR;
   s.txns.push({
     id: `${type}-${String(s.spawnSeq).padStart(4, '0')}`,
     kind: meta.kind,
     type,
+    channel,
     batchId,
     idx: startIdx,
     targetIdx: startIdx,
@@ -1597,6 +1595,13 @@ function spawnTxn(s: SimState, type: TxnType, batchId?: string): void {
     kbResumeSub: 0,
   });
   s.counters.inFlight += 1;
+  // Channel-labelled intake event (unsealed narration → pin-safe): the live feed now shows HOW each
+  // transaction arrived, not an all-SMART world. Provenance line is carried on the channel meta.
+  pushEvent(s, {
+    tick: s.tick,
+    kind: 'edi',
+    text: `Intake · ${CHANNELS[channel].label} — ${meta.label}`,
+  });
 }
 
 /** Ratchet a txn's PROOF as it clears a stage; authority follows as the weakest link (pulse on rise). */
@@ -1779,6 +1784,7 @@ export function grantPromotion(s: SimState, by = 'human:governance'): SimState {
     actor: by,
     human: true,
     fired: 'governed-action',
+    kind: 'authority-change',
     version: `GRANT·A${to}`,
     tier: 'D3',
     rung: `A${to}`,
@@ -1817,6 +1823,7 @@ export function revokeAuthority(s: SimState, reason: string): SimState {
     actor: 'auto:fail-closed',
     human: false,
     fired: 'surveillance',
+    kind: 'authority-change',
     version: `REVOKE·A${to}`,
     tier: 'D1',
     rung: `A${to}`,
@@ -2000,27 +2007,36 @@ export function routeDetection(
  * full detection-replay engine. Returns true iff the entry's stored hash matches the re-derivation.
  */
 export function verifyEntry(s: SimState, seq: number): boolean {
+  return verifyEntryDetail(s, seq)?.ok ?? false;
+}
+
+/**
+ * The DETAILED tamper-evidence re-check for one ledger entry — exposes the numbers that PROVE (or
+ * disprove) integrity so a UI can SHOW the work instead of a bare boolean: the recomputed hash vs the
+ * stored hash, and whether the prior-link into this entry holds. Pure read (no RNG, no seal, no
+ * mutation) → determinism-safe. This is a local integrity re-derivation, NOT a detection-replay.
+ */
+export interface EntryVerifyDetail {
+  seq: number;
+  ok: boolean;
+  prevOk: boolean; // the chain link INTO this entry matches the prior entry's hash
+  recomputed: string; // hex of the hash re-derived from the stored fields
+  stored: string; // hex of the hash actually stored on the entry
+}
+export function verifyEntryDetail(s: SimState, seq: number): EntryVerifyDetail | null {
   const i = s.ledger.findIndex((e) => e.seq === seq);
-  if (i < 0) return false;
+  if (i < 0) return null;
   const e = s.ledger[i];
   const prev = i === 0 ? e.prevHash : s.ledger[i - 1].hash;
-  if (prev !== e.prevHash) return false; // the chain link into this entry must hold
-  const hash = mixHash(prev, [
-    e.seq,
-    e.tick,
-    e.actor,
-    e.human,
-    e.fired,
-    e.version,
-    e.tier,
-    e.rung,
-    e.decision,
-    e.nistFn,
-    e.nistChar,
-    e.oversight,
-    e.reproducible,
-  ]);
-  return hash === e.hash;
+  const prevOk = prev === e.prevHash; // the chain link into this entry must hold
+  const recomputed = mixHash(prev, ledgerHashParts(e));
+  return {
+    seq,
+    ok: prevOk && recomputed === e.hash,
+    prevOk,
+    recomputed: (recomputed >>> 0).toString(16).padStart(8, '0'),
+    stored: (e.hash >>> 0).toString(16).padStart(8, '0'),
+  };
 }
 
 function beginNext(s: SimState, txn: Txn): void {
@@ -2565,21 +2581,12 @@ export function ledgerIntact(s: SimState): boolean {
   if (s.ledger.length === 0) return true;
   let h = s.ledger[0].prevHash;
   for (const e of s.ledger) {
-    const hash = mixHash(h, [
-      e.seq,
-      e.tick,
-      e.actor,
-      e.human,
-      e.fired,
-      e.version,
-      e.tier,
-      e.rung,
-      e.decision,
-      e.nistFn,
-      e.nistChar,
-      e.oversight,
-      e.reproducible,
-    ]);
+    // The STORED link must match the running one. Without this the loop only re-derived hashes and
+    // ignored `e.prevHash` on every row but the first — so `ledger[5].prevHash = 0` left this
+    // returning true while `verifyEntry` on the same row returned false, and `prevHash` is a
+    // displayed field. A chain check that does not check the chain links is a hash check.
+    if (e.prevHash !== h) return false;
+    const hash = mixHash(h, ledgerHashParts(e));
     if (hash !== e.hash) return false;
     h = hash;
   }

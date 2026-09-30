@@ -9,6 +9,7 @@
  * the RHTP registry expects (PLATFORM_TO_FHIR_ID_MAP).
  *
  * ID map (bundle Patient.id → canonical FHIR ID):
+ *   denise-fontaine → patient-denise-fontaine
  *   dorothy-simmons → patient-dorothy-042
  *   james-wilson    → patient-james-087
  *   alex-kirby      → patient-alex-kirby

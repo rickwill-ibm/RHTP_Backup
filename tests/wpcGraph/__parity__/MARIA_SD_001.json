@@ -62,7 +62,7 @@
         "n51",
         "n52"
       ],
-      "hash": "5c64093b"
+      "hash": "c769dfee"
     },
     {
       "panel": "graph.edges",
@@ -167,7 +167,7 @@
       "panel": "graph.story",
       "count": 5,
       "ids": [],
-      "hash": "0c7b8469"
+      "hash": "0ebf81eb"
     },
     {
       "panel": "graph.signals",

@@ -17,7 +17,7 @@ function baseRecord(): EvidenceRecord {
   return createEvidenceRecord({
     id: 'ev-MARIA_SD_001-72148-1730000000000',
     memberId: 'MARIA_SD_001',
-    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154783' },
+    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154782' },
     createdAt: '2026-08-25T00:00:00.000Z',
   });
 }

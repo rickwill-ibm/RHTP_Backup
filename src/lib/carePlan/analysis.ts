@@ -90,6 +90,32 @@ export function identifySpecialties(
   return Array.from(specialties);
 }
 
+/**
+ * The gap's human label, read DEFENSIVELY.
+ *
+ * The care-plan domain names it `measureName`; the patient registry names the same field
+ * `name` (`CareGapEntry`). `/care-plan-monitor/[patientId]` used to hand registry-shaped
+ * objects straight in behind an `as any`, and every keyword read below threw
+ * `Cannot read properties of undefined (reading 'toLowerCase')`, taking the whole route down.
+ * The cast is now gone (see `registryGaps.ts`), but this read stays: a label arriving under
+ * either name, from a registry, a FHIR projection or a fixture, must never crash the engine.
+ *
+ * It is NOT a fail-open default: the label is descriptive text used for keyword detection,
+ * not a status, consent, date or authority value. An unreadable label yields no detections,
+ * which is the same outcome as a gap whose label matches nothing.
+ *
+ * EXPORTED because the SAME unguarded read exists at five more sites in this domain —
+ * templates.ts:82 (`categorizeGap`), builder.ts:264 and :271 (`calculateImpact`),
+ * holistic.ts:154 and :157, and referrals.ts:32. Those files are outside this change's
+ * ownership, so they are reported rather than swept; each is reachable only by a caller that
+ * bypasses `fromRegistryGaps`, and each should read the label through this function.
+ */
+export function gapLabel(gap: { measureName?: unknown; name?: unknown }): string {
+  if (typeof gap.measureName === 'string' && gap.measureName !== '') return gap.measureName;
+  if (typeof gap.name === 'string') return gap.name;
+  return '';
+}
+
 export function detectSDoHNeeds(
   patient: Patient,
   alerts: UtilizationAlert[],
@@ -98,41 +124,28 @@ export function detectSDoHNeeds(
   const needs: string[] = [];
 
   careGaps.forEach((gap) => {
+    const label = gapLabel(gap).toLowerCase();
     const isSocialGap =
-      gap.measureName.toLowerCase().includes('social') ||
-      gap.measureName.toLowerCase().includes('transportation') ||
-      gap.measureName.toLowerCase().includes('childcare') ||
-      gap.measureName.toLowerCase().includes('food') ||
-      gap.measureName.toLowerCase().includes('housing') ||
-      gap.measureName.toLowerCase().includes('wic') ||
-      gap.measureName.toLowerCase().includes('snap') ||
-      gap.measureName.toLowerCase().includes('liheap');
+      label.includes('social') ||
+      label.includes('transportation') ||
+      label.includes('childcare') ||
+      label.includes('food') ||
+      label.includes('housing') ||
+      label.includes('wic') ||
+      label.includes('snap') ||
+      label.includes('liheap');
     if (!isSocialGap) return;
 
-    if (
-      gap.measureName.toLowerCase().includes('transportation') ||
-      gap.measureName.toLowerCase().includes('transport')
-    ) {
+    if (label.includes('transportation') || label.includes('transport')) {
       needs.push(`Transportation barrier: ${gap.notes || 'documented'}`);
     }
-    if (
-      gap.measureName.toLowerCase().includes('childcare') ||
-      gap.measureName.toLowerCase().includes('child care')
-    ) {
+    if (label.includes('childcare') || label.includes('child care')) {
       needs.push(`Childcare support: ${gap.notes || 'subsidy enrollment needed'}`);
     }
-    if (
-      gap.measureName.toLowerCase().includes('wic') ||
-      gap.measureName.toLowerCase().includes('food') ||
-      gap.measureName.toLowerCase().includes('snap')
-    ) {
+    if (label.includes('wic') || label.includes('food') || label.includes('snap')) {
       needs.push(`Food security: ${gap.notes || 'benefit enrollment needed'}`);
     }
-    if (
-      gap.measureName.toLowerCase().includes('housing') ||
-      gap.measureName.toLowerCase().includes('liheap') ||
-      gap.measureName.toLowerCase().includes('utility')
-    ) {
+    if (label.includes('housing') || label.includes('liheap') || label.includes('utility')) {
       needs.push(`Housing/utility support: ${gap.notes || 'assistance needed'}`);
     }
   });
@@ -183,7 +196,7 @@ export function identifyUrgentActions(
 
   careGaps.forEach((gap) => {
     if (gap.status === 'Open' && gap.daysOpen > 60) {
-      urgent.push(`${gap.measureName} overdue by ${gap.daysOpen} days`);
+      urgent.push(`${gapLabel(gap)} overdue by ${gap.daysOpen} days`);
     }
   });
 

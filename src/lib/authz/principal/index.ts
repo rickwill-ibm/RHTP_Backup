@@ -17,7 +17,12 @@ import type { Principal, PrincipalSession, MemberScope, AccessDecision } from '.
 
 export type { Principal, PrincipalSession, MemberScope, AccessDecision, Role } from './types';
 
-const KNOWN_ROLES: readonly Role[] = [
+/**
+ * The runtime role vocabulary — the SINGLE source of truth for role parsing.
+ * Exported so the session layer parses an IdP claim against this list rather than
+ * keeping a second copy that could drift (§5.4, one shape / one source).
+ */
+export const KNOWN_ROLES: readonly Role[] = [
   'member',
   'provider',
   'payer-ops',
@@ -26,6 +31,18 @@ const KNOWN_ROLES: readonly Role[] = [
   'admin',
   'auditor',
 ];
+
+/**
+ * Parse an UNTRUSTED role value — an IdP claim, a field opened out of a session
+ * cookie — into the role vocabulary (§5.3, parse at the boundary). Anything that
+ * is not exactly one known role yields `undefined`; the caller then holds NO role
+ * and must fall back to a fail-closed derivation. This is the one place a string
+ * becomes authority, so it is the one place that decides what a role may be.
+ */
+export function parseRole(value: unknown): Role | undefined {
+  if (typeof value !== 'string') return undefined;
+  return KNOWN_ROLES.find((known) => known === value);
+}
 
 /**
  * Roles whose authorization envelope is a single member (self-access only).
@@ -40,9 +57,19 @@ function isSelfOnlyRole(role: Role): boolean {
  * read the SMART fhirUser resource type (Practitioner => reviewer-class,
  * Patient/RelatedPerson => member). When nothing identifies the caller we fail
  * SECURE and treat them as a self-only member.
+ *
+ * A role the session ASSERTS is authority, so it is parsed, never trusted — and a
+ * present-but-UNRECOGNISED value fails CLOSED to the self-only `member` role
+ * instead of falling through to the fhirUser derivation. The fall-through would
+ * promote a Practitioner session to `pa-reviewer` on the strength of a role string
+ * the vocabulary just rejected, which is a misconfigured claim silently buying
+ * more authority than an absent one.
  */
 function deriveRole(session: PrincipalSession): Role {
-  if (session.role && KNOWN_ROLES.includes(session.role)) return session.role;
+  if (session.role !== undefined && session.role !== null) {
+    const parsed = parseRole(session.role);
+    return parsed === undefined ? 'member' : parsed;
+  }
   const fhirUser = (session.fhirUser ?? '').trim();
   if (fhirUser.startsWith('Practitioner/')) return 'pa-reviewer';
   if (fhirUser.startsWith('Patient/') || fhirUser.startsWith('RelatedPerson/')) {
@@ -143,4 +170,26 @@ export function purposeForRole(role: Role): import('@/lib/authz/guard').Purpose 
     default:
       return 'operations';
   }
+}
+
+/**
+ * References that are PLACEHOLDERS, not a real human of record.
+ *
+ * ONE list, because there were three. `approvalAuthority.isNonIdentity`,
+ * `decisionGate.isNonAutomatedDecider` and `credentialing.assertReviewerQualified` each encoded
+ * `'' | 'session-user' | 'unknown'` as literals, and they did not normalise the same way — one
+ * lowercased first, two did not, so `'Session-User'` was refused by one and accepted by another.
+ * They then produced DIFFERENT refusal codes, and the code is what member appeal rights turn on.
+ *
+ * The wave that fixed "two reviewer-authorization mechanisms disagreeing about the placeholder
+ * identity" shipped a third. This is that, undone.
+ *
+ * `'session-user'` is what `deriveUserId` returns when a session carries no `fhirUser` — a real,
+ * reachable value on the dev path, not a hypothetical.
+ */
+export const PLACEHOLDER_IDENTITIES: ReadonlySet<string> = new Set(['', 'session-user', 'unknown']);
+
+/** Is this reference a placeholder rather than a person? Normalises once, for every caller. */
+export function isPlaceholderIdentity(reference: string | null | undefined): boolean {
+  return PLACEHOLDER_IDENTITIES.has((reference ?? '').trim().toLowerCase());
 }

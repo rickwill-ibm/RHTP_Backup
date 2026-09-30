@@ -1,17 +1,29 @@
 {
-  "_note": "Seeded signal batch for member sde-demo-member. Run through the real engine with disposition-policy.default it MUST yield 5 approved, 3 suppressed, 1 delayed, one coordinated touchpoint. The shape is emergent from policy, not authored here. nowIso is 08:00 UTC — outside the sms window (15-19) so the behavioral sms signal delays.",
+  "_note": "Seeded signal batch for member sde-demo-member. Run through the real engine with disposition-policy.default it MUST yield 7 approved, 3 suppressed, 0 delayed, one coordinated touchpoint. The shape is emergent from policy, not authored here. RE-WALKED in W7.5d from 6/3/1: resolveChannel used to take the signal's taxonomy-default channel BEFORE the member's stated channelPreference, so this member (preference ['portal','sms']) was moved to sms for the behavioral.window signal against their choice and then delayed by the sms quiet-hours window. The delay was an artifact of overriding the member. nowIso is still 08:00 UTC, outside the sms window (15-19) \u2014 the window is unchanged; nothing is routed into it any more. G-052 records that this batch therefore no longer exercises the delay path, and that the fix is a second demo member who prefers sms rather than re-introducing a delay this member should never have had.",
   "memberId": "sde-demo-member",
   "correlationId": "corr-sde-demo-0001",
   "nowIso": "2026-08-22T08:00:00.000Z",
   "memberContext": {
     "memberId": "sde-demo-member",
-    "channelPreference": ["portal", "sms"],
-    "recentlyClosedMeasures": ["EED"],
+    "channelPreference": [
+      "portal",
+      "sms"
+    ],
+    "recentlyClosedMeasures": [
+      "EED"
+    ],
     "contactHistory": [],
-    "consentScopesGranted": ["care-outreach"],
+    "consentScopesGranted": [
+      "care-outreach"
+    ],
     "recentEdWithinHours": 12
   },
-  "authoredSummary": { "approved": 5, "suppressed": 3, "delayed": 1, "touchpoints": 1 },
+  "authoredSummary": {
+    "approved": 7,
+    "suppressed": 3,
+    "delayed": 0,
+    "touchpoints": 1
+  },
   "signals": [
     {
       "signalId": "sig-1",
@@ -26,7 +38,9 @@
       "measure": "GSD",
       "part2Restricted": false,
       "sequence": 1,
-      "refs": { "gap": "CareGap/gsd-2026" }
+      "refs": {
+        "gap": "CareGap/gsd-2026"
+      }
     },
     {
       "signalId": "sig-2",
@@ -39,7 +53,9 @@
       "channel": "task",
       "part2Restricted": false,
       "sequence": 2,
-      "refs": { "encounter": "Encounter/enc-77" }
+      "refs": {
+        "encounter": "Encounter/enc-77"
+      }
     },
     {
       "signalId": "sig-3",
@@ -52,7 +68,9 @@
       "channel": "task",
       "part2Restricted": false,
       "sequence": 3,
-      "refs": { "instrument": "PRAPARE" }
+      "refs": {
+        "instrument": "PRAPARE"
+      }
     },
     {
       "signalId": "sig-4",
@@ -65,7 +83,9 @@
       "channel": "task",
       "part2Restricted": false,
       "sequence": 4,
-      "refs": { "referral": "ServiceRequest/ref-12" }
+      "refs": {
+        "referral": "ServiceRequest/ref-12"
+      }
     },
     {
       "signalId": "sig-5",
@@ -78,7 +98,9 @@
       "channel": "task",
       "part2Restricted": false,
       "sequence": 5,
-      "refs": { "claim": "Claim/clm-9" }
+      "refs": {
+        "claim": "Claim/clm-9"
+      }
     },
     {
       "signalId": "sig-6",
@@ -93,7 +115,9 @@
       "measure": "GSD",
       "part2Restricted": false,
       "sequence": 6,
-      "refs": { "gap": "CareGap/gsd-2026-dup" }
+      "refs": {
+        "gap": "CareGap/gsd-2026-dup"
+      }
     },
     {
       "signalId": "sig-7",
@@ -108,7 +132,9 @@
       "measure": "EPDS",
       "part2Restricted": false,
       "sequence": 7,
-      "refs": { "instrument": "EPDS" }
+      "refs": {
+        "instrument": "EPDS"
+      }
     },
     {
       "signalId": "sig-8",
@@ -123,7 +149,9 @@
       "measure": "EED",
       "part2Restricted": false,
       "sequence": 8,
-      "refs": { "gap": "CareGap/eed-2026" }
+      "refs": {
+        "gap": "CareGap/eed-2026"
+      }
     },
     {
       "signalId": "sig-9",
@@ -137,7 +165,26 @@
       "consentScope": "care-outreach",
       "part2Restricted": false,
       "sequence": 9,
-      "refs": { "channel": "sms" }
+      "refs": {
+        "channel": "sms"
+      }
+    },
+    {
+      "signalId": "sig-10",
+      "kind": "care-gap.opened",
+      "sourceEventType": "sud.treatment.engagement-lapsed",
+      "occurredAtIso": "2026-08-22T07:55:00.000Z",
+      "priority": "high",
+      "actionability": "member-outreach",
+      "foldBehavior": "windowed",
+      "channel": "portal",
+      "consentScope": "care-outreach",
+      "measure": "IET",
+      "part2Restricted": true,
+      "sequence": 10,
+      "refs": {
+        "gap": "CareGap/iet-2026"
+      }
     }
   ]
 }

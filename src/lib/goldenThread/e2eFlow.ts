@@ -25,6 +25,7 @@
  * barrel, no node built-ins. Outbound comms are channel:'mock' — never transmitted.
  */
 import { permittedRung, AUTONOMY_RUNG } from '@/lib/agents/governance/interlock';
+import { effectiveAutonomy, type EffectiveAutonomy } from '@/lib/goldenThread/nistMap';
 import {
   isAdverseCoverageAction,
   isSubmissionActionType,
@@ -51,14 +52,8 @@ export const LANE_LABEL: Record<Lane, string> = {
 export type EmrSource = 'Epic' | 'Cerner (Oracle Health)';
 
 // ── Twin-Ladder verdict (computed by the REAL interlock) ─────────────────────────
-export type Autonomy = 'assist' | 'HITL' | 'HOTL' | 'autonomous';
-/** Map an authority rung to the operations autonomy label. */
-const RUNG_AUTONOMY: Record<AuthorityRung, Autonomy> = {
-  A0: 'assist',
-  A1: 'HITL',
-  A2: 'HOTL',
-  A3: 'autonomous',
-};
+/** The operations autonomy label. Re-exported from the ONE rung→label map (nistMap). */
+export type Autonomy = EffectiveAutonomy;
 
 /**
  * Does this governed action require a qualified human? Derived from the SAME two predicates
@@ -113,7 +108,7 @@ export function verdict(
     evidenceTier,
     manifestTier,
     permittedRung: rung,
-    autonomy: RUNG_AUTONOMY[rung],
+    autonomy: effectiveAutonomy(rung),
     cappedByEvidence,
     requiresHuman,
     reason,
@@ -514,10 +509,10 @@ export const TICKETS: OpsTicket[] = [
       'Approval-rate ratio is 59% (FQHC cohort) ÷ 78% (peer cohort) = 0.756, below the four-fifths (0.80) adverse-impact screen — stated on favorable (approval) rates, the correct basis, not on the raw denial %.',
       'This is an adverse-impact SIGNAL under ACA §1557 (Medicaid coverage), not the EEOC employment rule; the cohort is behavioral-health-skewed, so an MHPAEA NQTL parity review is also indicated.',
       'It is only a signal until case-mix / acuity risk-adjustment is applied — the disparate-impact label does not attach before confounder control. The surveillance layer surfaces the pattern; it reverses no individual determination.',
-      'Distinguish the denial class first: administrative denials may auto-deny, but a medical-necessity denial requires a qualified physician decider at the point of denial (42 CFR 438.210(b)(3)). "MD review before further denials" concedes the prior BH denials may have lacked a clinician decider — the likely root cause; re-review against BH criteria (ASAM / LOCUS-CALOCUS or the plan\'s).',
+      'Distinguish the denial class first: administrative denials may auto-deny, but a medical-necessity denial must be made by an individual with appropriate expertise in the enrollee\'s medical, BEHAVIORAL HEALTH, or LTSS needs (42 CFR 438.210(b)(3), quoted — the rule does not say "physician", and reading it that way is itself an error in a BH cohort, where the appropriate peer is often a licensed BH clinician rather than an MD). "Clinical review before further denials" concedes the prior BH denials may have lacked a qualified decider — the likely root cause; re-review against BH criteria (ASAM / LOCUS-CALOCUS or the plan\'s).',
     ],
     recommendation:
-      'Medical-director review before further auto-denials in this cohort; run the risk-adjusted re-analysis. If denials were improper: reprocess the wrongly-denied claims and issue each member a Notice of Adverse Benefit Determination with appeal / State fair-hearing rights (42 CFR 438 Subpart F), plus a Medicaid MCO parity analysis (42 CFR 438 Subpart K; §1557 via 45 CFR Part 92). Suspending the auto-deny rule is a human governance action — not an agent button. If SUD records are in scope, apply 42 CFR Part 2 consent/segmentation before surfacing member-level detail. Exposure is regulatory + reprocessing, not a single $ figure.',
+      'Qualified clinical review (medical director, or a BH peer where the cohort is BH) before further auto-denials in this cohort; run the risk-adjusted re-analysis. If denials were improper: reprocess the wrongly-denied claims and issue each member a Notice of Adverse Benefit Determination with appeal / State fair-hearing rights (42 CFR 438 Subpart F), plus a Medicaid MCO parity analysis (42 CFR 438 Subpart K; §1557 via 45 CFR Part 92). Suspending the auto-deny rule is a human governance action — not an agent button. If SUD records are in scope, apply 42 CFR Part 2 consent/segmentation before surfacing member-level detail. Exposure is regulatory + reprocessing, not a single $ figure.',
     verdict: verdict('HITL', 'D1', { actionType: 'provider-notice', adverse: true }),
     outbound: [
       outbound('ob-notice', 'Notice of review (provider)', 'provider-notice', 'letter (mock)'),

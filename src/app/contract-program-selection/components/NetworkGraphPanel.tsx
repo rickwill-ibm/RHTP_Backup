@@ -12,7 +12,7 @@ const NODES_BY_PROGRAM: Record<ProgramType, typeof CLINICAL_NODES> = {} as any;
 const CLINICAL_NODES = [
   {
     id: 'state',
-    label: 'SD DHSS',
+    label: 'State HHS Agency',
     sub: 'State Medicaid Agency',
     x: 50,
     y: 10,
@@ -38,7 +38,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'fqhc1',
-    label: 'Bennett Co. HC',
+    label: 'Prairie Health Ctr',
     sub: 'CAH · 8,420 pts',
     x: 10,
     y: 68,
@@ -51,7 +51,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'fqhc2',
-    label: 'Winner FQHC',
+    label: 'Riverbend FQHC',
     sub: 'FQHC · 5,640 pts',
     x: 30,
     y: 72,
@@ -64,7 +64,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'hosp1',
-    label: 'Winner Regional',
+    label: 'Cedar Bluff Regional',
     sub: 'Rural Hospital',
     x: 50,
     y: 75,
@@ -77,7 +77,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'hosp2',
-    label: 'Avera Sacred Hrt',
+    label: 'Cedar Valley CAH',
     sub: 'Critical Access',
     x: 68,
     y: 72,
@@ -90,7 +90,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'pcp1',
-    label: 'Oglala Lakota PCP',
+    label: 'Badlands PCP',
     sub: 'PCP · 3,100 pts',
     x: 85,
     y: 65,
@@ -103,7 +103,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'spec1',
-    label: 'Monument Cardio',
+    label: 'Summit Cardio',
     sub: 'Specialist',
     x: 20,
     y: 90,
@@ -116,7 +116,7 @@ const CLINICAL_NODES = [
   },
   {
     id: 'spec2',
-    label: 'Avera Specialists',
+    label: 'Cedar Valley Spec',
     sub: 'Specialist',
     x: 78,
     y: 88,
@@ -132,7 +132,7 @@ const CLINICAL_NODES = [
 const BH_NODES = [
   {
     id: 'state',
-    label: 'SD DHSS',
+    label: 'State HHS Agency',
     sub: 'BH Block Grant',
     x: 50,
     y: 10,
@@ -158,7 +158,7 @@ const BH_NODES = [
   },
   {
     id: 'bh1',
-    label: 'Avera BH Svcs',
+    label: 'Cedar Valley BH',
     sub: 'CCBHC · 1,840 pts',
     x: 15,
     y: 68,
@@ -171,7 +171,7 @@ const BH_NODES = [
   },
   {
     id: 'bh2',
-    label: 'Rapid City BHC',
+    label: 'Highland BHC',
     sub: 'Crisis Center',
     x: 35,
     y: 72,
@@ -184,7 +184,7 @@ const BH_NODES = [
   },
   {
     id: 'bh3',
-    label: 'Rosebud BH Prog',
+    label: 'Tribal BH Program',
     sub: 'Tribal BH · 920 pts',
     x: 55,
     y: 75,
@@ -197,7 +197,7 @@ const BH_NODES = [
   },
   {
     id: 'bh4',
-    label: 'Sioux Falls CSU',
+    label: 'Metro CSU',
     sub: 'Community Stabilization',
     x: 75,
     y: 70,
@@ -210,7 +210,7 @@ const BH_NODES = [
   },
   {
     id: 'bh5',
-    label: 'SD Crisis Line',
+    label: 'State Crisis Line',
     sub: '988 Network Partner',
     x: 45,
     y: 90,
@@ -226,7 +226,7 @@ const BH_NODES = [
 const SOCIAL_NODES = [
   {
     id: 'state',
-    label: 'SD DHSS',
+    label: 'State HHS Agency',
     sub: 'Social Needs Nav',
     x: 50,
     y: 10,
@@ -265,7 +265,7 @@ const SOCIAL_NODES = [
   },
   {
     id: 'cbo2',
-    label: 'SD Housing Auth',
+    label: 'State Housing Agy',
     sub: 'Housing Nav · 840 pts',
     x: 35,
     y: 72,
@@ -278,7 +278,7 @@ const SOCIAL_NODES = [
   },
   {
     id: 'cbo3',
-    label: 'Lakota Outreach',
+    label: 'Frontier Outreach',
     sub: 'CHW Program · 1,240 pts',
     x: 55,
     y: 68,
@@ -291,7 +291,7 @@ const SOCIAL_NODES = [
   },
   {
     id: 'cbo4',
-    label: 'Rides to Wellness',
+    label: 'Rides to Care',
     sub: 'Transport Benefit',
     x: 75,
     y: 72,
@@ -304,7 +304,7 @@ const SOCIAL_NODES = [
   },
   {
     id: 'cbo5',
-    label: 'SD Legal Aid',
+    label: 'Regional Legal Aid',
     sub: 'Benefits Navigation',
     x: 30,
     y: 90,
@@ -317,7 +317,7 @@ const SOCIAL_NODES = [
   },
   {
     id: 'cbo6',
-    label: 'SD SNAP Office',
+    label: 'State SNAP Office',
     sub: 'Food Assistance',
     x: 68,
     y: 90,

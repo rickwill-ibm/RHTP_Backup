@@ -658,7 +658,7 @@ export default function PortfolioScaleScreen() {
                             fontStyle: 'italic',
                           }}
                         >
-                          "{item.q}"
+                          &quot;{item.q}&quot;
                         </p>
                       </div>
                     ))}

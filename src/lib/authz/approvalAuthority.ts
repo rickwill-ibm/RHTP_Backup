@@ -24,7 +24,7 @@
  *
  * Pure and unit-testable apart from the swappable resolver: no I/O, no cookies.
  */
-import type { Principal, Role } from '@/lib/authz/principal';
+import { isPlaceholderIdentity, type Principal, type Role } from '@/lib/authz/principal';
 
 /**
  * Roles permitted to be the human of record on a PA submission. A clinical PA
@@ -60,7 +60,7 @@ const DEMO_REVIEWERS: Readonly<Record<string, ApproverIdentity>> = Object.freeze
   'Practitioner/dev': {
     reference: 'Practitioner/dev',
     display: 'Dr. Alex Rivera, UM Reviewer',
-    npi: '1730154783',
+    npi: '1730154782',
   },
 });
 
@@ -89,11 +89,8 @@ export function setApproverIdentityResolver(fn: ApproverIdentityResolver | null)
   resolver = fn ?? demoResolver;
 }
 
-/** References that are placeholders, not a real human of record. */
-function isNonIdentity(reference: string): boolean {
-  const r = (reference ?? '').trim();
-  return r === '' || r === 'session-user' || r === 'unknown';
-}
+/** References that are placeholders, not a real human of record. Single-sourced (see principal). */
+const isNonIdentity = isPlaceholderIdentity;
 
 export interface ApprovalDecision {
   /** Whether the acting principal is a resolvable, role-authorized reviewer of record. */

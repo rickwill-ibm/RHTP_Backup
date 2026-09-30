@@ -39,6 +39,18 @@ export interface TaxonomyEntry {
   defaultChannel?: Channel;
   /** Consent purpose a resulting member touchpoint requires (checked at act time). */
   consentScope?: string;
+  /**
+   * The data classes a signal of this type carries AT MINIMUM.
+   *
+   * A FLOOR, deliberately — not the authoritative class. The regime that governs
+   * a record attaches to its PROVENANCE, not to the event kind: the same EPDS
+   * result is 42 CFR Part 2 material from an OASAS-licensed program, NY MHL
+   * §33.13 material from an OMH-licensed clinic, and ordinary PHI from an OB
+   * practice. Making the taxonomy authoritative would freeze the regime as a
+   * compile-time constant of the vocabulary and make per-record segmentation
+   * structurally impossible. Provenance may only ESCALATE this, never reduce it.
+   */
+  dataClassFloor?: string[];
   /** Idempotent-intake dedupe key template, e.g. "care-gap:{memberId}:{measure}". */
   dedupeKeyTemplate: string;
   /** How long an undispositioned signal stays actionable (hours). */
@@ -167,6 +179,20 @@ export interface DispositionBatch {
   touchpoints: Touchpoint[];
   delayBundles: DelayBundle[];
   summary: DispositionSummary;
+  /**
+   * 45 CFR 92.210(b) — the identified inputs whose MITIGATION REVIEW is out of date as at this fold.
+   *
+   * Present and empty on a healthy fold. Non-empty means the ongoing duty has lapsed for those
+   * inputs, and the fold is DEMOTED: it still produces dispositions, and the caller is expected to
+   * route them through the human gate rather than act on them unreviewed.
+   *
+   * Demotion rather than refusal, deliberately. Failing closed on a stale review would stop the
+   * platform on a calendar date — the bug this programme already had to fix in the credentialing
+   * seed — and "ongoing duty" is satisfied by a live cadence with an escalation on breach, not by a
+   * binary. It is certainly not satisfied by a function that returns a list nobody reads, which is
+   * what this was until it was wired here.
+   */
+  fairnessDemotion: { staleFields: string[]; asOfMs: number };
 }
 
 /** Per-member context the engine reads (from person-context / consent domains). */

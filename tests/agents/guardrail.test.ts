@@ -8,7 +8,11 @@ import {
 } from '@/lib/agentRuntime';
 import { proposingWorkflow, waitFor, flush } from './helpers';
 
-const SUBMIT_PA: ProposedAction = { actionType: 'submit-pa', priority: 'high', refs: { thread: 'th-1' } };
+const SUBMIT_PA: ProposedAction = {
+  actionType: 'submit-pa',
+  priority: 'high',
+  refs: { thread: 'th-1' },
+};
 
 describe('AI guardrail: the runtime never sets an authoritative state', () => {
   it('an HITL PA proposal cannot execute without a human approval (the state machine gates)', async () => {
@@ -21,7 +25,7 @@ describe('AI guardrail: the runtime never sets an authoritative state', () => {
     await flush();
     // No amount of waiting produces an executed action: the runtime only PROPOSES.
     expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     expect(eventSink.ofType('agent.task.proposed')).toHaveLength(1);
   });
 
@@ -46,7 +50,7 @@ describe('AI guardrail: the runtime never sets an authoritative state', () => {
         occurredAtMs: 0,
         correlationId: 'c',
         proposalId: 'p',
-      }),
+      })
     ).toThrow(UnallowedAgentEventError);
     await expect(
       sink.emit({
@@ -58,7 +62,7 @@ describe('AI guardrail: the runtime never sets an authoritative state', () => {
         occurredAtMs: 0,
         correlationId: 'c',
         payload: {},
-      }),
+      })
     ).rejects.toBeInstanceOf(UnallowedAgentEventError);
   });
 });

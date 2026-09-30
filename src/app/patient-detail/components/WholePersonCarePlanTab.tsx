@@ -291,7 +291,7 @@ function UpdatePlanModal({ onClose, patientId }: { onClose: () => void; patientI
                 <label className={labelCls}>Which goal?</label>
                 <div className="space-y-2">
                   {filteredGoals.map((g, i) => {
-                    const sc = STATUS_CONFIG[g.status];
+                    const sc = STATUS_CONFIG[g.status] ?? STATUS_CONFIG['open'];
                     return (
                       <label
                         key={i}
@@ -788,7 +788,7 @@ export default function WholePersonCarePlanTab() {
             </div>
             <div className="divide-y divide-carbon-gray-10">
               {domain.goals.map((goal, gi) => {
-                const sc = STATUS_CONFIG[goal.status];
+                const sc = STATUS_CONFIG[goal.status] ?? STATUS_CONFIG['open'];
                 return (
                   <div key={gi} className="p-4">
                     <div className="flex items-start gap-3 flex-wrap mb-2">

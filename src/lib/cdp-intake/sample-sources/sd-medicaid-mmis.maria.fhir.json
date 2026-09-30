@@ -7,7 +7,7 @@
         "resourceType": "Patient",
         "id": "pat-maria-001",
         "identifier": [
-          { "system": "https://medicaid.sd.gov/mmis", "value": "SD-MEDICAID-88213" },
+          { "system": "https://medicaid.state.example.org/mmis", "value": "SD-MEDICAID-88213" },
           { "system": "urn:bennett-county-ehr:mrn", "value": "MARIA_SD_001" }
         ],
         "name": [{ "family": "Redhawk", "given": ["Maria"] }],

@@ -14,7 +14,7 @@ import { describe, it, expect } from 'vitest';
 import { createOutreachWorkflow, type OutreachTask } from '@/lib/agents/outreach';
 import { createReferralWorkflow, type ReferralTask } from '@/lib/agents/referral';
 import type { MemberContext, Touchpoint } from '@/lib/sde';
-import { createRuntime, waitFor, flush, HOUR } from './helpers';
+import { createRuntime, waitFor, flush, HOUR, disclosedForTest } from './helpers';
 
 const TOUCHPOINT: Touchpoint = {
   touchpointId: 'tp-g',
@@ -24,7 +24,7 @@ const TOUCHPOINT: Touchpoint = {
 };
 const GRANTED: MemberContext = { memberId: 'm1', consentScopesGranted: ['care-outreach'] };
 const OUTREACH_TASK: OutreachTask = {
-  touchpoint: TOUCHPOINT,
+  touchpoint: disclosedForTest(TOUCHPOINT),
   memberContext: GRANTED,
   consentScope: 'care-outreach',
   priority: 'high',
@@ -48,18 +48,25 @@ describe('AI guardrail: outreach cannot send without a human approval', () => {
     const { engine, eventSink } = createRuntime();
     const handle = engine.start(wf, { memberId: 'm1', input: OUTREACH_TASK });
 
-    await waitFor(() => engine.query(handle.workflowId)?.status === 'waiting-decision', 'suspended');
+    await waitFor(
+      () => engine.query(handle.workflowId)?.status === 'waiting-decision',
+      'suspended'
+    );
     // Suspended at the HITL gate: proposed, but no authoritative effect.
+    // `agent.task.executed` was REMOVED in W8 (register G-002) — it fired at APPROVAL time for an
+    // effect the engine never performed. `agent.task.settled` fires when the workflow actually
+    // settles, so "no settled" is the same claim made honestly: this workflow has not finished.
+    // `sent` stays the real effect assertion — it is the only thing that can prove nothing went out.
     expect(eventSink.ofType('agent.task.proposed')).toHaveLength(1);
     expect(sent).toHaveLength(0);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
 
     // Let a large amount of virtual time pass with NO human signal. A HITL agent
     // must not auto-approve on time — it may only escalate; it never sends.
     await engine.advanceTime(240 * HOUR);
     await flush();
     expect(sent).toHaveLength(0);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');
   });
 });
@@ -69,14 +76,18 @@ describe('AI guardrail: referral cannot execute without a human approval', () =>
     const { engine, eventSink } = createRuntime();
     const handle = engine.start(createReferralWorkflow(), { memberId: 'm2', input: REFERRAL_TASK });
 
-    await waitFor(() => engine.query(handle.workflowId)?.status === 'waiting-decision', 'suspended');
+    await waitFor(
+      () => engine.query(handle.workflowId)?.status === 'waiting-decision',
+      'suspended'
+    );
     expect(eventSink.ofType('agent.task.proposed')).toHaveLength(1);
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
 
-    // Walk well past every SLA hop into the park: still no executed, still waiting.
+    // Walk well past every SLA hop: still unsettled, still waiting. Time escalates a HITL
+    // proposal; it never decides one.
     await engine.advanceTime(240 * HOUR);
     await flush();
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     // Escalation (not execution) is the only thing time produces for a HITL agent.
     expect(eventSink.ofType('agent.task.escalated').length).toBeGreaterThan(0);
     expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');

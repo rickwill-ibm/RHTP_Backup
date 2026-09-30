@@ -29,10 +29,16 @@ describe('Input validators', () => {
     expect(validateOrderCode(42).ok).toBe(false);
   });
   it('validates NPI (optional, else 10 digits)', () => {
-    expect(validateNpi(undefined).ok).toBe(true);
-    expect(validateNpi('1730154783').ok).toBe(true);
+    expect(validateNpi(undefined).ok).toBe(true); // optional
+    expect(validateNpi('1730154782').ok).toBe(true);
     expect(validateNpi('abc').ok).toBe(false);
     expect(validateNpi('123').ok).toBe(false);
+    // THE ASSERTION THAT WAS MISSING, and whose absence let a check-digit-invalid NPI sit in 26
+    // files under a green test. This validator was `/^\d{10}$/`, so it passed ten of any digits —
+    // including '1730154783', the demo reviewer of record, whose real check digit is 2. It now
+    // delegates to the one NPPES 80840-Luhn implementation, and this is the case that proves it.
+    expect(validateNpi('1730154783').ok).toBe(false); // same digits, wrong check digit
+    expect(validateNpi('0000000000').ok).toBe(false); // ten digits, not an NPI
   });
   it('validates patientId characters', () => {
     expect(validatePatientId('MARIA_SD_001').ok).toBe(true);

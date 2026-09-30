@@ -24,6 +24,7 @@ vi.mock('@/lib/fhir/store', () => ({
       'patient-robert-103',
       'patient-lisa-156',
       'patient-alex-kirby',
+      'patient-denise-fontaine',
     ]);
     return known.has(id) ? { resourceType: 'Patient', id } : undefined;
   },
@@ -90,6 +91,13 @@ const PATIENTS = [
     platformId: 'PAT-0200',
     mrn: null,
     uuid: '6a5fdc1a-d700-4d69-9ddd-3569543bda5b',
+  },
+  {
+    name: 'Denise Fontaine',
+    fhirId: 'patient-denise-fontaine',
+    platformId: 'DENISE_NY_001',
+    mrn: 'NY-882104',
+    uuid: null,
   },
 ];
 

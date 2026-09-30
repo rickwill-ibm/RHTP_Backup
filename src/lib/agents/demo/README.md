@@ -10,7 +10,7 @@ const { actions, mode } = await getAgentDemoActions(); // resolves getDataMode('
   ([`authored-agent-actions.json`](./authored-agent-actions.json)); the hardcoded
   demo stays green.
 - `production` — `runRealAgentDemo()` runs the real agents over the seeded SDE
-  demo batch (SDE → dispatcher → agents → HITL auto-approved → executed) and
+  demo batch (SDE → dispatcher → agents → HITL auto-approved → settled) and
   projects the emergent actions.
 
 The authored list is kept at **parity** with the emergent output (authored ==

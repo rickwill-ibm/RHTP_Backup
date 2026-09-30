@@ -144,6 +144,7 @@ export function groupByQueue(items: WorkItem[]): Record<QueueName, WorkItem[]> {
     'more-info': [],
     'agent-proposal': [],
     escalated: [],
+    parked: [],
   };
   for (const it of items) groups[it.queue].push(it);
   return groups;

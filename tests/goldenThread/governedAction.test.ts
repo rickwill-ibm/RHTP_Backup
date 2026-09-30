@@ -3,12 +3,14 @@
  *
  * Proves the runner COMPOSES (never re-derives): the rung + human requirement via
  * `evaluateInterlock` (NOT hardcoded), the qualified-human gate via
- * `isQualifiedHumanDecision`, the MOCK X12/appeal transmission via the fail-closed
+ * `isNonAutomatedDecider`, the MOCK X12/appeal transmission via the fail-closed
  * `submissionGateway` seam, and the ticket via the Wave-7 `routeEscalation`. Covers the
  * qualified-human gate (no auto-execute of a payer-facing X12 without a qualified human),
  * the exactly-once id-idempotent lifecycle, the interlock-derived rung, the HOTL
  * auto-proceed / veto semantics, PHI-safe ticket routing, and determinism.
  */
+import { assertReviewerQualified, SEED_EPOCH_MS } from '@/lib/authz/credentialing';
+import { assertExecutionAuthorised } from '@/lib/goldenThread/executionAuthority';
 import { describe, it, expect } from 'vitest';
 import {
   createEvidenceRecord,
@@ -77,7 +79,35 @@ function human(decision: 'approved' | 'rejected', decidedBy = 'Practitioner/rev-
   return { decision, decidedBy, proposalId: 'p', decidedAtMs: Date.parse(NOW) };
 }
 
+/**
+ * A real proof, through the production door. `runGovernedAction` refuses to EXECUTE without one
+ * (adversarial-AFTER HIGH-4: it was a full parallel resolution path, exported and unguarded, whose
+ * only caller happened to qualify first).
+ */
+const proofFor = (reviewerRef: string) => {
+  // An unqualified decider gets NO proof — which is the state those tests are about: the interlock
+  // refuses to resolve, so the action is surfaced as `proposed` and never reaches the bind.
+  try {
+    return mintProof(reviewerRef);
+  } catch {
+    return undefined;
+  }
+};
+
+const mintProof = (reviewerRef: string) =>
+  assertReviewerQualified(
+    reviewerRef,
+    {
+      kind: 'initial-determination',
+      determinationClass: 'administrative',
+      needDomain: 'medical',
+      licenceJurisdiction: 'NY',
+    },
+    SEED_EPOCH_MS
+  );
+
 function ctx(over: Partial<GovernedActionContext> = {}): GovernedActionContext {
+  const decision = over.decision;
   return {
     now: NOW,
     manifestTier: 'HITL' as AutonomyTier,
@@ -85,6 +115,7 @@ function ctx(over: Partial<GovernedActionContext> = {}): GovernedActionContext {
     policies: loadEscalationPolicies(),
     escalationPolicyRef: 'default',
     gateway: GATEWAY,
+    reviewer: decision ? proofFor(decision.decidedBy) : undefined,
     ...over,
   };
 }
@@ -422,5 +453,39 @@ describe('runGovernedAction — PHI-safe ticket routing + determinism', () => {
     expect(outB.refs.claimId).toBe('claimB');
     expect(outA.refs.remittanceId).toBe('remA');
     expect(outB.refs.remittanceId).toBe('remB');
+  });
+});
+
+describe('assertExecutionAuthorised — the execution bind (HIGH-4)', () => {
+  const decision = human('approved', 'Practitioner/rev-1');
+
+  it('permits an execution with no human decision — an auto-proceed has no reviewer to name', () => {
+    // A HOTL non-submission action auto-proceeds under the interlock. Demanding a proof of a human
+    // there would be demanding a receipt for something that did not happen.
+    expect(() => assertExecutionAuthorised(null, undefined)).not.toThrow();
+  });
+
+  it('REFUSES a human-decided execution with no proof — the hole this closes', () => {
+    // `runGovernedAction` accepts a HumanDecision, executes a payer-facing submission on it, and
+    // writes `decidedBy` into the durable ledger. Its one caller qualified first; the exported
+    // function did not, and matched no marker of the gate that exists to catch that.
+    expect(() => assertExecutionAuthorised(decision, undefined)).toThrow(/QualifiedReviewer proof/);
+  });
+
+  it('REFUSES a CAST object — the brand is erased at runtime, the WeakSet is not', () => {
+    const forged = { reviewerRef: 'Practitioner/rev-1', verdict: {} } as never;
+    expect(() => assertExecutionAuthorised(decision, forged)).toThrow(/QualifiedReviewer proof/);
+  });
+
+  it('REFUSES a proof that names someone other than the decider on the record', () => {
+    expect(() => assertExecutionAuthorised(decision, mintProof('Practitioner/dev'))).toThrow(
+      /does not name the decider/
+    );
+  });
+
+  it('permits a matching minted proof — the bind is not refusing everything', () => {
+    expect(() =>
+      assertExecutionAuthorised(decision, mintProof('Practitioner/rev-1'))
+    ).not.toThrow();
   });
 });

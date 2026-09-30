@@ -12,6 +12,7 @@ import { PatientContextProvider } from '@/lib/patientContext';
 import { useDemoStore } from '@/uhg/store/demoStore';
 import { useAppContext } from '@/lib/appContext';
 import { getPatientSync } from '@/lib/services/patientService';
+import MemberScopeNotice from '@/components/wpc/MemberScopeNotice';
 
 // Map mockData patient IDs → registry platform IDs
 const MOCK_ID_TO_PLATFORM_ID: Record<string, string> = {
@@ -26,6 +27,9 @@ const MOCK_ID_TO_PLATFORM_ID: Record<string, string> = {
   'PAT-0103': 'PAT-0103',
   'patient-004': 'PAT-0156',
   'PAT-0156': 'PAT-0156',
+  'patient-denise-fontaine': 'DENISE_NY_001',
+  'patient/denise-fontaine': 'DENISE_NY_001',
+  DENISE_NY_001: 'DENISE_NY_001',
 };
 
 function PatientDetailContent() {
@@ -54,22 +58,41 @@ function PatientDetailContent() {
   }, [seedId]);
 
   // Render from the store — the switcher's target. URL is a seed, never a 2nd source.
-  // Prefer the fresh URL seed over the (possibly stale, pre-effect) store value on
-  // the very first paint after navigation — the effect above will sync the store to
-  // match seedId a moment later anyway, so this just removes the one-paint window
-  // where the OLD patient's data would otherwise flash/stick before the sync lands.
-  const resolvedId = seedId || activeCitizenId || 'MARIA_SD_001';
+  // No literal default. `demoStore` already initialises `activeCitizenId`, so the old
+  // `|| 'MARIA_SD_001'` never fired — it only made the default look like this screen's.
+  const resolvedId = activeCitizenId || seedId;
 
-  // Look up patient from registry — works for any patient, not just Maria
+  // FAIL CLOSED on an unresolvable member, through the seam that already exists for exactly
+  // this — `useActiveCitizen`'s `status` and `MemberScopeNotice`, both shipped and used by
+  // three other screens. This screen never adopted them, so an id outside the 5-member
+  // registry fell through to `defaultMariaState` and rendered one real member's MRN, DOB,
+  // RAF and BH risk under another member's name. Guarded at the ROUTE, before the provider
+  // mounts: a nullable context would push optional chaining through ~97 dereferences in six
+  // consumers, four of them ratcheted, and a screen of dashes is a new fail-open.
+  // Measurements, affected nav sources and the rejected designs: gap register G-032.
   const registryPatient = getPatientSync(resolvedId);
+  const unresolved = resolvedId.length === 0 || !registryPatient;
 
-  // Derive display values from registry (falls back gracefully if patient not in registry)
-  const patientName = registryPatient?.name ?? 'Maria Redhawk';
-  const rafScore = registryPatient?.rafScore?.toFixed(2) ?? '0.82';
-  const riskLabel = registryPatient?.riskLabel ?? 'MODERATE';
-  const contract = registryPatient?.contract ?? 'Medicaid RHTP Track 3';
-  const hccCount = registryPatient?.hccSuspects ?? 1;
+  const patientName = registryPatient?.name ?? '';
+  const rafScore = registryPatient?.rafScore?.toFixed(2) ?? '';
+  const riskLabel = registryPatient?.riskLabel ?? '';
+  const contract = registryPatient?.contract ?? '';
+  const hccCount = registryPatient?.hccSuspects ?? 0;
   const hccWarning = `⚠ ${hccCount} HCC suspect${hccCount !== 1 ? 's' : ''} require clinician review before Jun 30`;
+
+  if (unresolved) {
+    // The identifier is rendered, not laundered into a plausible name: an operator needs to
+    // see WHICH id did not resolve, because an unresolvable member on a task row is a
+    // referential-integrity break in the task store, not a cosmetic gap.
+    return (
+      <MemberScopeNotice
+        theme="light"
+        name={resolvedId.length > 0 ? `${resolvedId} (unresolved)` : 'No member in scope'}
+        id={resolvedId.length > 0 ? resolvedId : '—'}
+        view="Citizen Detail"
+      />
+    );
+  }
 
   return (
     <PatientContextProvider patientId={resolvedId}>

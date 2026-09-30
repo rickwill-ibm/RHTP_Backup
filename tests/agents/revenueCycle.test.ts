@@ -7,7 +7,7 @@
  *        interlock-permitted rung, BEFORE the proposeAndWait suspension;
  *  (ii)  an `agent-proposal` work item lands in the inbox + `agent.task.proposed`
  *        is emitted once;
- *  (iii) no `agent.task.executed`, and the workflow stays SUSPENDED — time never
+ *  (iii) no `agent.task.settled`, and the workflow stays SUSPENDED — time never
  *        auto-approves a HITL proposal; AND submitAppeal is NOT invoked pre-decision
  *        (spy count 0 at suspension, even after advanceTime);
  *  (iv)  least-privilege: a variant using the still-forbidden `claim.submit` tool
@@ -17,7 +17,7 @@
  *  (vii) a qualified-human APPROVE → the agent runs `claim.submit-appeal` exactly once
  *        and returns outcome:'submitted' + the submissionRef;
  *  (viii)a `system` / `autonomy:*` decider is BLOCKED — the workflow throws
- *        (isQualifiedHumanDecision) and submitAppeal is NEVER called (no auto-submit
+ *        (isNonAutomatedDecider) and submitAppeal is NEVER called (no auto-submit
  *        path at any tier).
  */
 import { describe, it, expect } from 'vitest';
@@ -41,6 +41,9 @@ import {
   registryWithTier,
   runtimeWithRegistry,
 } from './helpers';
+
+/** The seeded reviewer of record — a resolvable reference, not an invented label. */
+const REVIEWER = 'Practitioner/dev';
 
 const TASK: RecoveryTask = {
   claimId: 'claim-7',
@@ -82,7 +85,10 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
     const handle = engine.start(createRecoveryWorkflow(deps), { memberId: 'm1', input: TASK });
 
     // Suspends at the HITL gate.
-    await waitFor(() => engine.query(handle.workflowId)?.status === 'waiting-decision', 'suspended');
+    await waitFor(
+      () => engine.query(handle.workflowId)?.status === 'waiting-decision',
+      'suspended'
+    );
 
     // (i) the DRAFT was written by the AGENT, exactly once, BEFORE suspension, at
     // the interlock-permitted rung (HITL × D3 -> min(A1, A3) = A1).
@@ -98,11 +104,13 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
 
     // (iii) NOT executed, and time alone never approves a HITL proposal — AND no
     // submission is attempted while waiting-decision, even after the SLA elapses.
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    // W8 removed `agent.task.executed` (G-002); an unsettled workflow emits no `settled`.
+    // `submitCalls` remains the assertion that actually proves no payer submission happened.
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     expect(submitCalls).toHaveLength(0);
     await engine.advanceTime(240 * HOUR);
     await flush();
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');
     // The draft is not re-written on escalation, and STILL nothing was submitted.
     expect(calls).toHaveLength(1);
@@ -116,27 +124,28 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
 
     await waitFor(
       () => engine.query(handle.workflowId)?.status === 'waiting-decision',
-      'suspended-before-approve',
+      'suspended-before-approve'
     );
     // Not before the decision.
     expect(submitCalls).toHaveLength(0);
 
     // A qualified human (reviewer:*) approves → the workflow resumes, asserts the
     // qualified-human decision, and runs the governed submit tool once.
-    await approve(engine, handle.workflowId, 'reviewer:rn-9');
+    await approve(engine, handle.workflowId, REVIEWER);
     const result = await handle.done;
 
     expect(result.outcome).toBe('submitted');
     if (result.outcome === 'submitted') {
       expect(result.submissionRef).toBe('appeal::claim-7');
-      expect(result.decidedBy).toBe('reviewer:rn-9');
+      expect(result.decidedBy).toBe(REVIEWER);
       expect(result.rung).toBe('A1');
     }
     expect(submitCalls).toHaveLength(1);
     expect(submitCalls[0].task).toBe(TASK);
-    expect(submitCalls[0].decision.decidedBy).toBe('reviewer:rn-9');
-    // The runtime approve path fired exactly one execute for the proposal.
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(1);
+    expect(submitCalls[0].decision.decidedBy).toBe(REVIEWER);
+    // The runtime settled the workflow exactly once for this proposal. `submitCalls` above is
+    // what proves the submission actually happened; this proves the record of it exists.
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(1);
   });
 
   it('Wave-4: a REJECT is terminal — no submission, outcome rejected', async () => {
@@ -146,13 +155,13 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
 
     await waitFor(
       () => engine.query(handle.workflowId)?.status === 'waiting-decision',
-      'suspended-before-reject',
+      'suspended-before-reject'
     );
-    await reject(engine, handle.workflowId, 'reviewer:rn-9');
+    await reject(engine, handle.workflowId, REVIEWER);
     const result = await handle.done;
 
     expect(result.outcome).toBe('rejected');
-    if (result.outcome === 'rejected') expect(result.decidedBy).toBe('reviewer:rn-9');
+    if (result.outcome === 'rejected') expect(result.decidedBy).toBe(REVIEWER);
     expect(submitCalls).toHaveLength(0);
   });
 
@@ -166,20 +175,26 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
       });
       await waitFor(
         () => engine.query(handle.workflowId)?.status === 'waiting-decision',
-        `suspended-${decidedBy}`,
+        `suspended-${decidedBy}`
       );
       const proposalId = engine.query(handle.workflowId)?.awaitingProposalId;
       if (!proposalId) throw new Error('no awaiting proposal');
       // Force an unqualified (system/autonomy) approve signal directly onto the engine.
-      await engine.signal(handle.workflowId, {
-        name: 'agent.task.approved',
-        proposalId,
-        decidedBy,
-      });
-      // The workflow body asserts isQualifiedHumanDecision → throws; the submit tool
-      // is NEVER reached (no auto-submit path at any tier).
-      await expect(handle.done).rejects.toThrow(/qualified-human/);
-      expect(engine.query(handle.workflowId)?.status).toBe('failed');
+      //
+      // THE REFUSAL MOVED EARLIER, AND THAT IS THE POINT (G-045). It used to reach the workflow
+      // BODY, which asserted the decider and threw — so the engine happily resolved the proposal
+      // and only the agent's own code stopped the submission. Any workflow that forgot that assert
+      // had no protection at all. The engine now refuses the signal itself, so the proposal is never
+      // resolved, `handle.done` stays pending, and nothing downstream has to remember.
+      await expect(
+        engine.signal(handle.workflowId, { name: 'agent.task.approved', proposalId, decidedBy })
+        // `reviewer-proof-absent`, not `automated-decider`: a recovery submission is
+        // isSubmission-class, so `isAutoApprovable` already routed it to the human-required path,
+        // and a human-required proposal demands a PROOF rather than merely a non-automated name.
+        // The stricter of the two branches is the one that fires, which is the right ordering.
+      ).rejects.toThrow(/reviewer-proof-absent/);
+      // Still suspended — a refused signal is a no-op on the workflow, not a failure of it.
+      expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');
       expect(submitCalls).toHaveLength(0);
     }
   });
@@ -196,7 +211,7 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
 
     await waitFor(
       () => engine.query(handle.workflowId)?.status === 'waiting-decision',
-      'suspended-under-autonomous',
+      'suspended-under-autonomous'
     );
     // Give any auto-approve microtask/timer a chance to (wrongly) fire.
     await flush();
@@ -204,7 +219,7 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
     await flush();
 
     expect(engine.query(handle.workflowId)?.status).toBe('waiting-decision');
-    expect(eventSink.ofType('agent.task.executed')).toHaveLength(0);
+    expect(eventSink.ofType('agent.task.settled')).toHaveLength(0);
     expect(eventSink.ofType('agent.task.approved')).toHaveLength(0);
   });
 
@@ -254,7 +269,7 @@ describe('revenue-cycle agent: governed recovery DRAFT under a human gate', () =
       });
       await waitFor(
         () => engine.query(handle.workflowId)?.status === 'waiting-decision',
-        `suspended-${tier}`,
+        `suspended-${tier}`
       );
       expect(calls).toHaveLength(1);
       expect(calls[0].rung).toBe(expected);

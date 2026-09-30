@@ -239,7 +239,7 @@ export default function ContractProgramSelectionPage() {
       contextBanner={
         <div className="bg-[#defbe6] border-b border-[#a7f0ba] px-6 py-2 flex items-center gap-6 flex-wrap">
           <span className="text-xs font-semibold text-[#0e6027]">
-            State Medicaid Agency: SD DHSS
+            State Medicaid Agency: State HHS Agency
           </span>
           <span className="text-xs text-[#0e6027]">Program Year: 2026</span>
           <span className="text-xs text-[#0e6027]">Covered Counties: 14 SD Rural Counties</span>

@@ -669,8 +669,8 @@ function UnifiedGapPanel() {
       {/* Gap rows */}
       <div className="divide-y divide-carbon-gray-10">
         {filtered.map((gap) => {
-          const dc = DOMAIN_COLORS[gap.domain];
-          const sc = STATUS_COLORS[gap.status];
+          const dc = DOMAIN_COLORS[gap.domain] ?? DOMAIN_COLORS['Clinical'];
+          const sc = STATUS_COLORS[gap.status] ?? STATUS_COLORS['Open'];
           return (
             <div
               key={gap.id}

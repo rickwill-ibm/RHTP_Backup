@@ -51,12 +51,22 @@ export const ORG_DATA: Record<
   string,
   { closure: number; gainShare: number; patients: number; type: string }
 > = {
-  'Oglala Lakota PCP': { closure: 78, gainShare: 88, patients: 3100, type: 'PCP' },
-  'Monument Cardio': { closure: 82, gainShare: 74, patients: 1820, type: 'Specialist' },
-  'Bennett Co. Health': { closure: 71, gainShare: 142, patients: 8420, type: 'FQHC' },
-  'Gregory Co. Medical': { closure: 73, gainShare: 97, patients: 4200, type: 'PCP' },
-  'Winner Regional': { closure: 64, gainShare: 218, patients: 11200, type: 'Hospital' },
-  'Fall River Specialists': { closure: 55, gainShare: 61, patients: 2890, type: 'Specialist' },
+  'Badlands Primary Care Group': { closure: 78, gainShare: 88, patients: 3100, type: 'PCP' },
+  'Summit Regional': { closure: 82, gainShare: 74, patients: 1820, type: 'Specialist' },
+  'Prairie Health Services': { closure: 71, gainShare: 142, patients: 8420, type: 'FQHC' },
+  'Riverside Medical Associates': { closure: 73, gainShare: 97, patients: 4200, type: 'PCP' },
+  'Cedar Bluff Regional Medical Center': {
+    closure: 64,
+    gainShare: 218,
+    patients: 11200,
+    type: 'Hospital',
+  },
+  'Southridge Specialist Network': {
+    closure: 55,
+    gainShare: 61,
+    patients: 2890,
+    type: 'Specialist',
+  },
 };
 
 // Period multipliers on YTD values

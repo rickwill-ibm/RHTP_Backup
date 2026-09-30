@@ -8,7 +8,7 @@
  *   2. Download — generate environment + collection files for Postman Desktop
  *   3. Run      — fire the collection via /api/postman-run, stream SSE results
  */
-
+import { DEMO_MEMBER_ID } from '@/lib/config/demoDefaults';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PATIENT_SCENARIOS, MANDATE_SECTIONS } from '@/lib/cms0057fEndpoints';
 import type { ScopeKey } from '@/lib/cms0057fEndpoints';
@@ -114,7 +114,7 @@ export default function PostmanSuiteTab() {
   const [editWso2Client, setEditWso2Client] = useState('');
   const [editPatient, setEditPatient] = useState('MARIA_SD_001');
   const [editReviewer, setEditReviewer] = useState('reviewer@rhtp-health.org');
-  const [editNpi, setEditNpi] = useState('1730154783');
+  const [editNpi, setEditNpi] = useState('1730154782');
   const [editScopes, setEditScopes] = useState<Record<ScopeKey, boolean>>({
     patientAccess: true,
     providerAccess: true,
@@ -149,9 +149,9 @@ export default function PostmanSuiteTab() {
       setEditWso2Auth(data.wso2AuthorizeUrl ?? '');
       setEditWso2Token(data.wso2TokenUrl ?? '');
       setEditWso2Client(data.wso2ClientId ?? '');
-      setEditPatient(data.postmanPatientId ?? 'MARIA_SD_001');
+      setEditPatient(data.postmanPatientId ?? DEMO_MEMBER_ID);
       setEditReviewer(data.postmanReviewerEmail ?? 'reviewer@rhtp-health.org');
-      setEditNpi(data.postmanProviderNpi ?? '1730154783');
+      setEditNpi(data.postmanProviderNpi ?? '1730154782');
       setEditScopes(
         data.postmanScopes ?? {
           patientAccess: true,

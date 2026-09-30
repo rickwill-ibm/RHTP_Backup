@@ -26,7 +26,7 @@ test.describe('Financial Clearance', () => {
 
   test('gold-carded provider is PA-exempt and offers no stage-3 handoff', async ({ page }) => {
     await page.goto('/financial-clearance');
-    await page.getByLabel('Ordering provider').selectOption('1730154783');
+    await page.getByLabel('Ordering provider').selectOption('1730154782');
     await page.getByRole('button', { name: /run clearance/i }).click();
     await expect(page.getByText(/No PA required|Cleared/i).first()).toBeVisible();
   });

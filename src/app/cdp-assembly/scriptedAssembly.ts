@@ -13,7 +13,7 @@ export const IDENTITY_METHOD = 'DETERMINISTIC_CONFIRMED';
 export const IDENTITY_STATE_BEFORE = 'FRAGMENTED';
 export const IDENTITY_STATE_AFTER = 'UNIFIED';
 export const PROGRAM = 'Medicaid RHTP Track 3';
-export const STATE_AGENCY = 'SD DHSS';
+export const STATE_AGENCY = 'State HHS Agency';
 export const LOG_LINE_DELAY_MS = 80;
 
 export const IDENTITY_SOURCES = [
@@ -32,7 +32,7 @@ export function buildGraphNodes(memberId: string): string[] {
     'Care Gaps — 3 clinical · 2 BH · 4 social (9 total)',
     'Episodes — Pre-Diabetic ACTIVE · Postpartum UNMANAGED',
     'Medications — Metformin · Lisinopril (Elena) · Amoxicillin (Sophia)',
-    'Provider — Bennett County Health CAH · Sarah Johnson CM',
+    'Provider — Prairie Health CAH · Sarah Johnson CM',
     'SDOH — Transport HIGH · Childcare HIGH · Food MODERATE',
     'Consent — Layer 1 ACTIVE · Layer 2 ACTIVE · Layer 3 ACTIVE · Layer 4 PENDING',
     'Dependents — Sophia Redhawk (24mo) · Elena Redhawk (58y)',
@@ -67,8 +67,8 @@ export const SOURCE_SYSTEMS: SourceSystem[] = [
   },
   {
     id: 'src-2',
-    name: 'Bennett County Health EHR',
-    owner: 'Bennett County CAH',
+    name: 'Prairie Health EHR',
+    owner: 'Prairie Health Services',
     format: 'HL7 v2.x',
     formatType: 'hl7',
     fhir: 'FHIR Patient + Condition + Observation',
@@ -97,8 +97,8 @@ export const SOURCE_SYSTEMS: SourceSystem[] = [
   },
   {
     id: 'src-5',
-    name: 'SD DSS Integrated Benefits',
-    owner: 'SD Dept of Social Services',
+    name: 'State Benefits — Integrated Benefits',
+    owner: 'State Benefits Agency',
     format: 'EDI 834 + CSV',
     formatType: 'csv',
     fhir: 'FHIR Coverage + CarePlan + Task',
@@ -107,8 +107,8 @@ export const SOURCE_SYSTEMS: SourceSystem[] = [
   },
   {
     id: 'src-6',
-    name: 'SD Division of Behavioral Health',
-    owner: 'SD DHSS BH Division',
+    name: 'State Division of Behavioral Health',
+    owner: 'State HHS Agency BH Division',
     format: 'REST API',
     formatType: 'bh',
     fhir: 'FHIR CarePlan + EpisodeOfCare [42 CFR Pt 2 · SUD segment]',
@@ -176,7 +176,7 @@ export function buildLogLines(
       cardTrigger: 4,
     },
     {
-      text: `> [SD DSS Benefits]        EDI 834+CSV  → FHIR Coverage + Task ✓`,
+      text: `> [State Benefits Line Benefits]        EDI 834+CSV  → FHIR Coverage + Task ✓`,
       type: 'lime',
       cardTrigger: 5,
     },

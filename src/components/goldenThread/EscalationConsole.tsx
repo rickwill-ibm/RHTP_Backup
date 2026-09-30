@@ -17,6 +17,8 @@ import type {
   ProcessGate,
 } from '@/lib/goldenThread/escalationSignals';
 import type { EscalationTier, EscalationStep } from '@/lib/agentRuntime/escalation';
+import * as clock from '@/lib/clock'; // injected clock seam — the only wall-clock read
+import { escalationBreachState, hopIntervalLabel, slaLabel } from './escalationView';
 
 const SEVERITY_CLS: Record<SignalSeverity, string> = {
   info: 'bg-carbon-gray-10 text-carbon-gray-70 border-carbon-gray-20',
@@ -90,13 +92,25 @@ export function EscalationConsole({
   routed,
   tier,
   path,
+  asOf,
 }: {
   routed: RoutedEscalation;
   tier: EscalationTier | null;
   path: EscalationStep | null;
+  /**
+   * The instant the breach is judged against. Defaults to the injected clock so the console
+   * reports the REAL SLA position rather than the router's frozen routing timestamp. Pass it
+   * explicitly to render an as-of view.
+   */
+  asOf?: string;
 }): React.ReactElement {
   const { gate, signals, notifications, queueItem, escalationStep } = routed;
-  const breached = escalationStep !== null;
+  const asOfIso = typeof asOf === 'string' ? asOf : clock.nowIso();
+  // Breach is EITHER signal: a hop already fired, OR the due-by has passed as of `asOfIso`.
+  // Reading `escalationStep` alone made an item 21 days overdue render as "within SLA",
+  // because the router computes the hop against a frozen demo instant.
+  const breach = escalationBreachState({ queueItem, escalationStep }, asOfIso);
+  const breached = breach.breached;
 
   return (
     <div className="space-y-5">
@@ -121,8 +135,16 @@ export function EscalationConsole({
                   : 'border-carbon-gray-20'
               }`}
             >
-              <p className="text-lg font-semibold">{breached ? 'SLA breach' : 'within SLA'}</p>
-              <p className="text-[10px] uppercase text-carbon-gray-50">queue status</p>
+              <p className="text-lg font-semibold">
+                {breach.reason === 'no-item' ? 'no item' : breached ? 'SLA breach' : 'within SLA'}
+              </p>
+              <p className="text-[10px] uppercase text-carbon-gray-50">
+                {breach.daysPastDue > 0
+                  ? `${breach.daysPastDue}d past due`
+                  : breach.reason === 'due-by-unreadable'
+                    ? 'due-by unreadable'
+                    : 'queue status'}
+              </p>
             </div>
           </div>
         </div>
@@ -163,7 +185,7 @@ export function EscalationConsole({
                 </span>
               }
             />
-            <Row label="SLA" value={`${queueItem.slaHours}h`} />
+            <Row label="SLA (CMS-0057-F)" value={slaLabel(queueItem)} />
             <Row label="Submitted" value={queueItem.submittedAt} />
             <Row label="Due by" value={queueItem.dueBy} />
             {queueItem.note ? (
@@ -182,9 +204,10 @@ export function EscalationConsole({
         <section className="rounded-lg border border-carbon-gray-20 bg-white p-4">
           <h2 className="mb-1 text-sm font-semibold">Escalation path</h2>
           <p className="mb-3 text-[11px] text-carbon-gray-50">
-            Policy tier for a <span className="font-semibold">{tier.priority}</span> item · SLA{' '}
-            {tier.slaHours}h · on-exhaust: {tier.onExhaust}. The path below fires hop-by-hop once
-            the SLA is breached; the item parks after the hierarchy is exhausted.
+            {hopIntervalLabel(tier)} · on-exhaust: {tier.onExhaust}. This interval is the escalation
+            policy&apos;s hop spacing, not a second SLA — the item&apos;s SLA is the CMS-0057-F
+            clock shown above. The path below fires hop-by-hop once that SLA is breached; the item
+            parks after the hierarchy is exhausted.
           </p>
           <ol className="flex flex-wrap items-center gap-1.5">
             {tier.hierarchy.map((target, i) => {
@@ -220,12 +243,20 @@ export function EscalationConsole({
               </span>
             </li>
           </ol>
-          {!breached ? (
+          {breached ? (
+            <p className="mt-3 rounded border border-carbon-red bg-carbon-red-light p-2 text-[11px] text-carbon-red">
+              {breach.reason === 'hop-fired'
+                ? 'A hop has fired — the highlighted target above now owns the item.'
+                : breach.reason === 'due-by-unreadable'
+                  ? 'The due-by on this item cannot be read, so it is surfaced as breached.'
+                  : `SLA breached ${breach.daysPastDue} day(s) ago as of ${asOfIso.slice(0, 10)}. The next hop above is what fires on the sweep.`}
+            </p>
+          ) : (
             <p className="mt-3 rounded border border-carbon-gray-20 bg-carbon-gray-10 p-2 text-[11px] text-carbon-gray-60">
-              The item is within SLA as of the routing timestamp — no hop has fired. The path above
+              The item is within SLA as of {asOfIso.slice(0, 10)} — no hop has fired. The path above
               is what would fire on breach.
             </p>
-          ) : null}
+          )}
         </section>
       ) : null}
     </div>

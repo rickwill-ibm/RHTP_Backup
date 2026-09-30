@@ -61,7 +61,7 @@ describe('Orchestrator — full thread + evidence persistence', () => {
   });
 
   it('runs a gold-carded order → PA waived, auto-cleared queue', async () => {
-    const r = await runFinancialClearance(inputs('1730154783'), deps());
+    const r = await runFinancialClearance(inputs('1730154782'), deps());
     expect(r.netRequiresPA).toBe(false);
     expect(r.summary.netOutcome).toBe('pa-exempt-gold-card');
     expect(r.workItem.queue).toBe('auto-cleared');
@@ -70,7 +70,7 @@ describe('Orchestrator — full thread + evidence persistence', () => {
 
   it('with an empty gold-card source, the same provider needs PA', async () => {
     const r = await runFinancialClearance(
-      inputs('1730154783'),
+      inputs('1730154782'),
       deps(createInMemoryEvidenceStore(), emptyGoldCardDataSource)
     );
     expect(r.netRequiresPA).toBe(true);
@@ -94,12 +94,12 @@ describe('FHIR projection', () => {
           coding: [{ system: 'http://www.ama-assn.org/go/cpt', code: '75561' }],
           text: 'Cardiac MRI',
         },
-        requester: { identifier: { value: '1730154783' } },
+        requester: { identifier: { value: '1730154782' } },
       },
       coverage: { status: 'active', payor: [{ display: 'UHC' }], type: { text: 'Medicaid' } },
     });
     expect(projected.order.code).toBe('75561');
-    expect(projected.order.providerNpi).toBe('1730154783');
+    expect(projected.order.providerNpi).toBe('1730154782');
     expect(projected.coverage.payer).toBe('UHC');
     expect(projected.member.diagnoses[0].code).toBe('I42.0'); // ICD-10 surfaced
   });

@@ -26,8 +26,8 @@ describe('mintTicket ref-dedup — no operator ever sees the same ticket ref twi
       expect(n, `ref ${ref} appears ${n}× in the seed queue`).toBe(1);
     }
     // and the chain pin is untouched by the dedup (seal hashes ledger fields, never tickets)
-    expect(s.chainHead).toBe(2487355187);
-    expect(s.ledgerSeq).toBe(250);
+    expect(s.chainHead).toBe(1204273244);
+    expect(s.ledgerSeq).toBe(251);
   });
 
   it('no ticket ref is ever duplicated across a long run either', () => {

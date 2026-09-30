@@ -3,6 +3,8 @@
  * Agent manifest registry — public surface (conventions §10.2). Manifests are
  * versioned data; nothing about an agent's authority is implicit in code.
  */
+export { agentCapabilities } from './capabilities';
+export type { ManifestDataCapability } from './types';
 export type { AgentManifest, AgentManifestRegistryData, AutonomyTier, PhiPosture } from './types';
 export { AgentManifestError, UnknownAgentError, ToolNotAllowedError } from './types';
 export {
@@ -13,3 +15,4 @@ export {
   getAgentManifest,
   setProductionManifestLoader,
 } from './registry';
+export { assertManifestsWithinLock, shippedAuthorityLock } from './authorityGate';

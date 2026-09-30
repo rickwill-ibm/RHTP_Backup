@@ -119,7 +119,7 @@ function seededEvidenceRecord(id: string) {
     id,
     memberId,
     patientName,
-    order: { code, display: meta.display, providerNpi: patient?.pcp ?? '1730154783' },
+    order: { code, display: meta.display, providerNpi: patient?.pcp ?? '1730154782' },
     createdAt: ts,
     status: 'open',
     entries: [
@@ -159,7 +159,7 @@ function seededEvidenceRecord(id: string) {
         type: 'gold-card',
         exemption: {
           applied: meta.propensity <= 0.1,
-          providerNpi: patient?.pcp ?? '1730154783',
+          providerNpi: patient?.pcp ?? '1730154782',
           code,
           payer: meta.payer,
           approvalRate: meta.propensity,

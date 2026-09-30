@@ -32,10 +32,10 @@ describe('recon-agent — determinism isolation', () => {
     // advance(). The seal hash covers ONLY ledger fields (never ticket data), so the mintTicket
     // ref-dedup — which collapsed the duplicated seed refs to one row each (9 → 4) — leaves the chain
     // pin byte-identical and only shrinks the seed ticket count.
-    expect(s.chainHead).toBe(2487355187);
-    expect(s.ledgerSeq).toBe(250);
+    expect(s.chainHead).toBe(1204273244);
+    expect(s.ledgerSeq).toBe(251);
     expect(s.tick).toBe(684);
-    expect(s.tickets.length).toBe(4);
+    expect(s.tickets.length).toBe(5);
   });
   it('advancing stays deterministic and the recon chain stays intact', () => {
     const run = (): number => {

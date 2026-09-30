@@ -21,7 +21,7 @@ function baseRecord(): EvidenceRecord {
   return createEvidenceRecord({
     id: 'ev-spine-1',
     memberId: 'MARIA_SD_001',
-    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154783' },
+    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154782' },
     createdAt: '2026-08-25T00:00:00.000Z',
   });
 }
@@ -31,7 +31,13 @@ const ts = '2026-08-25T00:01:00.000Z';
 describe('append-only immutability preserved for new variants', () => {
   it('each recorder returns a NEW record and never mutates the input', () => {
     const r0 = baseRecord();
-    const r1 = recordClaimSubmission(r0, { id: 'c1', ts, claimId: 'CL-1', claimRef: 'C-1', total: 200 });
+    const r1 = recordClaimSubmission(r0, {
+      id: 'c1',
+      ts,
+      claimId: 'CL-1',
+      claimRef: 'C-1',
+      total: 200,
+    });
     expect(r0.entries.length).toBe(0);
     expect(r1.entries.length).toBe(1);
     expect(r1).not.toBe(r0);
@@ -41,7 +47,12 @@ describe('append-only immutability preserved for new variants', () => {
 
 describe('recordPasDecision — authId threading + exempt distinct from approved', () => {
   it('threads the caller-supplied authId onto the entry (not minted here)', () => {
-    const r = recordPasDecision(baseRecord(), { id: 'd1', ts, authId: 'AUTH-777', decision: 'approved' });
+    const r = recordPasDecision(baseRecord(), {
+      id: 'd1',
+      ts,
+      authId: 'AUTH-777',
+      decision: 'approved',
+    });
     const e = latestOfType(r, 'pas-decision');
     expect(e?.authId).toBe('AUTH-777');
     expect(e?.stage).toBe('prior-auth');
@@ -49,7 +60,12 @@ describe('recordPasDecision — authId threading + exempt distinct from approved
   });
 
   it("'exempt' is a DISTINCT decision value, never collapsed into 'approved'", () => {
-    const r = recordPasDecision(baseRecord(), { id: 'd2', ts, authId: 'AUTH-9', decision: 'exempt' });
+    const r = recordPasDecision(baseRecord(), {
+      id: 'd2',
+      ts,
+      authId: 'AUTH-9',
+      decision: 'exempt',
+    });
     const e = latestOfType(r, 'pas-decision');
     expect(e?.decision).toBe('exempt');
     expect(e?.decision).not.toBe('approved');
@@ -98,7 +114,13 @@ describe('each new recorder appends the right stage/type', () => {
   });
 
   it('recordRecovery → stage recovery, status always draft', () => {
-    const r = recordRecovery(baseRecord(), { id: 'rv1', ts, action: 'draft-appeal', rung: 'A2', remittanceId: 'RA-1' });
+    const r = recordRecovery(baseRecord(), {
+      id: 'rv1',
+      ts,
+      action: 'draft-appeal',
+      rung: 'A2',
+      remittanceId: 'RA-1',
+    });
     const e = latestOfType(r, 'recovery');
     expect(e?.stage).toBe('recovery');
     expect(e?.status).toBe('draft');

@@ -37,6 +37,7 @@ export function GoldenThreadSurface({
   presets,
   memberLabel,
   presetAutonomyTier,
+  presetClamp,
   integrity,
 }: {
   cash: CashResult;
@@ -47,6 +48,13 @@ export function GoldenThreadSurface({
   presets: ReadonlyArray<Option>;
   memberLabel: string;
   presetAutonomyTier: AutonomyTier;
+  /**
+   * Set when this deployment's authority lock capped the requested preset. A
+   * control that silently narrows authority is worse than one that refuses: the
+   * reviewer would read "Aggressive (autonomous)" in the picker while a HITL
+   * agent ran, and nothing on the page would say so.
+   */
+  presetClamp?: { requested: AutonomyTier; lockedMax: AutonomyTier };
   integrity?: EvidenceIntegrity;
 }): React.ReactElement {
   const models = buildStageModels(cash);
@@ -68,6 +76,20 @@ export function GoldenThreadSurface({
               ...(cash.evidence.order.display ? { display: cash.evidence.order.display } : {}),
             }}
           />
+
+          {presetClamp ? (
+            <p
+              role="status"
+              className="rounded border border-carbon-yellow bg-carbon-yellow-light p-2 text-xs text-[#b45309]"
+            >
+              <span className="font-semibold">Authority lock applied.</span> This preset requests{' '}
+              <span className="font-mono">{presetClamp.requested}</span>, but this deployment&apos;s
+              reviewed authority lock caps the recovery agent at{' '}
+              <span className="font-mono">{presetClamp.lockedMax}</span>. The run below executed at{' '}
+              <span className="font-mono">{presetAutonomyTier}</span>. Raising the ceiling is a
+              reviewed change to the authority lock, not a setting on this page.
+            </p>
+          ) : null}
 
           {models.map((model, i) =>
             model.present ? (

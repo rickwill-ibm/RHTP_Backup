@@ -64,6 +64,8 @@ export { consentGranted } from './consentGate';
 
 // ── Taxonomy + intake ─────────────────────────────────────────────────────────
 export { defaultTaxonomy, loadTaxonomy, indexTaxonomy, fillDedupeKey } from './taxonomy';
+// The ONE data-class-floor supplier the disclosure gate binds (CONTRACT: C-DISCLOSURE).
+export { taxonomyClassFloor, type ClassFloorSupplier } from './dataClassFloor';
 export {
   intakeSignals,
   intakeSignalsDurable,

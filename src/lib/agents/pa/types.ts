@@ -31,13 +31,28 @@ export interface PaTask {
 }
 
 /** The terminal outcome of a PA documentation workflow run (PHI-safe). */
+/**
+ * INVARIANT: `executed` means the advancement WAS applied. A transition that did not
+ * happen is `not-advanced`, which carries the reason as a REQUIRED field.
+ *
+ * WHY THE SHAPE CHANGED. `transitionError?: string` used to sit on the `executed` member,
+ * so the type itself said "executed, with an error" — and `paAgent` returned
+ * `outcome: 'executed'` whenever `transition()` came back with one. `transition()` fails
+ * SOFT (paMachine.ts: an illegal transition returns `{ state: current, error }`, it does
+ * not throw), so a human approved the proposal, `evidence.append` fired, the PA thread
+ * stayed where it was, and the audited demo row read `executed`. `transitionError` was
+ * written and read by NOTHING in the repo. That is the exact harm `parseDemoOutcome`'s
+ * docstring says it exists to prevent — a record telling an auditor an action was taken
+ * when it was not — reached through the outcome field instead of the outcome vocabulary.
+ */
 export type PaResult =
+  | { outcome: 'executed'; threadRef: string; state: PaState; decidedBy: string }
   | {
-      outcome: 'executed';
+      outcome: 'not-advanced';
       threadRef: string;
       state: PaState;
       decidedBy: string;
-      transitionError?: string;
+      transitionError: string;
     }
   | { outcome: 'rejected'; threadRef: string; state: PaState; decidedBy: string };
 

@@ -348,7 +348,7 @@ const PROGRAM_DESCRIPTIONS: Record<
 > = {
   All: {
     name: 'South Dakota Rural Health Transformation Program — All Programs',
-    sponsor: 'SD Department of Health & Human Services (DHSS)',
+    sponsor: 'State HHS Agency',
     population: '128,400 Attributed Lives',
     populationSub: 'Clinical + BH + Social program enrollees',
     model: 'Two-Sided Risk — Track 2',
@@ -356,7 +356,7 @@ const PROGRAM_DESCRIPTIONS: Record<
   },
   Clinical: {
     name: 'South Dakota Rural Health Transformation Program — Clinical',
-    sponsor: 'SD Department of Health & Human Services (DHSS)',
+    sponsor: 'State HHS Agency',
     population: '128,400 Medicaid Beneficiaries',
     populationSub: 'Rural, low-income, and underserved populations',
     model: 'Two-Sided Risk — Track 2',
@@ -364,7 +364,7 @@ const PROGRAM_DESCRIPTIONS: Record<
   },
   BH: {
     name: 'SD RHTP — Behavioral Health Program',
-    sponsor: 'SD DHSS + Division of Behavioral Health (DBH)',
+    sponsor: 'State HHS Agency + Division of Behavioral Health (DBH)',
     population: '41,200 BH Program Enrollees',
     populationSub: 'Medicaid beneficiaries with BH diagnosis or SUD',
     model: 'BH Pay-for-Performance — Track 1',
@@ -372,7 +372,7 @@ const PROGRAM_DESCRIPTIONS: Record<
   },
   Social: {
     name: 'SD RHTP — Social Programs',
-    sponsor: 'SD DHSS + Office of Social Services (OSS)',
+    sponsor: 'State HHS Agency + Office of Social Services (OSS)',
     population: '64,800 Screened Social Program Lives',
     populationSub: 'PRAPARE-screened Medicaid population with ≥1 SDOH need',
     model: 'CBO Performance-Based Contracting',

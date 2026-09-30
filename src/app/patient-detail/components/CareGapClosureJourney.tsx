@@ -292,7 +292,7 @@ function BeforeAfterGraphic({
           <div>
             <p className="text-2xs text-[#0e6027]">Provider</p>
             <p className="text-xs font-semibold text-[#0e6027] truncate">
-              {performingProvider || 'Bennett County Health PCP'}
+              {performingProvider || 'Prairie Health PCP'}
             </p>
           </div>
         </div>
@@ -530,7 +530,7 @@ function HbA1cClosurePanel({ gap, onClose, onDefer }: HbA1cClosurePanelProps) {
   const [closureNotes, setClosureNotes] = useState('');
   const [deferReason, setDeferReason] = useState('');
   const [dateOfService, setDateOfService] = useState('');
-  const [performingProvider, setPerformingProvider] = useState('Bennett County Health PCP');
+  const [performingProvider, setPerformingProvider] = useState('Prairie Health PCP');
   const [placeOfService, setPlaceOfService] = useState('Lab');
   const [resultValue, setResultValue] = useState('');
   const [evidenceSources, setEvidenceSources] = useState<string[]>([]);
@@ -873,7 +873,7 @@ function ClosureCompletedPanel({
           resultValue={closure.resultValue}
           hedisCompliance={closure.hedisCompliance === 'MET' ? 'MET' : 'NOT_MET'}
           dateOfService={closure.dateOfService ?? ''}
-          performingProvider={closure.performingProvider ?? 'Bennett County Health PCP'}
+          performingProvider={closure.performingProvider ?? 'Prairie Health PCP'}
         />
       )}
 

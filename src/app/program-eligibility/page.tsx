@@ -10,6 +10,15 @@ import {
 } from '@/lib/socialMockData';
 import type { Program } from '@/lib/socialMockData';
 import { useDemoStore } from '@/uhg/store/demoStore';
+import {
+  ANCHOR_CBO_ORG,
+  BENEFITS_PORTAL,
+  DEFAULT_DOCUMENTS,
+  HOUSING_AGENCY,
+  PROGRAM_DOCUMENTS,
+  PROGRAM_MONTHLY_VALUES,
+  officeForProgram,
+} from './enrollmentReference.data';
 
 // ─── Enroll Modal ─────────────────────────────────────────────────────────────
 interface EnrollModalProps {
@@ -19,9 +28,15 @@ interface EnrollModalProps {
   onComplete: (programId: string) => void;
 }
 
-const ENROLL_STEPS = ['Eligibility', 'Documents', 'SD Office', 'Unite Us Task', 'Confirmation'];
-const RENEW_STEPS = ['Current Benefit', 'SD DSS Renewal', 'Documents', 'Reminder', 'Confirmation'];
-const WAITLIST_STEPS = ['Waitlist Status', 'SDHDA Contact', 'Alternatives'];
+const ENROLL_STEPS = ['Eligibility', 'Documents', 'State Office', 'Unite Us Task', 'Confirmation'];
+const RENEW_STEPS = [
+  'Current Benefit',
+  'Benefits Renewal',
+  'Documents',
+  'Reminder',
+  'Confirmation',
+];
+const WAITLIST_STEPS = ['Waitlist Status', 'Housing Agency Contact', 'Alternatives'];
 
 function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalProps) {
   const [step, setStep] = useState(0);
@@ -30,95 +45,9 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
   const steps = isWaitlist ? WAITLIST_STEPS : isRenew ? RENEW_STEPS : ENROLL_STEPS;
   const totalSteps = steps.length;
 
-  const programValues: Record<string, string> = {
-    'WIC — Women, Infants & Children': '$320/mo',
-    'SD Childcare Assistance Program (CCAP)': '$487/mo',
-    'SNAP Food Assistance': '$281/mo',
-    'TANF — Temporary Assistance for Needy Families': '$463/mo',
-    'LIHEAP — Low Income Home Energy Assistance': '$180/season',
-  };
-
-  const programDocs: Record<string, string[]> = {
-    'WIC — Women, Infants & Children': [
-      'Proof of identity (SD ID or tribal ID)',
-      'Proof of residency (utility bill or lease)',
-      'Proof of income (pay stubs or benefit letter)',
-      'Infant/child birth certificate or pregnancy documentation',
-    ],
-    'SD Childcare Assistance Program (CCAP)': [
-      'Proof of identity (SD ID or tribal ID)',
-      'Proof of residency in Bennett County',
-      'Proof of income (last 30 days)',
-      "Child's birth certificate",
-      'Childcare provider information',
-    ],
-    'SNAP Food Assistance': [
-      'Proof of identity',
-      'Proof of SD residency',
-      'Proof of income or zero-income statement',
-      'Social Security numbers for all household members',
-    ],
-    'TANF — Temporary Assistance for Needy Families': [
-      'Proof of identity',
-      'Proof of SD residency',
-      'Birth certificates for all children',
-      'Proof of income',
-      'Social Security cards',
-    ],
-    'LIHEAP — Low Income Home Energy Assistance': [
-      'Proof of identity',
-      'Proof of residency',
-      'Most recent utility bill',
-      'Proof of income',
-    ],
-  };
-
-  const sdOffices: Record<string, { name: string; address: string; phone: string; hours: string }> =
-    {
-      'WIC — Women, Infants & Children': {
-        name: 'Bennett County WIC Office',
-        address: '102 N. Van Buren St, Martin, SD 57551',
-        phone: '(605) 685-6622',
-        hours: 'Mon–Fri 8am–5pm',
-      },
-      'SD Childcare Assistance Program (CCAP)': {
-        name: 'SD DSS Bennett County Office',
-        address: '102 N. Van Buren St, Martin, SD 57551',
-        phone: '(605) 685-6622',
-        hours: 'Mon–Fri 8am–5pm',
-      },
-      'SNAP Food Assistance': {
-        name: 'SD DSS Bennett County Office',
-        address: '102 N. Van Buren St, Martin, SD 57551',
-        phone: '(605) 685-6622',
-        hours: 'Mon–Fri 8am–5pm',
-      },
-      'TANF — Temporary Assistance for Needy Families': {
-        name: 'SD DSS Bennett County Office',
-        address: '102 N. Van Buren St, Martin, SD 57551',
-        phone: '(605) 685-6622',
-        hours: 'Mon–Fri 8am–5pm',
-      },
-      'LIHEAP — Low Income Home Energy Assistance': {
-        name: 'Community Action Partnership of the Black Hills',
-        address: '601 E. St. Joseph St, Rapid City, SD 57701',
-        phone: '(605) 348-0820',
-        hours: 'Mon–Fri 8am–4:30pm',
-      },
-    };
-
-  const monthlyValue = programValues[program.name] || 'Value TBD';
-  const docs = programDocs[program.name] || [
-    'Proof of identity',
-    'Proof of residency',
-    'Proof of income',
-  ];
-  const office = sdOffices[program.name] || {
-    name: 'SD DSS Bennett County Office',
-    address: '102 N. Van Buren St, Martin, SD 57551',
-    phone: '(605) 685-6622',
-    hours: 'Mon–Fri 8am–5pm',
-  };
+  const monthlyValue = PROGRAM_MONTHLY_VALUES[program.name] || 'Value TBD';
+  const docs = PROGRAM_DOCUMENTS[program.name] || DEFAULT_DOCUMENTS;
+  const office = officeForProgram(program.name);
 
   const handleComplete = () => {
     onComplete(program.id);
@@ -191,8 +120,8 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
             </div>
             <div className="bg-[#fdf6dd] border border-[#f1c21b] p-3">
               <p className="text-xs text-[#b45309]">
-                <span className="font-semibold">Note:</span> Bennett County Action CBO can assist
-                with document collection. Transportation available via Medicaid NEMT.
+                <span className="font-semibold">Note:</span> {ANCHOR_CBO_ORG} can assist with
+                document collection. Transportation available via Medicaid NEMT.
               </p>
             </div>
           </div>
@@ -201,7 +130,7 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
         return (
           <div className="space-y-4">
             <p className="text-xs text-carbon-gray-70">
-              Contact the SD county office to schedule an enrollment appointment:
+              Contact the district benefits office to schedule an enrollment appointment:
             </p>
             <div className="bg-[#edf5ff] border border-[#97c1ff] p-4 space-y-3">
               <p className="text-sm font-semibold text-carbon-gray-100">{office.name}</p>
@@ -225,8 +154,10 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                 Online Option
               </p>
               <p className="text-xs text-carbon-gray-70">
-                Apply online at <span className="text-[#0043ce] font-medium">dss.sd.gov</span> or
-                call SD DSS statewide: <span className="font-medium">(605) 773-3165</span>
+                Apply online at{' '}
+                <span className="text-[#0043ce] font-medium">{BENEFITS_PORTAL.domain}</span> or call
+                the state benefits line:{' '}
+                <span className="font-medium">{BENEFITS_PORTAL.statewidePhone}</span>
               </p>
             </div>
           </div>
@@ -244,8 +175,8 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                 <div>
                   <p className="text-sm font-semibold text-[#6929c4]">Unite Us Task Created</p>
                   <p className="text-xs text-[#6929c4] mt-1">
-                    Task #UU-SD-{program.id.replace(/\D/g, '').padStart(5, '4')}21 assigned to
-                    Bennett County Action CBO
+                    Task #UU-SD-{program.id.replace(/\D/g, '').padStart(5, '4')}21 assigned to{' '}
+                    {ANCHOR_CBO_ORG}
                   </p>
                 </div>
               </div>
@@ -254,7 +185,7 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
               {[
                 { label: 'Task Type', value: 'Benefit Enrollment Assistance' },
                 { label: 'Program', value: program.name },
-                { label: 'Assigned CBO', value: 'Bennett County Action CBO' },
+                { label: 'Assigned CBO', value: ANCHOR_CBO_ORG },
                 { label: 'Priority', value: 'High' },
                 {
                   label: 'Due Date',
@@ -281,7 +212,7 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
               <p className="text-2xs text-carbon-gray-70">
                 Track task status in{' '}
                 <a href="/cbo-directory" className="text-[#0043ce] font-semibold hover:underline">
-                  CBO Directory → Bennett County Action Tasks
+                  CBO Directory → Frontier Community Action Tasks
                 </a>
               </p>
             </div>
@@ -301,7 +232,7 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                 { label: 'Expected Start', value: '2–4 weeks after appointment' },
                 {
                   label: 'Unite Us Task',
-                  value: 'Created & assigned to Bennett County Action CBO',
+                  value: `Created & assigned to ${ANCHOR_CBO_ORG}`,
                 },
                 { label: 'Next Step', value: 'CBO will contact patient within 48 hours' },
               ].map((f) => (
@@ -372,9 +303,11 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
       case 1:
         return (
           <div className="space-y-4">
-            <p className="text-xs text-carbon-gray-70">Renew SNAP benefits through SD DSS:</p>
+            <p className="text-xs text-carbon-gray-70">
+              Renew SNAP benefits through the state benefits portal:
+            </p>
             <div className="bg-[#edf5ff] border border-[#97c1ff] p-4 space-y-3">
-              <p className="text-sm font-semibold text-carbon-gray-100">SD DSS Online Renewal</p>
+              <p className="text-sm font-semibold text-carbon-gray-100">Online Benefits Renewal</p>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon
@@ -382,16 +315,18 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                     size={14}
                     className="text-[#0043ce] flex-shrink-0"
                   />
-                  <span className="text-[#0043ce] font-medium">dss.sd.gov/snap</span> — Online
-                  renewal portal
+                  <span className="text-[#0043ce] font-medium">
+                    {BENEFITS_PORTAL.snapRenewalPath}
+                  </span>{' '}
+                  — Online renewal portal
                 </div>
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon name="PhoneIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
-                  SD DSS Statewide: (605) 773-3165
+                  State Benefits Line: {BENEFITS_PORTAL.statewidePhone}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon name="MapPinIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
-                  Bennett County DSS: 102 N. Van Buren St, Martin, SD 57551
+                  Frontier District Benefits Office: 18 Frontier Rd, Martin, SD 57551
                 </div>
               </div>
             </div>
@@ -507,15 +442,14 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                 <div>
                   <p className="text-sm font-semibold text-[#b45309]">Waitlist Position 47</p>
                   <p className="text-xs text-[#b45309] mt-1">
-                    Estimated wait: 18 months. Application submitted to SD Housing Development
-                    Authority.
+                    Estimated wait: 18 months. Application submitted to {HOUSING_AGENCY.name}.
                   </p>
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               {[
-                { label: 'Program', value: 'SD Housing Development Authority — Rental Assistance' },
+                { label: 'Program', value: `${HOUSING_AGENCY.name} — Rental Assistance` },
                 { label: 'Waitlist Position', value: '#47 of 312' },
                 { label: 'Estimated Wait', value: '18 months' },
                 { label: 'Application Date', value: 'Feb 10, 2026' },
@@ -538,16 +472,14 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
         return (
           <div className="space-y-4">
             <p className="text-xs text-carbon-gray-70">
-              Contact SD Housing Development Authority for status updates:
+              Contact {HOUSING_AGENCY.name} for status updates:
             </p>
             <div className="bg-[#edf5ff] border border-[#97c1ff] p-4 space-y-3">
-              <p className="text-sm font-semibold text-carbon-gray-100">
-                SD Housing Development Authority
-              </p>
+              <p className="text-sm font-semibold text-carbon-gray-100">{HOUSING_AGENCY.name}</p>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon name="PhoneIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
-                  (605) 773-3181
+                  {HOUSING_AGENCY.phone}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon
@@ -555,11 +487,11 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
                     size={14}
                     className="text-[#0043ce] flex-shrink-0"
                   />
-                  sdhda.org
+                  {HOUSING_AGENCY.domain}
                 </div>
                 <div className="flex items-center gap-2 text-xs text-carbon-gray-70">
                   <Icon name="MapPinIcon" size={14} className="text-[#0043ce] flex-shrink-0" />
-                  3060 E. Elizabeth St, Pierre, SD 57501
+                  {HOUSING_AGENCY.address}
                 </div>
               </div>
             </div>
@@ -575,11 +507,11 @@ function EnrollModal({ program, patientName, onClose, onComplete }: EnrollModalP
               {[
                 {
                   name: 'Emergency Rental Assistance (ERA)',
-                  desc: 'SD ERA program — apply at dss.sd.gov/era',
+                  desc: `Emergency rental assistance — apply at ${BENEFITS_PORTAL.eraPath}`,
                   urgency: 'Apply Now',
                 },
                 {
-                  name: 'Bennett County Action CBO',
+                  name: ANCHOR_CBO_ORG,
                   desc: 'Emergency housing assistance, 1–3 month bridge',
                   urgency: 'Contact CBO',
                 },
@@ -995,7 +927,7 @@ export default function ProgramEligibilityPage() {
                         <div className="mt-2 flex items-center gap-1.5 text-2xs text-[#24a148]">
                           <Icon name="CheckCircleIcon" size={11} className="flex-shrink-0" />
                           <span className="font-medium">
-                            Unite Us task created · Bennett County Action CBO assigned
+                            Unite Us task created · {ANCHOR_CBO_ORG} assigned
                           </span>
                         </div>
                       )}

@@ -1,0 +1,1501 @@
+{
+  "resourceType": "Bundle",
+  "id": "seed-denise-fontaine",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "Patient/patient-denise-fontaine",
+      "request": {
+        "method": "PUT",
+        "url": "Patient/patient-denise-fontaine"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient-denise-fontaine",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ],
+              "text": "MRN"
+            },
+            "system": "urn:rhtp:mrn",
+            "value": "NY-882104"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MC"
+                }
+              ],
+              "text": "Medicaid ID"
+            },
+            "system": "urn:ny:medicaid:cin",
+            "value": "NY-MED-5928174"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "family": "Fontaine",
+            "given": [
+              "Denise"
+            ],
+            "use": "official"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1973-11-18",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "518-555-0184",
+            "use": "mobile"
+          }
+        ],
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "418 Adirondack View Rd"
+            ],
+            "city": "Malone",
+            "state": "NY",
+            "postalCode": "12953",
+            "district": "Franklin County"
+          }
+        ],
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "system": "urn:ietf:bcp:47",
+                  "code": "en-US",
+                  "display": "English"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Practitioner/practitioner-ny-001",
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/practitioner-ny-001"
+      },
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "practitioner-ny-001",
+        "identifier": [
+          {
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1487693021"
+          }
+        ],
+        "name": [
+          {
+            "family": "Loomis",
+            "given": [
+              "Sarah"
+            ],
+            "prefix": [
+              "Dr."
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Organization/org-alice-hyde",
+      "request": {
+        "method": "PUT",
+        "url": "Organization/org-alice-hyde"
+      },
+      "resource": {
+        "resourceType": "Organization",
+        "id": "org-alice-hyde",
+        "name": "Alice Hyde Medical Center (UVM Health Network)",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "prov",
+                "display": "Healthcare Provider"
+              }
+            ]
+          }
+        ],
+        "address": [
+          {
+            "city": "Malone",
+            "state": "NY",
+            "postalCode": "12953"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Organization/org-healthy-alliance",
+      "request": {
+        "method": "PUT",
+        "url": "Organization/org-healthy-alliance"
+      },
+      "resource": {
+        "resourceType": "Organization",
+        "id": "org-healthy-alliance",
+        "name": "Healthy Alliance Foundation (North Country SCN Lead)",
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+                "code": "cbo",
+                "display": "Community Based Organization"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Coverage/cov-denise-medicaid",
+      "request": {
+        "method": "PUT",
+        "url": "Coverage/cov-denise-medicaid"
+      },
+      "resource": {
+        "resourceType": "Coverage",
+        "id": "cov-denise-medicaid",
+        "status": "active",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "PUBLICPOL",
+              "display": "Public Healthcare Policy (NY Medicaid)"
+            }
+          ]
+        },
+        "beneficiary": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "payor": [
+          {
+            "display": "New York State Medicaid / Managed Care"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Condition/cond-denise-t2d",
+      "request": {
+        "method": "PUT",
+        "url": "Condition/cond-denise-t2d"
+      },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-denise-t2d",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.9",
+              "display": "Type 2 diabetes mellitus without complications"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "44054006",
+              "display": "Type 2 diabetes mellitus"
+            }
+          ],
+          "text": "Type 2 Diabetes Mellitus"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "recordedDate": "2024-05-10"
+      }
+    },
+    {
+      "fullUrl": "Condition/cond-denise-retinopathy-risk",
+      "request": {
+        "method": "PUT",
+        "url": "Condition/cond-denise-retinopathy-risk"
+      },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-denise-retinopathy-risk",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "E11.319",
+              "display": "Type 2 diabetes mellitus with unspecified diabetic retinopathy without macular edema"
+            }
+          ],
+          "text": "Diabetic Retinopathy Screening Needed"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "recordedDate": "2025-02-14"
+      }
+    },
+    {
+      "fullUrl": "Condition/cond-denise-anxiety",
+      "request": {
+        "method": "PUT",
+        "url": "Condition/cond-denise-anxiety"
+      },
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-denise-anxiety",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "F41.1",
+              "display": "Generalized anxiety disorder"
+            }
+          ],
+          "text": "Mild-to-Moderate Anxiety (CCMP Monitored)"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "recordedDate": "2026-01-15"
+      }
+    },
+    {
+      "fullUrl": "MedicationRequest/med-denise-metformin",
+      "request": {
+        "method": "PUT",
+        "url": "MedicationRequest/med-denise-metformin"
+      },
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-denise-metformin",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "860975",
+              "display": "Metformin hydrochloride 500 MG Oral Tablet"
+            }
+          ],
+          "text": "Metformin 500mg PO BID"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "authoredOn": "2025-09-12"
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-a1c-baseline",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-a1c-baseline"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-a1c-baseline",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }
+          ],
+          "text": "Hemoglobin A1c"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-03-10T09:30:00Z",
+        "valueQuantity": {
+          "value": 9.1,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "H",
+                "display": "High"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-a1c-closed",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-a1c-closed"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-a1c-closed",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+            },
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "83036",
+              "display": "Hemoglobin; glycosylated (A1C)"
+            }
+          ],
+          "text": "Hemoglobin A1c (Post-NEMT Recheck)"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-09-15T14:15:00Z",
+        "valueQuantity": {
+          "value": 7.4,
+          "unit": "%",
+          "system": "http://unitsofmeasure.org",
+          "code": "%"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "N",
+                "display": "Normal/Controlled (<8.0% GSD Target)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-sdoh-transportation",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-sdoh-transportation"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-sdoh-transportation",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "93030-5",
+              "display": "Has lack of transportation kept you from medical appointments"
+            }
+          ],
+          "text": "AHC HRSN: Transportation Barrier (45-min clinic drive, North Country winter road friction)"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-08-01T10:00:00Z",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "LA30145-4",
+              "display": "Yes, kept from medical appointments in past 12 months"
+            }
+          ],
+          "text": "High Transportation Burden"
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-sdoh-financial",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-sdoh-financial"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-sdoh-financial",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76513-1",
+              "display": "Financial strain"
+            }
+          ],
+          "text": "Seasonal Farm-Adjacent Household Income Variation"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-08-01T10:00:00Z",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "415250009",
+              "display": "Seasonal variation in income"
+            }
+          ],
+          "text": "Amplifies medication affordability strain during winter"
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-gad7",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-gad7"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-gad7",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "survey"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "70274-6",
+              "display": "Generalized anxiety disorder 7 item (GAD-7) total score"
+            }
+          ],
+          "text": "GAD-7 Score"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-08-01T10:00:00Z",
+        "valueInteger": 8,
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "A",
+                "display": "Mild-to-Moderate Anxiety"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Task/task-denise-gap-a1c",
+      "request": {
+        "method": "PUT",
+        "url": "Task/task-denise-gap-a1c"
+      },
+      "resource": {
+        "resourceType": "Task",
+        "id": "task-denise-gap-a1c",
+        "status": "completed",
+        "intent": "order",
+        "priority": "urgent",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill"
+            }
+          ],
+          "text": "Glycemic Status Assessment (HEDIS GSD / QARR A1c Recheck)"
+        },
+        "description": "HbA1c Lab Recheck - Result 7.4% compliant with HEDIS GSD <8.0% threshold",
+        "for": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "authoredOn": "2026-08-01T10:00:00Z",
+        "lastModified": "2026-09-15T15:00:00Z",
+        "owner": {
+          "reference": "Practitioner/practitioner-ny-001",
+          "display": "Dr. Sarah Loomis"
+        }
+      }
+    },
+    {
+      "fullUrl": "Task/task-denise-gap-retinal",
+      "request": {
+        "method": "PUT",
+        "url": "Task/task-denise-gap-retinal"
+      },
+      "resource": {
+        "resourceType": "Task",
+        "id": "task-denise-gap-retinal",
+        "status": "in-progress",
+        "intent": "order",
+        "priority": "routine",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/CodeSystem/task-code",
+              "code": "fulfill"
+            }
+          ],
+          "text": "Diabetic Retinal Eye Exam (Alice Hyde Specialty Ophthalmology)"
+        },
+        "description": "Annual Diabetic Retinal Screening - Next available appointment in 5 weeks (regional specialist waitlist)",
+        "for": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "authoredOn": "2026-08-01T10:00:00Z",
+        "owner": {
+          "reference": "Organization/org-alice-hyde",
+          "display": "Alice Hyde Specialty Eye Clinic"
+        }
+      }
+    },
+    {
+      "fullUrl": "ServiceRequest/req-denise-nemt-transport",
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/req-denise-nemt-transport"
+      },
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "req-denise-nemt-transport",
+        "status": "completed",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "713458007",
+                "display": "Transportation services"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "A0100",
+              "display": "Non-emergency transportation; taxi"
+            }
+          ],
+          "text": "Medicaid NEMT Transportation via Medical Answering Services (MAS) - Keystone Ride to Clinic"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "authoredOn": "2026-08-25T11:00:00Z"
+      }
+    },
+    {
+      "fullUrl": "ServiceRequest/req-denise-retinal-referral",
+      "request": {
+        "method": "PUT",
+        "url": "ServiceRequest/req-denise-retinal-referral"
+      },
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "req-denise-retinal-referral",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "416800000",
+              "display": "Referral to ophthalmology service"
+            }
+          ],
+          "text": "Ophthalmology Consultation - Dilated Retinal Exam"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "authoredOn": "2026-08-15T09:00:00Z"
+      }
+    },
+    {
+      "fullUrl": "Consent/consent-denise-shinny",
+      "request": {
+        "method": "PUT",
+        "url": "Consent/consent-denise-shinny"
+      },
+      "resource": {
+        "resourceType": "Consent",
+        "id": "consent-denise-shinny",
+        "status": "active",
+        "scope": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+              "code": "patient-privacy"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/consentcategorycodes",
+                "code": "nys-shinny",
+                "display": "SHIN-NY Affirmative Opt-In Exchange via Hixny"
+              }
+            ]
+          }
+        ],
+        "patient": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "dateTime": "2026-01-10T14:00:00Z",
+        "policyRule": {
+          "text": "HIPAA + NY Mental Hygiene Law §33.13 Governed Consent Scope"
+        }
+      }
+    },
+    {
+      "fullUrl": "CarePlan/plan-denise-whole-person",
+      "request": {
+        "method": "PUT",
+        "url": "CarePlan/plan-denise-whole-person"
+      },
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "plan-denise-whole-person",
+        "status": "active",
+        "intent": "plan",
+        "title": "Franklin County Integrated Whole-Person Care Plan",
+        "description": "Keystone-sequenced care plan addressing distance blocker, glycemic control, and behavioral wellness",
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "period": {
+          "start": "2026-08-01",
+          "end": "2027-06-30"
+        },
+        "activity": [
+          {
+            "detail": {
+              "kind": "ServiceRequest",
+              "code": {
+                "text": "Schedule MAS Medicaid NEMT ride for clinic A1c lab (KEYSTONE: Unblocks A1c Lab)"
+              },
+              "status": "completed"
+            }
+          },
+          {
+            "detail": {
+              "kind": "Task",
+              "code": {
+                "text": "Repeat HbA1c Lab test at Alice Hyde Health Center (LOINC 4548-4)"
+              },
+              "status": "completed"
+            }
+          },
+          {
+            "detail": {
+              "kind": "ServiceRequest",
+              "code": {
+                "text": "Coordinate Dilated Retinal Exam Referral (5-week specialist waitlist tracked)"
+              },
+              "status": "in-progress"
+            }
+          },
+          {
+            "detail": {
+              "kind": "Task",
+              "code": {
+                "text": "Collaborative Care Mental Health monitoring under NY MHL §33.13"
+              },
+              "status": "in-progress"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Encounter/encounter-denise-today",
+      "request": {
+        "method": "PUT",
+        "url": "Encounter/encounter-denise-today"
+      },
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "encounter-denise-today",
+        "status": "in-progress",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://www.ama-assn.org/go/cpt",
+                "code": "99214",
+                "display": "Office visit, established patient"
+              }
+            ],
+            "text": "Office Visit — Established"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine",
+          "display": "Denise Fontaine"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "ATND",
+                    "display": "attender"
+                  }
+                ]
+              }
+            ],
+            "individual": {
+              "reference": "Practitioner/practitioner-ny-001",
+              "display": "Dr. Sarah Loomis, MD"
+            }
+          }
+        ],
+        "period": {
+          "start": "2026-09-15T09:00:00-04:00"
+        },
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Encounter for check up"
+              }
+            ],
+            "text": "Type 2 Diabetes Follow-Up"
+          },
+          {
+            "text": "Diabetic Retinopathy Screening Evaluation & NEMT Transit Check"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "display": "Alice Hyde Primary Care — Exam 2"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization/org-alice-hyde",
+          "display": "Alice Hyde Medical Center"
+        }
+      }
+    },
+    {
+      "fullUrl": "AllergyIntolerance/allergy-sulfa-denise",
+      "request": {
+        "method": "PUT",
+        "url": "AllergyIntolerance/allergy-sulfa-denise"
+      },
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "allergy-sulfa-denise",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active"
+            }
+          ]
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "type": "allergy",
+        "category": [
+          "medication"
+        ],
+        "criticality": "high",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "10167",
+              "display": "sulfamethoxazole"
+            }
+          ],
+          "text": "Sulfonamides / Sulfa Antibiotics"
+        },
+        "patient": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "recordedDate": "2018-05-12",
+        "reaction": [
+          {
+            "manifestation": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "271807003",
+                    "display": "Eruption of skin"
+                  }
+                ],
+                "text": "Maculopapular Rash & Facial Edema"
+              }
+            ],
+            "severity": "severe"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Immunization/imm-flu-denise-2025",
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/imm-flu-denise-2025"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-flu-denise-2025",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "140",
+              "display": "Influenza, seasonal, injectable, preservative free"
+            }
+          ],
+          "text": "Influenza (2025–26 season)"
+        },
+        "patient": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "occurrenceDateTime": "2025-10-14",
+        "primarySource": true
+      }
+    },
+    {
+      "fullUrl": "Immunization/imm-tdap-denise-2023",
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/imm-tdap-denise-2023"
+      },
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "imm-tdap-denise-2023",
+        "status": "completed",
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "115",
+              "display": "Tdap"
+            }
+          ],
+          "text": "Tdap (Tetanus, Diphtheria, Pertussis)"
+        },
+        "patient": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "occurrenceDateTime": "2023-04-18",
+        "primarySource": true
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-bp-today",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-bp-today"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-bp-today",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85354-9",
+              "display": "Blood pressure panel with all children optional"
+            }
+          ],
+          "text": "Blood Pressure"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-09-15T09:15:00-04:00",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "N",
+                "display": "Normal"
+              }
+            ]
+          }
+        ],
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 128,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic blood pressure"
+                }
+              ]
+            },
+            "valueQuantity": {
+              "value": 82,
+              "unit": "mmHg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mm[Hg]"
+            }
+          }
+        ],
+        "referenceRange": [
+          {
+            "text": "<130/80"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-weight-today",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-weight-today"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-weight-today",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body weight"
+            }
+          ],
+          "text": "Body Weight"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-09-15T09:15:00-04:00",
+        "valueQuantity": {
+          "value": 168,
+          "unit": "lbs",
+          "system": "http://unitsofmeasure.org",
+          "code": "[lb_av]"
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-denise-bmi-today",
+      "request": {
+        "method": "PUT",
+        "url": "Observation/obs-denise-bmi-today"
+      },
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-denise-bmi-today",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "vital-signs",
+                "display": "Vital Signs"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body mass index (BMI) [Ratio]"
+            }
+          ],
+          "text": "Body Mass Index"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-09-15T09:15:00-04:00",
+        "valueQuantity": {
+          "value": 27.8,
+          "unit": "kg/m2",
+          "system": "http://unitsofmeasure.org",
+          "code": "kg/m2"
+        }
+      }
+    },
+    {
+      "fullUrl": "Flag/flag-high-risk-denise",
+      "request": {
+        "method": "PUT",
+        "url": "Flag/flag-high-risk-denise"
+      },
+      "resource": {
+        "resourceType": "Flag",
+        "id": "flag-high-risk-denise",
+        "status": "active",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/flag-category",
+                "code": "clinical",
+                "display": "Clinical"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:rhtp:flag",
+              "code": "HIGH-RISK-DIABETIC",
+              "display": "High Risk — Diabetic Retinopathy Risk & Keystone Transport Need"
+            }
+          ],
+          "text": "High Risk — Retinopathy Screening Overdue (Specialist Shortage Area)"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "period": {
+          "start": "2026-08-01"
+        }
+      }
+    },
+    {
+      "fullUrl": "CareTeam/ct-denise-whole-person",
+      "request": {
+        "method": "PUT",
+        "url": "CareTeam/ct-denise-whole-person"
+      },
+      "resource": {
+        "resourceType": "CareTeam",
+        "id": "ct-denise-whole-person",
+        "status": "active",
+        "name": "Franklin County Whole-Person Care Team",
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine",
+          "display": "Denise Fontaine"
+        },
+        "participant": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://snomed.info/sct",
+                    "code": "446050000",
+                    "display": "Primary care physician"
+                  }
+                ],
+                "text": "Primary Care Physician"
+              }
+            ],
+            "member": {
+              "reference": "Practitioner/practitioner-ny-001",
+              "display": "Dr. Sarah Loomis, MD"
+            }
+          },
+          {
+            "role": [
+              {
+                "text": "Care Manager"
+              }
+            ],
+            "member": {
+              "display": "Sarah Johnson, RN"
+            }
+          },
+          {
+            "role": [
+              {
+                "text": "SCN Community Health Worker"
+              }
+            ],
+            "member": {
+              "reference": "Organization/org-healthy-alliance",
+              "display": "Healthy Alliance Foundation SCN Lead"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Goal/goal-denise-a1c",
+      "request": {
+        "method": "PUT",
+        "url": "Goal/goal-denise-a1c"
+      },
+      "resource": {
+        "resourceType": "Goal",
+        "id": "goal-denise-a1c",
+        "lifecycleStatus": "completed",
+        "achievementStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/goal-achievement",
+              "code": "achieved",
+              "display": "Achieved"
+            }
+          ]
+        },
+        "description": {
+          "text": "Maintain HbA1c < 8.0% (GSD Measure)"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "startDate": "2026-08-01",
+        "target": [
+          {
+            "measure": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "4548-4"
+                }
+              ]
+            },
+            "detailQuantity": {
+              "value": 8.0,
+              "comparator": "<",
+              "unit": "%"
+            },
+            "dueDate": "2026-09-15"
+          }
+        ],
+        "note": [
+          {
+            "text": "Achieved 7.4% on 2026-09-15 recheck after MAS NEMT transport unblocked clinic visit."
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "Goal/goal-denise-retinal",
+      "request": {
+        "method": "PUT",
+        "url": "Goal/goal-denise-retinal"
+      },
+      "resource": {
+        "resourceType": "Goal",
+        "id": "goal-denise-retinal",
+        "lifecycleStatus": "active",
+        "description": {
+          "text": "Complete Annual Diabetic Retinopathy Screening Exam"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "startDate": "2026-08-01",
+        "target": [
+          {
+            "dueDate": "2026-10-30"
+          }
+        ],
+        "note": [
+          {
+            "text": "Track Alice Hyde Specialty Eye Clinic waitlist; evaluate teleretinal option if delayed."
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "DiagnosticReport/dr-denise-a1c-today",
+      "request": {
+        "method": "PUT",
+        "url": "DiagnosticReport/dr-denise-a1c-today"
+      },
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "dr-denise-a1c-today",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "LAB",
+                "display": "Laboratory"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "4548-4",
+              "display": "Hemoglobin A1c"
+            }
+          ],
+          "text": "Hemoglobin A1c Glycemic Assessment"
+        },
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "effectiveDateTime": "2026-09-15T14:15:00Z",
+        "result": [
+          {
+            "reference": "Observation/obs-denise-a1c-closed"
+          }
+        ],
+        "conclusion": "HbA1c 7.4%. Controlled glycemic status (<8.0%). Significant improvement from 9.1% baseline."
+      }
+    },
+    {
+      "fullUrl": "DocumentReference/docref-denise-visit-0915",
+      "request": {
+        "method": "PUT",
+        "url": "DocumentReference/docref-denise-visit-0915"
+      },
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "docref-denise-visit-0915",
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11488-4",
+              "display": "Consultation note"
+            }
+          ],
+          "text": "Primary Care Clinical Progress Note"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11488-4"
+              }
+            ],
+            "text": "Progress Note"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/patient-denise-fontaine"
+        },
+        "date": "2026-09-15T10:00:00-04:00",
+        "author": [
+          {
+            "reference": "Practitioner/practitioner-ny-001",
+            "display": "Dr. Sarah Loomis, MD"
+          }
+        ],
+        "description": "Comprehensive Type 2 Diabetes Review, A1c Recheck & Retinal Specialist Referral Follow-up",
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "title": "Clinical Summary — Dr. Loomis",
+              "data": "RGVuaXNlIEZvbnRhaW5lIDUyIHlvIGZlbWFsZSBmb2xsb3ctdXAgZm9yIFQyRE0uIEExQyByZWNoZWNrIDcuNCUuIE1BUyBORU1UIHJpZGUgY29vcmRpbmF0ZWQgZm9yIEFsaWNlIEh5ZGUgRXllIENsaW5pYy4="
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

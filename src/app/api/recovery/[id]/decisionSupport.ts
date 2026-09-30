@@ -18,6 +18,8 @@
  * proposal, the qualified-human assert, or the production submission seam) so the
  * route's catch maps it to a fail-closed 500 with NOTHING saved (safely retryable).
  */
+import { assertReviewerQualified } from '@/lib/authz/credentialing';
+import { now } from '@/lib/clock';
 import {
   createRecoveryWorkflow,
   type RecoveryDeps,
@@ -129,10 +131,30 @@ export async function runReconstructAndSignal(
       'reconstruct-and-signal: awaiting proposal id did not match the deterministic target'
     );
   }
+  // The engine demands a QualifiedReviewer proof for a human-required proposal (G-045), and a
+  // recovery submission is isSubmission-class, so it always is one.
+  //
+  // `determinationClass: 'administrative'` is the honest classification and it matters. This is the
+  // payer's own underpayment-recovery / appeal SUBMISSION — a financial act, not a member benefit
+  // determination — so 42 CFR 438.210(b)(3) does not attach and a clinical-peer requirement here has
+  // no statutory basis and would block legitimate revenue-cycle operations. What IS required is an
+  // accountable, identified, non-automated human of record: the assert still refuses a placeholder
+  // identity, a reviewer absent from the credentialing source, and a stale credential file.
+  const reviewer = assertReviewerQualified(
+    decidedBy,
+    {
+      kind: 'initial-determination',
+      determinationClass: 'administrative',
+      needDomain: 'medical',
+      licenceJurisdiction: 'NY',
+    },
+    decisionTs ? Date.parse(decisionTs) : now()
+  );
   await engine.signal(workflowId, {
     name: decision === 'approved' ? 'agent.task.approved' : 'agent.task.rejected',
     proposalId,
     decidedBy,
+    reviewer,
   });
   await handle.done;
 

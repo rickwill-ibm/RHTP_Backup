@@ -7,29 +7,33 @@ import {
   DEFAULT_ADMIN_ROLE,
   ADMIN_ROLE_LABELS,
   canView,
-  canEdit,
   canFull,
   type AdminRole,
 } from '@/lib/adminConsoleRoles';
 import { getFhirClient, getFhirMockMode } from '@/lib/services/fhirClient';
+import * as clock from '@/lib/clock'; // injected clock seam — the only wall-clock read
+import { formatInstantUtc, useMountedInstant } from '@/lib/client/useMountedInstant';
+import {
+  CONSENT_RECORDS,
+  consentsFromBundle,
+  displayDate,
+  displayRef,
+  loadConsentView,
+  type ConsentSeedRecord,
+} from '@/lib/consent/consentRecords';
+import { deriveConsentStatus } from '@/lib/consent/consentStatus';
+import type { ConsentStatus } from '@/lib/consent/consentStatus';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
-type ConsentStatus = 'ACTIVE' | 'REVOKED' | 'EXPIRED' | 'PENDING';
-
-interface ConsentRecord {
-  id: string;
-  patient: string;
-  mrn: string;
-  type: string;
-  scope: string;
-  grantedTo: string;
-  status: ConsentStatus;
-  grantedDate: string;
-  expiresDate: string;
-  method: string;
-  fhirRef: string;
-}
+/**
+ * CONSENT STATUS IS DERIVED, NEVER STORED. The seven seed records live in ONE place
+ * (`src/lib/consent/data/consent-records.json`, shared with the Consent & Sovereignty
+ * Panel) and carry only lifecycle DATES. `loadConsentView(asOf)` derives each row's status
+ * and the KPI counts from the SAME traversal against the SAME clock reading, so the tiles
+ * can never disagree with the table. A stored status was the fail-open this screen shipped:
+ * four records whose grants lapsed in 2025 / early 2026 kept badging ACTIVE.
+ */
 
 interface SovereigntyRule {
   rule: string;
@@ -39,109 +43,19 @@ interface SovereigntyRule {
   lastAudit: string;
 }
 
+/**
+ * A partner data-use agreement. Same rule as a consent: NO stored status. Two rows here
+ * shipped a hardcoded ACTIVE against expiry dates of 2026-01-15 and 2026-06-01 — an admin
+ * reading ACTIVE would authorise a disclosure under a lapsed BAA.
+ */
 interface DuaRow {
   partner: string;
   agreementType: string;
   signedDate: string;
   expiresDate: string;
-  status: 'ACTIVE' | 'EXPIRED' | 'PENDING';
 }
 
 // ─── Mock data ─────────────────────────────────────────────────────────────────
-
-const CONSENT_MOCK: ConsentRecord[] = [
-  {
-    id: 'cns-001',
-    patient: 'M. Redhawk',
-    mrn: '…0006',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims + SDOH',
-    grantedTo: 'Bennett County Health Network',
-    status: 'ACTIVE',
-    grantedDate: '2024-03-12',
-    expiresDate: '2025-03-12',
-    method: 'Electronic',
-    fhirRef: 'Consent/cns-001',
-  },
-  {
-    id: 'cns-002',
-    patient: 'M. Redhawk',
-    mrn: '…0006',
-    type: 'Research',
-    scope: 'De-identified Clinical',
-    grantedTo: 'RHTP Research Registry',
-    status: 'ACTIVE',
-    grantedDate: '2024-03-12',
-    expiresDate: '2026-03-12',
-    method: 'Electronic',
-    fhirRef: 'Consent/cns-002',
-  },
-  {
-    id: 'cns-003',
-    patient: 'M. Redhawk',
-    mrn: '…0006',
-    type: 'BH Data',
-    scope: 'Behavioral Health Records',
-    grantedTo: 'CCBHC — Clay County',
-    status: 'REVOKED',
-    grantedDate: '2023-11-01',
-    expiresDate: '2024-11-01',
-    method: 'Paper',
-    fhirRef: 'Consent/cns-003',
-  },
-  {
-    id: 'cns-004',
-    patient: 'D. Simmons',
-    mrn: '…0042',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims',
-    grantedTo: 'Jackson County Memorial',
-    status: 'ACTIVE',
-    grantedDate: '2024-01-08',
-    expiresDate: '2025-01-08',
-    method: 'Electronic',
-    fhirRef: 'Consent/cns-004',
-  },
-  {
-    id: 'cns-005',
-    patient: 'J. Whitfield',
-    mrn: '…0019',
-    type: 'Data Sharing',
-    scope: 'Clinical Only',
-    grantedTo: 'Bennett County Health Network',
-    status: 'EXPIRED',
-    grantedDate: '2023-06-15',
-    expiresDate: '2024-06-15',
-    method: 'Electronic',
-    fhirRef: 'Consent/cns-005',
-  },
-  {
-    id: 'cns-006',
-    patient: 'R. Gutierrez',
-    mrn: '…0031',
-    type: 'SDOH Sharing',
-    scope: 'Social Needs Data',
-    grantedTo: 'Unite Us Network',
-    status: 'ACTIVE',
-    grantedDate: '2024-05-20',
-    expiresDate: '2025-05-20',
-    method: 'Electronic',
-    fhirRef: 'Consent/cns-006',
-  },
-  {
-    id: 'cns-007',
-    patient: 'T. Begay',
-    mrn: '…0055',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims + SDOH',
-    grantedTo: 'Bennett County Health Network',
-    status: 'PENDING',
-    grantedDate: '—',
-    expiresDate: '—',
-    method: 'Pending Signature',
-    fhirRef: '—',
-  },
-];
 
 const SOVEREIGNTY_RULES: SovereigntyRule[] = [
   {
@@ -190,74 +104,36 @@ const SOVEREIGNTY_RULES: SovereigntyRule[] = [
 
 const DUA_MOCK: DuaRow[] = [
   {
-    partner: 'Bennett County Health Network',
+    partner: 'Prairie Health Network',
     agreementType: 'BAA + DUA',
     signedDate: '2023-01-15',
     expiresDate: '2026-01-15',
-    status: 'ACTIVE',
   },
   {
     partner: 'CCBHC — Clay County',
     agreementType: 'BH DUA',
     signedDate: '2022-09-01',
     expiresDate: '2024-09-01',
-    status: 'EXPIRED',
   },
   {
     partner: 'Unite Us Network',
     agreementType: 'SDOH Data Share',
     signedDate: '2024-02-10',
     expiresDate: '2027-02-10',
-    status: 'ACTIVE',
   },
   {
     partner: 'Jackson County Memorial',
     agreementType: 'BAA',
     signedDate: '2023-06-01',
     expiresDate: '2026-06-01',
-    status: 'ACTIVE',
   },
   {
     partner: 'RHTP Research Registry',
     agreementType: 'Research DUA',
     signedDate: '2024-01-01',
     expiresDate: '2027-01-01',
-    status: 'ACTIVE',
   },
 ];
-
-// ─── FHIR mapper ───────────────────────────────────────────────────────────────
-
-function mapFhirConsent(r: any): ConsentRecord {
-  const statusMap: Record<string, ConsentStatus> = {
-    active: 'ACTIVE',
-    inactive: 'EXPIRED',
-    rejected: 'REVOKED',
-    'entered-in-error': 'REVOKED',
-    proposed: 'PENDING',
-    draft: 'PENDING',
-  };
-  const ext = (url: string) => r.extension?.find((e: any) => e.url === url)?.valueString ?? '';
-  const patientDisplay = r.patient?.display ?? r.patient?.reference ?? '';
-  const initials =
-    patientDisplay
-      .split(' ')
-      .map((w: string) => w[0])
-      .join('. ') + '.';
-  return {
-    id: r.id ?? '—',
-    patient: initials || patientDisplay,
-    mrn: `…${ext('mrn').slice(-4) || r.id?.slice(-4) || '????'}`,
-    type: ext('consent-type') || r.category?.[0]?.coding?.[0]?.display || 'Data Sharing',
-    scope: ext('scope') || r.provision?.action?.[0]?.coding?.[0]?.display || '—',
-    grantedTo: r.organization?.[0]?.display ?? ext('grantedTo') ?? '—',
-    status: statusMap[r.status] ?? 'ACTIVE',
-    grantedDate: r.dateTime?.slice(0, 10) ?? '—',
-    expiresDate: r.provision?.period?.end?.slice(0, 10) ?? '—',
-    method: ext('method') || 'Electronic',
-    fhirRef: `Consent/${r.id}`,
-  };
-}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -268,11 +144,15 @@ const STATUS_PILL: Record<ConsentStatus, string> = {
   PENDING: 'bg-[#fff1e0] text-[#8a3800]',
 };
 
-const DUA_PILL: Record<DuaRow['status'], string> = {
-  ACTIVE: 'bg-[#defbe6] text-[#0e6027]',
-  EXPIRED: 'bg-[#fff1f1] text-[#a2191f]',
-  PENDING: 'bg-[#fff1e0] text-[#8a3800]',
-};
+const DUA_PILL: Record<ConsentStatus, string> = STATUS_PILL;
+
+/** A DUA's status, derived from its dates by the SAME function the consent rows use. */
+function duaStatus(dua: DuaRow, asOf: string): ConsentStatus {
+  return deriveConsentStatus(
+    { grantedDate: dua.signedDate, expiresDate: dua.expiresDate, revokedDate: null },
+    asOf
+  );
+}
 
 type Tab = 'records' | 'rules' | 'dua';
 
@@ -281,12 +161,23 @@ type Tab = 'records' | 'rules' | 'dua';
 export default function ConsentGovernance() {
   const [adminRole, setAdminRole] = useState<AdminRole>(DEFAULT_ADMIN_ROLE);
   const [tab, setTab] = useState<Tab>('records');
-  const [records, setRecords] = useState<ConsentRecord[]>(CONSENT_MOCK);
+  const [records, setRecords] = useState<readonly ConsentSeedRecord[]>(CONSENT_RECORDS);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ConsentStatus | 'ALL'>('ALL');
+  // One clock reading for this session's view: table rows, KPI tiles and the Revoke
+  // affordance all resolve against the SAME `asOf` instant, rendered below.
+  const [asOf] = useState<string>(() => clock.nowIso());
+  // DISPLAY ONLY, and deliberately separate from `asOf`. `asOf` is the one instant every row,
+  // KPI and affordance resolves against and must exist during SSR; `shownAt` is the string React
+  // diffs, so it waits for hydration. Rendering `asOf` directly produced a text mismatch
+  // (React #418) whenever SSR and hydration straddled a minute boundary. Register G-067.
+  const shownAt = useMountedInstant();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [isMock, setIsMock] = useState(true);
   const [rulesOpen, setRulesOpen] = useState(true);
+  // A failed live read must be VISIBLE: a governance table silently falling back to seed
+  // records is a fail-quiet — the reader cannot tell authored data from the system of record.
+  const [liveReadFailed, setLiveReadFailed] = useState(false);
 
   useEffect(() => {
     setIsMock(getFhirMockMode());
@@ -294,17 +185,17 @@ export default function ConsentGovernance() {
 
   useEffect(() => {
     if (getFhirMockMode()) {
-      setRecords(CONSENT_MOCK);
+      setRecords(CONSENT_RECORDS);
       return;
     }
     (async () => {
       try {
-        const client = getFhirClient();
-        const bundle: any = await client.search('Consent', { _count: '50' });
-        const entries: any[] = (bundle?.entry ?? []).map((e: any) => e.resource);
-        if (entries.length > 0) setRecords(entries.map(mapFhirConsent));
+        const bundle: unknown = await getFhirClient().search('Consent', { _count: '50' });
+        const live = consentsFromBundle(bundle);
+        if (live.length > 0) setRecords(live);
       } catch {
-        /* keep mock */
+        // Keep the seed records so the table is never empty, but SAY SO — never swallow.
+        setLiveReadFailed(true);
       }
     })();
   }, []);
@@ -323,12 +214,15 @@ export default function ConsentGovernance() {
     );
   }
 
-  const filtered = records.filter((r) => {
+  // THE one derivation: rows and tile counts from a single traversal at a single instant.
+  const view = loadConsentView(asOf, records);
+  const filtered = view.records.filter((r) => {
+    const needle = search.toLowerCase();
     const matchSearch =
       !search ||
-      r.patient.toLowerCase().includes(search.toLowerCase()) ||
-      r.grantedTo.toLowerCase().includes(search.toLowerCase()) ||
-      r.id.toLowerCase().includes(search.toLowerCase());
+      r.patientDisplay.toLowerCase().includes(needle) ||
+      r.grantedTo.toLowerCase().includes(needle) ||
+      r.id.toLowerCase().includes(needle);
     const matchStatus = statusFilter === 'ALL' || r.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -388,24 +282,27 @@ export default function ConsentGovernance() {
       </div>
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {liveReadFailed && (
+        <p
+          role="alert"
+          className="text-xs mb-3 px-3 py-2 bg-[#fff1f1] text-[#a2191f] border border-[#ffb3b8]"
+        >
+          Live FHIR Consent read failed — showing seeded records, not the system of record.
+        </p>
+      )}
+      {/* The instant every status on this screen is derived against — a governance surface
+          must state its as-of, otherwise "ACTIVE" is an undated claim. */}
+      <p className="text-xs text-carbon-gray-50 mb-2">
+        Status derived from consent period dates as of{' '}
+        <span className="font-mono">{formatInstantUtc(shownAt)}</span>
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
-          { label: 'Total Records', value: records.length, color: 'border-l-carbon-gray-20' },
-          {
-            label: 'Active',
-            value: records.filter((r) => r.status === 'ACTIVE').length,
-            color: 'border-l-[#24a148]',
-          },
-          {
-            label: 'Revoked',
-            value: records.filter((r) => r.status === 'REVOKED').length,
-            color: 'border-l-[#da1e28]',
-          },
-          {
-            label: 'Pending',
-            value: records.filter((r) => r.status === 'PENDING').length,
-            color: 'border-l-[#f1c21b]',
-          },
+          { label: 'Total Records', value: view.records.length, color: 'border-l-carbon-gray-20' },
+          { label: 'Active', value: view.counts.ACTIVE, color: 'border-l-[#24a148]' },
+          { label: 'Expired', value: view.counts.EXPIRED, color: 'border-l-[#8d8d8d]' },
+          { label: 'Revoked', value: view.counts.REVOKED, color: 'border-l-[#da1e28]' },
+          { label: 'Pending', value: view.counts.PENDING, color: 'border-l-[#f1c21b]' },
         ].map((k) => (
           <div
             key={k.label}
@@ -479,8 +376,12 @@ export default function ConsentGovernance() {
                       className="hover:bg-carbon-gray-10 cursor-pointer"
                       onClick={() => setExpanded(expanded === r.id ? null : r.id)}
                     >
-                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100">{r.patient}</td>
-                      <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">{r.mrn}</td>
+                      <td className="px-4 py-2.5 font-medium text-carbon-gray-100">
+                        {r.patientDisplay}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
+                        {r.mrnMasked}
+                      </td>
                       <td className="px-4 py-2.5 text-xs text-carbon-gray-70">{r.type}</td>
                       <td className="px-4 py-2.5 text-xs text-carbon-gray-100">{r.grantedTo}</td>
                       <td className="px-4 py-2.5">
@@ -491,10 +392,10 @@ export default function ConsentGovernance() {
                         </span>
                       </td>
                       <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
-                        {r.expiresDate}
+                        {displayDate(r.expiresDate)}
                       </td>
                       <td className="px-4 py-2.5 text-xs font-mono text-carbon-blue">
-                        {r.fhirRef}
+                        {displayRef(r.fhirRef)}
                       </td>
                       {canFull(adminRole, 'consent-governance') && (
                         <td className="px-4 py-2.5">
@@ -534,7 +435,9 @@ export default function ConsentGovernance() {
                               <span className="text-carbon-gray-50 font-semibold uppercase tracking-wide">
                                 Granted
                               </span>
-                              <p className="mt-0.5 text-carbon-gray-100">{r.grantedDate}</p>
+                              <p className="mt-0.5 text-carbon-gray-100">
+                                {displayDate(r.grantedDate)}
+                              </p>
                             </div>
                             <div>
                               <span className="text-carbon-gray-50 font-semibold uppercase tracking-wide">
@@ -634,23 +537,26 @@ export default function ConsentGovernance() {
               </tr>
             </thead>
             <tbody className="divide-y divide-carbon-gray-20">
-              {DUA_MOCK.map((d) => (
-                <tr key={d.partner} className="hover:bg-carbon-gray-10">
-                  <td className="px-4 py-2.5 font-medium text-carbon-gray-100">{d.partner}</td>
-                  <td className="px-4 py-2.5 text-xs text-carbon-gray-70">{d.agreementType}</td>
-                  <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
-                    {d.signedDate}
-                  </td>
-                  <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
-                    {d.expiresDate}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`text-xs font-semibold px-2 py-0.5 ${DUA_PILL[d.status]}`}>
-                      {d.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {DUA_MOCK.map((d) => {
+                const status = duaStatus(d, asOf);
+                return (
+                  <tr key={d.partner} className="hover:bg-carbon-gray-10">
+                    <td className="px-4 py-2.5 font-medium text-carbon-gray-100">{d.partner}</td>
+                    <td className="px-4 py-2.5 text-xs text-carbon-gray-70">{d.agreementType}</td>
+                    <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
+                      {d.signedDate}
+                    </td>
+                    <td className="px-4 py-2.5 text-xs font-mono text-carbon-gray-50">
+                      {d.expiresDate}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className={`text-xs font-semibold px-2 py-0.5 ${DUA_PILL[status]}`}>
+                        {status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

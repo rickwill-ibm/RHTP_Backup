@@ -11,10 +11,10 @@ export const defaultMariaState: PatientSharedState = {
   age: 34,
   gender: 'F',
   dob: '1992-03-22',
-  pcp: 'Bennett County Health PCP',
+  pcp: 'Prairie Health PCP',
   careManager: 'Sarah Johnson',
   careManagerInitials: 'SJ',
-  organization: 'Bennett County Health Services',
+  organization: 'Prairie Health Services',
   attribution: 'Confirmed · Medicaid RHTP Track 3',
 
   episodeType: 'Pre-Diabetic / Postpartum',
@@ -48,11 +48,11 @@ export const defaultMariaState: PatientSharedState = {
   referralStatus: 'Active',
   referralDaysOpen: 12,
   foodSecurity: 'SNAP expired T+47d — unmet need',
-  housingStatus: 'Waitlist #47 — SDHDA',
+  housingStatus: 'Waitlist #47 — Housing Agency',
   language: 'English / Lakota',
   literacy: 'moderate',
   cohortFlag: 'Postpartum · Frontier SD · Oglala Lakota',
-  ruralDistance: '47 miles to Bennett County Health',
+  ruralDistance: '47 miles to Prairie Health Services',
   disparityFlag: 'AI/AN · Rural frontier · Medicaid',
   snapStatus: 'Expired — renewal overdue',
 
@@ -63,7 +63,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'A1C Recheck (Pre-Diabetic)',
       status: 'Open',
       daysOpen: 38,
-      assignedTo: 'Bennett County Health PCP',
+      assignedTo: 'Prairie Health PCP',
     },
     {
       id: 'mg-2',
@@ -71,7 +71,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'Postpartum Visit (427d overdue)',
       status: 'Open',
       daysOpen: 427,
-      assignedTo: 'Bennett County Health PCP',
+      assignedTo: 'Prairie Health PCP',
     },
     {
       id: 'mg-3',
@@ -79,7 +79,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'Well-Child 24mo — Sophia (21d overdue)',
       status: 'Open',
       daysOpen: 21,
-      assignedTo: 'Bennett County Health PCP',
+      assignedTo: 'Prairie Health PCP',
     },
     {
       id: 'mg-4',
@@ -103,7 +103,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'SNAP Renewal (T+47d overdue)',
       status: 'Open',
       daysOpen: 47,
-      assignedTo: 'Bennett County Action CBO',
+      assignedTo: 'Frontier Community Action CBO',
     },
     {
       id: 'mg-7',
@@ -111,7 +111,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'WIC Enrollment (eligible — not enrolled)',
       status: 'Open',
       daysOpen: 60,
-      assignedTo: 'Bennett County Action CBO',
+      assignedTo: 'Frontier Community Action CBO',
     },
     {
       id: 'mg-8',
@@ -119,7 +119,7 @@ export const defaultMariaState: PatientSharedState = {
       name: 'Childcare Subsidy (CCAP) Enrollment',
       status: 'Open',
       daysOpen: 60,
-      assignedTo: 'Bennett County Action CBO',
+      assignedTo: 'Frontier Community Action CBO',
     },
     {
       id: 'mg-9',

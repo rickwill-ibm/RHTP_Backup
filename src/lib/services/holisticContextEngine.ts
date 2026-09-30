@@ -42,14 +42,138 @@ export class HolisticContextEngine {
    */
   buildContext(patientId: string): HolisticPatientContext {
     // In production, this would aggregate from multiple data sources
-    // For now, return Maria's context as the demo patient
+    // Check for Denise Fontaine (NY Demo) or Maria Redhawk (SD Demo)
+    if (
+      patientId === 'DENISE_NY_001' ||
+      patientId === 'patient-denise-fontaine' ||
+      patientId === 'denise-fontaine'
+    ) {
+      return this.getDeniseContext();
+    }
 
-    if (patientId === 'patient-001' || patientId === 'maria-redhawk') {
+    if (
+      patientId === 'patient-001' ||
+      patientId === 'maria-redhawk' ||
+      patientId === 'MARIA_SD_001'
+    ) {
       return this.getMariaContext();
     }
 
     // Default context for other patients
     return this.getDefaultContext(patientId);
+  }
+
+  /**
+   * Get Denise Fontaine's complete holistic context (Franklin County, NY)
+   */
+  private getDeniseContext(): HolisticPatientContext {
+    return {
+      patient: {
+        id: 'patient-denise-fontaine',
+        name: 'Denise Fontaine',
+        age: 52,
+        gender: 'Female',
+        mrn: 'NY-882104',
+      },
+
+      clinicalProfile: {
+        chronicConditions: [
+          {
+            name: 'Type 2 Diabetes Mellitus',
+            icdCode: 'E11.9',
+            severity: 'moderate',
+            controlled: false,
+            diagnosisDate: '2024-05-10',
+          },
+          {
+            name: 'Diabetic Retinopathy Screening Needed',
+            icdCode: 'E11.319',
+            severity: 'moderate',
+            controlled: false,
+            diagnosisDate: '2025-02-14',
+          },
+          {
+            name: 'Mild-to-Moderate Anxiety (CCMP Monitored)',
+            icdCode: 'F41.1',
+            severity: 'low',
+            controlled: true,
+            diagnosisDate: '2026-01-15',
+          },
+        ],
+        conditionCount: 3,
+        complexityScore: 72,
+        riskLevel: 'high',
+        openCareGaps: [
+          {
+            id: 'GAP-NY-001',
+            type: 'HEDIS_GSD',
+            description: 'Glycemic Status Assessment (HbA1c Recheck)',
+            hedisCode: 'GSD',
+            dueDate: '2026-09-15',
+            priority: 'high',
+          },
+          {
+            id: 'GAP-NY-002',
+            type: 'HEDIS_EED',
+            description: 'Diabetic Retinal Eye Exam (5-week specialist waitlist)',
+            hedisCode: 'EED',
+            dueDate: '2026-10-30',
+            priority: 'moderate',
+          },
+        ],
+      },
+
+      sdohBarriers: [
+        {
+          domain: 'transportation',
+          barrier: 'Transportation / Distance: 45-min clinic drive, winter road conditions',
+          severity: 'high',
+          impactOnCare: 'Hard blocker on clinic visits and routine lab draws (Keystone)',
+          status: 'action_plan_active',
+        },
+        {
+          domain: 'financial_strain',
+          barrier: 'Seasonal farm-adjacent household income variability',
+          severity: 'medium',
+          impactOnCare: 'Amplifies medication affordability strain during winter months',
+          status: 'monitoring',
+        },
+      ],
+
+      caregiverBurden: {
+        hasCaregiver: false,
+        caregiverType: 'none',
+        burdenScore: 0,
+        burnoutRisk: 'low',
+      },
+
+      financialStress: {
+        level: 'moderate',
+        monthlyOutOfPocketEstimate: 120,
+        medicationInsecurityRisk: 'medium',
+        coverageGaps: ['NY Medicaid Managed Care / NYRx Active'],
+      },
+
+      accessLimitations: {
+        distanceToNearestPcpMiles: 28,
+        distanceToSpecialistMiles: 42,
+        pharmacyAccessLevel: 'limited',
+        broadbandReliability: 'moderate',
+      },
+
+      digitalCapacity: {
+        deviceAccess: ['smartphone'],
+        healthLiteracyLevel: 'medium',
+        patientPortalActive: true,
+        preferredContactChannel: 'sms',
+      },
+
+      psychosocialFactors: {
+        recentLifeEvents: ['Winter farm slowdown', 'Delayed specialty eye care'],
+        socialIsolationScore: 40,
+        healthGoalsExpressed: ['Keep A1c controlled below 8.0%', 'Complete retinal eye exam'],
+      },
+    };
   }
 
   /**

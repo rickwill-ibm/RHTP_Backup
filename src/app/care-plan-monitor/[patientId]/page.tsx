@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCarePlanStore, type MonitoredCarePlan } from '@/lib/stores/carePlanStore';
 import { getVisiblePatients, PLATFORM_TO_FHIR_ID_MAP } from '@/lib/patientRegistry';
+import { fromRegistryGaps } from '@/lib/carePlan/registryGaps';
 import { generateHolisticCarePlan } from '@/lib/services/carePlanGenerator';
 import { getFhirMockMode, getFhirClient } from '@/lib/services/fhirClient';
 import { useLaunchMemberSync } from '@/lib/context/useLaunchMemberSync';
@@ -27,9 +28,8 @@ export default function CarePlanMonitorPage() {
     if (loadedRef.current === patientId) return;
     loadedRef.current = patientId;
 
-    // Find patient in registry
-    const allPatients = getVisiblePatients(getFhirMockMode());
-    const patient = allPatients.find((p: any) => p.platformId === patientId || p.id === patientId);
+    const all = getVisiblePatients(getFhirMockMode());
+    const patient = all.find((p) => p.platformId === patientId || p.fhirId === patientId);
     if (!patient) {
       setLoading(false);
       return;
@@ -43,7 +43,7 @@ export default function CarePlanMonitorPage() {
       const generated = generateHolisticCarePlan({
         patient: patient as any,
         hccSuspects: [],
-        careGaps: (patient.careGaps || []) as any,
+        careGaps: fromRegistryGaps(patient.careGaps, patientId), // typed adapter, not `as any`
         alerts: [],
       });
       setCarePlan(patientId, generated as any);

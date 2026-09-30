@@ -33,7 +33,7 @@ so the agent **CAN** transmit — but ONLY in the post-approval branch, after
 _without_ one (not _structurally_ impossible): at **any** tier the proposal is
 `isSubmission`, so the runtime auto-approve gate refuses it (`isSubmission` →
 `isAutoApprovable` false — there is **no** auto-submit path at any tier), and the
-workflow body ASSERTS `isQualifiedHumanDecision` before the submit tool, so a
+workflow body ASSERTS `isNonAutomatedDecider` before the submit tool, so a
 `system`/`autonomy:*` signaller can never reach it. A REJECT is terminal with no
 submission. The transmit itself is a **MOCK, not-transmitted** channel
 (`channel:'mock'`, `transmitted:false`) behind the **fail-closed** real-EDI
@@ -43,6 +43,6 @@ reconstruct-and-signal engine, never at draft/dispatch time. Because step 4
 suspends, in a per-request engine `run` may not complete to the return — the caller
 reads the durable draft + proposal from engine state after suspension.
 
-The runtime emits `agent.task.proposed` → `approved`/`rejected` → `executed`
+The runtime emits `agent.task.proposed` → `approved`/`rejected` → `settled`
 around the proposal; payloads are PHI-safe (claim/remittance/auth ids, delta as a
 string — no member payload). `buildRecoveryAction` is the pure proposal builder.

@@ -9,7 +9,7 @@
  *
  * REUSE-FIRST — COMPOSITION, not new logic. It reimplements NOTHING:
  *   • the permitted autonomy rung + human requirement ← `evaluateInterlock` (interlock.ts)
- *   • the qualified-human gate                        ← `isQualifiedHumanDecision` (decisionGate.ts)
+ *   • the qualified-human gate                        ← `isNonAutomatedDecider` (decisionGate.ts)
  *   • the payer-facing submission class rule          ← the interlock's `isSubmission` (mirrors FIX-1)
  *   • the weakest-link evidence tier                  ← `computeProcessTier` (tier.ts)
  *   • the MOCK X12/appeal transmission                ← `submissionGateway` seam (fail-closed; not-transmitted)
@@ -27,6 +27,8 @@
  * (the ROUTE owns the store load/save/re-seal and resolves the fail-closed gateway seam).
  * PHI-safe: references / codes / amounts only.
  */
+import type { QualifiedReviewer } from '@/lib/authz/credentialing';
+import { assertExecutionAuthorised } from './executionAuthority';
 import {
   computeProcessTier,
   latestOfType,
@@ -106,6 +108,20 @@ export interface GovernedActionContext {
    * may veto), while a submission-class action or a HITL/low-rung action stays proposed.
    */
   decision?: HumanDecision | null;
+  /**
+   * PROOF that `decision.decidedBy` is a qualified reviewer, minted by
+   * `@/lib/authz/credentialing.assertReviewerQualified`.
+   *
+   * REQUIRED to EXECUTE. Adversarial review found this function is a full parallel resolution path:
+   * it accepts a `HumanDecision`, runs the interlock, and on `resolved` executes a payer-facing
+   * submission and writes `decidedBy` into the durable evidence ledger — calling neither
+   * `assertReviewerQualified` nor `assertSignalDecider`, and matching no marker of the E14 gate that
+   * exists to catch exactly that. Its only caller qualifies first, so the live path was covered; the
+   * FUNCTION was exported, unguarded and unwatched, and the second caller — an ops tool, a batch
+   * runner, a test turned utility — would have executed a submission on an unqualified decider with
+   * every gate green. The assert now lives here, so a caller cannot forget it.
+   */
+  reviewer?: QualifiedReviewer | null;
   /**
    * The resolved MOCK submission gateway (the route resolves the fail-closed seam and
    * passes it). Required only to EXECUTE a submission-class action; `null`/absent for
@@ -292,6 +308,7 @@ export async function runGovernedAction(
 
   // APPROVED (or auto-proceeded at HOTL/autonomous for a non-submission action):
   // EXECUTE the MOCK action and capture its not-transmitted receipt.
+  assertExecutionAuthorised(ctx.decision, ctx.reviewer); // see ./executionAuthority.ts
   const ref = executeMock(input.actionType, isSubmission, refs, ctx);
   return { ...commonOut, status: 'executed', ref, channel: 'mock' };
 }

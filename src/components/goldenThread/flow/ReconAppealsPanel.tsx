@@ -23,9 +23,19 @@ export function ReconAppealsPanel({
   appeals: Workflow[];
   openWfSeq: number | null;
   setOpenWfSeq: (seq: number | null) => void;
-}): React.ReactElement | null {
+}): React.ReactElement {
   const openWf = appeals.find((w) => w.reconSeq === openWfSeq) ?? appeals[appeals.length - 1];
-  if (!(appeals.length > 0 && openWf)) return null;
+  if (!(appeals.length > 0 && openWf)) {
+    return (
+      <div className="ed-card p-4 text-center">
+        <p className="text-[11px] font-semibold text-carbon-gray-70">No appeal in flight</p>
+        <p className="mt-1 text-[10px] text-carbon-gray-50">
+          Draft one from the Ledger tab (an underpayment record → “Draft appeal”) or from a
+          systematic pattern on the Overview tab →
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

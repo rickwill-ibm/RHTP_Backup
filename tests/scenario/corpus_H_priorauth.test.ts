@@ -83,7 +83,11 @@ describe('UC-38 | Standard PA through the golden thread (pipeline-real)', () => 
       order: { code: '72148', display: 'MRI lumbar spine' },
       createdAt: '2026-08-22T09:00:00.000Z',
     });
-    rec = recordDetermination(rec, { id: 'e1', ts: '2026-08-22T09:01:00.000Z', determination: det });
+    rec = recordDetermination(rec, {
+      id: 'e1',
+      ts: '2026-08-22T09:01:00.000Z',
+      determination: det,
+    });
     rec = appendEntry(rec, {
       id: 'e2',
       ts: '2026-08-22T09:05:00.000Z',
@@ -97,7 +101,11 @@ describe('UC-38 | Standard PA through the golden thread (pipeline-real)', () => 
     expect(summary.currentDetermination?.requiresPA).toBe(true);
     // The approved PA is a real ledger resource, projected to PHI-safe audit.
     const events = toAuditEvents(rec, 'uc38-cid');
-    expect(events.some((e) => e.action === 'evidence.pas-decision' && /decision=approved/.test(e.detail ?? ''))).toBe(true);
+    expect(
+      events.some(
+        (e) => e.action === 'evidence.pas-decision' && /decision=approved/.test(e.detail ?? '')
+      )
+    ).toBe(true);
     for (const e of events) expect(() => assertPhiSafe(e)).not.toThrow();
   });
 });
@@ -109,13 +117,13 @@ describe('UC-39 | Gold card earned from real feeds', () => {
   const ctx = { ...MOCK_GOLD_CARD_CONTEXT, asOf };
 
   it('a gold-carded provider auto-approves — PA is waived, no manual review', () => {
-    const gc = evaluateGoldCard({ providerNpi: '1730154783', code, payer }, ctx);
+    const gc = evaluateGoldCard({ providerNpi: '1730154782', code, payer }, ctx);
     expect(gc.applied).toBe(true);
 
     let rec = createEvidenceRecord({
       id: 'ev-uc39-gc',
       memberId: 'uc39-member',
-      order: { code, providerNpi: '1730154783' },
+      order: { code, providerNpi: '1730154782' },
       createdAt: asOf,
     });
     rec = recordGoldCard(rec, {

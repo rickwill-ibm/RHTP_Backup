@@ -71,9 +71,20 @@ function winnerForField(
   const tiebreak = rules.tiebreak;
 
   // Walk ranks top-first; first source with any fact wins, its facts resolved by tiebreak.
-  for (let rank = 0; rank < ranking.length; rank++) {
-    // mut-equiv: <= adds one iteration reading ranking[len]=undefined, which filters to zero facts and continues — identical behavior
-    const source = ranking[rank];
+  //
+  // `ranking.entries()` rather than an index loop, DELIBERATELY. The index form carried a
+  // relational bound (`rank < ranking.length`) whose `<=` mutant is provably equivalent — the
+  // extra iteration reads `ranking[len] === undefined`, filters to zero facts and `continue`s —
+  // and no test can kill it without casting a malformed fact past the type contract. So it
+  // needed a `mut-equiv` token, and that token was written on the line BELOW the `for`, where
+  // check-mutation.mjs cannot see it: it matches PER LINE (its line 91, `!line.includes(...)`),
+  // and a comment-only line is skipped regardless. The mutant read as a real survivor and
+  // failed E13 on 2026-09-29 — four lines under a comment warning of that exact trap.
+  //
+  // A suppression token one line out of place is indistinguishable from no token at all. The
+  // fix is therefore not to move it: remove the operator, and the mutant, and the need for a
+  // justification anyone can misplace. Same order, same indices, no bound to mutate.
+  for (const [rank, source] of ranking.entries()) {
     const atSource = facts.filter((f) => f.source === source);
     if (atSource.length === 0) continue;
     const chosen = resolveTie(atSource, tiebreak);

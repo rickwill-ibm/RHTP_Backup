@@ -1,0 +1,97 @@
+{
+  "_comment": "Generic demo data, no persona. Synthetic benefit-program enrollment reference: office names, addresses, phones (NANP-reserved 555) and portal domains (RFC 2606 example.org) are fabricated and identify no real agency or organisation. Federal/state program names (WIC, SNAP, TANF, LIHEAP, CCAP) are program identifiers, not entities. Data is not code (AI-CODING-CONVENTIONS §2).",
+  "portal": {
+    "domain": "benefits.example.org",
+    "snapRenewalPath": "benefits.example.org/snap",
+    "eraPath": "benefits.example.org/era",
+    "statewidePhone": "(605) 555-0151"
+  },
+  "defaultOffice": {
+    "name": "State Benefits Office — Frontier District",
+    "address": "18 Frontier Rd, Martin, SD 57551",
+    "phone": "(605) 555-0136",
+    "hours": "Mon–Fri 8am–5pm"
+  },
+  "offices": {
+    "WIC — Women, Infants & Children": {
+      "name": "Regional WIC Office",
+      "address": "18 Frontier Rd, Martin, SD 57551",
+      "phone": "(605) 555-0135",
+      "hours": "Mon–Fri 8am–5pm"
+    },
+    "SD Childcare Assistance Program (CCAP)": {
+      "name": "State Benefits Office — Frontier District",
+      "address": "18 Frontier Rd, Martin, SD 57551",
+      "phone": "(605) 555-0136",
+      "hours": "Mon–Fri 8am–5pm"
+    },
+    "SNAP Food Assistance": {
+      "name": "State Benefits Office — Frontier District",
+      "address": "18 Frontier Rd, Martin, SD 57551",
+      "phone": "(605) 555-0136",
+      "hours": "Mon–Fri 8am–5pm"
+    },
+    "TANF — Temporary Assistance for Needy Families": {
+      "name": "State Benefits Office — Frontier District",
+      "address": "18 Frontier Rd, Martin, SD 57551",
+      "phone": "(605) 555-0136",
+      "hours": "Mon–Fri 8am–5pm"
+    },
+    "LIHEAP — Low Income Home Energy Assistance": {
+      "name": "Highland Community Action Partnership",
+      "address": "720 Highland Ave, Rapid City, SD 57701",
+      "phone": "(605) 555-0139",
+      "hours": "Mon–Fri 8am–4:30pm"
+    }
+  },
+  "housingAgency": {
+    "name": "State Housing Finance Agency",
+    "shortName": "Housing Agency",
+    "address": "500 Capitol Plaza, Pierre, SD 57501",
+    "phone": "(605) 555-0133",
+    "domain": "housing.example.org"
+  },
+  "anchorCbo": "Frontier Community Action CBO",
+  "monthlyValues": {
+    "WIC — Women, Infants & Children": "$320/mo",
+    "SD Childcare Assistance Program (CCAP)": "$487/mo",
+    "SNAP Food Assistance": "$281/mo",
+    "TANF — Temporary Assistance for Needy Families": "$463/mo",
+    "LIHEAP — Low Income Home Energy Assistance": "$180/season"
+  },
+  "documents": {
+    "WIC — Women, Infants & Children": [
+      "Proof of identity (state ID or tribal ID)",
+      "Proof of residency (utility bill or lease)",
+      "Proof of income (pay stubs or benefit letter)",
+      "Infant/child birth certificate or pregnancy documentation"
+    ],
+    "SD Childcare Assistance Program (CCAP)": [
+      "Proof of identity (state ID or tribal ID)",
+      "Proof of residency in Bennett County",
+      "Proof of income (last 30 days)",
+      "Child's birth certificate",
+      "Childcare provider information"
+    ],
+    "SNAP Food Assistance": [
+      "Proof of identity",
+      "Proof of state residency",
+      "Proof of income or zero-income statement",
+      "Social Security numbers for all household members"
+    ],
+    "TANF — Temporary Assistance for Needy Families": [
+      "Proof of identity",
+      "Proof of state residency",
+      "Birth certificates for all children",
+      "Proof of income",
+      "Social Security cards"
+    ],
+    "LIHEAP — Low Income Home Energy Assistance": [
+      "Proof of identity",
+      "Proof of residency",
+      "Most recent utility bill",
+      "Proof of income"
+    ]
+  },
+  "defaultDocuments": ["Proof of identity", "Proof of residency", "Proof of income"]
+}

@@ -52,12 +52,12 @@ const PROGRAMS = [
 
 const ORGS = [
   'All Organizations',
-  'Oglala Lakota PCP',
-  'Monument Cardio',
-  'Bennett Co. Health',
-  'Gregory Co. Medical',
-  'Winner Regional',
-  'Fall River Specialists',
+  'Badlands Primary Care Group',
+  'Summit Regional',
+  'Prairie Health Services',
+  'Riverside Medical Associates',
+  'Cedar Bluff Regional Medical Center',
+  'Southridge Specialist Network',
 ];
 
 const PERIODS = ['YTD 2026', 'Q1 2026', 'Q2 2026', 'Q3 2026 (proj)', 'Full Year 2025'];

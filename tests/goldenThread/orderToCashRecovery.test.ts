@@ -6,7 +6,7 @@
  *  - F1: when deps.recovery is injected, the AGENT is the single writer of the
  *    recovery draft (exactly one recovery entry — orderToCash does NOT double-write),
  *    recovery.status==='proposed', workItemId defined, `agent.task.proposed` emitted
- *    once, the workflow stays SUSPENDED (no `agent.task.executed` — HITL never
+ *    once, the workflow stays SUSPENDED (no `agent.task.settled` — HITL never
  *    auto-approves), and the record is persisted ONCE.
  *  - the recovery rung is manifest-backed: permittedRung(manifest tier, currentTier).
  *  - F4: dispatch ONLY on the firstProcessed path — a replay of the same 835 creates
@@ -176,10 +176,11 @@ describe('Wave-3 F1 — the recovery draft is produced by the GOVERNED agent', (
     expect(result.recovery?.workItemId).toBeTruthy();
     expect(result.recovery?.requiresHumanForSubmission).toBe(true);
 
-    // `agent.task.proposed` emitted exactly once; the workflow SUSPENDED and NOTHING
-    // executed — HITL never auto-approves, so no `agent.task.executed`.
+    // `agent.task.proposed` emitted exactly once; the workflow SUSPENDED and therefore never
+    // settled — HITL never auto-approves. (`agent.task.executed` was removed in W8, register
+    // G-002: it asserted an effect the engine neither performed nor observed.)
     expect(rt.eventSink.ofType('agent.task.proposed').length).toBe(1);
-    expect(rt.eventSink.ofType('agent.task.executed').length).toBe(0);
+    expect(rt.eventSink.ofType('agent.task.settled').length).toBe(0);
     expect(rt.recovery.engine.query(rt.workflowId)?.status).toBe('waiting-decision');
 
     // Persisted ONCE, with the agent-written draft on it.
@@ -237,7 +238,7 @@ describe('Wave-3 F4 — dispatch ONLY on the firstProcessed path (no replay doub
 });
 
 describe('Wave-3 — a non-underpaid verdict dispatches no recovery', () => {
-  it("a denied PA → not-recoverable → no proposal, no draft", async () => {
+  it('a denied PA → not-recoverable → no proposal, no draft', async () => {
     const store = spyStore();
     const rt = runtime();
     const result = await runOrderToCash(

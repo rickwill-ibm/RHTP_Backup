@@ -18,11 +18,39 @@ export function priorityScore(signal: Signal, pack: PolicyPack, ctx: MemberConte
   return base + boost;
 }
 
-/** Resolve the channel: the signal's own, else member preference, else pack order. */
+/**
+ * Internal routing, not a way of contacting a member.
+ *
+ * `task` puts work in front of the CARE TEAM. A member's channel preference says how to reach the
+ * MEMBER, so it has nothing to say about a care-team task and must not override one.
+ */
+const INTERNAL_CHANNELS: ReadonlySet<Channel> = new Set<Channel>(['task']);
+
+/**
+ * Resolve the channel: the member's preference for anything member-facing, else the signal's own,
+ * else the pack order.
+ *
+ * WHAT THIS ORDER REPLACED, AND WHY IT IS A §1557 FIX, NOT A REFACTOR. It read
+ * `if (signal.channel) return signal.channel;` FIRST — and `signalIntake` sets `signal.channel` from
+ * `TaxonomyEntry.defaultChannel`, which 10 of the 11 shipped taxonomy kinds carry. So the member's
+ * stated preference was reached only for the one kind with no default: it was, in practice, dead.
+ *
+ * A deaf or hard-of-hearing member whose recorded preference is `['sms']` received care-gap outreach
+ * on `portal`, because the taxonomy said so. That is an effective-communication failure under
+ * Section 1557 (45 CFR 92.202), and it is exactly the harm `fairness-lock.json`'s
+ * `MemberContext.channelPreference` entry claims to be about — while that entry's own basis said
+ * "resolveChannel SELECTS the channel from it", which was false. A fairness record that misdescribes
+ * the mechanism is worse than no record: it points a reviewer away from the defect.
+ *
+ * `task` is exempt because it is internal routing, so preference does not apply. Every OTHER
+ * taxonomy default is now a FALLBACK for a member who expressed no preference, which is what a
+ * default should be.
+ */
 export function resolveChannel(signal: Signal, pack: PolicyPack, ctx: MemberContext): Channel {
-  if (signal.channel) return signal.channel;
+  if (signal.channel && INTERNAL_CHANNELS.has(signal.channel)) return signal.channel;
   const pref = ctx.channelPreference && ctx.channelPreference[0];
   if (pref) return pref;
+  if (signal.channel) return signal.channel;
   return pack.channelDefaultOrder[0] ?? 'portal';
 }
 
@@ -43,10 +71,32 @@ export function isExpired(signal: Signal, nowMs: number): boolean {
   return signal.occurredAtMs + signal.ttlHours * HOUR_MS < nowMs;
 }
 
-/** True when a channel with a contact window is currently outside it (delay path). */
-export function outsideSmsWindow(channel: Channel, nowMs: number, pack: PolicyPack): boolean {
+/**
+ * True when a channel with a contact window is currently outside it (delay path).
+ *
+ * THE QUIET-HOURS WINDOW IS A §92.210 IDENTIFIED INPUT (`fairness-lock.json`,
+ * `PolicyPack.smsWindow`), and it was contradicting itself. `PolicyPack.smsWindow`'s own type
+ * comment reads "24h clock, LOCAL" while this function read `getUTCHours()`. One UTC window across
+ * a multi-timezone state lands at the wrong local hour for a subset of members — so members in one
+ * part of a state were delayed for reasons that had nothing to do with their preference. And the
+ * window only ever delays SMS, the channel deaf and hard-of-hearing members depend on, so the error
+ * fell along a disability line.
+ *
+ * `utcOffsetMinutes` resolves it AS THE MEMBER EXPERIENCES IT when the member's offset is known.
+ * When it is NOT known the behaviour is unchanged (UTC) — deliberately, and recorded as residue in
+ * the lock rather than papered over: defaulting an unknown member to a guessed timezone would
+ * substitute one silent error for another, and the honest state is that this platform does not yet
+ * carry a member timezone.
+ */
+export function outsideSmsWindow(
+  channel: Channel,
+  nowMs: number,
+  pack: PolicyPack,
+  utcOffsetMinutes?: number
+): boolean {
   if (channel !== 'sms') return false;
-  const hour = new Date(nowMs).getUTCHours();
+  const shifted = nowMs + (utcOffsetMinutes ?? 0) * 60_000;
+  const hour = new Date(shifted).getUTCHours();
   const { startHour, endHour } = pack.smsWindow;
   return !(hour >= startHour && hour < endHour);
 }

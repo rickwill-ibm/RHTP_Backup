@@ -10,14 +10,26 @@
  */
 import type { EscalationPriority, ProposedAction } from '@/lib/agentRuntime';
 import type { IdempotencyStore } from '@/lib/idempotency';
-import type { MemberContext, Touchpoint } from '@/lib/sde';
+import type { MemberContext } from '@/lib/sde';
+// Type-only, so nothing is imported at runtime and no module cycle exists: the
+// brand is the dispatch module's proof-of-disclosure, and the outreach task is
+// where it has to LAND to enforce anything.
+import type { DisclosedTouchpoint } from '@/lib/agents/dispatch';
 
 export const OUTREACH_AGENT_ID = 'outreach-agent';
 
 /** A unit of outreach work: one SDE coordinated touchpoint plus its gate inputs. */
 export interface OutreachTask {
-  /** The SDE-composed coordinated touchpoint (channel + priority-ordered intents). */
-  touchpoint: Touchpoint;
+  /**
+   * The SDE-composed coordinated touchpoint (channel + priority-ordered intents),
+   * BRANDED as having cleared the disclosure plane intent by intent.
+   *
+   * This was a plain `Touchpoint`, so the brand enforced nothing: the dispatcher
+   * laundered an undecided touchpoint into this field with `tp as OutreachTouchpoint`
+   * on its no-gate path. Typing it as the brand is what makes the cast impossible
+   * to write without going through `decideTouchpointDisclosure`.
+   */
+  touchpoint: DisclosedTouchpoint;
   /** Member context (consent scopes granted, contact history) for the consent gate. */
   memberContext: MemberContext;
   /** The consent purpose this touchpoint requires (from the taxonomy/signal). */

@@ -3,109 +3,29 @@ import React, { useState, useEffect, useRef } from 'react';
 import AppLayout from '@/components/AppLayout';
 import Icon from '@/components/ui/AppIcon';
 import { getFhirMockMode, getFhirClient } from '@/lib/services/fhirClient';
+import * as clock from '@/lib/clock'; // injected clock seam — the only wall-clock read
+import { formatInstantUtc, useMountedInstant } from '@/lib/client/useMountedInstant';
+import {
+  CONSENT_RECORDS,
+  consentsFromBundle,
+  displayDate,
+  displayRef,
+  loadConsentView,
+  type ConsentSeedRecord,
+} from '@/lib/consent/consentRecords';
+import type { ConsentStatus, WithConsentStatus } from '@/lib/consent/consentStatus';
+
+/**
+ * CONSENT STATUS IS DERIVED, NEVER STORED. The seven seed records live in ONE place
+ * (`src/lib/consent/data/consent-records.json`, shared with the admin console) and carry
+ * only lifecycle DATES. `loadConsentView(asOf)` derives each row's status and the four KPI
+ * counts from the SAME traversal against the SAME clock reading, so the tiles can never
+ * disagree with the table. Storing the status was the fail-open this screen shipped: four
+ * records whose grants lapsed in 2025 / early 2026 kept badging ACTIVE.
+ */
+type ConsentRow = WithConsentStatus<ConsentSeedRecord>;
 
 // ─── Static mock/fallback data ────────────────────────────────────────────────
-
-const CONSENT_RECORDS_MOCK = [
-  {
-    id: 'cns-001',
-    patient: 'Maria Redhawk',
-    patientId: 'PAT-0006',
-    mrn: 'MRN-0006',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims + SDOH',
-    grantedTo: 'Bennett County Health Network',
-    status: 'ACTIVE',
-    grantedDate: '2024-03-12',
-    expiresDate: '2025-03-12',
-    method: 'Electronic',
-    fhirConsent: 'Consent/cns-001',
-  },
-  {
-    id: 'cns-002',
-    patient: 'Maria Redhawk',
-    patientId: 'PAT-0006',
-    mrn: 'MRN-0006',
-    type: 'Research',
-    scope: 'De-identified Clinical',
-    grantedTo: 'RHTP Research Registry',
-    status: 'ACTIVE',
-    grantedDate: '2024-03-12',
-    expiresDate: '2026-03-12',
-    method: 'Electronic',
-    fhirConsent: 'Consent/cns-002',
-  },
-  {
-    id: 'cns-003',
-    patient: 'Maria Redhawk',
-    patientId: 'PAT-0006',
-    mrn: 'MRN-0006',
-    type: 'BH Data',
-    scope: 'Behavioral Health Records',
-    grantedTo: 'CCBHC — Clay County',
-    status: 'REVOKED',
-    grantedDate: '2023-11-01',
-    expiresDate: '2024-11-01',
-    method: 'Paper',
-    fhirConsent: 'Consent/cns-003',
-  },
-  {
-    id: 'cns-004',
-    patient: 'Dorothy Simmons',
-    patientId: 'PAT-0042',
-    mrn: 'MRN-0042',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims',
-    grantedTo: 'Jackson County Memorial',
-    status: 'ACTIVE',
-    grantedDate: '2024-01-08',
-    expiresDate: '2025-01-08',
-    method: 'Electronic',
-    fhirConsent: 'Consent/cns-004',
-  },
-  {
-    id: 'cns-005',
-    patient: 'James Whitfield',
-    patientId: 'PAT-0019',
-    mrn: 'MRN-0019',
-    type: 'Data Sharing',
-    scope: 'Clinical Only',
-    grantedTo: 'Bennett County Health Network',
-    status: 'EXPIRED',
-    grantedDate: '2023-06-15',
-    expiresDate: '2024-06-15',
-    method: 'Electronic',
-    fhirConsent: 'Consent/cns-005',
-  },
-  {
-    id: 'cns-006',
-    patient: 'Rosa Gutierrez',
-    patientId: 'PAT-0031',
-    mrn: 'MRN-0031',
-    type: 'SDOH Sharing',
-    scope: 'Social Needs Data',
-    grantedTo: 'Unite Us Network',
-    status: 'ACTIVE',
-    grantedDate: '2024-05-20',
-    expiresDate: '2025-05-20',
-    method: 'Electronic',
-    fhirConsent: 'Consent/cns-006',
-  },
-  {
-    id: 'cns-007',
-    patient: 'Thomas Begay',
-    patientId: 'PAT-0055',
-    mrn: 'MRN-0055',
-    type: 'Data Sharing',
-    scope: 'Clinical + Claims + SDOH',
-    grantedTo: 'Bennett County Health Network',
-    status: 'PENDING',
-    grantedDate: '—',
-    expiresDate: '—',
-    method: 'Pending Signature',
-    fhirConsent: '—',
-  },
-];
 
 const DATA_SOVEREIGNTY_RULES = [
   {
@@ -152,70 +72,6 @@ const DATA_SOVEREIGNTY_RULES = [
   },
 ];
 
-// ─── FHIR → display shape mapper ─────────────────────────────────────────────
-
-type ConsentRecord = {
-  id: string;
-  patient: string;
-  patientId: string;
-  mrn: string;
-  type: string;
-  scope: string;
-  grantedTo: string;
-  status: string;
-  grantedDate: string;
-  expiresDate: string;
-  method: string;
-  fhirConsent: string;
-};
-
-function mapFhirConsent(resource: any): ConsentRecord {
-  // FHIR status → display status
-  const statusMap: Record<string, string> = {
-    active: 'ACTIVE',
-    inactive: 'EXPIRED',
-    rejected: 'REVOKED',
-    'entered-in-error': 'REVOKED',
-    proposed: 'PENDING',
-    draft: 'PENDING',
-  };
-
-  const ext = (url: string) =>
-    resource.extension?.find((e: any) => e.url === url)?.valueString ?? '';
-
-  const patientDisplay: string = resource.patient?.display ?? resource.patient?.reference ?? '';
-  const patientRef: string = resource.patient?.reference ?? '';
-  // derive a PAT-XXXX from the FHIR id if no display ID is available
-  const fhirPatientId = patientRef.replace('Patient/', '');
-  const patientIdDisplay =
-    fhirPatientId === 'patient-maria-001'
-      ? 'PAT-0006'
-      : fhirPatientId === 'patient-dorothy-042'
-        ? 'PAT-0042'
-        : fhirPatientId;
-
-  const period = resource.provision?.period ?? {};
-  const grantedTo = resource.organization?.[0]?.display ?? '—';
-
-  return {
-    id: resource.id ?? '',
-    patient: patientDisplay,
-    patientId: patientIdDisplay,
-    mrn: patientIdDisplay.replace('PAT', 'MRN'),
-    type:
-      ext('http://tcoc.example.org/fhir/StructureDefinition/consent-type') ||
-      resource.scope?.coding?.[0]?.display ||
-      'Consent',
-    scope: ext('http://tcoc.example.org/fhir/StructureDefinition/consent-scope-text') || '—',
-    grantedTo,
-    status: statusMap[resource.status] ?? resource.status?.toUpperCase() ?? 'UNKNOWN',
-    grantedDate: resource.dateTime?.split('T')[0] ?? '—',
-    expiresDate: period.end ?? '—',
-    method: ext('http://tcoc.example.org/fhir/StructureDefinition/consent-method') || 'Electronic',
-    fhirConsent: `Consent/${resource.id}`,
-  };
-}
-
 // ─── Status config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
@@ -228,12 +84,7 @@ const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string }> =
 
 // ─── FHIR write helpers ───────────────────────────────────────────────────────
 
-function postConsentAuditEvent(
-  action: 'C' | 'U',
-  consentId: string,
-  patientDisplay: string,
-  detail: string
-) {
+function postConsentAuditEvent(action: 'C' | 'U', consentId: string, detail: string) {
   getFhirClient()
     .create({
       resourceType: 'AuditEvent',
@@ -250,7 +101,7 @@ function postConsentAuditEvent(
         },
       ],
       action,
-      recorded: new Date().toISOString(),
+      recorded: clock.nowIso(),
       outcome: '0',
       agent: [{ who: { display: 'Care Manager Portal' }, requestor: true }],
       source: { observer: { display: 'TCOC Platform — Consent Sovereignty Panel' } },
@@ -266,9 +117,22 @@ function postConsentAuditEvent(
 export default function ConsentSovereigntyPanelPage() {
   const [activeTab, setActiveTab] = useState<'consents' | 'sovereignty' | 'audit'>('consents');
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [consentRecords, setConsentRecords] = useState<ConsentRecord[]>(CONSENT_RECORDS_MOCK);
+  const [statusFilter, setStatusFilter] = useState<ConsentStatus | 'All'>('All');
+  const [consentRecords, setConsentRecords] =
+    useState<readonly ConsentSeedRecord[]>(CONSENT_RECORDS);
   const [fhirSource, setFhirSource] = useState(false);
+  // A failed live read must be VISIBLE: silently falling back to seed records leaves the
+  // reader unable to tell authored data from the system of record.
+  const [liveReadFailed, setLiveReadFailed] = useState(false);
+  // One clock reading for this session's view: the table, the four KPI tiles and the
+  // enabled/disabled state of every action all resolve against the SAME `asOf` instant,
+  // which is rendered below so the reader knows when the derivation was taken.
+  const [asOf] = useState<string>(() => clock.nowIso());
+  // DISPLAY ONLY, and deliberately separate from `asOf`. `asOf` is the one instant every row,
+  // KPI and affordance resolves against and must exist during SSR; `shownAt` is the string React
+  // diffs, so it waits for hydration. Rendering `asOf` directly produced a text mismatch
+  // (React #418) whenever SSR and hydration straddled a minute boundary. Register G-067.
+  const shownAt = useMountedInstant();
   const fhirLoadedRef = useRef(false);
   // Local audit entries prepended by live grant/revoke actions
   const [liveAuditEntries, setLiveAuditEntries] = useState<
@@ -289,41 +153,35 @@ export default function ConsentSovereigntyPanelPage() {
     fhirLoadedRef.current = true;
     getFhirClient()
       .search('Consent', { _count: 50 })
-      .then((bundle: any) => {
-        const entries: any[] = bundle?.entry ?? [];
-        const resources = entries
-          .map((e: any) => e?.resource)
-          .filter(Boolean)
-          .filter((r: any) => r?.resourceType === 'Consent');
+      .then((bundle: unknown) => {
+        const resources = consentsFromBundle(bundle);
         if (resources.length > 0) {
-          setConsentRecords(resources.map(mapFhirConsent));
+          setConsentRecords(resources);
           setFhirSource(true);
         }
       })
       .catch(() => {
-        /* non-fatal — keep mock data */
+        // Keep the seed records so the registry is never empty, but SAY SO — never swallow.
+        setLiveReadFailed(true);
       });
   }, []);
 
   // ── FHIR write: revoke an active consent ─────────────────────────────────
-  const handleRevoke = (rec: ConsentRecord) => {
+  const handleRevoke = (rec: ConsentRow) => {
     if (rec.status !== 'ACTIVE') return;
-    // Optimistic UI update
+    const now = clock.nowIso();
+    const nowDate = now.slice(0, 10);
+    // Optimistic UI update: stamp the REVOCATION DATE. The REVOKED badge is then derived
+    // from that fact — no status is written, so the badge cannot drift from the record.
     setConsentRecords((prev) =>
-      prev.map((r) =>
-        r.id === rec.id
-          ? { ...r, status: 'REVOKED', expiresDate: new Date().toISOString().split('T')[0] }
-          : r
-      )
+      prev.map((r) => (r.id === rec.id ? { ...r, revokedDate: nowDate } : r))
     );
-    const now = new Date().toISOString();
-    const nowDate = now.split('T')[0];
     // Add live audit entry
     setLiveAuditEntries((prev) => [
       {
         time: now.replace('T', ' ').slice(0, 16),
         event: 'Consent REVOKED',
-        patient: rec.patient,
+        patient: rec.patientDisplay,
         detail: `${rec.type} — ${rec.grantedTo} revoked by Care Manager`,
         actor: 'Care Manager Portal',
         icon: 'MinusCircleIcon',
@@ -338,11 +196,12 @@ export default function ConsentSovereigntyPanelPage() {
           resourceType: 'Consent',
           id: rec.id,
           status: 'inactive',
-          patient: { reference: `Patient/${rec.patientId}`, display: rec.patient },
+          // Minimum necessary: the reference is authoritative; no display name is written.
+          patient: { reference: `Patient/${rec.patientId}` },
           dateTime: now,
           provision: {
             type: 'deny',
-            period: { start: rec.grantedDate !== '—' ? rec.grantedDate : nowDate, end: nowDate },
+            period: { start: rec.grantedDate === null ? nowDate : rec.grantedDate, end: nowDate },
           },
           extension: [
             {
@@ -360,27 +219,23 @@ export default function ConsentSovereigntyPanelPage() {
           ],
         })
         .catch((err) => console.warn('[Consent] PUT revoke failed:', err));
-      postConsentAuditEvent(
-        'U',
-        rec.id,
-        rec.patient,
-        `Consent revoked — ${rec.type} — ${rec.grantedTo}`
-      );
+      postConsentAuditEvent('U', rec.id, `Consent revoked — ${rec.type} — ${rec.grantedTo}`);
     }
   };
 
   // ── FHIR write: grant a new consent for PENDING/EXPIRED record ───────────
-  const handleGrant = (rec: ConsentRecord) => {
+  const handleGrant = (rec: ConsentRow) => {
     if (rec.status !== 'PENDING' && rec.status !== 'EXPIRED') return;
-    const now = new Date().toISOString();
-    const nowDate = now.split('T')[0];
-    // One-year default expiry
-    const expiryDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    // Optimistic UI update
+    const now = clock.nowIso();
+    const nowDate = now.slice(0, 10);
+    // One-year default expiry, computed off the injected clock.
+    const expiryDate = new Date(clock.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    // Optimistic UI update: stamp the new GRANT and EXPIRY dates and clear any revocation.
+    // The ACTIVE badge is derived from those facts, so it lapses on its own at expiry.
     setConsentRecords((prev) =>
       prev.map((r) =>
         r.id === rec.id
-          ? { ...r, status: 'ACTIVE', grantedDate: nowDate, expiresDate: expiryDate }
+          ? { ...r, grantedDate: nowDate, expiresDate: expiryDate, revokedDate: null }
           : r
       )
     );
@@ -388,7 +243,7 @@ export default function ConsentSovereigntyPanelPage() {
       {
         time: now.replace('T', ' ').slice(0, 16),
         event: 'Consent GRANTED',
-        patient: rec.patient,
+        patient: rec.patientDisplay,
         detail: `${rec.type} — ${rec.grantedTo} granted via Care Manager Portal`,
         actor: 'Care Manager Portal',
         icon: 'CheckCircleIcon',
@@ -397,13 +252,14 @@ export default function ConsentSovereigntyPanelPage() {
       ...prev,
     ]);
     if (!getFhirMockMode()) {
-      const newId = `${rec.id}-renewed-${Date.now()}`;
+      const newId = `${rec.id}-renewed-${clock.now()}`;
       getFhirClient()
         .create({
           resourceType: 'Consent',
           id: newId,
           status: 'active',
-          patient: { reference: `Patient/${rec.patientId}`, display: rec.patient },
+          // Minimum necessary: the reference is authoritative; no display name is written.
+          patient: { reference: `Patient/${rec.patientId}` },
           dateTime: now,
           organization: [{ display: rec.grantedTo }],
           provision: {
@@ -442,28 +298,25 @@ export default function ConsentSovereigntyPanelPage() {
           ],
         })
         .catch((err) => console.warn('[Consent] POST grant failed:', err));
-      postConsentAuditEvent(
-        'C',
-        newId,
-        rec.patient,
-        `Consent granted — ${rec.type} — ${rec.grantedTo}`
-      );
+      postConsentAuditEvent('C', newId, `Consent granted — ${rec.type} — ${rec.grantedTo}`);
     }
   };
 
-  const statuses = ['All', 'ACTIVE', 'REVOKED', 'EXPIRED', 'PENDING'];
-  const filtered = consentRecords.filter((r) => {
+  // THE one derivation: rows and tile counts from a single traversal at a single instant.
+  const view = loadConsentView(asOf, consentRecords);
+  const statuses: (ConsentStatus | 'All')[] = ['All', 'ACTIVE', 'REVOKED', 'EXPIRED', 'PENDING'];
+  const filtered = view.records.filter((r) => {
+    const needle = search.toLowerCase();
     const matchSearch =
-      r.patient.toLowerCase().includes(search.toLowerCase()) ||
-      r.patientId.toLowerCase().includes(search.toLowerCase());
+      r.patientDisplay.toLowerCase().includes(needle) || r.patientId.toLowerCase().includes(needle);
     const matchStatus = statusFilter === 'All' || r.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
-  const activeCount = consentRecords.filter((r) => r.status === 'ACTIVE').length;
-  const revokedCount = consentRecords.filter((r) => r.status === 'REVOKED').length;
-  const expiredCount = consentRecords.filter((r) => r.status === 'EXPIRED').length;
-  const pendingCount = consentRecords.filter((r) => r.status === 'PENDING').length;
+  const activeCount = view.counts.ACTIVE;
+  const revokedCount = view.counts.REVOKED;
+  const expiredCount = view.counts.EXPIRED;
+  const pendingCount = view.counts.PENDING;
 
   return (
     <AppLayout
@@ -484,6 +337,20 @@ export default function ConsentSovereigntyPanelPage() {
           </span>
         </div>
       )}
+      {liveReadFailed && (
+        <p
+          role="alert"
+          className="text-xs mb-3 px-3 py-2 bg-[#fff1f1] text-[#da1e28] border border-[#ffb3b8]"
+        >
+          Live FHIR Consent read failed — showing seeded records, not the system of record.
+        </p>
+      )}
+      {/* The instant every status on this screen is derived against — a governance surface
+          must state its as-of, otherwise "ACTIVE" is an undated claim. */}
+      <p className="text-2xs text-carbon-gray-50 mb-2 px-1">
+        Status derived from consent period dates as of{' '}
+        <span className="font-mono">{formatInstantUtc(shownAt)}</span>
+      </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           {
@@ -625,7 +492,7 @@ export default function ConsentSovereigntyPanelPage() {
                     className={`border-b border-carbon-gray-10 hover:bg-carbon-gray-10 transition-colors ${i % 2 === 0 ? '' : 'bg-carbon-gray-10/30'}`}
                   >
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-carbon-gray-100">{rec.patient}</p>
+                      <p className="font-semibold text-carbon-gray-100">{rec.patientDisplay}</p>
                       <p className="text-2xs text-carbon-gray-50">{rec.patientId}</p>
                     </td>
                     <td className="px-4 py-3 font-medium text-carbon-gray-70">{rec.type}</td>
@@ -642,10 +509,14 @@ export default function ConsentSovereigntyPanelPage() {
                         </span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-carbon-gray-50">{rec.grantedDate}</td>
-                    <td className="px-4 py-3 text-carbon-gray-50">{rec.expiresDate}</td>
+                    <td className="px-4 py-3 text-carbon-gray-50">
+                      {displayDate(rec.grantedDate)}
+                    </td>
+                    <td className="px-4 py-3 text-carbon-gray-50">
+                      {displayDate(rec.expiresDate)}
+                    </td>
                     <td className="px-4 py-3 font-mono text-carbon-gray-50 text-2xs">
-                      {rec.fhirConsent}
+                      {displayRef(rec.fhirRef)}
                     </td>
                     <td className="px-4 py-3 text-right whitespace-nowrap">
                       {rec.status === 'ACTIVE' && (
@@ -685,7 +556,7 @@ export default function ConsentSovereigntyPanelPage() {
           </div>
           <div className="divide-y divide-carbon-gray-10">
             {DATA_SOVEREIGNTY_RULES.map((rule) => {
-              const sc = STATUS_CONFIG[rule.status];
+              const sc = STATUS_CONFIG[rule.status] ?? STATUS_CONFIG['ACTIVE'];
               return (
                 <div key={rule.rule} className="px-4 py-4 flex items-start gap-4">
                   <div className="w-8 h-8 bg-[#defbe6] flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -733,13 +604,15 @@ export default function ConsentSovereigntyPanelPage() {
             )}
           </div>
           <div className="divide-y divide-carbon-gray-10">
+            {/* PHI posture: masked, matching the consent table. A disclosure audit log on an
+                oversight surface needs the WHO-and-WHAT, not a full legal name. */}
             {[
               ...liveAuditEntries,
               {
                 time: '2024-12-01 14:32',
                 event: 'Consent GRANTED',
-                patient: 'Maria Redhawk',
-                detail: 'Data Sharing — Bennett County Health Network',
+                patient: 'M. Redhawk',
+                detail: 'Data Sharing — Prairie Health Network',
                 actor: 'Patient Portal',
                 icon: 'CheckCircleIcon',
                 color: '#198038',
@@ -747,7 +620,7 @@ export default function ConsentSovereigntyPanelPage() {
               {
                 time: '2024-12-01 11:07',
                 event: 'Share BLOCKED',
-                patient: 'Thomas Begay',
+                patient: 'T. Begay',
                 detail: 'Cross-org share blocked — no active consent on file',
                 actor: 'Consent Enforcer Agent',
                 icon: 'XCircleIcon',
@@ -756,7 +629,7 @@ export default function ConsentSovereigntyPanelPage() {
               {
                 time: '2024-11-28 09:15',
                 event: 'Consent REVOKED',
-                patient: 'Maria Redhawk',
+                patient: 'M. Redhawk',
                 detail: 'BH Data — CCBHC Clay County revoked by patient',
                 actor: 'Care Manager Portal',
                 icon: 'MinusCircleIcon',
@@ -765,8 +638,8 @@ export default function ConsentSovereigntyPanelPage() {
               {
                 time: '2024-11-20 16:44',
                 event: 'Consent EXPIRED',
-                patient: 'James Whitfield',
-                detail: 'Data Sharing — Bennett County Health Network expired',
+                patient: 'J. Whitfield',
+                detail: 'Data Sharing — Prairie Health Network expired',
                 actor: 'System',
                 icon: 'ClockIcon',
                 color: '#8d8d8d',
@@ -774,7 +647,7 @@ export default function ConsentSovereigntyPanelPage() {
               {
                 time: '2024-11-15 10:22',
                 event: 'Tribal Rule ENFORCED',
-                patient: 'Maria Redhawk',
+                patient: 'M. Redhawk',
                 detail: 'Tribal data sovereignty rule applied — share restricted',
                 actor: 'Consent Enforcer Agent',
                 icon: 'ShieldCheckIcon',
@@ -783,7 +656,7 @@ export default function ConsentSovereigntyPanelPage() {
               {
                 time: '2024-11-10 08:55',
                 event: 'Consent GRANTED',
-                patient: 'Rosa Gutierrez',
+                patient: 'R. Gutierrez',
                 detail: 'SDOH Sharing — Unite Us Network',
                 actor: 'Patient Portal',
                 icon: 'CheckCircleIcon',

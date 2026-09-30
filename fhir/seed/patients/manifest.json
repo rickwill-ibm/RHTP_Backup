@@ -1,5 +1,32 @@
 [
   {
+    "pid": "patient-denise-fontaine",
+    "slug": "denise-fontaine",
+    "file": "fhir/seed/patients/denise-fontaine.bundle.json",
+    "entries": 33,
+    "resourceTypes": {
+      "Patient": 1,
+      "Practitioner": 1,
+      "Organization": 2,
+      "Coverage": 1,
+      "Condition": 3,
+      "MedicationRequest": 1,
+      "Observation": 8,
+      "Task": 2,
+      "ServiceRequest": 2,
+      "Consent": 1,
+      "CarePlan": 1,
+      "Encounter": 1,
+      "AllergyIntolerance": 1,
+      "Immunization": 2,
+      "Flag": 1,
+      "CareTeam": 1,
+      "Goal": 2,
+      "DiagnosticReport": 1,
+      "DocumentReference": 1
+    }
+  },
+  {
     "pid": "patient-dorothy-042",
     "slug": "dorothy-simmons",
     "file": "fhir/seed/patients/dorothy-simmons.bundle.json",

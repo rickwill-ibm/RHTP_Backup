@@ -67,6 +67,14 @@ function parseEntry(raw: unknown, i: number): TaxonomyEntry {
   if (o.defaultChannel !== undefined)
     entry.defaultChannel = oneOf(o.defaultChannel, CHANNELS, `${at}.defaultChannel`);
   if (o.consentScope !== undefined) entry.consentScope = str(o.consentScope, `${at}.consentScope`);
+  // A parser that DROPS a field the disclosure gate then reads turns a governed
+  // class into an ungoverned one silently — the same defect that made the
+  // authority lock's data-class cap vacuous. Carry it.
+  if (o.dataClassFloor !== undefined) {
+    entry.dataClassFloor = arr(o.dataClassFloor, `${at}.dataClassFloor`).map((c, j) =>
+      str(c, `${at}.dataClassFloor[${j}]`)
+    );
+  }
   if (o.ttlHours !== undefined) entry.ttlHours = num(o.ttlHours, `${at}.ttlHours`);
   if (o.sourceGated !== undefined) entry.sourceGated = str(o.sourceGated, `${at}.sourceGated`);
   return entry;

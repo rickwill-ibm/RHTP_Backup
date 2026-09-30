@@ -21,6 +21,6 @@ Flow (`outreachAgent.ts`):
    (mockable) → `{ outcome: 'executed', sendRef }`. On **rejection** → `{ outcome:
 'rejected' }`, no send.
 
-The runtime emits `agent.task.proposed` → `approved`/`rejected` → `executed`
+The runtime emits `agent.task.proposed` → `approved`/`rejected` → `settled`
 around this; payloads are PHI-safe (touchpoint id, channel, intent kinds — no
 member payload). `buildOutreachAction` is the pure proposal builder.

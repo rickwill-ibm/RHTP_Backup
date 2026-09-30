@@ -45,6 +45,8 @@ export const MRN_TO_FHIR_ID_MAP: Record<string, string> = {
   'MRN-0103': 'patient-robert-103',
   // Lisa Thompson
   'MRN-0156': 'patient-lisa-156',
+  // Denise Fontaine — system: urn:rhtp:mrn
+  'NY-882104': 'patient-denise-fontaine',
   // Alex Kirby — no MRN in seed bundle
 };
 

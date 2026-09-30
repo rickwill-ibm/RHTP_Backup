@@ -10,6 +10,7 @@
  * emits an audit entry (auditable). Per-member ordering is honored: signals are
  * folded in outbox-sequence order, which the memberId partition guarantees (C6).
  */
+import { assertEngineInputsIdentified, staleMitigations } from './fairnessGuard';
 import { sortByOrder } from '../intake/signalIntake';
 import { bundleDelays, composeTouchpoints } from '../touchpoint/composer';
 import type {
@@ -52,6 +53,18 @@ export function disposeBatch(
   ctx: MemberContext,
   deps: EngineDeps
 ): DispositionBatch {
+  // 45 CFR 92.210(b) — THE IDENTIFICATION ASSERTION, on the real path.
+  //
+  // This engine IS the patient care decision support tool: it reads the member context and the
+  // policy pack and decides who is contacted, how, and when. So this is where "we have identified
+  // the input variables that measure a protected characteristic" has to be true, and it is asserted
+  // rather than asserted-in-a-document: an input variable nobody has reviewed cannot reach a member
+  // decision, because the fold refuses to run over one.
+  //
+  // PRESENCE only. Whether every field has a reviewed entry is a property of the repository — it
+  // cannot go stale, so it can never stop the platform on a calendar date. Review CURRENCY is
+  // evaluated as-at and demotes; see `staleMitigations` below.
+  assertEngineInputsIdentified();
   const now = deps.now();
   const ordered = sortByOrder(signals);
   const foldWindowId = coordinationWindowId(now, pack);
@@ -168,6 +181,9 @@ export function disposeBatch(
     touchpoints,
     delayBundles,
     summary,
+    // 92.210(b) ongoing duty: an identified input whose mitigation review has lapsed as at THIS fold.
+    // Empty on a healthy fold; non-empty demotes the fold to the human gate rather than stopping it.
+    fairnessDemotion: { staleFields: staleMitigations(now).map((e) => e.field), asOfMs: now },
   };
 }
 

@@ -47,7 +47,7 @@ async function seedStore() {
         },
       }
     );
-  await mk('1730154783', 'ev-gold'); // gold-carded → auto-cleared
+  await mk('1730154782', 'ev-gold'); // gold-carded → auto-cleared
   await mk('1518998765', 'ev-normal'); // not gold-carded → needs PA
   return store;
 }

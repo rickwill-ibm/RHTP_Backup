@@ -71,7 +71,7 @@ export class SessionSecretNotConfiguredError extends Error {
  */
 export function serverEnv(): ServerEnv {
   return {
-    fhirGatewayBase: opt('FHIR_GATEWAY_BASE', 'http://localhost:8080/fhir/r4'),
+    fhirGatewayBase: opt('FHIR_GATEWAY_BASE', 'http://localhost:8080/fhir'),
     cdsGatewayBase: opt('CDS_GATEWAY_BASE', 'http://localhost:9096'),
     bulkGatewayBase: opt('BULK_GATEWAY_BASE', 'http://localhost:8091/bulk'),
     authorizeUrl: opt('WSO2_AUTHORIZE_URL'),

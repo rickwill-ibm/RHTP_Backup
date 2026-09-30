@@ -38,13 +38,12 @@ export function resolveIds(
 ): { patientId: string; encounterId: string } {
   const raw = (ctx.patientId ?? '').replace(/^patient\//, '');
   const patientId = raw === '' || raw === 'maria-redhawk-001' ? DEMO_PATIENT_ID : raw;
-  if (patientId === DEMO_PATIENT_ID) {
-    return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
-  }
   if (mock && !storeRead('Patient', patientId)) {
     return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
   }
-  // ② Bind the member's OWN encounter (was hardcoded to ctx.encounterId = Maria's).
-  const encounterId = (mock ? memberEncounterId(patientId) : undefined) ?? ctx.encounterId;
+  // Bind the member's OWN encounter if present in mock store
+  const encounterId =
+    (mock ? memberEncounterId(patientId) : undefined) ??
+    (patientId === DEMO_PATIENT_ID ? DEMO_ENCOUNTER_ID : ctx.encounterId);
   return { patientId, encounterId };
 }

@@ -9,6 +9,20 @@
  * client bundle. PHI: only the server-masked `recordRef` is rendered; the member-embedding
  * record id / `workItemId` never reach this layer.
  */
+/**
+ * The wire token for the process gate. Declared LOCALLY, not imported, because this module's own
+ * contract (above) is that no `@/lib/evidence` barrel reaches the client bundle — and
+ * `escalationSignals` pulls in the recovery/work-queue chain.
+ *
+ * It was `gate?: string`, and `gate` crosses an HTTP boundary: `/api/evidence/[id]` returns it inside
+ * `analysis.routed`, this module renders the raw token to a reviewer, and `EscalationConsole` renders
+ * a LABEL for the same value. An unbound `string` meant the wire vocabulary could move with no signal
+ * at either render site. Equality with `ProcessGate` is pinned by a type-level assertion in
+ * `tests/goldenThread/autonomyVocabulary.test.ts` rather than by an import, so the bundle stays clean
+ * and a divergence is still a red test.
+ */
+export type ProcessGateToken = 'assist' | 'hitl' | 'hotl' | 'autonomous';
+
 export type Party = 'payer' | 'provider';
 export type Outcome = 'ok' | 'plan-rejected' | 'eval-rejected';
 export type ActPhase = 'idle' | 'working' | 'done' | 'error';
@@ -41,7 +55,7 @@ export interface AnalysisFinding {
 export interface AnalysisTicket {
   kind: string;
   reason: string;
-  routed?: { gate?: string; queueItem?: { queue?: string; disposition?: string } | null };
+  routed?: { gate?: ProcessGateToken; queueItem?: { queue?: string; disposition?: string } | null };
 }
 export interface AnalysisRun {
   analysisId: string;

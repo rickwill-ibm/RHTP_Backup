@@ -3,57 +3,87 @@
   "entries": [
     {
       "signalType": "care-gap.opened",
-      "sourceEventTypes": ["care-gap.opened"],
+      "sourceEventTypes": [
+        "care-gap.opened"
+      ],
       "defaultPriority": "high",
       "actionability": "member-outreach",
       "foldBehavior": "windowed",
       "defaultChannel": "portal",
       "consentScope": "care-outreach",
       "dedupeKeyTemplate": "care-gap:{memberId}:{measure}",
-      "ttlHours": 720
+      "ttlHours": 720,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "care-gap.closed",
-      "sourceEventTypes": ["care-gap.closed"],
+      "sourceEventTypes": [
+        "care-gap.closed"
+      ],
       "defaultPriority": "routine",
       "actionability": "internal-only",
       "foldBehavior": "windowed",
       "dedupeKeyTemplate": "care-gap-closed:{memberId}:{measure}",
-      "ttlHours": 168
+      "ttlHours": 168,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "adt.admit",
-      "sourceEventTypes": ["encounter.admitted", "adt.admit"],
+      "sourceEventTypes": [
+        "encounter.admitted",
+        "adt.admit"
+      ],
       "defaultPriority": "urgent",
       "actionability": "care-team-task",
       "foldBehavior": "immediate",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "adt-admit:{memberId}:{encounter}",
-      "ttlHours": 72
+      "ttlHours": 72,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "adt.discharge",
-      "sourceEventTypes": ["encounter.discharged", "adt.discharge"],
+      "sourceEventTypes": [
+        "encounter.discharged",
+        "adt.discharge"
+      ],
       "defaultPriority": "urgent",
       "actionability": "care-team-task",
       "foldBehavior": "immediate",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "adt-discharge:{memberId}:{encounter}",
-      "ttlHours": 72
+      "ttlHours": 72,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "screening.result",
-      "sourceEventTypes": ["assessment.submitted", "observation.recorded"],
+      "sourceEventTypes": [
+        "assessment.submitted",
+        "observation.recorded"
+      ],
       "defaultPriority": "high",
       "actionability": "care-team-task",
       "foldBehavior": "windowed",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "screening:{memberId}:{instrument}",
-      "ttlHours": 336
+      "ttlHours": 336,
+      "dataClassFloor": [
+        "social-need"
+      ]
     },
     {
       "signalType": "missed.appointment",
-      "sourceEventTypes": ["appointment.missed"],
+      "sourceEventTypes": [
+        "appointment.missed"
+      ],
       "defaultPriority": "high",
       "actionability": "member-outreach",
       "foldBehavior": "windowed",
@@ -61,59 +91,91 @@
       "consentScope": "care-outreach",
       "dedupeKeyTemplate": "missed-appt:{memberId}:{appointment}",
       "ttlHours": 168,
-      "sourceGated": "scheduling-feed"
+      "sourceGated": "scheduling-feed",
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "referral.stalled",
-      "sourceEventTypes": ["referral.stalled"],
+      "sourceEventTypes": [
+        "referral.stalled"
+      ],
       "defaultPriority": "high",
       "actionability": "care-team-task",
       "foldBehavior": "windowed",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "referral:{memberId}:{referral}",
-      "ttlHours": 336
+      "ttlHours": 336,
+      "dataClassFloor": [
+        "social-need"
+      ]
     },
     {
       "signalType": "denial.issued",
-      "sourceEventTypes": ["pa.denied", "denial.issued"],
+      "sourceEventTypes": [
+        "pa.denied",
+        "denial.issued"
+      ],
       "defaultPriority": "high",
       "actionability": "care-team-task",
       "foldBehavior": "immediate",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "denial:{memberId}:{claim}",
-      "ttlHours": 168
+      "ttlHours": 168,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "pa.status-change",
-      "sourceEventTypes": ["pa.submitted", "pa.pended", "pa.approved", "pa.denied"],
+      "sourceEventTypes": [
+        "pa.submitted",
+        "pa.pended",
+        "pa.approved",
+        "pa.denied"
+      ],
       "defaultPriority": "routine",
       "actionability": "care-team-task",
       "foldBehavior": "windowed",
       "defaultChannel": "task",
       "dedupeKeyTemplate": "pa:{memberId}:{pa}",
-      "ttlHours": 336
+      "ttlHours": 336,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "behavioral.window",
-      "sourceEventTypes": ["engagement.window"],
+      "sourceEventTypes": [
+        "engagement.window"
+      ],
       "defaultPriority": "routine",
       "actionability": "member-outreach",
       "foldBehavior": "windowed",
       "defaultChannel": "sms",
       "consentScope": "care-outreach",
       "dedupeKeyTemplate": "behavioral:{memberId}:{channel}",
-      "ttlHours": 72
+      "ttlHours": 72,
+      "dataClassFloor": [
+        "demographic"
+      ]
     },
     {
       "signalType": "bh.screening.indicated",
-      "sourceEventTypes": ["bh.event.recorded"],
+      "sourceEventTypes": [
+        "bh.event.recorded"
+      ],
       "defaultPriority": "high",
       "actionability": "member-outreach",
       "foldBehavior": "windowed",
       "defaultChannel": "portal",
       "consentScope": "behavioral-health",
       "dedupeKeyTemplate": "bh-screening:{memberId}:{instrument}",
-      "ttlHours": 336
+      "ttlHours": 336,
+      "dataClassFloor": [
+        "mental-health"
+      ]
     }
   ]
 }

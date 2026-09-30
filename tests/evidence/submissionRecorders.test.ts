@@ -23,7 +23,7 @@ function baseRecord(): EvidenceRecord {
   return createEvidenceRecord({
     id: 'ev-sub-1',
     memberId: 'MARIA_SD_001',
-    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154783' },
+    order: { code: '72148', display: 'MRI lumbar', providerNpi: '1730154782' },
     createdAt: '2026-09-12T00:00:00.000Z',
   });
 }
@@ -150,7 +150,9 @@ describe('PHI-safe audit projection for the new variants', () => {
     });
     const events = toAuditEvents(r, 'corr-sub');
     for (const ev of events) expect(() => assertPhiSafe(ev)).not.toThrow();
-    expect(events.find((e) => e.action === 'evidence.submission')?.detail).toContain('channel=mock');
+    expect(events.find((e) => e.action === 'evidence.submission')?.detail).toContain(
+      'channel=mock'
+    );
     expect(events.find((e) => e.action === 'evidence.recovery-decision')?.detail).toContain(
       'recovery-decision=submitted'
     );

@@ -1,0 +1,103 @@
+{
+  "_comment": "Seed consent records — the ONE copy. Previously duplicated field-for-field in src/app/consent-sovereignty-panel/page.tsx and src/app/admin-console/consent-governance/page.tsx, which disagreed on PHI posture (full name + full MRN vs initials + last-4) with no gate deciding which was right. PHI POSTURE: masked. Both surfaces are governance/oversight screens, not point-of-care identity verification, so HIPAA minimum-necessary means neither needs a full legal name or a complete MRN; only the masked form is stored, so the unmasked value cannot leak from the seed at all. patientId is the pseudonymous internal id already used to build FHIR references. NO status FIELD: status is DERIVED from these dates by src/lib/consent/consentStatus.ts against an injected clock — a stored status is the fail-open this file exists to remove. revokedDate follows the screens' own revoke convention (a revocation stamps the period end), so cns-003's revocation instant is its recorded period end.",
+  "records": [
+    {
+      "id": "cns-001",
+      "patientDisplay": "M. Redhawk",
+      "patientId": "PAT-0006",
+      "mrnMasked": "…0006",
+      "type": "Data Sharing",
+      "scope": "Clinical + Claims + SDOH",
+      "grantedTo": "Prairie Health Network",
+      "grantedDate": "2024-03-12",
+      "expiresDate": "2025-03-12",
+      "revokedDate": null,
+      "method": "Electronic",
+      "fhirRef": "Consent/cns-001"
+    },
+    {
+      "id": "cns-002",
+      "patientDisplay": "M. Redhawk",
+      "patientId": "PAT-0006",
+      "mrnMasked": "…0006",
+      "type": "Research",
+      "scope": "De-identified Clinical",
+      "grantedTo": "RHTP Research Registry",
+      "grantedDate": "2024-03-12",
+      "expiresDate": "2026-03-12",
+      "revokedDate": null,
+      "method": "Electronic",
+      "fhirRef": "Consent/cns-002"
+    },
+    {
+      "id": "cns-003",
+      "patientDisplay": "M. Redhawk",
+      "patientId": "PAT-0006",
+      "mrnMasked": "…0006",
+      "type": "BH Data",
+      "scope": "Behavioral Health Records",
+      "grantedTo": "CCBHC — Clay County",
+      "grantedDate": "2023-11-01",
+      "expiresDate": "2024-11-01",
+      "revokedDate": "2024-11-01",
+      "method": "Paper",
+      "fhirRef": "Consent/cns-003"
+    },
+    {
+      "id": "cns-004",
+      "patientDisplay": "D. Simmons",
+      "patientId": "PAT-0042",
+      "mrnMasked": "…0042",
+      "type": "Data Sharing",
+      "scope": "Clinical + Claims",
+      "grantedTo": "Jackson County Memorial",
+      "grantedDate": "2024-01-08",
+      "expiresDate": "2025-01-08",
+      "revokedDate": null,
+      "method": "Electronic",
+      "fhirRef": "Consent/cns-004"
+    },
+    {
+      "id": "cns-005",
+      "patientDisplay": "J. Whitfield",
+      "patientId": "PAT-0019",
+      "mrnMasked": "…0019",
+      "type": "Data Sharing",
+      "scope": "Clinical Only",
+      "grantedTo": "Prairie Health Network",
+      "grantedDate": "2023-06-15",
+      "expiresDate": "2024-06-15",
+      "revokedDate": null,
+      "method": "Electronic",
+      "fhirRef": "Consent/cns-005"
+    },
+    {
+      "id": "cns-006",
+      "patientDisplay": "R. Gutierrez",
+      "patientId": "PAT-0031",
+      "mrnMasked": "…0031",
+      "type": "SDOH Sharing",
+      "scope": "Social Needs Data",
+      "grantedTo": "Unite Us Network",
+      "grantedDate": "2024-05-20",
+      "expiresDate": "2025-05-20",
+      "revokedDate": null,
+      "method": "Electronic",
+      "fhirRef": "Consent/cns-006"
+    },
+    {
+      "id": "cns-007",
+      "patientDisplay": "T. Begay",
+      "patientId": "PAT-0055",
+      "mrnMasked": "…0055",
+      "type": "Data Sharing",
+      "scope": "Clinical + Claims + SDOH",
+      "grantedTo": "Prairie Health Network",
+      "grantedDate": null,
+      "expiresDate": null,
+      "revokedDate": null,
+      "method": "Pending Signature",
+      "fhirRef": null
+    }
+  ]
+}

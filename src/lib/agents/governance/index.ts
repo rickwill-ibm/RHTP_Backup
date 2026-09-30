@@ -7,7 +7,7 @@
 export {
   isAdverseCoverageAction,
   isSubmissionActionType,
-  isQualifiedHumanDecision,
+  isNonAutomatedDecider,
   evaluateDecision,
   isAutoApprovable,
   type GateInput,

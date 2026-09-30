@@ -170,7 +170,7 @@ function CareGapWorkflowAuditSection() {
           rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
           idle: { cls: '', label: '' },
         } as const;
-        const sc = statusCfg[wf.status];
+        const sc = statusCfg[wf.status] ?? statusCfg['idle'];
 
         return (
           <div key={id} className="border border-carbon-gray-20 overflow-hidden">
@@ -355,7 +355,7 @@ function HCCWorkflowAuditSection() {
           rejected: { cls: 'bg-[#fff1f1] text-[#da1e28] border-[#da1e28]', label: 'Rejected' },
           idle: { cls: '', label: '' },
         } as const;
-        const sc = statusCfg[wf.status];
+        const sc = statusCfg[wf.status] ?? statusCfg['idle'];
 
         return (
           <div key={id} className="border border-carbon-gray-20 overflow-hidden">
@@ -544,7 +544,7 @@ function UtilizationWorkflowAuditSection() {
           rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Dismissed' },
           idle: { cls: '', label: '' },
         } as const;
-        const sc = statusCfg[wf.status];
+        const sc = statusCfg[wf.status] ?? statusCfg['idle'];
 
         return (
           <div key={id} className="border border-carbon-gray-20 overflow-hidden">
@@ -737,7 +737,7 @@ function AttributionDisputeAuditSection() {
           rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Withdrawn' },
           idle: { cls: '', label: '' },
         } as const;
-        const sc = statusCfg[wf.status];
+        const sc = statusCfg[wf.status] ?? statusCfg['idle'];
 
         return (
           <div key={id} className="border border-carbon-gray-20 overflow-hidden">
@@ -949,7 +949,7 @@ function ReferralWorkflowAuditSection() {
           rejected: { cls: 'bg-[#fdf6dd] text-[#b45309] border-[#f1c21b]', label: 'Deferred' },
           idle: { cls: '', label: '' },
         } as const;
-        const sc = statusCfg[wf.status];
+        const sc = statusCfg[wf.status] ?? statusCfg['idle'];
 
         return (
           <div key={id} className="border border-carbon-gray-20 overflow-hidden">

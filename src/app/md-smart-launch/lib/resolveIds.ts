@@ -14,9 +14,6 @@ export function resolveIds(
 ): { patientId: string; encounterId: string } {
   const raw = (ctx.patientId ?? '').replace(/^patient\//, '');
   const patientId = raw === '' || raw === 'maria-redhawk-001' ? DEMO_PATIENT_ID : raw;
-  if (patientId === DEMO_PATIENT_ID) {
-    return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
-  }
   if (mock && !storeRead('Patient', patientId)) {
     return { patientId: DEMO_PATIENT_ID, encounterId: DEMO_ENCOUNTER_ID };
   }

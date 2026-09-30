@@ -16,16 +16,28 @@
 // Exit 0 = every sampled mutant was killed (or no sites found). Exit 1 = a
 // mutant survived (a test-effectiveness gap) or a target file/command failed.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { sep } from 'node:path';
 import { execSync } from 'node:child_process';
+// Framework v1.6 §6 crash-safe restore (on-disk sentinel + crash recovery) lives in its
+// own module. It has NO import-time side effects and exposes NO recovery entry point that
+// does not REQUIRE the declared target set — see its ORDERING header and register G-009.
+import { createSentinelGuard } from './lib/mutation-sentinel.mjs';
 
 // Conservative, high-signal operators. Each flips MEANING without usually
 // breaking the parse. Order matters: longer tokens first so '>=' is not eaten
 // by '>'. We match on the raw text and skip comment lines.
 const OPERATORS = [
-  ['>=', '>'], ['<=', '<'], ['===', '!=='], ['!==', '==='],
-  ['&&', '||'], ['||', '&&'], ['>', '>='], ['<', '<='],
-  ['\\btrue\\b', 'false'], ['\\bfalse\\b', 'true'],
+  ['>=', '>'],
+  ['<=', '<'],
+  ['===', '!=='],
+  ['!==', '==='],
+  ['&&', '||'],
+  ['||', '&&'],
+  ['>', '>='],
+  ['<', '<='],
+  ['\\btrue\\b', 'false'],
+  ['\\bfalse\\b', 'true'],
 ];
 
 function isCommentLine(line) {
@@ -86,8 +98,13 @@ function findSites(src) {
         const re = opRegex(from);
         let m;
         while ((m = re.exec(scan)) !== null) {
-          sites.push({ absIndex: offset + m.index, matched: m[0], from, to,
-            lineText: line.trim().slice(0, 80) });
+          sites.push({
+            absIndex: offset + m.index,
+            matched: m[0],
+            from,
+            to,
+            lineText: line.trim().slice(0, 80),
+          });
           if (m.index === re.lastIndex) re.lastIndex++; // zero-width guard
         }
       }
@@ -117,28 +134,72 @@ function applyMutation(src, site) {
 }
 
 // --- Framework v1.6 §6: crash-safe restore -----------------------------------
-// A JS `finally` does NOT run when the process is killed by a signal (e.g. a
-// `timeout` SIGTERM), which can leave a MUTANT on disk masquerading as real code.
-// Track the in-flight file + its pristine bytes and restore on ANY terminating
-// signal before exiting, so an interrupted run can never corrupt the tree.
-let INFLIGHT_FILE = null;
-let INFLIGHT_ORIGINAL = null;
-function restoreInflight() {
-  if (INFLIGHT_FILE != null && INFLIGHT_ORIGINAL != null) {
-    try { writeFileSync(INFLIGHT_FILE, INFLIGHT_ORIGINAL); } catch {}
+// MOVED to ./lib/mutation-sentinel.mjs under the size ratchet (AI-CODING-CONVENTIONS §2/§3).
+// Nothing here arms it; the guard is built from the DECLARED TARGET SET at the bottom of
+// this file, after loadTargets(), and only that object can run recovery.
+
+/**
+ * PROVE THE SUITE IS GREEN BEFORE MUTATING ANYTHING.
+ *
+ * THE VACUITY THIS CLOSES. `killed` was derived from `execSync` throwing, and ANY
+ * non-zero exit was read as "killed": a typo in `mutation-targets.json`, a renamed test
+ * file, a vitest config error, a module-resolution failure, a 180s timeout, an OOM. Each
+ * of those made EVERY mutant "killed" and printed `PASS (E13): every sampled mutant was
+ * killed - tests have real catch-power`. A gate that scores a broken command as a perfect
+ * score is worse than no gate: it is a green tick over an absence.
+ *
+ * It is the same blind spot the sibling gate names at check-ref-resolution.mjs — "A GATE
+ * MUST VERIFY ITS OWN REACH" — which was fixed there and not carried here, in the same
+ * commit. `exit 2` (a wiring fault), not `exit 1` (a test-effectiveness finding), because
+ * the two mean different things to whoever reads CI.
+ */
+function assertBaselineGreen(file, testCmd) {
+  try {
+    execSync(testCmd, { stdio: 'ignore', timeout: 180000 });
+  } catch (err) {
+    console.error(`E13: the test command for ${file} is NOT GREEN on unmutated source.`);
+    console.error('     Refusing to score: every mutant would count as "killed" and the gate');
+    console.error('     would report 100% catch-power over a command that never ran.');
+    console.error(`     command: ${testCmd}`);
+    console.error(
+      `     exit:    ${String(err && err.status)}${err && err.signal ? ` signal ${err.signal}` : ''}`
+    );
+    process.exit(2);
   }
 }
-for (const sig of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
-  process.on(sig, () => { restoreInflight(); process.exit(130); });
-}
-process.on('exit', restoreInflight);
 
-function runTarget(file, testCmd, maxMutants) {
+/**
+ * Two operator pairs can match at the SAME index — `['>=','>']` and `['>','>=']` both
+ * match a single `>=`. `sample`'s comment claimed it deduped overlapping sites and it
+ * never did, so the second mutant at that index produced `>==`, a SYNTAX ERROR: tests
+ * fail, and the gate counted a guaranteed false KILL. Every `>=` and `<=` in a target
+ * inflated the reported catch rate. Keep the longest `matched` at each index — the
+ * specific operator, not the substring of it.
+ */
+function dedupeSites(sites) {
+  const best = new Map();
+  for (const s of sites) {
+    const prior = best.get(s.absIndex);
+    if (prior === undefined || s.matched.length > prior.matched.length) best.set(s.absIndex, s);
+  }
+  return [...best.values()].sort((a, b) => a.absIndex - b.absIndex);
+}
+
+function runTarget(guard, file, testCmd, maxMutants) {
   const original = readFileSync(file, 'utf8');
-  INFLIGHT_FILE = file;
-  INFLIGHT_ORIGINAL = original;
-  const sites = sample(findSites(original), maxMutants);
+  assertBaselineGreen(file, testCmd);
+  // DEDUPE BEFORE SAMPLING. Sampling first and deduping after removes sites from an
+  // already-drawn sample, so the denominator silently shrank below `maxMutants` by however
+  // many operator collisions the draw happened to contain — and "killed ≤ tested ≤
+  // maxMutants" stopped pinning anything.
+  const sites = sample(dedupeSites(findSites(original)), maxMutants);
   const result = { file, tested: 0, killed: 0, survived: [], sites: sites.length };
+  // ARM NOTHING until there is a mutant to protect. The first cut armed INFLIGHT_* and
+  // wrote the sentinel here and then returned early on the zero-sites path, BEFORE the
+  // `finally` that disarms — so `process.on('exit')` fired at normal termination and
+  // wrote bytes read at function entry over a file this run never mutated, silently
+  // reverting an edit made during the run. Nothing is armed and nothing is on disk until
+  // a mutant is actually about to be written, below.
   if (sites.length === 0) {
     console.log(`  ${file}: no mutation sites found (nothing to sample)`);
     return result;
@@ -147,6 +208,9 @@ function runTarget(file, testCmd, maxMutants) {
     for (const site of sites) {
       const mutated = applyMutation(original, site);
       if (mutated === original) continue;
+      // Sentinel BEFORE the write, carrying this mutant's hash — so recovery can PROVE
+      // the bytes it is about to overwrite are ours and not a developer's edit.
+      guard.arm(file, original, mutated);
       writeFileSync(file, mutated);
       result.tested++;
       let killed = false;
@@ -154,17 +218,23 @@ function runTarget(file, testCmd, maxMutants) {
         execSync(testCmd, { stdio: 'ignore', timeout: 180000 });
         killed = false; // tests passed despite the mutation -> SURVIVED
       } catch {
-        killed = true;  // a test failed -> mutant KILLED (good)
+        killed = true; // a test failed -> mutant KILLED (good)
       } finally {
         writeFileSync(file, original); // ALWAYS restore before the next mutant
       }
       if (killed) result.killed++;
-      else result.survived.push({ line: site.lineText, op: `${site.matched}->${site.to.replace(/\\b/g,'')}` });
+      else
+        result.survived.push({
+          line: site.lineText,
+          op: `${site.matched}->${site.to.replace(/\\b/g, '')}`,
+        });
     }
   } finally {
-    writeFileSync(file, original); // belt and suspenders
-    INFLIGHT_FILE = null;
-    INFLIGHT_ORIGINAL = null;
+    // Belt and suspenders — but provenance-guarded, so a concurrent save is never
+    // clobbered by bytes captured at function entry.
+    const onDisk = existsSync(file) ? readFileSync(file, 'utf8') : null;
+    if (onDisk !== null && onDisk !== original) writeFileSync(file, original);
+    guard.disarm(); // only after the final restore has actually been written
   }
   return result;
 }
@@ -177,24 +247,42 @@ function loadTargets() {
   if (argv.length >= 2) {
     return [{ file: argv[0], test: argv[1], maxMutants: Number(argv[2] || 6) }];
   }
-  console.error('usage: node check-mutation.mjs <sourceFile> "<testCommand>" [maxMutants]  |  --config <file.json>');
+  console.error(
+    'usage: node check-mutation.mjs <sourceFile> "<testCommand>" [maxMutants]  |  --config <file.json>'
+  );
   process.exit(2);
 }
 
+// ORDERING (register G-009). `loadTargets()` exits 2 on a usage error, so an invocation
+// that is about to refuse never reaches the filesystem. The guard is then CONSTRUCTED FROM
+// those targets: `createSentinelGuard` requires the declared set, so there is no way to
+// spell a call that recovers before the set exists — move either line above
+// `loadTargets()` and the program throws a TypeError instead of writing a file. That is
+// the invariant that used to rest on a `let DECLARED_TARGETS = null` and one line's
+// position; the import cannot weaken it, because the sentinel module has no import-time
+// side effects and no recovery entry point that does not take the set.
 const targets = loadTargets();
+const guard = createSentinelGuard(new Set(targets.map((t) => String(t.file).split(sep).join('/'))));
+guard.recover();
+
 let anySurvived = false;
 console.log('E13 mutation sampling - test-effectiveness gate');
 for (const t of targets) {
-  const r = runTarget(t.file, t.test, t.maxMutants || 6);
+  const r = runTarget(guard, t.file, t.test, t.maxMutants || 6);
   const rate = r.tested ? Math.round((r.killed / r.tested) * 100) : 100;
-  console.log(`  ${r.file}: ${r.killed}/${r.tested} mutants killed (${rate}%)`);
+  console.log(
+    `  ${r.file}: ${r.killed}/${r.tested} mutants killed (${rate}%) ` +
+      `[sampled ${r.sites} of max ${String(t.maxMutants || 6)}]`
+  );
   for (const s of r.survived) {
     anySurvived = true;
     console.log(`    SURVIVED [${s.op}] near: ${s.line}`);
   }
 }
 if (anySurvived) {
-  console.log('FAIL (E13): a mutant survived - the tests do not catch that break. Strengthen the test, do not delete the mutant.');
+  console.log(
+    'FAIL (E13): a mutant survived - the tests do not catch that break. Strengthen the test, do not delete the mutant.'
+  );
   process.exit(1);
 }
 console.log('PASS (E13): every sampled mutant was killed - tests have real catch-power.');

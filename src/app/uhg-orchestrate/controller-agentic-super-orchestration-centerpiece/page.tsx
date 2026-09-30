@@ -3538,13 +3538,13 @@ function ControllerScreenInner() {
                   fontStyle: 'italic',
                 }}
               >
-                The system didn't just verify that {firstName} has proxy consent. It verified that{' '}
+                The system didn’t just verify that {firstName} has proxy consent. It verified that{' '}
                 <span style={{ color: '#8b5cf6', fontWeight: 600, fontStyle: 'normal' }}>
                   this specific action
                 </span>{' '}
-                — sharing {cgFirst}'s medication list with a third party — falls outside the scope
-                of that consent. That distinction is the difference between compliance theater and
-                compliance architecture.
+                — sharing {cgFirst}&apos;s medication list with a third party — falls outside the
+                scope of that consent. That distinction is the difference between compliance theater
+                and compliance architecture.
               </p>
               <div className="flex flex-col gap-1.5">
                 {[

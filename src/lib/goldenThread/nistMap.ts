@@ -11,6 +11,74 @@
  * CLIENT-SAFE: pure data + pure functions. No `@/lib/evidence` barrel, no `node:crypto`.
  */
 export type NistFn = 'GOVERN' | 'MAP' | 'MEASURE' | 'MANAGE';
+
+/** The four authority rungs, restated locally so this module stays free of the evidence barrel. */
+export type EffectiveRung = 'A0' | 'A1' | 'A2' | 'A3';
+
+/**
+ * The EFFECTIVE autonomy label for a rung — the single rung→label map in the system.
+ *
+ * TWO CONCEPTS, NOT ONE, and the distinction is the whole point of the twin-ladder interlock:
+ *   • the GRANT  — `AutonomyTier` ('HITL' | 'HOTL' | 'autonomous'), what a manifest ALLOWS. Three
+ *     members, no 'assist'. Adding a fourth is now a decision the compiler forces rather than a
+ *     silent fall-through: `agents/authority/types.ts` derives `AUTONOMY_ORDER` from the same object
+ *     that declares the union, `decisionGate.evaluateDecision` switches exhaustively with a `never`
+ *     witness, and `interlock.minRung` floors an unranked rung to A0 instead of returning the other
+ *     side. Each of those three was a separate fail-open, and the first version of this comment
+ *     named only one of them.
+ *   • the EFFECTIVE label — this type. FOUR members, because A0 exists: an agent at A0 may only
+ *     advise. A0 has no counterpart in the grant vocabulary and never should.
+ *
+ * WHAT THIS REPLACED. Three independent rung→label mappings existed, and two of them disagreed:
+ *   1. `RUNG_AUTONOMY` in e2eFlow.ts       A0→'assist'
+ *   2. `RUNG_GATE` in escalationSignals.ts A0→'assist'  (lower-cased for the rest)
+ *   3. an inline ternary in flowSim.ts     A0→'watch'   ← the divergence
+ * So an A0 record carried `assist` or `watch` in its hashed `version` field depending only on which
+ * code path sealed it. `'watch'` was copied from `Oversight` below, where it is a legitimate and
+ * DIFFERENT value — oversight mode, not autonomy label — and is emitted independently into the
+ * record's own `oversight` field for every non-human A0 act. So nothing read `'watch'` out of
+ * `version`, and collapsing it loses no information.
+ *
+ * `Oversight` (below) stays a separate vocabulary on purpose. Its tokens 'HITL'/'HOTL' overlap these
+ * by SPELLING and not by meaning: one answers "how much autonomy did this act exercise", the other
+ * "what human oversight mode was in force". A future pass to "unify all the autonomy strings" must
+ * not merge them.
+ */
+export type EffectiveAutonomy = 'assist' | 'HITL' | 'HOTL' | 'autonomous';
+
+const EFFECTIVE_AUTONOMY_MAP = Object.freeze({
+  A0: 'assist',
+  A1: 'HITL',
+  A2: 'HOTL',
+  A3: 'autonomous',
+}) satisfies Readonly<Record<EffectiveRung, EffectiveAutonomy>>;
+
+/** The effective autonomy label for a rung. Total over `EffectiveRung` by construction. */
+export const effectiveAutonomy = (rung: EffectiveRung): EffectiveAutonomy =>
+  EFFECTIVE_AUTONOMY_MAP[rung];
+
+/**
+ * The same label for a rung expressed as a NUMBER (a clamped ceiling), which is the shape the engine
+ * holds. Out-of-range clamps to A0 rather than throwing: a seal must never fail on a label lookup,
+ * and A0 is the safe end — an act recorded as advise-only understates authority, never overstates it.
+ */
+export const effectiveAutonomyForLevel = (level: number): EffectiveAutonomy =>
+  EFFECTIVE_AUTONOMY_MAP[`A${Math.max(0, Math.min(3, Math.trunc(level)))}` as EffectiveRung];
+
+/**
+ * The wire/queue token for the same value. `ProcessGate` stays a NOMINAL type rather than becoming a
+ * `.toLowerCase()` of the above, because `gate` crosses an HTTP boundary — `/api/evidence/[id]`
+ * returns it inside `analysis.routed`, a client renders the raw token, and a test fixture pins the
+ * literal `'hitl'`. Deriving it by string transform would change an API body with no compile-time
+ * signal; an explicit map means widening the vocabulary is a type error at this table.
+ */
+export const PROCESS_GATE_OF = Object.freeze({
+  assist: 'assist',
+  HITL: 'hitl',
+  HOTL: 'hotl',
+  autonomous: 'autonomous',
+}) satisfies Readonly<Record<EffectiveAutonomy, string>>;
+
 export type Oversight = 'HITL' | 'HOTL' | 'watch' | 'none'; // human-in / human-on / watch-only (unearned) / unsupervised
 
 export interface NistSpec {

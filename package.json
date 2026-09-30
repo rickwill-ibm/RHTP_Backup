@@ -72,6 +72,7 @@
     "install:integrated": "bash install/install.sh --no-dev",
     "check:types": "tsc --noEmit",
     "check:sizes": "bash check-file-sizes.sh",
+    "check:terminology-freshness": "node scripts/check-terminology-freshness.mjs",
     "adl:check": "node tools/adl/verify.mjs",
     "seams:check": "node tools/seams/verify.mjs",
     "preflight": "bash tools/preflight-files.sh",

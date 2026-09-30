@@ -7,7 +7,7 @@ import {
   ASSET_FAMILIES,
   type TerminologyAsset,
 } from '@/lib/terminology/registry';
-import { seedTerminologyService } from '@/lib/terminology';
+import { createSeedTerminologyService, seedTerminologyService } from '@/lib/terminology';
 
 /**
  * Terminology-asset registry (Iteration 4): the facility that manages currency,
@@ -45,9 +45,18 @@ describe('ValueSetRegistry: register + get + getActiveVersion', () => {
   });
 
   it('getActiveVersion returns the active version in the same system group', () => {
-    const superseded = makeAsset({ id: 'x-v1', system: 'urn:x', status: 'superseded', version: 'v1' });
+    const superseded = makeAsset({
+      id: 'x-v1',
+      system: 'urn:x',
+      status: 'superseded',
+      version: 'v1',
+    });
     const active = makeAsset({ id: 'x-v2', system: 'urn:x', status: 'active', version: 'v2' });
-    const reg = createValueSetRegistry({ assets: [superseded, active], bindings: [], now: () => at('2025-06-01') });
+    const reg = createValueSetRegistry({
+      assets: [superseded, active],
+      bindings: [],
+      now: () => at('2025-06-01'),
+    });
     // Asking from the superseded id still resolves to the active version.
     expect(reg.getActiveVersion('x-v1')?.id).toBe('x-v2');
     expect(reg.getActiveVersion('x-v2')?.version).toBe('v2');
@@ -79,8 +88,16 @@ describe('ValueSetRegistry: isCurrent (currency window)', () => {
 
 describe('ValueSetRegistry: listStale', () => {
   it('finds an asset past its refresh cadence', () => {
-    const fresh = makeAsset({ id: 'fresh', lastRefreshed: '2026-08-01', refreshCadence: 'monthly' });
-    const stalePastCadence = makeAsset({ id: 'stale', lastRefreshed: '2026-01-01', refreshCadence: 'monthly' });
+    const fresh = makeAsset({
+      id: 'fresh',
+      lastRefreshed: '2026-08-01',
+      refreshCadence: 'monthly',
+    });
+    const stalePastCadence = makeAsset({
+      id: 'stale',
+      lastRefreshed: '2026-01-01',
+      refreshCadence: 'monthly',
+    });
     const reg = createValueSetRegistry({ assets: [fresh, stalePastCadence], bindings: [] });
     const stale = reg.listStale(at('2026-08-22')).map((a) => a.id);
     expect(stale).toContain('stale');
@@ -88,8 +105,16 @@ describe('ValueSetRegistry: listStale', () => {
   });
 
   it('finds an expired asset as stale, and treats irregular cadence as not clock-stale', () => {
-    const expired = makeAsset({ id: 'exp', expirationDate: '2025-12-31', refreshCadence: 'irregular' });
-    const irregularFresh = makeAsset({ id: 'irr', lastRefreshed: '2000-01-01', refreshCadence: 'irregular' });
+    const expired = makeAsset({
+      id: 'exp',
+      expirationDate: '2025-12-31',
+      refreshCadence: 'irregular',
+    });
+    const irregularFresh = makeAsset({
+      id: 'irr',
+      lastRefreshed: '2000-01-01',
+      refreshCadence: 'irregular',
+    });
     const reg = createValueSetRegistry({ assets: [expired, irregularFresh], bindings: [] });
     const stale = reg.listStale(at('2026-06-01')).map((a) => a.id);
     expect(stale).toContain('exp');
@@ -125,7 +150,7 @@ describe('ValueSetRegistry: code validated against a superseded version is flagg
       valueSetRegistry,
       'cms-hcc-v24',
       'ICD-10-CM',
-      'E11.9',
+      'E11.9'
     );
     expect(checked.validation.valid).toBe(true);
     expect(checked.currency).toMatchObject({ current: false, flagged: true, status: 'superseded' });
@@ -138,15 +163,66 @@ describe('ValueSetRegistry: code validated against a superseded version is flagg
       'cms-hcc-v28',
       'ICD-10-CM',
       'E11.9',
-      at('2025-06-01'), // within the annual refresh cadence of lastRefreshed 2025-04-01
+      at('2025-06-01') // within the annual refresh cadence of lastRefreshed 2025-04-01
     );
     expect(checked.currency).toMatchObject({ current: true, flagged: false });
   });
 
+  /**
+   * PINNED TO A FIXED CLOCK (2026-09-30). This asserted against the module singleton, which
+   * reads the system clock, so it asserted `assetId: 'icd-10-cm-fy2026'` about WHATEVER happened
+   * to be active on the day CI ran. It passed for eleven months and failed on 2026-09-30 - the
+   * last day of that asset's window - against byte-identical code, blocking a push.
+   *
+   * Two defects, and this fixes only the second. The first was `inWindow` treating a closed
+   * interval as half-open (see valueSetRegistry.ts); the second is this test asserting a
+   * clock-dependent fact in the PR gate. seedTerminologyService.ts documents the seam for
+   * exactly this - "a fixed `now` through createSeedTerminologyService, so tests pin it" - and
+   * this test reached past it for the singleton.
+   *
+   * The registry's coverage into the future is a REAL question and it is not answered here:
+   * pinning a behaviour test must not become the way the answer is silenced. It moved to
+   * `npm run check:terminology-freshness`, deliberately OUTSIDE the push gate, so a lapsed
+   * registry is reported without a calendar date being able to block a commit. See G-072.
+   */
   it('seeded validateCode attaches the active binding for the system', () => {
-    const v = seedTerminologyService.validateCode('ICD-10-CM', 'E11.9');
+    const svc = createSeedTerminologyService({ now: () => at('2026-06-01') });
+    const v = svc.validateCode('ICD-10-CM', 'E11.9');
     expect(v.binding).toBeDefined();
     expect(v.binding).toMatchObject({ assetId: 'icd-10-cm-fy2026', status: 'active' });
+  });
+
+  /**
+   * THE OFF-BY-ONE, PINNED IN BOTH DIRECTIONS. `[effectiveDate, expirationDate]` is closed, so
+   * the first and last day of a window are both inside it. The instant-comparison implementation
+   * passed the first-day case and failed the last-day case, which is why it survived review: a
+   * single-bound test is satisfied by a half-open interval.
+   */
+  it('a window is inclusive on BOTH its first and its last day', () => {
+    const reg = createValueSetRegistry({
+      assets: [makeAsset({ id: 'w', effectiveDate: '2026-01-01', expirationDate: '2026-09-30' })],
+      bindings: [],
+    });
+    expect(reg.checkCurrency('w', at('2026-01-01')).current).toBe(true); // first day
+    expect(reg.checkCurrency('w', at('2026-09-30')).current).toBe(true); // last day
+    expect(reg.checkCurrency('w', at('2025-12-31')).current).toBe(false); // day before
+    expect(reg.checkCurrency('w', at('2026-10-01')).current).toBe(false); // day after
+  });
+
+  /**
+   * The failure is reproduced as a REGRESSION, not just described. Any time on the expiration day
+   * - not only its midnight - must still resolve the asset. The old code compared an instant to
+   * UTC midnight, so 06:34 on the last day excluded it and `validateCode` returned no binding.
+   */
+  it('resolves the active asset at any hour of its final day, not only at midnight', () => {
+    const reg = createValueSetRegistry({
+      assets: [makeAsset({ id: 'w', effectiveDate: '2026-01-01', expirationDate: '2026-09-30' })],
+      bindings: [],
+    });
+    for (const hhmm of ['00:00', '06:34', '12:00', '23:59']) {
+      const asOf = new Date(`2026-09-30T${hhmm}:00.000Z`);
+      expect(reg.getActiveBySystem('urn:test:system', asOf)?.id, `at ${hhmm}`).toBe('w');
+    }
   });
 });
 
@@ -156,9 +232,14 @@ describe('ValueSetRegistry: all governed families are seeded', () => {
     for (const fam of ASSET_FAMILIES) {
       expect(families).toContain(fam);
     }
-    expect([...ASSET_FAMILIES].sort()).toEqual(
-      ['behavioral', 'clinical', 'privacy', 'quality', 'risk', 'social'],
-    );
+    expect([...ASSET_FAMILIES].sort()).toEqual([
+      'behavioral',
+      'clinical',
+      'privacy',
+      'quality',
+      'risk',
+      'social',
+    ]);
   });
 
   it('seeds HCC as one of several risk models (CMS-HCC, RxHCC, HHS-HCC, CDPS)', () => {
@@ -169,7 +250,9 @@ describe('ValueSetRegistry: all governed families are seeded', () => {
 
 describe('ValueSetRegistry: production refresh is the not-configured stub', () => {
   it('refresh throws naming the authority + operation', () => {
-    expect(() => valueSetRegistry.refresh('cms-hcc-v28')).toThrow(TerminologyRefreshNotConfiguredError);
+    expect(() => valueSetRegistry.refresh('cms-hcc-v28')).toThrow(
+      TerminologyRefreshNotConfiguredError
+    );
     try {
       valueSetRegistry.refresh('gravity-sdoh-2.6');
     } catch (err) {

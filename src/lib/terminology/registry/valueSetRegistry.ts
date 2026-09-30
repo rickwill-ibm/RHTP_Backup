@@ -65,11 +65,65 @@ function toDate(iso: string): Date {
   return new Date(`${iso.length <= 10 ? `${iso}T00:00:00.000Z` : iso}`);
 }
 
-/** True when `asOf` falls within [effectiveDate, expirationDate] of the asset. */
+/**
+ * THE REGISTRY'S TEMPORAL FRAME IS A CIVIL DATE, NOT AN INSTANT (2026-09-30).
+ *
+ * Seed windows are authored as bare civil dates ('2026-09-30') with no zone, because that is how
+ * their stewards publish them: a CMS fiscal-year boundary is a calendar date with no instant
+ * attached. The first implementation parsed those to UTC midnight and compared an INSTANT against
+ * them, which made the interval its own doc comment called CLOSED behave as half-open - an asset
+ * was excluded for the whole of its final day, since any moment after 00:00 satisfies
+ * `asOf > expiration`.
+ *
+ * WHAT THAT COST. On 2026-09-30, `icd-10-cm-fy2026` (exp 2026-09-30) stopped resolving, so
+ * `validateCode('ICD-10-CM', ...)` returned NO binding and a test that had passed the previous day
+ * against byte-identical code failed, blocking a push. The same bug sat mirrored on the lower
+ * bound: `>= UTC midnight` makes an asset effective 2026-10-01 go live at 17:00 PDT on 09-30,
+ * seven hours before the federal fiscal year starts.
+ *
+ * WHY STRING COMPARISON. ISO-8601 dates order lexicographically, so both bounds are inclusive by
+ * construction. There is no midnight to straddle, no DST, and - the operational point - no
+ * divergence between a UTC CI container and a developer's local machine, which would otherwise
+ * make the same commit green in CI and red on the authoring host for a several-hour band around
+ * every boundary. `dayOf` fixes the civil frame to UTC so a commit resolves identically
+ * everywhere; a caller west of UTC therefore crosses a boundary in their local evening, which is
+ * deterministic and stated rather than silently host-dependent.
+ *
+ * STILL OPEN, deliberately not fixed here: `asOf` defaults to the system clock, so a caller that
+ * forgets to thread date-of-service silently gets today's code set. In claims and risk, currency
+ * is keyed to DOS (or discharge date), never to "now" - a 2025 DOS claim reprocessed today must
+ * validate against FY2025. That is an API change across every call site and belongs in its own
+ * wave. Register: G-071.
+ */
+type CivilDate = string; // 'YYYY-MM-DD', comparable with < / > / <= / >=
+
+/** The civil date (UTC frame) on which an instant falls. */
+const dayOf = (asOf: Date): CivilDate => asOf.toISOString().slice(0, 10);
+
+/** The civil date an authored bound denotes, tolerating a full timestamp in the seed. */
+const civil = (iso: string): CivilDate => iso.slice(0, 10);
+
+/**
+ * True when `asOf` falls within the CLOSED interval [effectiveDate, expirationDate].
+ * ONE primitive: inWindow, isExpiredAsOf and isNotYetEffective all derive from `dayOf`/`civil`,
+ * so the enforcement path and the governance surface (listStale) can never disagree by a day
+ * about the same asset - they did while only one of them was patched.
+ */
 function inWindow(asset: TerminologyAsset, asOf: Date): boolean {
-  if (asOf < toDate(asset.effectiveDate)) return false;
-  if (asset.expirationDate && asOf > toDate(asset.expirationDate)) return false;
+  const d = dayOf(asOf);
+  if (d < civil(asset.effectiveDate)) return false;
+  if (asset.expirationDate && d > civil(asset.expirationDate)) return false;
   return true;
+}
+
+/** True when the asset's expiration day has fully passed at `asOf`. */
+function isExpiredAsOf(asset: TerminologyAsset, asOf: Date): boolean {
+  return asset.expirationDate !== undefined && dayOf(asOf) > civil(asset.expirationDate);
+}
+
+/** True when `asOf` precedes the asset's effective day. */
+function isNotYetEffective(asset: TerminologyAsset, asOf: Date): boolean {
+  return dayOf(asOf) < civil(asset.effectiveDate);
 }
 
 /** True when the asset is past its refresh cadence relative to `asOf`. */
@@ -181,14 +235,12 @@ export function createValueSetRegistry(opts: RegistryOptions = {}): ValueSetRegi
         };
       }
       const windowed = inWindow(asset, at);
-      const stale =
-        pastCadence(asset, at) ||
-        (asset.expirationDate !== undefined && at > toDate(asset.expirationDate));
+      const stale = pastCadence(asset, at) || isExpiredAsOf(asset, at);
       const current = asset.status === 'active' && windowed;
       let reason: string | undefined;
       if (asset.status !== 'active') reason = `version status is '${asset.status}'`;
       else if (!windowed)
-        reason = at < toDate(asset.effectiveDate) ? 'not yet effective' : 'past expiration date';
+        reason = isNotYetEffective(asset, at) ? 'not yet effective' : 'past expiration date';
       else if (stale) reason = `past ${asset.refreshCadence} refresh cadence`;
       return {
         assetId,
@@ -204,7 +256,7 @@ export function createValueSetRegistry(opts: RegistryOptions = {}): ValueSetRegi
     listStale(asOf) {
       const at = asOfOrNow(asOf);
       return [...assets.values()].filter((a) => {
-        const expired = a.expirationDate !== undefined && at > toDate(a.expirationDate);
+        const expired = isExpiredAsOf(a, at);
         return expired || pastCadence(a, at);
       });
     },

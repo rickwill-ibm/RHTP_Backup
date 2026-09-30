@@ -1114,6 +1114,61 @@ have surfaced. The E13 baseline divergence (985 vs 999 candidates) has the same 
 suite or a gate green for the REPOSITORY, verify the file inventory matches — a file count and a
 sorted digest of paths, not a spot check of the files just edited.
 
+### G-071 · Terminology currency defaults to the system clock, so a caller who forgets date-of-service validates against today's code set · High
+`src/lib/terminology/registry/valueSetRegistry.ts`, `src/lib/terminology/validateCode/validateCode.ts`
+
+`asOfOrNow = (asOf?: Date) => asOf ?? now()`. Every registry entry point takes `asOf` as OPTIONAL,
+so a caller that does not thread a date silently resolves against the clock. In claims and risk,
+terminology currency is keyed to **date of service** (discharge date for inpatient), and risk-model
+selection to the payment year — never to "now". A 2025 DOS claim reprocessed today must validate
+against ICD-10-CM FY2025; under `asOf ?? now()` it validates against whatever is current when the
+batch happens to run.
+
+The failure mode is bidirectional and silent: codes deleted in a later release come back `invalid`
+for a service date on which they were valid, and codes introduced later validate as current for a
+service date that predates them. Under posture `'enforce'` (`currency.ts`) each of those is a
+quarantine or an admission — money either way — and nothing in the current tests can see it,
+because they exercise the same default.
+
+**Not fixed in the 2026-09-30 civil-date change, deliberately.** That change corrected HOW dates are
+compared; this is WHICH date is compared. The fix is an API change — make `asOf` required, ideally
+as a branded `ISODate` so every unthreaded call site becomes a compile error rather than a
+convention — and it touches every consumer. It is a wave, not a patch.
+
+Two data facts belong with it, both surfaced by `npm run check:terminology-freshness` on 2026-09-30:
+`snomed-ct-us-20260301` is `status: 'active'` while out of window since 2026-08-31, and four ICD-10
+systems (`icd-10-cm`, f-codes, z-codes, plus SNOMED) lose coverage entirely from 2026-10-01 with no
+successor seeded. Real steward content is the fix; a `stub: true` successor would report currency
+against a release whose content was never loaded, which is worse than the gap — the gap at least
+quarantines correctly (`semantic-valueset-no-active-version`).
+
+### G-072 · A closed interval implemented as half-open, and the gate/alarm confusion it exposed · Med → CLOSED 2026-09-30
+`src/lib/terminology/registry/valueSetRegistry.ts`, `tests/terminology/valueSetRegistry.test.ts`
+
+`inWindow`'s doc comment declared `[effectiveDate, expirationDate]` — closed — while the code
+parsed bare civil dates to UTC midnight and compared an INSTANT, so any moment after 00:00 on the
+expiration day satisfied `asOf > expiration`. Every asset was therefore dead for the whole of its
+final day, and the same error sat mirrored on the lower bound: an asset effective 2026-10-01 went
+live at 17:00 PDT on 09-30, seven hours before the federal fiscal year began.
+
+It surfaced on 2026-09-30 — `icd-10-cm-fy2026`'s last day — as a test failure against
+byte-identical code that had passed the previous day, blocking a push. Fixed by comparing ISO date
+strings: both bounds inclusive by construction, no midnight to straddle, and no divergence between
+a UTC CI container and a local Windows host. `inWindow`, `isExpiredAsOf` and `isNotYetEffective`
+now derive from one primitive so enforcement and the governance surface (`listStale`) cannot
+disagree by a day about the same asset.
+
+**The second, more general finding.** The test that broke was doing two jobs: asserting a behaviour,
+and — by accident — detecting that the registry had no successor seeded. Pinning its clock, which
+is the obvious fix and the correct one for the behaviour half, would have deleted the detector along
+with the defect: the suite would pass forever while the registry rotted.
+
+**The rule this establishes:** a behaviour test pins its clock and belongs in the PR gate. A
+freshness question runs against the real clock and belongs OUTSIDE it — here,
+`npm run check:terminology-freshness`, wired into no gate and no hook by design. A control whose
+failure blocks unrelated work gets disabled, and a disabled control is this register's most repeated
+finding.
+
 
 ## CLOSED in Wave 0
 

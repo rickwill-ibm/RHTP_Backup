@@ -80,6 +80,64 @@ Sequence iterations by DEPENDENCY, not severity alone: a foundational model (ten
 AI-accountability invariant, an audit spine) is published BEFORE the iterations that build on it,
 so they build against the frozen contract instead of retrofitting.
 
+## Context as a managed resource (added v1.9)
+Conversation context is working memory: finite, and it DEGRADES BEFORE IT ENDS. This model already
+holds that conversation context is not storage and that the sync is the recovery point; what
+follows names the point at which context itself becomes the binding constraint, and what to do then.
+
+**Platform-agnostic by discovery, not by path.** Agents differ in where durable state lives and in
+what a fresh start is called - a session, a task, a new conversation. So the rule is: write durable
+state to the repo's EXISTING agent-memory convention; where none exists, propose one and confirm
+before creating it. L11 (locate-don't-recreate) governs memory files exactly as it governs code - a
+second status file is a forked source of truth, and the reconciliation lands on whoever reads both
+next. Never add a status file beside a register, a decision log or a programme plan that already
+answers the same question.
+
+### Detect pressure from signals, never from a percentage
+Most agents cannot observe their own context usage, so a numeric threshold is a control reporting a
+number it never measured - precisely what E12 exists to catch. Judge from what IS observable: a long
+transcript or large tool outputs already absorbed; the same file or explanation loaded twice;
+several completed phases in one conversation; difficulty recalling a decision made earlier in the
+SAME conversation; answers losing precision or contradicting an earlier one. Where a platform DOES
+expose usage, use it - it is better evidence. Where it does not, the signals govern and no figure
+is asserted.
+
+### Graded response
+- Early - work normally.
+- Noticed - stop broad reads, narrow every read to the lines that matter, bring the durable record
+  current.
+- Pronounced - finish the current atomic action, write the checkpoint, recommend a fresh
+  conversation.
+- Degrading - start no new work; produce a complete handoff and hand back.
+
+Do NOT interrupt an atomic edit, migration or test run to checkpoint. Reach the nearest safe
+boundary: a half-applied change is a worse recovery point than a slightly late one.
+
+### The handoff
+Finish the safe atomic action, then record: modified and uncommitted files; the verification
+commands and their EXACT outcomes; open blockers; and the approaches already tried and rejected.
+The rejected approaches are the highest-value lines in a handoff - without them the next session
+spends its first hour re-running them. The agent cannot open its own successor: say plainly that
+the person must start the new session or task, and never imply one was created.
+
+### A completeness claim is computed, not recalled
+"Is anything left?" is answered by inspecting state at the moment of answering - not from memory of
+what was done. An agent carrying a known-incomplete piece of work while answering a scope question
+from recall will omit it, and the omission surfaces after the boundary has closed. Repository state
+is authoritative wherever it conflicts with memory; correct the stale record immediately.
+
+### Reading discipline
+- Search before opening; open the lines that matter, not the file, and not the tree.
+- Load an implementation file together with its direct test - they are read as a pair regardless.
+- Never reload what is already summarized, and never re-derive a verified summary whose inputs did
+  not change.
+- Keep build output, dependencies, caches, binaries, coverage and generated artifacts out unless
+  they are the subject.
+- Reduce a large log to the actionable error, the command, and the location.
+- Reference a path and a one-line description rather than pasting contents into a durable file.
+- Use a subagent when the reading is broad and only the CONCLUSION is needed, passing it the
+  minimum context and never the transcript. Do not spawn one for a small known lookup.
+
 ## Definition of Ready (added v1.5) — NFRs and lens coverage BEFORE the build
 Each iteration opens with a Definition of READY (the front bracket to the Definition of Done):
 - an NFR + REGULATORY MANIFEST - the -ilities the increment must meet (security, tenancy,
